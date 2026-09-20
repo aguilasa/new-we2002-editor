@@ -3,7 +3,7 @@ id: CORR-LOOKS-065
 title: "Correção: três medições da LOOKS-TASK-29 sobre o ritmo e a mistura ficaram \"para o leitor de pose\", sem linha na task que as mede"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -96,17 +96,61 @@ No Contexto, um item datado com as três medições e o comando que as reproduz:
 
 ## Verificação
 
-- [ ] a LOOKS-TASK-32 traz as três medições no Contexto, com o comando que as
+- [x] a LOOKS-TASK-32 traz as três medições no Contexto, com o comando que as
       reproduz e o link para a 29
-- [ ] `python tools/check_tasks.py` ok
-- [ ] `roms/` intocada
+- [x] `python tools/check_tasks.py` ok
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-20
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito**
 
-**Problemas encontrados:**
+A [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) ganhou um item
+de Contexto datado com as três medições, o comando que as reproduz
+(`oracle.py --stature`, que as imprime em toda corrida) e o link para a
+[`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md). Cada uma está escrita
+ligada ao critério que ela alcança, que é o que faz a linha ser lida e não
+pulada:
 
-**Arquivos criados/modificados:**
+- os **dois quadros por passada** ficam ao lado do critério do período — se uma
+  passada desenha dois quadros-chave, "quadros por passada" e "quadros do
+  `ANIME.BIN`" não são a mesma contagem;
+- a **passada inteira interpolada** (11 pares, 0 de 11 exatas) fica ao lado das
+  6 misturas de peça avulsa que a task já citava, com a diferença dita: mesmo
+  caminho `(a+b)>>1` de `0x80011F90`, escopo outro;
+- o **quadro 0 do goleiro** entra com a linha literal da corrida, porque é o
+  caso mais barato de medir — acontece no quadro 0, na estatura do estado.
+
+**Números medidos hoje** (`python tools/looks/oracle.py --stature`):
+
+```text
+  -- slot 2 (outfield player) --
+    state  175 cm A  pieces 12/12 exact, frames [1, 2], 12 with the control's own pair  ok
+  -- slot 1 (goalkeeper) --
+      control refuses pass 2, frames [0, 1]: 11 of 12 exact, ['foot b'] off by up to 92 of 4096 with the scratchpad angles the file's own
+    state  175 cm A  pieces 12/12 exact, frames [3, 4], 12 with the control's own pair  ok
+oracle --stature: 0 problem(s) over 2 slot(s)
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+**Problemas encontrados**
+
+1. **A transcrição do `grep` na Evidência desta CORR diz `(vazio)` e não
+   estava.** O padrão levava `goleiro` e `0x80011F90` junto, e a
+   LOOKS-TASK-32 já citava os dois — o `goleiro` na linha 33 e o endereço na
+   36, pelas 6 misturas da task 26. O que estava ausente, e é o que a correção
+   pede, são as **três medições**; a linha do `grep`, como escrita, não prova
+   isso. Ficou registrado aqui em vez de reescrito lá: transcrição é o que foi
+   lido.
+2. **A passada de "0 de 11 exatas" não apareceu na corrida de hoje.** O que a
+   `--stature` recusou foi a outra: `11 of 12 exact`. As duas são a mesma
+   armadilha 74 vista em fases diferentes da caminhada, e a que a 29 mediu está
+   escrita **como dela**, com a data, em vez de atribuída à corrida de hoje.
+
+**Arquivos criados/modificados**
+
+- `docs/tasks/looks/32-o-ciclo-da-caminhada.md` — o item de Contexto

@@ -44,6 +44,38 @@ status: pendente
     jogo leu**; `anime.py --against-pose` separa exatas, misturadas e
     inexplicadas a cada corrida.
 
+- **Três medições da [`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md),
+  de 2026-09-19, que são do ritmo e não da estatura.** Ela as achou enquanto
+  controlava `HEIG` e `BODY`, recusou-as do controle com razão, e elas se medem
+  **aqui** (armadilhas 73 e 74 do perfil). Quem as reproduz é
+  `python tools/looks/oracle.py --stature`, em toda corrida:
+  - **uma passada de desenho atravessa DOIS quadros do `ANIME.BIN`**, cortados
+    numa peça que muda com a fase — `frames [1, 2]` no slot 2 e `[3, 4]` no
+    slot 1, remedido em 2026-09-20. Comparar pares peça a peça gastou 80
+    passadas procurando um corte que não voltava; o que nomeia a pose é o
+    **conjunto** de quadros (`oracle._stature_frames`). Isto é o período visto
+    de outro ângulo: se uma passada desenha dois quadros-chave, "quadros por
+    passada" e "quadros do `ANIME.BIN`" não são a mesma contagem;
+  - **uma passada inteira pode vir interpolada** — 11 pares lidos e **0 de 11**
+    matrizes exatas, medido pela 29 —, pela mesma média `(a+b)>>1` de
+    `0x80011F90` que explica as 6 misturas de peça avulsa acima. A diferença
+    importa para o critério: lá é peça avulsa na troca de quadro, aqui é a
+    passada toda;
+  - **no goleiro, o quadro 0 é mistura** na estatura do próprio estado: a
+    `foot b` sai **até 92 de 4096** fora da matriz do arquivo **com os ângulos
+    do scratchpad iguais aos do par** — ângulo certo, matriz outra. O
+    `--stature` imprime isso como passada recusada, e a linha é literal na
+    corrida de 2026-09-20:
+
+    ```text
+    control refuses pass 2, frames [0, 1]: 11 of 12 exact, ['foot b'] off by
+    up to 92 of 4096 with the scratchpad angles the file's own
+    ```
+
+  É onde o critério "quadros-chave contra quadros desenhados: iguais, ou a
+  interpolação medida" encosta: os três casos são a interpolação aparecendo, e
+  o goleiro dá o exemplo mais barato de medir, porque acontece no quadro 0.
+
 - **A [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) deixou uma
   armadilha que alcança toda leitura de registrador numa parada:** o ponteiro
   de modelo que o jogo carrega quando a matriz é carregada nomeia a peça que
