@@ -70,7 +70,7 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado | 9 | 22, 26 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
 | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | A câmera do jogo — projeção medida, e a silhueta como testemunha de forma | 9 | 27 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
 | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose | 9 | 22, 28 | ✅ Concluído | 2026-09-18 | 2026-09-19 |
-| [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | 20 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | 20 | ✅ Concluído | 2026-09-20 | ⬜ pendente |
 | [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | 22, 28 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-32](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) | Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço | 11 | 26 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | 28, 32 | ⬜ Pendente | — | — |
@@ -265,7 +265,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 
 ### Fase 10 — vestido (v2)
 
-- [ ] O uniforme lido pela guarda e desenhado; zero primitiva sem textura, ou o resto nomeado.
+- [x] O uniforme lido pela guarda e desenhado; zero primitiva sem textura, ou o resto nomeado — os 105 `TEX_*.BIN` na guarda com digest medido (form 1 e idênticos nos dois discos), e **qual deles a tela veste medido na VRAM** ([LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md)): é o `TEX_A4` nos dois states, que reproduz exatas uma página e duas paletas onde nenhum outro contêiner reproduz nenhuma. Com ele, 593 de 593 primitivas texturizadas na figura 0 e 629 de 629 na figura 1; o `looks_ui` passou a exigir isso e o `confront.py --kit-control` mede que o uniforme de outro time fica 0,063 a 0,218 mais longe da foto do jogo.
 - [ ] O painel e o cenário da tela medidos e reproduzidos.
 
 ### Fase 11 — andando (v2)

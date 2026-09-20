@@ -6,7 +6,7 @@ category: textura
 phase: 10
 depends_on: ["LOOKS-TASK-20"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (n)"
-status: pendente
+status: concluído
 ---
 
 # LOOKS-TASK-30: O uniforme
