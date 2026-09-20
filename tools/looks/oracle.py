@@ -32,6 +32,7 @@ Usage:
     python tools/looks/oracle.py --tmds          # unknown (a), the other half
     python tools/looks/oracle.py --buffers       # what the residue bands are
     python tools/looks/oracle.py --palettes      # unknown (d), from the GPU side
+    python tools/looks/oracle.py --kit [SLOT]    # which TEX_*.BIN the screen wears, off VRAM
     python tools/looks/oracle.py --assembly [HAIR ...]  # every value of a field
     python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
     python tools/looks/oracle.py --hair          # who writes the hair window, and from where
@@ -1801,6 +1802,212 @@ def check_palettes(slot=2, verbose=True):
           % ("ok" if not problems else "%d problem(s)" % len(problems)))
     for line in problems:
         print("    %s" % line, flush=True)
+    return 1 if problems else 0
+
+
+KIT_EXACT = "a page and a palette"
+"""What a container has to reproduce before it is called the kit on screen.
+
+Both, and halfword for halfword.  One alone would be a coincidence to argue
+about with 105 candidates in the room; the two together are the pixels of the
+body and the colours they are drawn in, which is the whole of what a kit is.
+Measured 2026-09-20 on both states: TEX_A4 reproduces one page and two
+palettes exactly and no other container reproduces any of the three.
+"""
+
+
+def _kit_records(body):
+    """The records of one kit container, images and palettes alike."""
+    import texture
+
+    return [record for table in texture.tables(body) for record in table.records]
+
+
+def _vram_words(game, records, seen):
+    """{(x, y, w, h): rows of five-bit VRAM}, read once per distinct rect."""
+    for record in records:
+        key = (record.x, record.y, record.w, record.h)
+        if key not in seen:
+            seen[key] = [[_five_bits(pixel) for pixel in row]
+                         for row in vram_region(game, *key)]
+    return seen
+
+
+def _kit_payload(body, record):
+    """The halfwords one record holds, palette or page.
+
+    A palette is stored plain and a page is an LZSS stream -- the same split
+    `texture.read_palette` and `atlas.read_image` make, and the reason this
+    reads bytes rather than calling them is that the comparison downstream is
+    against RAW VRAM: indices decoded into texels would be a second reading of
+    the same bytes, and a mismatch in it would not say which of the two was
+    wrong.  One page's stream gives more than its rect declares (the 64x64 at
+    (704, 256) hands back 16384 B for 8192), so the rect is what is read.
+    """
+    import lzss
+
+    if record.is_clut:
+        raw = body[record.offset:record.offset + record.size]
+    else:
+        plain, _used = lzss.decompress(body, record.offset)
+        raw = bytes(plain[:record.size])
+    if len(raw) < record.size:
+        raise OracleError("the record at %d holds %d B and declares %d"
+                          % (record.offset, len(raw), record.size))
+    return struct.unpack("<%dH" % (record.size // 2), raw)
+
+
+def _record_difference(body, record, rows):
+    """Halfwords of one record that differ from the VRAM rows it declares."""
+    stored = _kit_payload(body, record)
+    differ = 0
+    for row in range(record.h):
+        line = rows[row]
+        base = record.w * row
+        differ += sum(1 for at in range(record.w)
+                      if _disc_five_bits(stored[base + at]) != line[at])
+    return differ
+
+
+def _kit_difference(body, records, seen):
+    """{rect: the best this container does on it} against what VRAM holds.
+
+    **The best of the file's own candidates for that rectangle, not the sum
+    over its records.**  A kit container holds the strip TWICE -- two pages
+    and two palettes at the same VRAM coordinates, which is the home kit and
+    the away one -- and the console uploads ONE of them.  Summing both made
+    every container differ by thousands and the winner by 12,618, close enough
+    to the runner-up that the measurement decided nothing (measured
+    2026-09-20, before this).
+    """
+    out = {}
+    for record in records:
+        key = (record.x, record.y, record.w, record.h)
+        differ = _record_difference(body, record, seen[key])
+        out[key] = min(out[key], differ) if key in out else differ
+    return out
+
+
+def check_kit(slots=(2, 1), verbose=True):
+    """`--kit [SLOT]`: which `TEX_*.BIN` the screen is wearing, read off VRAM.
+
+    The uniform is per team and lives in 105 containers of identical shape
+    (section 1.8), so the file a renderer must read cannot be chosen by name:
+    it is chosen by asking the console which one it uploaded.  Every record of
+    every container is compared, halfword for halfword, against the VRAM
+    rectangle it declares -- the same five bits the hardware keeps, the same
+    comparison `--palettes` makes for `DAT2D.BIN`.
+
+    The controls, before the answer:
+
+      **the same slot twice** -- VRAM read again after a second `load_state`
+          has to give the same rectangles, or the reading is the emulator's
+          mood;
+      **the runner-up** -- no other container may fit those rectangles at
+          all, and how far the nearest one is off is printed, because "closest
+          of 105" and "the one" are not the same claim;
+      **the other slot** -- printed beside it, because the two states are two
+          different teams and are the cheapest wrong answer available.
+    """
+    import iso_source
+
+    ready = preflight()
+    with iso_source.open_disc(ready["image"]) as disc:
+        bodies = {tag: disc.read(layout.kit_path(tag))
+                  for tag in layout.KIT_TAGS}
+    records = {tag: _kit_records(body) for tag, body in bodies.items()}
+    shapes = {tuple(sorted((r.x, r.y, r.w, r.h) for r in one))
+              for one in records.values()}
+    print("  %d kit container(s), %d distinct set(s) of rectangles"
+          % (len(bodies), len(shapes)))
+
+    problems = []
+    found = {}
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, SLOTS[slot]))
+            restore_state(slot, verbose=False)
+            game.load_looks(slot, label="kit-%d" % slot)
+            seen = {}
+            for tag in layout.KIT_TAGS:
+                _vram_words(game, records[tag], seen)
+            restore_state(slot, verbose=False)
+            game.load_looks(slot, label="kit-%d-again" % slot)
+            again = {}
+            for tag in layout.KIT_TAGS:
+                _vram_words(game, records[tag], again)
+            if again != seen:
+                problems.append("slot %d: VRAM read twice gives two different "
+                                "pictures, so no container below is measured "
+                                "against anything" % slot)
+                continue
+            print("    control: %d rectangle(s) of VRAM read twice, identical"
+                  % len(seen))
+            apart = {tag: _kit_difference(bodies[tag], records[tag], seen)
+                     for tag in layout.KIT_TAGS}
+            whole = {tag: sum(one.values()) for tag, one in apart.items()}
+            # What names the kit is an EXACT rectangle, and not the smallest
+            # total: of the seven rectangles a container declares, the screen
+            # uploads three -- the other four hold whatever else the frame
+            # buffer has there, and they differ by thousands for EVERY
+            # container, which drowns the answer (measured 2026-09-20: 12,138
+            # against 13,274 over all seven, which decides nothing).
+            exact = {key: sorted(tag for tag in layout.KIT_TAGS
+                                 if apart[tag][key] == 0)
+                     for key in sorted(seen)}
+            worn = [key for key in sorted(exact) if exact[key]]
+            claimed = {tag for key in worn for tag in exact[key]}
+            for key in sorted(seen):
+                owners = exact[key]
+                print("      (%4d,%4d) %3dx%-3d  exact in %-28s"
+                      % (key[:2] + (key[2], key[3],
+                                    ", ".join("TEX_" + one for one in owners)
+                                    or "no container")))
+            if not worn:
+                problems.append("slot %d: no container reproduces any "
+                                "rectangle of VRAM exactly" % slot)
+                continue
+            if len(claimed) > 1 or any(len(exact[key]) > 1 for key in worn):
+                problems.append(
+                    "slot %d: %s reproduce a rectangle exactly, so the kit is "
+                    "not named" % (slot, ", ".join("TEX_" + one for one
+                                                   in sorted(claimed))))
+                continue
+            best = claimed.pop()
+            found[slot] = best
+            pages = [key for key in worn if key[3] > 1]
+            palettes = [key for key in worn if key[3] == 1]
+            others = {tag: sum(apart[tag][key] for key in worn)
+                      for tag in layout.KIT_TAGS if tag != best}
+            runner = min(others, key=others.get)
+            print("    the screen wears TEX_%s: %d page(s) and %d palette(s) "
+                  "halfword for halfword, and the nearest other container, "
+                  "TEX_%s, differs in %d of them"
+                  % (best, len(pages), len(palettes), runner, others[runner]))
+            print("    (over all %d rectangles, including the %d the screen "
+                  "does not upload, TEX_%s differs by %d and the next by %d "
+                  "-- which is why the exact rectangle is what decides)"
+                  % (len(seen), len(seen) - len(worn), best, whole[best],
+                     sorted(whole.values())[1]))
+            if not pages or not palettes:
+                problems.append(
+                    "slot %d: TEX_%s is exact on %d page(s) and %d palette(s) "
+                    "-- a kit is both, and one of them alone is a coincidence "
+                    "with 105 candidates"
+                    % (slot, best, len(pages), len(palettes)))
+            if not others[runner]:
+                problems.append("slot %d: TEX_%s is not the only container "
+                                "that fits those rectangles" % (slot, best))
+    if len(found) == len(slots) and len(set(found.values())) == 1:
+        print("  both states wear the same kit, TEX_%s" % found[slots[0]])
+    elif len(found) == len(slots):
+        print("  the two states wear different kits: %s"
+              % ", ".join("slot %d TEX_%s" % (k, v)
+                          for k, v in sorted(found.items())))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --kit: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
     return 1 if problems else 0
 
 
@@ -6191,6 +6398,8 @@ def main(argv):
             return check_where(row=argv[2] if len(argv) > 2 else "HAIR")
         if len(argv) >= 2 and argv[1] == "--assembly":
             return check_assembly(rows=tuple(argv[2:]) or None)
+        if len(argv) in (2, 3) and argv[1] == "--kit":
+            return check_kit((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) == 2 and argv[1] == "--palettes":
             return check_palettes()
         if len(argv) == 2 and argv[1] == "--buffers":

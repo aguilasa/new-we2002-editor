@@ -71,6 +71,13 @@ class Disc:
         """The directory entry (lba, size) -- metadata, so no content to check."""
         return self._image.entry(disc_path)
 
+    def form_of(self, disc_path: str) -> str:
+        """"form1", "form2" or "outside" -- metadata too, and what says whether
+        a file can be read here at all.  The 105 kit containers are form 1 on
+        both discs, and the European dump has 18 of them in form 2 (section 8),
+        so it is measured per disc rather than assumed."""
+        return self._image.status(disc_path)
+
     def close(self) -> None:
         self._image.close()
 
@@ -219,6 +226,29 @@ def _report_bases(disc, paths, seen: dict) -> int:
     return failures
 
 
+def _report_kits(disc, kits) -> int:
+    """The 105 kit containers through the guard, as one line and a count.
+
+    One line, not 105: they are a set, and what a reader needs from them is
+    that every one was accepted and how big the set is.  A refusal names the
+    file -- that is the case worth a line of its own.
+    """
+    refused = []
+    forms = {}
+    for path in kits:
+        forms[disc.form_of(path)] = forms.get(disc.form_of(path), 0) + 1
+        try:
+            disc.read(path)
+        except layout.WrongDisc as exc:
+            refused.append((path, exc))
+    print("  %d of %d kit container(s) accepted, %s"
+          % (len(kits) - len(refused), len(kits),
+             ", ".join("%d %s" % (n, kind) for kind, n in sorted(forms.items()))))
+    for path, exc in refused:
+        print("  REFUSED  %s: %s" % (path, exc))
+    return len(refused)
+
+
 def _check_discs(japanese: str, english: str) -> int:
     """Read the measured files off both real discs and show the guard working.
 
@@ -228,6 +258,14 @@ def _check_discs(japanese: str, english: str) -> int:
     is to show what would have been returned, and then that read() refuses it.
     """
     paths = sorted(layout.DIGEST)
+    kits = sorted(layout.KIT_FILES)
+    # What "accepted on the English disc" means: this project measured the
+    # file identical on both dumps.  It is not the same set as the geometry --
+    # ANIME.BIN and the 105 kits are identical too, and reading only the
+    # geometry into that expectation made the command report ANIME.BIN as an
+    # unexpected result on every run (found 2026-09-20, LOOKS-TASK-30).
+    shared = (layout.GEOMETRY_FILES | layout.ANIMATION_FILES
+              | layout.KIT_FILES)
     geometry = sorted(layout.GEOMETRY_FILES)
     failures = 0
     derived = {}
@@ -241,6 +279,7 @@ def _check_discs(japanese: str, english: str) -> int:
             except layout.WrongDisc as exc:
                 failures += 1
                 print("  REFUSED  %s: %s" % (path, exc))
+        failures += _report_kits(disc, kits)
 
         # The load base is derived from the file rather than read from the
         # table, every time this command runs.  Without this the two BASE
@@ -250,7 +289,7 @@ def _check_discs(japanese: str, english: str) -> int:
         # far from here.
         failures += _report_bases(disc, geometry, derived)
 
-    print("English disc -- geometry accepted, the Japanese-only files refused")
+    print("English disc -- what is identical accepted, the rest refused")
     with open_disc(english) as disc:
         for path in paths:
             try:
@@ -258,7 +297,7 @@ def _check_discs(japanese: str, english: str) -> int:
                 verdict = "accepted"
             except layout.WrongDisc:
                 verdict = "refused"
-            want = "accepted" if path in layout.GEOMETRY_FILES else "refused"
+            want = "accepted" if path in shared else "refused"
             mark = "ok" if verdict == want else "WRONG"
             if mark == "WRONG":
                 failures += 1
@@ -267,6 +306,8 @@ def _check_discs(japanese: str, english: str) -> int:
             # And the escape hatch still hands the bytes over, which is what
             # makes the refusal above a decision rather than a read failure.
             assert disc.read_unchecked(path), path
+
+        failures += _report_kits(disc, kits)
 
         # Geometry is byte-for-byte identical on both discs, so the base
         # derived here has to equal the one derived there.  Free assertion on

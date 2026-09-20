@@ -631,20 +631,34 @@ def combine(primitive, byname: dict, at: int) -> tuple:
     return (clut, band)
 
 
-def draw_list(disc, values: dict, figure: int) -> list:
+def draw_list(disc, values: dict, figure: int, kit: str = None) -> list:
     """Every primitive to draw for one tuple, with its image and its palette.
 
     Returns a list of dicts, one per primitive: the file and section it lives
-    in, its index, the image record its first corner resolves to, and the
-    palette window its CLUT id names -- both AFTER the tuple's edit.
+    in, its index, the image record its first corner resolves to, the palette
+    window its CLUT id names -- both AFTER the tuple's edit -- and WHICH
+    container holds the two.
+
+    *kit* is the tag of the kit container the figure wears
+    (`layout.KIT_ON_SCREEN` is the one the two save states showed, measured
+    off VRAM by `oracle.py --kit`).  Without it the body keeps its 237
+    primitives grey, which is what this drew until LOOKS-TASK-30: the pages
+    the body samples are in no common file, and `DAT2D.BIN` cannot answer for
+    a uniform that is per team (section 1.8).
     """
     import atlas
     import modelfile
     import section
 
     data2d = disc[layout.DAT2D]
-    images = texture.images(data2d)
-    palettes = texture.palettes(data2d)
+    # The common file first and the kit second, in that order and never the
+    # other way: a page the screen's own container holds is the screen's, and
+    # the kit answers only for what is missing from it.
+    banks = [(layout.DAT2D, texture.images(data2d), texture.palettes(data2d))]
+    if kit is not None:
+        path = layout.kit_path(kit)
+        body = disc[path]
+        banks.append((path, texture.images(body), texture.palettes(body)))
 
     out = []
     dropped: dict = {}
@@ -688,17 +702,29 @@ def draw_list(disc, values: dict, figure: int) -> list:
             else:
                 corner = atlas.texel(primitive, primitive.texcoords[0][0],
                                      primitive.texcoords[0][1] + band)
-            record = atlas.image_at(images, *corner)
             x, y = skin.grid(clut)[1] * texture.NARROW, skin.grid(clut)[0]
-            try:
-                window = texture.covering(palettes, x, y, texture.NARROW)
-            except texture.NoPalette:
-                window = None
+            record, window, container = None, None, None
+            for path, images, palettes in banks:
+                page = atlas.image_at(images, *corner)
+                if page is None:
+                    continue
+                try:
+                    window = texture.covering(palettes, x, y, texture.NARROW)
+                except texture.NoPalette:
+                    # The page is here and the colours are not.  Keep looking:
+                    # a primitive drawn out of one container through another's
+                    # palette is somebody else's sixteen colours, drawn
+                    # perfectly (the failure `window_for` exists for).
+                    window = None
+                    continue
+                record, container = page, path
+                break
             quads, left = dropped.get((name, index), ((), ()))
             out.append({
                 "file": name, "section": index, "primitive": at,
                 "clut": clut, "band": band,
                 "image": record.offset if record else None,
+                "container": container,
                 "palette": None if window is None else (x, y, texture.NARROW),
                 "band_unmeasured": left if at in quads else (),
                 "texcoords": texcoords,

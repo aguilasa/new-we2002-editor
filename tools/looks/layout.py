@@ -78,6 +78,15 @@ SELECT = "/SELECT.BIN"
 ANIME = "/BIN/ANIME.BIN"
 SELECT8 = "/SELECT8.BIN"
 
+KIT_DIR = "/BIN/"
+KIT_PREFIX = "TEX_"
+KIT_SUFFIX = ".BIN"
+"""How a kit container is named on the disc: `/BIN/TEX_<tag>.BIN`.
+
+Spelled in pieces so `kit_path` builds the name and nothing else does, and so
+the 105 tags below are the only list of them.
+"""
+
 # --- Identity of what may be read, measured 2026-09-14 --------------------
 #
 # sha256 of the FILE as read out of the disc, not of the disc.  Keying on the
@@ -103,6 +112,149 @@ DIGEST = {
     # part this cycle reads, the stature rule, is the same on both.
     SELECT8: "b735ed9c1ebaef001088de57c807c8e9680b3296516928fb23b4af612befef8e",
 }
+
+KIT_DIGEST = {
+    "00": "7323b0dc3079fc5e8c71c65a1deb8a49f37f7cd42be1b8f4d2731d0635c5a670",
+    "01": "12c0be27dda713ab112f384838157cafdbaf99addca39e1f362d8c3d4199ad70",
+    "02": "f88c644a86b429f252a1887799375c6c0bb4b410007680aa98654b7d2ab0520b",
+    "03": "6e4c996c13a91a6a9215b11589adfd05a9875e75fa6c4585248600b99455036f",
+    "04": "4de5ba822c37ad4482bd30c3530724572e7c2a28917c0036c9e83afb74898c32",
+    "05": "c0fb57223f9857ab5a67256e83a266a96b03910cdc193f559a578582bf5e6c31",
+    "06": "d4bf432e7e0490f925ef51bce4d69a12aa3ad3f3c04e03b0d2d4f600e7bbf814",
+    "07": "30cf31982d68d582ae12adb0469166945c9ba6e0214f7398f34572b3b4278ea5",
+    "08": "3d143f84b293834b254c1eb432392f1b107ba8c72a7e3de768cd51b65b07dd6f",
+    "09": "0d9d580f2a8af3454c990cd12d0c2490aab065592a9a64c9d05eff9f5ee87e18",
+    "10": "566cef5f90df7cf792a745fb5c784980aac00c326b3a85af144806a75f7a3bb8",
+    "11": "f96a3ff6a6fbf716d0eb0ad537a5b6216c071c23208072e077402640b6452c8a",
+    "12": "2082ef525bea6d5f16618c29fc69222073b515a1f513ff788ce6f110004c3485",
+    "13": "8d4f3df1a334a3b3811bc6517dc95e47b832fe43ac65a794495507c96f250551",
+    "14": "552509df2a5d49e3727116da2cac12cb2951f876fa2f18104e7d822074d188a2",
+    "15": "babc15cfc74b23bc25303203f9af23cc4b41db9709215d9a0ba70227dadb31d3",
+    "16": "7d462d8dbbbe148f0344f9e48f783144e10f6b92b1361aaf7f836fc492951afd",
+    "17": "81026fa465fa36bd0d48d671c53676bdce94695c78a65821c55baf603a78514e",
+    "18": "dada6a26945dd8607c26b9c03a73cc071c979e7610656cbcb5292f613cf9c9cf",
+    "19": "044bd05e51a604ac4feac5846b59397fc8302356894d63a4a98437ebb63b4772",
+    "20": "b48008f697cd1252113c05555374c03123796ebe0380b0a36141c3b3fdd4a9e8",
+    "21": "4b05f3b871e2de30933b88f19de9561e2525c073cd27c5bb19d214c27d7eedc2",
+    "22": "7f2398c241bf1adcaa695802c3855d5242a3631aec45ed999c52be2f795483ff",
+    "23": "ac5bacfbba424d19ab0842cbbf098c9aac1ee1024c58b415cd307e4888d549ba",
+    "24": "e439d5f4c4814bcc2bb0ac04c8bd0248f66714dc8b875385909f212950a674c8",
+    "25": "88d2aff9422132c50f346557a8e089404090000e264f9903d7ab7eef1cdbd20a",
+    "26": "6b01234cea6d8c53ac3418e967b6b3334611c87dad5aa3339cecad6c70a7524b",
+    "27": "93b75d97b63fafbd30cef80d3c06d342fbd985f432dc61af87f1fc19cf8a9f8c",
+    "28": "f55b807209f5f23a2ef19f699651cea1ff7483684ba07dda935a336157a81770",
+    "29": "1e302b7e37837feb339494585c6b7f22cdc0a7198d16def223944e7b84f9cdb1",
+    "30": "8f04095f49c2d7502cce82f87fa910ea0f6248ca75bf004df99bbc25b98a1976",
+    "31": "15ca7205cb63113fe8307269d5098316bf8c37c793caf06920f8be813e914a6a",
+    "32": "4015a3c5cc775a58d76d54a37674261efeea2e48cac0f008a50d2efebf68f379",
+    "33": "d12756b06860b90ec76c96b5425ae22b11916924e99adb9a29f2c94edec77070",
+    "34": "e65ac19f7e6fb6141fed0cc97fb73e206fbf16cf2842f8552021e5eb2e348842",
+    "35": "fdc48e1c9cd4a8f9c81a891bc81e89a75ee38177eb30145e331942129f8d6784",
+    "36": "5143a6ed3c0fc17e22564168d4dc1f19fbbf79aa2f3680a7ebede08fb831aa0a",
+    "37": "32e33b5f6a7e6c825c4de93cdcf4d7c6355af375f398fbf8ead5f86d7f946fad",
+    "38": "b8a644d8aa8c9c6f4e84c2d28ad7eaad3f6aa2596728e6bda485e8deda80e78f",
+    "39": "e5a3d1928034bee39c13ef7a4255e829214a9d1567c2cffb938c7c79e2592afd",
+    "40": "422b596c26222dd77211e1901c60b10840375adf65d8aa61f655bca234045014",
+    "41": "12ecc4a0898e00b8fa60ed72a173c41ce82bc35b6258c03bd2a437f3377146d5",
+    "42": "8d00ff1e9d527cf47841149777240956a6c5b0fc6ca38d2e14752651b5f73b01",
+    "43": "d76ed4e39116834f2d137a9a40a9a8a2d5486562ef259bb29ce63165a314a1aa",
+    "44": "ccfa76aa0ade532e8e92b24d1b811b66b59dc0874a6599bfd38858763d73383e",
+    "45": "c42972bf7a21550608fb1e5f3333196d043a4133eb2bbc7684f25ba8f6e0f024",
+    "46": "75292bd25e05a6a1432c4ad6bb1912ad1ce9d0cf513c728940208fcf4352b6aa",
+    "47": "8a7e24a43c4632da1e0123251ddeecb13845986458dad70b422ba712a3dc3e00",
+    "48": "2a6a10ea790c0fa66bd3bbc700979fea8d68c85377585b44a38b419a66c55bfc",
+    "49": "363ad2010d3e0227d4331bcb560ebf380c57f0729bbbcbfa7f879e81941cff96",
+    "50": "7d548b56c0520d051c2825d0638c929ad312dadb59d2f48184936deb9e4a6fee",
+    "51": "4b910e2a3c1a33fe6e1573f3c4ea0c415a208a282d833e155ed874e64f8a6574",
+    "52": "126751d62d49629f3f5c4a00158b0f4e8ed1c788f56eec5f1eaf8aac9413db8e",
+    "53": "1cc87b99c33116b44b4f419695e6983f69f188c52f24ce47e0d98eb39817b35d",
+    "54": "d75e75ca8aa1b3b75d72ce1c670c03195ed9dbc2d9ff470b6663985eaa6daa3e",
+    "55": "69e8aa00738f8bb6253e5ff1672591ccf2c0c0ecd7d9b99c3ec2da7dbcdeca12",
+    "56": "fec4ae845995dd150c778ed2bb9877f7f9ad0d16766a816489f0cd9a4c917be4",
+    "57": "76a4772182b4de6f2897be3f23881f404415937996685646748a9f9303236dc1",
+    "58": "1c0fd6d5cef10dd7ff59b8bf51f38a5c06903885f50d288c198b2fc4e10ed42c",
+    "59": "78f97c935afb178f7aca2d846e0d7417f650e756882f014e83fd0459342c1c56",
+    "60": "a98f6bc02f9f6e7a612c8787a31da4850cec79d889c24b18262b01f3541d96f3",
+    "61": "bccc43cd6bb6338db4d7d46e8a24f401380cf4904ff06cd79b3399c6b8fe4ade",
+    "62": "57cce20d09f9b88fdd9b6a45f7587ed488c310a9749ae48f6294c31eef1e7f58",
+    "63": "9d3c012abbf62e6c713fa9dc5454a175df1fd78a6103dadd603b5e07492da9c7",
+    "64": "b25495cea130ef69c25eeda68275fa53df815948e5e6169d66cb8da3c7a06b7b",
+    "65": "6b2a1b682b95b91ce39356adfaf52aeb73d07b52aaeef86206e49c0c49ada0ad",
+    "66": "823b3b3de609ec9b7323b50073cddf372c2b859edfba59924956847644463b66",
+    "67": "97d20cc889493ed544eef3022e24ae53e5cc1c5b4d9247d86a5698d64f682827",
+    "68": "b3d92d09476bf5f25df15b007cbab3ddadb6cd7e9a295b88a5755f0f5d6459d5",
+    "69": "b67ad65107540604eac110d59d4cba79f41238e2f1aa3b9de4c70b58e06bf7e2",
+    "70": "cbee81680641f397721aa20bb8e81c453f70d61533b178c73f08c1b691be78e5",
+    "71": "b8bfcd7312e5a3098f218b04ce2dd979e822018ede6348e622101c016fe6b834",
+    "72": "4a0cf84aec47b44609bb3494ef5141d4357b8cffe7261055b83ad74aa4376b09",
+    "73": "4436e6b5bc9c0606c962275750f6df953ffe21c51a2531e02f1c5e5efcfc124b",
+    "74": "592665cc44e222903eeb55c47fa0d401e0b4cad622cbe9e4a118226911f34461",
+    "75": "0a488bd21730155f945d659b5f51a7e37e3c4f1aed975bc7ac4de2ff26f5f71a",
+    "76": "88d147ca66796078f0a51fae6e9874f47907bfb1c1ae9a57f75f5466def51572",
+    "77": "1656e5d1c6fe2553b91f704f4b7fe76066c269b5bfe68d486a6ee8c0a80498cc",
+    "78": "4d88b67346ff7eb22686112db253434a5784d7c28c79838555e37d13ac964756",
+    "79": "6950b8fe8e59d5d68bb25001e1c0d1f8bcc3db6612a30ddbf14edc000bbeda87",
+    "80": "69381cd15ef366ea9b1e9aeb1a54751d38166e84b69d7a37dcdc5a0199958909",
+    "81": "7f8c192f934538ec7dbba963884c6af13163a38bdf9bb2a1d9a0e7fc51357466",
+    "82": "8ad8fb393b2dad67cbf010c92e5abe3d39bf7b3503158454ea54b454e59dc68d",
+    "83": "c83794f6df5d004202fa64e5c5a1d77ec5537a21f438912f20a6087c5399a2ca",
+    "84": "ef42c350033a76fa8fac4953e5dda959bb2b9b48bb0273b2455810f8734b699b",
+    "85": "656cdadbb63577a2831e315d85dd37e6c5343fe3942ce7d060185196c4d55365",
+    "86": "7d5b5d59a4a21b1834e848c960a404e9c010db3e1a21b15ac3fa28edec0bf1be",
+    "87": "3f164adf1d386fadfa30171b4d5d272b4c72334dd9f5a9e6b95d0b058e52ceea",
+    "88": "9d71f709b2fd2f47eee3009605e82ca60cc819183a8b9707e33d3286ebada3c0",
+    "89": "eea058339f53c7b3811fe54087faaea6c77123e11264480bccc138433b639da7",
+    "90": "3d394a0ff921f6a200554eef557386d5eb794cd4f4ac485aa57bf8459302a7f1",
+    "91": "31e5c9295e82917cf34dafb7c118a0f1932961ec2c0fd395db27816399d2cd61",
+    "92": "8efd0625929e34c8710ea3594b3317c22d6409cadc2629ec3a05801f69f15edf",
+    "93": "0d792f5910f93e0c0df0730a2b85ebc7187309f673ac9a5583be7abad100e749",
+    "94": "8ff239dc62e523a047b0aba9ed83d49288b1dc3821e1539fff7968ded5cbb644",
+    "95": "e80caf5d1d9a2062130b8040d289b4048d0cfd496b1acf4fe331f1802941bf90",
+    "96": "cfbede37e9bd82cf630b995720d358cf57fd250f90109d2e330732ce62d0bcc8",
+    "97": "dde081e461479970491fd13d04a445fd5aaced4f99b0f4954b78f4b9aaff4615",
+    "98": "9def8f0f39f53ab822264a84e9f4e1cb32299c0399fa9d581f6fbd4fcc6d6201",
+    "99": "7b6c02876efd8a08a3faaa0278074095453692b45b9df882ab28597189fa234b",
+    "A0": "7b6c02876efd8a08a3faaa0278074095453692b45b9df882ab28597189fa234b",
+    "A1": "7b6c02876efd8a08a3faaa0278074095453692b45b9df882ab28597189fa234b",
+    "A2": "7b6c02876efd8a08a3faaa0278074095453692b45b9df882ab28597189fa234b",
+    "A3": "5c4286ce1cfc5e1060e45ff80b4fc02e36b7ef4075eb4ac6e1b8f3ef006f9535",
+    "A4": "70d55a1dd0d9b47a4e40155075e938222b7b827c8957987c60144679572b7875",
+}
+"""The 105 kit containers, by tag, measured off the Japanese disc 2026-09-20.
+
+**The uniform is per team**, which is why it is not in the common texture file
+(section 1.8): each of these holds the pages the body samples -- (576, 256),
+(576, 384) and (704, 256) -- and the 256-entry palettes at (0, 486), (0, 488)
+and (256, 480).  The geometry names two of those pages and neither is in
+`DAT2D.BIN`, so until these had a digest the figure drew 237 primitives grey
+(section 6 (f)).
+
+The tags run `00` to `99` and then `A0` to `A4`: base ten until it runs out of
+two digits, and a letter after that.  Not an index -- `kit_path` builds the
+name from the tag, and `KIT_TAGS` is the order they sort in.
+
+**Identical on both discs**, measured the same day: all 105 read equal on the
+Japanese dump and on the English one that drives the emulator, and all 105 are
+form 1 on both.  They are guarded all the same, because a third disc is the
+thing the guard exists to refuse.
+"""
+
+KIT_TAGS = tuple(sorted(KIT_DIGEST))
+
+KIT_ON_SCREEN = "A4"
+"""The kit the two save states wear, measured off VRAM on 2026-09-20.
+
+`oracle.py --kit` reads the rectangles every container declares out of the
+console's own frame buffer and compares them halfword for halfword: on both
+states TEX_A4 reproduces the page at (576, 384) and the palettes at (0, 486)
+and (0, 488) exactly, and no other container reproduces any of the three --
+the nearest, TEX_95, differs in 789 halfwords of them.
+
+**A default for the two states, not a rule for every team.** Which container a
+team wears is not measured here; what is measured is which one these two
+screens uploaded, and that is what the window draws with until a task asks the
+other question.
+"""
 
 TEXTURE_FILES = frozenset({DAT2D})
 """Files that may only ever be read from the Japanese disc."""
@@ -132,6 +284,33 @@ RECORD_FILES = frozenset({SELECT})
 it holds the player records.  Folding it into TEXTURE_FILES would refuse it
 with a sentence about palettes, which is the wrong thing to go looking at.
 """
+
+KIT_FILES = frozenset(KIT_DIR + KIT_PREFIX + tag + KIT_SUFFIX
+                      for tag in KIT_DIGEST)
+"""The kit containers as paths, for the guard's families below."""
+
+
+def kit_path(tag: str) -> str:
+    """The disc path of one kit container, by its tag.
+
+    Refuses a tag nobody measured rather than building a name for it: a file
+    this project has no digest for cannot be read through the guard anyway,
+    and a path built here would fail three frames later with a message about
+    digests instead of about the tag.
+    """
+    if tag not in KIT_DIGEST:
+        raise WrongDisc("%r is not one of the %d kit tags measured on this "
+                        "disc" % (tag, len(KIT_DIGEST)))
+    return KIT_DIR + KIT_PREFIX + tag + KIT_SUFFIX
+
+
+def kit_tag(disc_path: str) -> str:
+    """The tag of a kit path, or a refusal."""
+    head, tail = KIT_DIR + KIT_PREFIX, KIT_SUFFIX
+    if not (disc_path.startswith(head) and disc_path.endswith(tail)):
+        raise WrongDisc("%s is not a kit container" % disc_path)
+    return disc_path[len(head):-len(tail)]
+
 
 CODE_FILES = frozenset({SELECT8})
 """Japanese-only as well, and CODE: the overlay the LOOKS SET screen runs.
@@ -709,7 +888,18 @@ def is_trusted(disc_path: str, data_digest: str) -> bool:
     Unknown paths answer False rather than True: a file nobody measured is
     not a file anybody may trust.
     """
-    return DIGEST.get(disc_path) == data_digest
+    return expected_digest(disc_path) == data_digest
+
+
+def expected_digest(disc_path: str) -> str | None:
+    """What this project measured at *disc_path*, or None for a path it has
+    not measured.  The kit containers are 105 of the answers and live in
+    their own table, so that DIGEST stays the short list a reader can read."""
+    if disc_path in DIGEST:
+        return DIGEST[disc_path]
+    if disc_path in KIT_FILES:
+        return KIT_DIGEST[kit_tag(disc_path)]
+    return None
 
 
 def _hint_for(disc_path: str) -> str:
@@ -744,6 +934,12 @@ def _hint_for(disc_path: str) -> str:
             f"everything else that differs.  Point {ENV_IMAGE} at it; "
             f"{ENV_DRIVE_IMAGE} is the disc you drive, not the disc you read."
         )
+    if disc_path in KIT_FILES:
+        return (
+            f"  {disc_path} is one of the {len(KIT_FILES)} kit containers, "
+            f"and they read identical on both known discs -- so a mismatch "
+            f"means a third disc, another release or a modified image."
+        )
     if disc_path in GEOMETRY_FILES | ANIMATION_FILES:
         return (
             f"  {disc_path} is identical on both known discs, so a mismatch "
@@ -763,7 +959,7 @@ def require(disc_path: str, data: bytes, image: str = "<unknown image>") -> byte
     if is_trusted(disc_path, got):
         return data
 
-    expected = DIGEST.get(disc_path)
+    expected = expected_digest(disc_path)
     if expected is None:
         raise WrongDisc(
             f"{disc_path}: nothing measured for this path, so nothing to "
@@ -1104,6 +1300,39 @@ def self_check() -> None:
     for japanese_only in TEXTURE_FILES | RECORD_FILES | CODE_FILES:
         assert ENV_IMAGE in _hint_for(japanese_only), japanese_only
         assert "Japanese" in _hint_for(japanese_only), japanese_only
+
+    # -- the kit containers ------------------------------------------------
+    #
+    # They are 105 and they are guarded like everything else, which is the
+    # whole point of measuring them: until they had a digest the figure drew
+    # its body grey, because the guard cannot hand over what it cannot check.
+    assert len(KIT_DIGEST) == len(KIT_FILES) == len(KIT_TAGS), len(KIT_DIGEST)
+    assert all(kit_tag(kit_path(tag)) == tag for tag in KIT_TAGS)
+    assert KIT_TAGS[0] == "00" and KIT_TAGS[-1] == "A4", KIT_TAGS[:1]
+    for tag in KIT_TAGS:
+        assert is_trusted(kit_path(tag), KIT_DIGEST[tag]), tag
+    # Red: a kit is refused like any other path, and by a sentence that names
+    # the third disc rather than by a bare mismatch.
+    try:
+        require(kit_path(KIT_TAGS[0]), b"another team's kit", "fake")
+    except WrongDisc as exc:
+        assert "third disc" in str(exc), str(exc)
+    else:
+        raise AssertionError("the kit guard accepted foreign content")
+    # Red: a tag nobody measured has no path, and says so as a tag.
+    try:
+        kit_path("ZZ")
+    except WrongDisc as exc:
+        assert "kit tags" in str(exc), str(exc)
+    else:
+        raise AssertionError("kit_path built a name for an unmeasured tag")
+    try:
+        kit_tag(DAT2D)
+    except WrongDisc as exc:
+        assert "not a kit container" in str(exc), str(exc)
+    else:
+        raise AssertionError("kit_tag read a tag out of a file that has none")
+    assert expected_digest("/BIN/NOSUCH.BIN") is None
 
     # The two disc variables are two different names.  They have been one
     # name before, in another project, and it cost twelve runs.

@@ -623,6 +623,15 @@ def judge_whole(counts: dict) -> list:
                        "%d -- eleven of the twelve pieces are the body, and a "
                        "body that did not draw looks exactly like this"
                        % (name, counts.get(name, "missing"), floor))
+    # And DRESSED: every primitive textured, not merely more than one.  The
+    # body's pages are in the kit container (LOOKS-TASK-30), and a figure that
+    # lost it draws 237 of its 593 primitives grey while clearing every floor
+    # above.
+    if counts.get("textured") != counts.get("primitives"):
+        bad.append("the whole figure drew %s primitive(s) and textured %s of "
+                   "them -- the ones left over are the body, and they are grey "
+                   "when the kit container did not reach the draw list"
+                   % (counts.get("primitives"), counts.get("textured")))
     return bad
 
 
@@ -918,6 +927,9 @@ BREAKS = (
     ("app.py --compare counting pixels", os.path.join("ui", "app.py"),
      "            if one.pixel(x, y) != two.pixel(x, y):",
      "            if False:"),
+    ("the kit reaching the body", "assembly.py",
+     "    if kit is not None:",
+     "    if False:"),
     ("the pose reaching the points", "scene.py",
      "        out.append(moved)",
      "        out.append(part)"),
@@ -1006,7 +1018,17 @@ def plant(python: str, env: dict, name: str, where: str, old: str,
         app = os.path.join(sandbox, "ui", "app.py")
         shots = os.path.join(tmp, "shots")
         os.makedirs(shots)
-        _shots, _theirs, bad, broke = measure(python, app, shots, env)
+        # The smoke counts first, and they are part of the judgement here and
+        # not only in `main`: a defect that leaves the body grey draws every
+        # picture below perfectly, and the control for it came back GREEN
+        # until this line existed (measured 2026-09-20, LOOKS-TASK-30).
+        code, output = run_app(python, app, ["--smoke"], env)
+        if code != 0:
+            return (False, "the planted tree for %s did not run, so nothing "
+                           "was proved: %s" % (name, output.rstrip()))
+        bad = judge_whole(_counted(output))
+        _shots, _theirs, more, broke = measure(python, app, shots, env)
+        bad += more
         if broke:
             return (False, "the planted tree for %s did not run, so nothing "
                            "was proved: %s" % (name, broke))
@@ -1481,17 +1503,25 @@ def _checks(c) -> None:
     # The whole figure, by the counts the app prints.  The colour pairs are
     # `--piece head` for a measured reason, and this is what keeps the other
     # eleven pieces inside a judgement (CORR-LOOKS-040).
-    figure = ("  A-A1-A-A-A, figure 0: 593 primitive(s), 356 textured, "
+    figure = ("  A-A1-A-A-A, figure 0: 593 primitive(s), 593 textured, "
               "5 surface(s), 1186 triangle(s)\n"
               "  sections 12, shelf on, wireframe off, camera yaw 180 "
               "pitch 0")
     ok("the counts are read out of the app's own line",
-       _counted(figure) == {"primitives": 593, "textured": 356,
+       _counted(figure) == {"primitives": 593, "textured": 593,
                             "sections": 12},
        "%r" % (_counted(figure),))
-    ok("and a whole figure passes the floors",
+    ok("and a whole DRESSED figure passes the floors",
        judge_whole(_counted(figure)) == [],
        "%s" % judge_whole(_counted(figure)))
+    # Red: the same figure with the body grey -- 356 textured of 593, which is
+    # what the app printed until the kit container reached the draw list
+    # (LOOKS-TASK-30).  It clears every floor above and is not a dressed
+    # figure, which is why the floors alone were not enough.
+    undressed = figure.replace("593 textured", "356 textured")
+    ok("a figure with its body untextured does not",
+       judge_whole(_counted(undressed)) != [],
+       "%s" % judge_whole(_counted(undressed)))
     alone = ("  A-A1-A-A-A, figure 0: 18 primitive(s), 18 textured, "
              "3 surface(s), 36 triangle(s)\n"
              "  sections 1, shelf on, wireframe off, camera yaw 180 "

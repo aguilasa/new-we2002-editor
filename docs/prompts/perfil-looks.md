@@ -679,6 +679,26 @@ Não se revertem sem o usuário pedir.
     batem inteiras): é resolução, a mesma da armadilha 68. O
     `--silhouette-stature` só afirma a ordem quando a mudança do jogo supera o
     resíduo, e imprime o resto como "abaixo da resolução".
+77. **O uniforme é por time, e o contêiner se mede na VRAM.** São 105
+    `TEX_*.BIN` com os mesmos retângulos; o nome não diz qual a tela usa. O
+    `oracle.py --kit` compara cada retângulo declarado com o frame buffer do
+    console, halfword a halfword: o `TEX_A4` reproduz **exatas** a página
+    (576, 384) e as paletas (0, 486) e (0, 488) nos dois states, e nenhum
+    outro reproduz nenhuma delas. **Somar os sete retângulos decide nada** —
+    a tela sobe três, os outros quatro diferem em milhares para todos os 105
+    (12.138 contra 13.274). E a página (576, 256) tem um bloco de 48 linhas
+    que a tela sobrescreve, igual nos dois states: quem nomeia o kit é o
+    retângulo exato, não a menor soma.
+78. **O confronto de cor desenha só a cabeça, então não testa o uniforme.** O
+    `--render`/`--score` usa `--piece head` por decisão medida; com o kit
+    ligado os números dele não se movem **nem um milésimo** — as três
+    pontuações saíram idênticas na primeira tentativa de controle. Quem cobra
+    o kit é o `--kit-control`, que desenha a figura **inteira** com o
+    contêiner de outros dois times e mede a distância até a foto do jogo.
+79. **Dois contêineres guardam registros no mesmo offset.** A chave da textura
+    era `(offset, profundidade, CLUT)` e passou a incluir o contêiner: sem
+    isso a página do corpo e a da cabeça colidem na tabela do viewer, e o
+    desenho morre com `KeyError` numa chave que parece legítima.
 ---
 
 ## As fontes de verdade binárias
@@ -722,12 +742,14 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | --- | --- | --- | --- | --- |
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
 | `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os dez `--check-image` (desde a LOOKS-TASK-29, com o `stature`), todos até o fim (a ordem é de leitura, não guarda — [`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
-| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` — desde a LOOKS-TASK-29 também fotografa a tela em 155, 175 e 210 cm e em `H TYPE` e exige que a tinta do painel siga as razões da regra (`STATURE_SLACK`), com dois controles plantados; sem câmera medida em `work/looks-camera/` diz que não julgou | `ctest -R looks_ui` | LOOKS-TASK-16 |
+| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` — desde a LOOKS-TASK-30 exige `textured == primitives` na figura inteira (o corpo vestido), e desde a LOOKS-TASK-29 também fotografa a tela em 155, 175 e 210 cm e em `H TYPE` e exige que a tinta do painel siga as razões da regra (`STATURE_SLACK`), com dois controles plantados; sem câmera medida em `work/looks-camera/` diz que não julgou | `ctest -R looks_ui` | LOOKS-TASK-16 |
 | `looks_live` | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo) | `python tools/looks/oracle.py --check-live` | `ctest -R looks_live` | LOOKS-TASK-19 (o comando, da LOOKS-TASK-07) |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min (medido 2026-09-20, os dois slots) | `python tools/looks/oracle.py --kit [SLOT]` — qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer: cada retângulo que cada contêiner declara contra a VRAM, halfword a halfword, com o controle (a mesma VRAM lida duas vezes, idêntica) fechando antes. Exige **uma página e uma paleta** exatas e que nenhum outro contêiner as reproduza (armadilha 77) | — | LOOKS-TASK-30 |
+| *(sem alvo ainda)* | venv + `WE2002_LOOKS_IMAGE` e as capturas de um `--run`; **sem emulador**, ~1 min | `python tools/looks/confront.py --kit-control [SLOT]` — a mesma tupla desenhada no uniforme de outros dois times, contra a foto do jogo: o kit medido tem de ficar `KIT_CONTROL_MARGIN` mais perto. É o controle negativo do uniforme, porque o `--score` não o alcança (armadilha 78) | — | LOOKS-TASK-30 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/assembly.py --check-image` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador; ~1 min, e ~30 s por tupla | `python tools/looks/oracle.py --patched <LINHA> [<SLOT> [<TUPLA> ...]]` — o slot desde a CORR-LOOKS-047 (sem ele é o 2); as tuplas desde a CORR-LOOKS-048, uma caminhada por tupla a partir de `load_state`, com as primitivas mudadas impressas | — | LOOKS-TASK-14 |

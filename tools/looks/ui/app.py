@@ -310,6 +310,9 @@ def main(argv=None) -> int:
     parser.add_argument("--piece", choices=("all", "head"), default="all",
                         help="head draws the section the tuple actually "
                              "changes, and nothing else")
+    parser.add_argument("--kit", default=None,
+                        help="the kit container the body wears, by tag; "
+                             "without it the one the save states showed")
     parser.add_argument("--visible", action="store_true",
                         help="show the window where the user can see it")
     args = parser.parse_args(argv)
@@ -330,7 +333,8 @@ def main(argv=None) -> int:
             return core.SKIP
     try:
         drawn = core.from_image(image, args.looks, args.figure,
-                                args.frame)
+                                args.frame, *((args.kit,) if args.kit
+                                              else ()))
     except core.BadScene as exc:
         print("app: %s refuses -- %s" % (args.looks, exc))
         return 2

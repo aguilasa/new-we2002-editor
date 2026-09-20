@@ -2182,13 +2182,31 @@ coordenada de **tela**, depois da transformação, não de modelo. *Destravaria:
 achar a matriz por peça em RAM, ou a animação parada do `ANIME.BIN`, que o §0
 põe fora do escopo.
 
-**(f) O uniforme — ABERTA.** Das 593 primitivas da figura 0, **237** amostram
-páginas que não são do `DAT2D.BIN` (629 e 429 na figura 1), medido pelo
-`assembly.py --check-image`; são as dos 105 `TEX_*.BIN`, e saem sem textura.
-*Por que está aberta:* os `TEX_*.BIN` não têm digest no `layout.py`, e a guarda
-dos dois discos não pode deixar ler o que não sabe conferir; o confronto foi
-feito na cabeça para não depender deles. *Destravaria:* os digests dos
-`TEX_*.BIN` japoneses na guarda, e a regra de qual deles cada time veste.
+**(f) O uniforme — FECHADA em 2026-09-20.** Das 593 primitivas da figura 0,
+**237** amostravam páginas que não são do `DAT2D.BIN` (629 e 429 na figura 1),
+medido pelo `assembly.py --check-image`; são as dos 105 `TEX_*.BIN`, e saíam
+sem textura.
+
+> **Fechada pela [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).** Os
+> 105 contêineres entraram na guarda com digest medido — todos **form 1** e
+> **idênticos nos dois discos**, o que é por que o `--check-discs` os aceita
+> dos dois lados —, e qual deles a tela veste passou a ser **medido na VRAM**
+> e não deduzido: `oracle.py --kit` compara cada retângulo que cada contêiner
+> declara com o que o console tem no frame buffer, halfword a halfword. Nos
+> dois states o vencedor é o **`TEX_A4`**, que reproduz **a página (576, 384)
+> e as paletas (0, 486) e (0, 488) exatamente**, e nenhum outro contêiner
+> reproduz nenhuma das três — o mais próximo, `TEX_95`, erra 789 halfwords
+> delas. Com ele no `draw_list`, o boneco sai **vestido**: 593 de 593
+> primitivas texturizadas na figura 0 e 629 de 629 na figura 1, zero
+> `no image` e zero `no palette`.
+>
+> Três coisas que a medição trouxe junto: das sete rectângulos de um
+> contêiner a tela **sobe três** (os outros quatro diferem em milhares para
+> todos os 105, e somá-los decidia nada — 12.138 contra 13.274); a página
+> (576, 256) tem um bloco de 48 linhas que a tela **sobrescreve**, igual nos
+> dois states; e os dois conjuntos que cada arquivo guarda são, no `TEX_A4`,
+> byte a byte iguais entre si, então qual dos dois o console subiu não se
+> distingue aqui.
 
 **(g) Sete quads da cabeça fora da display list — ABERTA.** No quadro de
 referência, das 18 primitivas da cabeça, 7 vêm na ordem guardada, 4 são gêmeas
@@ -2296,6 +2314,9 @@ leitura nas duas, com a tela trocando de time.
    com mensagem de erro que culpa a coisa errada (§4.2).
 5. **18 dos 105 `TEX_*.BIN` são form 2** na `golden-european-deluxe.bin`, e o
    `iso.py` os recusa. Não alcança os dois arquivos de modelo, alcança uniforme.
+   **No disco japonês e na tradução inglesa, não**: medido em 2026-09-20
+   (`iso_source.py --check-discs`), os 105 são form 1 nos dois e idênticos
+   entre eles, que é o que torna o uniforme legível aqui (§6 f).
 6. **`bin_archive.py` não acha a lista de CLUTs do `DAT2D.BIN`** e responde
    `0 clut(s)` sem reclamar (§1.7). Ler isso como "não tem paleta" é erro.
 7. **A tabela de texto é Shift-JIS full-width**, não ASCII (§1.10).
@@ -2908,9 +2929,28 @@ peça, ou nada — medido pela pose de dois valores de cada.
 > escalar linhas ou colunas dá a mesma matriz nesta tela, então nenhum
 > controle separa as duas.
 
-**(n) Qual `TEX_*.BIN` a tela veste.** A §6 (f): digest na guarda, o arquivo
-que o time dos save states usa, e as primitivas resolvidas.
-[`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).
+**(n) Qual `TEX_*.BIN` a tela veste — FECHADA em 2026-09-20.** A §6 (f):
+digest na guarda, o arquivo que o time dos save states usa, e as primitivas
+resolvidas. [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).
+
+> **É o `TEX_A4`, nos dois states, medido na VRAM** (§6 f). O desenho o lê
+> pelo `layout.KIT_ON_SCREEN`, e o que isso vale está medido dos dois lados:
+> o `scene.py --check-image` exige as duas figuras inteiramente texturizadas
+> **e** imprime o caso sem kit ao lado (356 de 593, as 237 do corpo cinzas);
+> o `looks_ui` exige `textured == primitives` na figura inteira, com o
+> controle plantado *"o kit chegando ao corpo"*; e o `confront.py
+> --kit-control` desenha a mesma tupla no uniforme de outros dois times e
+> mede que a foto do jogo fica **0,218, 0,218, 0,148 e 0,063** mais longe.
+>
+> **O confronto de cor da §5.3 não testa o uniforme**, e vale dizer por quê:
+> ele desenha `--piece head` por decisão medida, então trocar o kit não move
+> nenhum dos seus números — re-rodado com o uniforme ele fica onde estava,
+> 3 vitórias e 2 ranqueadas por slot, **0 inexplicadas**. Quem cobra o kit é
+> o controle de figura inteira acima.
+>
+> **Qual contêiner cada time veste continua sem medida.** O que está medido é
+> qual deles estes dois screens subiram; a regra por time é outra pergunta, e
+> nenhuma task aberta a faz.
 
 **(o) O painel e o cenário.** Se o degradê, a borda, a barra de título, as
 faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou do `EDT_2D.BIN`, ou

@@ -818,8 +818,9 @@ dono do repositório, e isso não muda na v2.
 **aberto**, com as fases 8 a 11 (tasks 21 a 35). O alvo da v2 é a própria tela
 do jogo: a janela **é** a `LOOKS SET`, com as doze linhas trocáveis, o cursor,
 a caixa de ajuda e o boneco no painel. Entregues a tela (fase 8) e o boneco
-montado, na pose e na câmera do jogo, com altura e corpo (fase 9, até a
-task 29); faltam o uniforme e o cenário (10) e a caminhada (11).
+montado, na pose e na câmera do jogo, com altura e corpo (fase 9) e com o
+uniforme do time (task 30); faltam o painel e o cenário (task 31) e a
+caminhada (fase 11).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
@@ -869,6 +870,8 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/confront.py --silhouette` / `--silhouette-styles` | a nossa silhueta contra a do jogo: no corpo inteiro testemunha a **pose**; no close-up, três estilos de cabelo andados no jogo, cada foto escolhendo o próprio |
 | `python tools/looks/oracle.py --stature [SLOT]` | o que `HEIG` e `BODY` fazem: o vetor de escala, a câmera e as peças contra a regra do `stature.py`, nos mesmos quadros da caminhada, e todos os valores das duas linhas |
 | `python tools/looks/confront.py --silhouette-stature [SLOT]` | a silhueta do jogo andado às pontas de `HEIG` e a dois `BODY`, contra a nossa com a câmera daquela estatura |
+| `python tools/looks/oracle.py --kit [SLOT]` | qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer do console |
+| `python tools/looks/confront.py --kit-control [SLOT]` | o uniforme de outro time desenhado na mesma tupla, para medir que o kit decide a figura |
 | `python tools/looks/anime.py --check-image` / `--report` / `--against-pose` | o `ANIME.BIN`: 204 animações, a varredura que fecha no EOF, os três ângulos de cada peça de cada quadro, e o confronto com a pose capturada |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |
@@ -893,8 +896,12 @@ Cinco coisas que custam tempo se descobertas tarde:
   `tools/looks/` não recebem esse caminho — ele é constante do `layout.py`.
 - **O emulador é um só**, e os dois `.sav` são fixture: a cópia mestra fica em
   `work/looks-states/`, e o slot do DuckStation é rascunho restaurado dela.
-- **O boneco sai montado e com o uniforme cinza, e o cinza é medição, não
-  defeito.** Os `TEX_*.BIN` do uniforme não têm digest na guarda (task 30). A
+- **O boneco sai montado e vestido desde a task 30.** O uniforme é **por
+  time**: mora nos 105 `TEX_*.BIN`, que entraram na guarda com digest medido
+  (todos form 1 e idênticos nos dois discos), e qual deles a tela usa se mede
+  na VRAM (`oracle.py --kit`) — é o `TEX_A4` nos dois states, e o desenho o lê
+  pelo `layout.KIT_ON_SCREEN`. Antes disso 237 primitivas do corpo saíam
+  cinzas, e o cinza era medição, não defeito. A
   pose vem do `ANIME.BIN` (tasks 24 a 26) e desde a task 27 o painel abre com
   ela: `ui/app.py --frame N` escolhe o quadro, e a prateleira da v1 continua
   atrás do `S`.

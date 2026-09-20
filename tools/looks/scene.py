@@ -90,9 +90,12 @@ class OffTheRecord(BadScene):
 class Surface:
     """One texture: an image record read through one CLUT, as RGBA bytes.
 
-    Keyed by the three things that decide the pixels -- the record, the page
-    depth and the CLUT id -- because the same image drawn through two CLUTs is
-    two different textures, which is exactly what a colour field does.
+    Keyed by the four things that decide the pixels -- the container, the
+    record, the page depth and the CLUT id -- because the same image drawn
+    through two CLUTs is two different textures, which is exactly what a
+    colour field does.  The container joined the key in LOOKS-TASK-30: two
+    containers hold records at the same offset, and without it the body's
+    texture and the head's collided in the viewer's own table.
     """
 
     __slots__ = ("key", "width", "height", "rgba", "record", "depth", "clut")
@@ -241,7 +244,7 @@ def sampled_indices(data: bytes, primitive, record, band: int = 0) -> set:
 
 
 def surface_for(data: bytes, record, depth: int, clut: int,
-                palettes) -> Surface:
+                palettes, container: str = None) -> Surface:
     """One image record read at `depth`, coloured through one CLUT id.
 
     The window comes from `texture.window_for`, never from the record's own
@@ -262,8 +265,8 @@ def surface_for(data: bytes, record, depth: int, clut: int,
                            % (index, len(entries), column * texture.NARROW,
                               row))
         rgba[4 * at:4 * at + 4] = bytes(entries[index])
-    return Surface((record.offset, depth, clut), width, height, bytes(rgba),
-                   record.offset, depth, clut)
+    return Surface((container, record.offset, depth, clut), width, height,
+                   bytes(rgba), record.offset, depth, clut)
 
 
 def part_for(primitive, vertices, record, surface, clut: int, band: int,
@@ -314,7 +317,7 @@ def part_for(primitive, vertices, record, surface, clut: int, band: int,
 # ---- the scene -----------------------------------------------------------
 
 def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE,
-          frame: int = None) -> Scene:
+          frame: int = None, kit: str = None) -> Scene:
     """Everything the tuple draws, out of the disc's own bytes.
 
     The draw list is `assembly`'s and is not recomputed here: which primitive
@@ -322,10 +325,15 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE,
     measurements, and a second copy of them would be a second thing to keep
     right.
     """
-    parts = assembly.draw_list(disc, values, figure)
-    data2d = disc[layout.DAT2D]
-    images = texture.images(data2d)
-    palettes = texture.palettes(data2d)
+    parts = assembly.draw_list(disc, values, figure, kit)
+    # One container per primitive, and the draw list says which: the body's
+    # pages are in the kit container and the head's are in the common file,
+    # and reading a record out of the wrong bytes decodes perfectly into
+    # somebody else's picture (LOOKS-TASK-30).
+    banks = {}
+    for path in {entry["container"] for entry in parts} - {None}:
+        body = disc[path]
+        banks[path] = (body, texture.images(body), texture.palettes(body))
 
     scans: dict = {}
     surfaces: dict = {}
@@ -341,13 +349,16 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE,
         record = None
         surface = None
         if entry["image"] is not None:
+            body, images, palettes = banks[entry["container"]]
             record = next(r for r in images if r.offset == entry["image"])
-            key = (record.offset, primitive.tpage_depth, entry["clut"])
+            key = (entry["container"], record.offset, primitive.tpage_depth,
+                   entry["clut"])
             if key not in surfaces:
                 try:
-                    surfaces[key] = surface_for(data2d, record,
+                    surfaces[key] = surface_for(body, record,
                                                 primitive.tpage_depth,
-                                                entry["clut"], palettes)
+                                                entry["clut"], palettes,
+                                                entry["container"])
                 except texture.NoPalette:
                     surfaces[key] = None
             surface = surfaces[key]
@@ -416,7 +427,7 @@ def place_for(places: dict, where: tuple, head: tuple):
 
 def from_image(image_path: str, text: str,
                figure: int = assembly.HEAD_FIGURE,
-               frame: int = None) -> Scene:
+               frame: int = None, kit: str = layout.KIT_ON_SCREEN) -> Scene:
     """The whole path, from a disc on disc to a scene -- what `ui/app.py` calls.
 
     It lives here and not in the window because the window is forbidden the
@@ -428,6 +439,8 @@ def from_image(image_path: str, text: str,
         data = {name: disc.read(name)
                 for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
                              layout.ANIME)}
+        if kit is not None:
+            data[layout.kit_path(kit)] = disc.read(layout.kit_path(kit))
     # A tuple the table refuses arrives here as BadScene, with the table's own
     # sentence kept whole.  The window is not allowed to import `assembly` or
     # `looks` to catch their exceptions, and a refusal that reaches it as a
@@ -435,7 +448,7 @@ def from_image(image_path: str, text: str,
     # it is -- three hair styles and one beard value are exactly that.
     try:
         values = looks.parse_tuple(text)
-        return build(data, values, figure, frame)
+        return build(data, values, figure, frame, kit)
     except (looks.BadLooks, assembly.BadAssembly) as exc:
         raise BadScene(str(exc)) from exc
 
@@ -452,7 +465,7 @@ class Builder:
     `iso_source`'s, and `ui/` may not import it.
     """
 
-    __slots__ = ("image_path", "figure", "frame", "_data")
+    __slots__ = ("image_path", "figure", "frame", "kit", "_data")
 
     def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE,
                  frame: int = None):
@@ -464,18 +477,20 @@ class Builder:
         # carries it so that the panel opens with the figure ASSEMBLED, which
         # is what LOOKS-TASK-27 delivers; `None` is the shelf, still reachable.
         self.frame = frame
+        self.kit = layout.KIT_ON_SCREEN
         with iso_source.open_disc(image_path) as disc:
             self._data = {name: disc.read(name)
                           for name in (layout.EDT_MOD, layout.MODEL,
                                        layout.DAT2D, layout.ANIME,
-                                       layout.SELECT8)}
+                                       layout.SELECT8,
+                                       layout.kit_path(self.kit))}
 
     def build(self, text: str, frame: int = None) -> Scene:
         """*text* as a scene, or `BadScene` carrying the table's own sentence."""
         try:
             values = looks.parse_tuple(text)
             return build(self._data, values, self.figure,
-                         self.frame if frame is None else frame)
+                         self.frame if frame is None else frame, self.kit)
         except (looks.BadLooks, assembly.BadAssembly) as exc:
             raise BadScene(str(exc)) from exc
 
@@ -1518,6 +1533,30 @@ def _check_image(image_path: str) -> int:
                         "not run at all")
     if not scene.surfaces:
         problems.append("no surface was built")
+
+    # DRESSED, and both figures: the body's pages live in the kit container
+    # and not in the common file, so a figure drawn without one comes back
+    # with 237 of its 593 primitives grey (429 of 629 for the goalkeeper) and
+    # passes every other check here (section 6 (f), LOOKS-TASK-30).
+    for figure in (assembly.HEAD_FIGURE, 1 - assembly.HEAD_FIGURE):
+        dressed = from_image(image_path, assembly.CORPUS_REFERENCE, figure)
+        counts = summary(dressed)
+        print("      figure %d in TEX_%s: %d of %d primitive(s) textured, "
+              "notes %s" % (figure, layout.KIT_ON_SCREEN, counts["textured"],
+                            counts["parts"], counts["notes"]))
+        if counts["textured"] != counts["parts"]:
+            problems.append("figure %d left %d primitive(s) untextured with "
+                            "the kit container read"
+                            % (figure, counts["parts"] - counts["textured"]))
+    # And the red case beside it, so the line above is a measurement and not a
+    # description: with no kit, the body is grey.
+    bare = summary(from_image(image_path, assembly.CORPUS_REFERENCE,
+                              assembly.HEAD_FIGURE, None, None))
+    print("      and with no kit at all: %d of %d textured, notes %s"
+          % (bare["textured"], bare["parts"], bare["notes"]))
+    if bare["textured"] == bare["parts"]:
+        problems.append("a figure drawn with no kit came out fully textured, "
+                        "so the kit is not what dresses it")
 
     # Up is measured, not declared: the head has to end up ABOVE the boots
     # once UP is applied, and if the disc ever says otherwise the constant is

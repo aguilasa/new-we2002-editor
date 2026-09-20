@@ -37,6 +37,7 @@ Usage:
     python tools/looks/confront.py --silhouette [SLOT]          # the pose, by shape
     python tools/looks/confront.py --silhouette-styles [SLOT]   # hair, in the close-up
     python tools/looks/confront.py --silhouette-stature [SLOT]  # HEIG and BODY, by shape
+    python tools/looks/confront.py --kit-control    # another team's uniform scores worse
 """
 
 from __future__ import annotations
@@ -661,21 +662,116 @@ def _python_and_app():
     return python, ui_check.APP
 
 
-def render(text: str, figure: int, out: str):
-    """(picture, None) or (None, the refusal) for one tuple on our side."""
+def render(text: str, figure: int, out: str, kit: str = None,
+           piece: str = None):
+    """(picture, None) or (None, the refusal) for one tuple on our side.
+
+    *kit* names another team's container, which is how the kit control draws
+    the same tuple in the wrong strip, and *piece* overrides the head-only
+    default the colour run is made of -- a uniform is not on the head.
+    """
     import ui_check
 
     python, app = _python_and_app()
     code, output = ui_check.run_app(
         python, app, ["--looks", text, "--figure", str(figure), "--piece",
-                      PIECE, "--size", "%dx%d" % RENDER_SIZE,
-                      "--screenshot", out], ui_check.environment())
+                      piece or PIECE, "--size", "%dx%d" % RENDER_SIZE,
+                      "--screenshot", out]
+        + ([] if kit is None else ["--kit", kit]), ui_check.environment())
     if code == 2:
         return (None, output.strip().splitlines()[-1])
     if code or not os.path.isfile(out):
         raise ConfrontError("the viewer failed on %s (exit %s): %s"
                             % (text, code, output.strip()[-400:]))
     return (ui_check.picture(out), None)
+
+
+WRONG_KITS = ("00", "50")
+"""Two other teams' containers, for the control below.
+
+Two and not one: a single wrong kit that happened to be close would make the
+control a coin toss, and the pair are far apart on the disc -- one from each
+end of the 105.
+"""
+
+KIT_CONTROL_MARGIN = 0.05
+"""How much better the kit the screen wears must score than another team's.
+
+In histogram intersection, where 1.0 is the same colour distribution.
+Measured 2026-09-20 over both slots and both wrong kits: **0.218, 0.218,
+0.148 and 0.063**, and the floor is written under the smallest of the four
+rather than over the average of them.
+"""
+
+
+def check_kit_control(slots=(2, 1), verbose=True) -> int:
+    """`--kit-control`: another team's uniform has to score worse.  No emulator.
+
+    The kit is chosen by measurement (`oracle.py --kit`, off VRAM), and this is
+    the other half of that claim: the choice has to MATTER to the picture.  Our
+    reference tuple is drawn again in two other teams' strips and scored
+    against the game's own capture of that tuple, by the same histogram
+    intersection `--score` judges with -- so a run that dressed the figure in
+    any container at all and called it the uniform comes back red here.
+    """
+    import ui_check
+
+    where = out_dir()
+    _python_and_app()
+    problems = []
+    for slot in slots:
+        figure = SLOT_FIGURE[slot]
+        game = os.path.join(where, "game-%d-%s.png" % (slot, START))
+        if not os.path.isfile(game):
+            print("  no capture at %s -- run --run first" % game)
+            return SKIP
+        panel = histogram(ui_check.picture(game), box=PANEL)
+        # The WHOLE figure, not the head the colour run renders (`PIECE`): a
+        # uniform is not on the head, and scored head-only the three kits come
+        # back to the third decimal identical -- measured, which is how this
+        # control was written wrong the first time.
+        mine = os.path.join(where, "ours-%d-%s-whole.png" % (slot, START))
+        picture, refusal = render(START, figure, mine, None, "all")
+        if picture is None:
+            problems.append("slot %d: our side refuses %s -- %s"
+                            % (slot, START, refusal))
+            continue
+        back = quantise(picture[3][0][0:3])
+        hist = histogram(picture, drop=back)
+        right = intersection(restrict(panel, set(hist)), hist)
+        print("  slot %d, %s whole, in the measured kit TEX_%s: %.3f"
+              % (slot, START, layout_kit(), right))
+        for tag in WRONG_KITS:
+            out = os.path.join(where, "ours-%d-%s-kit%s.png" % (slot, START,
+                                                                tag))
+            picture, refusal = render(START, figure, out, tag, "all")
+            if picture is None:
+                problems.append("slot %d: the viewer refused TEX_%s -- %s"
+                                % (slot, tag, refusal))
+                continue
+            wrong_back = quantise(picture[3][0][0:3])
+            wrong_hist = histogram(picture, drop=wrong_back)
+            wrong = intersection(restrict(panel, set(wrong_hist)), wrong_hist)
+            print("      in TEX_%s: %.3f (%.3f worse)"
+                  % (tag, wrong, right - wrong))
+            if right - wrong < KIT_CONTROL_MARGIN:
+                problems.append(
+                    "slot %d: TEX_%s scores %.3f against the measured kit's "
+                    "%.3f -- under the %.2f that says the kit decides the "
+                    "picture" % (slot, tag, wrong, right, KIT_CONTROL_MARGIN))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("confront --kit-control: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+def layout_kit() -> str:
+    """The tag the window draws with, read from `layout` (rule 3 keeps the
+    import inside the function, like every other one in this file)."""
+    import layout
+
+    return layout.KIT_ON_SCREEN
 
 
 def press_value(game, button: str, row: str, oracle) -> None:
@@ -1916,6 +2012,8 @@ def main(argv: list[str]) -> int:
             if argv[1] == "--silhouette-stature":
                 return check_silhouette_stature(chosen)
             return check_silhouette(chosen)
+        if len(argv) >= 2 and argv[1] == "--kit-control":
+            return check_kit_control(tuple(int(a) for a in argv[2:]) or (2, 1))
         if len(argv) == 3 and argv[1] == "--reach":
             return reach(argv[2])
     except oracle.Unavailable as exc:
