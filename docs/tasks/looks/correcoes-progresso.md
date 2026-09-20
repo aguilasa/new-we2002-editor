@@ -80,7 +80,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-062](/docs/tasks/looks/CORR-LOOKS-062.md) | [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | A segunda chuteira é posta por espelho em z, cai a 258 unidades da própria canela, e nenhum gate pode ver isso | Média | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-063](/docs/tasks/looks/CORR-LOOKS-063.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | O `--silhouette-styles` decide por mínimo, sem controle e sem margem, e o "estilo trocado discorda" não é asserção | Alta | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-064](/docs/tasks/looks/CORR-LOOKS-064.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | "603 a 1.680" e "1,4x a 4,4x" não são o que as corridas imprimem, e três textos ainda dizem o que a quinta sessão desmentiu | Baixa | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-065](/docs/tasks/looks/CORR-LOOKS-065.md) | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Três medições da LOOKS-TASK-29 sobre o ritmo e a mistura ficaram "para o leitor de pose", sem linha na task que as mede | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-065](/docs/tasks/looks/CORR-LOOKS-065.md) | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Três medições da LOOKS-TASK-29 sobre o ritmo e a mistura ficaram "para o leitor de pose", sem linha na task que as mede | Baixa | [x] concluída | 2026-09-20 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -159,7 +159,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-062 — o pé que a task ia medir saiu espelhado, e a asserção que o cobriria é vazia
 - [x] CORR-LOOKS-063 — o gate dos estilos no close-up não tem controle nem margem
 - [x] CORR-LOOKS-064 — os números e a prosa da LOOKS-TASK-28 ficaram atrás das próprias corridas
-- [ ] CORR-LOOKS-065 — o que a 29 achou sobre a caminhada não chegou à 32
+- [x] CORR-LOOKS-065 — o que a 29 achou sobre a caminhada não chegou à 32
 
 ## Detalhes por correção
 
