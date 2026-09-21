@@ -5,7 +5,7 @@ origin: LOOKS-TASK-36
 severity: medium
 files: [tools/looks/oracle.py, tools/looks/ui_check.py, tools/looks/sprites.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -100,3 +100,102 @@ $ python <cópia>/tools/looks/sprites.py
 sprites.py: 0 failure(s)
 # work/looks-scenery/slot{1,2}.json, página (704,0): só a ▶ (uv 128,248) com CLUT (80,497); nenhuma ◀
 ```
+
+### Correção, 2026-09-21 (HEAD `568f87e6`)
+
+**Reproduzida de novo, pelo gate inteiro.** Cópia de `HEAD` (`git archive`)
+com `ARROW_CLUT = (64, 496)`, sob `work/corr068-before/`:
+
+```text
+$ python work/corr068-before/tools/looks/ui_check.py
+...
+looks_ui: 14 of 14 negative control(s) red, and the window drew every tuple ...
+exit=0
+```
+
+**Causa raiz confirmada.** O `frame_arrows` separava as setas por página e
+`uv` e jogava fora a CLUT; o `ui_check` só lia a linha `arrows` do relatório da
+janela, que sai do `screen.State.arrows()` — janela e tabela concordando de
+graça. Nenhum dos dois encontrava os **pixels** do jogo.
+
+**A CLUT da ◀, medida:** `(80, 497)`, a mesma da ▶. Lida da lista que o
+quadro entrega ao GPU, em `DEFAUL` (uma `Up` depois da carga), nos dois slots,
+três leituras em cada um:
+
+```text
+2 ('Up',) (384, 43) uv (128, 240) clut (80, 497) colour 64/72/80  frame (115,90,0)/(132,107,0)/(148,115,0)
+1 ('Up',) (384, 43) uv (128, 240) clut (80, 497) colour 108/116/124 frame (198,156,0)/(214,165,0)/(231,181,0)
+```
+
+A seta só usa a entrada 15 da CLUT — `(255, 198, 0)`, laranja; a mesma
+entrada da `(64, 496)` da ajuda é `(214, 214, 214)`. E a cor da lista **não** é
+a do quadro à unidade: a seta pulsa alguns passos por quadro, e a lista lida é
+a do quadro seguinte (cor 96 sobre um quadro que corresponde a ~100).
+
+**O que mudou:**
+
+- `oracle.py`, `frame_arrows`: recusa a seta desenhada de CLUT diferente de
+  `sprites.ARROW_CLUT` e guarda as CLUTs vistas em `ARROW_CLUTS_SEEN`; o
+  `--keys` e o `--screen` imprimem a linha `the arrows' CLUT, read off the
+  list`.
+- `oracle.py --scenery [--write]`: `_arrow_samples` anda os `ARROW_WALKS` (a
+  carga, que mostra a ▶, e `Up`, que mostra a ◀ em `DEFAUL`), lê cada um duas
+  vezes como controle (mesmos pontos, `uv` e CLUT; a cor fica de fora porque
+  pulsa) e grava em `slotN.json` a lista `arrows` com os 22 texels opacos de
+  cada seta — onde olhar sai do disco com o `uv` e a CLUT **do jogo**, a cor sai
+  do frame buffer.
+- `ui_check.py`: `measure_arrows` fotografa a janela depois das mesmas teclas,
+  modula o pixel dela como a GPU (`min(255, texel * cor // 128)`) em cada cor a
+  até `ARROW_PULSE = 16` da da lista, e exige o melhor dentro de
+  `ARROW_SLACK = 9`. `arrow_gap` é puro e tem quatro checks no self-check. Dois
+  controles plantados em `ARROW_BREAKS`: a CLUT da ajuda e os dois `uv`
+  trocados.
+- `sprites.py`: nada — a constante estava certa; o defeito era não haver quem a
+  medisse.
+
+**Verificação, depois:**
+
+```text
+$ python tools/looks/oracle.py --scenery --write
+    arrows after the load: > at (480, 55), uv (128, 248), CLUT (80, 497), colour (96, 96, 96); 22 opaque texel(s) sampled
+    arrows after Up: < at (384, 43), uv (128, 240), CLUT (80, 497), colour (64, 64, 64); 22 opaque texel(s) sampled
+    (slot 1: colour 60 e 108)
+oracle --scenery: 0 problem(s) over 2 slot(s)
+
+# melhor distância da janela ao jogo, por seta (gap, cor achada)
+2 []     96 -> (2, 100)    2 ['Up'] 64 -> (1, 58)
+1 []     60 -> (1, 58)     1 ['Up'] 108 -> (2, 100)
+
+# os dois controles plantados
+(True, "slot 2 after the load: the right arrow at (480, 55) is not the game's -- 133 apart at best (colour 80); at (480,57) the game shows (198, 156, 0) and the window (214, 214, 214)")
+(True, "slot 2 after the load: the right arrow at (480, 55) is not the game's -- 198 apart at best (colour 80); at (480,57) the game shows (198, 156, 0) and the window (0, 53, 55)")
+
+$ python tools/looks/oracle.py --keys "Down,Right,Right,Right,Right" 2
+  the arrows' CLUT, read off the list: < (80,497)
+oracle --keys: 0 difference(s) after 5 press(es), across the game, screen.json and our window
+$ python tools/looks/oracle.py --keys "Up" 1
+  the arrows' CLUT, read off the list: < (80,497)
+oracle --keys: 0 difference(s) after 1 press(es), across the game, screen.json and our window
+
+# a mesma sequência numa cópia da árvore corrigida com ARROW_CLUT = (64, 496)
+oracle FAILED: the left arrow at (384, 67) is drawn from CLUT (80, 497), and the window cuts it from sprites.ARROW_CLUT (64, 496)
+exit=1
+
+# a Verificação do item: o gate inteiro numa cópia da árvore corrigida com ARROW_CLUT = (64, 496)
+$ python work/corr068-after/tools/looks/ui_check.py
+FAIL: slot 2 after the load: the right arrow at (480, 55) is not the game's -- 133 apart at best (colour 80); ...
+FAIL: slot 2 after Up: the left arrow at (384, 43) is not the game's -- 80 apart at best (colour 48); ...
+FAIL: slot 1 after the load: the right arrow at (480, 55) is not the game's -- 73 apart at best (colour 44); ...
+FAIL: slot 1 after Up: the left arrow at (384, 43) is not the game's -- 153 apart at best (colour 92); ...
+exit=1
+
+# e na árvore corrigida
+$ python tools/looks/ui_check.py
+  the arrows the window paints are the game's: 88 pixel(s) sampled over slots 2, 1, every one within 9 at the game's colour
+negative: breaking the arrows' CLUT reddens the arrows -- ... 133 apart at best ...
+negative: breaking the arrows' uv reddens the arrows -- ... 198 apart at best ...
+looks_ui: 16 of 16 negative control(s) red, ...
+exit=0
+```
+
+Antes 14 controles, agora 16: os dois de `ARROW_BREAKS`.

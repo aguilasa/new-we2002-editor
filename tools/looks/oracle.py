@@ -2188,9 +2188,15 @@ def check_scenery(slots=(2, 1), write=False, verbose=True):
             print("    the static sprites sampled: %d pixel(s) of %d sprite(s), "
                   "each the colour the game's frame shows there"
                   % (sum(len(one) for one in samples.values()), len(samples)))
+            arrows, arrow_problems = _arrow_samples(game, slot, display,
+                                                    ready["image"], confront,
+                                                    screen)
+            problems += ["slot %d: %s" % (slot, line)
+                         for line in arrow_problems]
             if write:
                 print("    wrote %s"
-                      % write_scenery(slot, found, display, sprites, samples))
+                      % write_scenery(slot, found, display, sprites, samples,
+                                      arrows))
     for line in problems:
         print("  FAIL  %s" % line)
     print("oracle --scenery: %d problem(s) over %d slot(s)"
@@ -2781,7 +2787,103 @@ def _static_samples(game, sprites, display, image, confront, screen):
     return out
 
 
-def write_scenery(slot, found, display, sprites=(), samples=None):
+ARROW_WALKS = ((), ("Up",))
+"""The presses after a load that put each arrow on screen: the load leaves the
+cursor on NAT with the right arrow beside its value, and one `Up` takes it to
+DEFAUL, whose value shows the left arrow alone (`screen.json`)."""
+
+
+def _arrow_samples(game, slot, display, image, confront, screen):
+    """`(arrows, problems)`: the arrows each of `ARROW_WALKS` shows, sampled.
+
+    What `ui_check.py` holds the window's ARROWS to (CORR-LOOKS-068), written
+    by this tool for the reason `_static_samples` gives: the colour of each
+    sample is the game's frame, not what `sprites.py` decodes.  Each entry is
+    `{"keys", "side", "point", "uv", "clut", "colour", "samples"}`, with the
+    uv, the CLUT and the colour the GAME's list carries.  The disc says only
+    WHERE to look -- the opaque texels of the sprite cut with the game's own
+    uv and CLUT, never `sprites.ARROW_CLUT`.
+
+    The colour is the list's, and it is not the frame's to the unit: the arrow
+    pulses a few steps a frame, and the list read is the frame being built
+    (measured 2026-09-21: a list colour of 96 over a frame of 24/19 in five
+    bits, which is 100).  The judge allows for it; nothing here pretends.
+
+    The control is the same walk twice: the same arrows, at the same points,
+    from the same uv and CLUT -- the colour is left out, because it pulses.
+    """
+    import iso_source
+    import sprites as art_module
+
+    with iso_source.open_disc(image) as disc:
+        art = art_module.Art(art_module.containers_of(disc))
+    out, problems, sides = [], [], set()
+    for keys in ARROW_WALKS:
+        seen = []
+        for _attempt in range(2):
+            restore_state(slot, verbose=False)
+            game.load_looks(slot, label="arrows-%d" % slot)
+            for button in keys:
+                tap(game, button)
+            listed = [one for one in sprites_of(frame_commands(game))
+                      if tuple(one["page"]) == layout.ARROW_PAGE]
+            frame = confront.still_frame(game, display,
+                                         sys.modules[__name__], screen)
+            seen.append((listed, frame))
+        shape = [[(tuple(one["point"]), tuple(one["uv"]), tuple(one["clut"]))
+                  for one in listed] for listed, _frame in seen]
+        if shape[0] != shape[1]:
+            problems.append("the arrows after %s read twice are not the same "
+                            "(%r, then %r), so nothing below is a measurement"
+                            % (",".join(keys) or "the load", shape[0], shape[1]))
+            continue
+        listed, frame = seen[0]
+        by_uv = {tuple(uv): side for side, uv in art_module.ARROWS.items()}
+        for one in listed:
+            side = by_uv.get(tuple(one["uv"]))
+            if side is None:
+                problems.append("a sprite on the arrows' page at %r samples uv "
+                                "%r, which is neither arrow"
+                                % (one["point"], one["uv"]))
+                continue
+            rgba = art.image(dict(one, colour=[art_module.NEUTRAL] * 3))
+            width, height = one["size"]
+            spots = []
+            for row in range(height):
+                for col in range(width):
+                    if not rgba[4 * (row * width + col) + 3]:
+                        continue
+                    x, y = one["point"][0] + col, one["point"][1] + row
+                    if 0 <= x < display[0] and 0 <= y < display[1]:
+                        spots.append([x, y, list(frame[y][x][:3])])
+            sides.add(side)
+            out.append({"keys": list(keys), "side": side,
+                        "point": list(one["point"]), "uv": list(one["uv"]),
+                        "clut": list(one["clut"]),
+                        "colour": list(one["colour"]), "samples": spots})
+            print("    arrows after %s: %s at %r, uv %r, CLUT %r, colour %r; "
+                  "%d opaque texel(s) sampled"
+                  % (",".join(keys) or "the load",
+                     {"left": "<", "right": ">"}[side], tuple(one["point"]),
+                     tuple(one["uv"]), tuple(one["clut"]),
+                     tuple(one["colour"]), len(spots)))
+            if tuple(one["clut"]) != tuple(art_module.ARROW_CLUT):
+                problems.append("the %s arrow at %r is drawn from CLUT %r, and "
+                                "the window cuts it from sprites.ARROW_CLUT %r"
+                                % (side, tuple(one["point"]),
+                                   tuple(one["clut"]),
+                                   tuple(art_module.ARROW_CLUT)))
+    missing = sorted(set(art_module.ARROWS) - sides)
+    if missing:
+        problems.append("the walks %r showed no %s arrow, so its pixels are "
+                        "not sampled" % (ARROW_WALKS, " and ".join(missing)))
+    print("    control: each walk read twice shows the same arrows from the "
+          "same uv and CLUT" if not problems else
+          "    the arrows: %d problem(s)" % len(problems))
+    return out, problems
+
+
+def write_scenery(slot, found, display, sprites=(), samples=None, arrows=None):
     """One JSON per slot, in `work/looks-scenery/`."""
     import json
 
@@ -2806,7 +2908,8 @@ def write_scenery(slot, found, display, sprites=(), samples=None):
                                     **({"samples": samples[index]}
                                        if samples and index in samples
                                        else {}))
-                               for index, one in enumerate(sprites)]},
+                               for index, one in enumerate(sprites)],
+                   "arrows": list(arrows or [])},
                   handle, indent=1)
         handle.write("\n")
     return path
@@ -4794,6 +4897,7 @@ def check_screen(write=False, verbose=True):
         screen.write(measured)
         print("oracle --screen --write: wrote %s" % screen.TABLE)
         return 0
+    _say_arrow_cluts()
     table = screen.load()
     differences = _differences(table, measured)
     for path, want, got in differences:
@@ -4842,6 +4946,14 @@ def frame_arrows(game):
     not part of the answer (LOOKS-TASK-36).  A sprite on that page with a
     `uv` that is neither arrow is refused -- it would be something this screen
     was never measured to draw.
+
+    **And an arrow drawn from a CLUT other than `sprites.ARROW_CLUT` is
+    refused** (CORR-LOOKS-068).  The window cuts both arrows from that one
+    CLUT, and until this check it had been measured for the right arrow only:
+    a wrong one passed every gate that runs without the emulator.  Every walk
+    that reads the arrows now measures the CLUT of each one it sees -- the
+    left arrow's is `(80, 497)` too, measured 2026-09-21 on DEFAUL in both
+    slots.  The CLUTs seen are kept in `ARROW_CLUTS_SEEN`, by side.
     """
     import sprites as art
 
@@ -4855,8 +4967,30 @@ def frame_arrows(game):
             raise OracleError("a sprite on the arrows' page at %r samples uv "
                               "%r, which is neither arrow"
                               % (one["point"], one["uv"]))
+        clut = tuple(one["clut"])
+        ARROW_CLUTS_SEEN.setdefault(side, set()).add(clut)
+        if clut != tuple(art.ARROW_CLUT):
+            raise OracleError("the %s arrow at %r is drawn from CLUT %r, and "
+                              "the window cuts it from sprites.ARROW_CLUT %r"
+                              % (side, tuple(one["point"]), clut,
+                                 tuple(art.ARROW_CLUT)))
         out.append({"side": side, "point": list(one["point"])})
     return sorted(out, key=lambda one: (one["side"], one["point"]))
+
+
+ARROW_CLUTS_SEEN: dict = {}
+"""{side: {clut, ...}} of every arrow `frame_arrows` has read in this run."""
+
+
+def _say_arrow_cluts():
+    """One line naming the CLUT each arrow side was drawn from, or none seen."""
+    if not ARROW_CLUTS_SEEN:
+        print("  the arrows' CLUT: no arrow was on screen in this run")
+        return
+    print("  the arrows' CLUT, read off the list: %s" % ", ".join(
+        "%s %s" % ({"left": "<", "right": ">"}[side],
+                   " ".join("(%d,%d)" % one for one in sorted(cluts)))
+        for side, cluts in sorted(ARROW_CLUTS_SEEN.items())))
 
 
 def _say_arrows(arrows):
@@ -5007,6 +5141,7 @@ def check_keys(sequence=None, slot=2, verbose=True):
             print("    %-9s %r" % (name, first["rows"][name]))
         print("    help      %r" % first["help"])
         print("    arrows    %s" % _say_arrows(first["arrows"]))
+    _say_arrow_cluts()
     print("oracle --keys: %d difference(s) after %d press(es), across the "
           "game, screen.json and %s"
           % (len(bad), len(buttons),

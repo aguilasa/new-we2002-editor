@@ -1508,6 +1508,146 @@ every plate in the outfield player's CLUT -- right in slot 2, wrong in slot 1,
 which is why both slots are photographed."""
 
 
+# ---- the arrows beside the cursor's value (CORR-LOOKS-068) ---------------
+
+ARROW_SLACK = 9
+"""How far the window's arrow, modulated at the game's colour, may sit from
+the pixel the game's frame showed: one five-bit step and a rounding.  A wrong
+CLUT misses by far more -- the help's `(64, 496)` holds a grey where the
+arrow's holds an orange, and the blue alone is then 100 and more apart."""
+
+ARROW_PULSE = 16
+"""How far from the list's colour the frame's may be, in the colour's units.
+
+The arrow pulses a few steps a frame and the list `oracle.py --scenery` reads
+is not exactly the frame it photographs: a list colour of 96 sat over a frame
+at 100 (measured 2026-09-21).  So the judge tries every colour within this
+much of the list's and keeps the best -- which forgives the pulse and nothing
+else, because a pulse only scales the colour and a wrong CLUT changes its
+hue."""
+
+
+def arrow_gap(spots, colour: int, window) -> tuple:
+    """`(gap, best colour)`: the window's arrow against the game's pixels.
+
+    *spots* is `[(x, y, [r, g, b])]` off the game's frame, *colour* the
+    arrow's colour in the game's list, and *window(x, y)* the window's pixel
+    there, drawn at colour 128.  The window's pixel is modulated the way the
+    GPU does it -- `min(255, texel * colour // 128)` -- at each colour within
+    `ARROW_PULSE` of *colour*, and the gap is the worst channel of the best of
+    them.  Pure, so the self-check can hold it to numbers."""
+    best = None
+    for tint in range(max(0, colour - ARROW_PULSE),
+                      colour + ARROW_PULSE + 1):
+        worst = 0
+        for x, y, want in spots:
+            got = window(x, y)
+            worst = max(worst, max(abs(min(255, one * tint // 128) - two)
+                                   for one, two in zip(got, want)))
+        if best is None or worst < best[0]:
+            best = (worst, tint)
+    return best if best is not None else (0, colour)
+
+
+def measure_arrows(python: str, app: str, where: str, env: dict) -> tuple:
+    """The window's arrows against the game's own pixels.
+
+    `(bad, broke, sampled)`; sampled is None when a slot's table carries no
+    arrow samples, and the caller says so instead of judging.  The samples
+    are the `arrows` of `work/looks-scenery/slotN.json`, written by `oracle.py
+    --scenery --write` off the console's frame buffer after each walk of its
+    `ARROW_WALKS` -- the load, which shows the right arrow, and `Up`, which
+    shows the left one on DEFAUL.  The window is photographed after the same
+    presses and read where the game's arrow was; nothing here asks
+    `sprites.py` what an arrow looks like.  An arrow the window does not
+    draw where the game did shows the furniture there, and misses too.
+    """
+    import json
+
+    bad, sampled = [], 0
+    for slot in SPRITE_SLOTS:
+        table_path = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
+                                  "work", "looks-scenery", "slot%d.json" % slot)
+        if not os.path.isfile(table_path):
+            return ([], "", None)
+        with open(table_path, encoding="utf-8") as handle:
+            arrows = json.load(handle).get("arrows") or []
+        if not arrows or not all(one.get("samples") for one in arrows):
+            return ([], "", None)
+        walks = {}
+        for one in arrows:
+            walks.setdefault(tuple(one["keys"]), []).append(one)
+        for keys, shown in walks.items():
+            out = os.path.join(where, "arrows-%d-%d.png"
+                               % (slot, len(keys)))
+            arguments = ["--state", str(slot), "--scale", "1",
+                         "--no-stand-in-text", "--screenshot", out]
+            if keys:
+                arguments[2:2] = ["--keys", ",".join(keys)]
+            code, output = run_app(python, app, arguments, env)
+            if code != 0 or not os.path.isfile(out):
+                return ([], "slot %d after %s: the screen did not draw: %s"
+                        % (slot, ",".join(keys) or "the load",
+                           output.rstrip()), None)
+            _width, _height, channels, rows = picture(out)
+
+            def window(x, y, rows=rows, channels=channels):
+                return rows[y][x * channels:x * channels + 3]
+
+            for one in shown:
+                gap, tint = arrow_gap(one["samples"], one["colour"][0], window)
+                sampled += len(one["samples"])
+                if gap > ARROW_SLACK:
+                    x, y, want = one["samples"][0]
+                    bad.append("slot %d after %s: the %s arrow at %r is not "
+                               "the game's -- %d apart at best (colour %d); "
+                               "at (%d,%d) the game shows %s and the window %s"
+                               % (slot, ",".join(keys) or "the load",
+                                  one["side"], tuple(one["point"]), gap, tint,
+                                  x, y, tuple(want), tuple(window(x, y))))
+    return (bad, "", sampled)
+
+
+def plant_arrows(python: str, env: dict, name: str, where: str, old: str,
+                 new: str) -> tuple:
+    """A defect in a copy of the tree, judged by `measure_arrows` alone."""
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, where, old, new)
+        if sandbox is None:
+            return (False, why)
+        tables = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
+                              "work", "looks-scenery")
+        shutil.copytree(tables, os.path.join(tmp, "work", "looks-scenery"))
+        shots = os.path.join(tmp, "shots")
+        os.makedirs(shots)
+        app = os.path.join(sandbox, "ui", "app.py")
+        bad, broke, sampled = measure_arrows(python, app, shots, env)
+        if broke or sampled is None:
+            return (False, "the planted tree for %s did not judge the "
+                           "arrows, so nothing was proved: %s"
+                    % (name, broke or "no arrow samples in the copy"))
+        if not bad:
+            return (False, "%s :: %s was broken (%s -> %s) and the arrows "
+                           "still passed" % (where, name, old.strip(),
+                                             new.strip()))
+        return (True, bad[0])
+
+
+ARROW_BREAKS = (
+    ("the arrows' CLUT",
+     "sprites.py",
+     "ARROW_CLUT = (80, 497)  # not-an-address: VRAM",
+     "ARROW_CLUT = (64, 496)  # not-an-address: VRAM"),
+    ("the arrows' uv",
+     "sprites.py",
+     'ARROWS = {"left": (128, 240), "right": (128, 248)}',
+     'ARROWS = {"left": (128, 248), "right": (128, 240)}'),
+)
+"""The window that cut its arrows from the help's CLUT -- green in every gate
+that ran without the emulator until CORR-LOOKS-068 -- and the one that drew
+each arrow pointing the other way."""
+
+
 # ---- the gate itself ------------------------------------------------------
 
 def skip(why: str) -> int:
@@ -1683,7 +1823,36 @@ def main(argv: list | None = None) -> int:
         print("  the sprites not judged: no samples in work/looks-scenery/ "
               "(oracle.py --scenery --write)")
 
+    with tempfile.TemporaryDirectory() as tmp:
+        bad, broke, sampled_arrows = measure_arrows(python, APP, tmp, env)
+    if broke:
+        print("FAIL: %s" % broke)
+        return 1
+    if bad:
+        for line in bad:
+            print("FAIL: %s" % line)
+        return 1
+    judged_arrows = sampled_arrows is not None
+    if judged_arrows:
+        print("  the arrows the window paints are the game's: %d pixel(s) "
+              "sampled over slots %s, every one within %d at the game's "
+              "colour" % (sampled_arrows, ", ".join(map(str, SPRITE_SLOTS)),
+                          ARROW_SLACK))
+    else:
+        print("  the arrows not judged: no arrow samples in "
+              "work/looks-scenery/ (oracle.py --scenery --write)")
+
     failed = 0
+    if judged_arrows:
+        for name, where, old, new in ARROW_BREAKS:
+            red, why = plant_arrows(python, env, name, where, old, new)
+            if red:
+                print("negative: breaking %s reddens the arrows -- %s"
+                      % (name, why))
+                PLANTED.append(name)
+            else:
+                print("FAIL: %s" % why)
+                failed += 1
     if judged_sprites:
         for name, where, old, new in SPRITE_BREAKS:
             red, why = plant_sprites(python, env, name, where, old, new)
@@ -1737,7 +1906,8 @@ def main(argv: list | None = None) -> int:
           "game shows" % (len(PLANTED), len(BREAKS) + len(KEY_BREAKS)
                           + (len(STATURE_BREAKS) if judged_stature else 0)
                           + (len(SCENERY_BREAKS) if judged_scenery else 0)
-                          + (len(SPRITE_BREAKS) if judged_sprites else 0)))
+                          + (len(SPRITE_BREAKS) if judged_sprites else 0)
+                          + (len(ARROW_BREAKS) if judged_arrows else 0)))
     return 0
 
 
@@ -1876,7 +2046,24 @@ def _checks(c) -> None:
     # The substitutions have to name lines that exist, or the planted runs
     # below are green for the wrong reason -- the same rule `_sandbox`
     # enforces at run time, checked here where it costs nothing.
-    for name, where, old, _new in BREAKS:
+    # The arrows' judge, on numbers: the orange of `(80, 497)` at colour 96
+    # is (191, 148, 0); the frame showed it one pulse brighter, which the
+    # judge forgives, and the help's grey at any colour it does not.
+    game = [(0, 0, [198, 156, 0])]
+    ok("the arrow's orange a pulse off the list's colour passes",
+       arrow_gap(game, 96, lambda x, y: (255, 198, 0))[0] <= ARROW_SLACK,
+       "%r" % (arrow_gap(game, 96, lambda x, y: (255, 198, 0)),))
+    ok("the help's grey in its place does not",
+       arrow_gap(game, 96, lambda x, y: (214, 214, 214))[0] > ARROW_SLACK,
+       "%r" % (arrow_gap(game, 96, lambda x, y: (214, 214, 214)),))
+    ok("nor the furniture where the arrow should be",
+       arrow_gap(game, 96, lambda x, y: (0, 66, 90))[0] > ARROW_SLACK,
+       "%r" % (arrow_gap(game, 96, lambda x, y: (0, 66, 90)),))
+    ok("nor a colour the pulse cannot reach",
+       arrow_gap([(0, 0, [255, 198, 0])], 60,
+                 lambda x, y: (255, 198, 0))[0] > ARROW_SLACK)
+
+    for name, where, old, _new in BREAKS + ARROW_BREAKS:
         path = os.path.join(LOOKS_DIR, where)
         if not os.path.isfile(path):
             c.skip("the break for %s: %s is not here yet" % (name, where))
