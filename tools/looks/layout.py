@@ -1918,6 +1918,21 @@ a sweep of those two comes back with the panel, the help box and the row
 stripes and nothing else (measured 2026-09-20, LOOKS-TASK-31).
 """
 
+GPU_LIST_SUBMIT = 0x8003ACB8
+GPU_LIST_HEAD = "a0"
+"""The instruction that hands the GPU its display list, and the register
+holding the list's first node.
+
+`sw a0, 0x0(v0)` with `v0` = the DMA channel 2 address register -- found on
+2026-09-21 (LOOKS-TASK-31) by a write watchpoint on that register, which
+stopped only here.  Per frame it stores the head of a one-node list and the
+head of the ordering table, which alternates between two buffers 0x4000 apart.
+Walking the table from here gives the frame's whole list in DRAWING order --
+which the band sweep of `SCENERY_SWEEP` could not: it found packets but not
+which ones this frame drew, and missed every semi-transparent one because the
+screen shows their blend and not their colour.
+"""
+
 ADDRESS_OWNER = "layout.py"
 """The one module of tools/looks/ allowed to carry an address (plan 3.3, rule 1)."""
 

@@ -2024,19 +2024,9 @@ Every vertex in the band is signed and small -- the row stripes run from -79 to
 this is the screen's own frame and not a coincidence.
 """
 
-SCENERY_SLACK = 10
-"""How far a packet's colour may sit from the pixel the screen shows there.
-
-Eight bits a channel in the packet, five in the frame buffer, and the shading
-the hardware applies to a flat colour is not the identity -- so the match is a
-distance and not an equality.  Measured 2026-09-20: the furniture that IS on
-screen lands within 4 of its packet, and the stale packets left in the band --
-another screen's rows, 9 pixels apart where this screen's are 12 -- miss by 20
-and more.
-"""
-
 _FURNITURE = (("28", 5, False, 4), ("2A", 5, False, 4), ("38", 8, True, 4),
-              ("20", 4, False, 3), ("22", 4, False, 3), ("30", 6, True, 3))
+              ("3A", 8, True, 4), ("20", 4, False, 3), ("22", 4, False, 3),
+              ("30", 6, True, 3), ("32", 6, True, 3))
 SCENERY_QUADS = {int(code, 16): (words, gradient, corners)
                  for code, words, gradient, corners in _FURNITURE}
 """The untextured packet codes, as (words, gradient, corners).
@@ -2078,37 +2068,6 @@ def _signed_vertex(word):
 def _packet_colour(word):
     """One GPU colour word as (r, g, b)."""
     return (word & 0xFF, (word >> 8) & 0xFF, (word >> 16) & 0xFF)  # not-an-address: three channels
-
-
-def scenery_nodes(data, base):
-    """Every well-formed furniture packet in a band, in screen coordinates.
-
-    A node is `[link][packet]`, the link's top byte saying how many words
-    follow, and a packet is kept only when that count is the length the
-    hardware gives its command -- the same test `walk_packets` makes, which is
-    what separates a display list from a histogram of bytes.
-    """
-    out = []
-    for at in range(0, len(data) - 8, 4):
-        link = struct.unpack_from("<I", data, at)[0]
-        length, code = link >> 24, data[at + 7]
-        if code not in SCENERY_QUADS or SCENERY_QUADS[code][0] != length:
-            continue
-        words, gradient, count = SCENERY_QUADS[code]
-        if at + 4 * (words + 1) > len(data):
-            continue
-        step = 8 if gradient else 4
-        corners, colours = [], []
-        for index in range(count):
-            corners.append(_signed_vertex(struct.unpack_from(
-                "<I", data, at + 8 + step * index)[0]))
-            colours.append(_packet_colour(struct.unpack_from(
-                "<I", data, at + 4 + (step * index if gradient else 0))[0]))
-        points = [(x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1])
-                  for x, y in corners]
-        out.append({"at": base + at, "code": code, "gradient": gradient,
-                    "points": points, "colours": colours})
-    return out
 
 
 def scenery_pages(data, display):
@@ -2177,38 +2136,6 @@ def _inside(points, display):
                for x, y in points)
 
 
-def _corner_pixels(frame, points, display):
-    """The frame's pixel a touch inside each corner of a quad, or None."""
-    xs = sorted({x for x, _y in points})
-    ys = sorted({y for _x, y in points})
-    if len(xs) < 2 or len(ys) < 2:
-        return None
-    left, right, top, bottom = xs[0], xs[-1], ys[0], ys[-1]
-    if right - left < 2 or bottom - top < 2:
-        return None
-    out = []
-    for x, y in ((left, top), (right, top), (left, bottom), (right, bottom)):
-        px = min(max(x + (1 if x == left else -1), 0), display[0] - 1)
-        py = min(max(y + (1 if y == top else -1), 0), display[1] - 1)
-        pixel = frame[py][px]
-        out.append(tuple(pixel[:3]))
-    return out
-
-
-def _colour_gap(packet, shown):
-    """The largest channel distance between a packet's corners and the frame's.
-
-    The frame keeps five bits a channel, so the packet's eight are rounded
-    before the comparison -- otherwise every colour is off by up to seven for
-    a reason that has nothing to do with which packet drew it.
-    """
-    worst = 0
-    for want, got in zip(packet, shown):
-        for one, two in zip(want, got):
-            worst = max(worst, abs((one >> 3) - (two >> 3)) * 8)
-    return worst
-
-
 def check_scenery(slots=(2, 1), write=False, verbose=True):
     """`--scenery [SLOT]`: what draws the screen's furniture, off the band.
 
@@ -2264,47 +2191,181 @@ def check_scenery(slots=(2, 1), write=False, verbose=True):
     return 1 if problems else 0
 
 
+GPU_LIST_STOPS = 6
+"""Stops at `layout.GPU_LIST_SUBMIT` read before the frame's lists are called
+seen.  Measured: three per frame -- a one-node list twice and the ordering
+table once -- so six covers two frames, and the table of the SECOND is the one
+walked, after the screen has settled."""
+
+GPU_LIST_LIMIT = 20 * 1000  # not-an-address: a count of nodes
+"""Nodes a walk may take before a list that does not end is refused."""
+
+POLYLINE_END = 0x55555555  # not-an-address: the GPU's own polyline terminator
+
+_FURNITURE_LINES = (("48", False), ("4A", True))
+POLYLINE_CODES = {int(code, 16): semi for code, semi in _FURNITURE_LINES}
+"""Monochrome polylines, and whether each is semi-transparent: the border
+around the panel is four of them."""
+
+
+_DRAW_MODE = ("E1", "E2", "E3", "E4", "E5", "E6")
+DRAW_MODE_CODES = {int(code, 16) for code in _DRAW_MODE}
+DRAW_MODE_SET = int("E1", 16)
+DRAW_MODE_BITS = (1 << 9) - 1
+"""The GPU's draw-mode commands, and the nine bits of the texture page word:
+page x, page y, the blend of semi-transparent drawing, and the colour depth."""
+
+BLEND_SHIFT = 5
+"""Where the blend sits in the page word: two bits, 0 to 3 -- half and half,
+back plus front, back minus front, back plus a quarter of front."""
+
+_PAGE_WORD = (("24", 4), ("25", 4), ("26", 4), ("27", 4), ("2C", 4),
+              ("2D", 4), ("2E", 4), ("2F", 4), ("34", 5), ("35", 5),
+              ("36", 5), ("37", 5), ("3C", 5), ("3D", 5), ("3E", 5),
+              ("3F", 5))
+PAGE_WORD = {int(code, 16): index for code, index in _PAGE_WORD}
+"""Textured polygons, by the index of the word whose upper half is the page:
+drawing one sets the page -- and the blend -- as an E1 would."""
+
+
+def gpu_list_heads(game):
+    """The heads the frame submits to the GPU, in the order it submits them."""
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.GPU_LIST_SUBMIT))
+    heads = []
+    try:
+        for _ in range(GPU_LIST_STOPS):
+            client.call("continue")
+            if not _wait_for_hit(game, WATCH_SECONDS):
+                raise OracleError("%s never ran, so no list reached the GPU"
+                                  % who_writes.hx(layout.GPU_LIST_SUBMIT))
+            registers = client.call("read_registers", group="gpr")
+            heads.append(who_writes.register_value(registers,
+                                                   layout.GPU_LIST_HEAD))
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    return heads
+
+
+def walk_gpu_list(ram, head):
+    """[(address, [packet words])] of one GPU list, in drawing order.
+
+    *ram* is all of main memory from `RAM_BASE`.  A node is a link word -- its
+    top byte the packet's length, the rest the next node -- followed by that
+    many words; nodes of length zero are the ordering table's own empty slots
+    and are walked through.
+    """
+    mask = OT_POINTER
+    out, seen, at = [], set(), head
+    while True:
+        if at in seen or len(seen) > GPU_LIST_LIMIT:
+            raise OracleError("the list from %#x does not end within %d "
+                              "nodes" % (head, GPU_LIST_LIMIT))
+        seen.add(at)
+        offset = (at & mask) - (RAM_BASE & mask)
+        link = struct.unpack_from("<I", ram, offset)[0]
+        length = link >> 24
+        if length:
+            out.append((at, list(struct.unpack_from("<%dI" % length, ram,
+                                                    offset + 4))))
+        nxt = link & mask
+        if nxt == mask:
+            return out
+        at = (RAM_BASE & ~mask) | nxt
+
+
+def furniture_of(nodes):
+    """The untextured packets of a list: quads, gradients and polylines.
+
+    What the screen's furniture is made of, in the order it is drawn, each as
+    `{"points", "colours", "gradient", "semi", "line"}` in screen pixels.
+    Textured packets are the figure and are left to `scenery_pages`.
+    """
+    out, mode = [], None
+    for _at, words in nodes:
+        code = words[0] >> 24
+        if code in DRAW_MODE_CODES:
+            # Each word of a draw-mode packet is a command of its own; only
+            # the one that sets the texture page carries the blend.
+            for one in words:
+                if one >> 24 == DRAW_MODE_SET:
+                    mode = one & DRAW_MODE_BITS
+            continue
+        if code in PAGE_WORD:
+            mode = (words[PAGE_WORD[code]] >> 16) & DRAW_MODE_BITS
+            continue
+        if code in SCENERY_QUADS:
+            _words, gradient, corners = SCENERY_QUADS[code]
+            if gradient:
+                colours = [_packet_colour(words[2 * i]) for i in range(corners)]
+                points = [_signed_vertex(words[2 * i + 1])
+                          for i in range(corners)]
+            else:
+                colours = [_packet_colour(words[0])] * corners
+                points = [_signed_vertex(words[1 + i]) for i in range(corners)]
+            semi = bool(code & 2)
+            line = False
+        elif code in POLYLINE_CODES:
+            points = [_signed_vertex(one) for one in words[1:]
+                      if one != POLYLINE_END]
+            colours = [_packet_colour(words[0])] * len(points)
+            gradient, semi, line = False, POLYLINE_CODES[code], True
+        else:
+            continue
+        out.append({"points": [(x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1])
+                               for x, y in points],
+                    "colours": colours, "gradient": gradient,
+                    "semi": semi, "line": line,
+                    "blend": (None if not semi or mode is None
+                              else (mode >> BLEND_SHIFT) & 3)})
+    return out
+
+
 def _scenery_of(game, slot, table, display, confront, screen):
-    """The furniture packets one load of *slot* actually draws."""
+    """(furniture, pages) of the list one load of *slot* hands the GPU.
+
+    Walked from the head the game submits (`layout.GPU_LIST_SUBMIT`), not
+    swept out of memory: the list says which packets this frame DRAWS and in
+    which order, which a sweep of RAM cannot, and it carries the
+    semi-transparent ones -- the title band is three -- that no colour test
+    against the frame can find, because the frame shows their blend.
+    """
     restore_state(slot, verbose=False)
     game.load_looks(slot, label="scenery-%d" % slot)
     game.step(SCENERY_SETTLE)
-    frame = confront.still_frame(game, display, oracle_module(), screen)
-    bands = []
+    heads = gpu_list_heads(game)
     first, size, step = layout.SCENERY_SWEEP
-    for base in range(first, first + size, step):
-        path = os.path.join(game.out_dir, "scenery-%08x.bin" % base)
-        bands.append((base, game.read_ram(base, step, path)))
-    out = []
-    pages = {}
-    for base, data in bands:
-        for key, value in scenery_pages(data, display).items():
-            count, box = pages.get(key, (0, value[1]))
-            here = value[1]
-            if key in pages:
-                here = (min(box[0], here[0]), min(box[1], here[1]),
-                        max(box[2], here[2]), max(box[3], here[3]))
-            pages[key] = (count + value[0], here)
-        for node in scenery_nodes(data, base):
-            if not _inside(node["points"], display):
-                continue
-            shown = _corner_pixels(frame, node["points"], display)
-            if shown is None:
-                continue
-            node["gap"] = _colour_gap(node["colours"], shown)
-            node["shown"] = shown
-            if node["gap"] <= SCENERY_SLACK:
-                out.append(node)
-    # The two bands are the double buffer and hold the same furniture; keeping
-    # both would count every rectangle twice.
-    seen, unique = set(), []
-    for node in sorted(out, key=lambda one: (one["points"], one["at"])):
-        key = (tuple(node["points"]), tuple(node["colours"]))
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(node)
-    return unique, pages
+    ram = b"".join(game.read_ram(base, step, os.path.join(
+        game.out_dir, "scenery-%08x.bin" % base))
+        for base in range(first, first + size, step))
+    nodes = []
+    for head in dict.fromkeys(heads[len(heads) // 2:]):
+        nodes += walk_gpu_list(ram, head)
+    # The walked packets laid back out as nodes, so the page reader that
+    # scans a band reads exactly this frame's list and nothing stale.
+    pages = scenery_pages(b"".join(
+        struct.pack("<I", len(words) << 24) +
+        struct.pack("<%dI" % len(words), *words) for _at, words in nodes),
+        display)
+    furniture = [one for one in furniture_of(nodes)
+                 if _inside_screen(one["points"], display)]
+    return furniture, pages
+
+
+def _inside_screen(points, display):
+    """Any part of the packet on screen -- the background runs off the edges."""
+    xs = [x for x, _y in points]
+    ys = [y for _x, y in points]
+    return (max(xs) >= 0 and min(xs) <= display[0]
+            and max(ys) >= 0 and min(ys) <= display[1])
 
 
 def _say_glyph_page(game):
@@ -2394,19 +2455,23 @@ def _say_scenery(found, table):
         groups.setdefault(where, []).append((box, node))
     for where in sorted(groups):
         items = groups[where]
-        flats = [one for _box, one in items if not one["gradient"]]
+        lines = [one for _box, one in items if one["line"]]
         grads = [one for _box, one in items if one["gradient"]]
-        print("    %-10s %3d packet(s): %d flat, %d gradient"
-              % (where, len(items), len(flats), len(grads)))
-        for box, node in sorted(items)[:4]:
+        semis = [one for _box, one in items if one["semi"]]
+        print("    %-10s %3d packet(s): %d gradient, %d line, %d "
+              "semi-transparent"
+              % (where, len(items), len(grads), len(lines), len(semis)))
+        for box, node in items[:14]:
             colours = node["colours"]
-            print("        (%3d,%3d)-(%3d,%3d) %-8s %s%s"
-                  % (box[0], box[1], box[2], box[3],
-                     "gradient" if node["gradient"] else "flat",
+            kind = ("line" if node["line"] else
+                    "gradient" if node["gradient"] else "flat")
+            print("        (%4d,%4d)-(%4d,%4d) %-8s%s %s%s"
+                  % (box[0], box[1], box[2], box[3], kind,
+                     " semi%s" % node["blend"] if node["semi"] else "      ",
                      colours[0],
-                     " -> %s" % (colours[2],) if node["gradient"] else ""))
-        if len(items) > 4:
-            print("        ... and %d more" % (len(items) - 4))
+                     " -> %s" % (colours[-1],) if node["gradient"] else ""))
+        if len(items) > 14:
+            print("        ... and %d more" % (len(items) - 14))
 
 
 def write_scenery(slot, found, display):
@@ -2420,7 +2485,10 @@ def write_scenery(slot, found, display):
                    "centre": list(SCENERY_CENTRE),
                    "packets": [{"points": one["points"],
                                 "colours": one["colours"],
-                                "gradient": one["gradient"]}
+                                "gradient": one["gradient"],
+                                "semi": one["semi"],
+                                "blend": one["blend"],
+                                "line": one["line"]}
                                for one in found]},
                   handle, indent=1)
         handle.write("\n")

@@ -352,6 +352,22 @@ CONTROLS = (
         "stays seamless and samples a quarter of the sheet",
     ),
     Control(
+        "scene-semi-diagonal-twice", "scene.py", "furniture_picture",
+        "            _shade_triangle(picture, size, points[1:], colours[1:], blend, 2)",
+        "            _shade_triangle(picture, size, points[1:], colours[1:], blend, None)",
+        ("scene",),
+        "the two halves of a quad share a diagonal; drawn by both, an "
+        "additive quad lights it twice -- a bright seam across the title band",
+    ),
+    Control(
+        "scene-quad-split-wrong", "scene.py", "furniture_picture",
+        "            _shade_triangle(picture, size, points[:3], colours[:3], blend,",
+        "            _shade_triangle(picture, size, points[:2] + points[3:], colours[:2] + colours[3:], blend,",
+        ("scene",),
+        "the GPU splits a quad 0,1,2 and 1,2,3; split 0,1,3 and a quad "
+        "stored in strip order leaves a corner unpainted",
+    ),
+    Control(
         "scene-up-is-down", "scene.py", "module constant",
         "UP = -1",
         "UP = 1",

@@ -3006,6 +3006,40 @@ barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou d
 > com o jogo fotografado duas vezes de controle. O painel fica a **4**, a
 > caixa de ajuda a **3** e as faixas a **11**, nos dois slots; as cores que a
 > v2 tinha escolhido a olho ficavam a 24 e a 142.
+>
+> **A lista que o quadro entrega ao GPU, e a barra de título está nela**
+> (2026-09-21). Um watchpoint de escrita no registrador de endereço do DMA do
+> GPU para só em `layout.GPU_LIST_SUBMIT` (`sw a0, 0x0(v0)`), e o `a0` dali é
+> a cabeça da lista: três por quadro, uma tabela de ordenação que alterna
+> entre dois buffers e uma lista de um nó. Andada da cabeça, ela dá **43
+> pacotes** de mobília, os mesmos nas duas leituras e nos dois slots, **em
+> ordem de desenho** — e corrige a varredura acima em duas coisas:
+>
+> | o que | pacote | cores |
+> |---|---|---|
+> | o fundo, oito peças em volta do painel e das faixas | 8 quads gouraud | (0,0,0), (14,8,49) e (29,22,99) |
+> | a barra de título, y 16 a 36 | 3 quads gouraud **aditivos** (blend 1) | cinza (192,192,192) a preto, teal (0,112,80) a preto, cinza a preto — **através** da tela, não para baixo |
+> | a área das faixas, (192,66)-(528,186) | 2 quads gouraud aditivos | (14,8,49) e (29,22,99) |
+> | a borda do painel | 4 polilinhas | (192,192,192), duas por lado, em x 16/17 e 160/161 |
+> | as faixas das linhas | **24** quads chatos, não 26 | os mesmos dois tons |
+>
+> A barra de título **não aparecia** na varredura por um motivo só: ela é
+> semitransparente, e o quadro mostra a **mistura**, nunca a cor que o pacote
+> declara — o filtro de cor a descartava. E duas das 26 faixas eram sobra. A
+> janela agora desenha a mobília do jeito que o GPU desenha — cada quad em dois
+> triângulos 0,1,2 e 1,2,3, sombreados entre os cantos, misturados pelo blend
+> do pacote — num núcleo (`scene.furniture_picture`), uma vez. O `confront.py
+> --outside` ganhou três regiões da mobília que o `screen.json` não nomeia:
+> **barra de título a 3, fundo a 3 e 3**, painel a 4, ajuda a 4, faixas a 6
+> (eram 11), nos dois slots.
+>
+> **E a página da fonte não está resolvida.** A mesma pergunta ao GPU na
+> passada que desenha do `SCREEN_GLYPH`, em três corridas, deu (704, 256) e
+> (832, 256) no slot 2 e as duas mais (704, 0) no slot 1 — só a (704, 0) tem
+> registro no `DAT2D.BIN`. O "(704, 0)" acima veio de **uma** corrida. O que o
+> GPU tem em vigor na parada não é necessariamente o que o glifo seguinte usa.
+> Texto, placa, caixa da camisa e setas continuam fora da lista: nenhum
+> pacote texturizado cai fora do painel.
 
 **(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
 interpola entre quadros-chave, e se o tronco que balança é da animação ou da

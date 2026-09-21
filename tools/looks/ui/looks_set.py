@@ -93,17 +93,25 @@ class LooksSet(QtWidgets.QWidget):
         self.setFixedSize(width * scale, height * scale)
         self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 
+        # The furniture drawn once, as the GPU draws it, by the core: it does
+        # not move, and the title band's gradients run across the screen,
+        # which a rectangle per packet painted here could not do.
+        self.furniture = None
+        if self.scenery:
+            picture = core.furniture_picture(self.scenery, (width, height))
+            self.furniture = QtGui.QImage(bytes(picture), width, height,
+                                          3 * width,
+                                          QtGui.QImage.Format.Format_RGB888
+                                          ).copy()
+
         self.viewer = Viewer(None, self)
         self.viewer.setGeometry(self._rect(self.places["panel"]))
-        panel = self._scenery_at(self.places["panel"])
-        if panel is not None:
-            # The panel's own gradient, measured, painted behind the figure --
-            # top and bottom by the corners that ARE on top and at the bottom.
-            corners = panel["points"]
-            top = min(range(len(corners)), key=lambda i: corners[i][1])
-            bottom = max(range(len(corners)), key=lambda i: corners[i][1])
-            self.viewer.clear_gradient = (tuple(panel["colours"][top]),
-                                          tuple(panel["colours"][bottom]))
+        if self.furniture is not None:
+            # The panel's own piece of the furniture -- gradient and border --
+            # painted behind the figure.
+            left, top, right, bottom = self.places["panel"]
+            self.viewer.clear_image = self.furniture.copy(
+                left, top, right - left + 1, bottom - top + 1)
         self.redraw()
 
     # -- geometry ----------------------------------------------------------
@@ -253,47 +261,15 @@ class LooksSet(QtWidgets.QWidget):
 
     # -- the drawing -------------------------------------------------------
 
-    def _scenery_at(self, box):
-        """The measured packet that covers *box*, or None."""
-        for packet in self.scenery:
-            xs = [point[0] for point in packet["points"]]
-            ys = [point[1] for point in packet["points"]]
-            if (abs(min(xs) - box[0]) <= 2 and abs(min(ys) - box[1]) <= 2
-                    and abs(max(xs) - box[2]) <= 2
-                    and abs(max(ys) - box[3]) <= 2):
-                return packet
-        return None
-
     def _paint_scenery(self, painter) -> None:
-        """The measured furniture: one rectangle per packet, flat or graded.
+        """The measured furniture, drawn once by the core, scaled to the window.
 
-        The packets are the game's own -- `oracle.py --scenery` reads them out
-        of the display list and keeps only those whose colours are the ones
-        the console showed inside them.  A gradient is drawn as the hardware
-        shades it between the first corner's colour and the third's.
+        The packets are the game's own -- `oracle.py --scenery` walks them off
+        the list the frame hands the GPU, in drawing order, blend and all.
         """
-        s = self.scale
-        for packet in self.scenery:
-            xs = [point[0] for point in packet["points"]]
-            ys = [point[1] for point in packet["points"]]
-            box = QtCore.QRect(min(xs) * s, min(ys) * s,
-                               (max(xs) - min(xs)) * s,
-                               (max(ys) - min(ys)) * s)
-            colours = [QtGui.QColor(*one) for one in packet["colours"]]
-            if packet["gradient"] and len(colours) > 2:
-                # By the corner that IS on top, not by the first one listed:
-                # the help box's packet lists its bottom corners first, and
-                # read in order its gradient came out upside down -- 32 away
-                # from the game's ground (measured by confront.py --outside).
-                corners = packet["points"]
-                top = min(range(len(corners)), key=lambda i: corners[i][1])
-                bottom = max(range(len(corners)), key=lambda i: corners[i][1])
-                shade = QtGui.QLinearGradient(box.topLeft(), box.bottomLeft())
-                shade.setColorAt(0.0, colours[top])
-                shade.setColorAt(1.0, colours[bottom])
-                painter.fillRect(box, QtGui.QBrush(shade))
-            else:
-                painter.fillRect(box, colours[0])
+        if self.furniture is None:
+            return
+        painter.drawImage(self.rect(), self.furniture)
 
     def paintEvent(self, event) -> None:
         painter = QtGui.QPainter(self)

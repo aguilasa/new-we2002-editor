@@ -864,9 +864,9 @@ class NoScenery(BadScene):
 def load_scenery(slot: int = 2) -> list:
     """The screen's furniture as the game draws it, or `NoScenery`.
 
-    One entry per packet: `{"points", "colours", "gradient"}`, in the display's
-    own 512x240 pixels, measured off the display list in RAM and held against
-    the frame the console showed (LOOKS-TASK-31).  It is never defaulted: the
+    One entry per packet: `{"points", "colours", "gradient", "semi", "blend",
+    "line"}`, in the display's own 512x240 pixels and in drawing order, walked
+    off the list the frame hands the GPU (LOOKS-TASK-31).  It is never defaulted: the
     colours the window used before this were chosen by eye, and a table that
     quietly fell back to them would make the window's picture a description of
     itself.
@@ -885,6 +885,106 @@ def load_scenery(slot: int = 2) -> list:
         raise NoScenery("%s holds no packet, so there is no furniture in it"
                         % path)
     return packets
+
+
+BLENDS = {
+    0: lambda back, front: (back + front) // 2,
+    1: lambda back, front: min(255, back + front),
+    2: lambda back, front: max(0, back - front),
+    3: lambda back, front: min(255, back + front // 4),
+}
+"""The four ways the GPU mixes a semi-transparent pixel with what is under it,
+by the two blend bits of the page word -- the hardware's own table.  This
+screen uses 1: all five semi-transparent packets are drawn additively
+(`oracle.py --scenery`, 2026-09-21)."""
+
+
+def _edge(a, b, x, y) -> int:
+    return (b[0] - a[0]) * (y - a[1]) - (b[1] - a[1]) * (x - a[0])
+
+
+def _shade_triangle(picture, size, corners, colours, blend, skip_edge) -> None:
+    """One gouraud triangle into *picture*, the colour of each pixel the
+    corners' own weighted by where it falls -- how the GPU shades one.
+
+    A pixel is in when it is on the inner side of all three edges, sampled at
+    its top-left corner, with the right and bottom edges left out like the
+    hardware leaves them out.  *skip_edge* drops the diagonal the two halves
+    of a quad share, so that a semi-transparent quad is not added twice there.
+    """
+    width, height = size
+    a, b, c = corners
+    area = _edge(a, b, c[0], c[1])
+    if area == 0:
+        return
+    if area < 0:
+        b, c = c, b
+        colours = (colours[0], colours[2], colours[1])
+        area = -area
+        skip_edge = {0: 0, 1: 2, 2: 1, None: None}[skip_edge]
+    x0 = max(0, min(a[0], b[0], c[0]))
+    x1 = min(width, max(a[0], b[0], c[0]))
+    y0 = max(0, min(a[1], b[1], c[1]))
+    y1 = min(height, max(a[1], b[1], c[1]))
+    mix = BLENDS.get(blend)
+    for y in range(y0, y1):
+        for x in range(x0, x1):
+            w0 = _edge(b, c, x, y)
+            w1 = _edge(c, a, x, y)
+            w2 = _edge(a, b, x, y)
+            if w0 < 0 or w1 < 0 or w2 < 0:
+                continue
+            if skip_edge is not None and (w0, w1, w2)[skip_edge] == 0:
+                continue
+            at = 3 * (y * width + x)
+            for k in range(3):
+                front = (w0 * colours[0][k] + w1 * colours[1][k]
+                         + w2 * colours[2][k]) // area
+                picture[at + k] = (front if mix is None
+                                   else mix(picture[at + k], front))
+
+
+def _line(picture, size, one, two, colour) -> None:
+    """One straight segment of a polyline, pixel by pixel, both ends in."""
+    width, height = size
+    (x, y), (xe, ye) = one, two
+    steps = max(abs(xe - x), abs(ye - y), 1)
+    for i in range(steps + 1):
+        px = x + (xe - x) * i // steps
+        py = y + (ye - y) * i // steps
+        if 0 <= px < width and 0 <= py < height:
+            at = 3 * (py * width + px)
+            picture[at:at + 3] = bytes(colour)
+
+
+def furniture_picture(packets: list, size: tuple) -> bytearray:
+    """The screen's furniture drawn as the GPU draws it: RGB, row by row.
+
+    The packets in the order the list hands them over, each a quad as two
+    triangles -- corners 0,1,2 and 1,2,3, the GPU's own split --, shaded
+    between its corners' colours, and mixed with what is under it when it is
+    semi-transparent.  Drawn once: the furniture does not move, and the window
+    paints the picture instead of each packet by hand, which a vertical
+    gradient per rectangle could not do -- the title band's gradients run
+    across the screen, not down it.
+    """
+    width, height = size
+    picture = bytearray(3 * width * height)
+    for packet in packets:
+        points = [tuple(one) for one in packet["points"]]
+        colours = [tuple(one) for one in packet["colours"]]
+        if packet.get("line"):
+            for one, two in zip(points, points[1:]):
+                _line(picture, size, one, two, colours[0])
+            continue
+        blend = packet.get("blend") if packet.get("semi") else None
+        if len(points) == 4:
+            _shade_triangle(picture, size, points[:3], colours[:3], blend,
+                            None)
+            _shade_triangle(picture, size, points[1:], colours[1:], blend, 2)
+        else:
+            _shade_triangle(picture, size, points, colours, blend, None)
+    return picture
 
 
 def to_camera(point, camera) -> tuple:
@@ -1286,6 +1386,40 @@ def self_check(verbose: bool = True) -> int:
 def _checks(c) -> None:
     ok, attempt = c.ok, c.attempt
     refuses = c.refusing(BadScene)
+
+    # The furniture rasterizer (LOOKS-TASK-31): what the GPU does with a quad,
+    # a semi-transparent one, a gradient across and a polyline.
+    size = (8, 6)
+    # Square, so that the diagonal the two halves share runs through pixels.
+    flat = {"points": [[1, 1], [5, 1], [1, 5], [5, 5]],
+            "colours": [[80, 40, 20]] * 4, "gradient": False}
+    pic = attempt("a flat quad drawn", lambda: furniture_picture([flat], size),
+                  default=bytearray(3 * 8 * 6))
+    lit = [(x, y) for y in range(6) for x in range(8)
+           if pic[3 * (y * 8 + x)] == 80]
+    ok("a flat quad covers its box, right and bottom edge left out",
+       lit == [(x, y) for y in range(1, 5) for x in range(1, 5)], "%r" % lit)
+    semi = dict(flat, semi=True, blend=1)
+    pic = attempt("an additive quad over another",
+                  lambda: furniture_picture([flat, semi], size),
+                  default=bytearray(3 * 8 * 6))
+    values = {pic[3 * (y * 8 + x)] for y in range(1, 5) for x in range(1, 5)}
+    ok("a semi-transparent quad adds ONCE, the shared diagonal included",
+       values == {160}, "%r" % values)
+    across = {"points": [[0, 0], [8, 0], [0, 6], [8, 6]],
+              "colours": [[0, 0, 0], [200, 0, 0], [0, 0, 0], [200, 0, 0]],
+              "gradient": True}
+    pic = attempt("a gradient across", lambda: furniture_picture([across], size),
+                  default=bytearray(3 * 8 * 6))
+    row = [pic[3 * (3 * 8 + x)] for x in range(8)]
+    ok("a gradient across runs left to right, corner by corner",
+       row == sorted(row) and row[0] == 0 and row[-1] > 150, "%r" % row)
+    line = {"points": [[0, 5], [7, 5]], "colours": [[9, 9, 9]] * 2,
+            "gradient": False, "line": True}
+    pic = attempt("a polyline", lambda: furniture_picture([line], size),
+                  default=bytearray(3 * 8 * 6))
+    ok("a polyline lights both its ends",
+       all(pic[3 * (5 * 8 + x)] == 9 for x in range(8)))
 
     ok("a quad is two triangles over the four stored indices",
        len(TRIANGLES) == 2

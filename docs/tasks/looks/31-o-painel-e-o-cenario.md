@@ -167,24 +167,64 @@ desenhados; o título, a placa, a camisa, as setas e os textos não, e o motivo
   `docs/prompts/perfil-looks.md` (armadilha 85, duas linhas de gate e a do
   `looks_ui`) e `CLAUDE.md`.
 
+### Quarta passada, 2026-09-21
+
+- **A lista que o quadro entrega ao GPU.** Um watchpoint de escrita no
+  endereço do DMA do GPU para só em `sw a0, 0x0(v0)` — virou
+  `layout.GPU_LIST_SUBMIT` —, e o `a0` é a cabeça: três por quadro. O
+  `--scenery` agora anda essa lista em vez de varrer a RAM com filtro de cor:
+  **43 pacotes**, os mesmos nas duas leituras e nos dois slots, em ordem de
+  desenho, com o blend de cada semitransparente lido do comando de modo (ou
+  da página de um texturizado) que vem antes dele.
+- **A barra de título e a borda estavam na lista.** A barra são três degradês
+  **aditivos** (blend 1) através da tela, e o filtro de cor os descartava
+  porque o quadro mostra a mistura (armadilha 86). A borda são quatro
+  polilinhas cinza, duas por lado. O fundo são oito degradês, e duas das 26
+  faixas da primeira passada eram sobra: são 24.
+- **A janela desenha como o GPU.** `scene.furniture_picture` (núcleo) põe cada
+  quad em dois triângulos 0,1,2 e 1,2,3, sombreia entre os cantos e mistura
+  pelo blend, uma vez; a janela pinta a imagem e o viewer recebe o recorte do
+  painel, borda inclusive. Degradê por retângulo de cima para baixo não
+  alcançava a barra, que corre da esquerda para a direita (armadilha 88).
+  Quatro self-checks novos e dois controles plantados (a diagonal somada duas
+  vezes, o quad partido errado).
+- **`confront.py --outside` ganhou três regiões** que o `screen.json` não
+  nomeia: **barra de título a 3, fundo a 3 e 3**; painel a 4, ajuda a 4 e
+  faixas a **6** (eram 11), nos dois slots.
+- **O `looks_ui` aprendeu a borda.** O juiz de estatura media a tinta do
+  painel e passou a achar a borda em toda linha (razões 1,000): ele agora mede
+  por dentro dela (`PANEL_BORDER`). O juiz da mobília pula pacote
+  semitransparente, linha e pacote coberto por outro depois, e tem um controle
+  novo — o viewer que não pinta o recorte fica vermelho.
+- **A página da fonte não está resolvida.** A mesma pergunta ao GPU, em três
+  corridas, deu (704,256) e (832,256) no slot 2 e ainda (704,0) no slot 1; o
+  "(704,0)" da primeira passada foi uma corrida só (armadilha 87).
+- **Arquivos desta passada:** `tools/looks/layout.py`
+  (`GPU_LIST_SUBMIT`, `GPU_LIST_HEAD`); `tools/looks/oracle.py`
+  (`gpu_list_heads`, `walk_gpu_list`, `furniture_of`, o `_scenery_of` novo, e
+  saem `scenery_nodes`, `_corner_pixels`, `_colour_gap`); `tools/looks/scene.py`
+  (`furniture_picture`, `BLENDS`); `tools/looks/controls.py`;
+  `tools/looks/ui/looks_set.py`, `tools/looks/ui/viewer.py` (`clear_image`);
+  `tools/looks/ui_check.py`; `tools/looks/confront.py`
+  (`FURNITURE_REGIONS`); `docs/PLAN-LOOKS-PY.md`,
+  `docs/prompts/perfil-looks.md` (armadilhas 86 a 88) e `CLAUDE.md`.
+
 ### O que falta para fechar esta task
 
-- **A barra de título, a borda, a placa (`GK`/`CB`), a caixa da camisa e as
-  setas `◀ ▶`.** Não são pacote na RAM, não são cópia de VRAM e não somem
-  quando as páginas conhecidas são estragadas. O que resta é ler o que o
-  caminho de impressão manda ao GPU comando a comando — parar em
-  `layout.SCREEN_PRINT` e seguir o que ele escreve.
-- **A fonte desenhada do disco.** Ela está medida (página (704,0) do
-  `DAT2D.BIN`), mas a janela ainda escreve com uma fonte do Qt; o critério 2
-  pede o que é imagem lido do disco pela guarda.
-- **O alinhamento à direita**, medido acima e não aplicado.
+- **A placa (`GK`/`CB`), a caixa da camisa, as setas `◀ ▶` e o texto.** A
+  lista do quadro não tem pacote texturizado fora do painel — então saem por
+  escrita direta no GPU, fora do DMA. O próximo passo é um watchpoint de
+  escrita na porta de comando do GPU, durante o `layout.SCREEN_PRINT`.
+- **A fonte desenhada do disco.** A página não está resolvida (acima), e a
+  janela ainda escreve com uma fonte do Qt; o critério 2 pede o que é imagem
+  lido do disco pela guarda.
+- **O alinhamento à direita**, medido na terceira passada e não aplicado.
 - **A câmera do close-up por linha**, que o contexto desta task traz da
   LOOKS-TASK-22: a janela desenha sempre a câmera de corpo inteiro.
 
-**Gates, na árvore commitada:** `selftest` 0 falhas, 90 de 90 controles
-vermelhos; `cli check` 10 de 10; `oracle.py --scenery` 0 problemas (28
-pacotes, iguais nas duas leituras); `oracle.py --repaint` 0 problemas;
-`oracle.py --pages` 0 problemas, com as duas corridas sem dano idênticas;
-`confront.py --outside` 0 problemas nos dois slots; `looks_ui` 11 de 11
-controles vermelhos;
-`check_tasks` 138 ok.
+**Gates, na árvore commitada:** `selftest` 0 falhas, 92 de 92 controles
+vermelhos; `cli check` 10 de 10; `oracle.py --scenery` 0 problemas (43
+pacotes, iguais nas duas leituras, nos dois slots); `oracle.py --repaint` e
+`--pages` sem mudança desde a segunda passada; `confront.py --outside` 0
+problemas em 7 regiões nos dois slots; `looks_ui` 12 de 12 controles
+vermelhos, 33 pacotes amostrados; `check_tasks` 138 ok.

@@ -1122,6 +1122,11 @@ def stature_keys(table: dict, steps) -> list:
     return out
 
 
+PANEL_BORDER = 2
+"""Native pixels of frame each side of the panel: the game draws two one-pixel
+lines a side (`oracle.py --scenery`, LOOKS-TASK-31), and the window paints
+them since."""
+
 PANEL_INK_APART = 24
 """How far a pixel of the panel has to sit from its ROW's ground to be figure.
 
@@ -1139,7 +1144,10 @@ def panel_ink(shot: tuple, box, scale: int) -> tuple:
     the figure is what differs from it.
     """
     _width, _height, channels, rows = shot
-    left, top, right, bottom = [one * scale for one in box]
+    # Inside the border: the game draws the panel's frame as two one-pixel
+    # lines a side, and a frame is ink on every row and every column.
+    left, top, right, bottom = [(one + PANEL_BORDER * way) * scale
+                                for one, way in zip(box, (1, 0, -1, 0))]
     first = last = None
     low = high = None
     drawn = 0
@@ -1298,28 +1306,43 @@ def measure_scenery(python: str, app: str, where: str, env: dict) -> tuple:
                                          "--screenshot", out], env)
     if code != 0 or not os.path.isfile(out):
         return ([], "the screen did not draw: %s" % output.rstrip(), None)
-    _width, _height, channels, rows = picture(out)
-    bad, sampled = [], 0
+    width, height, channels, rows = picture(out)
+    boxes = []
     for packet in packets:
         xs = [one[0] for one in packet["points"]]
         ys = [one[1] for one in packet["points"]]
-        left, top, bottom = min(xs), min(ys), max(ys)
+        boxes.append((min(xs), min(ys), max(xs), max(ys)))
+    bad, sampled = [], 0
+    for index, packet in enumerate(packets):
+        left, top, right, bottom = boxes[index]
+        if packet.get("semi") or packet.get("line"):
+            # A blended packet's pixel is its colour mixed with what is under
+            # it, and a line is one pixel wide: neither has a colour of its own
+            # to hold the window to.
+            continue
         if bottom - top <= 2 * SCENERY_INSET:
+            continue
+        x, y = max(left, 0) + SCENERY_INSET, max(top, 0) + SCENERY_INSET
+        if x >= width or y >= height or any(
+                one[0] <= x <= one[2] and one[1] <= y <= one[3]
+                and not later.get("line")
+                for one, later in zip(boxes[index + 1:], packets[index + 1:])):
+            # Off the screen, or drawn over by a later packet -- a polyline's
+            # box is not what it covers, only its edge is.
             continue
         colours = packet["colours"]
         corners = packet["points"]
         high = colours[min(range(len(corners)), key=lambda i: corners[i][1])]
         low = colours[max(range(len(corners)), key=lambda i: corners[i][1])]
-        share = SCENERY_INSET / float(bottom - top) if packet["gradient"] else 0
+        share = (y - top) / float(bottom - top) if packet["gradient"] else 0
         want = [a + (b - a) * share for a, b in zip(high, low)]
-        x, y = left + SCENERY_INSET, top + SCENERY_INSET
         got = rows[y][x * channels:x * channels + 3]
         sampled += 1
         gap = max(abs(a - b) for a, b in zip(want, got))
         if gap > SCENERY_SLACK:
             bad.append("the packet at (%d,%d)-(%d,%d) is %s in the table and "
                        "the window paints %s there, %d apart"
-                       % (left, top, max(xs), bottom,
+                       % (left, top, right, bottom,
                           tuple(int(v) for v in want), tuple(got), gap))
     return (bad, "", sampled)
 
@@ -1358,6 +1381,10 @@ SCENERY_BREAKS = (
     ("the measured furniture reaching the window",
      os.path.join("ui", "looks_set.py"),
      "        self._paint_scenery(painter)\n",
+     "        pass\n"),
+    ("the panel's piece of the furniture reaching the viewer",
+     os.path.join("ui", "viewer.py"),
+     "        painter.drawImage(self.rect(), self.clear_image)\n",
      "        pass\n"),
 )
 """The window that measured its furniture and painted its own colours anyway

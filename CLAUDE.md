@@ -872,7 +872,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/confront.py --silhouette-stature [SLOT]` | a silhueta do jogo andado às pontas de `HEIG` e a dois `BODY`, contra a nossa com a câmera daquela estatura |
 | `python tools/looks/oracle.py --kit [SLOT]` | qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer do console |
 | `python tools/looks/confront.py --kit-control [SLOT]` | o uniforme de outro time desenhado na mesma tupla, para medir que o kit decide a figura |
-| `python tools/looks/oracle.py --scenery [SLOT] [--write]` | os pacotes que desenham a mobília da tela, lidos da display list e conferidos contra o quadro; o `--write` é de onde a janela pinta |
+| `python tools/looks/oracle.py --scenery [SLOT] [--write]` | os pacotes que desenham a mobília da tela, andados da lista que o quadro entrega ao GPU; o `--write` é de onde a janela pinta |
 | `python tools/looks/oracle.py --repaint [SLOT]` | que partes da tela o jogo redesenha a cada quadro, medido sobrescrevendo os dois buffers |
 | `python tools/looks/oracle.py --pages [SLOT]` | o que na tela é desenhado de cada página da VRAM, medido estragando uma página por vez |
 | `python tools/looks/confront.py --outside [SLOT]` | a nossa tela contra a do jogo fora do boneco, região por região |

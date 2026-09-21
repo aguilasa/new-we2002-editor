@@ -1919,11 +1919,23 @@ colour chosen by eye misses by far more: the help box's grey border colour,
 which the v2 filled it with, is 142 away.
 """
 
-OUTSIDE_REGIONS = ("panel", "rows", "help")
+OUTSIDE_REGIONS = ("panel", "rows", "help", "title band", "ground below",
+                   "ground left")
 """The regions whose ground colour this cycle has MEASURED (`oracle.py
 --scenery`), and so the ones this comparison asserts.  The rest of the screen
--- the title band, the plate, the shirt box -- is printed beside them and not
-asserted, because nothing measured says what it should be yet."""
+-- the cursor box -- is printed beside them and not asserted, because nothing
+measured says what it should be yet."""
+
+FURNITURE_REGIONS = {
+    "title band": (192, 20, 480, 32),
+    "ground below": (0, 223, 511, 239),
+    "ground left": (0, 66, 15, 185),
+}
+"""Boxes of furniture `screen.json` does not name, in native pixels: the teal
+band of the title where no letter falls, and two pieces of the background.
+Their packets are the ones `oracle.py --scenery` walks off the list the frame
+hands the GPU -- the title band three additive gradients, the background
+eight opaque ones (2026-09-21)."""
 
 
 def ground_colour(frame, box, skip=None):
@@ -1994,16 +2006,19 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
         print("  -- slot %d --" % slot)
         first, again = theirs[slot]
         figure = panel_mask(first, box)
-        control = [name for name in sorted(table["regions"])
-                   if ground_colour(first, table["regions"][name]["native"])
-                   != ground_colour(again, table["regions"][name]["native"])]
+        regions = dict((name, table["regions"][name]["native"])
+                       for name in table["regions"])
+        regions.update(FURNITURE_REGIONS)
+        control = [name for name in sorted(regions)
+                   if ground_colour(first, regions[name])
+                   != ground_colour(again, regions[name])]
         if control:
             problems.append("slot %d: the game photographed twice has another "
                             "ground in %s, so nothing below is measured"
                             % (slot, ", ".join(control)))
             continue
         print("    control: the game photographed twice, the same ground in "
-              "all %d region(s)" % len(table["regions"]))
+              "all %d region(s)" % len(regions))
         out = os.path.join(out_dir(), "ours-outside-%d.png" % slot)
         code, output = ui_check.run_app(
             python, app, ["--state", str(slot), "--scale", "1",
@@ -2016,14 +2031,14 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
         width, height, channels, rows = shot
         ours = [[tuple(row[x * channels:x * channels + 3])
                  for x in range(width)] for row in rows]
-        for name in sorted(table["regions"]):
-            region = table["regions"][name]["native"]
+        for name in sorted(regions):
+            region = regions[name]
             skip = figure if name == "panel" else None
             game_ground = ground_colour(first, region, skip)
             our_ground = ground_colour(ours, region, skip)
             gap = colour_distance(game_ground, our_ground)
             asserted = name in OUTSIDE_REGIONS
-            print("    %-8s game %-15s ours %-15s %3d apart%s"
+            print("    %-12s game %-15s ours %-15s %3d apart%s"
                   % (name, game_ground, our_ground, gap,
                      "" if asserted else "  (not measured, not asserted)"))
             if asserted and gap > OUTSIDE_SLACK:

@@ -125,11 +125,12 @@ class Viewer(QOpenGLWidget):
         # never the measured one silently defaulted, which would make the
         # window's panel a description of itself.
         self.clear_colour = BACKGROUND
-        # And the gradient the game paints behind the figure, when one was
-        # measured: (top, bottom) as RGB.  One clear colour cannot be a
-        # gradient, and the panel came out 24 from the game's ground with it
+        # And the picture the game paints behind the figure, when one was
+        # measured: the panel's piece of the furniture, gradient and border,
+        # as a QImage at native size.  One clear colour cannot be a gradient,
+        # and the panel came out 24 from the game's ground with it
         # (confront.py --outside, LOOKS-TASK-31).
-        self.clear_gradient = None
+        self.clear_image = None
         # The game's own 4x4, when there is one: sixteen floats the CORE built
         # out of what `oracle.py --camera` measured off the GTE.  The window
         # does no projection arithmetic of its own with it -- it uploads it,
@@ -300,21 +301,17 @@ class Viewer(QOpenGLWidget):
 
     def paintGL(self) -> None:
         functions = QtGui.QOpenGLContext.currentContext().functions()
-        if self.clear_gradient is None:
+        if self.clear_image is None:
             functions.glClearColor(*self.clear_colour)
             functions.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             self._paint_figure(functions)
             return
-        # The measured gradient first, by QPainter, and the figure over it as
+        # The measured picture first, by QPainter, and the figure over it as
         # native GL -- the pairing Qt documents for a QOpenGLWidget.  QPainter
         # leaves its own GL state behind, so depth testing is switched back on
         # before the figure is drawn.
         painter = QtGui.QPainter(self)
-        top, bottom = self.clear_gradient
-        shade = QtGui.QLinearGradient(0, 0, 0, self.height())
-        shade.setColorAt(0.0, QtGui.QColor(*top))
-        shade.setColorAt(1.0, QtGui.QColor(*bottom))
-        painter.fillRect(self.rect(), QtGui.QBrush(shade))
+        painter.drawImage(self.rect(), self.clear_image)
         painter.beginNativePainting()
         functions.glEnable(GL_DEPTH_TEST)
         functions.glClear(GL_DEPTH_BUFFER_BIT)

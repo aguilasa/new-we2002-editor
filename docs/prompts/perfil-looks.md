@@ -732,6 +732,21 @@ Não se revertem sem o usuário pedir.
     movem. E pintar um degradê num viewer OpenGL não se faz com `glClearColor`:
     o painel ficou 24 longe do jogo até ser pintado por `QPainter` por trás do
     boneco.
+86. **Filtro de cor contra o quadro descarta todo pacote semitransparente.** O
+    quadro mostra a mistura, não a cor declarada: a barra de título são três
+    degradês **aditivos** e sumiram da varredura da armadilha 80 inteiros, com
+    a conclusão "não está em lista nenhuma da RAM". Quem diz o que o quadro
+    desenhou é a **lista que ele entrega ao GPU**, andada da cabeça que o jogo
+    grava no DMA (`layout.GPU_LIST_SUBMIT`), não a RAM varrida com filtro.
+87. **O estado do GPU numa parada não é o do próximo desenho.** A página em
+    vigor na passada que desenha do `SCREEN_GLYPH` deu três valores em três
+    corridas — (704,0), (704,256) e (832,256). Uma leitura só vira conclusão
+    falsa com cara de medida; repita antes de escrever.
+88. **Degradê de pacote não é vertical por definição.** A barra de título
+    corre da esquerda para a direita. Pintar cada pacote como retângulo com
+    gradiente de cima para baixo acerta o painel e a ajuda e erra o resto: o
+    que o GPU faz é sombrear dois triângulos entre as cores dos cantos
+    (`scene.furniture_picture`).
 ---
 
 ## As fontes de verdade binárias
@@ -782,7 +797,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min (medido 2026-09-20, os dois slots) | `python tools/looks/oracle.py --kit [SLOT]` — qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer: cada retângulo que cada contêiner declara contra a VRAM, halfword a halfword, com o controle (a mesma VRAM lida duas vezes, idêntica) fechando antes. Exige **uma página e uma paleta** exatas e que nenhum outro contêiner as reproduza (armadilha 77) | — | LOOKS-TASK-30 |
-| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~6 min por slot (a RAM inteira é lida) | `python tools/looks/oracle.py --scenery [SLOT] [--write]` — os pacotes que desenham a mobília da tela, lidos da display list e **conferidos contra o quadro** (armadilha 80), com o controle (a tela carregada duas vezes) fechando antes; o `--write` deixa `work/looks-scenery/slotN.json`, que é de onde a janela pinta | — | LOOKS-TASK-31 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~6 min por slot (a RAM inteira é lida) | `python tools/looks/oracle.py --scenery [SLOT] [--write]` — os pacotes que desenham a mobília da tela, **andados da lista que o quadro entrega ao GPU** (armadilha 86), em ordem de desenho, com blend e polilinhas, e o controle (a tela carregada duas vezes) fechando antes; o `--write` deixa `work/looks-scenery/slotN.json`, que é de onde a janela pinta | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | idem; ~3 min por slot | `python tools/looks/oracle.py --repaint [SLOT]` — sobrescreve os dois buffers e deixa o jogo correr: o mapa diz que parte da tela é redesenhada a cada quadro e que parte foi pintada uma vez, com o controle do mesmo mapa duas vezes | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states, o fork, o venv e `work/looks-scenery/`; ~2 min | `python tools/looks/confront.py --outside [SLOT]` — a nossa tela contra a do jogo **fora do boneco**: o chão de cada região pela mediana de cada canal (armadilha 85), com o jogo fotografado duas vezes de controle. Afirma as regiões cuja cor foi medida (`OUTSIDE_REGIONS`) dentro de `OUTSIDE_SLACK`, e imprime o resto sem afirmar | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min por slot | `python tools/looks/oracle.py --pages [SLOT]` — o que na tela vem de cada página da VRAM, estragando uma por vez, com duas corridas sem dano de controle (armadilha 83) | — | LOOKS-TASK-31 |
