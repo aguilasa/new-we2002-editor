@@ -815,12 +815,13 @@ geometria, textura e paleta **direto do disco**. Núcleo Python puro em
 dono do repositório, e isso não muda na v2.
 
 **A v1 fechou em 2026-09-17 e a v2 abriu no mesmo dia** — o ciclo está
-**aberto**, com as fases 8 a 11 (tasks 21 a 35). O alvo da v2 é a própria tela
+**aberto**, com as fases 8 a 11 (tasks 21 a 40). O alvo da v2 é a própria tela
 do jogo: a janela **é** a `LOOKS SET`, com as doze linhas trocáveis, o cursor,
 a caixa de ajuda e o boneco no painel. Entregues a tela (fase 8) e o boneco
 montado, na pose e na câmera do jogo, com altura e corpo (fase 9) e com o
-uniforme do time (task 30); faltam o painel e o cenário (task 31) e a
-caminhada (fase 11).
+uniforme do time (task 30), e o painel e a mobília medidos e pintados (task
+31); faltam os sprites, o texto, o alinhamento, a ajuda e o close-up (tasks 36
+a 40) e a caminhada (fase 11).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
@@ -914,7 +915,7 @@ Cinco coisas que custam tempo se descobertas tarde:
   ângulo por captura que a carga de câmera do GTE **não** traz — a câmera que
   vale ali se deriva das próprias peças (`oracle.camera_from_pieces`). O painel
   da nossa janela desenha com a câmera de corpo inteiro (task 28), e o close-up
-  por linha é da task 31.
+  por linha é da task 40.
 - **`HEIG` e `BODY` moram na câmera, e escalam por eixo.** O jogo escala as
   colunas da rotação da figura por um vetor antes da vista: `HEIG` mexe nos
   três eixos, `BODY` só em largura e profundidade. A regra — bias, divisores e

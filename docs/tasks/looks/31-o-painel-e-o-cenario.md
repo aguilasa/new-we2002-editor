@@ -134,6 +134,9 @@ task continua `⬜ Pendente`".
   três páginas vizinhas não derrubam nada — o controle que a lista carrega — e
   a da fonte derruba **um** ladrilho só, o que diz que ela é reenviada a cada
   quadro.
+  *Nota da [`CORR-LOOKS-066`](/docs/tasks/looks/CORR-LOOKS-066.md): os 17 e 17
+  são do slot 2; o slot 1 imprime **12** e **18**, e nos dois a ferramenta diz
+  "over help, panel" — a ajuda entra junto com o painel.*
 - **Arquivos desta passada:** `tools/looks/oracle.py` (`--pages`, a página da
   fonte lida no `SCREEN_GLYPH`, o mapa de procedência);
   `docs/PLAN-LOOKS-PY.md`, `docs/prompts/perfil-looks.md` (armadilhas 83 e 84)

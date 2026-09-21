@@ -22,10 +22,13 @@ press, the plate and the shirt, the title the band DRAWS (`S SET`, not the
 `LOOKS SET` its object holds -- CORR-LOOKS-054), and where every one of those
 sits, in the display's own 512x240 pixels.
 
-NOT measured, and therefore not claimed: the colours, the gradient of the
-panel, the borders and the typeface.  Whether the scenery is an image off the
-disc or polygons of the GPU is LOOKS-TASK-31, and until it is measured this
-draws a plain arrangement rather than an imitation that would pass for one.
+MEASURED too, since LOOKS-TASK-31: the furniture -- the panel, the help box,
+the background, the title bar, the row bands and the borders, with their
+colours and gradients -- is polygons of the GPU, and this paints the packets
+the frame hands to it (`scene.furniture_picture`), not a look-alike.
+
+NOT measured, and therefore not claimed: the typeface.  The text is drawn in
+Qt's font until the game's glyph table is read (LOOKS-TASK-37).
 
 ## Refusal is visible
 

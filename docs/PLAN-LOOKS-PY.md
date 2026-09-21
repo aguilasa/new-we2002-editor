@@ -2952,10 +2952,12 @@ resolvidas. [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).
 > qual deles estes dois screens subiram; a regra por time é outra pergunta, e
 > nenhuma task aberta a faz.
 
-**(o) O painel e o cenário — PARCIAL em 2026-09-20.** Se o degradê, a borda, a
+**(o) O painel e o cenário — FECHADA em 2026-09-21.** Se o degradê, a borda, a
 barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou do
 `EDT_2D.BIN`, ou polígonos da GPU.
-[`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md).
+[`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md), que fecha a medição e a mobília; o
+resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) a
+[`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md).
 
 > **Três elementos respondidos, e são polígonos.** O `oracle.py --scenery` lê a
 > display list na RAM e fica só com os pacotes cujas cores são as que o
@@ -2995,7 +2997,9 @@ barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou d
 >
 > E o `oracle.py --pages` estraga uma página de VRAM por vez e mede o que a
 > tela perde, com duas corridas sem dano de controle: as páginas do boneco
-> (512,256) e do kit (576,256) derrubam 17 ladrilhos do painel cada, três
+> (512,256) e do kit (576,256) derrubam 17 ladrilhos cada no slot 2, e 12 e 18
+> no slot 1, todos sobre a ajuda e o painel
+> ([`CORR-LOOKS-066`](/docs/tasks/looks/CORR-LOOKS-066.md)), três
 > páginas vizinhas não derrubam nada — e a da fonte derruba **um** ladrilho
 > só, o que diz que ela é reenviada a cada quadro. Medir o que o caminho de
 > impressão manda ao GPU, comando a comando, é a continuação desta task.

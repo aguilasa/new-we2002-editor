@@ -40,7 +40,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 tasks 01 a 20: a **tela `LOOKS SET`** do jogo — as doze linhas trocáveis, como
 os save states dos slots 1 e 2 a mostram — com o boneco **montado**,
 **vestido** e **andando** dentro dela, como uma gravação de tela do usuário
-mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
+mostra. As tasks 21 a 40 são as Fases 8 a 11, e a fonte de verdade delas é a
 §10 do plano.
 
 ## Resumo

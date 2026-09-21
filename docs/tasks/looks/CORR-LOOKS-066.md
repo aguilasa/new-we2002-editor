@@ -126,22 +126,63 @@ sem reescrever o que foi escrito naquela passada.
 
 ## Verificação
 
-- [ ] `grep -n "task 31\|21 a 35" CLAUDE.md docs/tasks/looks/progresso.md` não
+- [x] `grep -n "task 31\|21 a 35" CLAUDE.md docs/tasks/looks/progresso.md` não
       alcança mais o close-up nem o cenário como pendentes
-- [ ] o cabeçalho da §10.3 (o) diz `FECHADA em 2026-09-21`
-- [ ] os ladrilhos do `--pages` citados com os dois slots, iguais ao que a
+- [x] o cabeçalho da §10.3 (o) diz `FECHADA em 2026-09-21`
+- [x] os ladrilhos do `--pages` citados com os dois slots, iguais ao que a
       ferramenta imprime
-- [ ] `python tools/looks/selftest.py --quiet` verde (a regra 1 varre a
+- [x] `python tools/looks/selftest.py --quiet` verde (a regra 1 varre a
       docstring)
-- [ ] `python tools/check_tasks.py` ok
-- [ ] `roms/` intocada
+- [x] `python tools/check_tasks.py` ok
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-21
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+Reprodução no HEAD `2f4d12a6`, antes de mexer:
 
-**Arquivos criados/modificados:**
+```text
+$ grep -n "task 31\|21 a 35" CLAUDE.md docs/tasks/looks/progresso.md
+CLAUDE.md:818:**aberto**, com as fases 8 a 11 (tasks 21 a 35). O alvo da v2 é a própria tela
+CLAUDE.md:822:uniforme do time (task 30); faltam o painel e o cenário (task 31) e a
+CLAUDE.md:917:  por linha é da task 31.
+docs/tasks/looks/progresso.md:43:mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
+$ grep -n "^\*\*(o)" docs/PLAN-LOOKS-PY.md
+2955:**(o) O painel e o cenário — PARCIAL em 2026-09-20.** Se o degradê, a borda, a
+```
+
+Os ladrilhos remedidos no fork, os dois slots (`python tools/looks/oracle.py
+--pages`, e `--pages 2` de novo porque o `tail` da primeira corrida cortou o
+slot 2):
+
+```text
+  -- slot 2 (outfield player) --
+    control: two undamaged runs give the same screen
+    page (704,  0): 1 tile(s) of the screen change, over rows
+    page (512,256): 17 tile(s) of the screen change, over help, panel
+    page (576,256): 17 tile(s) of the screen change, over help, panel
+  -- slot 1 (goalkeeper) --
+    control: two undamaged runs give the same screen
+    page (704,  0): 1 tile(s) of the screen change, over rows
+    page (512,256): 12 tile(s) of the screen change, over help, panel
+    page (576,256): 18 tile(s) of the screen change, over help, panel
+oracle --pages: 0 problem(s)
+```
+
+A causa raiz confere: o fechamento dividido não varreu quem citava a 31 como
+dona do close-up e do cenário. O cabeçalho da §10.3 (o) passou a `FECHADA em
+2026-09-21`, nomeando a 31 como a que fecha a medição e a mobília e as 36 a 40
+como o resto; o `CLAUDE.md` diz tasks 21 a 40, o que falta da tela (36 a 40) e
+o close-up na task 40; o `progresso.md` diz 21 a 40; a docstring do
+`looks_set.py` diz que a mobília está medida e pintada e que só a fonte do jogo
+falta (LOOKS-TASK-37); e os ladrilhos do plano dizem os dois slots. Na task 31
+o texto da segunda passada ficou como foi escrito, com uma nota abaixo.
+
+**Problemas encontrados:** nenhum.
+
+**Arquivos criados/modificados:** `docs/PLAN-LOOKS-PY.md`, `CLAUDE.md`,
+`docs/tasks/looks/progresso.md`, `tools/looks/ui/looks_set.py`,
+`docs/tasks/looks/31-o-painel-e-o-cenario.md`, este arquivo.
