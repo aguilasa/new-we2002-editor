@@ -3068,7 +3068,7 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > | a barra vazia ao lado da placa | 1 | (960,256), (0,497) | `EDT_2D.BIN`, 288 de 288, chapada (o controle não a distingue) — e **toda transparente**, medido na LOOKS-TASK-36 (abaixo) |
 > | as caixas verdes da camisa | 4 | (576,0), (176,496) | `DAT2D.BIN`, 384 de 384 |
 > | a **placa** `CB`/`GK` | 4 | (576,0), **(208,499) no jogador de linha e (192,499) no goleiro** | `DAT2D.BIN`, 96 de 96 |
-> | a seta `▶` do valor sob o cursor | 1 | (704,0), (80,497) | `DAT2D.BIN`, 16 de 16 |
+> | a seta `▶` do valor sob o cursor | 1 | (704,0), (80,497) — e a `◀` também, medida em `DEFAUL` nos dois slots na CORR-LOOKS-068 | `DAT2D.BIN`, 16 de 16 |
 > | o texto da **ajuda** (`Visual`) | 6 ladrilhos 16×16 | (832,256), (64,496) | **nenhuma imagem do disco**: o jogo o escreve na VRAM em tempo de execução |
 >
 > As oito CLUTs estão no `DAT2D.BIN` e batem 16 de 16. O `EDT_2D.BIN` é
