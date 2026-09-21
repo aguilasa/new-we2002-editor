@@ -83,6 +83,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-064](/docs/tasks/looks/CORR-LOOKS-064.md) | Correção: "603 a 1.680" e "1,4x a 4,4x" não são o que as corridas imprimem, e três textos ainda dizem o que a quinta sessão desmentiu | LOOKS-TASK-28 | low | done | 2026-09-18 |
 | [CORR-LOOKS-065](/docs/tasks/looks/CORR-LOOKS-065.md) | Correção: três medições da LOOKS-TASK-29 sobre o ritmo e a mistura ficaram "para o leitor de pose", sem linha na task que as mede | LOOKS-TASK-29 | low | done | 2026-09-20 |
 | [CORR-LOOKS-066](/docs/tasks/looks/CORR-LOOKS-066.md) | Correção: a divisão da LOOKS-TASK-31 não chegou a cinco textos — a §10.3 (o) segue "PARCIAL", e o close-up e o cenário ainda apontam para a 31 | LOOKS-TASK-31 | low | done | 2026-09-21 |
+| [CORR-LOOKS-067](/docs/tasks/looks/CORR-LOOKS-067.md) | Correção: o DEFAUL tem uma segunda posição — Left leva o cursor ao rótulo, com a ajuda "Undo" —, e o screen.json a registra como trava | LOOKS-TASK-36 | medium | pending | — |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
