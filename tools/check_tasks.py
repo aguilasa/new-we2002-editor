@@ -8,7 +8,11 @@ perfil do ciclo -- e o `rite.py check`. O arquivo fica para o `ctest -R tasks`
 manter nome e sentido: ele so acha o CLI do Rite e o roda sobre todos os
 ciclos, arquivados inclusive.
 
-O CLI e procurado em `RITE_PY` e depois no cache de plugins do Claude Code.
+O CLI e procurado em `RITE_PY`, depois no `installPath` do plugin em
+`~/.claude/plugins/installed_plugins.json` e, por fim, no cache de plugins
+(`cache/<marketplace>/rite/<versao>/bin/rite.py`). O clone do marketplace
+(`marketplaces/rite/`) fica de fora: segue o `main` do Rite, nao a versao
+instalada.
 Sem ele o teste e pulado (saida 77, `SKIP_RETURN_CODE` em
 `tests/CMakeLists.txt`): o plugin e ferramenta da maquina de quem desenvolve,
 nao parte deste repositorio.
@@ -17,6 +21,7 @@ nao parte deste repositorio.
 from __future__ import annotations
 
 import glob
+import json
 import os
 import subprocess
 import sys
@@ -30,8 +35,19 @@ def find_rite() -> str | None:
     explicit = os.environ.get("RITE_PY")
     if explicit and Path(explicit).is_file():
         return explicit
-    cache = Path.home() / ".claude" / "plugins"
-    found = sorted(glob.glob(str(cache / "**" / "rite" / "bin" / "rite.py"), recursive=True),
+    plugins = Path.home() / ".claude" / "plugins"
+    try:
+        installed = json.loads((plugins / "installed_plugins.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        installed = {}
+    for key, entries in installed.get("plugins", {}).items():
+        if key.split("@")[0] != "rite":
+            continue
+        for entry in entries:
+            cli = Path(entry.get("installPath", "")) / "bin" / "rite.py"
+            if cli.is_file():
+                return str(cli)
+    found = sorted(glob.glob(str(plugins / "cache" / "*" / "rite" / "*" / "bin" / "rite.py")),
                    key=lambda p: Path(p).stat().st_mtime, reverse=True)
     return found[0] if found else None
 
