@@ -6,7 +6,7 @@ category: render
 phase: 10
 depends_on: ["LOOKS-TASK-22", "LOOKS-TASK-28"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (o)"
-status: pendente
+status: concluído
 ---
 
 # LOOKS-TASK-31: O painel e o cenário
@@ -55,21 +55,28 @@ na janela, lido do disco quando for do disco.
 
 ## Critério de conclusão
 
-- [ ] A fonte de cada elemento — painel, borda, barra de título, faixas,
+- [x] A fonte de cada elemento — painel, borda, barra de título, faixas,
       caixa de ajuda, fonte dos textos — medida pela display list: pacote e
       cores, ou registro de imagem e página.
-- [ ] A janela os desenha; o que é imagem sai do disco japonês pela guarda.
-- [ ] Com a câmera da [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), o nosso quadro e o do emulador comparados **fora
+- [x] A janela desenha a **mobília** — degradês, blend, faixas e borda — como
+      o GPU desenha. *Reescrito em 2026-09-21, a pedido do usuário:* o que
+      é imagem — sprites, texto, alinhamento, ajuda — e a câmera do close-up
+      saíram para as [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) a [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md).
+      Dizia: "A janela os desenha; o que é imagem sai do disco japonês pela
+      guarda."
+- [x] Com a câmera da [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), o nosso quadro e o do emulador comparados **fora
       da silhueta**, com o controle do emulador contra ele mesmo.
-- [ ] §10.3 (o) com o veredito e a data.
+- [x] §10.3 (o) com o veredito e a data.
 
 ---
 
 ## Log de Execução
 
-**PARCIAL — a task continua `⬜ Pendente`.** Três dos elementos estão medidos e
-desenhados; o título, a placa, a camisa, as setas e os textos não, e o motivo
-é um achado, não falta de tentativa.
+**Fechada em 2026-09-21, dividida.** A pedido do usuário, a task fecha com a
+medição de cada elemento e a mobília desenhada, e o que faltava virou as
+[`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) a [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md) — ver "Fechamento", no fim deste Log. As
+passadas abaixo ficam como foram escritas; a primeira linha dizia "PARCIAL — a
+task continua `⬜ Pendente`".
 
 - **Executado em:** 2026-09-20
 - **Resumo do que foi feito:** a mobília da tela se lê na **display list**, e o
@@ -257,20 +264,21 @@ desenhados; o título, a placa, a camisa, as setas e os textos não, e o motivo
   `.gitattributes` normaliza, mas um `replace` de texto com `\n` não casa —
   os patches passaram a normalizar antes.
 
-### O que falta para fechar esta task
+### O que faltava, e para onde foi
 
-- **Desenhar os sprites do disco.** O critério 2 pede que o que é imagem saia
-  do disco pela guarda, e agora se sabe de onde sai cada um. A fonte não se
-  resolve com a foto de um quadro — o texto muda com a tecla —, então o
-  próximo passo é a **tabela de glifos do jogo** (código → `u`, `v` e
-  largura), que a rotina de glifo lê de uma tabela da própria overlay, e a
-  janela trocar a fonte do Qt pelos glifos do `EDT_2D.BIN`. A placa, as
-  caixas, o ícone, a barra e o título são estáticos e saem do `slotN.json`.
-- **A ajuda**, escrita na VRAM em tempo de execução: medir de onde o jogo tira
-  esses texels antes de decidir se a janela a desenha do disco.
-- **O alinhamento à direita**, medido na terceira passada e não aplicado.
-- **A câmera do close-up por linha**, que o contexto desta task traz da
-  LOOKS-TASK-22: a janela desenha sempre a câmera de corpo inteiro.
+- **Os sprites estáticos e as setas** — placa, caixas, ícone, barra, título:
+  [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md).
+- **A tabela de glifos e o texto com a fonte do `EDT_2D.BIN`**:
+  [`LOOKS-TASK-37`](/docs/tasks/looks/37-a-tabela-de-glifos.md).
+- **O alinhamento à direita**, medido na terceira passada e não aplicado:
+  [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md).
+- **A ajuda**, escrita na VRAM em tempo de execução:
+  [`LOOKS-TASK-39`](/docs/tasks/looks/39-o-texto-da-ajuda.md).
+- **A câmera do close-up por linha**:
+  [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md), antes da
+  [`LOOKS-TASK-33`](/docs/tasks/looks/33-a-janela-animada.md).
+
+Cada uma tem o que já está medido escrito no próprio contexto.
 
 **Gates, na árvore commitada:** `selftest` 0 falhas, 94 de 94 controles
 vermelhos; `cli check` 10 de 10; `iso_source.py --check-discs` ok, com o
@@ -281,3 +289,20 @@ divergindo em 1.502 de 2.128); `oracle.py --repaint` e `--pages` sem mudança
 desde a segunda passada; `confront.py --outside` sem mudança desde a quarta
 (a janela não mudou nesta passada); `looks_ui` 12 de 12 controles vermelhos,
 33 pacotes amostrados; `check_tasks` 138 ok.
+
+### Fechamento, 2026-09-21
+
+- **Resumo:** a pedido do usuário, a task fecha dividida. O que ela entrega é a
+  resposta da incógnita (o) — de onde vem cada elemento da tela, lido da lista
+  que o quadro entrega ao GPU e, para o que é imagem, do disco contra a VRAM —
+  e a mobília desenhada como o GPU desenha, com a comparação fora da
+  silhueta. O que faltava virou cinco tasks da fase 10, com IDs novos e as
+  linhas logo depois desta no `progresso.md`, porque renumerar arrastaria as
+  32 a 35.
+- **Arquivos:** as tasks novas `36-os-sprites-estaticos.md`,
+  `37-a-tabela-de-glifos.md`, `38-o-alinhamento-dos-valores.md`,
+  `39-o-texto-da-ajuda.md` e `40-a-camera-do-close-up.md`; o `progresso.md`
+  (tabela, fases, ordem, grafo, sequência e checklist); a
+  `33-a-janela-animada.md` e a `35-fechamento-da-v2.md` (dependências); o
+  `docs/PLAN-LOOKS-PY.md` (o veredito da §10.3 (o)).
+- **Problemas encontrados:** nenhum.

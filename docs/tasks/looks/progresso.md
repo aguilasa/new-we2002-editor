@@ -71,15 +71,26 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | A câmera do jogo — projeção medida, e a silhueta como testemunha de forma | 9 | 27 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
 | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose | 9 | 22, 28 | ✅ Concluído | 2026-09-18 | 2026-09-19 |
 | [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | 20 | ✅ Concluído | 2026-09-20 | 2026-09-20 |
-| [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | 22, 28 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | 22, 28 | ✅ Concluído | 2026-09-21 | ⬜ pendente |
+| [LOOKS-TASK-36](/docs/tasks/looks/36-os-sprites-estaticos.md) | Os sprites estáticos da tela — placa, caixas, ícone, barra, título e setas, lidos do disco | 10 | 31 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-37](/docs/tasks/looks/37-a-tabela-de-glifos.md) | A tabela de glifos — o texto da tela desenhado com a fonte do `EDT_2D.BIN` | 10 | 31 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-38](/docs/tasks/looks/38-o-alinhamento-dos-valores.md) | O alinhamento dos valores — a caixa do objeto de texto no `screen.json`, e o valor à direita | 10 | 37 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md) | O texto da ajuda — quem escreve a página (832,256) na VRAM, e de onde | 10 | 37 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md) | A câmera do close-up — o painel aproxima na cabeça quando a linha é de cabeça | 10 | 28 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-32](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) | Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço | 11 | 26 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | 28, 32 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | 28, 32, 40 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-34](/docs/tasks/looks/34-o-goleiro-andando.md) | O goleiro — figura 1 montada e andando na tela, conferida no slot 1 | 11 | 33 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | 23, 29, 30, 31, 34 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | 23, 29, 30, 31, 34, 36, 37, 38, 39, 40 | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
 **As duas colunas de data são datas de commit**, não datas de intenção.
+
+**A ordem da tabela é a ordem de execução, não a ordem dos números.** Em
+2026-09-21, a pedido do usuário, a LOOKS-TASK-31 fechou com a medição e a
+mobília, e o que faltava dela virou as tasks 36 a 40, na fase 10 — com IDs
+novos e as linhas logo depois da 31, porque renumerar arrastaria as tasks 32
+a 35 e todo link para elas.
 
 - **"Concluída em"** — o commit que fechou a tarefa. Tarefa pendente leva `—`.
 - **"Revisado em"** — o commit da revisão. Tarefa concluída e ainda não revisada
@@ -107,7 +118,7 @@ corpus de 50 renders de terceiro. Ver
 | 7 — fechamento | 19 a 20 | os quatro alvos de `ctest` e a reconciliação do plano |
 | 8 — a tela (v2) | 21 a 23 | a tela `LOOKS SET` medida no jogo, a janela que a reproduz com as linhas trocáveis, e o default por nacionalidade |
 | 9 — montado (v2) | 24 a 29 | de onde vem a pose, a pose de referência, o `ANIME.BIN`, as peças no lugar, a câmera do jogo, e altura e corpo |
-| 10 — vestido (v2) | 30 a 31 | o uniforme dos `TEX_*.BIN`, e o painel e o cenário da tela |
+| 10 — vestido (v2) | 30, 31 e 36 a 40 | o uniforme dos `TEX_*.BIN`; o painel e o cenário da tela, medidos; os sprites, o texto, o alinhamento e a ajuda lidos do disco; e a câmera do close-up |
 | 11 — andando (v2) | 32 a 35 | o ciclo medido, a janela animada, o goleiro e o fechamento |
 
 **O que não pode ser pulado**, com a razão de cada ordem:
@@ -130,6 +141,9 @@ corpus de 50 renders de terceiro. Ver
   texto de cada valor, e o gate dela confere a invenção contra ela mesma.
 - **A 24 antes de tudo da Fase 9.** Um leitor de `ANIME.BIN` escrito sem saber
   que a pose sai dele lê perfeitamente e desenha outra coisa — é a 08 outra vez.
+- **A 37 antes da 38 e da 39, e a 40 antes da 33.** O alinhamento depende da
+  largura de cada glifo, e a ajuda provavelmente sai da mesma fonte; e a
+  janela animada precisa saber qual câmera vale em cada linha.
 - **A 25 antes da 26, a 28 antes de qualquer silhueta, a 32 antes da 33.** A
   pose capturada é o gabarito do leitor, a câmera do jogo é o que torna o
   desenho comparável, e o ritmo medido é o que impede uma caminhada inventada
@@ -168,11 +182,15 @@ Fase 9   (v2, montado)                     24 ◄──────────�
                                                               └──► 28 ──► 29 ◄── 22
                                                                     │
 Fase 10  (v2, vestido)                     30 ◄── 20        31 ◄── 22, 28
+                                                             ├──► 36
+                                                             └──► 37 ──┬──► 38
+                                                                       └──► 39
+                                                            40 ◄── 28
                                                                     │
 Fase 11  (v2, andando)                     32 ◄── 26               │
-                                            └──────────► 33 ◄──────┘
+                                            └──────────► 33 ◄──────┘  (e 28)
                                                           └──► 34
-                                           35 ◄── 23, 29, 30, 31, 34
+                                           35 ◄── 23, 29, 30, 31, 34, 36 a 40
 ```
 
 **Sequência mínima de execução:**
@@ -188,7 +206,8 @@ Fase 11  (v2, andando)                     32 ◄── 26               │
 8.  21 ► 22 ► 23                    a tela LOOKS SET, sobre a v1 como está
 9.  24 ► 25 ► 26 ► 27 ► 28 ► 29     o boneco montado
 10. 30 pode andar junto — só depende da 20; 31 depois da 28
-11. 32 depois da 26; 33 ► 34; 35 fecha
+11. 36; 37 ► 38 ► 39; 40            sprites, texto, alinhamento, ajuda, close-up
+12. 32 depois da 26; 33 ► 34; 35 fecha
 ```
 
 **A 13 é a candidata natural a antecipação.** Ela depende só da 09, é barata —
@@ -266,7 +285,12 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 ### Fase 10 — vestido (v2)
 
 - [x] O uniforme lido pela guarda e desenhado; zero primitiva sem textura, ou o resto nomeado — os 105 `TEX_*.BIN` na guarda com digest medido (form 1 e idênticos nos dois discos), e **qual deles a tela veste medido na VRAM** ([LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md)): é o `TEX_A4` nos dois states, que reproduz exatas uma página e duas paletas onde nenhum outro contêiner reproduz nenhuma. Com ele, 593 de 593 primitivas texturizadas na figura 0 e 629 de 629 na figura 1; o `looks_ui` passou a exigir isso e o `confront.py --kit-control` mede que o uniforme de outro time fica 0,063 a 0,218 mais longe da foto do jogo.
-- [ ] O painel e o cenário da tela medidos e reproduzidos.
+- [x] O painel e o cenário da tela medidos, e a mobília reproduzida ([LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md)): cada elemento lido da lista que o quadro entrega ao GPU — 43 pacotes de mobília, desenhados como o GPU desenha, e 142 sprites, com os texels de cada grupo do `EDT_2D.BIN` ou do `DAT2D.BIN` iguais à VRAM, e a ajuda escrita pelo jogo em tempo de execução. `confront.py --outside` 0 problema em 7 regiões nos dois slots.
+- [ ] Os sprites estáticos e as setas desenhados do disco ([LOOKS-TASK-36](/docs/tasks/looks/36-os-sprites-estaticos.md)).
+- [ ] O texto desenhado com os glifos do `EDT_2D.BIN` ([LOOKS-TASK-37](/docs/tasks/looks/37-a-tabela-de-glifos.md)).
+- [ ] Os valores alinhados como no jogo ([LOOKS-TASK-38](/docs/tasks/looks/38-o-alinhamento-dos-valores.md)).
+- [ ] A origem do texto da ajuda medida, e desenhada se for do disco ([LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md)).
+- [ ] A câmera do close-up por linha de cabeça ([LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md)).
 
 ### Fase 11 — andando (v2)
 

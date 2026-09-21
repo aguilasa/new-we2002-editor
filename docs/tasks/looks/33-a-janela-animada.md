@@ -4,7 +4,7 @@ title: "A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo d
 type: implementação
 category: render
 phase: 11
-depends_on: ["LOOKS-TASK-28", "LOOKS-TASK-32"]
+depends_on: ["LOOKS-TASK-28", "LOOKS-TASK-32", "LOOKS-TASK-40"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.4"
 status: pendente
 ---
@@ -20,6 +20,8 @@ status: pendente
   para tempo, não o contrário.
 - **Trocar um valor não reinicia o passo** — ou reinicia, se o jogo reinicia:
   mede-se na tela do jogo.
+- **A câmera muda com a linha** desde a [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md): numa linha de cabeça o
+  painel desenha o close-up, e a animação anda com a câmera que a linha pede.
 - **Gate precisa de quadro determinístico.** O timer é para quem olha; o gate
   desenha `--frame N`.
 

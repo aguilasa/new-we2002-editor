@@ -3075,6 +3075,16 @@ barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou d
 > sprite desenhado. **Falta desenhá-los**: a janela ainda escreve com uma fonte
 > do Qt, e o texto muda com a tecla, então o que a janela precisa é da tabela
 > de glifos do jogo (código → `u`, `v` e largura), não da foto de um quadro.
+>
+> **Veredito (2026-09-21): a tela é polígono e imagem, e o que é imagem é do
+> disco — menos a ajuda.** O painel, a caixa de ajuda, o fundo, a barra de título, as
+> faixas e a borda são 43 pacotes sem textura, desenhados pela janela como o
+> GPU os desenha. Texto, título, ícone, caixas, barra, placa e seta são 142
+> sprites cortados do `EDT_2D.BIN` e do `DAT2D.BIN`, com as paletas do
+> `DAT2D.BIN`. O texto da ajuda é escrito na VRAM pelo jogo em tempo de
+> execução. A [`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md) fecha com a medição e a mobília; desenhar
+> os sprites, o texto, o alinhamento, a ajuda e a câmera do close-up são as
+> [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) a [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md).
 
 **(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
 interpola entre quadros-chave, e se o tronco que balança é da animação ou da
