@@ -5,10 +5,10 @@ origin: LOOKS-TASK-36
 severity: medium
 files: [tools/looks/oracle.py, tools/looks/screen.py, tools/looks/screen.json, tools/looks/ui/looks_set.py, tools/looks/ui/app.py]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-21
+done_commit: 83f190cd
 ---
 
 # CORR-LOOKS-067 — Correção: o DEFAUL tem uma segunda posição — Left leva o cursor ao rótulo, com a ajuda "Undo" —, e o screen.json a registra como trava
@@ -202,3 +202,14 @@ Fica de fora, e vai para uma correção nova: com o cursor no valor, a caixa da
 janela é carregada da linha de carga (x 314), e o jogo a desenha em x 396 no
 `DEFAUL`. Nenhum gate compara a caixa do cursor da janela com a do jogo, e o
 problema vem de antes desta correção.
+
+## Log de Execução
+
+- **Closed** — commit `83f190cd` (2026-09-21): fix(looks): model DEFAUL's label position — Left moves the cursor to the name (Undo), it is not a lock
+  - Files (`git show --name-status 83f190cd`):
+    - `M docs/tasks/looks/CORR-LOOKS-067.md`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/screen.json`
+    - `M tools/looks/screen.py`
+    - `M tools/looks/ui/app.py`
+    - `M tools/looks/ui/looks_set.py`
