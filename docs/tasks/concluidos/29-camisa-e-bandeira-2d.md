@@ -6,7 +6,7 @@ category: features
 phase: 4
 depends_on: [WTE-TASK-08, WTE-TASK-24, WTE-TASK-27]
 status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#5.3"
 reviewed_on: 2026-08-21
 review_commit: null
 done_on: 2026-08-21
