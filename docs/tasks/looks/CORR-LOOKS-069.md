@@ -5,10 +5,10 @@ origin: LOOKS-TASK-36
 severity: low
 files: [tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-21
+done_commit: c4489fa7
 ---
 
 # CORR-LOOKS-069 — Dizer quantos sprites estáticos foram amostrados, não 14
@@ -104,3 +104,7 @@ negative control(s) red`.
 Varredura: "of 14 sprite" só aparece no Log de Execução da LOOKS-TASK-36
 (`36-os-sprites-estaticos.md:132`), que é registro do que a ferramenta
 imprimiu naquele dia — não foi reescrito.
+- **Closed** — commit `c4489fa7` (2026-09-21): fix(looks): count the static sprites that gave a sample (13) and name the bar that gave none
+  - Files (`git show --name-status c4489fa7`):
+    - `M docs/tasks/looks/CORR-LOOKS-069.md`
+    - `M tools/looks/oracle.py`

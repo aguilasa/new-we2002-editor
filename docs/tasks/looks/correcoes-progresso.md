@@ -85,7 +85,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-066](/docs/tasks/looks/CORR-LOOKS-066.md) | Correção: a divisão da LOOKS-TASK-31 não chegou a cinco textos — a §10.3 (o) segue "PARCIAL", e o close-up e o cenário ainda apontam para a 31 | LOOKS-TASK-31 | low | done | 2026-09-21 |
 | [CORR-LOOKS-067](/docs/tasks/looks/CORR-LOOKS-067.md) | Correção: o DEFAUL tem uma segunda posição — Left leva o cursor ao rótulo, com a ajuda "Undo" —, e o screen.json a registra como trava | LOOKS-TASK-36 | medium | done | 2026-09-21 |
 | [CORR-LOOKS-068](/docs/tasks/looks/CORR-LOOKS-068.md) | Julgar os pixels das setas, não só a lista, e medir a CLUT da ◀ | LOOKS-TASK-36 | medium | done | 2026-09-21 |
-| [CORR-LOOKS-069](/docs/tasks/looks/CORR-LOOKS-069.md) | Dizer quantos sprites estáticos foram amostrados, não 14 | LOOKS-TASK-36 | low | pending | — |
+| [CORR-LOOKS-069](/docs/tasks/looks/CORR-LOOKS-069.md) | Dizer quantos sprites estáticos foram amostrados, não 14 | LOOKS-TASK-36 | low | done | 2026-09-21 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
