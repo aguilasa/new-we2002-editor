@@ -964,9 +964,9 @@ sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
 **A LOOKS-TASK-13 pode ser antecipada** assim que a 09 fechar, e provavelmente
 deve: ela depende só da 09, é a task mais barata do ciclo — transcrição
 conferida contra quatro implementações que já concordam — e tanto o `--looks` da
-UI quanto o parser de tupla do corpus dependem dela. É o padrão que o
-`01-executar.md` já autoriza: tarefa de fase adiante de que uma tarefa da fase
-corrente precisa.
+UI quanto o parser de tupla do corpus dependem dela. É o que o
+`/rite:execute looks <ID>` faz quando o usuário pede: tarefa de fase adiante de
+que uma tarefa da fase corrente precisa.
 
 **O que não se antecipa:** nada que dependa da LOOKS-TASK-08. Enquanto a
 incógnita (a) estiver aberta, escrever montagem ou caçar paleta é trabalhar

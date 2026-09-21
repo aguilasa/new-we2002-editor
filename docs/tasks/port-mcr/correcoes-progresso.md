@@ -1,6 +1,8 @@
 # Correções — port em Python do editor de `.mcr` do WE2002
 
-Correções abertas pelo `/revisar` sobre as tasks deste ciclo. O andamento das
+Correções abertas pelo `/rite:review` (até a migração para o Rite, pelo
+`/revisar` — [prompt da época](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/02-revisar.md)) sobre as
+tasks deste ciclo. O andamento das
 **tarefas** fica em [`progresso.md`](/docs/tasks/port-mcr/progresso.md).
 
 **O prefixo deste pool é `CORR-MCR-`**, com numeração contínua a partir de

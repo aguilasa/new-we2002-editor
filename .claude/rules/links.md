@@ -11,7 +11,7 @@ raiz do repositório. Nunca caminho relativo.
 | `docs/PLAN-LINUX.md` | `/docs/PLAN-LINUX.md` | `PLAN-LINUX.md`, `../PLAN-LINUX.md` |
 | `docs/tasks/concluidos/01-ferramental.md` | `/docs/tasks/concluidos/01-ferramental.md` | `01-ferramental.md`, `tasks/01-ferramental.md` |
 | `docs/tasks/concluidos/CORR-WTE-001.md` | `/docs/tasks/concluidos/CORR-WTE-001.md` | `./CORR-WTE-001.md` |
-| `docs/prompts/03-corrigir.md` | `/docs/prompts/03-corrigir.md` | `../prompts/03-corrigir.md` |
+| `docs/prompts/perfil-mcr.md` | `/docs/prompts/perfil-mcr.md` | `../prompts/perfil-mcr.md` |
 
 Vale **de qualquer arquivo para qualquer arquivo** dentro de `docs/`, inclusive
 entre irmãos no mesmo diretório: o `progresso.md` linka
