@@ -144,7 +144,8 @@ $ python tools/looks/oracle.py --screen --write        # 14 min 22 s
 oracle --screen --write: wrote tools/looks/screen.json
 ```
 
-Nas outras sete linhas o ◀ fica em x 384. O HEIG chega no meio da faixa,
+Nas outras oito linhas (SKIN, HAIR, H.COL, FACE, H.F.COL., HEIG, BODY e BOOTS)
+o ◀ fica em x 384. O HEIG chega no meio da faixa,
 com `<(384,127) >(480,127)`. O `screen.json` regravado só **acrescenta**
 (`git diff --stat`: 539 inserções, 0 remoções); nada do que já estava medido
 mudou.
