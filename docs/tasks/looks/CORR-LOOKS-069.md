@@ -15,30 +15,42 @@ done_commit: null
 
 Origin: [LOOKS-TASK-36](/docs/tasks/looks/36-os-sprites-estaticos.md)
 
-## Problem
+## Problema identificado
 
-<!-- What is wrong, stated as an observable fact. -->
+O `oracle.py --scenery --write` imprime "359 pixel(s) of 14 sprite(s)", e o
+Log da task cita a frase. Só 13 sprites trazem amostra: a barra é inteira
+transparente (armadilha 91) e não tem nenhuma. O número é o de sprites
+estáticos achados, não o de amostrados.
 
-## Evidence
+## Evidência
 
-<!-- The exact command and its output that shows the problem. Whoever fixes this reproduces it first. -->
+Revisão da LOOKS-TASK-36 em 2026-09-21, contando os sprites com `samples` em
+`work/looks-scenery/slot{1,2}.json`:
 
 ```text
-$
+$ python -c (conta sprites com "samples" em work/looks-scenery/slot{1,2}.json)
+1 142 sprites; 13 with samples; 359 samples
+2 142 sprites; 13 with samples; 359 samples
+Counter: plate 4, shirt boxes 4, title 4, bar 1, icon 1  (= 14 static)
 ```
 
-## Root cause
+## Causa raiz
 
-## Fix
+(hipótese) A mensagem em `tools/looks/oracle.py:2188` divide pelo número de
+sprites estáticos, e não pelo dos que deram ao menos uma amostra.
 
-<!-- Where the change goes. If the defect is in generated output, the fix goes in the generator. -->
+## Correção
 
-## Files
+`tools/looks/oracle.py`, perto da linha 2188: imprimir os sprites que têm
+amostra e nomear os que não têm (a barra).
 
--
+## Arquivos a criar ou modificar
 
-## Verification
+- `tools/looks/oracle.py`
 
-<!-- Command(s) that turn red before the fix and green after it. -->
+## Verificação
+
+`python tools/looks/oracle.py --scenery --write` deve dizer "of 13 sprite(s)"
+e nomear a barra como não amostrada, batendo com a recontagem acima.
 
 ## Log de Execução
