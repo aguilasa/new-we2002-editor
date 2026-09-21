@@ -2977,15 +2977,28 @@ barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou d
 > da página (512,256) do `DAT2D.BIN` e o corpo da (576,256), que é do kit e
 > que o `DAT2D.BIN` não tem.
 >
+> **A fonte dos textos é imagem, e do disco.** Parando o jogo na passada que
+> DESENHA do `layout.SCREEN_GLYPH` e lendo o estado do próprio GPU, a página
+> em vigor é a de **VRAM (704, 0), 4 bits com CLUT**, e o `DAT2D.BIN` tem um
+> registro nela. Perguntar ao GPU é o caminho que resta: nesta tela o texto
+> não deixa pacote na RAM para ler.
+>
 > **O que falta, e por que não saiu daqui.** A barra de título, a placa
-> (`GK`/`CB`), a caixa da camisa, as setas `◀ ▶` e os textos **não estão em
-> lista nenhuma da RAM** — varrida inteira (`layout.SCENERY_SWEEP`), com
-> quads, triângulos e sprites, e nada cai fora do painel. E não é que sejam
-> pintados uma vez: o `oracle.py --repaint` sobrescreve os **dois** buffers
-> com magenta e deixa o jogo correr, e a tela **inteira** volta — tudo é
-> redesenhado a cada quadro. Então o caminho de impressão
-> (`layout.SCREEN_PRINT`) manda os comandos sem deixar nó em memória, e medir
-> o que ele manda é a continuação desta task.
+> (`GK`/`CB`), a caixa da camisa e as setas `◀ ▶` **não estão em lista nenhuma
+> da RAM** — varrida inteira (`layout.SCENERY_SWEEP`), com quads, triângulos e
+> sprites, e nada cai fora do painel. E não é que sejam pintados uma vez: o
+> `oracle.py --repaint` sobrescreve os **dois** buffers e a tela **inteira**
+> volta, então tudo é redesenhado a cada quadro. Nem são cópia de VRAM: o mapa
+> de procedência do `--scenery` procura cada ladrilho da tela no resto da VRAM
+> e **não acha nenhum** (o texto, que é desenhado por CLUT, também não aparece
+> ali — uma cópia apareceria).
+>
+> E o `oracle.py --pages` estraga uma página de VRAM por vez e mede o que a
+> tela perde, com duas corridas sem dano de controle: as páginas do boneco
+> (512,256) e do kit (576,256) derrubam 17 ladrilhos do painel cada, três
+> páginas vizinhas não derrubam nada — e a da fonte derruba **um** ladrilho
+> só, o que diz que ela é reenviada a cada quadro. Medir o que o caminho de
+> impressão manda ao GPU, comando a comando, é a continuação desta task.
 
 **(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
 interpola entre quadros-chave, e se o tronco que balança é da animação ou da

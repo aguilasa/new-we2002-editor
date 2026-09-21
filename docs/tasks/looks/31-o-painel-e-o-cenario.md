@@ -108,12 +108,37 @@ desenhados; o título, a placa, a camisa, as setas e os textos não, e o motivo
      comando viraram tabela de strings, como o `_PACKETS` já fazia, e o
      endereço foi para o `layout.py`.
 
+### Segunda passada, 2026-09-21
+
+- **A fonte dos textos está medida, e é imagem do disco.** Parando na passada
+  que DESENHA do `layout.SCREEN_GLYPH` e lendo o estado do próprio GPU, a
+  página em vigor é **VRAM (704, 0), 4 bits com CLUT**, e o `DAT2D.BIN` tem um
+  registro nela. Quando a lista não traz o desenho, quem responde é o hardware.
+- **Nada da tela é cópia de VRAM.** O mapa de procedência do `--scenery`
+  procura cada ladrilho no resto da VRAM e não acha nenhum — nem o texto, que
+  é desenhado por CLUT e por isso não casaria de qualquer forma; uma cópia
+  casaria.
+- **O `--pages` (novo) atribui a tela às páginas, estragando uma por vez:** as
+  do boneco (512,256) e do kit (576,256) derrubam 17 ladrilhos do painel cada,
+  três páginas vizinhas não derrubam nada — o controle que a lista carrega — e
+  a da fonte derruba **um** ladrilho só, o que diz que ela é reenviada a cada
+  quadro.
+- **Arquivos desta passada:** `tools/looks/oracle.py` (`--pages`, a página da
+  fonte lida no `SCREEN_GLYPH`, o mapa de procedência);
+  `docs/PLAN-LOOKS-PY.md`, `docs/prompts/perfil-looks.md` (armadilhas 83 e 84)
+  e `CLAUDE.md` (a linha do `--pages`).
+- **Problema encontrado:** a primeira versão do `--pages` comparava o quadro
+  antes e depois do dano e acusava **48 ladrilhos para toda página**, inclusive
+  as que nada amostra: o boneco anda entre as duas capturas. O controle certo
+  são duas corridas do mesmo comprimento a partir do state (armadilha 83).
+
 ### O que falta para fechar esta task
 
-- **A barra de título, a placa (`GK`/`CB`), a caixa da camisa, as setas
-  `◀ ▶` e a fonte dos textos.** O caminho é o de impressão: parar em
-  `layout.SCREEN_PRINT` / `layout.SCREEN_GLYPH` e ler o que ele manda ao GPU
-  (página, CLUT, posição e cor), que é a medição que a display list não dá.
+- **A barra de título, a placa (`GK`/`CB`), a caixa da camisa e as setas
+  `◀ ▶`.** Não são pacote na RAM, não são cópia de VRAM e não somem quando as
+  páginas conhecidas são estragadas. O que resta é ler o que o caminho de
+  impressão manda ao GPU comando a comando — parar em `layout.SCREEN_PRINT` e
+  seguir o que ele escreve, em vez de procurar o desenho já pronto.
 - **A comparação do nosso quadro com o do emulador fora da silhueta**, com o
   controle do emulador contra ele mesmo — critério 3, intocado.
 - **A câmera do close-up por linha**, que o contexto desta task traz da
@@ -124,6 +149,7 @@ desenhados; o título, a placa, a camisa, as setas e os textos não, e o motivo
   LOOKS-TASK-22.
 
 **Gates, na árvore commitada:** `selftest` 0 falhas, 90 de 90 controles
-vermelhos; `cli check` 10 de 10; `oracle.py --scenery` 0 problemas nos dois
-slots (28 pacotes, iguais nas duas leituras); `oracle.py --repaint` 0
-problemas; `looks_ui` 10 de 10 controles vermelhos; `check_tasks` 138 ok.
+vermelhos; `cli check` 10 de 10; `oracle.py --scenery` 0 problemas (28
+pacotes, iguais nas duas leituras); `oracle.py --repaint` 0 problemas;
+`oracle.py --pages` 0 problemas, com as duas corridas sem dano idênticas;
+`looks_ui` 10 de 10 controles vermelhos; `check_tasks` 138 ok.

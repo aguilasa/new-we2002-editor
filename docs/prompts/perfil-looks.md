@@ -714,6 +714,16 @@ Não se revertem sem o usuário pedir.
     `zstandard` no Python, nem `zstd` no `PATH` — a mesma armadilha que o
     `savestate.py` registra. O caminho que funciona aqui é ler a RAM e a VRAM
     por MCP.
+83. **Diff de tela entre "antes" e "depois" mede a caminhada, não o dano.** A
+    primeira versão do `--pages` estragava uma página, andava seis quadros e
+    comparava com o quadro anterior: **48 ladrilhos mudavam para toda página**,
+    inclusive as que nada amostra. O boneco anda. O controle certo é **duas
+    corridas do mesmo comprimento** a partir do state — uma com dano e uma
+    sem —, e as duas sem dano têm de dar a mesma tela.
+84. **O que o GPU tem em vigor responde onde o pacote não existe.** A página da
+    fonte saiu do `get_gpu_state` numa parada do `SCREEN_GLYPH`, não de pacote
+    nenhum. Quando a lista não tem o desenho, pergunte ao hardware o estado em
+    que ele está desenhando.
 ---
 
 ## As fontes de verdade binárias

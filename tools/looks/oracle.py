@@ -35,6 +35,7 @@ Usage:
     python tools/looks/oracle.py --kit [SLOT]    # which TEX_*.BIN the screen wears, off VRAM
     python tools/looks/oracle.py --scenery [SLOT] [--write]  # what draws the screen's furniture, off the display list
     python tools/looks/oracle.py --repaint [SLOT]  # which parts of the screen the game redraws every frame
+    python tools/looks/oracle.py --pages [SLOT]    # what on the screen is drawn from each VRAM page
     python tools/looks/oracle.py --assembly [HAIR ...]  # every value of a field
     python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
     python tools/looks/oracle.py --hair          # who writes the hair window, and from where
@@ -2251,6 +2252,9 @@ def check_scenery(slots=(2, 1), write=False, verbose=True):
                   "packet(s)" % len(found))
             _say_scenery(found, table)
             _say_pages(pages, table)
+            _say_glyph_page(game)
+            _say_provenance(provenance_map(game, display, confront, screen),
+                            table, display)
             if write:
                 print("    wrote %s" % write_scenery(slot, found, display))
     for line in problems:
@@ -2301,6 +2305,32 @@ def _scenery_of(game, slot, table, display, confront, screen):
         seen.add(key)
         unique.append(node)
     return unique, pages
+
+
+def _say_glyph_page(game):
+    """Print the page the screen's text is cut from, and what holds it."""
+    import atlas
+    import iso_source
+    import texture
+
+    seen = check_glyph_page(game)
+    if not seen:
+        print("    the glyph routine never stopped on its drawing pass")
+        return
+    pages = {}
+    for _code, _x, _y, page in seen:
+        pages[page] = pages.get(page, 0) + 1
+    ready = preflight()
+    with iso_source.open_disc(ready["image"]) as disc:
+        records = texture.images(disc.read(layout.DAT2D))
+    for page, count in sorted(pages.items(), key=lambda one: -one[1]):
+        x, y, mode = page
+        held = atlas.image_at(records, x, y) if x is not None else None
+        print("    the text is cut from VRAM (%s, %s), %s: %d glyph(s) drawn "
+              "from it; %s"
+              % (x, y, mode, count,
+                 "DAT2D.BIN holds that page" if held
+                 else "no DAT2D record holds that page"))
 
 
 def _say_pages(pages, table):
@@ -2425,6 +2455,172 @@ REPAINT_BACK = 0.98
 """How much of a tile has to come back before it is called redrawn."""
 
 
+GLYPH_DRAW_PASS = 0
+"""`a3` of the glyph routine on the pass that DRAWS -- 1 measures the width."""
+
+PROVENANCE_TILE = 16
+"""The square the provenance map is read at, in screen pixels.
+
+Sixteen, because that is the side a PSX texture page is cut into and the side
+a glyph of this screen is drawn at: a tile smaller than a glyph would find a
+blank corner of one page in every other page.
+"""
+
+PROVENANCE_PLAIN = 4
+"""How many colours a tile may hold before it counts as picture and not fill.
+
+A tile of the panel's gradient holds two or three; a tile of text or of the
+title band holds a dozen.  Plain tiles are left out of the search: a flat
+rectangle matches every other flat rectangle of the same colour in VRAM, and
+counting those as "found elsewhere" would call the whole screen an image.
+"""
+
+
+def check_glyph_page(game, verbose=True):
+    """Which VRAM page the screen's text is cut from, read at the draw pass.
+
+    The glyph routine (`layout.SCREEN_GLYPH`) is stopped on the pass that
+    draws, and the GPU's own draw state is read there: the texture page it has
+    in force is the font.  Asking the GPU beats reading the packet, because on
+    this screen the text leaves no packet in RAM to read (LOOKS-TASK-31).
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.SCREEN_GLYPH))
+    seen = []
+    try:
+        for _ in range(GLYPH_PAGE_STOPS):
+            client.call("continue")
+            if not _wait_for_hit(game, WATCH_SECONDS):
+                raise OracleError("%s never ran, so the text was not drawn"
+                                  % who_writes.hx(layout.SCREEN_GLYPH))
+            registers = client.call("read_registers", group="gpr")
+            if who_writes.register_value(registers, "a3") != GLYPH_DRAW_PASS:
+                continue
+            state = client.call("get_gpu_state", aspect="draw")
+            seen.append((who_writes.register_value(registers, "a0"),
+                         _signed16(who_writes.register_value(registers, "a1")),
+                         _signed16(who_writes.register_value(registers, "a2")),
+                         _draw_page(state)))
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    return seen
+
+
+GLYPH_PAGE_STOPS = 24
+"""Stops taken at the glyph routine before the pages it uses are counted.
+
+Enough for both passes of several strings: the measuring pass is skipped here
+and only the drawing one is kept, so a budget of one string's worth would come
+back with nothing."""
+
+
+def _draw_page(state):
+    """(x, y, colour mode) of the texture page the GPU has in force."""
+    found = state if isinstance(state, dict) else {}
+    return (found.get("texture_page_x"), found.get("texture_page_y"),
+            found.get("texture_color_mode"))
+
+
+PROVENANCE_TILE = 16
+"""The square the provenance map is read at, in screen pixels.
+
+Sixteen: the side a PSX texture page is cut into and the side this screen's
+glyphs are drawn at.  Smaller would find the blank corner of one page in every
+other page.
+"""
+
+PROVENANCE_STRIDE = 8
+"""How far apart the VRAM blocks the map searches are taken.
+
+Half a tile, so a source that is not tile-aligned is still found.  Whole VRAM
+at this stride is 8,128 blocks, which a dictionary swallows.
+"""
+
+PROVENANCE_PLAIN = 4
+"""How many colours a tile may hold before it counts as picture, not fill.
+
+A tile of the panel's gradient holds two or three; a tile of text or of the
+title band holds a dozen.  Flat tiles are left out: a filled rectangle matches
+every other rectangle of that colour in VRAM, and counting those as "found
+elsewhere" would call the whole screen an image.
+"""
+
+
+def provenance_map(game, display, confront, screen):
+    """Which tiles of the screen exist somewhere ELSE in VRAM.
+
+    The question section 10.3 (o) asks about the title band, the plate and the
+    shirt box, for which there is no packet in RAM to read: a rectangle whose
+    pixels are also sitting in a page of VRAM was BLITTED from that page --
+    it is an image -- and one that exists only in the frame buffer was drawn
+    there.
+
+    Flat tiles are skipped (`PROVENANCE_PLAIN`), because a rectangle of one
+    colour is found everywhere and would answer "image" for the whole screen.
+    """
+    import atlas
+
+    frame = confront.still_frame(game, display, oracle_module(), screen)
+    path = os.path.join(game.out_dir, "vram-provenance.png")
+    if os.path.exists(path):
+        os.remove(path)
+    game.client.call("dump_vram", path=path, format="png")
+    width, height, rows = atlas.read_png(path)
+    tile = PROVENANCE_TILE
+    # Every block of VRAM OUTSIDE the two frame buffers, by its pixels.
+    buffers = set()
+    for origin in confront.BUFFERS:
+        buffers.update(range(origin, origin + display[1]))
+    blocks = {}
+    for y in range(0, height - tile, PROVENANCE_STRIDE):
+        if y in buffers or (y + tile - 1) in buffers:
+            continue
+        for x in range(0, width - tile, PROVENANCE_STRIDE):
+            key = tuple(tuple(rows[y + dy][x + dx][:3]) for dy in range(tile)
+                        for dx in range(tile))
+            blocks.setdefault(key, (x, y))
+    out = {}
+    for ty in range(0, display[1] - tile + 1, tile):
+        for tx in range(0, display[0] - tile + 1, tile):
+            pixels = tuple(tuple(frame[ty + dy][tx + dx][:3])
+                           for dy in range(tile) for dx in range(tile))
+            colours = len(set(pixels))
+            if colours <= PROVENANCE_PLAIN:
+                out[(tx, ty)] = ("flat", colours, None)
+                continue
+            where = blocks.get(pixels)
+            out[(tx, ty)] = ("image" if where else "drawn", colours, where)
+    return out
+
+
+def _say_provenance(found, table, display):
+    """Print the provenance map, and what it says region by region."""
+    tile = PROVENANCE_TILE
+    mark = {"image": "I", "drawn": "d", "flat": "."}
+    print("    where the pixels come from, %dx%d tiles -- I also in a VRAM "
+          "page, d only in the frame buffer, . flat fill"
+          % (display[0] // tile, display[1] // tile))
+    for ty in range(0, display[1] - tile + 1, tile):
+        print("        %3d  %s" % (ty, "".join(
+            mark[found[(tx, ty)][0]]
+            for tx in range(0, display[0] - tile + 1, tile))))
+    sources = {}
+    for (tx, ty), (kind, _colours, where) in sorted(found.items()):
+        if kind == "image" and where:
+            sources.setdefault(where[1] // 64 * 64, set()).add(where[0] // 64 * 64)
+    for row in sorted(sources):
+        print("        tiles found in VRAM rows %d..%d, page columns %s"
+              % (row, row + 63, sorted(sources[row])))
+
+
 def check_repaint(slots=(2, 1), verbose=True):
     """`--repaint [SLOT]`: which parts of the screen the game draws per frame.
 
@@ -2516,6 +2712,139 @@ def _say_repaint(found, table, width, height):
                 kinds[kind] = kinds.get(kind, 0) + 1
         print("        %-8s %s" % (name, ", ".join(
             "%d %s" % (n, kind) for kind, n in sorted(kinds.items()))))
+
+
+PAGE_SIZE = (64, 256)
+"""The width and height of one PSX texture page, in VRAM halfwords."""
+
+PAGE_CANDIDATES = ((704, 0), (512, 256), (576, 256), (640, 256), (768, 0),
+                   (832, 0))
+"""The pages this screen is known or suspected to draw from.
+
+The first is the font (`--scenery` reads it off the GPU at the glyph routine's
+drawing pass), the second and third are the head's and the kit's
+(LOOKS-TASK-30), and the rest are their neighbours -- a page nothing draws
+from comes back with nothing changed, which is the control this list carries
+inside it.
+"""
+
+PAGE_FRAMES = 6
+"""Frames let run after a page is damaged, before the screen is read again."""
+
+
+def check_pages(slots=(2, 1), verbose=True):
+    """`--pages [SLOT]`: what on the screen is drawn from each VRAM page.
+
+    The question section 10.3 (o) leaves open after `--scenery`: the title
+    band, the plate, the shirt box and the arrows leave no packet in RAM, and
+    their pixels are in no other page of VRAM either -- so are they images at
+    all?  This asks the console directly.  One page of VRAM is overwritten
+    with a colour the screen does not use, the game is let run, and the screen
+    is compared with itself: **what changes is drawn from that page**.
+
+    The control is in the list -- pages nothing samples have to come back with
+    nothing changed -- and the state is reloaded between pages, so the damage
+    of one is never read as the damage of the next.
+    """
+    import confront
+    import screen
+
+    ready = preflight()
+    table = screen.load()
+    display = table["display"]
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, SLOTS[slot]))
+            quiet = []
+            clean = _page_frame(game, slot, display, confront, screen)
+            twice = _page_frame(game, slot, display, confront, screen)
+            if [row[:] for row in clean] != [row[:] for row in twice]:
+                problems.append("slot %d: two undamaged runs of the same "
+                                "length differ, so the damage below cannot "
+                                "be told from the walk" % slot)
+                continue
+            print("    control: two undamaged runs give the same screen")
+            for page in PAGE_CANDIDATES:
+                changed, boxes = _damage_page(game, slot, page, display,
+                                              confront, screen, clean)
+                if not changed:
+                    quiet.append(page)
+                    continue
+                print("    page (%3d,%3d): %d tile(s) of the screen change, "
+                      "over %s" % (page[0], page[1], changed,
+                                   ", ".join(_name_boxes(boxes, table))))
+            print("    and nothing on screen comes from %s -- the control "
+                  "this list carries"
+                  % (", ".join("(%d,%d)" % one for one in quiet) or "no page"))
+            if not quiet:
+                problems.append("slot %d: every page tried changed the "
+                                "screen, so the damage is not local and the "
+                                "attribution means nothing" % slot)
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --pages: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+def _page_frame(game, slot, display, confront, screen, page=None):
+    """The screen after `PAGE_FRAMES`, with one page damaged or with none.
+
+    **Two runs from the same state, and not one run before and after.** The
+    figure walks: a frame taken before the damage and one taken after differ
+    in every tile the walk touched, which is how the first version of this
+    reported the same 48 tiles for every page, including the ones nothing
+    samples (measured 2026-09-21).
+    """
+    restore_state(slot, verbose=False)
+    game.load_looks(slot, label="pages-%d" % slot)
+    game.step(SCENERY_SETTLE)
+    if page is not None:
+        path = os.path.join(game.out_dir, "page-magenta.bin")
+        with open(path, "wb") as handle:
+            handle.write(struct.pack("<H", REPAINT_COLOUR)
+                         * (PAGE_SIZE[0] * PAGE_SIZE[1]))
+        game.client.call("write_vram_region", x=page[0], y=page[1],
+                         width=PAGE_SIZE[0], height=PAGE_SIZE[1],
+                         input_path=path, format="raw")
+    game.step(PAGE_FRAMES)
+    return confront.still_frame(game, display, oracle_module(), screen)
+
+
+def _damage_page(game, slot, page, display, confront, screen, before=None):
+    """(tiles changed, their boxes) after one VRAM page is overwritten."""
+    if before is None:
+        before = _page_frame(game, slot, display, confront, screen)
+    after = _page_frame(game, slot, display, confront, screen, page)
+    tile = PROVENANCE_TILE
+    changed, boxes = 0, []
+    for ty in range(0, display[1] - tile + 1, tile):
+        for tx in range(0, display[0] - tile + 1, tile):
+            for dy in range(tile):
+                row_a, row_b = before[ty + dy], after[ty + dy]
+                if any(tuple(row_a[tx + dx][:3]) != tuple(row_b[tx + dx][:3])
+                       for dx in range(tile)):
+                    changed += 1
+                    boxes.append((tx, ty))
+                    break
+    return changed, boxes
+
+
+def _name_boxes(boxes, table):
+    """The regions of the screen a list of tiles falls in."""
+    tile = PROVENANCE_TILE
+    names = []
+    for name in sorted(table["regions"]):
+        box = table["regions"][name]["native"]
+        if any(tx + tile > box[0] and tx <= box[2] and ty + tile > box[1]
+               and ty <= box[3] for tx, ty in boxes):
+            names.append(name)
+    top = min(ty for _tx, ty in boxes)
+    if top < min(table["regions"][one]["native"][1]
+                 for one in table["regions"]):
+        names.append("above them all (the title band)")
+    return names or ["nowhere this cycle has named"]
 
 
 def check_assembly(rows=None, slot=2, verbose=True):
@@ -6905,6 +7234,8 @@ def main(argv):
             return check_where(row=argv[2] if len(argv) > 2 else "HAIR")
         if len(argv) >= 2 and argv[1] == "--assembly":
             return check_assembly(rows=tuple(argv[2:]) or None)
+        if len(argv) in (2, 3) and argv[1] == "--pages":
+            return check_pages((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) in (2, 3) and argv[1] == "--repaint":
             return check_repaint((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) >= 2 and argv[1] == "--scenery":
