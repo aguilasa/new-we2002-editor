@@ -5,10 +5,10 @@ origin: LOOKS-TASK-36
 severity: medium
 files: [tools/looks/oracle.py, tools/looks/ui_check.py, tools/looks/sprites.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-21
+done_commit: 9716a6be
 ---
 
 # CORR-LOOKS-068 — Julgar os pixels das setas, não só a lista, e medir a CLUT da ◀
@@ -199,3 +199,8 @@ exit=0
 ```
 
 Antes 14 controles, agora 16: os dois de `ARROW_BREAKS`.
+- **Closed** — commit `9716a6be` (2026-09-21): fix(looks): judge the arrows' pixels against the game and measure the ◀ CLUT — (80,497), the same as the ▶
+  - Files (`git show --name-status 9716a6be`):
+    - `M docs/tasks/looks/CORR-LOOKS-068.md`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/ui_check.py`
