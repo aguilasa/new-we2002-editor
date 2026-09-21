@@ -364,8 +364,10 @@ class LooksSet(QtWidgets.QWidget):
                              (self.places["shirt"][1] + 8) * s,
                              self.state.shirt())
 
-        # The rows.  The cursor rectangle first, so the text sits on top.
-        cursor = self._row_rect(self.state.cursor)
+        # The rows.  The cursor rectangle first, so the text sits on top --
+        # where the state says it is, which on DEFAUL's label is over the
+        # row's name and not its value (CORR-LOOKS-067).
+        cursor = self._rect(self.state.cursor_box())
         painter.setPen(CURSOR)
         painter.drawRect(cursor.adjusted(0, 0, -1, -1))
         for arrow in self.arrows():

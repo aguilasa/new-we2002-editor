@@ -179,10 +179,14 @@ def _send_keys(app: QtWidgets.QApplication, window: LooksSet,
                      QtCore.QEvent.Type.KeyRelease):
             event = QtGui.QKeyEvent(kind, key,
                                     QtCore.Qt.KeyboardModifier.NoModifier)
-            before = window.state.texts(), window.state.row
+            # The label position counts: Left on DEFAUL moves the cursor to
+            # the row's name and changes no text (CORR-LOOKS-067).
+            before = (window.state.texts(), window.state.row,
+                      window.state.on_label)
             app.sendEvent(window, event)
             if kind == QtCore.QEvent.Type.KeyPress:
-                moved.append((window.state.texts(), window.state.row) != before)
+                moved.append((window.state.texts(), window.state.row,
+                              window.state.on_label) != before)
         app.processEvents()
     return moved
 

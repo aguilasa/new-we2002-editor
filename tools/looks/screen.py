@@ -468,6 +468,13 @@ def validate(table: dict) -> list:
                                 % (name, end, row.get(end)))
         helps.append(row.get("help"))
         problems += _arrow_problems(name, row)
+        label = row.get("label", "missing")
+        if label == "missing":
+            problems.append("row %s does not say whether Left takes the "
+                            "cursor to its label" % name)
+        elif label is not None:
+            problems += _label_problems(name, label)
+            helps.append(label.get("help"))
         field = looks.BY_ROW.get(name)
         if field is not None:
             if row.get("stored") != field.name:
@@ -491,6 +498,45 @@ def validate(table: dict) -> list:
         problems += _title_problems(slot, state)
     if sorted(table.get("initial", {})) != ["1", "2"]:
         problems.append("the initial values are not those of slots 1 and 2")
+    return problems
+
+
+LABEL_MOVES = {"enter": "Left", "leave": "Right", "left": "locks",
+               "up": "locks", "down": "locks"}
+"""What a row's label position does with each press -- the only shape the
+walk has measured (DEFAUL, CORR-LOOKS-067): Left from the row's first value
+enters it, Right leaves it for that value, and Left, Up and Down move nothing.
+A walk that measured anything else refuses rather than write it here."""
+
+
+def _label_problems(name: str, label: dict) -> list:
+    """The label position of a row has to be the shape `State` reads."""
+    if not isinstance(label, dict):
+        return ["row %s: the label position is %r" % (name, label)]
+    problems = []
+    if not isinstance(label.get("help"), str) or not label.get("help"):
+        problems.append("row %s: the label position has no help" % name)
+    arrows = label.get("arrows")
+    if not isinstance(arrows, list):
+        problems.append("row %s: the label position does not say where its "
+                        "arrows show" % name)
+    else:
+        for one in arrows:
+            if (not isinstance(one, dict)
+                    or one.get("side") not in ARROW_SIDES
+                    or len(one.get("point", [])) != 2):
+                problems.append("row %s: an arrow on the label is %r"
+                                % (name, one))
+    cursor = label.get("cursor")
+    if (not isinstance(cursor, list) or len(cursor) != 4
+            or not cursor[0] <= cursor[2] or not cursor[1] <= cursor[3]):
+        problems.append("row %s: the cursor box on the label is %r"
+                        % (name, cursor))
+    for key, want in LABEL_MOVES.items():
+        if label.get(key) != want:
+            problems.append("row %s: on the label, %s is %r and the only one "
+                            "modelled is %r"
+                            % (name, key, label.get(key), want))
     return problems
 
 
@@ -645,7 +691,7 @@ class State:
     would agree by construction if the window did its own arithmetic.
     """
 
-    __slots__ = ("table", "slot", "cursor", "indices", "pressed")
+    __slots__ = ("table", "slot", "cursor", "indices", "pressed", "on_label")
 
     def __init__(self, table: dict, slot: int | str = 2):
         slot = str(slot)
@@ -659,6 +705,10 @@ class State:
         self.indices = {name: index_of(table, name, start["rows"][name])
                         for name in looks.SCREEN}
         self.pressed = 0
+        # On the row's LABEL rather than its value: DEFAUL has two positions,
+        # and Left from its value takes the cursor box to the name, the help
+        # to "Undo" and the arrow to the other side (CORR-LOOKS-067).
+        self.on_label = False
 
     # -- what the screen shows --------------------------------------------
 
@@ -690,6 +740,8 @@ class State:
         """
         if not self.pressed:
             return self.table["help_on_load"]
+        if self.on_label:
+            return self.table["rows"][self.row]["label"]["help"]
         return self.table["rows"][self.row]["help"]
 
     def arrows(self) -> list:
@@ -699,12 +751,16 @@ class State:
         at an end, or between -- picks which of the walk's four readings
         applies.  A row with one value has no end to reach, and shows what
         it showed when the cursor arrived (DEFAUL: the left arrow alone).
+        On the row's label the label's own arrows apply (DEFAUL: the right
+        arrow beside the name, CORR-LOOKS-067).
         """
         row = self.table["rows"][self.row]
         arrows = row["arrows"]
         count = len(row["texts"])
         index = self.indices[self.row]
-        if count == 1:
+        if self.on_label:
+            found = row["label"]["arrows"]
+        elif count == 1:
             found = arrows["arrival"]
         elif index == 0:
             found = arrows["left_end"]
@@ -713,6 +769,16 @@ class State:
         else:
             found = arrows["between"]
         return [dict(one, point=list(one["point"])) for one in found]
+
+    def cursor_box(self) -> list:
+        """The yellow box, in native pixels: over the row's value, carried
+        down by the pitch from the box the walk measured -- or over the row's
+        name, where the walk measured it, when the cursor is on the label."""
+        if self.on_label:
+            return list(self.table["rows"][self.row]["label"]["cursor"])
+        x0, y0, x1, y1 = self.layout()["cursor"]
+        step = self.table["pitch"] * self.cursor
+        return [x0, y0 + step, x1, y1 + step]
 
     def plate(self) -> str:
         return self.table["initial"][self.slot]["plate"]
@@ -799,12 +865,22 @@ class State:
             raise BadScreen("%r is not one of the four this screen answers "
                             "to: %s" % (button, ", ".join(BUTTONS)))
         self.pressed += 1
+        row = self.row
+        label = self.table["rows"][row].get("label")
+        if self.on_label:
+            if button == label["leave"]:
+                self.on_label = False
+                return True
+            return False  # Left, Up and Down lock there (LABEL_MOVES)
+        if (label is not None and button == label["enter"]
+                and self.indices[row] == 0):
+            self.on_label = True
+            return True
         if button in ("Up", "Down"):
             where = move(self.table, self.cursor, button)
             moved = where != self.cursor
             self.cursor = where
             return moved
-        row = self.row
         where = step(self.table, row, self.indices[row], button)
         moved = where != self.indices[row]
         self.indices[row] = where
@@ -1017,6 +1093,54 @@ def _checks(c) -> None:
                                                      "point": [0, 0]}]
     ok("an arrow that is neither side is refused",
        any("an arrow" in p for p in validate(broken)))
+    labelled = json.loads(json.dumps(table))
+    labelled["rows"]["SKIN"]["label"] = dict(
+        LABEL_MOVES, help="label help",
+        arrows=[{"side": "right", "point": [276, 67]}],
+        cursor=[188, 65, 272, 76])
+    ok("a row with a label position validates", validate(labelled) == [],
+       "%r" % validate(labelled))
+    on = State(labelled, 2)
+    on.press("Down")
+    on.press("Up")
+    entered = on.press("Left")
+    ok("Left from the row's first value takes the cursor to the label: the "
+       "text stays, the help, the arrows and the box move (CORR-LOOKS-067)",
+       entered and on.on_label and on.text_of("SKIN") == "A TYPE"
+       and on.help_text() == "label help"
+       and on.arrows() == [{"side": "right", "point": [276, 67]}]
+       and on.cursor_box() == [188, 65, 272, 76],
+       "%r %r %r" % (on.help_text(), on.arrows(), on.on_label))
+    ok("and on the label Left, Up and Down move nothing",
+       on.press_all(["Left", "Up", "Down"]) == [False, False, False]
+       and on.on_label and on.row == "SKIN")
+    ok("Right leaves the label for the value, with the row's own help back",
+       on.press("Right") and not on.on_label
+       and on.help_text() == "help %d" % looks.SCREEN.index("SKIN"))
+    plain = State(table, 2)
+    plain.press("Down")
+    plain.press("Up")
+    ok("without a label position Left at the first value locks, as before",
+       plain.press("Left") is False and not plain.on_label)
+    broken = json.loads(json.dumps(labelled))
+    broken["rows"]["SKIN"]["label"]["up"] = "wraps"
+    ok("a label position that moves where the walk measured a lock is "
+       "refused", any("the only one modelled" in p for p in validate(broken)),
+       "%r" % validate(broken))
+    broken = json.loads(json.dumps(labelled))
+    broken["rows"]["SKIN"]["label"]["help"] = broken["rows"]["NAT"]["help"]
+    ok("a label whose help is another row's is refused -- the help is what "
+       "says where the cursor is", any("share a help" in p
+                                       for p in validate(broken)))
+    broken = json.loads(json.dumps(labelled))
+    del broken["rows"]["SKIN"]["label"]["cursor"]
+    ok("a label position with no cursor box is refused",
+       any("cursor box on the label" in p for p in validate(broken)))
+    broken = json.loads(json.dumps(table))
+    del broken["rows"]["DEFAUL"]["label"]
+    ok("a row that does not say whether it has a label is refused, which is "
+       "the table the walk wrote before CORR-LOOKS-067",
+       any("to its label" in p for p in validate(broken)))
     ok("Right locks at the right end", step(table, "SKIN", 3, "Right") == 3)
     ok("Left locks at the left end", step(table, "SKIN", 0, "Left") == 0)
     ok("Down wraps past FOOT when the walk said so",
@@ -1120,6 +1244,27 @@ def _state_checks(c, table: dict) -> None:
        State(table, 1).title() == table["initial"]["1"]["title"]
        and State(table, 1).title() != table["initial"]["1"]["title_object"])
 
+    label = table["rows"]["DEFAUL"]["label"]
+    ok("DEFAUL has a label position, and its help is not the row's",
+       label is not None and label["help"] != table["rows"]["DEFAUL"]["help"],
+       "%r" % (label,))
+    if label is not None:
+        on = State(table, 2)
+        while on.row != "DEFAUL":
+            on.press("Up")
+        on.press("Left")
+        ok("Up, Left from the load puts the cursor on DEFAUL's name, with its "
+           "help, arrows and box (CORR-LOOKS-067)",
+           on.on_label and on.help_text() == label["help"]
+           and on.arrows() == label["arrows"]
+           and on.cursor_box() == label["cursor"]
+           and on.text_of("DEFAUL") == table["rows"]["DEFAUL"]["texts"][0])
+        on.press("Right")
+        ok("and Right brings it back to the value",
+           not on.on_label
+           and on.help_text() == table["rows"]["DEFAUL"]["help"]
+           and on.arrows() == table["rows"]["DEFAUL"]["arrows"]["arrival"])
+
     refuses("a button this screen does not answer to is refused, not ignored",
             lambda: State(table, 2).press("Cross"), "is not one of the four")
     refuses("and a slot nobody measured is refused",
@@ -1138,6 +1283,7 @@ def _toy_table() -> dict:
                       "left": "locks", "right": "locks",
                       "help": "help %d" % number,
                       "stored": field.name if field else None,
+                      "label": None,
                       "arrows": {
                           "arrival": [{"side": "right", "point": [480, 43]}],
                           "left_end": [{"side": "right", "point": [480, 43]}],

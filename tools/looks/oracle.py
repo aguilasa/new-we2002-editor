@@ -4471,7 +4471,7 @@ def measure_screen(game, verbose=True):
     for index, name in enumerate(looks.SCREEN):
         table["rows"][name].update(
             _walk_row(game, walk_slot, name, table, geometry, orders,
-                      verbose))
+                      verbose, regions, display))
 
     table["regions"] = {}
     for name, box in sorted(regions.items()):
@@ -4549,8 +4549,17 @@ def _walk_cursor(game, slot, display, regions, geometry, origin, verbose):
     return helps, vertical, boxes
 
 
-def _walk_row(game, slot, name, table, geometry, orders, verbose):
-    """Every value one row walks, both ends, and what moves beside it."""
+def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
+              display):
+    """Every value one row walks, both ends, and what moves beside it.
+
+    A lock is judged by the text, the help AND the arrows: a press that
+    leaves all three where they were moved nothing.  DEFAUL is why -- Left
+    from its one value keeps `O.K.` and takes the cursor box to the row's
+    name, the help to `Undo` and the arrow to the other side, and a walk that
+    looked at the text alone wrote that down as a lock (CORR-LOOKS-067).  The
+    position it reaches is measured by `_walk_label` as the row's `label`.
+    """
     import looks
 
     game.load_looks(slot)
@@ -4570,31 +4579,61 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose):
     field = looks.BY_ROW.get(name)
 
     arrows_now = []
+    help_now = [None]
 
     def read():
         reading = ScreenReading(geometry, screen_objects(game))
         rows = reading.rows(orders)
         value = screen_record(game)[field.name] if field else None
         arrows_now[:] = frame_arrows(game)
+        help_now[0] = screen_help(game)
         return rows, value
+
+    def rest():
+        return (help_now[0], list(arrows_now))
 
     rows, value = read()
     initial = dict(rows)
     arrival = list(arrows_now)
+    # On the row the state loads on the help still reads "Visual" (trap 35),
+    # and the first press makes it say the row whatever else it does -- so
+    # that change is no evidence of anything, and the baseline is the row's.
+    help_now[0] = table["rows"][name]["help"]
     moved, dropped = set(), 0
     # The arrows of every value the Right walk reaches, end included.
     between = []
+    # The arrows on the value the cursor stood on when a Left took it to the
+    # row's label, if one did.
+    entered = []
 
     def go(direction, texts, values):
         nonlocal dropped
         for _ in range(SCREEN_WALK_LIMIT):
+            before = rest()
             tap(game, direction)
             rows, value = read()
+            if rows[name] == texts[-1] and rest() != before:
+                # The text held and the help or the arrows moved: the cursor
+                # left the value without changing it.
+                if direction != "Left":
+                    raise OracleError(
+                        "%s: %s kept the text %r and moved the help or the "
+                        "arrows (%r to %r), which only Left into a label is "
+                        "modelled to do" % (name, direction, texts[-1],
+                                            before, rest()))
+                entered[:] = before[1]
+                return "label"
             if rows[name] == texts[-1]:
                 tap(game, direction)
                 rows, value = read()
-                if rows[name] == texts[-1]:
+                if rows[name] == texts[-1] and rest() == before:
                     return "locks"
+                if rows[name] == texts[-1]:
+                    raise OracleError(
+                        "%s: a second %s kept the text %r and moved the help "
+                        "or the arrows (%r to %r)" % (name, direction,
+                                                      texts[-1], before,
+                                                      rest()))
                 dropped += 1
             moved.update(other for other in looks.SCREEN
                          if other != name and rows[other] != initial[other])
@@ -4613,7 +4652,14 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose):
         raise OracleError("%s wraps going Left; a wrapping row is not "
                           "modelled, and the walk says so rather than guess"
                           % name)
-    left_end = list(arrows_now)
+    label = None
+    if left == "label":
+        label = _walk_label(game, name, table, geometry, regions, display,
+                            left_texts[-1], entered, read, rest)
+        left = "locks"
+        left_end = list(entered)
+    else:
+        left_end = list(arrows_now)
     texts, values = [left_texts[-1]], [left_values[-1]]
     right = go("Right", texts, values)
     if right == "wraps":
@@ -4631,6 +4677,7 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose):
                       orders)
     out = {"texts": texts, "left": left, "right": right,
            "stored": field.name if field else None,
+           "label": label,
            "moves_beside": sorted(moved, key=looks.SCREEN.index),
            "arrows": {"arrival": arrival, "left_end": left_end,
                       "between": inner[0] if inner else None,
@@ -4645,6 +4692,12 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose):
               "%s, at the right end %s"
               % tuple(_say_arrows(out["arrows"][key]) for key in
                       ("arrival", "left_end", "between", "right_end")))
+        if label is not None:
+            print("            label: Left from the first value, help %r, "
+                  "arrows %s, cursor %s; there Left %s, Up %s, Down %s, and "
+                  "Right back" % (label["help"], _say_arrows(label["arrows"]),
+                                  label["cursor"], label["left"], label["up"],
+                                  label["down"]))
         shown = texts if len(texts) <= 6 else texts[:3] + ["..."] + texts[-2:]
         print("  %-9s %3d value(s), Left %s, Right %s%s%s; end checked "
               "against %d drawn string(s)%s"
@@ -4654,6 +4707,55 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose):
                  glyphs, ", %d press(es) dropped" % dropped if dropped else ""))
         print("            %s" % " | ".join(shown))
     return out
+
+
+def _walk_label(game, name, table, geometry, regions, display, text,
+                entered, read, rest):
+    """The row's label position, which a Left from its first value reached.
+
+    Measured, not assumed: the help and the arrows there, the cursor box off
+    VRAM, and each of Left, Up and Down pressed twice -- two presses that move
+    nothing are a lock, the way `go` judges one.  Anything else is refused,
+    because `screen.LABEL_MOVES` is the only shape the table can say.  Right
+    last, and it has to put the value's own help and arrows back.
+    """
+    import looks
+
+    origin = (display[0] // 2, display[1] // 2)
+    here = rest()
+    frames, _ = screen_frames(game, display)
+    row, box = _cursor_row(frames, regions, geometry, origin)
+    if row != looks.SCREEN.index(name):
+        raise OracleError("%s: Left took the cursor box to row %s"
+                          % (name, looks.SCREEN[row]))
+    label = {"help": here[0], "arrows": here[1], "cursor": list(box),
+             "enter": "Left"}
+    for button in ("Left", "Up", "Down"):
+        for _ in range(2):
+            tap(game, button)
+            rows, _value = read()
+            if rows[name] != text or rest() != here:
+                raise OracleError(
+                    "%s: %s on the label moved the screen (text %r, help and "
+                    "arrows %r), which is not modelled"
+                    % (name, button, rows[name], rest()))
+        label[button.lower()] = "locks"
+    frames, _ = screen_frames(game, display)
+    if _cursor_row(frames, regions, geometry, origin)[1] != box:
+        raise OracleError("%s: the cursor box left the label on a press that "
+                          "moved nothing else" % name)
+    back = (table["rows"][name]["help"], list(entered))
+    for _attempt in range(2):
+        tap(game, "Right")
+        rows, _value = read()
+        if rows[name] == text and rest() == back:
+            break
+    else:
+        raise OracleError("%s: Right from the label shows text %r and %r, "
+                          "not the value's %r" % (name, rows[name], rest(),
+                                                   back))
+    label["leave"] = "Right"
+    return label
 
 
 def _require_initial(table, slot, state):

@@ -296,6 +296,7 @@
     ]
    },
    "help": "Age",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -416,6 +417,7 @@
     ]
    },
    "help": "Body",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -488,6 +490,7 @@
     ]
    },
    "help": "Boots   ■ Turn",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -528,10 +531,10 @@
     "left_end": [
      {
       "point": [
-       276,
+       384,
        43
       ],
-      "side": "right"
+      "side": "left"
      }
     ],
     "right_end": [
@@ -545,6 +548,29 @@
     ]
    },
    "help": "Confirm",
+   "label": {
+    "arrows": [
+     {
+      "point": [
+       276,
+       43
+      ],
+      "side": "right"
+     }
+    ],
+    "cursor": [
+     188,
+     41,
+     272,
+     52
+    ],
+    "down": "locks",
+    "enter": "Left",
+    "help": "Undo",
+    "leave": "Right",
+    "left": "locks",
+    "up": "locks"
+   },
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -600,6 +626,7 @@
     ]
    },
    "help": "Kind of Face Hair   ■ Turn",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -670,6 +697,7 @@
     ]
    },
    "help": "Foot",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -732,6 +760,7 @@
     ]
    },
    "help": "Hair Colour   ■ Turn",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -804,6 +833,7 @@
     ]
    },
    "help": "Hair Face Colour   ■ Turn",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -874,6 +904,7 @@
     ]
    },
    "help": "Kind of Hair   ■ Turn",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -1001,6 +1032,7 @@
     ]
    },
    "help": "Height",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -1169,6 +1201,7 @@
     ]
    },
    "help": "Nation",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
@@ -1303,6 +1336,7 @@
     ]
    },
    "help": "Skin Colour   ■ Turn",
+   "label": null,
    "left": "locks",
    "moves_beside": [],
    "right": "locks",
