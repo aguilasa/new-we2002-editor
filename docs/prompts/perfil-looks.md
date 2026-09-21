@@ -7,12 +7,12 @@ mora aqui.
 
 Fonte: [`PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md). Onde este perfil e o plano
 divergirem, **o plano ganha** — aqui só mora o resumo operacional, e o
-`fonte_de_verdade` de cada task aponta para a seção que a mede.
+`source_of_truth` de cada task aponta para a seção que a mede.
 
 **Este ciclo mora numa subpasta.** Os comandos o recebem por argumento:
-`/executar looks`, `/revisar looks`, `/corrigir looks`. Sem argumento, os
-comandos continuam no `docs/tasks/` raso, que é o ciclo de PES2. A regra está no
-"Passo 0" de cada prompt.
+`/rite:execute looks`, `/rite:review looks`, `/rite:fix looks`. Sem argumento, os
+comandos continuam no `docs/tasks/` raso, que é o ciclo de PES2 — a regra é o
+`rite resolve-cycle`.
 
 ---
 

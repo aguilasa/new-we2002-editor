@@ -1,198 +1,48 @@
 #!/usr/bin/env python3
-"""Confere as convencoes de `.claude/rules/tasks.md` nas tasks de `docs/tasks/`.
+"""Confere as convencoes das tasks de `docs/tasks/` -- hoje, pelo Rite.
 
-Varre `docs/tasks/` **e as subpastas**, porque projeto encerrado vai inteiro
-para `docs/tasks/concluidos/` -- tasks, correcoes e os dois arquivos de
-progresso juntos. Cada pasta e um conjunto fechado: a task e conferida contra o
-`progresso.md` que mora **ao lado dela**, e nunca contra o de outra pasta.
+Desde a migracao para o plugin Rite (configuracao em `rite.toml`), quem confere
+as convencoes que este script conferia a mao -- fonte de verdade por task,
+estado no frontmatter, links, `depends_on` dentro do ciclo, entrada da fase no
+perfil do ciclo -- e o `rite.py check`. O arquivo fica para o `ctest -R tasks`
+manter nome e sentido: ele so acha o CLI do Rite e o roda sobre todos os
+ciclos, arquivados inclusive.
 
-Quatro coisas, e a razao de cada uma esta na regra:
-
-1. toda task tem `fonte_de_verdade` no frontmatter, apontando para arquivo que
-   existe -- task que nao diz contra o que se mede nao e executavel;
-2. `status:` do frontmatter bate com o simbolo na tabela do `progresso.md` --
-   os prompts leem os dois, e divergencia faz o `/executar` escolher uma task
-   bloqueada;
-3. toda task tem linha COM LINK no `progresso.md` -- e assim que o prompt acha
-   o arquivo, desde que o mapeamento `ID -> arquivo` saiu dos prompts;
-4. `depends_on` so cita IDs que existem.
-
-E uma quinta: fase que aparece no `phase:` de alguma task tem de ter entrada na
-secao "Verificacoes especificas por fase" do perfil que o `progresso.md` da
-pasta nomeia -- e ali que o `02-revisar.md` manda procurar o que se pergunta de
-uma fase, e fase sem entrada faz o revisor improvisar. A Fase 5 do ciclo
-`port-mcr` nasceu assim (CORR-MCR-022): registrada no plano, no progresso e na
-tabela de gates, e nao no unico lugar que o rito le.
-
-E uma sexta, que nao e sobre task: pasta de `docs/tasks/` que tenha
-`correcoes-progresso.md` e nao tenha `progresso.md` e recusada -- ela seria
-invisivel para a varredura, e um ciclo inteiro ficaria sem gate.
-
-Sai com 1 e imprime o que falhou. Sem argumento, confere tudo.
+O CLI e procurado em `RITE_PY` e depois no cache de plugins do Claude Code.
+Sem ele o teste e pulado (saida 77, `SKIP_RETURN_CODE` em
+`tests/CMakeLists.txt`): o plugin e ferramenta da maquina de quem desenvolve,
+nao parte deste repositorio.
 """
+
 from __future__ import annotations
-import re
+
+import glob
+import os
+import subprocess
 import sys
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parent.parent
-TASKS = RAIZ / "docs" / "tasks"
-PROGRESSOS = "progresso.md", "correcoes-progresso.md"
-
-# A secao do perfil onde o `02-revisar.md` manda procurar, e as duas formas em
-# que os perfis deste repositorio escrevem uma entrada: `- **Fase 3** -- ...` no
-# `perfil-mcr.md` e `**Fase 0 (tasks ...) -- ...:**` no `perfil-pes2.md`. Casar
-# so a primeira daria falso vermelho nas oito fases do ciclo de PES2.
-SECAO_FASES = "## Verificações específicas por fase"
-ENTRADA_FASE = re.compile(r"^-?\s*\*\*Fase ([0-9]+)", re.M)
-PERFIL = re.compile(r"/docs/prompts/(perfil-[A-Za-z0-9._-]+\.md)")
-
-SIMBOLO = {
-    "pendente": "⬜ Pendente",
-    "bloqueado": "❌ Bloqueado",
-    "concluído": "✅ Concluído",
-    "em andamento": "🔄 Em andamento",
-    "pulado": "⏭️ Pulado",
-}
+ROOT = Path(__file__).resolve().parent.parent
+SKIP = 77
 
 
-def frontmatter(texto: str) -> dict[str, str]:
-    if not texto.startswith("---\n"):
-        return {}
-    fim = texto.index("\n---", 4)
-    campos = {}
-    for linha in texto[4:fim].splitlines():
-        if ":" in linha and not linha.startswith(" "):
-            chave, _, valor = linha.partition(":")
-            campos[chave.strip()] = valor.strip().strip('"')
-    return campos
-
-
-def pastas_com_progresso() -> list[Path]:
-    """As pastas de `docs/tasks/` que tem um `progresso.md` proprio."""
-    return sorted(
-        d for d in [TASKS, *(x for x in TASKS.iterdir() if x.is_dir())]
-        if (d / "progresso.md").is_file()
-    )
-
-
-def tasks_de(pasta: Path) -> list[Path]:
-    return sorted(
-        p for p in pasta.glob("*.md")
-        if not p.name.startswith("CORR-") and not p.name.endswith(".template.md")
-        and p.name not in PROGRESSOS
-    )
+def find_rite() -> str | None:
+    explicit = os.environ.get("RITE_PY")
+    if explicit and Path(explicit).is_file():
+        return explicit
+    cache = Path.home() / ".claude" / "plugins"
+    found = sorted(glob.glob(str(cache / "**" / "rite" / "bin" / "rite.py"), recursive=True),
+                   key=lambda p: Path(p).stat().st_mtime, reverse=True)
+    return found[0] if found else None
 
 
 def main() -> int:
-    pastas = pastas_com_progresso()
-    if not pastas:
-        print("check_tasks: nenhum progresso.md em docs/tasks/", file=sys.stderr)
-        return 1
-
-    erros: list[str] = []
-    total = 0
-    for pasta in pastas:
-        total += confere(pasta, erros)
-
-    # Pasta com correcoes e sem progresso e invisivel para a varredura acima --
-    # `pastas_com_progresso()` so olha o `progresso.md`. Antes de 2026-09-07 esse
-    # caso passava calado; um ciclo em subpasta que esquecesse o progresso teria
-    # as tasks e as CORRs sem gate nenhum.
-    for d in sorted(x for x in TASKS.iterdir() if x.is_dir()):
-        if (d / "correcoes-progresso.md").is_file() and not (d / "progresso.md").is_file():
-            erros.append(f"{d.name}/: tem correcoes-progresso.md e nao tem progresso.md")
-
-    if erros:
-        print(f"check_tasks: {len(erros)} problema(s) em {total} task(s):", file=sys.stderr)
-        for e in erros:
-            print(f"  {e}", file=sys.stderr)
-        return 1
-    print(f"check_tasks: {total} task(s), ok")
-    return 0
-
-
-def confere(pasta: Path, erros: list[str]) -> int:
-    progresso = (pasta / "progresso.md").read_text(encoding="utf-8")
-    entradas, perfil = entradas_de_fase(progresso)
-    arquivos = tasks_de(pasta)
-    if not arquivos:
-        # pasta so com templates e um progresso recem-criado -- nada a conferir
-        return 0
-
-    ids = {frontmatter(p.read_text(encoding="utf-8")).get("id") for p in arquivos}
-
-    for p in arquivos:
-        texto = p.read_text(encoding="utf-8")
-        fm = frontmatter(texto)
-        nome = p.name
-        tid = fm.get("id")
-        if not tid:
-            erros.append(f"{nome}: sem `id` no frontmatter")
-            continue
-
-        # 1. fonte_de_verdade
-        fonte = fm.get("fonte_de_verdade")
-        if not fonte:
-            erros.append(f"{nome}: sem `fonte_de_verdade` -- ver .claude/rules/tasks.md")
-        else:
-            m = re.match(r"(/docs/[A-Za-z0-9._/-]+\.md)", fonte)
-            if not m:
-                erros.append(f"{nome}: `fonte_de_verdade` nao comeca com caminho /docs/...: {fonte!r}")
-            elif not (RAIZ / m.group(1).lstrip("/")).is_file():
-                erros.append(f"{nome}: `fonte_de_verdade` aponta para arquivo inexistente: {m.group(1)}")
-
-        # 3. linha com link no progresso, que vive ao lado da task
-        rel = pasta.relative_to(RAIZ).as_posix()          # docs/tasks[/<subpasta>]
-        marcas = (f"({nome})", f"/{rel}/{nome})")
-        linha = next((l for l in progresso.splitlines()
-                      if l.lstrip().startswith("|") and any(m in l for m in marcas)), None)
-        if linha is None:
-            erros.append(f"{nome}: sem linha COM LINK no progresso.md de {rel}/")
-
-        # 2. status x simbolo
-        status = (fm.get("status") or "").lower()
-        if status not in SIMBOLO:
-            erros.append(f"{nome}: `status: {status}` desconhecido")
-        elif linha and SIMBOLO[status] not in linha:
-            atual = next((s for s in SIMBOLO.values() if s in linha), "nenhum")
-            erros.append(f"{nome}: frontmatter diz `{status}` e a tabela diz `{atual}`")
-
-        # 4. depends_on
-        for dep in re.findall(r'"([A-Z][A-Z-]*-TASK-\d+)"', fm.get("depends_on", "")):
-            if dep not in ids:
-                erros.append(f"{nome}: `depends_on` cita {dep}, que nao existe")
-
-        # 5. a fase tem entrada no perfil
-        fase = (fm.get("phase") or "").strip()
-        if fase and entradas is not None and fase not in entradas:
-            erros.append(
-                f"{nome}: `phase: {fase}` e {perfil} nao tem entrada "
-                f'"Fase {fase}" na secao "{SECAO_FASES.lstrip("# ")}" '
-                f"-- e la que o /revisar procura o que perguntar da fase")
-
-    return len(arquivos)
-
-
-def entradas_de_fase(progresso: str) -> tuple[set[str] | None, str | None]:
-    """As fases que o perfil do ciclo descreve. `(fases, nome do perfil)`.
-
-    `None` no lugar do conjunto quer dizer "nao ha o que conferir", e cada
-    motivo e deliberado: um `progresso.md` sem campo `perfil:` (o do arquivo em
-    `concluidos/` e assim, e e historia), um perfil que nao existe no disco, ou
-    um perfil sem a secao. Recusar esses casos aqui seria alargar a regra alem
-    do que a CORR-MCR-022 mediu.
-    """
-    m = PERFIL.search(progresso)
-    if not m:
-        return None, None
-    caminho = RAIZ / "docs" / "prompts" / m.group(1)
-    if not caminho.is_file():
-        return None, m.group(1)
-    partes = caminho.read_text(encoding="utf-8").split(SECAO_FASES)
-    if len(partes) < 2:
-        return None, m.group(1)
-    return set(ENTRADA_FASE.findall(partes[1])), m.group(1)
+    rite = find_rite()
+    if not rite:
+        print("check_tasks: CLI do Rite nao encontrado (instale o plugin ou defina RITE_PY); pulado")
+        return SKIP
+    return subprocess.call([sys.executable, rite, "check", "--all", "--include-archived",
+                            "--root", str(ROOT)])
 
 
 if __name__ == "__main__":

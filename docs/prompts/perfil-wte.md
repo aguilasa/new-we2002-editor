@@ -3,7 +3,7 @@
 **Este arquivo é o perfil do ciclo `wte/` Lazarus**, e é carregado pelos
 prompts de `docs/prompts/` quando o `progresso.md` em vigor o nomeia no campo
 `perfil:`. Os prompts têm o **rito** — ler o progresso, achar a próxima
-pendente, conferir `depends_on`, medir contra o `fonte_de_verdade` da task,
+pendente, conferir `depends_on`, medir contra o `source_of_truth` da task,
 varrer discrepância, `[x]` só depois do commit. O que é **deste ciclo** mora
 aqui.
 
@@ -22,7 +22,7 @@ aqui.
 **Leia isto antes de tocar em qualquer arquivo.** São decisões já tomadas que
 **não devem ser revertidas** sem o usuário pedir. A fonte delas é o
 [`PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md); se a task em mãos declarar
-outro `fonte_de_verdade`, leia o dela.
+outro `source_of_truth`, leia o dela.
 
 - **O original é Borland C++Builder 6, não Delphi.** Os dois usam a mesma VCL,
   os mesmos `rtl60.bpl`/`vcl60.bpl` e o mesmo `.dfm`; o que separa é o mangling

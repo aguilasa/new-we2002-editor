@@ -105,7 +105,7 @@ depois: é a única alteração da task que não é sobre preço.
 
 **E a porta foi fechada**, porque a terceira ocorrência do mesmo formato é
 padrão e não acaso. A conferência entrou no
-[`01-executar.md`](/docs/prompts/01-executar.md), no ponto em que a lista é
+[`01-executar.md`](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/01-executar.md), no ponto em que a lista é
 escrita, e é literalmente uma linha:
 
 ```bash

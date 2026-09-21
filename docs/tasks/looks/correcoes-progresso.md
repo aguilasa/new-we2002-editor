@@ -85,16 +85,18 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-066](/docs/tasks/looks/CORR-LOOKS-066.md) | Correção: a divisão da LOOKS-TASK-31 não chegou a cinco textos — a §10.3 (o) segue "PARCIAL", e o close-up e o cenário ainda apontam para a 31 | LOOKS-TASK-31 | low | pending | — |
 <!-- rite:end -->
 
-**Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
+edite dentro dela. **Status:** `pending` · `in-progress` · `done` · `stale`. **Severidade:**
+`critical` · `high` · `medium` · `low`.
 
-**Criticidade** é sobre o efeito, não sobre o tamanho do conserto:
+**Severidade** é sobre o efeito, não sobre o tamanho do conserto:
 
-- **Alta** — a task entregou algo que mede errado, ou um gate que passa sem
+- **`high`** — a task entregou algo que mede errado, ou um gate que passa sem
   medir. Neste ciclo isso inclui qualquer guarda que fique verde lendo o disco
   errado, porque esse erro não tem sintoma.
-- **Média** — o resultado está certo mas a evidência não sustenta, ou o código
+- **`medium`** — o resultado está certo mas a evidência não sustenta, ou o código
   viola uma das três regras de desenho.
-- **Baixa** — documentação, número que não reproduz, link ou nome.
+- **`low`** — documentação, número que não reproduz, link ou nome.
 
 ## Checklist
 

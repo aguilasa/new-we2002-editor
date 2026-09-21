@@ -15,7 +15,7 @@ do plano.
 Os prompts de `docs/prompts/` têm o **rito** e são agnósticos de projeto; o que
 é **deste ciclo** — decisões confirmadas, armadilhas, fontes binárias, o que é
 gerado, os gates, os arquivos quentes e as verificações por fase — mora no
-perfil, e é este campo que o nomeia. Mesma mecânica do `fonte_de_verdade` da
+perfil, e é este campo que o nomeia. Mesma mecânica do `source_of_truth` da
 task, um nível acima: a task nomeia o plano contra o qual se mede, o progresso
 nomeia o perfil sob o qual o ciclo roda. O ciclo anterior tem o seu em
 [`/docs/prompts/perfil-wte.md`](/docs/prompts/perfil-wte.md), e ele **não vale
@@ -86,14 +86,14 @@ PES2-TASK-22.
 | [PES2-TASK-35](/docs/tasks/35-desbloqueio-de-times.md) | Desbloqueio de times secretos e da lista de Master League, pelo disco | 4 | engenharia-reversa | — | pending | — | — |
 <!-- rite:end -->
 
-**Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada task — não edite
+dentro dela. **Status:** `pending` · `in-progress` · `done` · `blocked` · `skipped`.
 
 **As duas colunas de data são datas de commit**, não datas de intenção.
 
-- **"Concluída em"** — o commit que fechou a tarefa. Tarefa pendente leva `—`.
-- **"Revisado em"** — o commit da revisão. Tarefa concluída e ainda não
-  revisada leva `⬜ pendente`; tarefa que nem começou leva `—`, porque não há o
-  que revisar.
+- **"Done on"** — a data do commit de trabalho, escrita pelo `rite close`. Tarefa pendente leva `—`.
+- **"Reviewed on"** — `pending` enquanto a tarefa concluída espera revisão; a data, depois do
+  `rite mark-reviewed`; `—` se a tarefa nem começou.
 
 **Revisão sem discrepância também preenche a coluna.** É resultado legítimo, e
 sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".

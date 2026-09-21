@@ -6,7 +6,7 @@ de `docs/prompts/`. Os prompts têm o **rito**; o que é deste ciclo mora aqui.
 
 Fonte: [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md). Onde este perfil e o plano
 divergirem, **o plano ganha** — aqui só mora o resumo operacional, e o
-`fonte_de_verdade` de cada task aponta para a seção que a mede.
+`source_of_truth` de cada task aponta para a seção que a mede.
 
 ---
 

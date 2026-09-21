@@ -1,7 +1,7 @@
 # Progresso de Correções — WE2002 Team Editor → Lazarus
 
-Correções abertas pelo `/revisar` ([`../prompts/02-revisar.md`](/docs/prompts/02-revisar.md))
-e fechadas pelo `/corrigir`. O andamento das **tarefas** fica em
+Correções abertas pelo `/rite:review` (até a migração para o Rite, pelo `/revisar` — [prompt da época](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/02-revisar.md))
+e fechadas pelo `/corrigir` (hoje, `/rite:fix`). O andamento das **tarefas** fica em
 [`progresso.md`](/docs/tasks/concluidos/progresso.md); este arquivo só rastreia correção.
 
 **"Concluída em" nasce `—`** e é preenchida por quem executa a correção, com a

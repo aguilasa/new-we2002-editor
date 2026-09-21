@@ -47,8 +47,9 @@ ciclo arquivado, o dele em
 | [CORR-MCR-030](/docs/tasks/port-mcr/CORR-MCR-030.md) | Correção: a Fase 5 pede captura de tela no Log, e as dez sondas da MCR-TASK-17 só têm testemunho | MCR-TASK-17 | low | done | 2026-09-10 |
 <!-- rite:end -->
 
-**Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
-**Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
+edite dentro dela. **Status:** `pending` · `in-progress` · `done` · `stale`. **Severidade:**
+`critical` · `high` · `medium` · `low`.
 
 ---
 

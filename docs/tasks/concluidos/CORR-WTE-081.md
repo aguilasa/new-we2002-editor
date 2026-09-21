@@ -261,7 +261,7 @@ o compilador diria se chamasse — as três únicas quebras foram `Cadeia`,
   (`estrategia.BitBtn1Click` e `MainForm.mostrar_estrategiaClick`), e medir a
   metade não lida de 1.931 bytes é RE de spec. Por isso a saída foi abrir a
   correção nova com o que se mediu, como manda o
-  [`03-corrigir.md`](/docs/prompts/03-corrigir.md) para discrepância grande, e
+  [`03-corrigir.md`](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/03-corrigir.md) para discrepância grande, e
   parar.
 
 ---

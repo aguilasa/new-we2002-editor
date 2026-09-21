@@ -13,8 +13,8 @@ favor do plano.
 
 **Pasta deste ciclo:** `docs/tasks/looks/`. Todos os caminhos deste arquivo e
 das tasks ao lado dele saem daqui, e é o nome desta pasta que os comandos
-recebem como argumento (`/executar looks`, `/revisar looks`,
-`/corrigir looks`). Sem argumento, os comandos continuam lendo `docs/tasks/`
+recebem como argumento (`/rite:execute looks`, `/rite:review looks`,
+`/rite:fix looks`). Sem argumento, os comandos continuam lendo `docs/tasks/`
 raso — o ciclo de PES2.
 
 **Perfil deste ciclo:** [`/docs/prompts/perfil-looks.md`](/docs/prompts/perfil-looks.md).
@@ -90,7 +90,8 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | documentação | LOOKS-TASK-23, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-34, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40 | pending | — | — |
 <!-- rite:end -->
 
-**Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada task — não edite
+dentro dela. **Status:** `pending` · `in-progress` · `done` · `blocked` · `skipped`.
 
 **As duas colunas de data são datas de commit**, não datas de intenção.
 
@@ -98,11 +99,12 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 2026-09-21, a pedido do usuário, a LOOKS-TASK-31 fechou com a medição e a
 mobília, e o que faltava dela virou as tasks 36 a 40, na fase 10 — com IDs
 novos e as linhas logo depois da 31, porque renumerar arrastaria as tasks 32
-a 35 e todo link para elas.
+a 35 e todo link para elas. Essa ordem mora no `order:` do frontmatter deste arquivo, que é o
+que o `rite next` e a tabela seguem.
 
-- **"Concluída em"** — o commit que fechou a tarefa. Tarefa pendente leva `—`.
-- **"Revisado em"** — o commit da revisão. Tarefa concluída e ainda não revisada
-  leva `⬜ pendente`; tarefa que nem começou leva `—`.
+- **"Done on"** — a data do commit de trabalho, escrita pelo `rite close`. Tarefa pendente leva `—`.
+- **"Reviewed on"** — `pending` enquanto a tarefa concluída espera revisão; a data, depois do
+  `rite mark-reviewed`; `—` se a tarefa nem começou.
 
 ---
 

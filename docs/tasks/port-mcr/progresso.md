@@ -12,7 +12,7 @@ do plano.
 
 **Pasta deste ciclo:** `docs/tasks/port-mcr/`. Todos os caminhos deste arquivo
 e das tasks ao lado dele saem daqui, e é o nome desta pasta que os comandos
-recebem como argumento (`/executar port-mcr`). Sem argumento, os comandos
+recebem como argumento (`/rite:execute port-mcr`). Sem argumento, os comandos
 continuam lendo `docs/tasks/` raso — o ciclo de PES2 —, exatamente como antes.
 
 **Perfil deste ciclo:** [`/docs/prompts/perfil-mcr.md`](/docs/prompts/perfil-mcr.md).
@@ -59,11 +59,12 @@ por princípio.
 | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | Onde o option file guarda os times secretos e a opção de Master League no modo exibição | 5 | verificação | MCR-TASK-09 | done | 2026-09-10 | 2026-09-10 |
 <!-- rite:end -->
 
-**Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada task — não edite
+dentro dela. **Status:** `pending` · `in-progress` · `done` · `blocked` · `skipped`.
 
-**Concluída em** é a data em que a task passou a ✅; **Revisado em** é a data em
-que o `/revisar` passou por ela. `⬜ pendente` na segunda coluna significa que a
-revisão ainda não aconteceu.
+- **"Done on"** — a data do commit de trabalho, escrita pelo `rite close`. Tarefa pendente leva `—`.
+- **"Reviewed on"** — `pending` enquanto a tarefa concluída espera revisão; a data, depois do
+  `rite mark-reviewed`; `—` se a tarefa nem começou.
 
 ---
 

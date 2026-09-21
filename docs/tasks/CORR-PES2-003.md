@@ -34,7 +34,7 @@ uma exclusão que não alcança o objeto proibido não exclui coisa nenhuma.
 
 Ficou de fora da CORR-PES2-002 de propósito: dívida independente, nem criada
 nem revelada por aquele conserto, e redimensionar CORR no meio de um lote é o
-que o [`04-corrigir-tudo.md`](/docs/prompts/04-corrigir-tudo.md) desaconselha.
+que o [`04-corrigir-tudo.md`](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/04-corrigir-tudo.md) desaconselha.
 
 ## Evidência
 

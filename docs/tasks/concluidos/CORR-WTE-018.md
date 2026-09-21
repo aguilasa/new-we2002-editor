@@ -15,7 +15,7 @@ done_commit: dac5638
 
 ## Problema identificado
 
-A etapa 2 do [`02-revisar.md`](/docs/prompts/02-revisar.md) manda remedir toda
+A etapa 2 do [`02-revisar.md`](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/02-revisar.md) manda remedir toda
 contagem que a task afirma, e dá a lista de exemplos (linha 88):
 
 ```

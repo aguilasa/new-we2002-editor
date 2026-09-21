@@ -1,11 +1,11 @@
 # Progresso de Correções — mapeamento do Pro Evolution Soccer 2 (PSX)
 
-Correções abertas pelo `/revisar` ([`../prompts/02-revisar.md`](/docs/prompts/02-revisar.md))
-e fechadas pelo `/corrigir`. O andamento das **tarefas** fica em
+Correções abertas pelo `/rite:review` (até a migração para o Rite, pelo `/revisar` — [prompt da época](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/02-revisar.md))
+e fechadas pelo `/rite:fix`. O andamento das **tarefas** fica em
 [`progresso.md`](/docs/tasks/progresso.md); este arquivo só rastreia correção.
 
-**"Concluída em" nasce `—`** e é preenchida por quem executa a correção, com a
-data do commit — o `/revisar` abre a correção, não a fecha.
+**"Done on" nasce `—`** e é escrita pelo `rite close` com a data do commit que
+corrigiu — a revisão abre a correção, não a fecha.
 
 **A numeração deste pool começa em `CORR-PES2-001`.** O pool anterior, com a
 numeração `CORR-WTE-XXX` contínua de 001 a 143, desceu inteiro para
@@ -57,17 +57,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-032](/docs/tasks/CORR-PES2-032.md) | Correção: o fork morre calado durante execução livre, e toda ferramenta relata isso como "não está rodando" | PES2-TASK-33 | high | done | 2026-09-03 |
 <!-- rite:end -->
 
-<!-- Criticidade: Alta · Média · Baixa.
-     Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
-     A coluna de origem aceita uma task **ou outra CORR**, quando a correção
-     nasceu de uma correção.
-
-     Modelo de linha, para quando a primeira for aberta -- as duas primeiras
-     celulas sao link em `/docs/`, como manda a .claude/rules/links.md; aqui
-     estao sem colchete para nao virar link quebrado na conferencia:
-
-| CORR-PES2-001 -> /docs/tasks/CORR-PES2-001.md | PES2-TASK-04 -> a task de origem | <o problema em uma frase, nao o fix> | Alta | [ ] pendente | — |
--->
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
+edite dentro dela. **Status:** `pending` · `in-progress` · `done` · `stale`. **Severidade:**
+`critical` · `high` · `medium` · `low`. A origem (`origin`) aceita uma task **ou outra CORR**, quando a correção nasceu
+de uma correção. Correção nova sai do `rite new-fix`, que aloca o ID.
 
 ## Checklist
 

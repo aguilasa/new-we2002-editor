@@ -695,7 +695,7 @@ puro em `tools/mcr/`, UI **PySide6** em `tools/mcr/ui/`, separados por regra.
 
 O plano é [docs/PLAN-MCR-PY.md](docs/PLAN-MCR-PY.md); o ciclo de tasks é
 [docs/tasks/port-mcr/](docs/tasks/port-mcr/progresso.md), com prefixo
-`MCR-TASK-` e pool `CORR-MCR-`, e roda por `/executar port-mcr`.
+`MCR-TASK-` e pool `CORR-MCR-`, e roda por `/rite:execute port-mcr`.
 
 **O mapa do option file** é o [docs/MCR-OPTION-FILE.md](docs/MCR-OPTION-FILE.md):
 estrutura do save, o que cada byte conhecido significa, e o que continua
@@ -825,7 +825,7 @@ caminhada (fase 11).
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
 `CORR-LOOKS-`, perfil [docs/prompts/perfil-looks.md](docs/prompts/perfil-looks.md),
-e roda por `/executar looks`. Não estende o `we2002_core` e não compartilha
+e roda por `/rite:execute looks`. Não estende o `we2002_core` e não compartilha
 build; o que empresta é leitura de disco de `tools/pes2/` (`iso.py`, `lzss.py`,
 `mcp.py`, `fork.py`) e conhecimento de formato.
 
@@ -1254,46 +1254,38 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há duas:
 
 - [.claude/rules/tasks.md](.claude/rules/tasks.md)
-  — **os prompts de `docs/prompts/` são agnósticos de projeto.** Eles leem os
-  dois arquivos de progresso, abrem a task pelo link da linha dela, e medem
-  contra o que o campo `fonte_de_verdade` do frontmatter dela apontar. Nunca
-  codifique num prompt o nome de um plano, um prefixo de ID, uma fase ou um
-  mapeamento `ID → arquivo` — este repositório tem dois projetos no mesmo
-  `progresso.md` e terá outros. `ctest -R tasks` (`tools/check_tasks.py`)
-  confere as quatro convenções que fazem isso funcionar, mais a do perfil: a
-  fase que uma task declara tem de ter entrada na seção "Verificações
-  específicas por fase" do perfil do ciclo, que é onde o `/revisar` procura o
-  que perguntar dela.
+  — **as tasks rodam pelo plugin Rite** (`/rite:execute`, `/rite:review`,
+  `/rite:fix`, `/rite:status`…), configurado em [rite.toml](rite.toml). O
+  estado de cada task e CORR mora no frontmatter dela e é escrito pelo CLI do
+  Rite; as tabelas dos arquivos de progresso são geradas. `ctest -R tasks`
+  (`tools/check_tasks.py`) roda o `rite.py check`: fonte de verdade com âncora,
+  `depends_on`, links, tabelas em dia e a entrada da fase no perfil do ciclo.
 - [.claude/rules/links.md](.claude/rules/links.md)
   — link de um markdown de `docs/` para outro markdown dentro de `docs/` usa
-  `/docs/` + o caminho do arquivo, nunca caminho relativo. Alvo fora de `docs/`
-  (`../NOTICE.md`, `../CLAUDE.md`) continua relativo.
+  `/docs/` + o caminho do arquivo, nunca caminho relativo. Nos arquivos de
+  ciclo (tasks, CORRs, progresso, perfis) o Rite exige a raiz para **qualquer**
+  alvo; no resto de `docs/`, alvo fora de `docs/` (`../NOTICE.md`) continua
+  relativo.
 
-**Um ciclo vivo também pode morar numa subpasta**, desde 2026-09-07, e o
-primeiro que mora é o `docs/tasks/port-mcr/`. Quem escolhe a pasta é o
-**argumento do comando** — `/executar port-mcr`, `/revisar port-mcr` —, e sem
-argumento tudo continua lendo `docs/tasks/` raso, que hoje é o ciclo de PES2. A
-regra é o **Passo 0**, idêntico nos cinco prompts; a convenção está em
-[.claude/rules/tasks.md](.claude/rules/tasks.md), seção "O ciclo pode morar numa
-subpasta". Três coisas que decorrem: nenhum prompt cita o nome de um ciclo
-(`grep -rn 'port-mcr' docs/prompts .claude` sai vazio); `depends_on` não
-atravessa pasta; e pasta com `correcoes-progresso.md` e sem `progresso.md` é
-recusada pelo `check_tasks.py`, porque seria invisível para a varredura.
+<!-- rite:begin -->
+Este repositório usa o plugin **Rite** (<https://github.com/aguilasa/rite>); a configuração está em
+`rite.toml`. Estado de task e CORR só muda pelo CLI (`rite close`, `rite mark*`, `rite new-fix`),
+nunca à mão. Comandos: `/rite:status`, `/rite:execute`, `/rite:review`, `/rite:fix`.
+<!-- rite:end -->
+
+**Um ciclo vivo também pode morar numa subpasta**, desde 2026-09-07. O ciclo é
+o **argumento do comando**, pelo nome — `/rite:execute port-mcr`,
+`/rite:review looks` — e os nomes são `pes2` (`docs/tasks/`), `looks`,
+`port-mcr` e `wte` (arquivado). `depends_on` não atravessa pasta, e uma pasta é
+ciclo se, e só se, tem `progresso.md` próprio.
 
 **Projeto encerrado é arquivado em `docs/tasks/concluidos/`.** Em 2026-09-01 as
 195 tasks, `CORR-*.md` e os dois arquivos de progresso do ciclo `WTE-TASK` +
-`PAR-TASK` desceram para lá, e `docs/tasks/` ficou só com
-`progresso.template.md` e `correcoes-progresso.template.md` — a base do próximo
-ciclo. Três coisas que decorrem disso, e que já custaram conserto na mudança:
+`PAR-TASK` desceram para lá; hoje quem arquiva é o `/rite:close-cycle`. Duas
+coisas que decorrem disso, e que já custaram conserto na mudança:
 
-- **A pasta é um conjunto fechado.** Task e progresso viajam juntos, porque o
-  `check_tasks.py` confere cada task contra o `progresso.md` que mora **ao lado
-  dela** — ele varre `docs/tasks/` e cada subpasta que tenha progresso próprio.
-- **Os prompts nunca apontam para o arquivo.** Até 2026-09-07 eles cravavam
-  `docs/tasks/progresso.md`, o vivo; desde então resolvem a **pasta do ciclo**
-  no Passo 0 e trabalham com `<CICLO>`. O efeito é o mesmo — prompt que aponta
-  para história executa task já feita —, e agora vale também quando há mais de
-  um ciclo vivo.
+- **A pasta é um conjunto fechado.** Task e progresso viajam juntos, porque
+  cada task é conferida contra o `progresso.md` que mora **ao lado dela**.
 - **Os `CORR-*.md` são cheios de transcrição** — saída de `grep`, de `git show`,
   fonte de gerador — e ali `docs/tasks/…` dentro de **bloco de código ou entre
   crases** é **evidência do que um arquivo dizia**, não link. Reescrever é
