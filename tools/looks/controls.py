@@ -360,6 +360,23 @@ CONTROLS = (
         "additive quad lights it twice -- a bright seam across the title band",
     ),
     Control(
+        "oracle-node-read-as-one-command", "oracle.py", "commands_of",
+        "            size = command_words(words, at)",
+        "            size = len(words) - at",
+        ("oracle",),
+        "libgs packs a sprite behind the E1 that names its page in one node; "
+        "read a node as one command and every glyph of the screen is a "
+        "draw-mode change -- the four readings that called the text absent",
+    ),
+    Control(
+        "oracle-sprite-forgets-the-page", "oracle.py", "sprites_of",
+        "            mode = words[0] & DRAW_MODE_BITS",
+        "            pass",
+        ("oracle",),
+        "a sprite carries no page of its own; without the E1 before it every "
+        "glyph is cut from VRAM (0, 0), and the disc comparison looks there",
+    ),
+    Control(
         "scene-quad-split-wrong", "scene.py", "furniture_picture",
         "            _shade_triangle(picture, size, points[:3], colours[:3], blend,",
         "            _shade_triangle(picture, size, points[:2] + points[3:], colours[:2] + colours[3:], blend,",

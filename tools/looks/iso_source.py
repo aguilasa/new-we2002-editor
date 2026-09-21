@@ -265,7 +265,7 @@ def _check_discs(japanese: str, english: str) -> int:
     # geometry into that expectation made the command report ANIME.BIN as an
     # unexpected result on every run (found 2026-09-20, LOOKS-TASK-30).
     shared = (layout.GEOMETRY_FILES | layout.ANIMATION_FILES
-              | layout.KIT_FILES)
+              | layout.SCREEN_ART_FILES | layout.KIT_FILES)
     geometry = sorted(layout.GEOMETRY_FILES)
     failures = 0
     derived = {}

@@ -741,12 +741,28 @@ Não se revertem sem o usuário pedir.
 87. **O estado do GPU numa parada não é o do próximo desenho.** A página em
     vigor na passada que desenha do `SCREEN_GLYPH` deu três valores em três
     corridas — (704,0), (704,256) e (832,256). Uma leitura só vira conclusão
-    falsa com cara de medida; repita antes de escrever.
+    falsa com cara de medida; repita antes de escrever. **E os três estavam
+    certos**: eram a seta, a fonte e a ajuda, três sprites diferentes, e a
+    parada lia a página do último desenhado (quinta passada da LOOKS-TASK-31).
 88. **Degradê de pacote não é vertical por definição.** A barra de título
     corre da esquerda para a direita. Pintar cada pacote como retângulo com
     gradiente de cima para baixo acerta o painel e a ajuda e erra o resto: o
     que o GPU faz é sombrear dois triângulos entre as cores dos cantos
     (`scene.furniture_picture`).
+89. **Nó da lista não é comando.** A libgs põe o E1 que escolhe a página e o
+    sprite no **mesmo** nó, e um leitor que classifica o nó pela primeira
+    palavra vê uma troca de modo e nada mais. Foi assim que os 142 sprites da
+    tela — texto, placa, setas, título — passaram quatro leituras como
+    ausentes, com a conclusão "saem por escrita direta no GPU", que um
+    watchpoint na porta de comando desmentiu: nada escreve nela. Parta o nó
+    em comandos pelo comprimento que o código de cada um declara
+    (`oracle.commands_of`) antes de perguntar o que ele desenha.
+90. **Página sem registro no disco pode ser escrita pelo jogo.** O texto da
+    ajuda são seis ladrilhos 16×16 da página (832,256), e nenhuma imagem de
+    contêiner nenhum a cobre inteira — o `DATSEL3.BIN` tem um registro ali e
+    bate só em parte. A CLUT é do disco; os texels, o jogo os escreve na VRAM
+    em tempo de execução. "Não está no disco" é resultado, não falha do
+    leitor, desde que o controle da comparação feche no resto.
 ---
 
 ## As fontes de verdade binárias
@@ -755,6 +771,7 @@ Não se revertem sem o usuário pedir.
 | --- | --- | --- |
 | geometria | `/BIN/EDT_MOD.BIN`, `/BIN/MODEL.BIN` | igual nos dois discos |
 | textura e paleta | `/BIN/DAT2D.BIN` | **só o japonês** |
+| arte da tela — a fonte, o título, a barra | `/BIN/EDT_2D.BIN` | igual nos dois discos (LOOKS-TASK-31) |
 | registros de jogador | `/SELECT.BIN` +157.164, **1.449** × 12 B — dizia 1.242, o número do Superpack, até a LOOKS-TASK-13 medir (armadilha 16) | japonês |
 | corpus de render | 50 JPGs do Superpack | terceiro, fora do git |
 
@@ -797,7 +814,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min (medido 2026-09-20, os dois slots) | `python tools/looks/oracle.py --kit [SLOT]` — qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer: cada retângulo que cada contêiner declara contra a VRAM, halfword a halfword, com o controle (a mesma VRAM lida duas vezes, idêntica) fechando antes. Exige **uma página e uma paleta** exatas e que nenhum outro contêiner as reproduza (armadilha 77) | — | LOOKS-TASK-30 |
-| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~6 min por slot (a RAM inteira é lida) | `python tools/looks/oracle.py --scenery [SLOT] [--write]` — os pacotes que desenham a mobília da tela, **andados da lista que o quadro entrega ao GPU** (armadilha 86), em ordem de desenho, com blend e polilinhas, e o controle (a tela carregada duas vezes) fechando antes; o `--write` deixa `work/looks-scenery/slotN.json`, que é de onde a janela pinta | — | LOOKS-TASK-31 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~6 min por slot (a RAM inteira é lida) | `python tools/looks/oracle.py --scenery [SLOT] [--write]` — os pacotes que desenham a mobília da tela, **andados da lista que o quadro entrega ao GPU** (armadilha 86) e **partidos em comandos** (armadilha 89), em ordem de desenho, com blend e polilinhas, e o controle (a tela carregada duas vezes) fechando antes; os sprites por página, com os texels amostrados decodificados do `EDT_2D.BIN` e do `DAT2D.BIN` contra a VRAM e o controle (a VRAM três linhas abaixo) tendo de divergir; o `--write` deixa `work/looks-scenery/slotN.json`, que é de onde a janela pinta | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | idem; ~3 min por slot | `python tools/looks/oracle.py --repaint [SLOT]` — sobrescreve os dois buffers e deixa o jogo correr: o mapa diz que parte da tela é redesenhada a cada quadro e que parte foi pintada uma vez, com o controle do mesmo mapa duas vezes | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states, o fork, o venv e `work/looks-scenery/`; ~2 min | `python tools/looks/confront.py --outside [SLOT]` — a nossa tela contra a do jogo **fora do boneco**: o chão de cada região pela mediana de cada canal (armadilha 85), com o jogo fotografado duas vezes de controle. Afirma as regiões cuja cor foi medida (`OUTSIDE_REGIONS`) dentro de `OUTSIDE_SLACK`, e imprime o resto sem afirmar | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min por slot | `python tools/looks/oracle.py --pages [SLOT]` — o que na tela vem de cada página da VRAM, estragando uma por vez, com duas corridas sem dano de controle (armadilha 83) | — | LOOKS-TASK-31 |

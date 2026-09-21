@@ -209,22 +209,75 @@ desenhados; o título, a placa, a camisa, as setas e os textos não, e o motivo
   (`FURNITURE_REGIONS`); `docs/PLAN-LOOKS-PY.md`,
   `docs/prompts/perfil-looks.md` (armadilhas 86 a 88) e `CLAUDE.md`.
 
+### Quinta passada, 2026-09-21
+
+- **O texto, a placa, o título e as setas estavam na lista, como sprites.**
+  A quarta passada escreveu que eles "saem por escrita direta no GPU", e as
+  duas medidas desta desmentem: um watchpoint de escrita na porta de comando
+  do GPU não dispara nenhuma vez com a tela de pé, e o código da rotina de
+  glifo (`layout.SCREEN_GLYPH`) só preenche um `GsSPRITE` no scratchpad, que o
+  chamador ordena no `GsOT` do quadro — o mesmo cuja cabeça vai ao DMA. O
+  defeito era do leitor: a libgs põe o E1 da página e o sprite **no mesmo
+  nó**, e o `--scenery` classificava o nó pela primeira palavra (armadilha
+  89). Partido em comandos (`oracle.commands_of`), o quadro traz **142
+  sprites**, iguais nas duas leituras e nos dois slots.
+- **De onde vem cada um, medido do disco contra a VRAM.** O `--scenery`
+  decodifica, pela guarda, os texels que cada grupo amostra e os compara com a
+  VRAM da tela de pé; o controle, a mesma VRAM três linhas abaixo, diverge em
+  1.502 de 2.128. A **fonte** (121 sprites, página (704,256)), o título, o
+  ícone e a barra vazia saem do **`EDT_2D.BIN`**, todos os texels iguais; as
+  caixas verdes, a placa e a seta, do `DAT2D.BIN`; as oito CLUTs, do
+  `DAT2D.BIN`, 16 de 16. A placa troca de CLUT com a posição — (208,499) no
+  jogador de linha, (192,499) no goleiro.
+- **A ajuda não está no disco como imagem.** O `Visual` da caixa de baixo são
+  seis ladrilhos 16×16 da página (832,256), e nenhuma imagem os cobre: o jogo
+  os escreve na VRAM em tempo de execução (armadilha 90).
+- **A página da fonte se resolve** (armadilha 87): os três valores que o
+  estado do GPU deu eram três sprites diferentes — a fonte, a ajuda e a seta.
+  A leitura por estado do GPU (`check_glyph_page`) saiu, substituída pela
+  lista.
+- **`EDT_2D.BIN` entrou na guarda**, com digest, LBA e tamanho: idêntico nos
+  dois discos, família própria (`layout.SCREEN_ART_FILES`), e o
+  `iso_source.py --check-discs` o aceita nos dois.
+- **Arquivos desta passada:** `tools/looks/oracle.py` (`command_words`,
+  `commands_of`, `sprites_of`, `sprite_texels`, `_say_sprites` e a
+  comparação com o disco; o `furniture_of` anda comandos; saem
+  `check_glyph_page`, `_say_glyph_page`, `_draw_page` e uma cópia morta das
+  constantes de procedência; sete self-checks novos); `tools/looks/layout.py`
+  (`EDT_2D`, `SCREEN_ART_FILES`, e o que o `SCREEN_GLYPH` faz de fato);
+  `tools/looks/iso_source.py` (o `EDT_2D` entre os aceitos no disco inglês);
+  `tools/looks/controls.py` (o nó lido como um comando só, o sprite que
+  esquece a página); `docs/PLAN-LOOKS-PY.md` (a tabela dos sprites),
+  `docs/prompts/perfil-looks.md` (armadilhas 89 e 90, a 87 fechada, a fonte
+  binária nova e a linha do `--scenery`) e `CLAUDE.md`.
+- **Problemas encontrados:** a barra vazia é chapada, e o controle deslocado
+  lê nela o mesmo que o disco; o controle passou a valer sobre todos os
+  grupos, e o grupo chapado diz na própria linha que ali ele não distingue.
+  E as escritas por script deixavam `CRLF` na cópia de trabalho; o
+  `.gitattributes` normaliza, mas um `replace` de texto com `\n` não casa —
+  os patches passaram a normalizar antes.
+
 ### O que falta para fechar esta task
 
-- **A placa (`GK`/`CB`), a caixa da camisa, as setas `◀ ▶` e o texto.** A
-  lista do quadro não tem pacote texturizado fora do painel — então saem por
-  escrita direta no GPU, fora do DMA. O próximo passo é um watchpoint de
-  escrita na porta de comando do GPU, durante o `layout.SCREEN_PRINT`.
-- **A fonte desenhada do disco.** A página não está resolvida (acima), e a
-  janela ainda escreve com uma fonte do Qt; o critério 2 pede o que é imagem
-  lido do disco pela guarda.
+- **Desenhar os sprites do disco.** O critério 2 pede que o que é imagem saia
+  do disco pela guarda, e agora se sabe de onde sai cada um. A fonte não se
+  resolve com a foto de um quadro — o texto muda com a tecla —, então o
+  próximo passo é a **tabela de glifos do jogo** (código → `u`, `v` e
+  largura), que a rotina de glifo lê de uma tabela da própria overlay, e a
+  janela trocar a fonte do Qt pelos glifos do `EDT_2D.BIN`. A placa, as
+  caixas, o ícone, a barra e o título são estáticos e saem do `slotN.json`.
+- **A ajuda**, escrita na VRAM em tempo de execução: medir de onde o jogo tira
+  esses texels antes de decidir se a janela a desenha do disco.
 - **O alinhamento à direita**, medido na terceira passada e não aplicado.
 - **A câmera do close-up por linha**, que o contexto desta task traz da
   LOOKS-TASK-22: a janela desenha sempre a câmera de corpo inteiro.
 
-**Gates, na árvore commitada:** `selftest` 0 falhas, 92 de 92 controles
-vermelhos; `cli check` 10 de 10; `oracle.py --scenery` 0 problemas (43
-pacotes, iguais nas duas leituras, nos dois slots); `oracle.py --repaint` e
-`--pages` sem mudança desde a segunda passada; `confront.py --outside` 0
-problemas em 7 regiões nos dois slots; `looks_ui` 12 de 12 controles
-vermelhos, 33 pacotes amostrados; `check_tasks` 138 ok.
+**Gates, na árvore commitada:** `selftest` 0 falhas, 94 de 94 controles
+vermelhos; `cli check` 10 de 10; `iso_source.py --check-discs` ok, com o
+`EDT_2D` aceito nos dois discos; `oracle.py --scenery` 0 problemas (43
+pacotes e 142 sprites, iguais nas duas leituras, nos dois slots; texels e
+CLUTs de todos os grupos com imagem no disco iguais à VRAM, e o controle
+divergindo em 1.502 de 2.128); `oracle.py --repaint` e `--pages` sem mudança
+desde a segunda passada; `confront.py --outside` sem mudança desde a quarta
+(a janela não mudou nesta passada); `looks_ui` 12 de 12 controles vermelhos,
+33 pacotes amostrados; `check_tasks` 138 ok.

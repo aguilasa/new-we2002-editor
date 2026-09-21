@@ -2039,14 +2039,19 @@ nothing.
 """
 
 _SPRITES = (("64", 4, None), ("65", 4, None), ("66", 4, None),
-            ("74", 3, 8), ("75", 3, 8), ("7C", 3, 16), ("7D", 3, 16))
+            ("67", 4, None), ("6C", 3, 1), ("6D", 3, 1), ("6E", 3, 1),
+            ("6F", 3, 1), ("74", 3, 8), ("75", 3, 8), ("76", 3, 8),
+            ("77", 3, 8), ("7C", 3, 16), ("7D", 3, 16), ("7E", 3, 16),
+            ("7F", 3, 16))
 SPRITE_CODES = {int(code, 16): (words, size) for code, words, size in _SPRITES}
 """The textured RECTANGLE codes, as (words, fixed size or None).
 
 A sprite carries a corner and, for the variable form, a size; the page comes
-from the draw mode in force rather than from the packet.  Kept apart from the
-quads because a sprite is where a screen's text would be -- if the text were
-in a list in RAM at all, which on this screen it is not.
+from the draw mode in force rather than from the packet.  This screen's text,
+the plate and the arrows are all sprites, and each rides in ONE node behind the
+E1 that sets its page -- so a reader that classifies a node by its first word
+calls the whole node a draw-mode change and never sees the sprite
+(LOOKS-TASK-31, 2026-09-21).  `commands_of` is what splits the node.
 """
 
 _TEXTURED = (("2C", 9), ("2D", 9), ("2E", 9), ("2F", 9), ("24", 7), ("25", 7),
@@ -2071,7 +2076,10 @@ def _packet_colour(word):
 
 
 def scenery_pages(data, display):
-    """The textured packets of a band, grouped by the VRAM page they sample.
+    """The textured QUADS of a band, grouped by the VRAM page they sample.
+
+    Sprites are left to `sprites_of`: they take their page from the draw mode
+    in force, which a scan of packets one at a time does not know.
 
     A textured quad carries its page in the second half of the `uv1` word and
     its CLUT in the second half of `uv0`, which is where the hardware reads
@@ -2088,20 +2096,6 @@ def scenery_pages(data, display):
                 "<I", data, at + 8 + 8 * i)[0]) for i in range(4)]
             clut = struct.unpack_from("<H", data, at + 14)[0]
             page = struct.unpack_from("<H", data, at + 22)[0]
-        elif code in SPRITE_CODES and SPRITE_CODES[code][0] == length:
-            # A sprite is one corner plus a size, and it takes the page from
-            # the draw mode in force rather than carrying one: the glyphs of
-            # this screen are sprites, and reading only quads is what made the
-            # first sweep come back with the figure and nothing else.
-            words, size = SPRITE_CODES[code]
-            corner = _signed_vertex(struct.unpack_from("<I", data, at + 8)[0])
-            clut = struct.unpack_from("<H", data, at + 14)[0]
-            page = None
-            if size is None:
-                wide, tall = struct.unpack_from("<hh", data, at + 16)
-            else:
-                wide = tall = size
-            points = [corner, (corner[0] + wide, corner[1] + tall)]
         else:
             continue
         points = [(x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1])
@@ -2165,25 +2159,33 @@ def check_scenery(slots=(2, 1), write=False, verbose=True):
     with Oracle(ready["cue"], verbose=verbose) as game:
         for slot in slots:
             print("  -- slot %d (%s) --" % (slot, SLOTS[slot]))
-            found, pages = _scenery_of(game, slot, table, display, confront,
-                                       screen)
-            again, _pages = _scenery_of(game, slot, table, display, confront,
-                                        screen)
+            found, pages, sprites = _scenery_of(game, slot, table, display,
+                                                confront, screen)
+            again, _pages, sprites_again = _scenery_of(
+                game, slot, table, display, confront, screen)
             if [one["points"] for one in found] != [one["points"]
                                                     for one in again]:
                 problems.append("slot %d: the furniture read twice is not the "
                                 "same, so nothing below is a measurement"
                                 % slot)
                 continue
+            if sprites != sprites_again:
+                problems.append("slot %d: the sprites read twice are not the "
+                                "same, so nothing below is a measurement"
+                                % slot)
+                continue
             print("    control: the screen loaded twice draws the same %d "
-                  "packet(s)" % len(found))
+                  "packet(s) and the same %d sprite(s)"
+                  % (len(found), len(sprites)))
             _say_scenery(found, table)
             _say_pages(pages, table)
-            _say_glyph_page(game)
+            problems += ["slot %d: %s" % (slot, line) for line in
+                         _say_sprites(game, sprites, ready["image"])]
             _say_provenance(provenance_map(game, display, confront, screen),
                             table, display)
             if write:
-                print("    wrote %s" % write_scenery(slot, found, display))
+                print("    wrote %s"
+                      % write_scenery(slot, found, display, sprites))
     for line in problems:
         print("  FAIL  %s" % line)
     print("oracle --scenery: %d problem(s) over %d slot(s)"
@@ -2226,6 +2228,104 @@ _PAGE_WORD = (("24", 4), ("25", 4), ("26", 4), ("27", 4), ("2C", 4),
 PAGE_WORD = {int(code, 16): index for code, index in _PAGE_WORD}
 """Textured polygons, by the index of the word whose upper half is the page:
 drawing one sets the page -- and the blend -- as an E1 would."""
+
+
+_COMMAND_WORDS = (("00", 1), ("02", 3), ("80", 4), ("C0", 3))
+COMMAND_WORDS = {int(code, 16): words for code, words in _COMMAND_WORDS}
+"""The fixed-length GP0 commands that are not polygons, lines or rectangles:
+no-op, fill, VRAM copy, VRAM read.  The draw-mode ones are a word each."""
+
+POLYLINE_MASK = 0xF000F000  # not-an-address: the bits a polyline end is tested on
+POLYLINE_MARK = 0x50005000  # not-an-address: and what they have to read
+
+
+def command_words(words, at):
+    """How many words the GP0 command at *words[at]* takes, itself included.
+
+    The length is in the code's bits, the way the GPU reads it: a polygon has
+    three or four vertices, each one word, plus a texel word if textured and a
+    colour word per vertex after the first if gouraud; a rectangle is a corner,
+    a texel word if textured and a size word if its size is not fixed; a
+    polyline runs to its terminator.  A code this does not know takes the rest
+    of the node, which is the honest answer when the node is not understood.
+    """
+    code = words[at] >> 24
+    rest = len(words) - at
+    if code in COMMAND_WORDS:
+        return min(rest, COMMAND_WORDS[code])
+    if code in DRAW_MODE_CODES:
+        return 1
+    family = code >> 5
+    if family == 1:
+        corners = 4 if code & 8 else 3
+        per = 2 if code & 4 else 1
+        return min(rest, 1 + corners * per + (corners - 1 if code & 16 else 0))
+    if family == 2:
+        if code & 8:
+            for end in range(at + 1, len(words)):
+                if words[end] & POLYLINE_MASK == POLYLINE_MARK:
+                    return end - at + 1
+            return rest
+        return min(rest, 3 + (1 if code & 16 else 0))
+    if family == 3:
+        size = (code >> 3) & 3
+        return min(rest, 2 + (1 if code & 4 else 0) + (0 if size else 1))
+    return rest
+
+
+def commands_of(nodes):
+    """Every GP0 command of a walked list, in order, each as its word list.
+
+    A node is not a command: libgs packs a sprite behind the E1 that sets its
+    page in one node, so reading a node by its first word sees a draw-mode
+    change and nothing else.  That is how every sprite of this screen -- the
+    text, the plate, the arrows -- stayed out of the first four readings.
+    """
+    out = []
+    for _at, words in nodes:
+        at = 0
+        while at < len(words):
+            size = command_words(words, at)
+            out.append(words[at:at + size])
+            at += size
+    return out
+
+
+def sprites_of(commands):
+    """The textured rectangles of a list, with the page each is cut from.
+
+    Each as `{"point", "size", "uv", "clut", "page", "bits", "colour", "raw",
+    "semi", "blend"}`: screen pixels, the texel corner, the CLUT and page in
+    VRAM coordinates, and the page's colour depth.  The page and blend are the
+    draw mode in force -- the last E1, or the last textured polygon, before it.
+    """
+    out, mode = [], 0
+    for words in commands:
+        code = words[0] >> 24
+        if code == DRAW_MODE_SET:
+            mode = words[0] & DRAW_MODE_BITS
+            continue
+        if code in PAGE_WORD and len(words) > PAGE_WORD[code]:
+            mode = (words[PAGE_WORD[code]] >> 16) & DRAW_MODE_BITS
+            continue
+        if code not in SPRITE_CODES:
+            continue
+        _words, fixed = SPRITE_CODES[code]
+        x, y = _signed_vertex(words[1])
+        if fixed is None:
+            size = (words[3] & 0xFFFF, words[3] >> 16)  # not-an-address: two halves
+        else:
+            size = (fixed, fixed)
+        page = page_vram(mode)
+        out.append({"point": (x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1]),
+                    "size": size,
+                    "uv": (words[2] & 0xFF, (words[2] >> 8) & 0xFF),  # not-an-address: two bytes
+                    "clut": clut_vram(words[2] >> 16),
+                    "page": page[:2], "bits": page[2],
+                    "colour": _packet_colour(words[0]),
+                    "raw": bool(code & 1), "semi": bool(code & 2),
+                    "blend": (mode >> BLEND_SHIFT) & 3})
+    return out
 
 
 def gpu_list_heads(game):
@@ -2290,7 +2390,7 @@ def furniture_of(nodes):
     Textured packets are the figure and are left to `scenery_pages`.
     """
     out, mode = [], None
-    for _at, words in nodes:
+    for words in commands_of(nodes):
         code = words[0] >> 24
         if code in DRAW_MODE_CODES:
             # Each word of a draw-mode packet is a command of its own; only
@@ -2349,15 +2449,21 @@ def _scenery_of(game, slot, table, display, confront, screen):
     nodes = []
     for head in dict.fromkeys(heads[len(heads) // 2:]):
         nodes += walk_gpu_list(ram, head)
-    # The walked packets laid back out as nodes, so the page reader that
+    # The walked commands laid back out one per node, so the page reader that
     # scans a band reads exactly this frame's list and nothing stale.
+    commands = commands_of(nodes)
     pages = scenery_pages(b"".join(
         struct.pack("<I", len(words) << 24) +
-        struct.pack("<%dI" % len(words), *words) for _at, words in nodes),
+        struct.pack("<%dI" % len(words), *words) for words in commands),
         display)
     furniture = [one for one in furniture_of(nodes)
                  if _inside_screen(one["points"], display)]
-    return furniture, pages
+    sprites = [one for one in sprites_of(commands)
+               if _inside_screen([one["point"],
+                                  (one["point"][0] + one["size"][0],
+                                   one["point"][1] + one["size"][1])],
+                                 display)]
+    return furniture, pages, sprites
 
 
 def _inside_screen(points, display):
@@ -2366,32 +2472,6 @@ def _inside_screen(points, display):
     ys = [y for _x, y in points]
     return (max(xs) >= 0 and min(xs) <= display[0]
             and max(ys) >= 0 and min(ys) <= display[1])
-
-
-def _say_glyph_page(game):
-    """Print the page the screen's text is cut from, and what holds it."""
-    import atlas
-    import iso_source
-    import texture
-
-    seen = check_glyph_page(game)
-    if not seen:
-        print("    the glyph routine never stopped on its drawing pass")
-        return
-    pages = {}
-    for _code, _x, _y, page in seen:
-        pages[page] = pages.get(page, 0) + 1
-    ready = preflight()
-    with iso_source.open_disc(ready["image"]) as disc:
-        records = texture.images(disc.read(layout.DAT2D))
-    for page, count in sorted(pages.items(), key=lambda one: -one[1]):
-        x, y, mode = page
-        held = atlas.image_at(records, x, y) if x is not None else None
-        print("    the text is cut from VRAM (%s, %s), %s: %d glyph(s) drawn "
-              "from it; %s"
-              % (x, y, mode, count,
-                 "DAT2D.BIN holds that page" if held
-                 else "no DAT2D record holds that page"))
 
 
 def _say_pages(pages, table):
@@ -2413,11 +2493,6 @@ def _say_pages(pages, table):
     for (page, clut), (count, box) in sorted(pages.items(),
                                              key=lambda one: -one[1][0]):
         cx, cy = clut_vram(clut)
-        if page is None:
-            print("        sprite, page from the draw mode, clut (%3d,%3d): "
-                  "%3d packet(s) over (%3d,%3d)-(%3d,%3d)"
-                  % (cx, cy, count, box[0], box[1], box[2], box[3]))
-            continue
         x, y, bits = page_vram(page)
         held = atlas.image_at(records, x, y)
         print("        page %04x (%3d,%3d) %2d-bit, clut (%3d,%3d): %3d "
@@ -2474,7 +2549,186 @@ def _say_scenery(found, table):
             print("        ... and %d more" % (len(items) - 14))
 
 
-def write_scenery(slot, found, display):
+SPRITE_FILES = ("EDT_2D", "DAT2D")
+"""The containers a sprite's texels are looked for in, by `layout` name.
+
+`EDT_2D.BIN` holds the screen's own art -- the font the text is cut from --
+and `DAT2D.BIN` the rest; both were found by decoding every record of every
+2D container on the disc against the VRAM of LOOKS SET (2026-09-21)."""
+
+SPRITE_CONTROL_SHIFT = 3
+"""Rows the control reads VRAM off by.
+
+The same comparison against VRAM three rows lower has to disagree somewhere,
+or equal would not have meant anything: a page of zeros matches a page of
+zeros.  Three and not one, because a glyph's top and bottom rows are blank."""
+
+COLOUR_BITS = (1 << 15) - 1
+"""The fifteen bits of a halfword a VRAM read survives: the fork hands VRAM
+back as a PNG, and the top bit -- the mask bit, or the high bit of a 4-bit
+page's fourth texel -- does not make the trip."""
+
+TEXELS_PER_HALFWORD = {4: 4, 8: 2, 16: 1}
+"""How many texels one VRAM halfword holds, by the page's colour depth."""
+
+
+def _halfword(pixel):
+    """One (r, g, b) of a VRAM read back as the halfword's low 15 bits."""
+    r, g, b = pixel[:3]
+    return (r >> 3) | ((g >> 3) << 5) | ((b >> 3) << 10)
+
+
+def sprite_texels(sprite):
+    """The VRAM halfwords one sprite samples, as a set of (x, y)."""
+    per = TEXELS_PER_HALFWORD[sprite["bits"]]
+    (px, py), (u, v), (w, h) = sprite["page"], sprite["uv"], sprite["size"]
+    return {(px + t // per, py + row) for t in range(u, u + w)
+            for row in range(v, v + h)}
+
+
+def _disc_halfwords(disc):
+    """({(x, y): halfword}, {(x, y): file}, {file: images}) of `SPRITE_FILES`.
+
+    Read through the guard off the Japanese disc.  Where two records cover a
+    halfword the first file in `SPRITE_FILES` wins, which never happens on this
+    disc: the two files hold disjoint parts of VRAM.
+    """
+    import lzss
+    import texture
+
+    held, owner, counts = {}, {}, {}
+    for name in SPRITE_FILES:
+        data = disc.read(getattr(layout, name))
+        counts[name] = len(texture.images(data))
+        for record in texture.images(data):
+            plain, _used = lzss.decompress(data, record.offset)
+            for row in range(record.h):
+                for col in range(record.w):
+                    at = 2 * (row * record.w + col)
+                    key = (record.x + col, record.y + row)
+                    if key in held or at + 1 >= len(plain):
+                        continue
+                    held[key] = (plain[at] | plain[at + 1] << 8) & COLOUR_BITS
+                    owner[key] = name
+    return held, owner, counts
+
+
+def _clut_from_disc(disc, x, y, colours):
+    """The CLUT's halfwords (low 15 bits) from DAT2D.BIN's palettes, or None."""
+    import texture
+
+    data = disc.read(layout.DAT2D)
+    try:
+        record, first = texture.window_for(texture.palettes(data), x, y,
+                                           colours)
+    except texture.NoPalette:
+        return None
+    at = record.offset + 2 * first
+    return [struct.unpack_from("<H", data, at + 2 * i)[0] & COLOUR_BITS
+            for i in range(colours)]
+
+
+def _vram_halfwords(game, keys, below=0):
+    """{(x, y): halfword} of VRAM over the box of *keys*, *below* rows more."""
+    xs = [x for x, _y in keys]
+    ys = [y for _x, y in keys]
+    x0, y0 = min(xs), min(ys)
+    rows = vram_region(game, x0, y0, max(xs) - x0 + 1,
+                       max(ys) - y0 + 1 + below)
+    return {(x0 + col, y0 + row): _halfword(pixel)
+            for row, line in enumerate(rows) for col, pixel in enumerate(line)}
+
+
+def _say_sprites(game, sprites, image):
+    """Print the sprites by page and hold their texels against the disc.
+
+    What section 10.3 (o) asks of the text, the plate and the arrows: which
+    image each is cut from.  Every group's sampled halfwords are decoded off
+    the disc and compared with what VRAM holds while the screen is up, with a
+    control read a few rows off that has to disagree -- over all the groups,
+    since one flat bar reads the same shifted.  Returns the problems: texels
+    held on the disc that differ from VRAM, a CLUT that differs, a control
+    that cannot tell anywhere.  Texels held by NO image are a finding, not a
+    problem -- the game may write them at run time.
+    """
+    import iso_source
+
+    groups = {}
+    for one in sprites:
+        key = (one["page"], one["bits"], one["clut"])
+        groups.setdefault(key, []).append(one)
+    problems, compared, told = [], 0, 0
+    with iso_source.open_disc(image) as disc:
+        held, owner, counts = _disc_halfwords(disc)
+        print("    the sprites by page, and where their texels come from (%s):"
+              % ", ".join("%s.BIN %d image(s)" % (name, counts[name])
+                          for name in SPRITE_FILES))
+        for (page, bits, clut), items in sorted(groups.items(),
+                                                key=lambda one: -len(one[1])):
+            xs = [one["point"][0] for one in items]
+            ys = [one["point"][1] for one in items]
+            box = (min(xs), min(ys),
+                   max(one["point"][0] + one["size"][0] for one in items),
+                   max(one["point"][1] + one["size"][1] for one in items))
+            keys = set()
+            for one in items:
+                keys |= sprite_texels(one)
+            vram = _vram_halfwords(game, keys, SPRITE_CONTROL_SHIFT)
+            mine = sorted(key for key in keys if key in held)
+            files = sorted({owner[key] for key in mine})
+            same = sum(1 for key in mine if held[key] == vram[key])
+            control = sum(1 for (x, y) in mine
+                          if held[(x, y)] == vram[(x, y + SPRITE_CONTROL_SHIFT)])
+            print("        page (%3d,%3d) %2d-bit, clut (%3d,%3d): %3d "
+                  "sprite(s) over (%3d,%3d)-(%3d,%3d)"
+                  % (page[0], page[1], bits, clut[0], clut[1], len(items),
+                     box[0], box[1], box[2], box[3]))
+            if not mine:
+                print("            texels: %d halfword(s), held by no image on "
+                      "the disc" % len(keys))
+            else:
+                print("            texels: %d of %d halfword(s) in %s, %d of "
+                      "them equal to VRAM; control %d rows down: %d equal"
+                      % (len(mine), len(keys), " + ".join(
+                          "%s.BIN" % name for name in files), same,
+                         SPRITE_CONTROL_SHIFT, control))
+                if same != len(mine):
+                    problems.append("page (%d,%d): %d texel(s) on the disc "
+                                    "differ from VRAM"
+                                    % (page[0], page[1], len(mine) - same))
+                if control == len(mine):
+                    # A flat image reads the same shifted; it is the whole
+                    # comparison that has to be able to tell, not each group.
+                    print("            the control cannot tell here: the "
+                          "texels are flat")
+                compared += len(mine)
+                told += len(mine) - control
+            colours = 1 << bits if bits < 16 else 0
+            if not colours:
+                continue
+            want = _clut_from_disc(disc, clut[0], clut[1], colours)
+            got = [vram_halfword for vram_halfword in
+                   (_halfword(pixel) for pixel in
+                    vram_region(game, clut[0], clut[1], colours, 1)[0])]
+            if want is None:
+                print("            clut: no palette of DAT2D.BIN covers it")
+                continue
+            equal = sum(1 for a, b in zip(want, got) if a == b)
+            print("            clut: DAT2D.BIN, %d of %d entries equal to VRAM"
+                  % (equal, colours))
+            if equal != colours:
+                problems.append("clut (%d,%d): %d entr(ies) of DAT2D.BIN "
+                                "differ from VRAM"
+                                % (clut[0], clut[1], colours - equal))
+    print("    control: %d of %d compared texel(s) differ %d rows off"
+          % (told, compared, SPRITE_CONTROL_SHIFT))
+    if compared and not told:
+        problems.append("the control rows read the same as the disc "
+                        "everywhere, so equal says nothing")
+    return problems
+
+
+def write_scenery(slot, found, display, sprites=()):
     """One JSON per slot, in `work/looks-scenery/`."""
     import json
 
@@ -2489,7 +2743,14 @@ def write_scenery(slot, found, display):
                                 "semi": one["semi"],
                                 "blend": one["blend"],
                                 "line": one["line"]}
-                               for one in found]},
+                               for one in found],
+                   "sprites": [dict(one, point=list(one["point"]),
+                                    size=list(one["size"]),
+                                    uv=list(one["uv"]),
+                                    clut=list(one["clut"]),
+                                    page=list(one["page"]),
+                                    colour=list(one["colour"]))
+                               for one in sprites]},
                   handle, indent=1)
         handle.write("\n")
     return path
@@ -2521,80 +2782,6 @@ times that.
 
 REPAINT_BACK = 0.98
 """How much of a tile has to come back before it is called redrawn."""
-
-
-GLYPH_DRAW_PASS = 0
-"""`a3` of the glyph routine on the pass that DRAWS -- 1 measures the width."""
-
-PROVENANCE_TILE = 16
-"""The square the provenance map is read at, in screen pixels.
-
-Sixteen, because that is the side a PSX texture page is cut into and the side
-a glyph of this screen is drawn at: a tile smaller than a glyph would find a
-blank corner of one page in every other page.
-"""
-
-PROVENANCE_PLAIN = 4
-"""How many colours a tile may hold before it counts as picture and not fill.
-
-A tile of the panel's gradient holds two or three; a tile of text or of the
-title band holds a dozen.  Plain tiles are left out of the search: a flat
-rectangle matches every other flat rectangle of the same colour in VRAM, and
-counting those as "found elsewhere" would call the whole screen an image.
-"""
-
-
-def check_glyph_page(game, verbose=True):
-    """Which VRAM page the screen's text is cut from, read at the draw pass.
-
-    The glyph routine (`layout.SCREEN_GLYPH`) is stopped on the pass that
-    draws, and the GPU's own draw state is read there: the texture page it has
-    in force is the font.  Asking the GPU beats reading the packet, because on
-    this screen the text leaves no packet in RAM to read (LOOKS-TASK-31).
-    """
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.SCREEN_GLYPH))
-    seen = []
-    try:
-        for _ in range(GLYPH_PAGE_STOPS):
-            client.call("continue")
-            if not _wait_for_hit(game, WATCH_SECONDS):
-                raise OracleError("%s never ran, so the text was not drawn"
-                                  % who_writes.hx(layout.SCREEN_GLYPH))
-            registers = client.call("read_registers", group="gpr")
-            if who_writes.register_value(registers, "a3") != GLYPH_DRAW_PASS:
-                continue
-            state = client.call("get_gpu_state", aspect="draw")
-            seen.append((who_writes.register_value(registers, "a0"),
-                         _signed16(who_writes.register_value(registers, "a1")),
-                         _signed16(who_writes.register_value(registers, "a2")),
-                         _draw_page(state)))
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
-    return seen
-
-
-GLYPH_PAGE_STOPS = 24
-"""Stops taken at the glyph routine before the pages it uses are counted.
-
-Enough for both passes of several strings: the measuring pass is skipped here
-and only the drawing one is kept, so a budget of one string's worth would come
-back with nothing."""
-
-
-def _draw_page(state):
-    """(x, y, colour mode) of the texture page the GPU has in force."""
-    found = state if isinstance(state, dict) else {}
-    return (found.get("texture_page_x"), found.get("texture_page_y"),
-            found.get("texture_color_mode"))
 
 
 PROVENANCE_TILE = 16
@@ -7222,6 +7409,51 @@ def _checks(c) -> None:
     else:
         c.skip("a difference in the gap between sections",
                "the synthetic file has no gap to plant one in")
+
+    # -- a node of the list is not a command --------------------------------
+    #
+    # The shape libgs leaves in the list for one glyph: an E1 naming the page
+    # and a variable sprite, in ONE node.  Then a 16x16 sprite behind its own
+    # E1, and a flat quad, each a node.  The words are the ones the frame of
+    # LOOKS SET carries: page 27 is VRAM (704, 256) at 4 bits, and CLUT id
+    # 0x7C40 is (0, 497).
+    font_page = DRAW_MODE_SET << 24 | 27
+    plate_page = DRAW_MODE_SET << 24 | 29
+    corner = (-7 & 0xFFFF) << 16 | (-43 & 0xFFFF)  # not-an-address: y, x
+    texel = 0x7C40 << 16 | 146 << 8 | 126  # not-an-address: clut, v, u
+    sprite = int("64", 16) << 24 | 0x808080  # not-an-address: code and colour
+    tile = int("7C", 16) << 24 | 0x808080  # not-an-address: idem, 16x16
+    quad = int("28", 16) << 24 | 0x303030  # not-an-address: a flat quad
+    nodes = [(0, [font_page, sprite, corner, texel, 12 << 16 | 5]),
+             (1, [plate_page, tile, corner, texel]),
+             (2, [quad, corner, corner, corner, corner])]
+    commands = commands_of(nodes)
+    ok("a node holding a draw mode and a sprite splits into both",
+       [one[0] >> 24 for one in commands]
+       == [DRAW_MODE_SET, int("64", 16), DRAW_MODE_SET, int("7C", 16),
+           int("28", 16)],
+       [hex(one[0]) for one in commands])
+    found = sprites_of(commands)
+    ok("both sprites are found, and nothing else",
+       len(found) == 2, len(found))
+    if len(found) == 2:
+        glyph, plate = found
+        ok("the glyph takes the page of the E1 in its own node",
+           glyph["page"] == (704, 256) and glyph["bits"] == 4,
+           (glyph["page"], glyph["bits"]))
+        ok("the tile takes the page of the E1 in ITS node, not the first one",
+           plate["page"] == (832, 256), plate["page"])
+        ok("and its CLUT, corner and texel come off the packet",
+           glyph["clut"] == (0, 497) and glyph["uv"] == (126, 146)
+           and glyph["point"] == (256 - 43, 120 - 7),
+           (glyph["clut"], glyph["uv"], glyph["point"]))
+        ok("a variable sprite reads its size, a fixed one knows it",
+           glyph["size"] == (5, 12) and plate["size"] == (16, 16),
+           (glyph["size"], plate["size"]))
+        ok("the texels a 4-bit sprite samples are counted in halfwords",
+           len(sprite_texels(glyph)) == 2 * 12, len(sprite_texels(glyph)))
+    ok("and the quad behind them is still furniture",
+       len(furniture_of(nodes)) == 1, len(furniture_of(nodes)))
 
 
 # --- entry point ----------------------------------------------------------

@@ -3040,6 +3040,41 @@ barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou d
 > GPU tem em vigor na parada não é necessariamente o que o glifo seguinte usa.
 > Texto, placa, caixa da camisa e setas continuam fora da lista: nenhum
 > pacote texturizado cai fora do painel.
+>
+> **Estavam na lista o tempo todo, e são sprites** (2026-09-21, quinta
+> passada). A frase acima está errada. Quem a desmentiu foi o código do jogo:
+> a rotina de glifo (`layout.SCREEN_GLYPH`) só preenche uma estrutura
+> `GsSPRITE` no scratchpad, e quem a manda para a lista é uma chamada ao sort
+> de sprite com o `GsOT` cuja etiqueta é a própria cabeça que o quadro entrega
+> ao DMA. Um watchpoint de escrita na porta de comando do GPU confirmou o
+> resto: **nada** escreve nela durante a tela. O que escondia os sprites era o
+> leitor. A libgs põe o **E1** que escolhe a página e o **sprite** no mesmo
+> nó, e o `--scenery` classificava o nó pela primeira palavra: via uma troca de
+> modo e nada mais. Partido em comandos (`oracle.commands_of`), o quadro traz
+> **142 sprites**, os mesmos nas duas leituras e nos dois slots. Cada grupo
+> teve os texels amostrados decodificados do disco japonês, pela guarda, e
+> comparados com a VRAM da tela de pé; o controle, a mesma comparação três
+> linhas abaixo, diverge em 1.502 de 2.128 texels:
+>
+> | o que | sprites | página, CLUT | de onde vêm os texels |
+> |---|---|---|---|
+> | a **fonte**: rótulos, valores, `SHIRT N`, `CB` | 121 | (704,256) 4 bits, (0,497) | **`EDT_2D.BIN`**, 1.068 de 1.068 iguais |
+> | o título `S SET` | 4 | (768,256), (128,498) | `EDT_2D.BIN`, 180 de 180 |
+> | o ícone à esquerda da camisa | 1 | (768,256), (80,499) | `EDT_2D.BIN`, 96 de 96 |
+> | a barra vazia ao lado da placa | 1 | (960,256), (0,497) | `EDT_2D.BIN`, 288 de 288, chapada (o controle não a distingue) |
+> | as caixas verdes da camisa | 4 | (576,0), (176,496) | `DAT2D.BIN`, 384 de 384 |
+> | a **placa** `CB`/`GK` | 4 | (576,0), **(208,499) no jogador de linha e (192,499) no goleiro** | `DAT2D.BIN`, 96 de 96 |
+> | a seta `▶` do valor sob o cursor | 1 | (704,0), (80,497) | `DAT2D.BIN`, 16 de 16 |
+> | o texto da **ajuda** (`Visual`) | 6 ladrilhos 16×16 | (832,256), (64,496) | **nenhuma imagem do disco**: o jogo o escreve na VRAM em tempo de execução |
+>
+> As oito CLUTs estão no `DAT2D.BIN` e batem 16 de 16. O `EDT_2D.BIN` é
+> idêntico nos dois discos e entrou na guarda (`layout.SCREEN_ART_FILES`). E a
+> "página da fonte não resolvida" se resolve: os três valores que o estado do
+> GPU deu eram **três sprites diferentes** — a fonte (704,256), a ajuda
+> (832,256) e a seta (704,0) —, e o estado lido na parada era o do último
+> sprite desenhado. **Falta desenhá-los**: a janela ainda escreve com uma fonte
+> do Qt, e o texto muda com a tecla, então o que a janela precisa é da tabela
+> de glifos do jogo (código → `u`, `v` e largura), não da foto de um quadro.
 
 **(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
 interpola entre quadros-chave, e se o tronco que balança é da animação ou da

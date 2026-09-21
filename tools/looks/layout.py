@@ -77,6 +77,7 @@ DAT2D = "/BIN/DAT2D.BIN"
 SELECT = "/SELECT.BIN"
 ANIME = "/BIN/ANIME.BIN"
 SELECT8 = "/SELECT8.BIN"
+EDT_2D = "/BIN/EDT_2D.BIN"
 
 KIT_DIR = "/BIN/"
 KIT_PREFIX = "TEX_"
@@ -111,6 +112,12 @@ DIGEST = {
     # the overlay carries the screen's text, and the patch translated it.  The
     # part this cycle reads, the stature rule, is the same on both.
     SELECT8: "b735ed9c1ebaef001088de57c807c8e9680b3296516928fb23b4af612befef8e",
+    # Identical on both discs, measured 2026-09-21 (LOOKS-TASK-31): the same
+    # 40,360 bytes and digest on the Japanese dump and the English one.  It
+    # holds the screen's own art -- the font the text is cut from included --
+    # and every texel LOOKS SET samples from it decodes to what VRAM shows
+    # (`oracle.py --scenery`).
+    EDT_2D: "ec4bebf15b702080313972c982777974a2406cd12438cad6f23660027a1458eb",
 }
 
 KIT_DIGEST = {
@@ -277,6 +284,16 @@ GEOMETRY_FILES because that set is the keys of BASE, which `spans()` and
 not one, and its load address is ANIME_BASE.
 """
 
+SCREEN_ART_FILES = frozenset({EDT_2D})
+"""The screen's own 2D art, identical on both discs.
+
+Measured on 2026-09-21 (LOOKS-TASK-31): /BIN/EDT_2D.BIN holds 4-bit images
+in the VRAM columns 704-1023 of the lower half, and the LOOKS SET text, the
+title and the bar beside the plate are cut from them.  Its palettes are not here -- the sprites take theirs from
+DAT2D.BIN's rows 496-499 -- which is why it is a family apart from
+TEXTURE_FILES: this one may be read off either disc.
+"""
+
 RECORD_FILES = frozenset({SELECT})
 """Japanese-only too, but records rather than art -- so a hint of its own.
 
@@ -350,6 +367,7 @@ LBA = {
     SELECT: 850,
     ANIME: 3000,
     SELECT8: 1800,
+    EDT_2D: 3900,
 }
 
 SIZE = {
@@ -359,6 +377,7 @@ SIZE = {
     SELECT: 300648,
     ANIME: 396804,
     SELECT8: 125176,
+    EDT_2D: 40360,
 }
 
 # --- Where each model file loads in RAM -----------------------------------
@@ -939,6 +958,12 @@ def _hint_for(disc_path: str) -> str:
             f"  {disc_path} is one of the {len(KIT_FILES)} kit containers, "
             f"and they read identical on both known discs -- so a mismatch "
             f"means a third disc, another release or a modified image."
+        )
+    if disc_path in SCREEN_ART_FILES:
+        return (
+            f"  {disc_path} is the screen's own art and reads identical on "
+            f"both known discs, so a mismatch means a third disc -- another "
+            f"release, or a modified image."
         )
     if disc_path in GEOMETRY_FILES | ANIMATION_FILES:
         return (
@@ -1649,6 +1674,12 @@ SCREEN_GLYPH = 0x8010BB04
 (every glyph at the same x), 0 is the pass that draws it.  Only the draw pass
 is what the screen shows, and it is the witness the decoding of SCREEN_PRINT's
 strings is checked against.
+
+It does not touch the GPU.  Read on 2026-09-21 (LOOKS-TASK-31): it fills a
+libgs `GsSPRITE` in the scratchpad at 0x1F8000B8 -- width off a table, height
+12, page word 27, which is VRAM (704, 256) at 4 bits, and CLUT (0, 497) -- and
+its caller hands that to the sprite sort with the frame's own `GsOT`, whose tag
+is the head GPU_LIST_SUBMIT sends.  So the text IS in the list, as sprites.
 """
 
 SCREEN_HELP = 0x800E8338
