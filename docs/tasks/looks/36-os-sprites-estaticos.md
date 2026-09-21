@@ -5,12 +5,12 @@ type: implementação
 category: render
 phase: 10
 depends_on: [LOOKS-TASK-31]
-status: pending
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-21
+done_commit: 2b698730
 ---
 
 # LOOKS-TASK-36: Os sprites estáticos da tela
@@ -225,3 +225,25 @@ Os outros três alvos do ciclo — `looks_ui` (14 de 14 controles vermelhos),
 rodaram sobre o código do commit, antes das últimas edições de texto dele
 (prosa do perfil, do `CLAUDE.md` e uma string do `controls.py`). Estão
 transcritos acima.
+- **Closed** — commit `2b698730` (2026-09-21): feat(looks): draw the static sprites and the arrows off the disc
+  - Files (`git show --name-status 2b698730`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `A docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/36-os-sprites-estaticos.md`
+    - `M docs/tasks/looks/37-a-tabela-de-glifos.md`
+    - `M docs/tasks/looks/38-o-alinhamento-dos-valores.md`
+    - `M tools/looks/cli.py`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/screen.json`
+    - `M tools/looks/screen.py`
+    - `M tools/looks/selftest.py`
+    - `A tools/looks/sprites.py`
+    - `M tools/looks/ui/app.py`
+    - `M tools/looks/ui/looks_set.py`
+    - `M tools/looks/ui_check.py`
