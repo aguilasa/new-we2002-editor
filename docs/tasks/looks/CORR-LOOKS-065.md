@@ -3,8 +3,12 @@ id: CORR-LOOKS-065
 title: "Correção: três medições da LOOKS-TASK-29 sobre o ritmo e a mistura ficaram \"para o leitor de pose\", sem linha na task que as mede"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-29
+severity: low
+done_on: 2026-09-20
+done_commit: 7b79908
 ---
 
 # CORR-LOOKS-065: o que a 29 achou sobre a caminhada não chegou à 32

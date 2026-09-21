@@ -3,15 +3,19 @@ id: CORR-WTE-039
 title: "Correção: o GABARITO diz que o gerador recusa `(int)*(int *)`, e ele aceita"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-23
+severity: high
+done_on: 2026-08-10
+done_commit: d41c982
 ---
 
 # CORR-WTE-039: a marca de decompilado que só existe no texto
 
 ## Problema identificado
 
-O [`wte/re/spec/GABARITO.md`](../../../wte/re/spec/GABARITO.md), linha 133, lista
+O [`wte/re/spec/GABARITO.md`](/wte/re/spec/GABARITO.md), linha 133, lista
 o que o `spec_index.py` **recusa** como decompilado colado:
 
 > os nomes que o Ghidra inventa — `undefined4`, `uVar1`, `iVar2`, `local_1c`,
@@ -53,7 +57,7 @@ for t in alvos:
     print(f"{'RECUSA' if hit else 'ACEITA'}  {t!r}  {hit}")
 ```
 
-O [`wte/re/spec/README.md`](../../../wte/re/spec/README.md) **não** tem o problema:
+O [`wte/re/spec/README.md`](/wte/re/spec/README.md) **não** tem o problema:
 ele lista as marcas sem o cast, e está de acordo com o código.
 
 ## Causa raiz

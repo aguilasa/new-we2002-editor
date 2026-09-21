@@ -3,8 +3,12 @@ id: CORR-WTE-052
 title: "Correção: o Log da WTE-TASK-22 diz 15 testes no `golden_veredito`, e são 18"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-22
+severity: high
+done_on: 2026-08-11
+done_commit: ce99c16
 ---
 
 # CORR-WTE-052: 15 contra 18, nos dois sítios do Log

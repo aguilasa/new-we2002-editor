@@ -3,8 +3,12 @@ id: CORR-LOOKS-051
 title: "Correção: o `looks_live` perde a sessão MCP no primeiro `pause`, uma vez em catorze corridas"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-19
+severity: medium
+done_on: 2026-09-17
+done_commit: e645f25
 ---
 
 # CORR-LOOKS-051: `missing or invalid MCP-Session-Id` logo depois de o emulador subir

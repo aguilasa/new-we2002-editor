@@ -3,8 +3,12 @@ id: CORR-MCR-022
 title: "Correção: a Fase 5 nasceu sem entrada em \"Verificações específicas por fase\", que é o único lugar onde o `/revisar` procura o que perguntar de uma fase"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-15
+severity: low
+done_on: 2026-09-09
+done_commit: 49bf095
 ---
 
 # CORR-MCR-022: fase nova, e o perfil não diz o que se pergunta dela

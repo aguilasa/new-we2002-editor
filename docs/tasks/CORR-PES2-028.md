@@ -3,8 +3,12 @@ id: CORR-PES2-028
 title: "Correção: o fork publica binário próprio, e o AppImage dele traz o servidor MCP"
 type: correção
 category: ferramental
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-32
+severity: high
+done_on: 2026-09-03
+done_commit: 35f263a
 ---
 
 # CORR-PES2-028: "não publica binário próprio" é falso, e o binário publicado tem o MCP

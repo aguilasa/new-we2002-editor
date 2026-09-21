@@ -3,8 +3,12 @@ id: CORR-WTE-118
 title: "Correção: a seção de renomeação da WTE-TASK-39 ainda manda renomear o que a própria task decidiu não renomear"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-39
+severity: low
+done_on: 2026-08-26
+done_commit: 602218d
 ---
 
 # CORR-WTE-118: a instrução de renomear ficou de pé depois de revogada
@@ -32,7 +36,7 @@ seção continua dizendo *"que esta task aplica"*.
 
 O estado da árvore concorda com o Log: `wte/wte.lpi`, `wte/wte.lpr` e
 `wte/build/wte` seguem com o nome antigo, e só o binário instalado leva o slug.
-O [`wte/README.md`](../../../wte/README.md) registra a reversão **corretamente**,
+O [`wte/README.md`](/wte/README.md) registra a reversão **corretamente**,
 com a razão — então o único documento fora de sincronia é a própria task.
 
 É a **prosa vencida** que a terceira passagem da
@@ -109,7 +113,7 @@ usam — o fato primeiro, a razão depois:
 >
 > **O repasse previa isto e a execução decidiu o contrário** (ver o Log, e a
 > seção *"O binário se chama `wte` na árvore e `we2002Lazarus` instalado"* do
-> [`wte/README.md`](../../../wte/README.md)): `wte.lpi`, `wte.lpr` e `build/wte`
+> [`wte/README.md`](/wte/README.md)): `wte.lpi`, `wte.lpr` e `build/wte`
 > **continuam** com o nome da árvore; o slug entra no `install`. O inventário
 > abaixo fica porque continua correto — é quem citaria os três arquivos **se**
 > a renomeação vier a acontecer.
@@ -169,3 +173,7 @@ Sobram duas ocorrências vivas da frase `renomear wte.lpi…`, no `Makefile` e n
 
 - `docs/tasks/concluidos/39-empacotamento.md` — o título e a ressalva
 - `wte/README.md` — a contradição, achada na varredura
+
+## Log de Execução
+
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

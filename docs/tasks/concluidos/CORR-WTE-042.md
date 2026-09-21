@@ -3,8 +3,12 @@ id: CORR-WTE-042
 title: "Correção: o Log da WTE-TASK-18 diz que os testes do transpilador eram 33, e eram 38"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-18
+severity: high
+done_on: 2026-08-10
+done_commit: 5a685ec
 ---
 
 # CORR-WTE-042: o número de partida dos testes não foi medido

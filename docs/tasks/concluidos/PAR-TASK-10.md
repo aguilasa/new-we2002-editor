@@ -4,9 +4,14 @@ title: "O item aberto do Windows: nome de time pela janela Qt"
 type: verificação
 category: verificação
 projeto: newWe2002
-depends_on: ["PAR-TASK-01"]
-fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.11"
-status: bloqueado
+depends_on: [PAR-TASK-01]
+status: blocked
+source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.11"
+phase: null
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PAR-TASK-10: O item aberto do Windows: nome de time pela janela Qt

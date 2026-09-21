@@ -3,8 +3,12 @@ id: CORR-WTE-062
 title: "Correção: o `lista_formacionesClick` ficou entre duas tasks concluídas e continua `REStub`"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-25
+severity: high
+done_on: 2026-08-18
+done_commit: 89a04d2
 ---
 
 # CORR-WTE-062: o handler que as duas tasks apontaram uma para a outra
@@ -85,8 +89,8 @@ metade do efeito para trás.
 
 ### Arquivos
 
-- [`wte/src/impl/`](../../../wte/src/impl/) — o `.inc` novo e o estado no `.aux.inc`
-- [`wte/re/spec/estrategia.lista_formacionesClick.md`](../../../wte/re/spec/estrategia.lista_formacionesClick.md)
+- [`wte/src/impl/`](/wte/src/impl) — o `.inc` novo e o estado no `.aux.inc`
+- [`wte/re/spec/estrategia.lista_formacionesClick.md`](/wte/re/spec/estrategia.lista_formacionesClick.md)
 - as specs do `bolaMouseDown` e do `relojTimer`
 
 ---

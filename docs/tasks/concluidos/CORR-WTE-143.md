@@ -3,8 +3,12 @@ id: CORR-WTE-143
 title: "Correção: `8.10-return-nao-dispara.sh` é chamado de hook de golden, mas `golden_check.sh` com ele sempre reprova"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-09
+severity: low
+done_on: 2026-08-31
+done_commit: ef745d3
 ---
 
 # CORR-WTE-143: o roteiro do item 4 só serve para um dos dois lados

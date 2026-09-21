@@ -3,8 +3,12 @@ id: CORR-LOOKS-039
 title: "Correção: os pares do `looks_ui` nunca saem da família A, e o defeito da CORR-LOOKS-034 passou por eles"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-16
+severity: medium
+done_on: 2026-09-16
+done_commit: 3c65af4
 ---
 
 # CORR-LOOKS-039: o gate da UI mede a única cabeça em que o código funcionava

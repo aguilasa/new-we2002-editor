@@ -3,8 +3,12 @@ id: CORR-WTE-107
 title: "Correção: a lista de arquivos da WTE-TASK-35 não menciona o repasse escrito na WTE-TASK-36"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-35
+severity: low
+done_on: 2026-08-25
+done_commit: 0c8fa41
 ---
 
 # CORR-WTE-107: a lista da WTE-TASK-35 omite o repasse para a 36

@@ -3,8 +3,12 @@ id: CORR-WTE-051
 title: "Correção: a fração de 92,5% subtrai linhas úteis de um total que conta linhas em branco"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-21
+severity: low
+done_on: 2026-08-10
+done_commit: 2b03e51
 ---
 
 # CORR-WTE-051: as duas colunas da fração não contam a mesma coisa
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 A tabela da seção 1 do
-[`wte/re/fase-3-fechamento.md`](../../../wte/re/fase-3-fechamento.md) apresenta três
+[`wte/re/fase-3-fechamento.md`](/wte/re/fase-3-fechamento.md) apresenta três
 colunas — **linhas**, **à mão**, **por regra** — em que a terceira é a subtração
 das duas primeiras, e fecha em `3692 − 277 = 3415`, os 92,5% publicados.
 

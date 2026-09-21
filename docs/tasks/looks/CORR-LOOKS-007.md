@@ -3,8 +3,12 @@ id: CORR-LOOKS-007
 title: "Correção: o `layout.py` diz que não faz I/O, e faz"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-02
+severity: low
+done_on: 2026-09-14
+done_commit: 536c374
 ---
 
 # CORR-LOOKS-007: o `layout.py` diz que não faz I/O, e faz

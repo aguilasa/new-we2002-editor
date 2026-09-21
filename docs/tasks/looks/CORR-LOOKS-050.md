@@ -3,8 +3,12 @@ id: CORR-LOOKS-050
 title: "Correção: o `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-18
+severity: medium
+done_on: 2026-09-16
+done_commit: a82f922
 ---
 
 # CORR-LOOKS-050: o gate do corpus não fica vermelho no erro sistemático que existe para achar

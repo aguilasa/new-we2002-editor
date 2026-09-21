@@ -4,9 +4,13 @@ title: "Round-trip headless contra o we2002_core, nas duas ROMs"
 type: verificação
 category: dados
 phase: 3
-depends_on: ["WTE-TASK-18", "WTE-TASK-19"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.2 (oráculo B), §6 e Fase 3 itens 5 e 6"
-status: concluído
+depends_on: [WTE-TASK-18, WTE-TASK-19]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.2"
+reviewed_on: 2026-08-10
+review_commit: null
+done_on: 2026-08-10
+done_commit: 691a025
 ---
 
 # WTE-TASK-20: Round-trip headless
@@ -86,7 +90,7 @@ não há comportamento indefinido para preservar.
 > japonesa guarda `83 41 83 43 …`, que é katakana e cai no ramo padrão. São
 > 95 de 95 campos decodificados na europeia contra 0 de 95 na japonesa. As
 > duas continuam necessárias — por motivos trocados. Medida em
-> [`../../wte/re/fase-3.md`](../../../wte/re/fase-3.md).
+> [`../../wte/re/fase-3.md`](/wte/re/fase-3.md).
 
 ### 5. Round-trip de gravação
 
@@ -108,7 +112,7 @@ WTE-TASK-02 decidiu que a bateria mora.
 
 | Arquivo | Ação |
 |---|---|
-| `wte/tests/dump_estado.pas` | criar — **em `tests/`, não em `tools/`**: é programa compilado, e a convenção do [`../../wte/tests/README.md`](../../../wte/tests/README.md) é essa |
+| `wte/tests/dump_estado.pas` | criar — **em `tests/`, não em `tools/`**: é programa compilado, e a convenção do [`../../wte/tests/README.md`](/wte/tests/README.md) é essa |
 | `wte/tests/dump_estado.cpp` | criar — o irmão, em vez de estender o `tests/golden_tool.cpp` do `newWe2002` |
 | `wte/tools/compare_dumps.py` | criar |
 | `wte/re/fase-3.md` | criar, **gerado** |

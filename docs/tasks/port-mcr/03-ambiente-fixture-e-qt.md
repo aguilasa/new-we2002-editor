@@ -4,9 +4,13 @@ title: "A fixture nomeada, o venv e o binding Qt"
 type: ferramenta
 category: ferramental
 phase: 0
-depends_on: ["MCR-TASK-01"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §4"
-status: concluído
+depends_on: [MCR-TASK-01]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#4"
+reviewed_on: 2026-09-07
+review_commit: null
+done_on: 2026-09-07
+done_commit: 43f54b1
 ---
 
 # MCR-TASK-03: Fixture, venv e Qt
@@ -119,7 +123,7 @@ trouxeram o que precisavam.
 2. **Licença.** PySide6 é **LGPL**; PyQt6 é **GPL-ou-comercial**. Este
    repositório **não pode ser licenciado** — o código herdado é
    todos-os-direitos-reservados e por isso não há `LICENSE` (ver
-   [`../../../NOTICE.md`](../../../NOTICE.md)). Linkar uma dependência GPL num
+   [`../../../NOTICE.md`](/NOTICE.md)). Linkar uma dependência GPL num
    repositório nessa posição acrescenta uma obrigação que ele não tem como
    cumprir.
 

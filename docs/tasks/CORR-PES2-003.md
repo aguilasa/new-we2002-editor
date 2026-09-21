@@ -3,8 +3,12 @@ id: CORR-PES2-003
 title: "Correção: os prompts e os wrappers cravam WTE-TASK-XX; o ciclo vivo é PES2-TASK-XX"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: [CORR-PES2-002]
+origin: CORR-PES2-002
+severity: medium
+done_on: 2026-09-01
+done_commit: ef5f7fb
 ---
 
 # CORR-PES2-003: o prefixo de *task* está cravado nos prompts, pela mesma razão que o de correção estava
@@ -21,7 +25,7 @@ letra — 39 e 11 ocorrências —, enquanto o `progresso.md` vivo lista
 
 > **Não codifique num prompt** o nome de um plano, um **prefixo de ID**, uma
 > fase ou um mapeamento `ID → arquivo`.
-> — [`.claude/rules/tasks.md`](../../.claude/rules/tasks.md)
+> — [`.claude/rules/tasks.md`](/.claude/rules/tasks.md)
 
 E a regra explica por quê com este caso exato: *"prompt que conhece um deles
 pelo nome quebra no próximo"*. Quebrou. As três exclusões que dizem "nunca

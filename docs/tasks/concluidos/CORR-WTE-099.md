@@ -3,8 +3,12 @@ id: CORR-WTE-099
 title: "Correção: a lista de arquivos da WTE-TASK-32 não menciona a mudança no .gitignore"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-32
+severity: low
+done_on: 2026-08-24
+done_commit: e907423
 ---
 
 # CORR-WTE-099: a lista de arquivos da WTE-TASK-32 omite o `.gitignore`

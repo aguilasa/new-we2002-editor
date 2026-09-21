@@ -3,8 +3,12 @@ id: CORR-PES2-014
 title: "Correção: não são os 105 `TEX_*.BIN` da European Deluxe que são Form 2 — são 18"
 type: correção
 category: formato
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-27
+severity: high
+done_on: 2026-09-01
+done_commit: ccf583c
 ---
 
 # CORR-PES2-014: 18 de 105, e a própria PES2-TASK-27 lê os outros 87

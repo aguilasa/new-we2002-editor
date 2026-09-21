@@ -3,8 +3,12 @@ id: CORR-WTE-006
 title: "Correção: os fatos medidos pela WTE-TASK-04 não chegaram aos documentos que serão executados"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-04
+severity: high
+done_on: 2026-08-06
+done_commit: cc69848
 ---
 
 # CORR-WTE-006: seis documentos ainda dizem o que a medição já desmentiu
@@ -14,7 +18,7 @@ depends_on: []
 A WTE-TASK-04 mediu os 96 handlers com dono e **listou** as divergências contra
 texto já escrito — o critério "discordância listada, não escondida" está
 cumprido. Mas a lista mora só em
-[`../../wte/re/published_methods.md`](../../../wte/re/published_methods.md), e os
+[`../../wte/re/published_methods.md`](/wte/re/published_methods.md), e os
 documentos errados continuam errados.
 
 Quem executar a WTE-TASK-25, a 28 ou a 30 abre `docs/tasks/25-*.md`,

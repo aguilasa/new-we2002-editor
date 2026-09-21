@@ -1,12 +1,16 @@
 ---
 id: WTE-TASK-31
 title: "Fechamento da fase 4 — os 96 têm veredito?"
-type: fechamento
+type: closing
 category: comportamento
 phase: 4
-depends_on: ["WTE-TASK-25", "WTE-TASK-26", "WTE-TASK-27", "WTE-TASK-28", "WTE-TASK-29", "WTE-TASK-30"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 4, critério de pronto"
-status: concluído
+depends_on: [WTE-TASK-25, WTE-TASK-26, WTE-TASK-27, WTE-TASK-28, WTE-TASK-29, WTE-TASK-30]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-24
+review_commit: null
+done_on: 2026-08-24
+done_commit: c3ccd5d
 ---
 
 # WTE-TASK-31: Fechamento da fase 4
@@ -24,7 +28,7 @@ status: concluído
 > (2026-08-22) mediu quais são, um a um. A terceira (2026-08-23) baixou para
 > **15**, sem implementar nada: sete daqueles vereditos estavam presos por
 > prosa cujo bloqueio já tinha caído. Ver o Log de Execução e
-> [`wte/re/fase-4.md`](../../../wte/re/fase-4.md).
+> [`wte/re/fase-4.md`](/wte/re/fase-4.md).
 
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
@@ -97,7 +101,7 @@ de ML — ainda não está feito.
       relógio. *Adaptado:* o critério dizia "nas duas ROMs", e a europeia não
       hospeda o oráculo — o `wte.exe` morre ao trocar de time (49.749 violações
       de acesso) e a gravação nunca acontece. Medido em 2026-08-18 e registrado
-      em [`wte/re/gravacao-controle.md`](../../../wte/re/gravacao-controle.md); a
+      em [`wte/re/gravacao-controle.md`](/wte/re/gravacao-controle.md); a
       europeia é da [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-completa.md)
 - [x] Varredura por decompilado colado, limpa — **237 arquivos**, nada
 - [x] Cinco `trivial` reamostrados e reconferidos — os cinco confirmados por
@@ -111,8 +115,8 @@ de ML — ainda não está feito.
 - **Resumo do que foi feito:**
 
   Seis dos sete critérios fecharam, medidos por ferramenta nova
-  ([`check_fase4.py`](../../../wte/tools/check_fase4.py), irmã das `check_fase1/2/3`)
-  que gera o [`wte/re/fase-4.md`](../../../wte/re/fase-4.md). O sétimo — *"nenhuma
+  ([`check_fase4.py`](/wte/tools/check_fase4.py), irmã das `check_fase1/2/3`)
+  que gera o [`wte/re/fase-4.md`](/wte/re/fase-4.md). O sétimo — *"nenhuma
   `aberto`"* — não fecha, e agora se sabe exatamente o quanto falta: **78 dos 96
   têm veredito fechado**, 16 continuam `aberto` e 2 não têm arquivo de spec.
 
@@ -184,7 +188,7 @@ de ML — ainda não está feito.
 bloqueios que **caíram** desde que foram escritas — `0x0040756c` portada,
 `0x00404820` portada, a tela do `MainForm` populada. Reconferir veredito contra
 a régua é trabalho de fechamento, não implementação, então a passagem rodou o
-[`compara_tela.sh`](../../../wte/tools/compara_tela.sh), que é a régua do grupo de
+[`compara_tela.sh`](/wte/tools/compara_tela.sh), que é a régua do grupo de
 carga.
 
 **Nenhum veredito virou, e a razão é melhor do que se esperava: a conferência
@@ -370,7 +374,7 @@ era disparado por nada. O número estava certo e a conclusão não: ela
 generalizava de um instrumento (o `compara_tela.sh`, régua de pixel) para todos.
 O handler dispara em **quatro** gates verdes. O erro está registrado na própria
 spec em vez de apagado, e a guarda que impede a classe inteira é o
-[`cobertura_gate.py`](../../../wte/tools/cobertura_gate.py).
+[`cobertura_gate.py`](/wte/tools/cobertura_gate.py).
 
 - **Arquivos criados/modificados na quarta passagem:** ver os Logs das seis
   CORRs. Nesta task, este arquivo e o `docs/tasks/concluidos/progresso.md`.
@@ -433,7 +437,7 @@ tocado à mão.
   - `make -C wte check` → toda a bateria de `--check` verde
   - `make -C wte test` → **764 testes, OK (skipped=1)**
   - bateria golden: **42 de 42 corridas**, 3.958 s, registro em
-    [`wte/re/fase-4-golden.tsv`](../../../wte/re/fase-4-golden.tsv)
+    [`wte/re/fase-4-golden.tsv`](/wte/re/fase-4-golden.tsv)
 
 - **Problemas encontrados na quinta passagem:** Nenhum. A árvore estava limpa e
   o `fase-4.md` regerou byte-idêntico antes da correção de prosa, o que

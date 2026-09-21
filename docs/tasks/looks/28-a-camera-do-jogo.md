@@ -4,9 +4,13 @@ title: "A câmera do jogo — projeção medida, e a silhueta como testemunha de
 type: implementação
 category: oráculo
 phase: 9
-depends_on: ["LOOKS-TASK-27"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (m)"
-status: concluído
+depends_on: [LOOKS-TASK-27]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: 2026-09-18
+review_commit: null
+done_on: 2026-09-18
+done_commit: b85b6c5
 ---
 
 # LOOKS-TASK-28: A câmera do jogo

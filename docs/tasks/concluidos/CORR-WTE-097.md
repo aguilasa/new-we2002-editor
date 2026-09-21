@@ -3,8 +3,12 @@ id: CORR-WTE-097
 title: "Correção: o comentário do base_teamClick diz \"medido em dois times\" e a medida final tem seis"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-32
+severity: low
+done_on: 2026-08-24
+done_commit: 1a996de
 ---
 
 # CORR-WTE-097: o `.inc` do `base_teamClick` ainda diz "dois times"
@@ -13,7 +17,7 @@ depends_on: []
 
 O achado de que **o original preça 22 slots, não 23** está escrito em quatro
 lugares, e três deles dizem **seis times**. O quarto — o cabeçalho do
-[`ep2002_mainform.base_teamClick.inc`](../../../wte/src/impl/ep2002_mainform.base_teamClick.inc),
+[`ep2002_mainform.base_teamClick.inc`](/wte/src/impl/ep2002_mainform.base_teamClick.inc),
 que é onde mora a constante `ULTIMO_SLOT_PRECADO = 21` que depende do achado —
 ainda diz **dois**, com a lista `(2 e 9)` de quando só duas corridas existiam.
 

@@ -1,3 +1,8 @@
+---
+cycle: pes2
+prefix: PES2
+profile: /docs/prompts/perfil-pes2.md
+---
 # Progresso — mapeamento do Pro Evolution Soccer 2 (PSX), rumo a um editor
 
 Rastreamento das tasks de [`../PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md), que
@@ -41,43 +46,45 @@ PES2-TASK-22.
 
 ## Resumo
 
-| ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
-| -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | `numpy` e desmontador MIPS — decisão do dono da máquina | 0 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | `poke.py` — gravação pelo conjunto de cópias | 2 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md) | Direção do DuckStation — navegar e capturar | 2 | — | 🔄 Em andamento | — | — |
-| [PES2-TASK-04](/docs/tasks/04-poke-de-validacao.md) | O `poke` de PIEMONTE em todas as telas — **fecha a Fase 2** | 2 | 02, 03 | ⬜ Pendente | — | — |
-| [PES2-TASK-05](/docs/tasks/05-diferencial-de-cartao.md) | Harness de diferencial de memory card | 3 | 03 | ⬜ Pendente | — | — |
-| [PES2-TASK-06](/docs/tasks/06-registro-de-jogador-no-cartao.md) | Estrutura do registro de jogador, pelo cartão | 3 | 05 | ⬜ Pendente | — | — |
-| [PES2-TASK-07](/docs/tasks/07-dump-de-ram-e-casamento.md) | Dump de RAM e casamento com o bloco do disco | 3 | 06 | ⬜ Pendente | — | — |
-| [PES2-TASK-08](/docs/tasks/08-indice-do-bloco-de-nomes.md) | Os 624 candidatos de 16 bits — há índice? | 3 | — | ⬜ Pendente | — | — |
-| [PES2-TASK-09](/docs/tasks/09-os-blocos-extras-de-selectc.md) | Os 25 blocos de nome depois do pool | 3 | — | ⬜ Pendente | — | — |
-| [PES2-TASK-10](/docs/tasks/10-fechamento-fase-3.md) | Fechamento da Fase 3 — o registro de jogador | 3 | 06, 07, 08, 09 | ⬜ Pendente | — | — |
-| [PES2-TASK-11](/docs/tasks/11-elenco-de-time.md) | Elenco por time — que jogador pertence a que clube | 4 | 10 | ⬜ Pendente | — | — |
-| [PES2-TASK-12](/docs/tasks/12-formacoes.md) | Formações — a tabela tática por time | 4 | 11 | ⬜ Pendente | — | — |
-| [PES2-TASK-13](/docs/tasks/13-uniforme-e-cores.md) | Uniforme e cores de time | 4 | 11 | ⬜ Pendente | — | — |
-| [PES2-TASK-14](/docs/tasks/14-bandeiras.md) | Bandeiras — forma e cores | 4 | 13 | ⬜ Pendente | — | — |
-| [PES2-TASK-15](/docs/tasks/15-master-league.md) | Master League — custos, slots e elencos | 4 | 11 | ⬜ Pendente | — | — |
-| [PES2-TASK-16](/docs/tasks/16-fechamento-fase-4.md) | Fechamento da Fase 4 — o resto do banco | 4 | 11, 12, 13, 14, 15 | ⬜ Pendente | — | — |
-| [PES2-TASK-17](/docs/tasks/17-formato-do-mapa.md) | O formato do `pes2_map.json` | 5 | 10 | ⬜ Pendente | — | — |
-| [PES2-TASK-18](/docs/tasks/18-mapa-consolidado.md) | `pes2_map.json` — o mapa consolidado | 5 | 16, 17 | ⬜ Pendente | — | — |
-| [PES2-TASK-19](/docs/tasks/19-gerador-e-guarda.md) | O gerador — do mapa ao código, com `--check` | 5 | 18 | ⬜ Pendente | — | — |
-| [PES2-TASK-20](/docs/tasks/20-round-trip-pelo-mapa.md) | Round-trip headless pelo mapa | 5 | 19 | ⬜ Pendente | — | — |
-| [PES2-TASK-21](/docs/tasks/21-fechamento-fase-5.md) | Fechamento da Fase 5 — **o portão da Fase 6** | 5 | 04, 18, 20 | ⬜ Pendente | — | — |
-| [PES2-TASK-22](/docs/tasks/22-decisao-de-linguagem-e-ui.md) | Decisão de linguagem e UI do editor | 6 | 21, 30 | ⬜ Pendente | — | — |
-| [PES2-TASK-23](/docs/tasks/23-editor-leitura.md) | O editor — leitura e exibição | 6 | 22 | ⬜ Pendente | — | — |
-| [PES2-TASK-24](/docs/tasks/24-editor-gravacao.md) | O editor — gravação | 6 | 23 | ⬜ Pendente | — | — |
-| [PES2-TASK-25](/docs/tasks/25-verificacao-final.md) | Verificação final contra a definição de pronto | 6 | 24 | ⬜ Pendente | — | — |
-| [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM | 7 | 26 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md) | `T_NAME_I`/`T_NAME_S` — o conjunto de cópias por idioma | 7 | 27 | ⬜ Pendente | — | — |
-| [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — **o portão da 22** | 7 | 27, 28, 29 | ⬜ Pendente | — | — |
-| [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | — | ⬜ Pendente | — | — |
-| [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | — | ✅ Concluído | 2026-09-02 | 2026-09-03 |
-| [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | Compilar o fork e validar o MCP de fato | 0 | 32 | ✅ Concluído | 2026-09-03 | 2026-09-03 |
-| [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | Rotas MCP no lugar do `drive.py` | 0 | 33 | ✅ Concluído | 2026-09-03 | 2026-09-03 |
-| [PES2-TASK-35](/docs/tasks/35-desbloqueio-de-times.md) | Desbloqueio de times secretos e da lista de ML, pelo disco | 4 | — | ⬜ Pendente | — | — |
+<!-- rite:begin tasks -->
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | Ferramental das fases 3 e 4 — numpy e desmontador MIPS | 0 | decisão | — | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | `tools/pes2/poke.py` — gravação pelo conjunto de cópias | 2 | ferramenta | — | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md) | Direção do DuckStation — navegar até a tela e capturar | 2 | ferramenta | — | in-progress | — | — |
+| [PES2-TASK-04](/docs/tasks/04-poke-de-validacao.md) | O `poke` de validação — PIEMONTE em todas as telas | 2 | verificação | PES2-TASK-02, PES2-TASK-03 | pending | — | — |
+| [PES2-TASK-05](/docs/tasks/05-diferencial-de-cartao.md) | Harness de diferencial de memory card | 3 | ferramenta | PES2-TASK-03 | pending | — | — |
+| [PES2-TASK-06](/docs/tasks/06-registro-de-jogador-no-cartao.md) | Estrutura do registro de jogador, pelo cartão | 3 | engenharia-reversa | PES2-TASK-05 | pending | — | — |
+| [PES2-TASK-07](/docs/tasks/07-dump-de-ram-e-casamento.md) | Dump de RAM e casamento com o bloco do disco | 3 | engenharia-reversa | PES2-TASK-06 | pending | — | — |
+| [PES2-TASK-08](/docs/tasks/08-indice-do-bloco-de-nomes.md) | Os 624 candidatos de 16 bits — existe índice para o bloco de nomes? | 3 | engenharia-reversa | — | pending | — | — |
+| [PES2-TASK-09](/docs/tasks/09-os-blocos-extras-de-selectc.md) | Os 25 blocos de nome depois do pool, em `SELECTC.BIN` | 3 | engenharia-reversa | — | pending | — | — |
+| [PES2-TASK-10](/docs/tasks/10-fechamento-fase-3.md) | Fechamento da Fase 3 — o registro de jogador | 3 | closing | PES2-TASK-06, PES2-TASK-07, PES2-TASK-08, PES2-TASK-09 | pending | — | — |
+| [PES2-TASK-11](/docs/tasks/11-elenco-de-time.md) | Elenco por time — que jogador pertence a que clube | 4 | engenharia-reversa | PES2-TASK-10 | pending | — | — |
+| [PES2-TASK-12](/docs/tasks/12-formacoes.md) | Formações — a tabela tática por time | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
+| [PES2-TASK-13](/docs/tasks/13-uniforme-e-cores.md) | Uniforme e cores de time | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
+| [PES2-TASK-14](/docs/tasks/14-bandeiras.md) | Bandeiras — forma e cores | 4 | engenharia-reversa | PES2-TASK-13 | pending | — | — |
+| [PES2-TASK-15](/docs/tasks/15-master-league.md) | Master League — custos, slots e elencos | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
+| [PES2-TASK-16](/docs/tasks/16-fechamento-fase-4.md) | Fechamento da Fase 4 — o resto do banco | 4 | closing | PES2-TASK-11, PES2-TASK-12, PES2-TASK-13, PES2-TASK-14, PES2-TASK-15 | pending | — | — |
+| [PES2-TASK-17](/docs/tasks/17-formato-do-mapa.md) | O formato do `pes2_map.json` | 5 | projeto | PES2-TASK-10 | pending | — | — |
+| [PES2-TASK-18](/docs/tasks/18-mapa-consolidado.md) | `pes2_map.json` — o mapa consolidado | 5 | implementação | PES2-TASK-16, PES2-TASK-17 | pending | — | — |
+| [PES2-TASK-19](/docs/tasks/19-gerador-e-guarda.md) | O gerador — do mapa ao código, com `--check` | 5 | ferramenta | PES2-TASK-18 | pending | — | — |
+| [PES2-TASK-20](/docs/tasks/20-round-trip-pelo-mapa.md) | Round-trip headless pelo mapa | 5 | verificação | PES2-TASK-19 | pending | — | — |
+| [PES2-TASK-21](/docs/tasks/21-fechamento-fase-5.md) | Fechamento da Fase 5 — o portão da Fase 6 | 5 | closing | PES2-TASK-04, PES2-TASK-18, PES2-TASK-20 | pending | — | — |
+| [PES2-TASK-22](/docs/tasks/22-decisao-de-linguagem-e-ui.md) | Decisão de linguagem e UI do editor | 6 | decisão | PES2-TASK-21, PES2-TASK-30 | pending | — | — |
+| [PES2-TASK-23](/docs/tasks/23-editor-leitura.md) | O editor — leitura e exibição | 6 | implementação | PES2-TASK-22 | pending | — | — |
+| [PES2-TASK-24](/docs/tasks/24-editor-gravacao.md) | O editor — gravação | 6 | implementação | PES2-TASK-23 | pending | — | — |
+| [PES2-TASK-25](/docs/tasks/25-verificacao-final.md) | Verificação final — o projeto contra a definição de pronto | 6 | closing | PES2-TASK-24 | pending | — | — |
+| [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | engenharia-reversa | — | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM — 4 e 8 bpp com CLUT | 7 | engenharia-reversa | PES2-TASK-26 | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md) | `T_NAME_I` e `T_NAME_S` — o conjunto de cópias por idioma | 7 | engenharia-reversa | PES2-TASK-27 | pending | — | — |
+| [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail, recompressão só do editado | 7 | ferramenta | PES2-TASK-27 | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — o que o editor precisa mostrar | 7 | verificação | PES2-TASK-27, PES2-TASK-28, PES2-TASK-29 | pending | — | — |
+| [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | engenharia-reversa | — | pending | — | — |
+| [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | decisão | — | done | 2026-09-02 | 2026-09-03 |
+| [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | Compilar o fork e validar o MCP de fato | 0 | decisão | PES2-TASK-32 | done | 2026-09-03 | 2026-09-03 |
+| [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | Rotas MCP no lugar do `drive.py` | 0 | ferramenta | PES2-TASK-33 | done | 2026-09-03 | 2026-09-03 |
+| [PES2-TASK-35](/docs/tasks/35-desbloqueio-de-times.md) | Desbloqueio de times secretos e da lista de Master League, pelo disco | 4 | engenharia-reversa | — | pending | — | — |
+<!-- rite:end -->
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -382,7 +389,7 @@ Vindas de [`../PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) e de erro já pago.
 | Compartilhamento com o `newWe2002` | **conhecimento de formato, nunca código** | o `we2002_core` é a única coisa verificada byte a byte do repositório; um `if` de jogo dentro dele põe isso em risco (§6.9) |
 | Fonte do código de leitura/gravação | **o mapa é o fonte**, o resto é gerado com `--check` | mesma disciplina do `newWe2002`, onde ela pegou dois erros de gerador e um seek trocado |
 | Conteúdo do jogo no git | **nunca** | mapa é fato sobre o formato; tabela copiada de dentro da imagem é conteúdo comercial (§2). Vale para quadro de emulador, save state e dump de RAM |
-| Display | **`:98`, sem exceção** | regra do [CLAUDE.md](../../CLAUDE.md), e a §6.10 do plano diz que não há exceção para este projeto |
+| Display | **`:98`, sem exceção** | regra do [CLAUDE.md](/CLAUDE.md), e a §6.10 do plano diz que não há exceção para este projeto |
 | Asset que não cabe no extent | **fit-or-fail**, e rebuild de ISO fica fora do projeto | o jogo não acha arquivo por nome — as LBAs estão cravadas no MIPS e o buffer de destino continua do tamanho antigo mesmo com o diretório ISO corrigido (§5a do `PLAN-FEATURES`) |
 | Entrada de contêiner não editada | **nunca recomprime** | o compressor do CARP nunca reproduz os bytes da Konami; guardar os originais é o que dá o "abrir e salvar sem editar devolve `cmp` zero" da §0 |
 | Cópias de asset por idioma | **varrido, nunca declarado** | `T_NAME_I` e `T_NAME_S` são byte a byte idênticos; gravar um só repete a §6.1 uma camada acima, e o erro é invisível para quem joga no idioma gravado (§6.12) |

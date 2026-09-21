@@ -4,9 +4,13 @@ title: "Reconciliação do plano, `perfil-looks.md` e os entregáveis"
 type: documentação
 category: fechamento
 phase: 7
-depends_on: ["LOOKS-TASK-19"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §9"
-status: concluído
+depends_on: [LOOKS-TASK-19]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#9"
+reviewed_on: 2026-09-17
+review_commit: null
+done_on: 2026-09-17
+done_commit: bc6c238
 ---
 
 # LOOKS-TASK-20: Reconciliação e fechamento
@@ -93,7 +97,7 @@ disco.
 - [x] A definição de pronto da §0 é percorrida item a item, com o resultado de
       cada um — tabela na própria §0.
 - [x] `python tools/check_tasks.py` verde, e a conferência de link do
-      [.claude/rules/links.md](../../../.claude/rules/links.md) sem linha nova.
+      [.claude/rules/links.md](/.claude/rules/links.md) sem linha nova.
 - [x] `NOTICE.md` conferido contra o que o projeto de fato usou.
 - [x] **O `CLAUDE.md` ganha a seção do `looks`.** Ele descreve cinco
       projetos e não menciona o sexto — nem as duas variáveis da §4.5 do

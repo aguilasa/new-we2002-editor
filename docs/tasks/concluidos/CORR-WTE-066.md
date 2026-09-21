@@ -3,8 +3,12 @@ id: CORR-WTE-066
 title: "Correção: a tabela de endereços atropelados lista um que nunca é alcançado e esconde o quarto"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-33
+severity: high
+done_on: 2026-08-19
+done_commit: 7c055b7
 ---
 
 # CORR-WTE-066: `0x004335f4` é atropelado e não aparece em lugar nenhum

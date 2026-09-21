@@ -3,8 +3,12 @@ id: CORR-WTE-012
 title: "Correção: a §1 do plano diz 300 imports de rtl60/vcl60 (são 267) e chama o TBrowseURL de componente de terceiro, que a §5 do mesmo arquivo já desmente"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-07
+severity: high
+done_on: 2026-08-06
+done_commit: 2110fe1
 ---
 
 # CORR-WTE-012: duas afirmações da §1 que a WTE-TASK-07 mediu e ninguém propagou

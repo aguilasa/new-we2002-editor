@@ -3,8 +3,12 @@ id: CORR-LOOKS-042
 title: "Correção: os quads de cabelo saem uma linha curtos — o jogo desenha v 15 onde o disco guarda 14"
 type: correção
 category: render
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-17
+severity: medium
+done_on: 2026-09-16
+done_commit: 6b6b671
 ---
 
 # CORR-LOOKS-042: a faixa de cabelo é aplicada sobre o `v` do disco, e o jogo reescreve o `v`

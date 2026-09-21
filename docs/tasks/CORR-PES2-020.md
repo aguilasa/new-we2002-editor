@@ -3,8 +3,12 @@ id: CORR-PES2-020
 title: "Correção: a conferência antes da gravação nunca foi vista ficando vermelha"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-29
+severity: low
+done_on: 2026-09-01
+done_commit: 6eb0641
 ---
 
 # CORR-PES2-020: A guarda de "conferir antes do disco" não é exercitada

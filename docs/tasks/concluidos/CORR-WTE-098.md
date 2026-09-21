@@ -3,8 +3,12 @@ id: CORR-WTE-098
 title: "Correção: a §5.1 do plano ainda diz que o preço não precisa de golden, e ele tem um"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-32
+severity: medium
+done_on: 2026-08-24
+done_commit: 9bffd69
 ---
 
 # CORR-WTE-098: a §5.1 do plano ainda diz que o preço não precisa de golden
@@ -24,7 +28,7 @@ Medido desde então, e por duas tasks:
   `MainForm.base_teamClick` — a outra metade da feature — **grava** um byte por
   jogador;
 - a [WTE-TASK-32](/docs/tasks/concluidos/32-preco-do-jogador.md) escreveu o
-  [`golden-22-precos`](../../../wte/tests/roteiros/golden-22-precos.txt) para
+  [`golden-22-precos`](/wte/tests/roteiros/golden-22-precos.txt) para
   medi-lo, e o registrou como gate.
 
 O corpo da própria task já corrige a premissa (*"a régua desta task é dupla:

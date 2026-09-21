@@ -3,8 +3,12 @@ id: CORR-MCR-009
 title: "Correção: a tabela de controles da MCR-TASK-06 descreve o defeito em prosa, e duas das cinco contagens não reproduzem"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-06
+severity: low
+done_on: 2026-09-07
+done_commit: d663d76
 ---
 
 # CORR-MCR-009: o estímulo dos controles negativos não está versionado

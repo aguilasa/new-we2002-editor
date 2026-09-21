@@ -3,8 +3,12 @@ id: CORR-WTE-091
 title: "Correção: o `Original ` da ficha esperava uma mudança de estrutura, e a régua dele precisa ser um par"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: high
+done_on: 2026-08-24
+done_commit: 0d13ab1
 ---
 
 # CORR-WTE-091: `jugador.BitBtn1Click` e a régua diferencial
@@ -40,7 +44,7 @@ nenhum deles.
 ### A mudança de estrutura
 
 `PreencheFicha` e os dois `CAMPOS_*` desceram para
-[`wte/src/wte_ficha.pas`](../../../wte/src/wte_ficha.pas), a unidade neutra que a
+[`wte/src/wte_ficha.pas`](/wte/src/wte_ficha.pas), a unidade neutra que a
 [CORR-WTE-081](/docs/tasks/concluidos/CORR-WTE-081.md) criou — mesma forma que a
 `wte_render2d` estreou e a `wte_tatica` repetiu. A regra de corte do cabeçalho
 daquela unidade vale e foi conferida: veio a rotina inteira e nada do que ela
@@ -62,8 +66,8 @@ Por isso o gate são **dois** roteiros que diferem por um único clique:
 
 | Roteiro | O que faz | Byte em `404748` |
 |---|---|---|
-| [`golden-18-ficha-edicao`](../../../wte/tests/roteiros/golden-18-ficha-edicao.txt) | edita o número de camisa para `7` e grava | `0xc0` |
-| [`golden-19-ficha-original`](../../../wte/tests/roteiros/golden-19-ficha-original.txt) | edita para `7`, clica `Original `, e grava | `0x80` |
+| [`golden-18-ficha-edicao`](/wte/tests/roteiros/golden-18-ficha-edicao.txt) | edita o número de camisa para `7` e grava | `0xc0` |
+| [`golden-19-ficha-original`](/wte/tests/roteiros/golden-19-ficha-original.txt) | edita para `7`, clica `Original `, e grava | `0x80` |
 
 **`0x80` é o valor que a ROM japonesa já tinha ali**, conferido no arquivo
 intocado. O `Original ` não devolveu *um* valor: devolveu **o** valor. Com o

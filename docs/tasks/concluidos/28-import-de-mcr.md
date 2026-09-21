@@ -4,9 +4,13 @@ title: "Import e export de .mcr — memory card do PSX"
 type: implementação
 category: features
 phase: 4
-depends_on: ["WTE-TASK-08", "WTE-TASK-24", "WTE-TASK-27"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §5.2"
-status: concluído
+depends_on: [WTE-TASK-08, WTE-TASK-24, WTE-TASK-27]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-20
+review_commit: null
+done_on: 2026-08-20
+done_commit: f354787
 ---
 
 # WTE-TASK-28: Import de `.mcr`
@@ -45,7 +49,7 @@ gravar **nesta imagem**:
 - **Cópia, sempre.** Cada rodada de golden usa duas cópias de ~474 MB, e `roms/`
   nunca é alvo.
 - **O diff de controle já está medido** e vale aqui igual:
-  [`wte/re/gravacao-controle.md`](../../../wte/re/gravacao-controle.md). Gravar sem
+  [`wte/re/gravacao-controle.md`](/wte/re/gravacao-controle.md). Gravar sem
   editar nada **muda** 22 bytes nesta ROM — katakana virando ASCII. Sem esse
   desconto, toda medição vem contaminada.
 - **O clique não grava; quem grava é o `fseek` seguinte.** O `wte.exe` escreve
@@ -53,8 +57,8 @@ gravar **nesta imagem**:
   gravação mede um oráculo truncado: o harness encerra com `wineserver -k` e o
   buffer se perde. Todo roteiro de gravação tem de terminar com uma troca de
   time — a descarga — e só então a marca de corte. Medido com o par
-  [`27-descarga-sem.txt`](../../../wte/tests/roteiros/27-descarga-sem.txt) /
-  [`27-descarga-com.txt`](../../../wte/tests/roteiros/27-descarga-com.txt); sem
+  [`27-descarga-sem.txt`](/wte/tests/roteiros/27-descarga-sem.txt) /
+  [`27-descarga-com.txt`](/wte/tests/roteiros/27-descarga-com.txt); sem
   repetir isso aqui, o golden desta task nasceria com o defeito que a primeira
   passagem da 27 levou oito dias para achar.
 
@@ -126,11 +130,11 @@ arquivo** — é o golden test desta feature.
 | `wte/src/impl/ep2002_mainform.boton_mcr{,2iso}Click.inc` | criar — feito |
 
 *(2026-08-20)* A fixture **não é versionada**, e a decisão está escrita no
-[`mcr.md`](../../../wte/re/mcr.md): 128 KiB de nomes e atributos tirados da ROM são
+[`mcr.md`](/wte/re/mcr.md): 128 KiB de nomes e atributos tirados da ROM são
 dado do jogo, e este repositório não versiona dado do jogo — nem `roms/`, nem
 `we-team-editor/`. O que entra no git é a **medição**; quem quiser refazer gera
 o cartão com o próprio original, pelo roteiro
-[`27-mcr.txt`](../../../wte/tests/roteiros/27-mcr.txt). É o mesmo arranjo do
+[`27-mcr.txt`](/wte/tests/roteiros/27-mcr.txt). É o mesmo arranjo do
 `work/ml-jp.bin` da [WTE-TASK-33](/docs/tasks/concluidos/33-slots-de-master-league.md).
 
 ---
@@ -145,7 +149,7 @@ o cartão com o próprio original, pelo roteiro
       (`SLPM-86600` é a japonesa do gate) e declara 16.384 bytes nos blocos 1 e 2
 - [x] **Conteúdo do bloco do WE2002 mapeado** — 17 destinos, os dois lados
       (`0x0040f150` escreve, `0x0040b9ec` lê), em
-      [`wte/re/mcr.md`](../../../wte/re/mcr.md). Duas tabelas do `.exe` entram como
+      [`wte/re/mcr.md`](/wte/re/mcr.md). Duas tabelas do `.exe` entram como
       guard: a de cobradores (`0x00423F84`) e a de deslocamentos de bit
       (`0x0042360C`), e o gerador recusa se qualquer uma deixar de bater
 - [x] **Fixtures geradas pelo original, não à mão** — pelo roteiro `27-mcr.txt`,
@@ -156,7 +160,7 @@ o cartão com o próprio original, pelo roteiro
 - [x] **Os três casos especiais do readme cobertos por teste**, e cada um por
       um instrumento diferente, porque cada um mora num lugar diferente. O mapa
       está na seção "Os três casos especiais" de
-      [`wte/re/mcr.md`](../../../wte/re/mcr.md):
+      [`wte/re/mcr.md`](/wte/re/mcr.md):
       **capitão e cobradores** — a tabela `0x00423F84` não é crescente e o
       capitão mora sozinho em `0x6500`; provado em `test_mcr.pas` sobre cartão
       sintético, plantando pelos endereços **literais** (plantar pela mesma
@@ -174,20 +178,20 @@ o cartão com o próprio original, pelo roteiro
       meio); um leitor de cadeia foi escrito de propósito e reprovou
 - [x] **Round-trip export/import estável, e o resultado é forte:** cartão →
       imagem → cartão sai **byte-idêntico**, os 131.072. Medido no lado oráculo
-      do [`golden-13-roundtrip`](../../../wte/tests/roteiros/golden-13-roundtrip.txt)
+      do [`golden-13-roundtrip`](/wte/tests/roteiros/golden-13-roundtrip.txt)
       e versionado em `wte/re/mcr-roundtrip.tsv` — seis campos, zero divergência
       em cada um, e o arquivo inteiro junto. A comparação é campo a campo (e não
       fatia crua) porque os dois cartões herdam a mesma folga do molde, que
       responderia pelo dado
 - [x] **Export do app byte-idêntico ao export do original** — é o
-      [`golden-07-mcr`](../../../wte/tests/roteiros/golden-07-mcr.txt) com
+      [`golden-07-mcr`](/wte/tests/roteiros/golden-07-mcr.txt) com
       `--artefato saida.mcr`, que compara o `.mcr` que cada lado emite além das
       duas imagens. **PASSOU: byte-idêntico**, e voltou a passar em 2026-08-20
       depois de o layout mudar de casa para o `we2002_mcr`
 - [x] **`boton_mcr2isoClick` com spec e golden verde na ROM japonesa** —
       spec em `wte/re/spec/MainForm.boton_mcr2isoClick.md`, Pascal em
       `ep2002_mainform.boton_mcr2isoClick.inc`, e o
-      [`golden-12-mcr2iso`](../../../wte/tests/roteiros/golden-12-mcr2iso.txt)
+      [`golden-12-mcr2iso`](/wte/tests/roteiros/golden-12-mcr2iso.txt)
       **PASSOU: byte-idêntico**, com o controle fechando antes. Gravação e
       origem dos bytes fecharam na mesma task, como a divisão de 2026-08-19
       previa
@@ -197,7 +201,7 @@ o cartão com o próprio original, pelo roteiro
       decisão e não consequência. **Medido, não é.** O `boton_mcr2iso` grava
       sete faixas e **todas caem dentro do payload de 2048 B** — a maior tem
       276 bytes. A conta é a mesma do
-      [`gravacao_controle.py`](../../../wte/tools/gravacao_controle.py), que
+      [`gravacao_controle.py`](/wte/tools/gravacao_controle.py), que
       absorveu a sonda nova sozinha: **164 faixas em 12 sessões**, nenhuma
       tocando byte de EDC/ECC nem de cabeçalho de setor.
 
@@ -290,7 +294,7 @@ no gerador (o `.inc` é escrito à mão).
   trabalho.** O contêiner saiu da documentação pública do memory card do PSX —
   16 blocos de 8192, bloco 0 com o cabeçalho `MC` e 15 quadros de diretório de
   128 B, códigos de estado `0x51`/`0x52`/`0x53`/`0xA0` — e o
-  [`dump_mcr.py`](../../../wte/tools/dump_mcr.py) **lê** o diretório do molde em
+  [`dump_mcr.py`](/wte/tools/dump_mcr.py) **lê** o diretório do molde em
   vez de supô-lo. O save se chama `BISLPM-86600WEW-OPT`, e `SLPM-86600` é
   exatamente a ROM japonesa que o gate usa.
 

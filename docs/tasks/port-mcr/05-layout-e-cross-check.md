@@ -4,9 +4,13 @@ title: "`layout.py` e o cross-check dos 17 destinos"
 type: implementação
 category: núcleo
 phase: 1
-depends_on: ["MCR-TASK-04"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §1.2"
-status: concluído
+depends_on: [MCR-TASK-04]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#1.2"
+reviewed_on: 2026-09-07
+review_commit: null
+done_on: 2026-09-07
+done_commit: 860c05b
 ---
 
 # MCR-TASK-05: Os endereços, e a única fonte deles
@@ -15,7 +19,7 @@ status: concluído
 
 - **Referência:** [`/docs/PLAN-MCR-PY.md`](/docs/PLAN-MCR-PY.md) §1.2 e §3.3
   (Regra 1).
-- Os 17 destinos estão medidos em [`../wte/re/mcr.md`](../../../wte/re/mcr.md),
+- Os 17 destinos estão medidos em [`../wte/re/mcr.md`](/wte/re/mcr.md),
   do `we-team-editor.exe`. O upstream chega **independentemente** aos mesmos
   números onde as duas listas se tocam — 21508, 22788 passo 32, os cinco
   cobradores, 25256/25266/25557.

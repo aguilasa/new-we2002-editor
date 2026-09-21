@@ -3,8 +3,12 @@ id: CORR-LOOKS-028
 title: "Correção: o `draw_list` joga fora a segunda faixa que o `HAIR_MAP` mediu, e não diz"
 type: correção
 category: núcleo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-14
+severity: high
+done_on: 2026-09-16
+done_commit: c9b5cf9
 ---
 
 # CORR-LOOKS-028: a segunda faixa do cabelo é descartada em silêncio

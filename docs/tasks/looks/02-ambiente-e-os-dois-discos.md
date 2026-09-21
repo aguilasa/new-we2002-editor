@@ -4,9 +4,13 @@ title: "Ambiente — o venv, os dois discos e seus papéis, e a armadilha do MSY
 type: infraestrutura
 category: ambiente
 phase: 0
-depends_on: ["LOOKS-TASK-01"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §4"
-status: concluído
+depends_on: [LOOKS-TASK-01]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#4"
+reviewed_on: 2026-09-14
+review_commit: null
+done_on: 2026-09-14
+done_commit: f6db86f
 ---
 
 # LOOKS-TASK-02: O ambiente, e a divisão entre os dois discos

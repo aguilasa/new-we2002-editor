@@ -4,9 +4,13 @@ title: "Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano"
 type: documentação
 category: fechamento
 phase: 11
-depends_on: ["LOOKS-TASK-23", "LOOKS-TASK-29", "LOOKS-TASK-30", "LOOKS-TASK-31", "LOOKS-TASK-34", "LOOKS-TASK-36", "LOOKS-TASK-37", "LOOKS-TASK-38", "LOOKS-TASK-39", "LOOKS-TASK-40"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.5"
-status: pendente
+depends_on: [LOOKS-TASK-23, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-34, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40]
+status: pending
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.5"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # LOOKS-TASK-35: Fechamento da v2

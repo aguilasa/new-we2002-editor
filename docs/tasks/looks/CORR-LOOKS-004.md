@@ -3,8 +3,12 @@ id: CORR-LOOKS-004
 title: "Correção: a LOOKS-TASK-18 se contradiz sobre as 50 tuplas em dois bullets seguidos"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-01
+severity: low
+done_on: 2026-09-14
+done_commit: b6c5575
 ---
 
 # CORR-LOOKS-004: a LOOKS-TASK-18 se contradiz sobre as 50 tuplas em dois bullets seguidos

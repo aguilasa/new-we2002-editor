@@ -3,15 +3,19 @@ id: CORR-WTE-008
 title: "Correção: o decodificador de instrução x86 do dump_strings.py só foi conferido à mão, e a coluna `handler` inteira depende dele"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-05
+severity: low
+done_on: 2026-08-06
+done_commit: a4cbc67
 ---
 
 # CORR-WTE-008: a conferência que sustenta a coluna `handler` não tem rota de volta
 
 ## Problema identificado
 
-A coluna `handler` do [`strings.tsv`](../../../wte/re/strings.tsv) não sai de nenhuma
+A coluna `handler` do [`strings.tsv`](/wte/re/strings.tsv) não sai de nenhuma
 tabela do binário: ela sai de **medir onde cada um dos 96 handlers termina**, e
 isso exige um decodificador de comprimento de instrução x86-32 escrito à mão em
 `wte/tools/dump_strings.py` (`decode()`, `extent()`, ~200 linhas de tabela de
@@ -91,7 +95,7 @@ teste de ferramenta Python, e ficou como parágrafo em vez de arquivo.
 ### Arquivo: `wte/tools/test_dump_strings.py`
 
 `unittest` de stdlib pura, no molde do
-[`test_dfm_extract.py`](../../../wte/tools/test_dfm_extract.py). Duas metades:
+[`test_dfm_extract.py`](/wte/tools/test_dfm_extract.py). Duas metades:
 
 1. **Comprimento por caso, sem o `.exe`.** Uma tabela de (bytes, comprimento
    esperado) cobrindo o que a `.text` do Obocaman exercita e o que ela não

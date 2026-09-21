@@ -3,8 +3,12 @@ id: CORR-WTE-047
 title: "Correção: a segunda régua (`cmp`) das sessões 10 e 11 não ficou registrada em lugar nenhum"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-19
+severity: low
+done_on: 2026-08-10
+done_commit: 25db58b
 ---
 
 # CORR-WTE-047: as sessões que deram 18 dos 33 offsets não têm o resultado da conferência das duas réguas
@@ -25,7 +29,7 @@ nenhum:
 
 - o `cmp.tsv` de cada corrida fica no diretório de saída da sessão, que **não é
   versionado** — só o `io.tsv` (o trace) foi fundido em
-  [`wte/re/io-medido.tsv`](../../../wte/re/io-medido.tsv);
+  [`wte/re/io-medido.tsv`](/wte/re/io-medido.tsv);
 - o Log da 5ª passagem não traz o número, ao contrário do da 4ª;
 - o `offsets-novos.md` gerado cita o `cmp` só na seção do método, nunca como
   resultado dessas duas sessões.

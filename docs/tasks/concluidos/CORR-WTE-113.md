@@ -3,8 +3,12 @@ id: CORR-WTE-113
 title: "Correção: `golden_suite.sh --roteiro` trunca o `golden.tsv` inteiro — 96 corridas viram zero"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-37
+severity: high
+done_on: 2026-08-25
+done_commit: ea72428
 ---
 
 # CORR-WTE-113: `--roteiro` sem `--retomar` apaga a bateria inteira
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 Rodar a bateria filtrada por um roteiro **destrói o registro dos outros**. O
-[`golden_suite.sh`](../../../wte/tools/golden_suite.sh) reescreve o cabeçalho do
+[`golden_suite.sh`](/wte/tools/golden_suite.sh) reescreve o cabeçalho do
 TSV sempre que `--retomar` não é passado, e faz isso **antes de qualquer
 corrida**:
 

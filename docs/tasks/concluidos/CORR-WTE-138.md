@@ -3,8 +3,12 @@ id: CORR-WTE-138
 title: "Correção: os ids 69 e 86 do item 2 da §8.8 estão marcados sem terem sido medidos"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-07
+severity: low
+done_on: 2026-08-31
+done_commit: 98658e9
 ---
 
 # CORR-WTE-138: dois dos ids sem bandeira própria nunca foram à tela
@@ -30,7 +34,7 @@ if(id>0 && id<64)   { ... squad_nazall[id-1] ... }
 if(id>63 && id<96)  { ... squad_ml[id-64] ... }
 ```
 
-O port faz o mesmo em [`src/app/Commands.cpp:65`](../../../src/app/Commands.cpp),
+O port faz o mesmo em [`src/app/Commands.cpp:65`](/src/app/Commands.cpp),
 com `db_.teams[id-1]` e `db_.ml_teams[id-64]`. Medir 57..63 não exercita esse
 segundo caminho, e é justamente por ele que 69 e 86 passam.
 

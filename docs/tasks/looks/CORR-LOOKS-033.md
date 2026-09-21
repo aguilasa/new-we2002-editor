@@ -3,8 +3,12 @@ id: CORR-LOOKS-033
 title: "Correção: a §6(c) do plano ainda se declara medida em parte, com a task pendente"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-14
+severity: low
+done_on: 2026-09-16
+done_commit: 38705b2
 ---
 
 # CORR-LOOKS-033: a fonte de verdade da LOOKS-TASK-14 diz que ela não fechou
@@ -108,3 +112,4 @@ Nenhum.
 - `docs/PLAN-LOOKS-PY.md` — o cabeçalho da §6(c) e a lista de resíduos
 - `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
 - `docs/tasks/looks/CORR-LOOKS-033.md` — este arquivo
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

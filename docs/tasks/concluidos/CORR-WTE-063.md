@@ -3,8 +3,12 @@ id: CORR-WTE-063
 title: "Correção: cara, cabelo e barba da ficha não têm dono em nenhuma das 40 tasks"
 type: correção
 category: escopo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-26
+severity: high
+done_on: 2026-08-18
+done_commit: 66393d1
 ---
 
 # CORR-WTE-063: uma exclusão de escopo sem dono nomeado
@@ -39,7 +43,7 @@ $ grep -ciE "careto|pelo|barba" docs/tasks/29-camisa-e-bandeira-2d.md
 ```
 
 O que elas fazem já está medido, na §5 e na §6 do
-[`wte/re/assets.md`](../../../wte/re/assets.md): as três abrem o `.bmp` em `"r+b"` e
+[`wte/re/assets.md`](/wte/re/assets.md): as três abrem o `.bmp` em `"r+b"` e
 **regravam a paleta dentro do arquivo de asset** antes de recarregá-lo. Mexer
 numa seta de cabelo altera o arquivo que todos os jogadores compartilham — e a
 marca disso está no `mtime` da pasta do usuário.
@@ -76,7 +80,7 @@ dentro do log de uma task concluída.
 - [`docs/tasks/concluidos/29-camisa-e-bandeira-2d.md`](/docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)
   ou [`docs/tasks/concluidos/35-divergencias-deliberadas.md`](/docs/tasks/concluidos/35-divergencias-deliberadas.md),
   conforme a decisão
-- [`wte/re/spec/jugador.flechasapaClick.md`](../../../wte/re/spec/jugador.flechasapaClick.md)
+- [`wte/re/spec/jugador.flechasapaClick.md`](/wte/re/spec/jugador.flechasapaClick.md)
   — a nota "sem dono" passa a apontar para o dono
 
 ---

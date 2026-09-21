@@ -3,8 +3,12 @@ id: CORR-MCR-026
 title: "Correção: a regra da soma é creditada a sete cartões independentes e dois de terceiros, e a medição dá seis padrões distintos e um de terceiro"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-17
+severity: high
+done_on: 2026-09-10
+done_commit: 928bd81
 ---
 
 # CORR-MCR-026: sete cartões independentes, dos quais três são o mesmo arquivo
@@ -30,7 +34,7 @@ acima (:163, "`a1`, `a2` e o `we2002-ptbr-first-boot.mcr` são o mesmo md5"):
    distintos**. E "os quatro acima" nomeia **cinco** rótulos (`a1`, `a2`,
    `b-nome`, `c-opcao`, `c-opcao2`).
 2. **Só um cartão é de terceiro**, o `29939`. O
-   [`mcr/README.md`](../../../mcr/README.md):184 diz do outro candidato, em
+   [`mcr/README.md`](/mcr/README.md):184 diz do outro candidato, em
    letra: o `we2002-english-first-boot.mcr` "não veio de pacote de terceiro nem
    de editor".
 

@@ -3,8 +3,12 @@ id: CORR-WTE-055
 title: "Correção: a WTE-TASK-24 chama de 322 os imports de `rtl60`/`vcl60`, e eles são 267"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-24
+severity: low
+done_on: 2026-08-11
+done_commit: 602218d
 ---
 
 # CORR-WTE-055: 322 é o total de imports, não o das duas BPLs — e o Log da própria task diz 267
@@ -123,3 +127,4 @@ primeira vez.
 | `docs/tasks/concluidos/07-unidades-duvidosas.md` | modificado — a linha de contexto |
 | `docs/tasks/concluidos/CORR-WTE-055.md` | `status: concluído` e este Log |
 | `docs/tasks/concluidos/correcoes-progresso.md` | `[x]` na tabela e no checklist |
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

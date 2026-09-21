@@ -4,9 +4,13 @@ title: "Bateria golden completa — toda gravação, nas duas ROMs"
 type: verificação
 category: verificação
 phase: 6
-depends_on: ["WTE-TASK-31", "WTE-TASK-32", "WTE-TASK-33"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 6 item 1 e §0 (definição de pronto, item 2)"
-status: concluído
+depends_on: [WTE-TASK-31, WTE-TASK-32, WTE-TASK-33]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-25
+review_commit: null
+done_on: 2026-08-25
+done_commit: 8cfd02b
 ---
 
 # WTE-TASK-34: Bateria golden completa
@@ -53,7 +57,7 @@ vaivém, a segunda gravação diverge mesmo com a primeira idêntica.
 > mediu o terceiro ponto num time onde a troca seria visível: uma gravação e
 > duas dão a **mesma** imagem, e os cobradores saem intactos. O `wte.exe` não
 > tem o vaivém — é resultado negativo, registrado em
-> [`golden.md`](../../../wte/re/golden.md).
+> [`golden.md`](/wte/re/golden.md).
 
 ### Custo
 
@@ -99,15 +103,15 @@ ferramenta nenhuma.
 
 - [x] Toda operação de gravação na bateria, nas duas ROMs — **92 corridas,
       23 roteiros × 2 ROMs × 2 modos**, registro em
-      [`wte/re/golden.tsv`](../../../wte/re/golden.tsv). Na japonesa, **46 de 46
+      [`wte/re/golden.tsv`](/wte/re/golden.tsv). Na japonesa, **46 de 46
       `PASSOU`**. Na europeia, **2 `PASSOU`, 22 `SEM_ORACULO`, 22
       `NAO_APLICAVEL`, e zero `REPROVOU`** — ver o critério seguinte e a
       ressalva abaixo
 - [x] Edição múltipla antes de gravar coberta —
-      [`golden-23-multiplas-edicoes`](../../../wte/tests/roteiros/golden-23-multiplas-edicoes.txt),
+      [`golden-23-multiplas-edicoes`](/wte/tests/roteiros/golden-23-multiplas-edicoes.txt),
       controle 143 s / golden 134 s na japonesa
 - [x] Gravação dupla coberta —
-      [`golden-24-gravacao-dupla`](../../../wte/tests/roteiros/golden-24-gravacao-dupla.txt),
+      [`golden-24-gravacao-dupla`](/wte/tests/roteiros/golden-24-gravacao-dupla.txt),
       controle 157 s / golden 145 s. **A segunda metade do critério não foi
       provada, e está registrada como pendência abaixo:** o roteiro prova que
       os dois lados chegam ao mesmo byte depois de duas gravações de tática —
@@ -116,7 +120,7 @@ ferramenta nenhuma.
       fala é do `ed.exe` (`Load`+`Save` em clubes de ML), e o `wte.exe` do
       Obocaman é outro binário e outro caminho de código
 - [x] Tabela de resultado completa, sem célula vazia —
-      [`wte/re/golden.md`](../../../wte/re/golden.md), 23 linhas × 2 ROMs. A
+      [`wte/re/golden.md`](/wte/re/golden.md), 23 linhas × 2 ROMs. A
       guarda 2 do `check_golden.py` **aborta** se um roteiro com par em disco
       ficar fora do TSV
 - [x] Temporário limpo; `roms/` intocada — cada corrida faz duas cópias em
@@ -129,10 +133,10 @@ ferramenta nenhuma.
 
 - **Resumo do que foi feito:**
 
-  A bateria virou ferramenta: [`golden_suite.sh`](../../../wte/tools/golden_suite.sh)
-  roda a lista inteira, e [`check_golden.py`](../../../wte/tools/check_golden.py)
-  publica [`golden.md`](../../../wte/re/golden.md) a partir do
-  [`golden.tsv`](../../../wte/re/golden.tsv) que ela escreve. Até aqui a bateria
+  A bateria virou ferramenta: [`golden_suite.sh`](/wte/tools/golden_suite.sh)
+  roda a lista inteira, e [`check_golden.py`](/wte/tools/check_golden.py)
+  publica [`golden.md`](/wte/re/golden.md) a partir do
+  [`golden.tsv`](/wte/re/golden.tsv) que ela escreve. Até aqui a bateria
   era o `golden_check.sh` mais um operador — 42 invocações à mão e o resultado
   transcrito depois. Duas coisas não sobrevivem a esse arranjo: a reprodução (a
   próxima pessoa não sabe a lista nem a ordem) e a fixture (o operador aponta
@@ -147,7 +151,7 @@ ferramenta nenhuma.
   golden ali, byte-idêntico. A leitura em bloco que o projeto carregava desde
   2026-08-18 — *"a europeia não hospeda o oráculo"* — tinha sido medida sobre
   **um** roteiro, e aquele roteiro trocava de time. O recorte certo é mecânico e
-  já estava no [`crash-causa.md`](../../../wte/re/crash-causa.md): sem a troca, a
+  já estava no [`crash-causa.md`](/wte/re/crash-causa.md): sem a troca, a
   carga não escreve além do fim da tabela de `0x00433580`, o ponteiro de
   `dorsal1` não vira `0x00010001`, e o `wte.exe` não cai. Vinte e dois dos vinte
   e três roteiros trocam de time, então a conclusão prática não muda — mas ela
@@ -158,7 +162,7 @@ ferramenta nenhuma.
 
   **O gate classificava travamento do oráculo como divergência do port, e a
   correção é da fase 4 achada pela fase 6.** O
-  [`golden_run_wte.sh`](../../../wte/tools/golden_run_wte.sh) varre o log do Wine
+  [`golden_run_wte.sh`](/wte/tools/golden_run_wte.sh) varre o log do Wine
   atrás de `c0000005` **depois** de executar o roteiro. Sob `set -e`, um roteiro
   que não consegue dirigir devolve 1 e aborta o script **antes** da varredura —
   e na europeia é exatamente o que acontece: o oráculo trava ao trocar de time e
@@ -212,7 +216,7 @@ ferramenta nenhuma.
   > modo que a comparação **não podia** dar resposta. Movido para o time 5 e
   > medido, o terceiro ponto fecha em **0 bytes** entre uma gravação e duas,
   > com os cobradores intactos nos três estados — **resultado negativo**. Está
-  > escrito em [`golden.md`](../../../wte/re/golden.md), como este parágrafo pedia.
+  > escrito em [`golden.md`](/wte/re/golden.md), como este parágrafo pedia.
 
 - **Arquivos criados/modificados:** ver `git show --stat`. Criados:
   `wte/tools/golden_suite.sh`, `wte/tools/check_golden.py`,

@@ -3,8 +3,12 @@ id: CORR-WTE-111
 title: "Correção: o campo `faixa` do CAMPOS é dado morto, e dois dos quatro valores contradizem o medido"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-36
+severity: low
+done_on: 2026-08-25
+done_commit: a6af0a2
 ---
 
 # CORR-WTE-111: `faixa` no `CAMPOS` — ninguém lê, e dois estão errados
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 A tabela `CAMPOS` do
-[`dump_buffers.py`](../../../wte/tools/dump_buffers.py) declara uma chave `faixa`
+[`dump_buffers.py`](/wte/tools/dump_buffers.py) declara uma chave `faixa`
 nos quatro campos de texto. **Nada a lê.** Os limites publicados saem de
 `lim_min`/`lim_max`, que o gerador **mede** das tabelas
 `TEAM_NAME_KANJI_LEN` e `TEAM_NAME_LEN_3`; a `faixa` fica na estrutura sem
@@ -91,7 +95,7 @@ Duas saídas, e a escolha muda o que a chave significa:
 
 1. **Apagar a chave dos quatro** — é a mais simples e a que o resto do arquivo
    já pratica: o limite é medido, não declarado. O banner do
-   [`buffers.md`](../../../wte/re/buffers.md) diz *"todo número daqui saiu do
+   [`buffers.md`](/wte/re/buffers.md) diz *"todo número daqui saiu do
    script"*, e dado declarado ao lado de dado medido enfraquece a frase.
 2. **Mantê-la como expectativa, e conferi-la** — vira `esperado`, e o gerador
    **aborta** quando o medido sai dela, com a mensagem dizendo os dois números.

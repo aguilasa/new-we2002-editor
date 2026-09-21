@@ -4,9 +4,13 @@ title: "Estrutura do registro de jogador, pelo cartão"
 type: engenharia-reversa
 category: formato
 phase: 3
-depends_on: ["PES2-TASK-05"]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §5 (Fase 3)"
-status: pendente
+depends_on: [PES2-TASK-05]
+status: pending
+source_of_truth: "/docs/PLAN-PES2-PSX.md#5"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-06: Estrutura do registro de jogador, pelo cartão

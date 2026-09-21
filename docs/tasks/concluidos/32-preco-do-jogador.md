@@ -4,9 +4,13 @@ title: "Preço derivado dos atributos — jogador e time inteiro"
 type: implementação
 category: features
 phase: 5
-depends_on: ["WTE-TASK-24", "WTE-TASK-25"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §5.1"
-status: concluído
+depends_on: [WTE-TASK-24, WTE-TASK-25]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-24
+review_commit: null
+done_on: 2026-08-24
+done_commit: 04182fd
 ---
 
 # WTE-TASK-32: Preço do jogador
@@ -68,7 +72,7 @@ O `base_teamClick` chegou nesta lista pela WTE-TASK-30, que implementou a
 **moldura** dele — posicionar o `ficha_creditos_equipo`, mostrá-lo e desistir
 em `mrCancel` — e deixou o miolo aqui, com o veredito `aberto` e o dono
 nomeado. A spec medida está em
-[`wte/re/spec/MainForm.base_teamClick.md`](../../../wte/re/spec/MainForm.base_teamClick.md)
+[`wte/re/spec/MainForm.base_teamClick.md`](/wte/re/spec/MainForm.base_teamClick.md)
 e já traz a faixa de endereços da fórmula (`0x004110E7`..`0x0041112A`), as
 constantes que aparecem nela (`0x2DC6C0`, `0x9C40`, `0x2BC`, `7`, `+5`) e a
 variante `× 5 div 3` de `0x00411142`.
@@ -119,7 +123,7 @@ original, jogador a jogador.
 > da feature, o `MainForm.base_teamClick`, **grava** um byte por jogador. A
 > régua desta task é dupla — tela para a fórmula, byte para o time inteiro —, e
 > o golden de byte é o
-> [`golden-22-precos`](../../../wte/tests/roteiros/golden-22-precos.txt). O
+> [`golden-22-precos`](/wte/tests/roteiros/golden-22-precos.txt). O
 > enunciado fica como foi escrito; a §5.1 do plano, que dizia o mesmo, foi
 > corrigida pela [CORR-WTE-098](/docs/tasks/concluidos/CORR-WTE-098.md).
 
@@ -149,13 +153,13 @@ arquivo.
 ## Critério de conclusão
 
 - [x] Fórmula recuperada por tabela de verdade — **132 jogadores, 6 times**,
-      em [`wte/re/preco.tsv`](../../../wte/re/preco.tsv)
+      em [`wte/re/preco.tsv`](/wte/re/preco.tsv)
 - [x] Fórmula conferida contra o disassembly, e as duas fontes concordando —
       e são **três**: os dois handlers foram lidos instrução a instrução e são
       a mesma fórmula compilada duas vezes (`0x004110e7`..`0x0041112a` e
       `0x00408c3b`..`0x00408c83`)
 - [x] Saturação, arredondamento e termo cruzado testados explicitamente —
-      [`test_preco.pas`](../../../wte/tests/test_preco.pas), 12 conferências. A
+      [`test_preco.pas`](/wte/tests/test_preco.pas), 12 conferências. A
       saturação é **transbordo de 32 bits**, e o ponto de virada foi medido:
       soma **216**
 - [x] Cálculo do time inteiro conferido, não presumido soma — não é soma: é a
@@ -178,7 +182,7 @@ arquivo.
 
   A fórmula é `s⁴ div 3000000 + s³ div 40000 + s² div 700 + s div 7 + 5`, com
   `× 5 div 3` para goleiro, sobre a soma das dezesseis barras de habilidade. Ela
-  está inteira em [`wte/re/preco.md`](../../../wte/re/preco.md). **Com ela, a fase
+  está inteira em [`wte/re/preco.md`](/wte/re/preco.md). **Com ela, a fase
   4 fechou: 96 de 96 vereditos.**
 
   **O método rendeu mais que o previsto, e por uma troca.** A task manda montar

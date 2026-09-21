@@ -4,9 +4,13 @@ title: "A casca Qt: janela, elenco e ficha em leitura"
 type: implementação
 category: ui
 phase: 3
-depends_on: ["MCR-TASK-10"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §3"
-status: concluído
+depends_on: [MCR-TASK-10]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#3"
+reviewed_on: 2026-09-08
+review_commit: null
+done_on: 2026-09-08
+done_commit: 0dce63e
 ---
 
 # MCR-TASK-11: A UI em leitura

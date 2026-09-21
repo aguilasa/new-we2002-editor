@@ -3,8 +3,12 @@ id: CORR-WTE-053
 title: "Correção: a seção 2 da WTE-TASK-22 descreve o controle como uma faixa só, e o gate declara nove"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-22
+severity: low
+done_on: 2026-08-11
+done_commit: 602218d
 ---
 
 # CORR-WTE-053: 11.952 bytes numa faixa contra 11.955 em nove, e nenhum dos dois diz de qual imagem fala
@@ -196,3 +200,4 @@ verdade, e é dele que sai o `PASSOU` acima.
 | `wte/re/visual.md` | modificado — o tamanho por imagem, e o achado 2 rotulado como europeu |
 | `docs/tasks/concluidos/CORR-WTE-053.md` | `status: concluído` e este Log |
 | `docs/tasks/concluidos/correcoes-progresso.md` | `[x]` na tabela e no checklist |
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

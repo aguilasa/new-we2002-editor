@@ -3,8 +3,12 @@ id: CORR-WTE-133
 title: "Correção: os dois lados liam defaultlook.txt diferentes — fixture do oráculo fora de sincronia"
 type: correção
 category: paridade
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-08
+severity: medium
+done_on: 2026-09-01
+done_commit: 57d88ea
 ---
 
 # CORR-WTE-133: o "reset def. look" diverge em 92 bytes
@@ -16,7 +20,7 @@ depends_on: []
 
 Medido em 2026-09-01 na `ptbr-remaster.bin`, pela
 [PAR-TASK-08](/docs/tasks/concluidos/PAR-TASK-08.md) item 4, com
-[`tools/par/8.9-reset-look.sh`](../../../tools/par/8.9-reset-look.sh):
+[`tools/par/8.9-reset-look.sh`](/tools/par/8.9-reset-look.sh):
 
 ```text
 FALHOU: 4 divergencia(s) nao esperada(s):

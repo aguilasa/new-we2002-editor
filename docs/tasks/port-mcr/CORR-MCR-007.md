@@ -3,8 +3,12 @@ id: CORR-MCR-007
 title: "Correção: retraduzir o `card.py` para en-US e fechar a dívida aberta da §3.5"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-04
+severity: medium
+done_on: 2026-09-07
+done_commit: 0d45b8e
 ---
 
 # CORR-MCR-007: o `card.py` é anterior à regra de idioma

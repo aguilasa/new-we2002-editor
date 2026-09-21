@@ -3,8 +3,12 @@ id: CORR-WTE-049
 title: "Correção: o parágrafo de dependência da WTE-TASK-20 troca as duas populações de offset, e cita a 19 como bloqueada"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-20
+severity: low
+done_on: 2026-08-10
+done_commit: 691a025
 ---
 
 # CORR-WTE-049: os 36 "que o `we2002_core` não tem" são justamente os que ele tem
@@ -25,7 +29,7 @@ seis critérios da 20 toca o oráculo A. O texto é que tem dois defeitos.
 Os "36 restantes" saem dos **50 `OFS_*` que a WTE-TASK-06 marcou `ausente`**, e
 esses 50 são nomes do **nosso** `src/core/include/we2002/Offsets.hpp` — a
 tabela de vereditos do
-[`offsets-novos.md`](../../../wte/re/offsets-novos.md) tem `Offsets.hpp` como
+[`offsets-novos.md`](/wte/re/offsets-novos.md) tem `Offsets.hpp` como
 primeira coluna. `ausente` ali quer dizer *não casa com a tabela em `.data` do
 `wte.exe`*, não *falta no `we2002_core`*. Existe **lado C++ para todos os 50**.
 

@@ -3,8 +3,12 @@ id: CORR-LOOKS-017
 title: "Correção: sem `WE2002_LOOKS_IMAGE` o `--check-live` sobe o emulador e morre num traceback, em vez de pular com 77"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-07
+severity: medium
+done_on: 2026-09-14
+done_commit: 7065d1f
 ---
 
 # CORR-LOOKS-017: o quarto pré-requisito do `--check-live` não tem caminho de skip

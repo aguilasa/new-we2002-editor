@@ -3,15 +3,19 @@ id: CORR-WTE-026
 title: "Correção: a coluna VCL da tabela do achado 2 não foi medida, e a tabela se anuncia inteira como medida"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-13
+severity: low
+done_on: 2026-08-10
+done_commit: 35c2002
 ---
 
 # CORR-WTE-026: metade da tabela de semântica de sinal é memória, não medida
 
 ## Problema identificado
 
-O achado 2 do [`wte/re/eventos.md`](../../../wte/re/eventos.md) abre com
+O achado 2 do [`wte/re/eventos.md`](/wte/re/eventos.md) abre com
 **"Medido no fonte da LCL 3.0 instalada:"** e logo abaixo vem uma tabela de
 três colunas — `VCL/Win32 (2002)`, `LCL/GTK2 3.0` e `Diverge?`.
 

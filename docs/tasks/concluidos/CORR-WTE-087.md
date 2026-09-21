@@ -3,8 +3,12 @@ id: CORR-WTE-087
 title: "Correção: o Log da WTE-TASK-30 conta 12 .inc novos e 6 .uses tocados; são 11 e 5"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-30
+severity: low
+done_on: 2026-08-23
+done_commit: 85bc04f
 ---
 
 # CORR-WTE-087: o Log da WTE-TASK-30 conta 12 `.inc` novos, e são 11
@@ -23,7 +27,7 @@ na mesma frase — é **modificado**, não novo, e é ele que faz o total de cor
 tocados dar doze; contado como `.inc` novo, vira doze duas vezes.
 
 O próprio Log corrobora o 11 por outro caminho: a linha de "Escrito à mão" do
-[`wte/re/fase-2.md`](../../../wte/re/fase-2.md), regerada no mesmo commit, foi de
+[`wte/re/fase-2.md`](/wte/re/fase-2.md), regerada no mesmo commit, foi de
 **83 para 94 arquivos** — onze.
 
 Nada quebra por causa disso; o que se perde é a única conta que permite

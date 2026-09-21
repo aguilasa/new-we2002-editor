@@ -3,8 +3,12 @@ id: CORR-WTE-011
 title: "Correção: o critério de limite do dump_offsets.py aborta num sentido só, e a janela de plausibilidade sai do nosso próprio header"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-06
+severity: low
+done_on: 2026-08-06
+done_commit: 3ce86bf
 ---
 
 # CORR-WTE-011: o `offsets.md` promete mais guarda do que o script tem
@@ -142,7 +146,7 @@ Regerado, nunca editado à mão.
 
 ### Arquivo: `wte/tools/test_dump_offsets.py`
 
-No molde do [`test_dump_strings.py`](../../../wte/tools/test_dump_strings.py), que a
+No molde do [`test_dump_strings.py`](/wte/tools/test_dump_strings.py), que a
 [CORR-WTE-008](/docs/tasks/concluidos/CORR-WTE-008.md) criou: fixar os três casos que esta
 revisão plantou à mão — referência antes do fim **aborta**, referência além do
 fim **avisa e segue**, e valor implausível no header alarga a janela (com a

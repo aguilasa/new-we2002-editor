@@ -4,9 +4,13 @@ title: "Camisa e bandeira 2D em tempo real, com colar-cores"
 type: implementação
 category: features
 phase: 4
-depends_on: ["WTE-TASK-08", "WTE-TASK-24", "WTE-TASK-27"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §5.3 e §9"
-status: concluído
+depends_on: [WTE-TASK-08, WTE-TASK-24, WTE-TASK-27]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-21
+review_commit: null
+done_on: 2026-08-21
+done_commit: b0e3cd9
 ---
 
 # WTE-TASK-29: Render 2D
@@ -59,7 +63,7 @@ não serve para tempo real.
 > outra. O `TLazIntfImage` continua sendo o certo, e por outro motivo: o port
 > precisa do **índice** de cada pixel, e o leitor de BMP da LCL entrega o
 > bitmap já convertido para 32 bpp, com a paleta consumida e jogada fora. Daí a
-> [`we2002_bmp.pas`](../../../wte/src/we2002_bmp.pas), que decodifica o arquivo
+> [`we2002_bmp.pas`](/wte/src/we2002_bmp.pas), que decodifica o arquivo
 > ela mesma.
 
 ### Onde a fidelidade some
@@ -93,10 +97,10 @@ tolerância. Render é tela; gravação é dado. Não confundir os dois critéri
 > o destino em `"wb"`, **lê** da imagem e escreve num arquivo, terminando com
 > `O uni foi salvo!!!.`. A ROM sai intacta. O critério byte-idêntico continua
 > valendo, mas sobre o **artefato** — é a mesma forma do
-> [`golden-07-mcr`](../../../wte/tests/roteiros/golden-07-mcr.txt), com
+> [`golden-07-mcr`](/wte/tests/roteiros/golden-07-mcr.txt), com
 > `--artefato`. Quem grava textura **na** imagem é o `boton_tex2isoClick`, que
 > já tem veredito `implementado`. Detalhe em
-> [`wte/re/render2d.md`](../../../wte/re/render2d.md).
+> [`wte/re/render2d.md`](/wte/re/render2d.md).
 
 *(decisão do usuário, 2026-08-19)* Até essa data o handler era da
 [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md) — a gravação lá, o render
@@ -111,14 +115,14 @@ gravar **nesta imagem**:
 - **Fronteira de setor.** `2352 = 24 + 2048 + 280`, com os saltos à mão.
 - **Cópia, sempre**; `roms/` nunca é alvo.
 - **O diff de controle** já medido em
-  [`wte/re/gravacao-controle.md`](../../../wte/re/gravacao-controle.md) vale aqui
+  [`wte/re/gravacao-controle.md`](/wte/re/gravacao-controle.md) vale aqui
   igual: gravar sem editar **muda** 22 bytes nesta ROM.
 - **O clique não grava; quem grava é o `fseek` seguinte.** Saída bufferizada do
   runtime C — roteiro que termina numa gravação mede um oráculo truncado, porque
   o harness encerra com `wineserver -k`. Todo roteiro de gravação termina com
   uma troca de time e só então a marca de corte. Medido com o par
-  [`27-descarga-sem.txt`](../../../wte/tests/roteiros/27-descarga-sem.txt) /
-  [`27-descarga-com.txt`](../../../wte/tests/roteiros/27-descarga-com.txt).
+  [`27-descarga-sem.txt`](/wte/tests/roteiros/27-descarga-sem.txt) /
+  [`27-descarga-com.txt`](/wte/tests/roteiros/27-descarga-com.txt).
 
 ---
 
@@ -150,7 +154,7 @@ gravar **nesta imagem**:
       cabeçalho de 54 bytes, a primeira entrada — e reescrevem as primeiras
       entradas; nenhuma toca um pixel. **E não reescrevem o mesmo tanto:** a
       bandeira faz 16 e o uniforme faz 15, duas vezes, uma por arquivo. A
-      seção 6 do [`assets.md`](../../../wte/re/assets.md) dizia "idem, 16" para o
+      seção 6 do [`assets.md`](/wte/re/assets.md) dizia "idem, 16" para o
       uniforme; foi corrigida, e o número passou a sair de ferramenta
 - [x] **Espaço de cor de escurecer/clarear identificado: nenhum.** Não é RGB
       de 8 bits nem HSL — a conta acontece na palavra BGR555 **empacotada**.
@@ -159,7 +163,7 @@ gravar **nesta imagem**:
       `0xF8` é `31 << 3`, o que prova de quebra que a expansão de 5 para 8 bits
       é **deslocamento**, saturando em 248 e não em 255
 - [x] **`TLazIntfImage` usado; render em tempo real sem travar a janela.** A
-      [`wte_render2d.pas`](../../../wte/src/wte_render2d.pas) monta um
+      [`wte_render2d.pas`](/wte/src/wte_render2d.pas) monta um
       `TLazIntfImage` a partir do índice de paleta de cada pixel e o atribui ao
       `TImage`. O custo está medido, não afirmado: o maior bitmap que este
       render toca tem **51 × 42 = 2.142 px** (o `dump_render2d.py` mede a
@@ -185,11 +189,11 @@ gravar **nesta imagem**:
       da bandeira; e o gradiente escrevendo a partir da ponta em vez do miolo
       acusa 15 das 16
 - [x] **`grabar_camisetaClick` byte-idêntico, sem tolerância** — spec em
-      [`MainForm.grabar_camisetaClick.md`](../../../wte/re/spec/MainForm.grabar_camisetaClick.md),
-      golden [`golden-14-uniforme`](../../../wte/tests/roteiros/golden-14-uniforme.txt)
+      [`MainForm.grabar_camisetaClick.md`](/wte/re/spec/MainForm.grabar_camisetaClick.md),
+      golden [`golden-14-uniforme`](/wte/tests/roteiros/golden-14-uniforme.txt)
       verde com o controle antes. **30.956 bytes idênticos nos dois lados, e a
       imagem intacta nos dois.** O gate é `--artefato`, como o
-      [`golden-07-mcr`](../../../wte/tests/roteiros/golden-07-mcr.txt): comparar
+      [`golden-07-mcr`](/wte/tests/roteiros/golden-07-mcr.txt): comparar
       só as imagens aprovaria um port inerte, porque nenhum dos dois lados as
       toca. A recusa foi **vista** — tirando o `+ 32` do campo de tamanho o
       artefato sai com 30.924 bytes
@@ -246,7 +250,7 @@ Sem esta linha a exclusão de lá viraria buraco: os dois lados diriam "é da
 outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`
 (bandeira do titular), `0x00405468` (bandeira do reserva) e `0x004056c8`
 (uniforme); as duas primeiras estão inventariadas em
-[`auxiliares.md`](../../../wte/re/auxiliares.md), com tamanho e chamadores.
+[`auxiliares.md`](/wte/re/auxiliares.md), com tamanho e chamadores.
 
 ## Log de Execução
 
@@ -264,7 +268,7 @@ que o `published_methods.tsv` atribui aqui e que não é cor: é geometria.
   números que diferem entram por parâmetro.
 
   **Os três números não foram digitados.** `24`, `16` e `3` saem do `.text` pelo
-  [`dump_zonas.py`](../../../wte/tools/dump_zonas.py), que ganhou um decodificador
+  [`dump_zonas.py`](/wte/tools/dump_zonas.py), que ganhou um decodificador
   de malha, e vão para a `wte_zonas.pas` como `MALHA_PASSO_X`, `MALHA_PASSO_Y` e
   `MALHA_FOLGA`. O que lhes dá valor não é a extração — é a **conferência contra
   o `.lfm`**, que é outra fonte e tem de fechar em quatro pontos por malha:
@@ -505,7 +509,7 @@ esta task*. Falta variar a cor.
   `ficha_color.FormCreate` dizia, com todas as letras, que escrever aquele
   corpo antes de decidir onde os cinco globais do editor moram seria inventar,
   e que a decisão era desta task. Eles moram em
-  [`wte_cor.pas`](../../../wte/src/wte_cor.pas), e cada um tem nome: `familia`,
+  [`wte_cor.pas`](/wte/src/wte_cor.pas), e cada um tem nome: `familia`,
   `conjunto`, `entrada`, `faixa_ini`, `faixa_fim`.
 
   **E o alias que quase passou batido:** o vetor das 16 palavras fica em
@@ -846,7 +850,7 @@ enunciado manda fechar *antes* de escrever código; o que falta é Pascal e gate
 
   **As três perguntas do enunciado tinham resposta no `.text`, e nenhuma
   precisou de decompilador.** São padrões de instrução curtos e inequívocos, e
-  o [`dump_render2d.py`](../../../wte/tools/dump_render2d.py) os lê e **recusa**
+  o [`dump_render2d.py`](/wte/tools/dump_render2d.py) os lê e **recusa**
   emitir markdown se algum deixar de aparecer — 17 assinaturas, com as duas
   recusas vistas.
 

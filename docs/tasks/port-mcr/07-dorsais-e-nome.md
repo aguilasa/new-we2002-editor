@@ -4,9 +4,13 @@ title: "`numbers.py` e `text.py` — os 5 bits e o cp932"
 type: implementação
 category: núcleo
 phase: 1
-depends_on: ["MCR-TASK-05"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §1.5"
-status: concluído
+depends_on: [MCR-TASK-05]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#1.5"
+reviewed_on: 2026-09-07
+review_commit: null
+done_on: 2026-09-07
+done_commit: d663d76
 ---
 
 # MCR-TASK-07: Dorsais e nome

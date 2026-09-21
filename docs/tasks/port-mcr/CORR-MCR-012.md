@@ -3,8 +3,12 @@ id: CORR-MCR-012
 title: "Correção: o check chamado \"e nada mais\" só afirma \"algo mudou\", e a exclusividade do dorsal fica sem guarda"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-09
+severity: high
+done_on: 2026-09-08
+done_commit: bbb67ab
 ---
 
 # CORR-MCR-012: o check que promete exclusividade e não a mede

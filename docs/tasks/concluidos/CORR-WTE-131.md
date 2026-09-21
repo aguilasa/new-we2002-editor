@@ -3,8 +3,12 @@ id: CORR-WTE-131
 title: "Correção: as edições do DefaultTacticsDialog não chegam ao disco no port, e chegam no ed.exe"
 type: correção
 category: paridade
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-06
+severity: high
+done_on: 2026-08-30
+done_commit: 0c8fc30
 ---
 
 # CORR-WTE-131: o diálogo de presets não tem como confirmar no port
@@ -16,7 +20,7 @@ um slot — grava no `ed.exe` e **não grava** no port.
 
 Medido em 2026-08-30 na `ptbr-remaster.bin`, pela
 [PAR-TASK-06](/docs/tasks/concluidos/PAR-TASK-06.md) item 4. Roteiro em
-[`tools/par/8.7-preset-renomear.sh`](../../../tools/par/8.7-preset-renomear.sh).
+[`tools/par/8.7-preset-renomear.sh`](/tools/par/8.7-preset-renomear.sh).
 
 | lado | contra a imagem original |
 |---|---|

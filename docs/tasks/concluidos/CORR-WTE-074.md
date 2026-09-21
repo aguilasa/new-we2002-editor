@@ -3,8 +3,12 @@ id: CORR-WTE-074
 title: "Correção: a confrontação Pascal × Python do .mcr aponta para um arquivo transitório"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-28
+severity: low
+done_on: 2026-08-20
+done_commit: 0f1b9ae
 ---
 
 # CORR-WTE-074: a confrontação Pascal × Python do `.mcr` aponta para um arquivo transitório
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 `TestPascalConcorda.test_a_leitura_bate_com_a_do_python`, em
-[`wte/tools/test_dump_mcr.py`](../../../wte/tools/test_dump_mcr.py), é **a única
+[`wte/tools/test_dump_mcr.py`](/wte/tools/test_dump_mcr.py), é **a única
 prova de que o leitor Pascal e o leitor Python enxergam o mesmo cartão de
 verdade** — os invariantes sem cartão não cobrem isso. Ele procura a fixture
 num caminho fixo:

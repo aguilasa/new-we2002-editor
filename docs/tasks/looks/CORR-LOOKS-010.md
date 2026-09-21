@@ -3,8 +3,12 @@ id: CORR-LOOKS-010
 title: "Correção: o `EDT_MOD.BIN` tem 20 seções e duas listas de onze — a varredura começou a 15.704 e chamou o resto de EOF exato"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-04
+severity: high
+done_on: 2026-09-14
+done_commit: 727e00d
 ---
 
 # CORR-LOOKS-010: o `EDT_MOD.BIN` tem 20 seções e duas listas de onze

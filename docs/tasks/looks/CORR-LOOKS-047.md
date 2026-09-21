@@ -3,8 +3,12 @@ id: CORR-LOOKS-047
 title: "Correção: o mapa de cabelo do goleiro não foi medido, e 136 dos 179 goleiros do disco são recusados"
 type: correção
 category: engenharia-reversa
-status: concluído
-depends_on: ["CORR-LOOKS-046"]
+status: done
+depends_on: [CORR-LOOKS-046]
+origin: LOOKS-TASK-17
+severity: medium
+done_on: 2026-09-16
+done_commit: e1561f6
 ---
 
 # CORR-LOOKS-047: a figura 1 só desenha o `A1`

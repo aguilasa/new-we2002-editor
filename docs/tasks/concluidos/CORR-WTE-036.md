@@ -3,8 +3,12 @@ id: CORR-WTE-036
 title: "Correção: a regra `!` → `not` do `SUBS` atravessa a quebra de linha e engole seis statements para dentro de comentário"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-17
+severity: high
+done_on: 2026-08-10
+done_commit: 7e74c63
 ---
 
 # CORR-WTE-036: a armadilha que o próprio cabeçalho documenta, cometida na regra 7

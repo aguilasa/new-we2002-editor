@@ -3,8 +3,12 @@ id: CORR-WTE-128
 title: "Correção: o item 1 da §8.4 não tem roteiro, e a seção afirma que os cinco têm"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-04
+severity: high
+done_on: 2026-08-29
+done_commit: acd5883
 ---
 
 # CORR-WTE-128: o clamp de habilidade é o único dos cinco sem estímulo versionado

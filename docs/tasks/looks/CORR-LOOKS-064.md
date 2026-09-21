@@ -3,8 +3,12 @@ id: CORR-LOOKS-064
 title: "Correção: \"603 a 1.680\" e \"1,4x a 4,4x\" não são o que as corridas imprimem, e três textos ainda dizem o que a quinta sessão desmentiu"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-28
+severity: low
+done_on: 2026-09-18
+done_commit: 32fa25d
 ---
 
 # CORR-LOOKS-064: os números e a prosa da LOOKS-TASK-28 ficaram atrás das próprias corridas

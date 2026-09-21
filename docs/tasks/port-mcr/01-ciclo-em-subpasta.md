@@ -5,8 +5,12 @@ type: infraestrutura
 category: processo
 phase: 0
 depends_on: []
-fonte_de_verdade: "/docs/tasks/port-mcr/01-ciclo-em-subpasta.md §Critério de conclusão"
-status: concluído
+status: done
+source_of_truth: /docs/tasks/port-mcr/01-ciclo-em-subpasta.md
+reviewed_on: 2026-09-07
+review_commit: null
+done_on: 2026-09-07
+done_commit: 2a71f1b
 ---
 
 # MCR-TASK-01: O ciclo em subpasta
@@ -15,7 +19,7 @@ status: concluído
 
 - **Referência:** esta task. O critério mora aqui porque o que ela muda é o
   **rito**, e o rito não tem plano — ele tem
-  [`.claude/rules/tasks.md`](../../../.claude/rules/tasks.md), que esta task
+  [`.claude/rules/tasks.md`](/.claude/rules/tasks.md), que esta task
   também altera.
 - **Ovo e galinha:** enquanto o Passo 0 não existir, `/executar port-mcr` não
   resolve pasta nenhuma. Esta task é feita no **bootstrap**, junto com a

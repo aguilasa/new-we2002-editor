@@ -3,8 +3,12 @@ id: CORR-LOOKS-003
 title: "Correção: `superpack_count.py` descarta entrada ilegível em silêncio"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-01
+severity: medium
+done_on: 2026-09-14
+done_commit: f6db86f
 ---
 
 # CORR-LOOKS-003: `superpack_count.py` descarta entrada ilegível em silêncio

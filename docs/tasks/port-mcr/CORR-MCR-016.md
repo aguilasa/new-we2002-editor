@@ -3,8 +3,12 @@ id: CORR-MCR-016
 title: "Correção: \"os três últimos nasceram na MCR-TASK-10\" não são os três últimos da lista"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-10
+severity: low
+done_on: 2026-09-08
+done_commit: 298856b
 ---
 
 # CORR-MCR-016: o ponteiro por posição na §3.2 do plano não casa com os três que a prosa explica

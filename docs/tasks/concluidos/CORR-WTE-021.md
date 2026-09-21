@@ -3,8 +3,12 @@ id: CORR-WTE-021
 title: "Correção: o critério \"blobs visíveis na janela\" foi adiado para a WTE-TASK-11, que não o tem"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-10
+severity: low
+done_on: 2026-08-09
+done_commit: 323a5de
 ---
 
 # CORR-WTE-021: o único critério aberto da WTE-TASK-10 foi entregue a uma tarefa que não o recebeu

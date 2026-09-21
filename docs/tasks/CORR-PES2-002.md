@@ -3,8 +3,12 @@ id: CORR-PES2-002
 title: "Correção: as regras e os prompts dizem CORR-WTE, o pool vivo é CORR-PES2"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-01
+severity: medium
+done_on: 2026-09-01
+done_commit: 5e2b8bd
 ---
 
 # CORR-PES2-002: o prefixo de correção está dito em dois lugares, e os dois discordam

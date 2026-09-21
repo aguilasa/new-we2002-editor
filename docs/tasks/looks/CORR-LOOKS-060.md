@@ -3,8 +3,12 @@ id: CORR-LOOKS-060
 title: "Correção: \"todos os outros ficam abaixo de 2,3x\" — a corrida imprime 2,5x na cabeça do slot 2"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-25
+severity: low
+done_on: 2026-09-18
+done_commit: a12d753
 ---
 
 # CORR-LOOKS-060: o limiar que separa junta de não-junta está escrito 0,2 abaixo do medido

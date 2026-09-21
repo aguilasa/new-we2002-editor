@@ -4,9 +4,13 @@ title: "O oráculo do Obocaman: o `0x6500`, o nome cheio e o veredito do console
 type: verificação
 category: engenharia-reversa
 phase: 3
-depends_on: ["MCR-TASK-09"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §5.5"
-status: concluído
+depends_on: [MCR-TASK-09]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#5.5"
+reviewed_on: 2026-09-08
+review_commit: null
+done_on: 2026-09-08
+done_commit: 0dce63e
 ---
 
 # MCR-TASK-13: O oráculo, e as três perguntas

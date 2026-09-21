@@ -3,8 +3,12 @@ id: CORR-WTE-077
 title: "Correção: a §5.3 do plano ainda manda varrer pixel, e a WTE-TASK-29 mediu que é paleta"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-29
+severity: high
+done_on: 2026-08-21
+done_commit: e152967
 ---
 
 # CORR-WTE-077: a §5.3 do plano ainda manda varrer pixel, e a WTE-TASK-29 mediu que é paleta

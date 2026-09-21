@@ -3,8 +3,12 @@ id: CORR-LOOKS-005
 title: "Correção: a guarda dos dois discos não tem quem a chame, e nada obriga a 03 a chamá-la"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-02
+severity: high
+done_on: 2026-09-14
+done_commit: f6db86f
 ---
 
 # CORR-LOOKS-005: a guarda dos dois discos não tem quem a chame, e nada obriga a 03 a chamá-la

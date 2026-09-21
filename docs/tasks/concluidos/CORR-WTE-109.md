@@ -3,8 +3,12 @@ id: CORR-WTE-109
 title: "Correção: quatro sítios do lado WTE atribuem a não-idempotência ao \"editor original\", que aqui é o wte.exe — e o único caminho medido não a tem"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-35
+severity: medium
+done_on: 2026-08-25
+done_commit: e07dbca
 ---
 
 # CORR-WTE-109: "o editor original não é idempotente" — qual editor?
@@ -28,8 +32,8 @@ trocar de palavras.
 
 | Sítio | O que diz | Qual editor o leitor entende |
 |---|---|---|
-| [`wte/tools/gravacao_controle.py:197`](../../../wte/tools/gravacao_controle.py) | *"o `Load`+`Save` do editor original não é idempotente"* | `wte.exe` |
-| [`wte/re/gravacao-controle.md:19`](../../../wte/re/gravacao-controle.md) | idem — **é gerado pelo de cima** | `wte.exe` |
+| [`wte/tools/gravacao_controle.py:197`](/wte/tools/gravacao_controle.py) | *"o `Load`+`Save` do editor original não é idempotente"* | `wte.exe` |
+| [`wte/re/gravacao-controle.md:19`](/wte/re/gravacao-controle.md) | idem — **é gerado pelo de cima** | `wte.exe` |
 | [`docs/tasks/concluidos/19-os-50-offsets-restantes.md:41`](/docs/tasks/concluidos/19-os-50-offsets-restantes.md) | *"O `Load`+`Save` do original **não é idempotente**"* | `wte.exe` |
 | [`docs/tasks/concluidos/27-handlers-de-gravacao.md:91`](/docs/tasks/concluidos/27-handlers-de-gravacao.md) | *"o `Load`+`Save` do original não é idempotente"* | `wte.exe` |
 

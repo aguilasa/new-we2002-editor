@@ -3,8 +3,12 @@ id: CORR-WTE-122
 title: "Correção: o progresso.md ainda chama o hook do lado do port de GOLDEN_EDIT, nome que o golden_gui.sh não lê"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-01
+severity: medium
+done_on: 2026-08-28
+done_commit: c86e794
 ---
 
 # CORR-WTE-122: o nome do hook que a PAR-TASK-01 corrigiu num arquivo e deixou no outro

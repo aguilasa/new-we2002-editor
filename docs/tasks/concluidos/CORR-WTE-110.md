@@ -3,8 +3,12 @@ id: CORR-WTE-110
 title: "Correção: os quatro casos de borda foram medidos num vetor só, e o critério diz \"por campo\""
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-36
+severity: medium
+done_on: 2026-08-25
+done_commit: 49b57c5
 ---
 
 # CORR-WTE-110: as bordas foram medidas em `names`, e são quatro campos
@@ -14,7 +18,7 @@ depends_on: []
 O segundo critério da [WTE-TASK-36](/docs/tasks/concluidos/36-buffers-e-truncamento.md) é
 
 > - [x] Os quatro casos de borda testados **por campo** — em
->   [`test_bordas.pas`](../../../wte/tests/test_bordas.pas), **10 de 10**
+>   [`test_bordas.pas`](/wte/tests/test_bordas.pas), **10 de 10**
 >   conferências, headless
 
 As dez conferências passam — conferido nesta revisão, compilando e rodando o

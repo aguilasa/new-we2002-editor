@@ -3,8 +3,12 @@ id: CORR-LOOKS-016
 title: "Correção: os dois alvos de `looks` são registrados fora do `if(Python3_FOUND)` que guarda os outros oito"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-06
+severity: medium
+done_on: 2026-09-14
+done_commit: db48d90
 ---
 
 # CORR-LOOKS-016: os alvos de `looks` estão fora da guarda de Python

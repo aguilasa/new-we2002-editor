@@ -1,12 +1,16 @@
 ---
 id: WTE-TASK-40
 title: "Verificação final — as três condições da definição de pronto"
-type: fechamento
+type: closing
 category: verificação
 phase: 7
-depends_on: ["WTE-TASK-36", "WTE-TASK-37", "WTE-TASK-39"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §0, definição de pronto"
-status: concluído
+depends_on: [WTE-TASK-36, WTE-TASK-37, WTE-TASK-39]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#0"
+reviewed_on: 2026-08-26
+review_commit: null
+done_on: 2026-08-26
+done_commit: 061ea53
 ---
 
 # WTE-TASK-40: Verificação final
@@ -186,7 +190,7 @@ not found. / Press OK to ignore and risk data corruption. / Press Abort to kill
 the program.` — antes de qualquer janela.
 
 A causa medida é o log de trace: `ResolveArquivo` em
-[`wte/src/retrace.pas`](../../../wte/src/retrace.pas) resolve
+[`wte/src/retrace.pas`](/wte/src/retrace.pas) resolve
 `<dir do executável>/../re/trace.log` quando `WTE_TRACE_FILE` não está
 definida, e o `Rewrite` levanta `EInOutError` porque o diretório não existe.
 Controle: com o binário em `<algum>/sub/wte`, criar `<algum>/re/` — o `re/` é
@@ -206,7 +210,7 @@ com o binário *instalado*, não com o de `build/`.
 medida: `make -C wte install PREFIX=<p>`, `mv <p> <outro>`, e o binário
 instalado abriu, achou os assets no caminho novo e carregou um time da imagem
 japonesa. A regra passou a viver no
-[`wte/src/wte_datafiles.pas`](../../../wte/src/wte_datafiles.pas), e ela cobre
+[`wte/src/wte_datafiles.pas`](/wte/src/wte_datafiles.pas), e ela cobre
 assets **e** trace.
 
 **O que esta task ainda deve, e é a outra metade:** rodar num ambiente **sem
@@ -216,12 +220,12 @@ não mostra nada de Wine), não que ele rode onde Wine não existe. As duas
 afirmações são diferentes, e só a segunda fecha a condição 3.
 
 > **Resolvido nesta task, em 2026-08-26.** A ausência de Wine foi **fabricada**
-> em vez de esperada: o [`sem_wine.sh`](../../../wte/tools/sem_wine.sh) cobre com
+> em vez de esperada: o [`sem_wine.sh`](/wte/tools/sem_wine.sh) cobre com
 > `tmpfs` vazio o runner do Bottles — que **é** o Wine desta máquina, já que
 > não há pacote no apt —, o `/var/lib/flatpak`, os dois `work/wineprefix*` e o
 > stack `i386`, e **recusa** se algum desses alvos não ficar vazio lá dentro
 > (a cláusula que trabalha nesta máquina) ou se `wine`/`wine64`/`wineserver`/
 > `winecfg` responderem no `PATH`. As
-> sete medidas do [`nativo_check.sh`](../../../wte/tools/nativo_check.sh) deram
+> sete medidas do [`nativo_check.sh`](/wte/tools/nativo_check.sh) deram
 > `ok` sobre a árvore **instalada**; o registro está em
-> [`wte/re/nativo.md`](../../../wte/re/nativo.md).
+> [`wte/re/nativo.md`](/wte/re/nativo.md).

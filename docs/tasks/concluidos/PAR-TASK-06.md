@@ -4,9 +4,14 @@ title: "Táticas, presets e o formato `.t2002`"
 type: verificação
 category: ui
 projeto: newWe2002
-depends_on: ["PAR-TASK-03"]
-fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.7"
-status: concluído
+depends_on: [PAR-TASK-03]
+status: done
+source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.7"
+phase: null
+reviewed_on: 2026-09-01
+review_commit: null
+done_on: 2026-09-01
+done_commit: bc292da
 ---
 
 # PAR-TASK-06: Táticas, presets e o formato `.t2002`

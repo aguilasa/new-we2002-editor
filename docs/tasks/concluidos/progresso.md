@@ -1,3 +1,7 @@
+---
+cycle: wte
+prefix: WTE
+---
 # Progresso — de `.exe` a editor em Lazarus (WE2002 Team Editor, Obocaman)
 
 Rastreamento das tasks de [`../PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md),
@@ -18,48 +22,61 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 
 ## Resumo
 
-| ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
-| -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [WTE-TASK-01](/docs/tasks/concluidos/01-ferramental.md) | Ferramental (Lazarus, FPC, Ghidra) | 0 | — | ✅ Concluído | 2026-08-05 | 2026-08-05 |
-| [WTE-TASK-02](/docs/tasks/concluidos/02-esqueleto-do-projeto.md) | Esqueleto de `wte/` e build | 0 | 01 | ✅ Concluído | 2026-08-05 | 2026-08-05 |
-| [WTE-TASK-03](/docs/tasks/concluidos/03-extrator-de-dfm.md) | `dfm_extract.py` — os 18 formulários | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-05 |
-| [WTE-TASK-04](/docs/tasks/concluidos/04-mapa-de-handlers.md) | `published_methods.tsv` — os 96, com dono | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-05](/docs/tasks/concluidos/05-inventario-de-strings.md) | `re/strings.tsv` | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-06](/docs/tasks/concluidos/06-mapa-de-offsets.md) | `re/offsets.md` — a tabela em `.data` | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-07](/docs/tasks/concluidos/07-unidades-duvidosas.md) | Veredito das 4 unidades VCL duvidosas | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-08](/docs/tasks/concluidos/08-convencao-dos-assets.md) | Convenção dos 198 bitmaps e do `dat.bin` | 1 | 05 | ✅ Concluído | 2026-08-06 | 2026-08-06 |
-| [WTE-TASK-09](/docs/tasks/concluidos/09-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | 03-08 | ✅ Concluído | 2026-08-06 | 2026-08-06 |
-| [WTE-TASK-10](/docs/tasks/concluidos/10-conversor-dfm-para-lfm.md) | `dfm2lfm.py` — os `.lfm` e os esqueletos | 2 | 03, 04, 07 | ✅ Concluído | 2026-08-06 | 2026-08-09 |
-| [WTE-TASK-11](/docs/tasks/concluidos/11-app-com-a-casca-completa.md) | App com os 18 formulários e 96 stubs | 2 | 10 | ✅ Concluído | 2026-08-06 | 2026-08-09 |
-| [WTE-TASK-12](/docs/tasks/concluidos/12-comparacao-visual.md) | Comparação visual dos 18 formulários | 2 | 11 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-13](/docs/tasks/concluidos/13-trace-de-eventos.md) | Trace de eventos contra o original | 2 | 11 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-14](/docs/tasks/concluidos/14-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | 12, 13 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-15](/docs/tasks/concluidos/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | 02 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-16](/docs/tasks/concluidos/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-17](/docs/tasks/concluidos/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
-| [WTE-TASK-18](/docs/tasks/concluidos/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-19](/docs/tasks/concluidos/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-20](/docs/tasks/concluidos/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-21](/docs/tasks/concluidos/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-22](/docs/tasks/concluidos/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ✅ Concluído | 2026-08-10 | 2026-08-11 |
-| [WTE-TASK-23](/docs/tasks/concluidos/23-formato-da-spec.md) | Formato de `re/spec/` e vocabulário de veredito | 4 | 09 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
-| [WTE-TASK-24](/docs/tasks/concluidos/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland | 4 | 04, 06 | ✅ Concluído | 2026-08-09 | 2026-08-11 |
-| [WTE-TASK-25](/docs/tasks/concluidos/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ✅ Concluído | 2026-08-11 | 2026-08-11 |
-| [WTE-TASK-26](/docs/tasks/concluidos/26-handlers-de-edicao.md) | Handlers de edição | 4 | 25 | ✅ Concluído | 2026-08-18 | 2026-08-18 |
-| [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ✅ Concluído | 2026-08-20 | 2026-08-20 |
-| [WTE-TASK-28](/docs/tasks/concluidos/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-20 | 2026-08-20 |
-| [WTE-TASK-29](/docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-21 | 2026-08-21 |
-| [WTE-TASK-30](/docs/tasks/concluidos/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ✅ Concluído | 2026-08-21 | 2026-08-23 |
-| [WTE-TASK-31](/docs/tasks/concluidos/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | ✅ Concluído | 2026-08-24 | 2026-08-24 |
-| [WTE-TASK-32](/docs/tasks/concluidos/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ✅ Concluído | 2026-08-24 | 2026-08-24 |
-| [WTE-TASK-33](/docs/tasks/concluidos/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | 2026-08-19 |
-| [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-35](/docs/tasks/concluidos/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-36](/docs/tasks/concluidos/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-37](/docs/tasks/concluidos/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-38](/docs/tasks/concluidos/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ✅ Concluído | 2026-08-26 | 2026-08-26 |
-| [WTE-TASK-40](/docs/tasks/concluidos/40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ✅ Concluído | 2026-08-26 | 2026-08-26 |
+<!-- rite:begin tasks -->
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [WTE-TASK-01](/docs/tasks/concluidos/01-ferramental.md) | Instalar e verificar o ferramental (Lazarus, FPC, Ghidra) | 0 | infra | — | done | 2026-08-05 | 2026-08-05 |
+| [PAR-TASK-01](/docs/tasks/concluidos/PAR-TASK-01.md) | Nomes e abreviações de time, pela tela | — | verificação | — | done | 2026-08-28 | 2026-08-28 |
+| [WTE-TASK-02](/docs/tasks/concluidos/02-esqueleto-do-projeto.md) | Esqueleto de wte/ e build por linha de comando | 0 | infra | WTE-TASK-01 | done | 2026-08-05 | 2026-08-05 |
+| [PAR-TASK-02](/docs/tasks/concluidos/PAR-TASK-02.md) | Números de camisa e o clamp em 32 | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 |
+| [WTE-TASK-03](/docs/tasks/concluidos/03-extrator-de-dfm.md) | tools/dfm_extract.py — os 18 formulários, completos | 1 | ferramenta | WTE-TASK-02 | done | 2026-08-05 | 2026-08-05 |
+| [PAR-TASK-03](/docs/tasks/concluidos/PAR-TASK-03.md) | Cobradores, capitão e o foco de combo | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 |
+| [WTE-TASK-04](/docs/tasks/concluidos/04-mapa-de-handlers.md) | published_methods.tsv — os 96 handlers, com dono | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 |
+| [PAR-TASK-04](/docs/tasks/concluidos/PAR-TASK-04.md) | Atributos do jogador e os clamps | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 |
+| [WTE-TASK-05](/docs/tasks/concluidos/05-inventario-de-strings.md) | re/strings.tsv — strings com endereço e quem as usa | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 |
+| [PAR-TASK-05](/docs/tasks/concluidos/PAR-TASK-05.md) | Troca de jogador nos quatro tipos de slot | — | verificação | PAR-TASK-04 | done | 2026-08-29 | 2026-08-29 |
+| [WTE-TASK-06](/docs/tasks/concluidos/06-mapa-de-offsets.md) | re/offsets.md — a tabela em .data cruzada com Offsets.hpp | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 |
+| [PAR-TASK-06](/docs/tasks/concluidos/PAR-TASK-06.md) | Táticas, presets e o formato `.t2002` | — | verificação | PAR-TASK-03 | done | 2026-09-01 | 2026-09-01 |
+| [WTE-TASK-07](/docs/tasks/concluidos/07-unidades-duvidosas.md) | Veredito sobre Registry, Printers, Comobj e Winhelpviewer | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 |
+| [PAR-TASK-07](/docs/tasks/concluidos/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | — | verificação | PAR-TASK-01 | done | 2026-08-31 | 2026-09-01 |
+| [WTE-TASK-08](/docs/tasks/concluidos/08-convencao-dos-assets.md) | Convenção de nome dos 198 bitmaps e do dat.bin | 1 | extração | WTE-TASK-05 | done | 2026-08-06 | 2026-08-06 |
+| [PAR-TASK-08](/docs/tasks/concluidos/PAR-TASK-08.md) | Operações em massa | — | verificação | PAR-TASK-04, PAR-TASK-07 | blocked | — | — |
+| [WTE-TASK-09](/docs/tasks/concluidos/09-fechamento-fase-1.md) | Fechamento da fase 1 — a extração estática está completa? | 1 | closing | WTE-TASK-03, WTE-TASK-04, WTE-TASK-05, WTE-TASK-06, WTE-TASK-07, WTE-TASK-08 | done | 2026-08-06 | 2026-08-06 |
+| [PAR-TASK-09](/docs/tasks/concluidos/PAR-TASK-09.md) | Ciclo de vida da janela | — | verificação | — | done | 2026-08-31 | 2026-09-01 |
+| [WTE-TASK-10](/docs/tasks/concluidos/10-conversor-dfm-para-lfm.md) | tools/dfm2lfm.py — gerador dos .lfm e do esqueleto das units | 2 | ferramenta | WTE-TASK-03, WTE-TASK-04, WTE-TASK-07 | done | 2026-08-06 | 2026-08-09 |
+| [PAR-TASK-10](/docs/tasks/concluidos/PAR-TASK-10.md) | O item aberto do Windows: nome de time pela janela Qt | — | verificação | PAR-TASK-01 | blocked | — | — |
+| [WTE-TASK-11](/docs/tasks/concluidos/11-app-com-a-casca-completa.md) | App Lazarus abrindo os 18 formulários, com os 96 stubs logando | 2 | implementação | WTE-TASK-10 | done | 2026-08-06 | 2026-08-09 |
+| [PAR-TASK-11](/docs/tasks/concluidos/PAR-TASK-11.md) | SoFIFA: o que dá para conferir sem rede | — | verificação | PAR-TASK-01, PAR-TASK-02, PAR-TASK-03, PAR-TASK-04, PAR-TASK-05, PAR-TASK-06, PAR-TASK-07, PAR-TASK-08, PAR-TASK-09 | blocked | — | — |
+| [WTE-TASK-12](/docs/tasks/concluidos/12-comparacao-visual.md) | Comparação visual dos 18 formulários contra o original | 2 | verificação | WTE-TASK-11 | done | 2026-08-09 | 2026-08-09 |
+| [WTE-TASK-13](/docs/tasks/concluidos/13-trace-de-eventos.md) | Trace de eventos — a ordem de disparo dos dois lados | 2 | verificação | WTE-TASK-11 | done | 2026-08-09 | 2026-08-09 |
+| [WTE-TASK-14](/docs/tasks/concluidos/14-fechamento-fase-2.md) | Fechamento da fase 2 — a casca está fiel? | 2 | closing | WTE-TASK-12, WTE-TASK-13 | done | 2026-08-09 | 2026-08-09 |
+| [WTE-TASK-15](/docs/tasks/concluidos/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | decisão | WTE-TASK-02 | done | 2026-08-09 | 2026-08-09 |
+| [WTE-TASK-16](/docs/tasks/concluidos/16-gerador-de-tabelas.md) | tools/gen_tables_pas.py — offsets e tabelas estáticas | 3 | ferramenta | WTE-TASK-15 | done | 2026-08-09 | 2026-08-09 |
+| [WTE-TASK-17](/docs/tasks/concluidos/17-transpilador-da-camada-de-dados.md) | tools/port_database_pas.py — transpilar o we2002_core | 3 | ferramenta | WTE-TASK-15, WTE-TASK-16 | done | 2026-08-09 | 2026-08-10 |
+| [WTE-TASK-18](/docs/tasks/concluidos/18-camada-de-dados-gerada.md) | Gerar a camada de dados e fazê-la compilar | 3 | implementação | WTE-TASK-17 | done | 2026-08-10 | 2026-08-10 |
+| [WTE-TASK-19](/docs/tasks/concluidos/19-os-50-offsets-restantes.md) | Descobrir os offsets que o Obocaman tem e nós não | 3 | extração | WTE-TASK-06, WTE-TASK-18 | done | 2026-08-10 | 2026-08-10 |
+| [WTE-TASK-20](/docs/tasks/concluidos/20-round-trip-headless.md) | Round-trip headless contra o we2002_core, nas duas ROMs | 3 | verificação | WTE-TASK-18, WTE-TASK-19 | done | 2026-08-10 | 2026-08-10 |
+| [WTE-TASK-21](/docs/tasks/concluidos/21-fechamento-fase-3.md) | Fechamento da fase 3 — a camada de dados é 100% gerada? | 3 | closing | WTE-TASK-20 | done | 2026-08-10 | 2026-08-10 |
+| [WTE-TASK-22](/docs/tasks/concluidos/22-harness-golden.md) | golden_check.sh — o gate: wte.exe contra o app Lazarus | 4 | ferramenta | WTE-TASK-11, WTE-TASK-21 | done | 2026-08-10 | 2026-08-11 |
+| [WTE-TASK-23](/docs/tasks/concluidos/23-formato-da-spec.md) | Decidir o formato de re/spec/ e o vocabulário de veredito | 4 | decisão | WTE-TASK-09 | done | 2026-08-09 | 2026-08-10 |
+| [WTE-TASK-24](/docs/tasks/concluidos/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland — e os VMTs da VCL | 4 | infra | WTE-TASK-04, WTE-TASK-06 | done | 2026-08-09 | 2026-08-11 |
+| [WTE-TASK-25](/docs/tasks/concluidos/25-handlers-de-carga.md) | Handlers de carga — abrir a imagem e popular as telas | 4 | implementação | WTE-TASK-22, WTE-TASK-23, WTE-TASK-24 | done | 2026-08-11 | 2026-08-11 |
+| [WTE-TASK-26](/docs/tasks/concluidos/26-handlers-de-edicao.md) | Handlers de edição — nomes, números, atributos, mover jogador | 4 | implementação | WTE-TASK-25 | done | 2026-08-18 | 2026-08-18 |
+| [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md) | Handlers de gravação — escrever na imagem de CD | 4 | implementação | WTE-TASK-26 | done | 2026-08-20 | 2026-08-20 |
+| [WTE-TASK-28](/docs/tasks/concluidos/28-import-de-mcr.md) | Import e export de .mcr — memory card do PSX | 4 | implementação | WTE-TASK-08, WTE-TASK-24, WTE-TASK-27 | done | 2026-08-20 | 2026-08-20 |
+| [WTE-TASK-29](/docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D em tempo real, com colar-cores | 4 | implementação | WTE-TASK-08, WTE-TASK-24, WTE-TASK-27 | done | 2026-08-21 | 2026-08-21 |
+| [WTE-TASK-30](/docs/tasks/concluidos/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | implementação | WTE-TASK-25 | done | 2026-08-21 | 2026-08-23 |
+| [WTE-TASK-31](/docs/tasks/concluidos/31-fechamento-fase-4.md) | Fechamento da fase 4 — os 96 têm veredito? | 4 | closing | WTE-TASK-25, WTE-TASK-26, WTE-TASK-27, WTE-TASK-28, WTE-TASK-29, WTE-TASK-30 | done | 2026-08-24 | 2026-08-24 |
+| [WTE-TASK-32](/docs/tasks/concluidos/32-preco-do-jogador.md) | Preço derivado dos atributos — jogador e time inteiro | 5 | implementação | WTE-TASK-24, WTE-TASK-25 | done | 2026-08-24 | 2026-08-24 |
+| [WTE-TASK-33](/docs/tasks/concluidos/33-slots-de-master-league.md) | Contador de slots livres de Master League | 5 | implementação | WTE-TASK-20 | done | 2026-08-19 | 2026-08-19 |
+| [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-completa.md) | Bateria golden completa — toda gravação, nas duas ROMs | 6 | verificação | WTE-TASK-31, WTE-TASK-32, WTE-TASK-33 | done | 2026-08-25 | 2026-08-25 |
+| [WTE-TASK-35](/docs/tasks/concluidos/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | verificação | WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 |
+| [WTE-TASK-36](/docs/tasks/concluidos/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e comportamento de truncamento | 6 | verificação | WTE-TASK-26, WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 |
+| [WTE-TASK-37](/docs/tasks/concluidos/37-reconferencia-de-ui.md) | Reconferência dos 18 formulários, com a lógica ligada | 6 | verificação | WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 |
+| [WTE-TASK-38](/docs/tasks/concluidos/38-nome-e-linhagem.md) | Decidir o nome do produto e registrar a linhagem | 7 | decisão | WTE-TASK-35 | done | 2026-08-25 | 2026-08-25 |
+| [WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md) | Ícone, .desktop, AppStream e regras de instalação | 7 | implementação | WTE-TASK-38 | done | 2026-08-26 | 2026-08-26 |
+| [WTE-TASK-40](/docs/tasks/concluidos/40-verificacao-final.md) | Verificação final — as três condições da definição de pronto | 7 | closing | WTE-TASK-36, WTE-TASK-37, WTE-TASK-39 | done | 2026-08-26 | 2026-08-26 |
+<!-- rite:end -->
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -214,7 +231,7 @@ só uma escolha de quando.
 - [x] Ghidra importa o `.exe`
 - [x] `wte/` compilando, com `re/` versionado e saída de build ignorada
 - [x] Decidido onde mora a bateria de `--check` dos geradores
-      (`wte/Makefile` autônomo — ver [`../../wte/README.md`](../../../wte/README.md))
+      (`wte/Makefile` autônomo — ver [`../../wte/README.md`](/wte/README.md))
 
 ### Fase 1 — Extração estática
 
@@ -249,7 +266,7 @@ só uma escolha de quando.
 - [x] Bitfield de `SquadNumbers` conferido contra imagem real
 - [x] Registrado se o Ghidra foi necessário na fase 3 — **não foi**, e a
       medida está na seção 4 do
-      [`fase-3-fechamento.md`](../../../wte/re/fase-3-fechamento.md)
+      [`fase-3-fechamento.md`](/wte/re/fase-3-fechamento.md)
 
 ### Fase 4 — Comportamento
 
@@ -266,7 +283,7 @@ só uma escolha de quando.
       [WTE-TASK-31](/docs/tasks/concluidos/31-fechamento-fase-4.md), medido pelo
       `check_fase4.py`): 69 `implementado`, 19 `trivial`, 6 `divergencia
       deliberada`, 2 `nao portado`, **0 `aberto`**, 0 sem spec. Registro em
-      [`wte/re/fase-4.md`](../../../wte/re/fase-4.md).
+      [`wte/re/fase-4.md`](/wte/re/fase-4.md).
       **O critério percorreu 78 → 81 → 93 → 96 em quatro passagens, e nenhuma
       delas implementou um handler** — o que segurava era régua que não
       alcançava, dono não nomeado ou prosa vencida; doze dos dezesseis `aberto`
@@ -286,8 +303,8 @@ só uma escolha de quando.
       três razões era minha, de um dia antes**, e o registro fica na spec: o
       número (69 disparos do irmão, zero deste) estava certo e a conclusão
       generalizava de um instrumento para todos. Mecanizado pelo
-      [`cobertura_gate.py`](../../../wte/tools/cobertura_gate.py), que versiona a
-      cobertura em [`fase-4-cobertura.tsv`](../../../wte/re/fase-4-cobertura.tsv) e
+      [`cobertura_gate.py`](/wte/tools/cobertura_gate.py), que versiona a
+      cobertura em [`fase-4-cobertura.tsv`](/wte/re/fase-4-cobertura.tsv) e
       **aborta** se uma spec citar o TSV como evidência sem ter linha nele
 - [x] **Três `aberto` esperavam decisão, não medição, e um deles fechava um
       ciclo entre fases** *(CORR-WTE-090, 2026-08-24)*. O
@@ -307,12 +324,12 @@ só uma escolha de quando.
       2026-08-24)*. O `jugador.BitBtn1Click` (o botão `Original `) tem seis
       bytes e esperava mudança de estrutura, não código: a `PreencheFicha`
       morava no `.aux.inc` do `MainForm`, invisível de fora, e desceu para a
-      [`wte_ficha`](../../../wte/src/wte_ficha.pas) como a CORR-WTE-081 já fizera
+      [`wte_ficha`](/wte/src/wte_ficha.pas) como a CORR-WTE-081 já fizera
       com o buffer de jogador. **A régua teve de ser um par**, e essa é a lição:
       clicar `Original ` sem ter editado nada antes passaria com o corpo vazio.
-      O [`golden-18-ficha-edicao`](../../../wte/tests/roteiros/golden-18-ficha-edicao.txt)
+      O [`golden-18-ficha-edicao`](/wte/tests/roteiros/golden-18-ficha-edicao.txt)
       edita o número de camisa e grava `0xc0`; o
-      [`golden-19-ficha-original`](../../../wte/tests/roteiros/golden-19-ficha-original.txt)
+      [`golden-19-ficha-original`](/wte/tests/roteiros/golden-19-ficha-original.txt)
       edita, clica `Original ` e grava `0x80` — **o valor que a ROM intocada já
       tinha**. Os quatro gates deram byte-idêntico, e o par fechou também o
       `casilla_dorsalKeyPress`, que ele exercita de passagem
@@ -403,14 +420,14 @@ só uma escolha de quando.
       nunca acontece, então o oráculo não existe daquele lado. O critério vale
       como está para a japonesa e a europeia é da
       [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-completa.md); ver
-      [`wte/re/gravacao-controle.md`](../../../wte/re/gravacao-controle.md).
+      [`wte/re/gravacao-controle.md`](/wte/re/gravacao-controle.md).
       **E "gravação" nem sempre quer dizer a imagem:** o `grabar_memory` emite
       um `.mcr` e deixa a ROM intacta, então o gate ganhou `--artefato` em
       2026-08-19 — comparar só as duas imagens aprovaria um port inerte; quatro
       roteiros usam
 - [x] Cinco `trivial` reamostrados e reconferidos — na WTE-TASK-31
       (2026-08-22), por disassembly, com o registro em
-      [`wte/re/fase-4-trivial.tsv`](../../../wte/re/fase-4-trivial.tsv). A amostra
+      [`wte/re/fase-4-trivial.tsv`](/wte/re/fase-4-trivial.tsv). A amostra
       é **declarada, não sorteada**: cinco espaçados uniformemente pela lista
       ordenada por endereço, para o `--check` poder refazê-la. Os cinco
       confirmaram, e nos três `FormCreate` a cor que o original passa a
@@ -445,7 +462,7 @@ só uma escolha de quando.
       [WTE-TASK-32](/docs/tasks/concluidos/32-preco-do-jogador.md) o fechou junto com os
       dois handlers de preço da ficha, que nem spec tinham. **E o preço é a
       décima oitava rota de escrita**, com gate próprio
-      ([`golden-22-precos`](../../../wte/tests/roteiros/golden-22-precos.txt)),
+      ([`golden-22-precos`](/wte/tests/roteiros/golden-22-precos.txt)),
       controle antes e byte-idêntico
 - [x] **As gravações não são nove, são dezessete** *(medido na WTE-TASK-31,
       2026-08-22)*. Nove era a conta de quem alguém *chamou* de gravação;
@@ -458,7 +475,7 @@ só uma escolha de quando.
       ficaram sem dono até a WTE-TASK-30
 - [x] `.mcr`: contêiner por documentação pública, conteúdo revertido — 16
       destinos mapeados dos **dois** lados em
-      [`wte/re/mcr.md`](../../../wte/re/mcr.md), com o contêiner lido do molde e
+      [`wte/re/mcr.md`](/wte/re/mcr.md), com o contêiner lido do molde e
       não suposto
 - [x] Os três casos especiais do readme do original cobertos, cada um pelo
       instrumento que alcança onde ele mora: **capitão e cobradores** e
@@ -480,7 +497,7 @@ só uma escolha de quando.
       pixel), a aritmética de escurecer/clarear é na palavra BGR555 empacotada,
       e o gradiente acumula em `Single` e **trunca para zero** — as duas causas
       do risco nomeado da §9, medidas em
-      [`wte/re/render2d.md`](../../../wte/re/render2d.md). **E a tolerância é
+      [`wte/re/render2d.md`](/wte/re/render2d.md). **E a tolerância é
       zero, medida em três réguas.** As duas primeiras mediam a paleta como ela
       veio da imagem: `compara_tela.sh 2 9 63` compara `bandera`, `home1` e
       `home2` pixel a pixel e dá 0 de 8.960 px (9.800 no clube de ML), e
@@ -493,7 +510,7 @@ só uma escolha de quando.
       de 3.840 px da bandeira) e o gradiente escrevendo a partir da ponta (15
       de 16)
 - [x] `grabar_camisetaClick` byte-idêntico, sem tolerância — **fechado em
-      2026-08-21** pelo [`golden-14-uniforme`](../../../wte/tests/roteiros/golden-14-uniforme.txt),
+      2026-08-21** pelo [`golden-14-uniforme`](/wte/tests/roteiros/golden-14-uniforme.txt),
       com controle antes: 30.956 bytes idênticos nos dois lados, e a imagem
       intacta nos dois. Ele **não grava na imagem**: lê dela e emite arquivo,
       com o laço saltando cabeçalho e EDC/ECC de cada setor, então o gate é
@@ -510,11 +527,11 @@ alimenta e passou a **carregar** essa gravação.
       `s⁴ div 3000000 + s³ div 40000 + s² div 700 + s div 7 + 5`, com
       `× 5 div 3` para goleiro, sobre a soma das dezesseis barras de
       habilidade. **132 jogadores em 6 times, 100% de acerto**
-      ([`wte/re/preco.md`](../../../wte/re/preco.md)). E as fontes são três, não
+      ([`wte/re/preco.md`](/wte/re/preco.md)). E as fontes são três, não
       duas: os **dois** handlers foram lidos instrução a instrução e são a
       mesma fórmula compilada duas vezes
 - [x] Saturação, arredondamento e termo cruzado testados — 12 conferências em
-      [`test_preco.pas`](../../../wte/tests/test_preco.pas). **A saturação não é
+      [`test_preco.pas`](/wte/tests/test_preco.pas). **A saturação não é
       teto, é transbordo de 32 bits**: o original faz `imul` de 32×32 e um
       `cdq` logo em seguida, que joga fora a metade alta. O ponto de virada foi
       medido — soma **216** —, e a partir dali o preço do original **cai**
@@ -525,8 +542,8 @@ alimenta e passou a **carregar** essa gravação.
 
 - [x] Bateria completa: operação × ROM, sem célula vazia — **92 corridas**
       (23 roteiros × 2 ROMs × 2 modos) em
-      [`wte/re/golden.md`](../../../wte/re/golden.md), rodadas pelo
-      [`golden_suite.sh`](../../../wte/tools/golden_suite.sh) e publicadas pelo
+      [`wte/re/golden.md`](/wte/re/golden.md), rodadas pelo
+      [`golden_suite.sh`](/wte/tools/golden_suite.sh) e publicadas pelo
       `check_golden.py`. **48 `PASSOU`, 22 `SEM_ORACULO`, 22 `NAO_APLICAVEL`,
       zero `REPROVOU`**; a japonesa fechou **46 de 46**. *(São **96 corridas**
       desde 2026-08-25: a WTE-TASK-37 acrescentou o `golden-25-retorno`, com o
@@ -540,7 +557,7 @@ alimenta e passou a **carregar** essa gravação.
       fecha em **0 bytes**, com os cobradores intactos nos três estados. **O
       `wte.exe` não tem o vaivém** — a não-idempotência de que o plano fala é
       do `ed.exe`. Resultado negativo, escrito em
-      [`golden.md`](../../../wte/re/golden.md)
+      [`golden.md`](/wte/re/golden.md)
 - [x] **A europeia hospeda o oráculo — só não para quem troca de time**
       *(medido na WTE-TASK-34, 2026-08-24)*. O `golden-01-arranque` passou
       controle **e** golden ali, byte-idêntico; os outros 22 roteiros trocam de
@@ -558,9 +575,9 @@ alimenta e passou a **carregar** essa gravação.
       defeito:** com a japonesa o roteiro sempre dirige até o fim
 - [x] Toda exceção do golden com entrada em `divergencias.md` — **3 exceções
       nomeadas, as 3 com entrada**, mecanizado nos dois sentidos pelo
-      [`check_divergencias.py`](../../../wte/tools/check_divergencias.py), com as
+      [`check_divergencias.py`](/wte/tools/check_divergencias.py), com as
       recusas **versionadas** em
-      [`test_check_divergencias.py`](../../../wte/tools/test_check_divergencias.py)
+      [`test_check_divergencias.py`](/wte/tools/test_check_divergencias.py)
       pela [CORR-WTE-106](/docs/tasks/concluidos/CORR-WTE-106.md) — 20 casos, os quatro
       sentidos plantados. O registro tem **seis entradas**, e a bateria de
       bytes **não tem exceção nenhuma**: zero roteiro declara `conhecida:`, o
@@ -576,9 +593,9 @@ alimenta e passou a **carregar** essa gravação.
       **9 para 12** sozinha, que é o sinal de que a isenção saiu de fato
 - [x] Inventário de buffers com os quatro casos de borda, nas duas ROMs —
       **seis campos**, gerados pelo
-      [`dump_buffers.py`](../../../wte/tools/dump_buffers.py) em
-      [`buffers.md`](../../../wte/re/buffers.md), e **25 de 25** conferências de
-      borda em [`test_bordas.pas`](../../../wte/tests/test_bordas.pas), headless
+      [`dump_buffers.py`](/wte/tools/dump_buffers.py) em
+      [`buffers.md`](/wte/re/buffers.md), e **25 de 25** conferências de
+      borda em [`test_bordas.pas`](/wte/tests/test_bordas.pas), headless
       *(eram 10, todas num vetor só; a
       [CORR-WTE-110](/docs/tasks/concluidos/CORR-WTE-110.md) levou os grupos 1 e 2 aos
       quatro campos)*.
@@ -599,7 +616,7 @@ alimenta e passou a **carregar** essa gravação.
       a validação sair do handler
 - [x] Nenhuma ação destrutiva alcançável por `Return` — **medido nos 18 e em
       bytes** *(WTE-TASK-37, 2026-08-25)*, em
-      [`retorno.md`](../../../wte/re/retorno.md): 13 formulários têm botão
+      [`retorno.md`](/wte/re/retorno.md): 13 formulários têm botão
       `Default`, 7 têm `Cancel`, e **um** `Default` dispara handler que grava na
       imagem — o `OK` do `ficha_color`, 383 bytes por time. **É do original**
       (`Default = True` está no DFM de 2002 e o `dfm2lfm.py` o copia verbatim),
@@ -610,8 +627,8 @@ alimenta e passou a **carregar** essa gravação.
       tecla
 - [x] Os 18 formulários reconferidos com a lógica ligada — **15 pares** de
       captura no mesmo estado dos dois lados, em
-      [`visual/carregado/`](../../../wte/re/visual/carregado) e medidos em
-      [`carregado.md`](../../../wte/re/carregado.md). **Cor de fundo de execução:
+      [`visual/carregado/`](/wte/re/visual/carregado) e medidos em
+      [`carregado.md`](/wte/re/carregado.md). **Cor de fundo de execução:
       15 de 15 batem**; ordem de tabulação: **18 de 18 iguais**; nenhum
       controle faltando, sobrando ou fora de posição
 - [x] **A §8.9 reabriu, e quatro vezes maior** *(achado da WTE-TASK-37)*. Ela
@@ -653,7 +670,7 @@ alimenta e passou a **carregar** essa gravação.
       `retrace.ResolveArquivo` resolvia `<exe>/../re/trace.log` e o `Rewrite`
       levantava quando o diretório não existia. **Consertado em 2026-08-26**
       pela [WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md): a regra passou para o
-      [`wte_datafiles.pas`](../../../wte/src/wte_datafiles.pas), que cobre assets
+      [`wte_datafiles.pas`](/wte/src/wte_datafiles.pas), que cobre assets
       **e** trace, e o `retrace` desliga o log em vez de derrubar o app quando
       o arquivo não abre
 - [x] Árvore instalada funciona depois de movida — instalada num prefixo,
@@ -682,18 +699,18 @@ alimenta e passou a **carregar** essa gravação.
       `REPROVOU`**, e os 96 vereditos **idênticos** aos da WTE-TASK-34; só data
       e segundos mudaram *(idem)*
 - [x] **Condição 3 testada em ambiente sem Wine** — e testada, não presumida.
-      O [`sem_wine.sh`](../../../wte/tools/sem_wine.sh) cobre com `tmpfs` vazio o
+      O [`sem_wine.sh`](/wte/tools/sem_wine.sh) cobre com `tmpfs` vazio o
       runner do Bottles (que **é** o Wine desta máquina — não há pacote no
       apt), o `/var/lib/flatpak`, os dois `work/wineprefix*` e o stack `i386`,
       e **recusa** se algum alvo não ficar vazio lá dentro — a cláusula que
       trabalha nesta máquina — ou se `wine`/`wine64`/`wineserver`/`winecfg`
       responderem no `PATH` ([CORR-WTE-120](/docs/tasks/concluidos/CORR-WTE-120.md)). O
-      [`nativo_check.sh`](../../../wte/tools/nativo_check.sh) mede sete coisas
+      [`nativo_check.sh`](/wte/tools/nativo_check.sh) mede sete coisas
       sobre a árvore **instalada** e as sete deram `ok` — inclusive a `carga`,
       que separa *abriu* de *funciona*: 3 teclas `Down` viraram 3
       `lista_equiposChange` no trace que o próprio app escreve *(idem)*
 - [x] Vocabulário escrito: verificado, não verificado, divergente por decisão —
-      em [`wte/README.md`](../../../wte/README.md), seção *"O que este projeto
+      em [`wte/README.md`](/wte/README.md), seção *"O que este projeto
       pode afirmar"*, com os **cinco** itens abertos e a razão de cada um
       *(idem)*
 - [x] §11 do plano preenchida — as três condições medidas, os quatro defeitos
@@ -763,13 +780,13 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
 ## Pendências externas
 
 - **Publicação depende do usuário.** O binário do Obocaman é sem licença, como
-  todo o código herdado que o [`../../NOTICE.md`](../../../NOTICE.md) registra. A
+  todo o código herdado que o [`../../NOTICE.md`](/NOTICE.md) registra. A
   WTE-TASK-38 prepara a linhagem; **publicar não é decisão do executor.**
 - **Assets não redistribuídos, com uma exceção.** Os 198 BMP e o `dat.bin` ficam
   com o usuário, como `roms/`. O app precisa falhar com mensagem clara sem eles.
   A exceção são os 118 blobs de formulário (816.880 B), que **estão** versionados
   em hex nos `wte/forms/*.lfm` — decisão de 2026-08-06, registrada em
-  [`../../wte/re/dfm/README.md`](../../../wte/re/dfm/README.md) e no §2 do
+  [`../../wte/re/dfm/README.md`](/wte/re/dfm/README.md) e no §2 do
   [`PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md).
 - **Nada disso roda em CI.** O golden test precisa de Wine, do `:99` e de ~1 GB
   de temporário por rodada. O CI do repositório, aliás, está com `push` e
@@ -779,8 +796,8 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
   WTE-TASK-19 e o desenho do gate da 22. Medido na WTE-TASK-19: o editor
   **morre** ao trocar de time, com a ROM europeia deste repositório — a
   japonesa nunca tinha sido medida neste caminho, e passa. A atribuição é medida, não lida da tela — os roteiros
-  [07](../../../wte/tests/roteiros/07-controle-sem-time.txt) e
-  [08](../../../wte/tests/roteiros/08-so-troca-de-time.txt) são iguais linha a
+  [07](/wte/tests/roteiros/07-controle-sem-time.txt) e
+  [08](/wte/tests/roteiros/08-so-troca-de-time.txt) são iguais linha a
   linha até `= ARRANQUE` e o 08 só acrescenta a troca de time: **0 violações de
   acesso no 07, 309 no 08**.
 
@@ -797,7 +814,7 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
   **nulo** — chamada de uma rotina do `.exe` que procura um controle por
   `FindComponent("dorsal" + N)`. **É estado de interface, não leitura da
   imagem:** falta o objeto, não o byte. Detalhe, com endereços e chamadores, em
-  [`../../wte/re/crash.md`](../../../wte/re/crash.md).
+  [`../../wte/re/crash.md`](/wte/re/crash.md).
 
   **Veredito (CORR-WTE-044, 2026-08-10): resolvida — o oráculo é dirigível com
   a ROM japonesa.** O controle **existe** (os 23 `dorsalN` estão vivos no
@@ -816,7 +833,7 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
   [CORR-WTE-044](/docs/tasks/concluidos/CORR-WTE-044.md) existia para quebrar — 22 precisa
   do oráculo vivo, entendê-lo seria a WTE-TASK-25, e a 25 depende da 22 — está
   desfeita sem implementar handler nenhum. Medição, ressalvas e o que ficou sem
-  resposta em [`../../wte/re/crash-causa.md`](../../../wte/re/crash-causa.md).
+  resposta em [`../../wte/re/crash-causa.md`](/wte/re/crash-causa.md).
 - **Binário original em espanhol seria bom ter, e não é bloqueante.** O `.exe` é
   a tradução PT-BR com 13 strings de `.data` truncadas por padding — mais 80
   literais nos DFM, que são outra população (WTE-TASK-09). As três mensagens em
@@ -919,7 +936,7 @@ A primeira medição foi feita na criação destas tasks (2026-08-05), com
 `objdump`, `strings` e script Python descartável. A **WTE-TASK-09 remediu tudo
 com ferramenta versionada** e corrigiu quatro linhas; o confronto item a item,
 com a causa de cada correção, está em
-[`../../wte/re/fase-1.md`](../../../wte/re/fase-1.md).
+[`../../wte/re/fase-1.md`](/wte/re/fase-1.md).
 
 | Eixo | Estado |
 | --- | --- |
@@ -934,10 +951,10 @@ com a causa de cada correção, está em
 | Offsets nossos que batem | **19 de 69**, em tabela a partir de `0x004231a0` |
 | Strings com enchimento do tradutor | 13 em `.data`, 80 nos DFM — *corrigido* |
 | Assets externos | 198 `.bmp` + `dat.bin` de 145.408 B — *corrigido* |
-| Ferramental instalado | **nenhum** — sem Lazarus, FPC, Ghidra ou `pefile`. **Superado pela WTE-TASK-01**: ver [`../../wte/re/ambiente.md`](../../../wte/re/ambiente.md) |
+| Ferramental instalado | **nenhum** — sem Lazarus, FPC, Ghidra ou `pefile`. **Superado pela WTE-TASK-01**: ver [`../../wte/re/ambiente.md`](/wte/re/ambiente.md) |
 
 Censo de componentes, medido nos 18 DFM pelo `dfm_extract.py` — o detalhe por
-formulário está em [`../../wte/re/dfm/censo.md`](../../../wte/re/dfm/censo.md):
+formulário está em [`../../wte/re/dfm/censo.md`](/wte/re/dfm/censo.md):
 
 ```
 TLabel        182     TGroupBox      10
@@ -971,7 +988,7 @@ transpilação: 303 delas são Pascal escrito à mão que mora nas constantes do
 próprio gerador — as quatro peças que o `tipos.md` já decidira que não
 transpilam. "100% gerado" seria verdade de arquivo e mentira de conteúdo, e a
 §4.5 fala de conteúdo. A medida sai do
-[`check_fase3.py`](../../../wte/tools/check_fase3.py), e conta **linha física dos
+[`check_fase3.py`](/wte/tools/check_fase3.py), e conta **linha física dos
 dois lados** — a fração foi publicada como 92,5% até a
 [CORR-WTE-051](/docs/tasks/concluidos/CORR-WTE-051.md), quando o total contava linha em
 branco e o manual não.
@@ -1019,7 +1036,7 @@ de mapeamento é a **European Deluxe** (95 de 95 campos decodificados) e a
 japonesa exercita o **ramo padrão** (0 de 95 — katakana vira espaço). As duas
 continuam necessárias, por motivos trocados. Vale como aviso geral: *"sem esta
 entrada o código X não é exercitado"* é afirmação sobre cobertura, e cobertura
-se mede — [`../../wte/re/fase-3.md`](../../../wte/re/fase-3.md).
+se mede — [`../../wte/re/fase-3.md`](/wte/re/fase-3.md).
 
 **E zero contra zero não prova nada.** O critério da 20 é que as duas gravações
 saiam byte a byte iguais; se o `Save` parasse de gravar, elas continuariam
@@ -1033,7 +1050,7 @@ fizeram alguma coisa.
 erro que parece certo.** Todo handler do `.exe` referencia controle por
 deslocamento, e a derivação barata seria "primeiro `object` do `.dfm` no
 primeiro campo". Medido pelo
-[`dump_campos.py`](../../../wte/tools/dump_campos.py): essa regra acerta **73 de
+[`dump_campos.py`](/wte/tools/dump_campos.py): essa regra acerta **73 de
 440**, e no `MainForm` **zero de 116**. A ordem do `.dfm` é a de criação, a dos
 campos é a da declaração no `.h`. O mapa certo sai da *published field table*
 que o VMT aponta em **-56** — irmã da published method table da WTE-TASK-04, e
@@ -1061,7 +1078,7 @@ os 95 itens da lista são os **63 `teams` seguidos dos 32 `ml_teams`**. O port
 pode ler a camada de dados em vez de reabrir a imagem, e isso não é suposição.
 É o método da §4.2 rendendo o que promete: o diff diz *onde*, o core diz *o
 que*. Virou guarda de build no
-[`check_barras.py`](../../../wte/tools/check_barras.py), que decodifica as
+[`check_barras.py`](/wte/tools/check_barras.py), que decodifica as
 constantes do próprio corpo do handler — constante que mude no binário derruba
 a conferência em vez de passar.
 
@@ -1074,7 +1091,7 @@ quando o corpo inteiro entrar.
 
 **WTE-TASK-25, quarta passagem — a lista desses auxiliares era escrita à mão, e
 por isso estava curta.** A spec listava cinco endereços; medido pelo
-[`dump_auxiliares.py`](../../../wte/tools/dump_auxiliares.py), o handler chama
+[`dump_auxiliares.py`](/wte/tools/dump_auxiliares.py), o handler chama
 **treze** rotinas internas. Parte é biblioteca, que uma lista à mão descartaria
 de propósito — mas `0x004050d0` e `0x0040cbc8` carregam dado do jogo, e essas
 não estavam sendo descartadas: não estavam sendo vistas. É a armadilha 11 numa
@@ -1101,11 +1118,11 @@ desconhecido. Divergência de tela, não de gravação.
 não dispara `CBN_SELCHANGE` em `SetCurSel`; o Qt **dispara**
 `currentIndexChanged` em `setCurrentIndex`, e o `newWe2002` precisou de
 `QSignalBlocker` nas cargas de time. Medido em gtk2 pelo
-[`test_lcl_combo.pas`](../../../wte/tests/test_lcl_combo.pas): **nenhum** dos cinco
+[`test_lcl_combo.pas`](/wte/tests/test_lcl_combo.pas): **nenhum** dos cinco
 casos dispara — nem `ItemIndex :=`, nem reatribuir o mesmo índice, nem
 `Items.Clear` com item selecionado. A LCL se comporta como o original, e os
 corpos da fase 4 dispensam bloqueio de sinal. Virou guarda de build
-([`check_lcl_combo.py`](../../../wte/tools/check_lcl_combo.py)) porque a resposta é
+([`check_lcl_combo.py`](/wte/tools/check_lcl_combo.py)) porque a resposta é
 propriedade do **widgetset instalado**, e pode virar num upgrade sem que uma
 linha deste repositório mude.
 
@@ -1160,7 +1177,7 @@ programa.
 vão da imagem para a tela: vão para `0x00434592`, e é dali que sai a largura. A
 carga enche, o `track_barraChange` grava, o `boton_barras2isoClick` lê para
 gravar na imagem — os três tocam o mesmo endereço, conferido por
-[`check_barras.py`](../../../wte/tools/check_barras.py). Se o port desenhasse a
+[`check_barras.py`](/wte/tools/check_barras.py). Se o port desenhasse a
 barra a partir de `Jogo.teams[].bar_*`, editar mudaria o pixel e a gravação
 escreveria o valor velho, **com o golden acusando a gravação** por um defeito da
 edição. É a forma que todo grupo de edição da fase 4 deve ter, e vale procurar
@@ -1192,7 +1209,7 @@ A decisão alcançou o **vocabulário de veredito**, e tinha de alcançar:
 `implementado` dizia "golden verde", o que tornaria impossível fechar qualquer
 handler de edição — o veredito mediria a ordem das tasks, não o estado do
 handler. Passou a dizer "a régua da task do handler verde", com a tabela por
-grupo no [`GABARITO.md`](../../../wte/re/spec/GABARITO.md).
+grupo no [`GABARITO.md`](/wte/re/spec/GABARITO.md).
 
 **E a régua existe e fechou verde:** `compara_tela.sh --edicao` edita a barra
 `defesa` do time 2 nos dois lados e mede — 4 → 6 nos dois, com as outras quatro
@@ -1230,19 +1247,7 @@ mesma família de campo no `newWe2002` nunca foi conferida pela tela.
 
 ## Resumo
 
-| ID | Tarefa | §  | Itens | Dependências | Status | Concluída em | Revisado em |
-| -- | ------ | -- | ----: | ------------ | ------ | ------------ | ----------- |
-| [PAR-TASK-01](/docs/tasks/concluidos/PAR-TASK-01.md) | Nomes e abreviações de time, pela tela | 8.1 | 5 | — | ✅ Concluído | 2026-08-28 | 2026-08-28 |
-| [PAR-TASK-02](/docs/tasks/concluidos/PAR-TASK-02.md) | Números de camisa e o clamp em 32 | 8.2 | 3 | 01 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-03](/docs/tasks/concluidos/PAR-TASK-03.md) | Cobradores, capitão e o foco de combo | 8.3 | 3 | 01 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-04](/docs/tasks/concluidos/PAR-TASK-04.md) | Atributos do jogador e os clamps | 8.4 | 5 | 01 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-05](/docs/tasks/concluidos/PAR-TASK-05.md) | Troca de jogador nos quatro tipos de slot | 8.5 | 4 | 04 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-06](/docs/tasks/concluidos/PAR-TASK-06.md) | Táticas, presets e o formato `.t2002` | 8.7 | 5 | 03 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PAR-TASK-07](/docs/tasks/concluidos/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | 8.8 | 3 | 01 | ✅ Concluído | 2026-08-31 | 2026-09-01 |
-| [PAR-TASK-08](/docs/tasks/concluidos/PAR-TASK-08.md) | Operações em massa | 8.9 | 5 | 04, 07 | ❌ Bloqueado | — | — |
-| [PAR-TASK-09](/docs/tasks/concluidos/PAR-TASK-09.md) | Ciclo de vida da janela | 8.10 | 5 | — | ✅ Concluído | 2026-08-31 | 2026-09-01 |
-| [PAR-TASK-10](/docs/tasks/concluidos/PAR-TASK-10.md) | O item aberto do Windows: nome de time pela janela Qt | 8.11 | 1 | 01 | ❌ Bloqueado | — | — |
-| [PAR-TASK-11](/docs/tasks/concluidos/PAR-TASK-11.md) | SoFIFA: o que dá para conferir sem rede | 8.6 | 5 | 01–09 | ❌ Bloqueado | — | — |
+_The state of these items now lives in their frontmatter and in the generated table above (`rite.py sync`)._
 
 **44 itens, 11 tasks.** As **três** bloqueadas têm bloqueio nomeado: a **08**
 pelos dois itens de `CMD_SORT_RESERVES` exigirem MSVC com MFC estático (3 de 5

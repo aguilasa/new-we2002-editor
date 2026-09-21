@@ -4,9 +4,13 @@ title: "`model.py`, `mcrio.py` e o round-trip byte-idêntico"
 type: implementação
 category: núcleo
 phase: 1
-depends_on: ["MCR-TASK-06", "MCR-TASK-07", "MCR-TASK-08"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §5.1"
-status: concluído
+depends_on: [MCR-TASK-06, MCR-TASK-07, MCR-TASK-08]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#5.1"
+reviewed_on: 2026-09-08
+review_commit: null
+done_on: 2026-09-08
+done_commit: 298856b
 ---
 
 # MCR-TASK-09: O modelo e o round-trip

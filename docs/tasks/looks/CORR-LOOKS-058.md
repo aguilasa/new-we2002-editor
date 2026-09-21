@@ -3,8 +3,12 @@ id: CORR-LOOKS-058
 title: "Correção: o docstring do `layout.POSE_MATRIX` reparte as 40 paradas de um jeito que a ferramenta não reproduz"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-24
+severity: low
+done_on: 2026-09-18
+done_commit: cf98bb9
 ---
 
 # CORR-LOOKS-058: 18 e 17 no módulo, 18 e 18 em toda corrida

@@ -3,8 +3,12 @@ id: CORR-MCR-028
 title: "Correção: o mapa diz que três imagens de roms/ declaram SLPM-87056, e são cinco"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-17
+severity: low
+done_on: 2026-09-10
+done_commit: db8fb48
 ---
 
 # CORR-MCR-028: são cinco as imagens que declaram `SLPM-87056`

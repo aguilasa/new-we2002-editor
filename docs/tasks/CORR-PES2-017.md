@@ -3,8 +3,12 @@ id: CORR-PES2-017
 title: "Correção: o perfil do ciclo não tem seção de Fase 7, e a Fase 7 já teve quatro tasks executadas"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-29
+severity: medium
+done_on: 2026-09-01
+done_commit: 3e2ccb6
 ---
 
 # CORR-PES2-017: A Fase 7 não tem verificações escritas no perfil

@@ -4,9 +4,14 @@ title: "SoFIFA: o que dá para conferir sem rede"
 type: verificação
 category: features
 projeto: newWe2002
-depends_on: ["PAR-TASK-01", "PAR-TASK-02", "PAR-TASK-03", "PAR-TASK-04", "PAR-TASK-05", "PAR-TASK-06", "PAR-TASK-07", "PAR-TASK-08", "PAR-TASK-09"]
-fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.6"
-status: bloqueado
+depends_on: [PAR-TASK-01, PAR-TASK-02, PAR-TASK-03, PAR-TASK-04, PAR-TASK-05, PAR-TASK-06, PAR-TASK-07, PAR-TASK-08, PAR-TASK-09]
+status: blocked
+source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.6"
+phase: null
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PAR-TASK-11: SoFIFA, o possível sem rede
@@ -21,7 +26,7 @@ status: bloqueado
 **O import do SoFIFA está desligado desde 2026-08-05, por decisão**, e fica em
 último plano até a paridade com o `ed.exe` estar conferida tela a tela — que é
 exatamente o que as PAR-TASK-01 a 09 entregam. O interruptor é
-`app::SOFIFA_ENABLED` em [../../src/app/Features.hpp](../../../src/app/Features.hpp).
+`app::SOFIFA_ENABLED` em [../../src/app/Features.hpp](/src/app/Features.hpp).
 
 Ele apaga (em cinza, não escondido) os três botões de SoFIFA, o botão de edit
 options, as 23 caixas de URL, o `CMD_READ_URL` do diálogo de atributos e a

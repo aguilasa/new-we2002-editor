@@ -4,9 +4,13 @@ title: "O alinhamento dos valores — a caixa do objeto de texto no `screen.json
 type: implementação
 category: ui
 phase: 10
-depends_on: ["LOOKS-TASK-37"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (o)"
-status: pendente
+depends_on: [LOOKS-TASK-37]
+status: pending
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # LOOKS-TASK-38: O alinhamento dos valores

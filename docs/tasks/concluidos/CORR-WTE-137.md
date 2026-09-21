@@ -3,8 +3,12 @@ id: CORR-WTE-137
 title: "Correção: `8.8-b2002-exportar.sh` não reproduz, não confere nada e deixa o modal aberto"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-07
+severity: high
+done_on: 2026-08-31
+done_commit: 866e3c0
 ---
 
 # CORR-WTE-137: o roteiro de exportação da §8.8 é um falso verde à espera
@@ -13,7 +17,7 @@ depends_on: []
 
 O item 3 da §8.8 — "`.b2002` e `.m2002`: exportar do port e importar no
 `ed.exe`, e vice-versa" — se apoia em
-[`tools/par/8.8-b2002-exportar.sh`](../../../tools/par/8.8-b2002-exportar.sh), e o
+[`tools/par/8.8-b2002-exportar.sh`](/tools/par/8.8-b2002-exportar.sh), e o
 roteiro tem três defeitos que se somam:
 
 1. **Não reproduz.** Quatro corridas idênticas desta revisão deram quatro

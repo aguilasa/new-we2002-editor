@@ -3,8 +3,12 @@ id: CORR-PES2-005
 title: "Correção: duas das cinco recusas do `--self-check` do `poke.py` medem a mesma coisa; a regra de fim e o último registro nunca são exercitados"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-02
+severity: high
+done_on: 2026-09-01
+done_commit: bfbcaf6
 ---
 
 # CORR-PES2-005: o `--self-check` não exercita duas das guardas que o `poke.py` tem

@@ -3,8 +3,12 @@ id: CORR-WTE-094
 title: "Correção: a premissa da WTE-TASK-32 está errada — o `ed.exe` calcula preço, o que ele não tem é o botão"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: medium
+done_on: 2026-08-24
+done_commit: d906cbf
 ---
 
 # CORR-WTE-094: o `ed.exe` tem a fórmula de preço

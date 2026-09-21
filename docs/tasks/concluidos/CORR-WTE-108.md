@@ -3,8 +3,12 @@ id: CORR-WTE-108
 title: "Correção: a WTE-TASK-35 deixa \"o plano é o que falta conferir\" e o plano nunca afirmou aquilo"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-35
+severity: low
+done_on: 2026-08-25
+done_commit: 0c8fa41
 ---
 
 # CORR-WTE-108: um "falta conferir" que já está conferido
@@ -22,14 +26,14 @@ Conferido nesta revisão: **o plano nunca afirmou aquilo.** O
 `docs/PLAN-WTE-LAZARUS.md` não contém `idempot`, `cobrador`, `OFS_KICKER` nem
 `vaivém` em lugar nenhum. A afirmação morava em dois sítios, e os dois já
 dizem `ed.exe`: o enunciado da WTE-TASK-34 e a prosa gerada do
-[`golden.md`](../../../wte/re/golden.md).
+[`golden.md`](/wte/re/golden.md).
 
 A frase manda alguém procurar um texto que não existe — que é, palavra por
 palavra, o defeito que esta mesma task nomeia como princípio ao explicar por
 que **removeu** a isenção `pendente_32` em vez de registrá-la: *"uma entrada
 falsa manda alguém procurar um problema que não existe"*.
 
-O registro durável — o [`divergencias.md`](../../../wte/re/divergencias.md) — está
+O registro durável — o [`divergencias.md`](/wte/re/divergencias.md) — está
 **correto**: a entrada 6 não carrega a pendência. O resto é só no arquivo da
 task.
 

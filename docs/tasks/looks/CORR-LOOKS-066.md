@@ -3,8 +3,12 @@ id: CORR-LOOKS-066
 title: "Correção: a divisão da LOOKS-TASK-31 não chegou a cinco textos — a §10.3 (o) segue \"PARCIAL\", e o close-up e o cenário ainda apontam para a 31"
 type: correção
 category: processo
-status: pendente
+status: pending
 depends_on: []
+origin: LOOKS-TASK-31
+severity: low
+done_on: null
+done_commit: null
 ---
 
 # CORR-LOOKS-066: a 31 fechou dividida, e cinco textos ainda a leem aberta

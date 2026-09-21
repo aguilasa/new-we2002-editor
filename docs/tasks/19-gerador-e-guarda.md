@@ -4,9 +4,13 @@ title: "O gerador — do mapa ao código, com `--check`"
 type: ferramenta
 category: build
 phase: 5
-depends_on: ["PES2-TASK-18"]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §4.4"
-status: pendente
+depends_on: [PES2-TASK-18]
+status: pending
+source_of_truth: "/docs/PLAN-PES2-PSX.md#4.4"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-19: O gerador e a guarda

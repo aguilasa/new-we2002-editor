@@ -3,8 +3,12 @@ id: CORR-LOOKS-015
 title: "Correção: o gate obrigatório não é alcançável por `ctest` nesta máquina, e pedir por ele continua saindo 0"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-06
+severity: high
+done_on: 2026-09-14
+done_commit: db48d90
 ---
 
 # CORR-LOOKS-015: o gate obrigatório não é alcançável por `ctest` nesta máquina

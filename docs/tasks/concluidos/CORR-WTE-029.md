@@ -3,8 +3,12 @@ id: CORR-WTE-029
 title: "Correção: o Log da WTE-TASK-16 diz que a reconciliação do `fase-2.md` saiu em commit próprio, e ela saiu no mesmo commit"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-16
+severity: low
+done_on: 2026-08-10
+done_commit: d754d38
 ---
 
 # CORR-WTE-029: a reconciliação da fase 2 não teve commit próprio

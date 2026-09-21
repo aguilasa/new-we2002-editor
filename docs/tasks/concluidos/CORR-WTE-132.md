@@ -3,8 +3,12 @@ id: CORR-WTE-132
 title: "Correção: nenhuma — os 52 bytes do port é que estão certos; quem diverge é o ed.exe x64"
 type: correção
 category: paridade
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-06
+severity: high
+done_on: 2026-09-01
+done_commit: b3658f4
 ---
 
 # CORR-WTE-132: o `.t2002` do port não é o do original
@@ -20,7 +24,7 @@ com o mesmo preset e o mesmo roteiro:
 | `newWe2002` | **52 bytes** |
 
 Medido em 2026-08-30 pela [PAR-TASK-06](/docs/tasks/concluidos/PAR-TASK-06.md) item 5, com
-[`tools/par/8.7-t2002-exportar.sh`](../../../tools/par/8.7-t2002-exportar.sh) na
+[`tools/par/8.7-t2002-exportar.sh`](/tools/par/8.7-t2002-exportar.sh) na
 `ptbr-remaster.bin`.
 
 ```text
@@ -109,7 +113,7 @@ original recusa**. Trocaria um port correto por um que reproduz um defeito de
 recompilação do oráculo.
 
 `VPTR_BYTES = 4` e `FILE_BYTES = 52` em
-[`src/app/DefaultTacticsDialog.cpp`](../../../src/app/DefaultTacticsDialog.cpp)
+[`src/app/DefaultTacticsDialog.cpp`](/src/app/DefaultTacticsDialog.cpp)
 **ficam como estão**, e o comentário de lá passa a dizer por quê.
 
 O que sobra é de documentação, e está feito nesta invocação:

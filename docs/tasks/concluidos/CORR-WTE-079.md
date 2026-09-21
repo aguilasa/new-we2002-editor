@@ -3,8 +3,12 @@ id: CORR-WTE-079
 title: "Correção: o compara_tela.sh ficou com dois blocos de --malha colados no lugar errado"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-29
+severity: low
+done_on: 2026-08-21
+done_commit: 2f851a1
 ---
 
 # CORR-WTE-079: o `compara_tela.sh` ficou com dois blocos de `--malha` colados no lugar errado
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 O modo `--malha` entrou no
-[`wte/tools/compara_tela.sh`](../../../wte/tools/compara_tela.sh) na sétima
+[`wte/tools/compara_tela.sh`](/wte/tools/compara_tela.sh) na sétima
 passagem da [WTE-TASK-29](/docs/tasks/concluidos/29-camisa-e-bandeira-2d.md), e a emenda
 deixou **dois trechos mortos**, um em cada função de captura.
 

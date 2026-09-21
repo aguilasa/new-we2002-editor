@@ -3,8 +3,12 @@ id: CORR-WTE-002
 title: "Correção: dois números do `ambiente.md` só são reproduzíveis pelo scratchpad"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-01
+severity: low
+done_on: 2026-08-05
+done_commit: 0aa5ad0
 ---
 
 # CORR-WTE-002: evidência que mora no `/tmp` e comando que não está escrito

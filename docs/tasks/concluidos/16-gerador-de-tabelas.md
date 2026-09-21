@@ -4,9 +4,13 @@ title: "tools/gen_tables_pas.py — offsets e tabelas estáticas"
 type: ferramenta
 category: dados
 phase: 3
-depends_on: ["WTE-TASK-15"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.4 e Fase 3 item 3"
-status: concluído
+depends_on: [WTE-TASK-15]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.4"
+reviewed_on: 2026-08-09
+review_commit: null
+done_on: 2026-08-09
+done_commit: 6dab6bb
 ---
 
 # WTE-TASK-16: Gerador de tabelas

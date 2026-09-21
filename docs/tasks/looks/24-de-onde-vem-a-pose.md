@@ -4,9 +4,13 @@ title: "Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tab
 type: investigação
 category: oráculo
 phase: 9
-depends_on: ["LOOKS-TASK-20"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (j)"
-status: concluído
+depends_on: [LOOKS-TASK-20]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: 2026-09-18
+review_commit: null
+done_on: 2026-09-17
+done_commit: 8a32160
 ---
 
 # LOOKS-TASK-24: De onde vem a pose

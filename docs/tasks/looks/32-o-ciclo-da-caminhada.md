@@ -4,9 +4,13 @@ title: "Incógnita (p) — o ciclo da caminhada: quadros por passada, interpola�
 type: investigação
 category: oráculo
 phase: 11
-depends_on: ["LOOKS-TASK-26"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (p)"
-status: pendente
+depends_on: [LOOKS-TASK-26]
+status: pending
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # LOOKS-TASK-32: O ciclo da caminhada

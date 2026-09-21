@@ -3,8 +3,12 @@ id: CORR-WTE-121
 title: "Correção: o port grava três faixas de nome de time diferentes do oráculo, e só a ptbr-remaster expõe"
 type: correção
 category: paridade
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-34
+severity: high
+done_on: 2026-08-28
+done_commit: edff503
 ---
 
 # CORR-WTE-121: três faixas de nome de time que só a régua nova enxerga
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 A bateria golden do `wte/` rodada sobre a `ptbr-remaster.bin` — as 48 corridas
-de [`wte/re/golden-ptbr.tsv`](../../../wte/re/golden-ptbr.tsv), medidas em
+de [`wte/re/golden-ptbr.tsv`](/wte/re/golden-ptbr.tsv), medidas em
 2026-08-27 — deu **46 `PASSOU` e 2 `REPROVOU`**. As duas reprovações são o
 **mesmo defeito**: as faixas saem idênticas, byte a byte, nos dois roteiros.
 
@@ -24,7 +28,7 @@ de [`wte/re/golden-ptbr.tsv`](../../../wte/re/golden-ptbr.tsv), medidas em
 
 Os dois roteiros que reprovam — `golden-05-nomes` e
 `golden-23-multiplas-edicoes` — são os que **editam nome de time**. Nenhuma das
-três faixas está declarada em [`wte/re/divergencias.md`](../../../wte/re/divergencias.md).
+três faixas está declarada em [`wte/re/divergencias.md`](/wte/re/divergencias.md).
 
 **O defeito não é da imagem, e não é novo.** Ele está no port desde sempre; o
 que faltava era régua capaz de vê-lo. As outras duas ROMs não conseguem:
@@ -158,7 +162,7 @@ o original mede a largura do registro **andando pela imagem**
 | `TEAM_NAME_KANJI_LEN` (`edit_nombre1`) | 95/95 | **66/95** | **46/95** |
 
 **Isto já estava registrado como divergência deliberada** — a §4 do
-[`divergencias.md`](../../../wte/re/divergencias.md), *"o `MaxLength` do
+[`divergencias.md`](/wte/re/divergencias.md), *"o `MaxLength` do
 `edit_nombre1` na European Deluxe"*, decisão *manter*. A entrada estava errada
 em duas coisas: não é só da European Deluxe, e não é limite de tela — é nome do
 usuário perdido na imagem. Ela virou **remoção**, no molde da §9.

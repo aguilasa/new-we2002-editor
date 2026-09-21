@@ -4,9 +4,13 @@ title: "A câmera do close-up — o painel aproxima na cabeça quando a linha é
 type: implementação
 category: render
 phase: 10
-depends_on: ["LOOKS-TASK-28"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (o)"
-status: pendente
+depends_on: [LOOKS-TASK-28]
+status: pending
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # LOOKS-TASK-40: A câmera do close-up

@@ -38,7 +38,7 @@ divergirem, **o plano ganha** — aqui só mora o resumo operacional, e o
 ## Armadilhas medidas neste ciclo
 
 As de GUI e de cópia valem para o repositório inteiro e estão no
-[`CLAUDE.md`](../../CLAUDE.md). Estas são do formato e do método.
+[`CLAUDE.md`](/CLAUDE.md). Estas são do formato e do método.
 
 1. **Uma cópia gravada é pior que nenhuma — e nenhuma cópia é cópia.** PES2
    grava in-place como o WE2002, e a release inteira são 571 MiB em oito

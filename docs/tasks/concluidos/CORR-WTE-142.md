@@ -3,8 +3,12 @@ id: CORR-WTE-142
 title: "Correção: os roteiros de ciclo de vida gravam captura em `/tmp/c09`, que ninguém cria — e o do oráculo anuncia a captura que não fez"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-09
+severity: high
+done_on: 2026-08-31
+done_commit: 759e4d9
 ---
 
 # CORR-WTE-142: a evidência dos itens 1, 2 e 5 da §8.10 não é reproduzível

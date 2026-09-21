@@ -3,8 +3,12 @@ id: CORR-PES2-010
 title: "Correção: as duas constantes do `scan` do `lzss.py` — uma decide todo verdicto com 128 B de margem, a outra é justificada por um número errado"
 type: correção
 category: formato
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-26
+severity: medium
+done_on: 2026-09-01
+done_commit: 2b25c49
 ---
 
 # CORR-PES2-010: os dois limiares do `scan`, e o que o plano afirma por causa deles

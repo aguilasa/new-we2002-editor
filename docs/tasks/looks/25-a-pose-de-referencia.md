@@ -4,9 +4,13 @@ title: "A pose de referência — as matrizes de cada peça num quadro contado, 
 type: investigação
 category: oráculo
 phase: 9
-depends_on: ["LOOKS-TASK-24"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (k)"
-status: concluído
+depends_on: [LOOKS-TASK-24]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: 2026-09-18
+review_commit: null
+done_on: 2026-09-18
+done_commit: 81c8ca8
 ---
 
 # LOOKS-TASK-25: A pose de referência

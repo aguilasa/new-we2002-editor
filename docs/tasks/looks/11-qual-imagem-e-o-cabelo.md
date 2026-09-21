@@ -4,9 +4,13 @@ title: "A contradição 8 × 3.568 — qual imagem do `DAT2D.BIN` é o cabelo"
 type: engenharia-reversa
 category: textura
 phase: 3
-depends_on: ["LOOKS-TASK-10"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §1.8"
-status: concluído
+depends_on: [LOOKS-TASK-10]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#1.8"
+reviewed_on: 2026-09-15
+review_commit: null
+done_on: 2026-09-15
+done_commit: "2273318"
 ---
 
 # LOOKS-TASK-11: Qual imagem é o cabelo

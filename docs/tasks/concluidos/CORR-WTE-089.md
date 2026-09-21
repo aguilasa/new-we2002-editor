@@ -3,8 +3,12 @@ id: CORR-WTE-089
 title: "Correção: três vereditos `aberto` por 'nada exercita o corpo' quando a bateria golden já os exercita"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: high
+done_on: 2026-08-24
+done_commit: 7cf7ba0
 ---
 
 # CORR-WTE-089: a cobertura que a bateria golden já dava
@@ -13,7 +17,7 @@ depends_on: []
 
 A razão mais comum de um veredito ficar `aberto` na fase 4 é a frase *"nada
 exercita o corpo"*. Ela foi escrita mais de uma vez a partir do
-[`compara_tela.sh`](../../../wte/tools/compara_tela.sh), que é a régua de **pixel**
+[`compara_tela.sh`](/wte/tools/compara_tela.sh), que é a régua de **pixel**
 do grupo de carga — e não a partir da bateria golden, que é a régua de **byte**
 e dirige a janela muito mais fundo.
 
@@ -37,7 +41,7 @@ para todos.
 ## Evidência
 
 Medida com o `port-trace.log` que o
-[`golden_run_laz.sh`](../../../wte/tools/golden_run_laz.sh) já escreve, rodando o
+[`golden_run_laz.sh`](/wte/tools/golden_run_laz.sh) já escreve, rodando o
 lado port dos 16 roteiros com par. ROM japonesa, cópia em `work/`.
 
 | Handler | Roteiro | Disparos |
@@ -53,7 +57,7 @@ lado port dos 16 roteiros com par. ROM japonesa, cópia em `work/`.
 | `mostrar_jugadorClick` | `golden-15-ficha` | 1 |
 
 Os quatro roteiros estão `PASSOU` em **controle e golden** no
-[`fase-4-golden.tsv`](../../../wte/re/fase-4-golden.tsv).
+[`fase-4-golden.tsv`](/wte/re/fase-4-golden.tsv).
 
 E o outro lado da medida, que é o que dá limite ao argumento: dos demais
 `aberto`, **nenhum** aparece em roteiro nenhum — `BitBtn1Click`,

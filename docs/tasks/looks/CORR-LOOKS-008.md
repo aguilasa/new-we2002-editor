@@ -3,8 +3,12 @@ id: CORR-LOOKS-008
 title: "Correção: o `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-03
+severity: medium
+done_on: 2026-09-14
+done_commit: c4bc075
 ---
 
 # CORR-LOOKS-008: o `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum

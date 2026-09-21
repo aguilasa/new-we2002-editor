@@ -3,8 +3,12 @@ id: CORR-LOOKS-061
 title: "Correção: o `--against-pose` descarta metade das capturas sem dizer, e o \"96 de 96\" se lê como cobertura inteira"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-26
+severity: medium
+done_on: 2026-09-18
+done_commit: 08ac05f
 ---
 
 # CORR-LOOKS-061: oito capturas entram, oito somem, e a linha diz oito

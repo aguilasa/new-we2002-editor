@@ -4,9 +4,13 @@ title: "A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo d
 type: implementação
 category: render
 phase: 11
-depends_on: ["LOOKS-TASK-28", "LOOKS-TASK-32", "LOOKS-TASK-40"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.4"
-status: pendente
+depends_on: [LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40]
+status: pending
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # LOOKS-TASK-33: A janela animada

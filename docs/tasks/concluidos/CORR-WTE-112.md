@@ -3,19 +3,23 @@ id: CORR-WTE-112
 title: "Correção: o `filtro` de cada campo é publicado no buffers.md e nunca conferido contra o KeyPress"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-36
+severity: low
+done_on: 2026-08-25
+done_commit: 1af0d4e
 ---
 
 # CORR-WTE-112: o `filtro` é afirmação de doc sem guarda
 
 ## Problema identificado
 
-O [`buffers.md`](../../../wte/re/buffers.md) publica, por campo, o conjunto de
+O [`buffers.md`](/wte/re/buffers.md) publica, por campo, o conjunto de
 caracteres que o `KeyPress` deixa passar — `[A-Za-z0-9 .]` nos três de nome,
 `[A-Za-z0-9]` na abreviatura, `[0-9]` nos dois numéricos. O valor é
 **declarado à mão** na tabela `CAMPOS` do
-[`dump_buffers.py`](../../../wte/tools/dump_buffers.py) e **nunca conferido**
+[`dump_buffers.py`](/wte/tools/dump_buffers.py) e **nunca conferido**
 contra o handler que o implementa.
 
 O contraste está dentro do mesmo arquivo: o `predicado` de faixa dos campos
@@ -27,7 +31,7 @@ Consequência prática: se alguém mexer no `KeyPress` — trocar o conjunto,
 acrescentar o hífen, deixar o ponto entrar na abreviatura —, o `buffers.md`
 continua afirmando o conjunto antigo, e o banner dele diz **"todo número daqui
 saiu do script"**. É a definição de prosa vencida num arquivo gerado, e o
-`grupo 4` do [`test_bordas.pas`](../../../wte/tests/test_bordas.pas) — que é
+`grupo 4` do [`test_bordas.pas`](/wte/tests/test_bordas.pas) — que é
 *sobre* caractere fora do conjunto — não fecha esse buraco: ele mede o codec e
 a camada de dados, não o filtro de tela.
 

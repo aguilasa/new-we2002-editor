@@ -4,9 +4,14 @@ title: "Atributos do jogador e os clamps"
 type: verificação
 category: core
 projeto: newWe2002
-depends_on: ["PAR-TASK-01"]
-fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.4"
-status: concluído
+depends_on: [PAR-TASK-01]
+status: done
+source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.4"
+phase: null
+reviewed_on: 2026-08-29
+review_commit: null
+done_on: 2026-08-29
+done_commit: acd5883
 ---
 
 # PAR-TASK-04: Atributos do jogador e os clamps

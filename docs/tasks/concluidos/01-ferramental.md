@@ -5,8 +5,12 @@ type: infra
 category: infra
 phase: 0
 depends_on: []
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §3 e Fase 0"
-status: concluído
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#3"
+reviewed_on: 2026-08-05
+review_commit: null
+done_on: 2026-08-05
+done_commit: dde7062
 ---
 
 # WTE-TASK-01: Ferramental

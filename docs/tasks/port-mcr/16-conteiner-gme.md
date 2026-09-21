@@ -4,9 +4,13 @@ title: "Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos"
 type: implementação
 category: core
 phase: 5
-depends_on: ["MCR-TASK-15"]
-fonte_de_verdade: "/docs/tasks/port-mcr/16-conteiner-gme.md §Critério de conclusão"
-status: concluído
+depends_on: [MCR-TASK-15]
+status: done
+source_of_truth: /docs/tasks/port-mcr/16-conteiner-gme.md
+reviewed_on: 2026-09-09
+review_commit: null
+done_on: 2026-09-09
+done_commit: 45f30c0
 ---
 
 # MCR-TASK-16: `.gme` como formato de entrada e de saída, e a conversão nos dois sentidos
@@ -21,7 +25,7 @@ status: concluído
   menciona contêiner nenhum, então o critério é o daqui, como
   `.claude/rules/tasks.md` autoriza.
 - **A fixture já está no repositório.** Desde `cea0c31` há **oito `.gme`** em
-  `mcr/`, com checksum registrado em [`../../../mcr/README.md`](../../../mcr/README.md).
+  `mcr/`, com checksum registrado em [`../../../mcr/README.md`](/mcr/README.md).
   Um gate de contêiner não precisa de `WE2002_MCR_CARD` — roda em qualquer
   clone, o que nenhum outro gate deste ciclo faz.
 
@@ -63,7 +67,7 @@ Duas conclusões que decidem o desenho, e não são palpite:
 
 1. **Contêiner não é save.** **Cinco** dos oito `.gme` de `mcr/` são de
    **PES2** (`…PES-OPT`) e um de WE2002 **não tem option file** (só
-   `WEW-D0A`) — a tabela de [`../../../mcr/README.md`](../../../mcr/README.md)
+   `WEW-D0A`) — a tabela de [`../../../mcr/README.md`](/mcr/README.md)
    é quem os separa. O leitor de contêiner tem de abrir os oito e entregar um
    cartão de 131.072 B; quem recusa **seis** deles — os cinco de PES2 mais o
    `34978` — é o `check_card`, um nível acima, com a mensagem que

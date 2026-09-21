@@ -3,8 +3,12 @@ id: CORR-PES2-015
 title: "Correção: um dos quatro offsets de bandeira citados é de forma, e mora noutro arquivo; o quarto de cor é 75776"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-27
+severity: high
+done_on: 2026-09-01
+done_commit: a5476f7
 ---
 
 # CORR-PES2-015: 72400 não é cor de bandeira nem está em `DAT2D.BIN`

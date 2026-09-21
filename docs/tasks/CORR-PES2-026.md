@@ -3,8 +3,12 @@ id: CORR-PES2-026
 title: "Correção: o offset da RAM no fluxo inflado ficou em 6799; o leitor corrigido mede 6754"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-32
+severity: high
+done_on: 2026-09-03
+done_commit: 29bdebd
 ---
 
 # CORR-PES2-026: a correção de 45 bytes arrumou os dois endereços e esqueceu o deslocamento

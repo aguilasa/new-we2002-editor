@@ -4,9 +4,13 @@ title: "O editor — leitura e exibição"
 type: implementação
 category: ui
 phase: 6
-depends_on: ["PES2-TASK-22"]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §5 (Fase 6)"
-status: pendente
+depends_on: [PES2-TASK-22]
+status: pending
+source_of_truth: "/docs/PLAN-PES2-PSX.md#5"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-23: O editor, lado da leitura

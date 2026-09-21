@@ -4,9 +4,13 @@ title: "Onde o option file guarda os times secretos e a opção de Master League
 type: verificação
 category: engenharia-reversa
 phase: 5
-depends_on: ["MCR-TASK-09"]
-fonte_de_verdade: "/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md §Critério de conclusão"
-status: concluído
+depends_on: [MCR-TASK-09]
+status: done
+source_of_truth: /docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md
+reviewed_on: 2026-09-10
+review_commit: null
+done_on: 2026-09-10
+done_commit: 3b1564d
 ---
 
 # MCR-TASK-17: o mapa dos desbloqueios
@@ -36,7 +40,7 @@ São dez coisas ligáveis. Onde elas moram no option file é a pergunta.
 
 ### As fixtures, e por que elas bastam
 
-Três cartões, os três versionados em [`../../../mcr/`](../../../mcr/README.md),
+Três cartões, os três versionados em [`../../../mcr/`](/mcr/README.md),
 os três com `BISLPM-87056WEW-OPT` nos blocos 1–2:
 
 | Cartão | Estado | md5 |
@@ -80,7 +84,7 @@ Dois motivos, e os dois são de forma:
 2. Os outros cinco caem na **região da tabela de nomes**, e os valores (`ae`,
    `b1`, `b0 c5`, `db`) são exatamente os bytes que aparecem no confronto
    english × ptbr **deslocando nomes de um byte** — `Ylonen`, `Kovtun`,
-   `De Anda`, medidos no [`README`](../../../mcr/README.md) de `mcr/`. Ali as
+   `De Anda`, medidos no [`README`](/mcr/README.md) de `mcr/`. Ali as
    duas builds não guardam a mesma lista, e isso não tem a ver com desbloqueio.
 
 Candidato é candidato. O critério abaixo manda confirmar, não assumir.
@@ -280,7 +284,7 @@ option file, e **qual valor** significa ligado.
 - [x] **O mapa vai para [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md)**,
       arquivo novo: endereço, máscara, o nome de cada opção como o jogo a
       escreve na tela, e o comando que reproduz cada medição. É o papel que o
-      [`wte/re/mcr.md`](../../../wte/re/mcr.md) faz para os 17 destinos — a
+      [`wte/re/mcr.md`](/wte/re/mcr.md) faz para os 17 destinos — a
       task que for implementar isso cita esse arquivo, e não este.
 - [x] **Hipótese descartada fica registrada, com o motivo.** Os cinco bytes da
       tabela de nomes são a primeira candidata a cair; se caírem, o arquivo diz

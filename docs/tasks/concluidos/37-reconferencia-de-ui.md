@@ -4,9 +4,13 @@ title: "Reconferência dos 18 formulários, com a lógica ligada"
 type: verificação
 category: ui
 phase: 6
-depends_on: ["WTE-TASK-34"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 6 item 4"
-status: concluído
+depends_on: [WTE-TASK-34]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-25
+review_commit: null
+done_on: 2026-08-25
+done_commit: f779b58
 ---
 
 # WTE-TASK-37: Reconferência de UI

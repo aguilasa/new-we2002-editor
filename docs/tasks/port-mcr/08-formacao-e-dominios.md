@@ -4,9 +4,13 @@ title: "`formation.py` e `domains.py` — X/Y, papéis, cobradores e presets"
 type: implementação
 category: núcleo
 phase: 1
-depends_on: ["MCR-TASK-05"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §1.7"
-status: concluído
+depends_on: [MCR-TASK-05]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#1.7"
+reviewed_on: 2026-09-07
+review_commit: null
+done_on: 2026-09-07
+done_commit: 860c05b
 ---
 
 # MCR-TASK-08: Formação e domínios

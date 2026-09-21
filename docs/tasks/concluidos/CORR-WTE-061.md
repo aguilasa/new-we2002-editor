@@ -3,8 +3,12 @@ id: CORR-WTE-061
 title: "Correção: o `MaxLength` de `edit_nombre1` é o literal 5, lido da tela, sem lastro no formato"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-26
+severity: low
+done_on: 2026-08-18
+done_commit: 1dfb765
 ---
 
 # CORR-WTE-061: um limite que só a tela sustenta
@@ -19,7 +23,7 @@ edit_nombre2.MaxLength := SizeOf(Jogo.teams[0].mixed_case_name) - 1;
 ```
 
 **As duas linhas não têm o mesmo lastro.** A segunda sai da camada de dados e o
-[`dump_truncamento.py`](../../../wte/tools/dump_truncamento.py) confere a cada
+[`dump_truncamento.py`](/wte/tools/dump_truncamento.py) confere a cada
 `make check`. A primeira é **um literal**, e o único apoio dele é uma leitura de
 tela: o oráculo mostra `ABC.D` quando se digita `AB-C.D E`.
 
@@ -82,9 +86,9 @@ mas com a razão escrita. **Também fecha.**
 
 ### Arquivos
 
-- [`wte/tools/dump_truncamento.py`](../../../wte/tools/dump_truncamento.py) — a
+- [`wte/tools/dump_truncamento.py`](/wte/tools/dump_truncamento.py) — a
   tabela `DESTINOS` e o `MEDIDO_NA_TELA`
-- [`wte/src/impl/ep2002_mainform.FormShow.inc`](../../../wte/src/impl/ep2002_mainform.FormShow.inc)
+- [`wte/src/impl/ep2002_mainform.FormShow.inc`](/wte/src/impl/ep2002_mainform.FormShow.inc)
 
 ---
 

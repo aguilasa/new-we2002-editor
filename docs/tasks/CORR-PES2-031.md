@@ -3,8 +3,12 @@ id: CORR-PES2-031
 title: "Correção: o fluxo A, que é a razão de o fork existir, não tem ferramenta versionada"
 type: correção
 category: ferramental
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-33
+severity: medium
+done_on: 2026-09-04
+done_commit: e6e7190
 ---
 
 # CORR-PES2-031: o procedimento do fluxo A mora num Log, não em `tools/pes2/`

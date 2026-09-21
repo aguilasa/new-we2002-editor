@@ -3,8 +3,12 @@ id: CORR-LOOKS-002
 title: "Correção: o comentário do `.gitignore` guarda o número que a própria task derrubou"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-01
+severity: low
+done_on: 2026-09-14
+done_commit: 61be8a5
 ---
 
 # CORR-LOOKS-002: o comentário do `.gitignore` guarda o número que a própria task derrubou

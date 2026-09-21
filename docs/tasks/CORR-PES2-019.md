@@ -3,8 +3,12 @@ id: CORR-PES2-019
 title: "Correção: o import não valida profundidade nem paleta, e grava um PNG de 4 bpp num slot de 8 bpp em silêncio"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-29
+severity: high
+done_on: 2026-09-01
+done_commit: fb21339
 ---
 
 # CORR-PES2-019: `asset_write.py import` aceita a profundidade errada

@@ -3,8 +3,12 @@ id: CORR-MCR-030
 title: "Correção: a Fase 5 pede captura de tela no Log, e as dez sondas da MCR-TASK-17 só têm testemunho"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-17
+severity: low
+done_on: 2026-09-10
+done_commit: 25bfd4f
 ---
 
 # CORR-MCR-030: a tabela de sondas não tem uma imagem sequer

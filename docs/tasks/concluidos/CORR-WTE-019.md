@@ -3,8 +3,12 @@ id: CORR-WTE-019
 title: "Correção: a reversão que versionou 816.880 bytes de arte do Obocaman só está registrada num README derivado"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-10
+severity: high
+done_on: 2026-08-09
+done_commit: 8bc5a5d
 ---
 
 # CORR-WTE-019: a reversão do versionamento dos blobs não chegou ao plano, ao `.gitignore` nem ao `progresso.md`
@@ -135,7 +139,7 @@ fora e o que entrou:
 > - **Assets não redistribuídos, com uma exceção.** Os 198 BMP e o `dat.bin`
 >   ficam com o usuário, como `roms/`. Os 118 blobs de formulário (816.880 B)
 >   **estão** versionados em hex nos `wte/forms/*.lfm` — decisão de 2026-08-06,
->   em [`../../wte/re/dfm/README.md`](../../../wte/re/dfm/README.md).
+>   em [`../../wte/re/dfm/README.md`](/wte/re/dfm/README.md).
 
 ## Arquivos a criar ou modificar
 

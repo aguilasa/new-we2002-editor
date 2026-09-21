@@ -3,8 +3,12 @@ id: CORR-WTE-045
 title: "Correção: a seção das seis áreas cita `roms/09-areas-com-time`, que é o nome da sessão e não o da imagem"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-19
+severity: low
+done_on: 2026-08-10
+done_commit: e130b96
 ---
 
 # CORR-WTE-045: o `offsets-novos.md` nomeia uma ROM que não existe
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 A seção **"As seis áreas, com um time carregado"** do
-[`wte/re/offsets-novos.md`](../../../wte/re/offsets-novos.md) — gerada por
+[`wte/re/offsets-novos.md`](/wte/re/offsets-novos.md) — gerada por
 `wte/tools/analisar_io.py` — diz que a medição foi feita sobre
 
 > cópia de `roms/09-areas-com-time`

@@ -4,9 +4,13 @@ title: "Gerar a camada de dados e fazê-la compilar"
 type: implementação
 category: dados
 phase: 3
-depends_on: ["WTE-TASK-17"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 3 item 3"
-status: concluído
+depends_on: [WTE-TASK-17]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-10
+review_commit: null
+done_on: 2026-08-10
+done_commit: 7b642f7
 ---
 
 # WTE-TASK-18: Camada de dados gerada
@@ -122,7 +126,7 @@ Vindas do `newWe2002`, todas com custo pago:
   que é um problema só; o resto se dividiu entre rota 1 (fallthrough,
   `static_assert`, `sizeof`) e rota 3 (`CdImage`, `SquadNumbers`, `Reporter`,
   sidecar — os quatro já desenhados no `tipos.md`). O veredito por recusa está em
-  [`wte/re/recusas.md`](../../../wte/re/recusas.md).
+  [`wte/re/recusas.md`](/wte/re/recusas.md).
 
   **O que a task ensinou, e não estava previsto:** o passe estrutural não é a
   parte perigosa. As decisões que mudam comportamento em silêncio estão nos

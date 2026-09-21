@@ -3,8 +3,12 @@ id: CORR-PES2-007
 title: "Correção: três textos vivos ainda dizem cinco listas, e a tabela de testes do plano não conhece o `poke`"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-02
+severity: medium
+done_on: 2026-09-01
+done_commit: 1a2c6b1
 ---
 
 # CORR-PES2-007: o "cinco → oito" parou antes de três textos vivos

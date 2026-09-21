@@ -3,8 +3,12 @@ id: CORR-WTE-056
 title: "Correção: três sítios ainda mandam rodar `apply_names.py`, e o script é `.java`"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-24
+severity: low
+done_on: 2026-08-11
+done_commit: 602218d
 ---
 
 # CORR-WTE-056: o procedimento para refazer o projeto Ghidra cita um arquivo que não existe
@@ -126,3 +130,4 @@ significa.
 | `wte/tools/ghidra/run_headless.sh` | modificado — o cabeçalho |
 | `docs/tasks/concluidos/CORR-WTE-056.md` | `status: concluído` e este Log |
 | `docs/tasks/concluidos/correcoes-progresso.md` | `[x]` na tabela e no checklist |
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

@@ -3,8 +3,12 @@ id: CORR-WTE-080
 title: "Correção: o golden-14-uniforme falha por tempo em boa parte das corridas"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-29
+severity: high
+done_on: 2026-08-21
+done_commit: b0e3cd9
 ---
 
 # CORR-WTE-080: o `golden-14-uniforme` falha por tempo em boa parte das corridas
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 O gate do `grabar_camisetaClick` — o
-[`golden-14-uniforme`](../../../wte/tests/roteiros/golden-14-uniforme.txt), da
+[`golden-14-uniforme`](/wte/tests/roteiros/golden-14-uniforme.txt), da
 [WTE-TASK-29](/docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) — **não fecha de forma
 repetível**. Nesta revisão foram quatro tentativas do modo `controle` na mesma
 máquina, sem mudar uma linha da árvore: **três falharam por espera de janela e
@@ -71,7 +75,7 @@ PASSOU: byte-identico
 ```
 
 O limite de espera é o default do
-[`roteiro.sh`](../../../wte/tools/roteiro.sh):
+[`roteiro.sh`](/wte/tools/roteiro.sh):
 
 ```bash
 espera_janela() {

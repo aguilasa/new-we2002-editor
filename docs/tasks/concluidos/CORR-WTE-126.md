@@ -3,8 +3,12 @@ id: CORR-WTE-126
 title: "Correção: os itens 1 e 2 da §8.2 não têm roteiro versionado, e a §8.2 é a única seção fora da convenção que a CORR-WTE-123 fixou"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-02
+severity: high
+done_on: 2026-08-29
+done_commit: d07b909
 ---
 
 # CORR-WTE-126: dois terços da §8.2 continuam sem o comando que a "Definição de pronto" promete

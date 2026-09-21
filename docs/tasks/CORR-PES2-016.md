@@ -3,8 +3,12 @@ id: CORR-PES2-016
 title: "Correção: a profundidade é decidida por contêiner, e o `DAT2D.BIN` do PES2 tem 261 paletas de 16 contra 5 de 256"
 type: correção
 category: formato
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-27
+severity: high
+done_on: 2026-09-01
+done_commit: fe070a4
 ---
 
 # CORR-PES2-016: `depth_of()` escolhe 8 bpp para um arquivo cujas paletas dizem 4

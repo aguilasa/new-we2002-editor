@@ -4,9 +4,13 @@ title: "Uniforme e cores de time"
 type: engenharia-reversa
 category: formato
 phase: 4
-depends_on: ["PES2-TASK-11"]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §5 (Fase 4)"
-status: pendente
+depends_on: [PES2-TASK-11]
+status: pending
+source_of_truth: "/docs/PLAN-PES2-PSX.md#5"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-13: Uniforme e cores

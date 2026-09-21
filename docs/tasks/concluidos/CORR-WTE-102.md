@@ -3,8 +3,12 @@ id: CORR-WTE-102
 title: "Correção: quatro sítios vivos ainda dizem \"as 94 specs\" onde o índice conta 96"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: medium
+done_on: 2026-08-24
+done_commit: e7ee783
 ---
 
 # CORR-WTE-102: "as 94 specs" onde hoje são 96

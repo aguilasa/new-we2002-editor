@@ -3,8 +3,12 @@ id: CORR-WTE-103
 title: "Correção: no estado zero o fase-4.md perde a linha em branco antes do título seguinte"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: low
+done_on: 2026-08-24
+done_commit: 602218d
 ---
 
 # CORR-WTE-103: linha em branco que só existe quando há o que listar
@@ -133,3 +137,7 @@ Removendo o `a("")` de propósito, o caso do gerador reprova — medido.
 - `wte/tools/check_fase4.py` — o `a("")` fora do `if`, com o porquê ao lado
 - `wte/tools/test_check_fase4.py` — `TestSaidaBemFormada`, três casos
 - `wte/re/fase-4.md` — regerado
+
+## Log de Execução
+
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

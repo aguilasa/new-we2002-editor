@@ -3,8 +3,12 @@ id: CORR-WTE-073
 title: "Correção: check_lcl_combo.py ficou preso no :99 depois da mudança para o :98"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-28
+severity: high
+done_on: 2026-08-20
+done_commit: edd305f
 ---
 
 # CORR-WTE-073: `check_lcl_combo.py` ficou preso no `:99` depois da mudança para o `:98`
@@ -19,7 +23,7 @@ forma da mudança:
 > `Makefile`, **`WTE_DISPLAY` nos scripts de `wte/tools/`**, `GOLDEN_DISPLAY`
 > nos de `tools/`)
 
-O [`wte/tools/check_lcl_combo.py`](../../../wte/tools/check_lcl_combo.py) é um
+O [`wte/tools/check_lcl_combo.py`](/wte/tools/check_lcl_combo.py) é um
 script de `wte/tools/` que dirige GUI — compila um programa LCL e o roda para
 medir o que a LCL dispara por atribuição — e **não recebeu a variável**. Ele
 continua procurando o `:99` em código vivo, não em prosa:

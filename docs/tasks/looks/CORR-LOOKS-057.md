@@ -3,8 +3,12 @@ id: CORR-LOOKS-057
 title: "Correção: o docstring do `layout.PLAYER_NATION` ensina a regra `código = índice − 1` que a própria task desmentiu"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-23
+severity: medium
+done_on: 2026-09-17
+done_commit: b95aca7
 ---
 
 # CORR-LOOKS-057: a regra errada sobrevive no módulo dos endereços

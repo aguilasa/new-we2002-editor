@@ -3,8 +3,12 @@ id: CORR-WTE-081
 title: "Correção: três gravações na imagem sem dono — o OK do ficha_color, o Comple. do jugador e o Accept do estrategia"
 type: correção
 category: comportamento
-status: concluído
-depends_on: ["CORR-WTE-082"]
+status: done
+depends_on: [CORR-WTE-082]
+origin: WTE-TASK-30
+severity: high
+done_on: 2026-08-21
+done_commit: 519ff09
 ---
 
 # CORR-WTE-081: três gravações na imagem sem dono
@@ -39,7 +43,7 @@ fecharia; com dono, a 31 volta a ser o que é.
 
 Os três chamam a escritora `0x00403400`, direta ou indiretamente. Medido com o
 decodificador do
-[`dump_auxiliares.py`](../../../wte/tools/dump_auxiliares.py) sobre o `.text`:
+[`dump_auxiliares.py`](/wte/tools/dump_auxiliares.py) sobre o `.text`:
 
 ```text
 callers de 0x004051A4 (o gravador do bloco de cor)  ->  ['0x4069f9']
@@ -48,17 +52,17 @@ callers de 0x004051A4 (o gravador do bloco de cor)  ->  ['0x4069f9']
 Um chamador só, e ele está dentro do `ficha_color.BitBtn3Click`. As specs
 trazem o resto:
 
-- [`ficha_color.BitBtn3Click`](../../../wte/re/spec/ficha_color.BitBtn3Click.md) —
+- [`ficha_color.BitBtn3Click`](/wte/re/spec/ficha_color.BitBtn3Click.md) —
   a `0x004051A4` é o **espelho exato** da carga `0x004050D0`, bloco por bloco,
   com a mesma global de offset em cada um; troca a `0x004033BC` (ler) pela
   `0x00403400` (gravar). São sete regiões por time: bandeira, forma, os dois
   uniformes, oito paletas de chuteira, a quarta paleta e o par de bytes de
   padrão de camisa;
-- [`jugador.BitBtn3Click`](../../../wte/re/spec/jugador.BitBtn3Click.md) — valida
+- [`jugador.BitBtn3Click`](/wte/re/spec/jugador.BitBtn3Click.md) — valida
   créditos (1…250) e número de camisa, e então chama a `0x00404820` e a
   `0x00404048`. **As duas já estão portadas** como `GravaJogador` e
   `GravaNumeroDaCamisa`, pela WTE-TASK-27;
-- [`estrategia.BitBtn3Click`](../../../wte/re/spec/estrategia.BitBtn3Click.md) —
+- [`estrategia.BitBtn3Click`](/wte/re/spec/estrategia.BitBtn3Click.md) —
   1.931 bytes: valida as cores do radar, grava duas regiões de 2 bytes por
   time, e converte as posições dos componentes `bola`/`tirador`/`simbolo` de
   pixel para célula da malha.
@@ -96,7 +100,7 @@ duas gravações novas em voo, um golden vermelho tem duas causas possíveis.
 1. **`jugador.BitBtn3Click`** primeiro. É a mais barata: as duas rotinas de
    escrita já existem no port, e o que falta é a validação, a cópia dos campos
    e o roteiro. Ela também esbarra no ciclo de `uses` que o
-   [`jugador.BitBtn1Click`](../../../wte/re/spec/jugador.BitBtn1Click.md) descreve
+   [`jugador.BitBtn1Click`](/wte/re/spec/jugador.BitBtn1Click.md) descreve
    — `GravaJogador` e `GravaNumeroDaCamisa` moram no `.aux.inc` do `MainForm` —,
    e resolver esse ciclo uma vez destrava os dois handlers;
 2. **`ficha_color.BitBtn3Click`** depois. Precisa que o `we2002_offsets` exponha
@@ -104,24 +108,24 @@ duas gravações novas em voo, um golden vermelho tem duas causas possíveis.
    famílias não portadas (chuteira e quarta paleta) para poder devolvê-las
    intactas: pular os 288 bytes delas gravaria menos que o original, e gravar
    zeros corromperia a imagem. O slot 0, o vetor de edição e o `PadraoDaCamisa`
-   já existem na [`wte_cor`](../../../wte/src/wte_cor.pas);
+   já existem na [`wte_cor`](/wte/src/wte_cor.pas);
 3. **`estrategia.BitBtn3Click`** por último, e **ela tem um pré-requisito fora
    desta correção**: a `0x0040A0B4`, que enche a tela de tática, não está
    portada. Gravar as posições dos componentes de uma tela que ninguém
    posicionou gravaria as coordenadas de tempo de projeto do `.lfm`. Portar
    aquela rotina fecha três `aberto` de uma vez — este, o
-   [`estrategia.BitBtn1Click`](../../../wte/re/spec/estrategia.BitBtn1Click.md) e
-   o [`mostrar_estrategiaClick`](../../../wte/re/spec/MainForm.mostrar_estrategiaClick.md)
+   [`estrategia.BitBtn1Click`](/wte/re/spec/estrategia.BitBtn1Click.md) e
+   o [`mostrar_estrategiaClick`](/wte/re/spec/MainForm.mostrar_estrategiaClick.md)
    — e é dívida herdada da WTE-TASK-26.
 
 Cada uma precisa de **roteiro golden dos dois lados**, na forma dos que já
-existem em [`wte/tests/roteiros/`](../../../wte/tests/roteiros/): editar pela tela
+existem em [`wte/tests/roteiros/`](/wte/tests/roteiros): editar pela tela
 antes de gravar, e comparar as duas imagens byte a byte. Nenhuma delas emite
 arquivo, então nenhuma precisa de `--artefato`.
 
 **A imagem é a japonesa.** Com a europeia o `wte.exe` morre ao trocar de time —
 49.749 violações de acesso contra 0 — e o oráculo não existe daquele lado; ver
-[`wte/re/gravacao-controle.md`](../../../wte/re/gravacao-controle.md).
+[`wte/re/gravacao-controle.md`](/wte/re/gravacao-controle.md).
 
 **O controle vem antes do teste, em cada uma.** Original contra original tem de
 dar zero divergência no roteiro novo antes de o lado port entrar. Sem ele,

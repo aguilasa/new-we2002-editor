@@ -4,9 +4,13 @@ title: "Incógnita (q) — a tela `LOOKS SET` medida no jogo: texto de cada valo
 type: investigação
 category: oráculo
 phase: 8
-depends_on: ["LOOKS-TASK-20"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (q)"
-status: concluído
+depends_on: [LOOKS-TASK-20]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: 2026-09-17
+review_commit: null
+done_on: 2026-09-17
+done_commit: 1fb8488
 ---
 
 # LOOKS-TASK-21: A tela `LOOKS SET`, medida

@@ -5,8 +5,12 @@ type: decisão
 category: ferramental
 phase: 0
 depends_on: [PES2-TASK-32]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §6.14"
-status: concluído
+status: done
+source_of_truth: "/docs/PLAN-PES2-PSX.md#6.14"
+reviewed_on: 2026-09-03
+review_commit: null
+done_on: 2026-09-03
+done_commit: "6665565"
 ---
 
 # PES2-TASK-33: Compilar o fork e validar o MCP de fato

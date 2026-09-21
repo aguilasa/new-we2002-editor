@@ -4,9 +4,13 @@ title: "O texto da ajuda — quem escreve a página (832,256) na VRAM, e de onde
 type: investigação
 category: render
 phase: 10
-depends_on: ["LOOKS-TASK-37"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (o)"
-status: pendente
+depends_on: [LOOKS-TASK-37]
+status: pending
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # LOOKS-TASK-39: O texto da ajuda

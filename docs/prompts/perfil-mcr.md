@@ -109,8 +109,8 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 
 | pergunta | quem responde |
 |---|---|
-| onde fica cada campo | [`wte/re/mcr.md`](../../wte/re/mcr.md) — 17 destinos medidos do `we-team-editor.exe` |
-| como se empacotam os 12 bytes | [`src/core/Player.cpp`](../../src/core/Player.cpp) — **normativo** |
+| onde fica cada campo | [`wte/re/mcr.md`](/wte/re/mcr.md) — 17 destinos medidos do `we-team-editor.exe` |
+| como se empacotam os 12 bytes | [`src/core/Player.cpp`](/src/core/Player.cpp) — **normativo** |
 | o contêiner PSX | spec pública do nocash, já implementada em `wte/tools/dump_mcr.py` |
 | o que significam X, Y, papéis e os domínios | o upstream — **rótulo de terceiro, não medição** |
 | o `0x6500` | **o capitão** — medido na MCR-TASK-13 por quatro caminhos independentes (§1.8 do plano). O domínio é o onze inicial, `0..10`, e não os 23 slots |

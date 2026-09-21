@@ -3,8 +3,12 @@ id: CORR-PES2-023
 title: "Correção: o perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde há oito"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-34
+severity: medium
+done_on: 2026-09-03
+done_commit: 178305a
 ---
 
 # CORR-PES2-023: a Fase 0 não tem verificações escritas no perfil

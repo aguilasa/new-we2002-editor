@@ -3,8 +3,12 @@ id: CORR-MCR-014
 title: "Correção: as duas varreduras de desenho param no topo, e a `tools/mcr/ui/` que a MCR-TASK-11 vai criar fica invisível para as duas"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-10
+severity: high
+done_on: 2026-09-08
+done_commit: 298856b
 ---
 
 # CORR-MCR-014: `os.listdir` no lugar de `os.walk`, nas duas varreduras que julgam a árvore

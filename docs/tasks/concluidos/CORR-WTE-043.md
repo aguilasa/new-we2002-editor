@@ -3,8 +3,12 @@ id: CORR-WTE-043
 title: "Correção: `players[i].cost := Ord(buf1[0])` perde o sinal que o C++ tem"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-18
+severity: low
+done_on: 2026-08-10
+done_commit: 8db4aba
 ---
 
 # CORR-WTE-043: o custo do jogador NC entra sem sinal na camada Pascal
@@ -32,7 +36,7 @@ texto que ele tem — mas neste ponto ele alimenta um campo **`int`**. Para
 byte ≥ 128 os dois lados divergem: o C++ estende o sinal (200 → **-56**), o
 Pascal não (200 → **200**).
 
-É exatamente o caso que a decisão 4 do [`tipos.md`](../../../wte/re/tipos.md)
+É exatamente o caso que a decisão 4 do [`tipos.md`](/wte/re/tipos.md)
 existe para impedir — "o `char` do x86 tem sinal e a UI alarga com
 `static_cast<int>`: 200 tem de chegar como -56" — aplicada aos **campos**
 `char` e aos locais, mas não a esta conversão, que é local→campo largo.

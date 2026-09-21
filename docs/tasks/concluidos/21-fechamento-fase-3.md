@@ -1,12 +1,16 @@
 ---
 id: WTE-TASK-21
 title: "Fechamento da fase 3 — a camada de dados é 100% gerada?"
-type: fechamento
+type: closing
 category: dados
 phase: 3
-depends_on: ["WTE-TASK-20"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 3, critério de pronto"
-status: concluído
+depends_on: [WTE-TASK-20]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-10
+review_commit: null
+done_on: 2026-08-10
+done_commit: 691a025
 ---
 
 # WTE-TASK-21: Fechamento da fase 3
@@ -96,12 +100,12 @@ headless. A gravação dirigida pela tela é a WTE-TASK-22 em diante.
 - **Resumo do que foi feito:**
 
   O fechamento tem medidor próprio, o
-  [`check_fase3.py`](../../../wte/tools/check_fase3.py), irmão do `check_fase1` e
+  [`check_fase3.py`](/wte/tools/check_fase3.py), irmão do `check_fase1` e
   do `check_fase2` — e a saída dele **não** é o `fase-3.md`, que já é de outra
   task: o `compare_dumps.py` da WTE-TASK-20 escreve aquele arquivo, e dois
   geradores no mesmo destino seriam a duplicação sem guarda que o `README.md`
   de `wte/tools/` manda evitar. Daí o nome novo,
-  [`fase-3-fechamento.md`](../../../wte/re/fase-3-fechamento.md), com os dois
+  [`fase-3-fechamento.md`](/wte/re/fase-3-fechamento.md), com os dois
   linkando um para o outro: um mede se **os valores batem**, o outro **quem
   escreveu o código que os produz**.
 

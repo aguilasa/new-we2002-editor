@@ -3,8 +3,12 @@ id: CORR-WTE-064
 title: "Correção: o lote do `edit_nombre1` está provado e a conta dá um a mais que o oráculo"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-26
+severity: medium
+done_on: 2026-08-18
+done_commit: 63c2745
 ---
 
 # CORR-WTE-064: um a mais, e não é o campo errado desta vez
@@ -87,20 +91,20 @@ contador está errado em algum ponto, e não que falte um caso especial.
    `WINEDEBUG` de chamadas de arquivo, ou medir a tela em **três times de
    larguras diferentes** e ver se a diferença é constante em 1 ou proporcional;
 3. com a conta fechada, tirar o literal do
-   [`LimiteDoNome1`](../../../wte/src/impl/ep2002_mainform.aux.inc) e a entrada de
+   [`LimiteDoNome1`](/wte/src/impl/ep2002_mainform.aux.inc) e a entrada de
    `CONTRADIZ_A_TELA` do
-   [`dump_truncamento.py`](../../../wte/tools/dump_truncamento.py).
+   [`dump_truncamento.py`](/wte/tools/dump_truncamento.py).
 
 Se a releitura mostrar que a largura do lote kanji **não** é derivável, o
 literal fica — mas aí com a razão medida, e não com "a conta dá outro número".
 
 ### Arquivos
 
-- [`wte/tools/dump_truncamento.py`](../../../wte/tools/dump_truncamento.py) — a
+- [`wte/tools/dump_truncamento.py`](/wte/tools/dump_truncamento.py) — a
   tabela `CONTRADIZ_A_TELA`
-- [`wte/src/impl/ep2002_mainform.aux.inc`](../../../wte/src/impl/ep2002_mainform.aux.inc)
+- [`wte/src/impl/ep2002_mainform.aux.inc`](/wte/src/impl/ep2002_mainform.aux.inc)
   — o `LimiteDoNome1`
-- [`wte/re/spec/MainForm.lista_equiposChange.md`](../../../wte/re/spec/MainForm.lista_equiposChange.md)
+- [`wte/re/spec/MainForm.lista_equiposChange.md`](/wte/re/spec/MainForm.lista_equiposChange.md)
 
 ---
 

@@ -3,8 +3,12 @@ id: CORR-WTE-007
 title: "Correção: a tabela \"onde o plano envelheceu\" atribui ao plano uma frase que só existe na task, e não registra três divergências medidas"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-04
+severity: low
+done_on: 2026-08-06
+done_commit: 75c05f1
 ---
 
 # CORR-WTE-007: a tabela de envelhecimento do `published_methods.md` está incompleta e erra uma atribuição

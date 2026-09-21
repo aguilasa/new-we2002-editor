@@ -3,8 +3,12 @@ id: CORR-PES2-001
 title: "Correção: o -EL do objdump não é o que a §3.2 diz que é — quem mente é o -EB"
 type: correção
 category: infra
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-01
+severity: high
+done_on: 2026-09-01
+done_commit: ae79230
 ---
 
 # CORR-PES2-001: o `-EL` do `objdump` não é o que a §3.2 diz que é

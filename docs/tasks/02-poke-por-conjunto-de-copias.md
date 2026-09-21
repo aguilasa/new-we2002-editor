@@ -5,8 +5,12 @@ type: ferramenta
 category: verificação
 phase: 2
 depends_on: []
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §6.1"
-status: concluído
+status: done
+source_of_truth: "/docs/PLAN-PES2-PSX.md#6.1"
+reviewed_on: 2026-09-01
+review_commit: null
+done_on: 2026-09-01
+done_commit: 02f419b
 ---
 
 # PES2-TASK-02: Gravação pelo conjunto de cópias

@@ -1,12 +1,16 @@
 ---
 id: PES2-TASK-16
 title: "Fechamento da Fase 4 — o resto do banco"
-type: fechamento
+type: closing
 category: verificação
 phase: 4
-depends_on: ["PES2-TASK-11", "PES2-TASK-12", "PES2-TASK-13", "PES2-TASK-14", "PES2-TASK-15"]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §7 (entregável da Fase 4)"
-status: pendente
+depends_on: [PES2-TASK-11, PES2-TASK-12, PES2-TASK-13, PES2-TASK-14, PES2-TASK-15]
+status: pending
+source_of_truth: "/docs/PLAN-PES2-PSX.md#7"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-16: Fechamento da Fase 4
