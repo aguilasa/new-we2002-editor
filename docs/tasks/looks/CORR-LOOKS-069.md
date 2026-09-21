@@ -3,7 +3,7 @@ id: CORR-LOOKS-069
 title: "Dizer quantos sprites estáticos foram amostrados, não 14"
 origin: LOOKS-TASK-36
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -54,3 +54,14 @@ amostra e nomear os que não têm (a barra).
 e nomear a barra como não amostrada, batendo com a recontagem acima.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-21, HEAD `36d1aaed`: **reproduzida**.
+
+```text
+1 142 sprites; 13 with samples; 359 samples
+2 142 sprites; 13 with samples; 359 samples
+1 with samples key: 14 nonempty: 13 empty: [(None, [66, 53], [96, 12])]
+2 with samples key: 14 nonempty: 13 empty: [(None, [66, 53], [96, 12])]
+oracle.py:2188-2190: print("    the static sprites sampled: %d pixel(s) of %d sprite(s), ..." % (..., len(samples)))
+_static_samples: out[index] = [...] roda para todo sprite estático, e guarda [] para a barra transparente
+```

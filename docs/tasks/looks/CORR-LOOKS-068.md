@@ -3,7 +3,7 @@ id: CORR-LOOKS-068
 title: "Julgar os pixels das setas, não só a lista, e medir a CLUT da ◀"
 origin: LOOKS-TASK-36
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/oracle.py, tools/looks/ui_check.py, tools/looks/sprites.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -84,3 +84,19 @@ tools/looks/ui_check.py` (ou `oracle.py --keys "Down,Right,Right,Right,Right"
 2`). Hoje passa; depois da correção tem de ficar vermelho.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-21, HEAD `36d1aaed`: **reproduzida**.
+
+```text
+oracle.py:4756  out.append({"side": side, "point": list(one["point"])})   # frame_arrows filtra só página e uv
+ui_check.py: "arrow" só em 746-748 (linha "arrows " do relatório), 967 (o controle) e 1064 (docstring)
+# cópia plantada (git archive HEAD tools), ARROW_CLUT = (64, 496), WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin
+$ python <cópia>/tools/looks/sprites.py --check-image
+arrow left uv (128, 240): 22 of 64 texels opaque
+arrow right uv (128, 248) ...
+the left arrow is the right one mirrored
+sprites --check-image: 0 problem(s)
+$ python <cópia>/tools/looks/sprites.py
+sprites.py: 0 failure(s)
+# work/looks-scenery/slot{1,2}.json, página (704,0): só a ▶ (uv 128,248) com CLUT (80,497); nenhuma ◀
+```

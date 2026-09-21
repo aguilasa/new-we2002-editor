@@ -93,3 +93,15 @@ A caixa do cursor sobre o rótulo quando o `State` diz que ele está lá.
 - [ ] `python tools/looks/oracle.py --screen` com 0 diferença do `screen.json`
 
 ## Log de Execução *(preenchido após execução)*
+
+Triagem do `/rite:fix-all looks` em 2026-09-21, HEAD `36d1aaed`: **reproduzida**.
+
+```text
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin WE2002_LOOKS_DRIVE_IMAGE=C:/games/ps1/work/we2002-english.cue     python tools/looks/oracle.py --keys "Up,Left" 2
+  control: the same sequence twice in the game gives the same twelve rows, the same help and the same arrows
+  FAIL  the help: the game shows 'Undo' and screen.json says 'Confirm'
+  FAIL  the help: the game shows 'Undo' and our window shows 'Confirm'
+  FAIL  the arrows: the game draws >(276,43) and screen.json says <(384,43)
+  FAIL  the arrows: the game draws >(276,43) and our window draws <(384,43)
+oracle --keys: 4 difference(s) after 2 press(es), across the game, screen.json and our window
+```
