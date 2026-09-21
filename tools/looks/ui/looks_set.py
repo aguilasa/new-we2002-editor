@@ -27,8 +27,17 @@ the background, the title bar, the row bands and the borders, with their
 colours and gradients -- is polygons of the GPU, and this paints the packets
 the frame hands to it (`scene.furniture_picture`), not a look-alike.
 
+MEASURED since LOOKS-TASK-36: the static sprites -- the title, the icon, the
+shirt boxes, the bar and the plate -- cut off the disc by the core
+(`scene.static_sprites`), the plate's CLUT from the player's position, and
+painted over the furniture once, which is the order the game's list draws
+them in.  And the two arrows beside the cursor's value, where the screen walk
+read them (`screen.State.arrows`).
+
 NOT measured, and therefore not claimed: the typeface.  The text is drawn in
-Qt's font until the game's glyph table is read (LOOKS-TASK-37).
+Qt's font until the game's glyph table is read (LOOKS-TASK-37).  Nor the pulse
+of the arrows: the game dims and brightens them frame to frame, and the
+window draws them at 128, unmodulated -- the animation is phase 11's.
 
 ## Refusal is visible
 
@@ -78,6 +87,11 @@ class LooksSet(QtWidgets.QWidget):
         self.builds = 0
         self.drawn = None
         self.tuple_text = state.tuple_text()
+        # The plate's and the shirt's text in Qt's font, standing in for the
+        # game's until LOOKS-TASK-37 reads its glyphs.  It is wider than the
+        # game's and lands on sprite pixels the game leaves bare, so the gate
+        # that judges the sprites photographs the window without it.
+        self.stand_in_text = True
         # Where the game's camera comes from, handed in by whoever built the
         # window: a callable of the rows' values.  The window does not compose
         # it -- that is the core's (`scene.panel_camera`), and the camera is
@@ -100,8 +114,25 @@ class LooksSet(QtWidgets.QWidget):
         # not move, and the title band's gradients run across the screen,
         # which a rectangle per packet painted here could not do.
         self.furniture = None
+        # The static sprites, painted over the furniture: the list draws every
+        # one of them after the furniture under it (LOOKS-TASK-36).  Without a
+        # builder there is no disc to cut them from, and the note says so.
+        self.sprites, self.sprites_note = [], None
+        if self.scenery and builder is not None:
+            try:
+                self.sprites = core.static_sprites(
+                    core.load_sprites(int(state.slot)), state.plate())
+            except core.BadScene as exc:
+                self.sprites_note = str(exc)
+        self.arrow_images = {}
         if self.scenery:
             picture = core.furniture_picture(self.scenery, (width, height))
+            if self.sprites:
+                try:
+                    builder.paint_sprites(picture, (width, height),
+                                          self.sprites)
+                except core.BadScene as exc:
+                    self.sprites, self.sprites_note = [], str(exc)
             self.furniture = QtGui.QImage(bytes(picture), width, height,
                                           3 * width,
                                           QtGui.QImage.Format.Format_RGB888
@@ -141,6 +172,26 @@ class LooksSet(QtWidgets.QWidget):
         x0, y0, x1, y1 = self.places["cursor"]
         step = self.places["pitch"] * index
         return self._rect([x0, y0 + step, x1, y1 + step])
+
+    def arrows(self) -> list:
+        """The arrows this window draws now, `[{"side", "point"}]`.
+
+        What `paintEvent` paints and what `report` says are both this list,
+        so the report is the drawing's own account and not the table's."""
+        if self.builder is None:
+            return []
+        return self.state.arrows()
+
+    def _arrow_image(self, side: str) -> QtGui.QImage:
+        """The arrow off the disc, as the core cuts it, once per side."""
+        if side not in self.arrow_images:
+            sprite = core.arrow_sprite(side, (0, 0))
+            width, height = sprite["size"]
+            rgba = self.builder.sprite_rgba(sprite)
+            self.arrow_images[side] = QtGui.QImage(
+                rgba, width, height, 4 * width,
+                QtGui.QImage.Format.Format_RGBA8888).copy()
+        return self.arrow_images[side]
 
     def _font(self, size: int) -> QtGui.QFont:
         font = QtGui.QFont("Consolas")
@@ -260,6 +311,10 @@ class LooksSet(QtWidgets.QWidget):
             "plate": self.state.plate(),
             "shirt": self.state.shirt(),
             "title": self.state.title(),
+            "sprites": {one["group"]: tuple(one["clut"])
+                        for one in self.sprites},
+            "sprites_note": self.sprites_note,
+            "arrows": self.arrows(),
         }
 
     # -- the drawing -------------------------------------------------------
@@ -291,22 +346,33 @@ class LooksSet(QtWidgets.QWidget):
         painter.drawRect(panel.adjusted(0, 0, -1, -1))
         painter.drawRect(self._rect(self.places["rows"]).adjusted(0, 0, -1, -1))
 
-        painter.setFont(self._font(max(9, 10 * s)))
         painter.setPen(INK)
-        painter.drawText(self.places["title"][0] * s,
-                         (self.places["title"][1] + 10) * s,
-                         self.state.title())
+        if not any(one["group"] == "title" for one in self.sprites):
+            # The title is a sprite off the disc once the static sprites are
+            # painted; the Qt text is only what stands in without them.
+            painter.setFont(self._font(max(9, 10 * s)))
+            painter.drawText(self.places["title"][0] * s,
+                             (self.places["title"][1] + 10) * s,
+                             self.state.title())
         painter.setFont(small)
-        painter.drawText(self.places["plate"][0] * s,
-                         (self.places["plate"][1] + 9) * s, self.state.plate())
-        painter.setPen(DIM)
-        painter.drawText(self.places["shirt"][0] * s,
-                         (self.places["shirt"][1] + 8) * s, self.state.shirt())
+        if self.stand_in_text:
+            painter.drawText(self.places["plate"][0] * s,
+                             (self.places["plate"][1] + 9) * s,
+                             self.state.plate())
+            painter.setPen(DIM)
+            painter.drawText(self.places["shirt"][0] * s,
+                             (self.places["shirt"][1] + 8) * s,
+                             self.state.shirt())
 
         # The rows.  The cursor rectangle first, so the text sits on top.
         cursor = self._row_rect(self.state.cursor)
         painter.setPen(CURSOR)
         painter.drawRect(cursor.adjusted(0, 0, -1, -1))
+        for arrow in self.arrows():
+            picture = self._arrow_image(arrow["side"])
+            x, y = arrow["point"]
+            painter.drawImage(QtCore.QRect(x * s, y * s, picture.width() * s,
+                                           picture.height() * s), picture)
         for index, name in enumerate(self.state.order):
             box = self._row_rect(index)
             painter.setFont(small)

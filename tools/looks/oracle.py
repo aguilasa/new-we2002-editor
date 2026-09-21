@@ -2183,9 +2183,14 @@ def check_scenery(slots=(2, 1), write=False, verbose=True):
                          _say_sprites(game, sprites, ready["image"])]
             _say_provenance(provenance_map(game, display, confront, screen),
                             table, display)
+            samples = _static_samples(game, sprites, display, ready["image"],
+                                      confront, screen)
+            print("    the static sprites sampled: %d pixel(s) of %d sprite(s), "
+                  "each the colour the game's frame shows there"
+                  % (sum(len(one) for one in samples.values()), len(samples)))
             if write:
                 print("    wrote %s"
-                      % write_scenery(slot, found, display, sprites))
+                      % write_scenery(slot, found, display, sprites, samples))
     for line in problems:
         print("  FAIL  %s" % line)
     print("oracle --scenery: %d problem(s) over %d slot(s)"
@@ -2728,7 +2733,55 @@ def _say_sprites(game, sprites, image):
     return problems
 
 
-def write_scenery(slot, found, display, sprites=()):
+STATIC_SAMPLES = 32
+"""Pixels kept per static sprite, spread evenly over its opaque texels."""
+
+
+def _static_samples(game, sprites, display, image, confront, screen):
+    """{sprite index: [[x, y, [r, g, b]], ...]} for the static sprites.
+
+    What `ui_check.py` holds the window's sprites to, and why it is written by
+    THIS tool: the colour of each sample is the game's, read off the frame
+    buffer with the CPU stopped, not what `sprites.py` decodes -- a judge that
+    asked the code under test what the answer is would agree with it however
+    wrong it was.  The disc says only WHERE to look: a texel whose CLUT entry
+    is transparent shows the furniture, and a pixel a later sprite covers
+    shows that one, so neither is a sample of this sprite.
+    """
+    import iso_source
+    import sprites as art_module
+
+    frame = confront.still_frame(game, display, sys.modules[__name__], screen)
+    with iso_source.open_disc(image) as disc:
+        art = art_module.Art(art_module.containers_of(disc))
+    boxes = [(one["point"][0], one["point"][1],
+              one["point"][0] + one["size"][0], one["point"][1] + one["size"][1])
+             for one in sprites]
+    out = {}
+    for index, one in enumerate(sprites):
+        if art_module.group_of(one) is None:
+            continue
+        rgba = art.image(one)
+        width, height = one["size"]
+        spots = []
+        for row in range(height):
+            for col in range(width):
+                if not rgba[4 * (row * width + col) + 3]:
+                    continue
+                x, y = one["point"][0] + col, one["point"][1] + row
+                if not (0 <= x < display[0] and 0 <= y < display[1]):
+                    continue
+                if any(box[0] <= x < box[2] and box[1] <= y < box[3]
+                       for box in boxes[index + 1:]):
+                    continue
+                spots.append((x, y))
+        step = max(1, len(spots) // STATIC_SAMPLES)
+        out[index] = [[x, y, list(frame[y][x][:3])]
+                      for x, y in spots[::step][:STATIC_SAMPLES]]
+    return out
+
+
+def write_scenery(slot, found, display, sprites=(), samples=None):
     """One JSON per slot, in `work/looks-scenery/`."""
     import json
 
@@ -2749,8 +2802,11 @@ def write_scenery(slot, found, display, sprites=()):
                                     uv=list(one["uv"]),
                                     clut=list(one["clut"]),
                                     page=list(one["page"]),
-                                    colour=list(one["colour"]))
-                               for one in sprites]},
+                                    colour=list(one["colour"]),
+                                    **({"samples": samples[index]}
+                                       if samples and index in samples
+                                       else {}))
+                               for index, one in enumerate(sprites)]},
                   handle, indent=1)
         handle.write("\n")
     return path
@@ -4513,15 +4569,21 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose):
                                         screen_help(game)))
     field = looks.BY_ROW.get(name)
 
+    arrows_now = []
+
     def read():
         reading = ScreenReading(geometry, screen_objects(game))
         rows = reading.rows(orders)
         value = screen_record(game)[field.name] if field else None
+        arrows_now[:] = frame_arrows(game)
         return rows, value
 
     rows, value = read()
     initial = dict(rows)
+    arrival = list(arrows_now)
     moved, dropped = set(), 0
+    # The arrows of every value the Right walk reaches, end included.
+    between = []
 
     def go(direction, texts, values):
         nonlocal dropped
@@ -4540,6 +4602,8 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose):
                 return "wraps"
             texts.append(rows[name])
             values.append(value)
+            if direction == "Right":
+                between.append((rows[name], list(arrows_now)))
         raise OracleError("%s walked %s %d times without an end"
                           % (name, direction, SCREEN_WALK_LIMIT))
 
@@ -4549,25 +4613,38 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose):
         raise OracleError("%s wraps going Left; a wrapping row is not "
                           "modelled, and the walk says so rather than guess"
                           % name)
+    left_end = list(arrows_now)
     texts, values = [left_texts[-1]], [left_values[-1]]
     right = go("Right", texts, values)
     if right == "wraps":
         raise OracleError("%s wraps going Right after locking going Left"
                           % name)
+    right_end = list(arrows_now)
     if list(reversed(left_texts)) != texts[:len(left_texts)]:
         raise OracleError("%s: Left walked %r and Right came back %r"
                           % (name, left_texts, texts))
+    inner = [one for text, one in between if text != texts[-1]]
+    if any(one != inner[0] for one in inner):
+        raise OracleError("%s: the arrows between the two ends are not the "
+                          "same on every value: %r" % (name, between))
     glyphs = _control(game, ScreenReading(geometry, screen_objects(game)),
                       orders)
     out = {"texts": texts, "left": left, "right": right,
            "stored": field.name if field else None,
-           "moves_beside": sorted(moved, key=looks.SCREEN.index)}
+           "moves_beside": sorted(moved, key=looks.SCREEN.index),
+           "arrows": {"arrival": arrival, "left_end": left_end,
+                      "between": inner[0] if inner else None,
+                      "right_end": right_end}}
     if field:
         if values != list(range(values[0], values[0] + len(values))):
             raise OracleError("%s: the stored value did not step by one with "
                               "the text: %r" % (name, values))
         out["values"] = values
     if verbose:
+        print("            arrows: on arrival %s, at the left end %s, between "
+              "%s, at the right end %s"
+              % tuple(_say_arrows(out["arrows"][key]) for key in
+                      ("arrival", "left_end", "between", "right_end")))
         shown = texts if len(texts) <= 6 else texts[:3] + ["..."] + texts[-2:]
         print("  %-9s %3d value(s), Left %s, Right %s%s%s; end checked "
               "against %d drawn string(s)%s"
@@ -4637,6 +4714,59 @@ where a disagreement has somewhere to hide.
 """
 
 
+def frame_commands(game):
+    """The GP0 commands of the frame on screen, walked off the list it hands
+    the GPU (`layout.GPU_LIST_SUBMIT`), the way `_scenery_of` walks them.
+
+    Cheap enough to ask after every press: the heads cost two frames of
+    execution and all of RAM reads in a third of a second (measured
+    2026-09-21, LOOKS-TASK-36)."""
+    heads = gpu_list_heads(game)
+    first, size, step = layout.SCENERY_SWEEP
+    ram = b"".join(game.read_ram(base, step, os.path.join(
+        game.out_dir, "frame-%08x.bin" % base))
+        for base in range(first, first + size, step))
+    nodes = []
+    for head in dict.fromkeys(heads[len(heads) // 2:]):
+        nodes += walk_gpu_list(ram, head)
+    return commands_of(nodes)
+
+
+def frame_arrows(game):
+    """The arrows beside the cursor's value in the frame on screen.
+
+    `[{"side": "left" or "right", "point": [x, y]}]`, sorted: the sprites of
+    `layout.ARROW_PAGE`, told apart by their `uv`.  Their colour pulses and is
+    not part of the answer (LOOKS-TASK-36).  A sprite on that page with a
+    `uv` that is neither arrow is refused -- it would be something this screen
+    was never measured to draw.
+    """
+    import sprites as art
+
+    sides = {tuple(uv): side for side, uv in art.ARROWS.items()}
+    out = []
+    for one in sprites_of(frame_commands(game)):
+        if tuple(one["page"]) != layout.ARROW_PAGE:
+            continue
+        side = sides.get(tuple(one["uv"]))
+        if side is None:
+            raise OracleError("a sprite on the arrows' page at %r samples uv "
+                              "%r, which is neither arrow"
+                              % (one["point"], one["uv"]))
+        out.append({"side": side, "point": list(one["point"])})
+    return sorted(out, key=lambda one: (one["side"], one["point"]))
+
+
+def _say_arrows(arrows):
+    if arrows is None:
+        return "-"
+    if not arrows:
+        return "none"
+    return " ".join("%s(%d,%d)" % ({"left": "<", "right": ">"}[one["side"]],
+                                    one["point"][0], one["point"][1])
+                    for one in arrows)
+
+
 def _screen_geometry(table):
     """The four numbers `ScreenReading` needs, out of the measured table."""
     return {"row0_y": table["row0_y"], "pitch": table["pitch"],
@@ -4649,7 +4779,8 @@ def _press_sequence(game, slot, buttons, geometry, orders):
     for button in buttons:
         tap(game, button)
     reading = ScreenReading(geometry, screen_objects(game))
-    return {"rows": reading.rows(orders), "help": screen_help(game)}
+    return {"rows": reading.rows(orders), "help": screen_help(game),
+            "arrows": frame_arrows(game)}
 
 
 def _window_sequence(slot, buttons, verbose=True, shot=None):
@@ -4724,6 +4855,8 @@ def check_keys(sequence=None, slot=2, verbose=True):
                if first["rows"][name] != again["rows"][name]]
     if first["help"] != again["help"]:
         control.append(("help", first["help"], again["help"]))
+    if first["arrows"] != again["arrows"]:
+        control.append(("arrows", first["arrows"], again["arrows"]))
     for name, one, two in control:
         print("  FAIL  control: the game answered the same sequence with %s "
               "%r and then %r" % (name, one, two))
@@ -4732,11 +4865,12 @@ def check_keys(sequence=None, slot=2, verbose=True):
               "would mean anything")
         return 1
     print("  control: the same sequence twice in the game gives the same "
-          "twelve rows and the same help")
+          "twelve rows, the same help and the same arrows")
 
     state = screen.State(table, slot)
     state.press_all(buttons)
-    ours = {"rows": state.texts(), "help": state.help_text()}
+    ours = {"rows": state.texts(), "help": state.help_text(),
+            "arrows": state.arrows()}
     window = _window_sequence(slot, buttons, verbose, ours_shot)
     if window is not None:
         print("  the pair to look at: the game %s, our window %s"
@@ -4757,12 +4891,20 @@ def check_keys(sequence=None, slot=2, verbose=True):
     if window is not None and window.get("help") != first["help"]:
         bad.append("the help: the game shows %r and our window shows %r"
                    % (first["help"], window.get("help")))
+    if ours["arrows"] != first["arrows"]:
+        bad.append("the arrows: the game draws %s and screen.json says %s"
+                   % (_say_arrows(first["arrows"]), _say_arrows(ours["arrows"])))
+    if window is not None and window.get("arrows") != first["arrows"]:
+        bad.append("the arrows: the game draws %s and our window draws %s"
+                   % (_say_arrows(first["arrows"]),
+                      _say_arrows(window.get("arrows"))))
     for line in bad:
         print("  FAIL  %s" % line)
     if verbose and not bad:
         for name in table["order_of_rows"]:
             print("    %-9s %r" % (name, first["rows"][name]))
         print("    help      %r" % first["help"])
+        print("    arrows    %s" % _say_arrows(first["arrows"]))
     print("oracle --keys: %d difference(s) after %d press(es), across the "
           "game, screen.json and %s"
           % (len(bad), len(buttons),

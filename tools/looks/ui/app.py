@@ -200,6 +200,15 @@ def _screen_report(window: LooksSet, moved: list) -> dict:
           % (seen["tuple"], seen["builds"]))
     if seen["refused"]:
         print("  refused: %s" % seen["refused"])
+    if seen["sprites"]:
+        print("  sprites %s" % ", ".join(
+            "%s clut %d,%d" % (name, clut[0], clut[1])
+            for name, clut in sorted(seen["sprites"].items())))
+    else:
+        print("  sprites none: %s" % seen["sprites_note"])
+    print("  arrows %s" % (" ".join(
+        "%s@%d,%d" % (one["side"], one["point"][0], one["point"][1])
+        for one in seen["arrows"]) or "none"))
     if moved:
         print("  presses %s"
               % "".join("+" if one else "." for one in moved))
@@ -230,6 +239,7 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
                            else args.frame)
 
     window = LooksSet(state, builder, args.scale)
+    window.stand_in_text = not args.no_stand_in_text
     window.viewer.shelved = False
     # The panel draws with the camera the game projects with, when there is a
     # measured one on disc.  Without it the window says so and keeps the v1
@@ -315,6 +325,10 @@ def main(argv=None) -> int:
                              "without it the one the save states showed")
     parser.add_argument("--visible", action="store_true",
                         help="show the window where the user can see it")
+    parser.add_argument("--no-stand-in-text", action="store_true",
+                        help="leave out the plate's and the shirt's text in "
+                             "Qt's font, which stands in for the game's font "
+                             "and covers sprite pixels the game leaves bare")
     args = parser.parse_args(argv)
 
     app = QtWidgets.QApplication(sys.argv[:1])

@@ -294,6 +294,41 @@ DAT2D.BIN's rows 496-499 -- which is why it is a family apart from
 TEXTURE_FILES: this one may be read off either disc.
 """
 
+SCREEN_SPRITES = (
+    ("title", (768, 256), (128, 498)),
+    ("icon", (768, 256), (80, 499)),
+    ("shirt boxes", (576, 0), (176, 496)),
+    ("bar", (960, 256), (0, 497)),
+    ("plate", (576, 0), None),
+)
+"""The static sprites of LOOKS SET, by (name, page, CLUT) in VRAM coordinates.
+
+Measured on 2026-09-21 (LOOKS-TASK-31, fifth pass): `oracle.py --scenery`
+splits the list the frame hands the GPU into commands, and these five groups
+are 14 of its 142 sprites, the same in both states and cut from EDT_2D.BIN
+(title, icon, bar) and DAT2D.BIN (boxes, plate).  The plate's CLUT is `None`
+because it is not a constant of the screen: it follows the player's position,
+`PLATE_CLUT`.  Left out on purpose: the font (LOOKS-TASK-37), the help text
+the game writes into VRAM (LOOKS-TASK-39) and the arrows, which follow the
+cursor (`ARROW_PAGE`).
+"""
+
+PLATE_CLUT = {"GK": (192, 499), "CB": (208, 499)}
+"""The plate's CLUT by the position it reads, the only two measured.
+
+Slot 1 is a goalkeeper and draws the plate's four sprites through (192, 499);
+slot 2 is a centre back and draws the same four through (208, 499) -- same
+page, same `uv`, same place (LOOKS-TASK-31).  A position neither state holds
+has no measured CLUT, and the screen refuses it rather than borrow one.
+"""
+
+ARROW_PAGE = (704, 0)
+"""The page the two arrows beside the cursor's value are cut from.
+
+`uv` (128, 248) is the one on the right and (128, 240) the one on the left,
+both 8x8 through the CLUT (80, 497) of DAT2D.BIN.  Where each one shows is
+measured by the screen walk and kept in screen.json (LOOKS-TASK-36)."""
+
 RECORD_FILES = frozenset({SELECT})
 """Japanese-only too, but records rather than art -- so a hint of its own.
 

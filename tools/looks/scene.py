@@ -465,7 +465,7 @@ class Builder:
     `iso_source`'s, and `ui/` may not import it.
     """
 
-    __slots__ = ("image_path", "figure", "frame", "kit", "_data")
+    __slots__ = ("image_path", "figure", "frame", "kit", "_data", "_art")
 
     def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE,
                  frame: int = None):
@@ -482,8 +482,9 @@ class Builder:
             self._data = {name: disc.read(name)
                           for name in (layout.EDT_MOD, layout.MODEL,
                                        layout.DAT2D, layout.ANIME,
-                                       layout.SELECT8,
+                                       layout.SELECT8, layout.EDT_2D,
                                        layout.kit_path(self.kit))}
+        self._art = None
 
     def build(self, text: str, frame: int = None) -> Scene:
         """*text* as a scene, or `BadScene` carrying the table's own sentence."""
@@ -497,6 +498,33 @@ class Builder:
     def scale(self, values: dict) -> tuple:
         """The figure's scale for the screen's `HEIG` and `BODY` (`stature`)."""
         return figure_scale(self._data, values)
+
+    def art(self):
+        """The screen's 2D art laid out in VRAM, once (`sprites.Art`)."""
+        import sprites
+
+        if self._art is None:
+            self._art = sprites.Art({name: self._data[getattr(layout, name)]
+                                     for name in sprites.FILES})
+        return self._art
+
+    def paint_sprites(self, picture: bytearray, size, drawn) -> int:
+        """*drawn* painted onto an RGB *picture*, in order; pixels laid."""
+        import sprites
+
+        try:
+            return self.art().paint(picture, size, drawn)
+        except sprites.BadSprite as exc:
+            raise BadScene(str(exc)) from exc
+
+    def sprite_rgba(self, sprite: dict) -> bytes:
+        """One sprite as RGBA, row by row (`sprites.image`)."""
+        import sprites
+
+        try:
+            return self.art().image(sprite)
+        except sprites.BadSprite as exc:
+            raise BadScene(str(exc)) from exc
 
 
 
@@ -885,6 +913,50 @@ def load_scenery(slot: int = 2) -> list:
         raise NoScenery("%s holds no packet, so there is no furniture in it"
                         % path)
     return packets
+
+
+def load_sprites(slot: int = 2) -> list:
+    """The sprites the list of *slot* hands the GPU, as `--scenery` wrote them.
+
+    Every one, in drawing order -- the font and the help included; which of
+    them the window draws is `static_sprites`'s to say.  Never defaulted, for
+    the reason `load_scenery` gives.
+    """
+    import json
+
+    path = os.path.join(SCENERY_DIR, "slot%d.json" % slot)
+    if not os.path.isfile(path):
+        raise NoScenery("no %s -- run `oracle.py --scenery %d --write` first"
+                        % (path, slot))
+    with open(path, encoding="utf-8") as handle:
+        found = json.load(handle).get("sprites") or []
+    if not found:
+        raise NoScenery("%s holds no sprite -- written before LOOKS-TASK-31's "
+                        "fifth pass; run `oracle.py --scenery %d --write`"
+                        % (path, slot))
+    return found
+
+
+def static_sprites(found: list, plate: str) -> list:
+    """The title, icon, shirt boxes, bar and plate out of *found*.
+
+    The plate's CLUT comes from *plate*, the position the screen shows, and
+    not from the table (`sprites.static`) -- a position no state was measured
+    in is refused.
+    """
+    import sprites
+
+    try:
+        return sprites.static(found, plate)
+    except sprites.BadSprite as exc:
+        raise BadScene(str(exc)) from exc
+
+
+def arrow_sprite(side: str, point) -> dict:
+    """One of the two arrows beside the cursor's value, as a sprite."""
+    import sprites
+
+    return sprites.arrow_sprite(side, point)
 
 
 BLENDS = {

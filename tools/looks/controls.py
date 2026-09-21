@@ -652,7 +652,7 @@ CONTROLS = (
         "    \"stature\",\n)",
         ")",
         ("cli",),
-        "the disc gate running nine of the ten --check-image: green, and "
+        "the disc gate running ten of the eleven --check-image: green, and "
         "blind to the one left out -- the shape looks_image had for five "
         "tasks, when it ran modelfile alone",
     ),
@@ -914,6 +914,31 @@ CONTROLS = (
         "the help box naming the row before any button was pressed: the game "
         "shows the previous menu's `Visual` until the first press (trap 35), "
         "and a window that improves on that disagrees with it on frame one",
+    ),
+    Control(
+        "sprites-transparent-drawn", "sprites.py", "paint",
+        "            if not rgba[at + 3]:\n                continue",
+        "            if False:\n                continue",
+        ("sprites",),
+        "the CLUT entry 0x0000 drawn as black: every sprite of the screen "
+        "comes out as a black rectangle over the furniture it should sit on",
+    ),
+    Control(
+        "sprites-colour-ignored", "sprites.py", "image",
+        "            if not raw:",
+        "            if False:",
+        ("sprites",),
+        "the sprite's own colour dropped: the arrows pulse by exactly this "
+        "modulation -- their colour changes frame to frame -- and without it "
+        "they never dim",
+    ),
+    Control(
+        "sprites-plate-from-the-state", "sprites.py", "static",
+        "            one = dict(one, clut=list(layout.PLATE_CLUT[plate]))",
+        "            pass",
+        ("sprites",),
+        "the plate drawn in the CLUT the measured table happened to hold: the "
+        "screen then copies a slot instead of reading the position",
     ),
 )
 

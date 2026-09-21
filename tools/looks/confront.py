@@ -1920,7 +1920,7 @@ which the v2 filled it with, is 142 away.
 """
 
 OUTSIDE_REGIONS = ("panel", "rows", "help", "title band", "ground below",
-                   "ground left")
+                   "ground left", "title", "icon", "shirt boxes", "plate")
 """The regions whose ground colour this cycle has MEASURED (`oracle.py
 --scenery`), and so the ones this comparison asserts.  The rest of the screen
 -- the cursor box -- is printed beside them and not asserted, because nothing
@@ -1936,6 +1936,35 @@ band of the title where no letter falls, and two pieces of the background.
 Their packets are the ones `oracle.py --scenery` walks off the list the frame
 hands the GPU -- the title band three additive gradients, the background
 eight opaque ones (2026-09-21)."""
+
+
+SPRITE_REGION_GROUPS = ("title", "icon", "shirt boxes", "plate")
+"""The static sprites whose box is a region of the comparison (LOOKS-TASK-36).
+
+The bar is not one: every texel of it is transparent, so its box is the
+shirt box under it and would be counted twice."""
+
+
+def sprite_regions(slot):
+    """{group: (left, top, right, bottom)} of the static sprites of *slot*.
+
+    The union of each group's sprites, inclusive, off the table
+    `oracle.py --scenery --write` measured -- not off the code that draws them.
+    """
+    import scene
+    import sprites
+
+    boxes = {}
+    for one in scene.load_sprites(slot):
+        name = sprites.group_of(one)
+        if name not in SPRITE_REGION_GROUPS:
+            continue
+        (x, y), (w, h) = one["point"], one["size"]
+        box = (x, y, x + w - 1, y + h - 1)
+        old = boxes.get(name, box)
+        boxes[name] = (min(old[0], box[0]), min(old[1], box[1]),
+                       max(old[2], box[2]), max(old[3], box[3]))
+    return boxes
 
 
 def ground_colour(frame, box, skip=None):
@@ -2009,6 +2038,7 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
         regions = dict((name, table["regions"][name]["native"])
                        for name in table["regions"])
         regions.update(FURNITURE_REGIONS)
+        regions.update(sprite_regions(slot))
         control = [name for name in sorted(regions)
                    if ground_colour(first, regions[name])
                    != ground_colour(again, regions[name])]

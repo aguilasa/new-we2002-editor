@@ -73,6 +73,7 @@ SKIP = 77
 CHECK_IMAGE = (
     "modelfile",
     "texture",
+    "sprites",
     "atlas",
     "skin",
     "looks",

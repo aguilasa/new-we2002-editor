@@ -56,6 +56,15 @@ com os glifos do `EDT_2D.BIN`, posicionados pela regra do jogo.
 
 ---
 
+## Notas
+
+- **Da [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md):** a
+  janela tem `--no-stand-in-text`, que omite o texto da placa e da camisa
+  escrito com a fonte do Qt, porque ele cobre texels de sprite que o jogo deixa
+  à mostra (armadilha 93). Com os glifos do jogo, a opção e o `stand_in_text`
+  do `looks_set.py` perdem o motivo — e o `looks_ui` pode voltar a fotografar
+  a janela inteira.
+
 ## Log de Execução
 
 *(preencher ao executar)*

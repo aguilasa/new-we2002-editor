@@ -736,6 +736,19 @@ def read_screen(output: str) -> dict:
             seen["presses"] = text[len("presses "):]
         elif text.startswith("refused: "):
             seen["refused"] = text[len("refused: "):]
+        elif text.startswith("sprites "):
+            body = text[len("sprites "):]
+            seen["sprites"] = ({} if body.startswith("none") else
+                               {name: tuple(int(v) for v in clut.split(","))
+                                for name, _, clut in
+                                (part.rpartition(" clut ")
+                                 for part in body.split(", "))})
+        elif text.startswith("arrows "):
+            body = text[len("arrows "):]
+            seen["arrows"] = [] if body == "none" else [
+                {"side": side, "point": [int(v) for v in at.split(",")]}
+                for side, _, at in (one.partition("@")
+                                    for one in body.split())]
         elif text.startswith("plate "):
             parts = text.split(", ")
             seen["plate"] = parts[0][len("plate "):]
@@ -1391,6 +1404,110 @@ SCENERY_BREAKS = (
 -- the defect this judgement exists for."""
 
 
+# ---- the screen's sprites (LOOKS-TASK-36) ---------------------------------
+
+SPRITE_SLACK = 8
+"""How far the window's pixel may sit from the one the game's frame showed.
+
+Both sides expand five bits to eight the same way and draw the static sprites
+at colour 128, unmodulated; one five-bit step is room for nothing more than a
+rounding, and a sprite cut from the wrong CLUT misses by far more -- the two
+plates differ by 33 in red where they differ at all."""
+
+SPRITE_SLOTS = (2, 1)
+"""Both states: the plate's CLUT is the position's, and only the two of them
+together show the window reads it rather than copying one."""
+
+
+def measure_sprites(python: str, app: str, where: str, env: dict) -> tuple:
+    """The window's static sprites against the game's own pixels.
+
+    `(bad, broke, sampled)`; sampled is None when a slot's table carries no
+    samples, and the caller says so instead of judging.  The samples were
+    written by `oracle.py --scenery --write` off the console's frame buffer --
+    opaque texels of each static sprite that no later sprite covers, with the
+    colour the GAME drew there -- so nothing here asks `sprites.py` what the
+    answer is.
+    """
+    import json
+
+    bad, sampled = [], 0
+    for slot in SPRITE_SLOTS:
+        table_path = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
+                                  "work", "looks-scenery", "slot%d.json" % slot)
+        if not os.path.isfile(table_path):
+            return ([], "", None)
+        with open(table_path, encoding="utf-8") as handle:
+            found = json.load(handle)["sprites"]
+        spots = [spot for one in found for spot in one.get("samples", [])]
+        if not spots:
+            return ([], "", None)
+        out = os.path.join(where, "sprites-%d.png" % slot)
+        # Without the stand-in text: Qt's font is wider than the game's and
+        # covers sprite pixels the game leaves bare (LOOKS-TASK-37's to fix).
+        code, output = run_app(python, app, ["--state", str(slot), "--scale",
+                                             "1", "--no-stand-in-text",
+                                             "--screenshot", out], env)
+        if code != 0 or not os.path.isfile(out):
+            return ([], "slot %d: the screen did not draw: %s"
+                    % (slot, output.rstrip()), None)
+        width, _height, channels, rows = picture(out)
+        missed = []
+        for x, y, want in spots:
+            got = rows[y][x * channels:x * channels + 3]
+            gap = max(abs(a - b) for a, b in zip(want, got))
+            if gap > SPRITE_SLACK:
+                missed.append((x, y, tuple(want), tuple(got), gap))
+        sampled += len(spots)
+        if missed:
+            x, y, want, got, gap = missed[0]
+            bad.append("slot %d: %d of %d sprite pixel(s) are not the game's; "
+                       "the first at (%d,%d) is %s in the game and %s in the "
+                       "window, %d apart" % (slot, len(missed), len(spots), x,
+                                             y, want, got, gap))
+    return (bad, "", sampled)
+
+
+def plant_sprites(python: str, env: dict, name: str, where: str, old: str,
+                  new: str) -> tuple:
+    """A defect in a copy of the tree, judged by `measure_sprites` alone."""
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, where, old, new)
+        if sandbox is None:
+            return (False, why)
+        tables = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
+                              "work", "looks-scenery")
+        shutil.copytree(tables, os.path.join(tmp, "work", "looks-scenery"))
+        shots = os.path.join(tmp, "shots")
+        os.makedirs(shots)
+        app = os.path.join(sandbox, "ui", "app.py")
+        bad, broke, sampled = measure_sprites(python, app, shots, env)
+        if broke or sampled is None:
+            return (False, "the planted tree for %s did not judge the "
+                           "sprites, so nothing was proved: %s"
+                    % (name, broke or "no samples in the copy"))
+        if not bad:
+            return (False, "%s :: %s was broken (%s -> %s) and the sprites "
+                           "still passed" % (where, name, old.strip(),
+                                             new.strip()))
+        return (True, bad[0])
+
+
+SPRITE_BREAKS = (
+    ("the static sprites reaching the window",
+     os.path.join("ui", "looks_set.py"),
+     "                    builder.paint_sprites(picture, (width, height),\n",
+     "                    (picture, (width, height),\n"),
+    ("the plate's CLUT read from the position",
+     os.path.join("ui", "looks_set.py"),
+     "                    core.load_sprites(int(state.slot)), state.plate())",
+     "                    core.load_sprites(int(state.slot)), \"CB\")"),
+)
+"""The window that measured its sprites and drew none, and the one that drew
+every plate in the outfield player's CLUT -- right in slot 2, wrong in slot 1,
+which is why both slots are photographed."""
+
+
 # ---- the gate itself ------------------------------------------------------
 
 def skip(why: str) -> int:
@@ -1547,7 +1664,36 @@ def main(argv: list | None = None) -> int:
         print("  the furniture not judged: no work/looks-scenery/ table "
               "(oracle.py --scenery --write)")
 
+    with tempfile.TemporaryDirectory() as tmp:
+        bad, broke, sampled_sprites = measure_sprites(python, APP, tmp, env)
+    if broke:
+        print("FAIL: %s" % broke)
+        return 1
+    if bad:
+        for line in bad:
+            print("FAIL: %s" % line)
+        return 1
+    judged_sprites = sampled_sprites is not None
+    if judged_sprites:
+        print("  the static sprites the window paints are the game's: %d "
+              "pixel(s) sampled over slots %s, every one within %d"
+              % (sampled_sprites, ", ".join(map(str, SPRITE_SLOTS)),
+                 SPRITE_SLACK))
+    else:
+        print("  the sprites not judged: no samples in work/looks-scenery/ "
+              "(oracle.py --scenery --write)")
+
     failed = 0
+    if judged_sprites:
+        for name, where, old, new in SPRITE_BREAKS:
+            red, why = plant_sprites(python, env, name, where, old, new)
+            if red:
+                print("negative: breaking %s reddens the sprites -- %s"
+                      % (name, why))
+                PLANTED.append(name)
+            else:
+                print("FAIL: %s" % why)
+                failed += 1
     if judged_scenery:
         for name, where, old, new in SCENERY_BREAKS:
             red, why = plant_scenery(python, env, name, where, old, new)
@@ -1590,7 +1736,8 @@ def main(argv: list | None = None) -> int:
           "every tuple it was asked for and answered every key with what the "
           "game shows" % (len(PLANTED), len(BREAKS) + len(KEY_BREAKS)
                           + (len(STATURE_BREAKS) if judged_stature else 0)
-                          + (len(SCENERY_BREAKS) if judged_scenery else 0)))
+                          + (len(SCENERY_BREAKS) if judged_scenery else 0)
+                          + (len(SPRITE_BREAKS) if judged_sprites else 0)))
     return 0
 
 

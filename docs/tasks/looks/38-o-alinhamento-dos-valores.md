@@ -51,6 +51,14 @@ valores encostados na borda direita.
 
 ---
 
+## Notas
+
+- **Da [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md):** o ◀
+  ao lado do valor tem x **fixo por linha** (302 em `NAT`, 424 em `AGE`, 416
+  em `FOOT`, 384 nas outras oito, gravado no `screen.json` pelo walk) e não
+  acompanha o começo do texto. Ele não serve de régua para o alinhamento — e o
+  alinhamento não precisa movê-lo.
+
 ## Log de Execução
 
 *(preencher ao executar)*

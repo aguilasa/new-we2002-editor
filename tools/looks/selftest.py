@@ -42,6 +42,7 @@ MODULES = (
     "section",
     "modelfile",
     "texture",
+    "sprites",
     "atlas",
     "skin",
     "looks",

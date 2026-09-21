@@ -467,6 +467,7 @@ def validate(table: dict) -> list:
                 problems.append("row %s: the %s end is %r"
                                 % (name, end, row.get(end)))
         helps.append(row.get("help"))
+        problems += _arrow_problems(name, row)
         field = looks.BY_ROW.get(name)
         if field is not None:
             if row.get("stored") != field.name:
@@ -490,6 +491,46 @@ def validate(table: dict) -> list:
         problems += _title_problems(slot, state)
     if sorted(table.get("initial", {})) != ["1", "2"]:
         problems.append("the initial values are not those of slots 1 and 2")
+    return problems
+
+
+ARROW_WHERE = ("arrival", "left_end", "between", "right_end")
+"""Where the walk reads the arrows of a row: when the cursor arrives on it,
+at each end, and on every value between -- which it asserts are all the same.
+"""
+
+ARROW_SIDES = ("left", "right")
+
+
+def _arrow_problems(name: str, row: dict) -> list:
+    """The arrows a row stores have to be the shape `State.arrows` reads.
+
+    `between` is None exactly when the row has no value between its two ends:
+    a table that says otherwise was written by a walk that did not look.
+    """
+    arrows = row.get("arrows")
+    if not isinstance(arrows, dict):
+        return ["row %s does not say where its arrows show" % name]
+    problems = []
+    for where in ARROW_WHERE:
+        if where not in arrows:
+            problems.append("row %s: no arrows %s" % (name, where))
+            continue
+        found = arrows[where]
+        if found is None:
+            if where != "between" or len(row.get("texts", [])) > 2:
+                problems.append("row %s: the arrows %s were not read"
+                                % (name, where))
+            continue
+        for one in found:
+            if (one.get("side") not in ARROW_SIDES
+                    or len(one.get("point", [])) != 2):
+                problems.append("row %s: an arrow %s is %r" % (name, where,
+                                                               one))
+    if (arrows.get("between") is not None
+            and len(row.get("texts", [])) <= 2):
+        problems.append("row %s has no value between its ends and stores "
+                        "arrows there" % name)
     return problems
 
 
@@ -650,6 +691,28 @@ class State:
         if not self.pressed:
             return self.table["help_on_load"]
         return self.table["rows"][self.row]["help"]
+
+    def arrows(self) -> list:
+        """The arrows beside the cursor's value, as the walk read them.
+
+        `[{"side", "point"}]` in native pixels.  Where the row is -- arriving,
+        at an end, or between -- picks which of the walk's four readings
+        applies.  A row with one value has no end to reach, and shows what
+        it showed when the cursor arrived (DEFAUL: the left arrow alone).
+        """
+        row = self.table["rows"][self.row]
+        arrows = row["arrows"]
+        count = len(row["texts"])
+        index = self.indices[self.row]
+        if count == 1:
+            found = arrows["arrival"]
+        elif index == 0:
+            found = arrows["left_end"]
+        elif index == count - 1:
+            found = arrows["right_end"]
+        else:
+            found = arrows["between"]
+        return [dict(one, point=list(one["point"])) for one in found]
 
     def plate(self) -> str:
         return self.table["initial"][self.slot]["plate"]
@@ -935,6 +998,25 @@ def _checks(c) -> None:
     table = _toy_table()
     ok("a whole toy table validates", validate(table) == [],
        "%r" % validate(table))
+    walked = State(table, 2)
+    ok("on arrival at the left end the right arrow shows alone",
+       [one["side"] for one in walked.arrows()] == ["right"],
+       "%r" % walked.arrows())
+    walked.press("Right")
+    ok("between the ends both arrows show",
+       [one["side"] for one in walked.arrows()] == ["left", "right"])
+    walked.press_all(["Right", "Right"])
+    ok("at the right end the left arrow shows alone",
+       [one["side"] for one in walked.arrows()] == ["left"])
+    broken = json.loads(json.dumps(table))
+    broken["rows"]["SKIN"]["arrows"]["between"] = None
+    ok("a row with values between its ends and no arrows there is refused",
+       any("were not read" in p for p in validate(broken)))
+    broken = json.loads(json.dumps(table))
+    broken["rows"]["SKIN"]["arrows"]["left_end"] = [{"side": "up",
+                                                     "point": [0, 0]}]
+    ok("an arrow that is neither side is refused",
+       any("an arrow" in p for p in validate(broken)))
     ok("Right locks at the right end", step(table, "SKIN", 3, "Right") == 3)
     ok("Left locks at the left end", step(table, "SKIN", 0, "Left") == 0)
     ok("Down wraps past FOOT when the walk said so",
@@ -1055,7 +1137,13 @@ def _toy_table() -> dict:
         rows[name] = {"texts": ["%s %d" % (name, n) for n in range(4)],
                       "left": "locks", "right": "locks",
                       "help": "help %d" % number,
-                      "stored": field.name if field else None}
+                      "stored": field.name if field else None,
+                      "arrows": {
+                          "arrival": [{"side": "right", "point": [480, 43]}],
+                          "left_end": [{"side": "right", "point": [480, 43]}],
+                          "between": [{"side": "left", "point": [300, 43]},
+                                      {"side": "right", "point": [480, 43]}],
+                          "right_end": [{"side": "left", "point": [300, 43]}]}}
     rows["SKIN"]["texts"] = ["A TYPE", "B TYPE", "C TYPE", "D TYPE"]
     initial = {slot: {"rows": {name: rows[name]["texts"][0]
                                for name in looks.SCREEN},
@@ -1064,7 +1152,8 @@ def _toy_table() -> dict:
                       "title_skipped": title_skipped("LOOKS SET  ")}
                for slot in ("1", "2")}
     return {"order_of_rows": list(looks.SCREEN), "rows": rows,
-            "vertical": {"up": "wraps", "down": "wraps"}, "initial": initial}
+            "vertical": {"up": "wraps", "down": "wraps"}, "initial": initial,
+            "cursor_on_load": "SKIN"}
 
 
 def main(argv) -> int:

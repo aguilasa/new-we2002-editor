@@ -819,14 +819,16 @@ dono do repositório, e isso não muda na v2.
 do jogo: a janela **é** a `LOOKS SET`, com as doze linhas trocáveis, o cursor,
 a caixa de ajuda e o boneco no painel. Entregues a tela (fase 8) e o boneco
 montado, na pose e na câmera do jogo, com altura e corpo (fase 9) e com o
-uniforme do time (task 30), e o painel e a mobília medidos e pintados (task
-31); faltam os sprites, o texto, o alinhamento, a ajuda e o close-up (tasks 36
-a 40) e a caminhada (fase 11).
+uniforme do time (task 30), o painel e a mobília medidos e pintados (task
+31), e os sprites estáticos e as setas lidos do disco (task 36); faltam o
+texto, o alinhamento, a ajuda e o close-up (tasks 37 a 40) e a caminhada (fase
+11).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
-`CORR-LOOKS-`, perfil [docs/prompts/perfil-looks.md](docs/prompts/perfil-looks.md),
-e roda por `/rite:execute looks`. Não estende o `we2002_core` e não compartilha
+`CORR-LOOKS-`, perfil [docs/prompts/perfil-looks.md](docs/prompts/perfil-looks.md)
+(as armadilhas da 86 em diante em
+[perfil-looks.armadilhas.md](docs/prompts/perfil-looks.armadilhas.md)), e roda por `/rite:execute looks`. Não estende o `we2002_core` e não compartilha
 build; o que empresta é leitura de disco de `tools/pes2/` (`iso.py`, `lzss.py`,
 `mcp.py`, `fork.py`) e conhecimento de formato.
 
@@ -857,7 +859,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | Comando | O que faz |
 |---|---|
 | `python tools/looks/selftest.py` | o gate **obrigatório**: os self-checks, as três regras de desenho e os controles negativos plantados |
-| `python tools/looks/cli.py sections\|pieces\|texture\|looks [tupla]\|check` | a linha de comando do núcleo; `check` roda os dez `--check-image` e é o alvo `looks_image` |
+| `python tools/looks/cli.py sections\|pieces\|texture\|looks [tupla]\|check` | a linha de comando do núcleo; `check` roda os onze `--check-image` e é o alvo `looks_image` |
 | `.\make.ps1 looks` | **abre a tela `LOOKS SET`** — `-State 1\|2` escolhe goleiro ou jogador de linha, `-Tuple A-I3-A-E-A` abre o visualizador de uma tupla só. É o **único** alvo do ciclo que mostra janela ao usuário; opção de visualizador sem `-Tuple` é **recusada**, não ignorada |
 | `work/venv-looks/Scripts/python.exe tools/looks/ui/app.py` | o mesmo app: **sem** `--looks` abre a tela (com `--state`, `--keys`, `--screenshot`); **com** `--looks <tupla>` desenha uma tupla fora da tela, e tupla que a tabela recusa sai **2** |
 | `python tools/looks/screen.py --check` / `--report` | a tabela da tela: decodificação, caixas, cursor e os rótulos do `looks.py` contra ela; o `--report` imprime o que a tabela diz |

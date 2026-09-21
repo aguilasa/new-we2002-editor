@@ -243,6 +243,58 @@
  "row0_y": -79,
  "rows": {
   "AGE": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       424,
+       151
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       151
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       424,
+       151
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       151
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       151
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       424,
+       151
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Age",
    "left": "locks",
    "moves_beside": [],
@@ -318,6 +370,51 @@
    ]
   },
   "BODY": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       139
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       384,
+       139
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       139
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       139
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       139
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Body",
    "left": "locks",
    "moves_beside": [],
@@ -345,6 +442,51 @@
    ]
   },
   "BOOTS": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       163
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       384,
+       163
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       163
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       163
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       163
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Boots   ■ Turn",
    "left": "locks",
    "moves_beside": [],
@@ -372,6 +514,36 @@
    ]
   },
   "DEFAUL": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       384,
+       43
+      ],
+      "side": "left"
+     }
+    ],
+    "between": null,
+    "left_end": [
+     {
+      "point": [
+       276,
+       43
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       43
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Confirm",
    "left": "locks",
    "moves_beside": [],
@@ -382,6 +554,51 @@
    ]
   },
   "FACE": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       103
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       384,
+       103
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       103
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       103
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       103
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Kind of Face Hair   ■ Turn",
    "left": "locks",
    "moves_beside": [],
@@ -407,6 +624,51 @@
    ]
   },
   "FOOT": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       175
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       416,
+       175
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       175
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       175
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       416,
+       175
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Foot",
    "left": "locks",
    "moves_beside": [],
@@ -424,6 +686,51 @@
    ]
   },
   "H.COL": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       91
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       384,
+       91
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       91
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       91
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       91
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Hair Colour   ■ Turn",
    "left": "locks",
    "moves_beside": [],
@@ -451,6 +758,51 @@
    ]
   },
   "H.F.COL.": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       115
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       384,
+       115
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       115
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       115
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       115
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Hair Face Colour   ■ Turn",
    "left": "locks",
    "moves_beside": [],
@@ -476,6 +828,51 @@
    ]
   },
   "HAIR": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       79
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       384,
+       79
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       79
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       79
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       79
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Kind of Hair   ■ Turn",
    "left": "locks",
    "moves_beside": [],
@@ -551,6 +948,58 @@
    ]
   },
   "HEIG": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       384,
+       127
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       127
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       384,
+       127
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       127
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       127
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       127
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Height",
    "left": "locks",
    "moves_beside": [],
@@ -674,6 +1123,51 @@
    ]
   },
   "NAT": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       55
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       302,
+       55
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       55
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       55
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       302,
+       55
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Nation",
    "left": "locks",
    "moves_beside": [],
@@ -763,6 +1257,51 @@
    ]
   },
   "SKIN": {
+   "arrows": {
+    "arrival": [
+     {
+      "point": [
+       480,
+       67
+      ],
+      "side": "right"
+     }
+    ],
+    "between": [
+     {
+      "point": [
+       384,
+       67
+      ],
+      "side": "left"
+     },
+     {
+      "point": [
+       480,
+       67
+      ],
+      "side": "right"
+     }
+    ],
+    "left_end": [
+     {
+      "point": [
+       480,
+       67
+      ],
+      "side": "right"
+     }
+    ],
+    "right_end": [
+     {
+      "point": [
+       384,
+       67
+      ],
+      "side": "left"
+     }
+    ]
+   },
    "help": "Skin Colour   ■ Turn",
    "left": "locks",
    "moves_beside": [],
