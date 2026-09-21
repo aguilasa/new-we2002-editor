@@ -2185,9 +2185,7 @@ def check_scenery(slots=(2, 1), write=False, verbose=True):
                             table, display)
             samples = _static_samples(game, sprites, display, ready["image"],
                                       confront, screen)
-            print("    the static sprites sampled: %d pixel(s) of %d sprite(s), "
-                  "each the colour the game's frame shows there"
-                  % (sum(len(one) for one in samples.values()), len(samples)))
+            _say_static_samples(sprites, samples)
             arrows, arrow_problems = _arrow_samples(game, slot, display,
                                                     ready["image"], confront,
                                                     screen)
@@ -2785,6 +2783,26 @@ def _static_samples(game, sprites, display, image, confront, screen):
         out[index] = [[x, y, list(frame[y][x][:3])]
                       for x, y in spots[::step][:STATIC_SAMPLES]]
     return out
+
+
+def _say_static_samples(sprites, samples):
+    """Print how many static sprites gave a sample, and name those that gave none.
+
+    The count is of the sprites that HAVE samples, not of the static sprites
+    found (CORR-LOOKS-069): the bar is transparent over its whole cut
+    (armadilha 91), so it is static and gives no pixel to judge.
+    """
+    import sprites as art_module
+
+    sampled = [index for index, one in samples.items() if one]
+    empty = [index for index, one in samples.items() if not one]
+    print("    the static sprites sampled: %d pixel(s) of %d sprite(s), "
+          "each the colour the game's frame shows there"
+          % (sum(len(one) for one in samples.values()), len(sampled)))
+    for index in empty:
+        one = sprites[index]
+        print("    not sampled: the %s at %s, %s -- no opaque texel on screen"
+              % (art_module.group_of(one), one["point"], one["size"]))
 
 
 ARROW_WALKS = ((), ("Up",))
