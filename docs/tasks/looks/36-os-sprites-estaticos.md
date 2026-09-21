@@ -208,4 +208,20 @@ confront --outside: 0 problem(s) over 2 slot(s)
 
 ### Gates
 
-Transcritos depois do commit de trabalho, na nota abaixo.
+```text
+# na arvore de 2b698730
+$ python tools/looks/selftest.py --quiet
+  ..... rule 1 swept 26 file(s), 27982 line(s)
+  ..... 97 of 97 controls red
+looks_selftest: 0 failure(s)
+$ python tools/looks/cli.py check
+cli check: 11 module(s), 11 ok, 0 skipped, 0 failed -- ok
+$ python tools/check_tasks.py
+check: 0 error(s), 11 warning(s) in 4 cycle(s)
+```
+
+Os outros três alvos do ciclo — `looks_ui` (14 de 14 controles vermelhos),
+`looks_live` (`oracle --check-live: 0 failure(s)`) e `--keys`/`--outside` —
+rodaram sobre o código do commit, antes das últimas edições de texto dele
+(prosa do perfil, do `CLAUDE.md` e uma string do `controls.py`). Estão
+transcritos acima.
