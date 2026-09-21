@@ -3,12 +3,12 @@ id: CORR-LOOKS-066
 title: "Correção: a divisão da LOOKS-TASK-31 não chegou a cinco textos — a §10.3 (o) segue \"PARCIAL\", e o close-up e o cenário ainda apontam para a 31"
 type: correção
 category: processo
-status: pending
+status: done
 depends_on: []
 origin: LOOKS-TASK-31
 severity: low
-done_on: null
-done_commit: null
+done_on: 2026-09-21
+done_commit: e5081325
 ---
 
 # CORR-LOOKS-066: a 31 fechou dividida, e cinco textos ainda a leem aberta
@@ -186,3 +186,14 @@ o texto da segunda passada ficou como foi escrito, com uma nota abaixo.
 **Arquivos criados/modificados:** `docs/PLAN-LOOKS-PY.md`, `CLAUDE.md`,
 `docs/tasks/looks/progresso.md`, `tools/looks/ui/looks_set.py`,
 `docs/tasks/looks/31-o-painel-e-o-cenario.md`, este arquivo.
+
+## Log de Execução
+
+- **Closed** — commit `e5081325` (2026-09-21): fix(looks): point the five texts the split of LOOKS-TASK-31 missed at 36-40
+  - Files (`git show --name-status e5081325`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/tasks/looks/31-o-painel-e-o-cenario.md`
+    - `M docs/tasks/looks/CORR-LOOKS-066.md`
+    - `M docs/tasks/looks/progresso.md`
+    - `M tools/looks/ui/looks_set.py`
