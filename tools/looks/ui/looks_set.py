@@ -97,10 +97,13 @@ class LooksSet(QtWidgets.QWidget):
         self.viewer.setGeometry(self._rect(self.places["panel"]))
         panel = self._scenery_at(self.places["panel"])
         if panel is not None:
-            # The panel's own gradient, measured: the viewer clears to its top
-            # colour, which is what the figure is seen against.
-            self.viewer.clear_colour = tuple(
-                [one / 255.0 for one in panel["colours"][0]] + [1.0])
+            # The panel's own gradient, measured, painted behind the figure --
+            # top and bottom by the corners that ARE on top and at the bottom.
+            corners = panel["points"]
+            top = min(range(len(corners)), key=lambda i: corners[i][1])
+            bottom = max(range(len(corners)), key=lambda i: corners[i][1])
+            self.viewer.clear_gradient = (tuple(panel["colours"][top]),
+                                          tuple(panel["colours"][bottom]))
         self.redraw()
 
     # -- geometry ----------------------------------------------------------
@@ -278,9 +281,16 @@ class LooksSet(QtWidgets.QWidget):
                                (max(ys) - min(ys)) * s)
             colours = [QtGui.QColor(*one) for one in packet["colours"]]
             if packet["gradient"] and len(colours) > 2:
+                # By the corner that IS on top, not by the first one listed:
+                # the help box's packet lists its bottom corners first, and
+                # read in order its gradient came out upside down -- 32 away
+                # from the game's ground (measured by confront.py --outside).
+                corners = packet["points"]
+                top = min(range(len(corners)), key=lambda i: corners[i][1])
+                bottom = max(range(len(corners)), key=lambda i: corners[i][1])
                 shade = QtGui.QLinearGradient(box.topLeft(), box.bottomLeft())
-                shade.setColorAt(0.0, colours[0])
-                shade.setColorAt(1.0, colours[2])
+                shade.setColorAt(0.0, colours[top])
+                shade.setColorAt(1.0, colours[bottom])
                 painter.fillRect(box, QtGui.QBrush(shade))
             else:
                 painter.fillRect(box, colours[0])

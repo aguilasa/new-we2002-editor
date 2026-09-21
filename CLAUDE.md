@@ -875,6 +875,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --scenery [SLOT] [--write]` | os pacotes que desenham a mobília da tela, lidos da display list e conferidos contra o quadro; o `--write` é de onde a janela pinta |
 | `python tools/looks/oracle.py --repaint [SLOT]` | que partes da tela o jogo redesenha a cada quadro, medido sobrescrevendo os dois buffers |
 | `python tools/looks/oracle.py --pages [SLOT]` | o que na tela é desenhado de cada página da VRAM, medido estragando uma página por vez |
+| `python tools/looks/confront.py --outside [SLOT]` | a nossa tela contra a do jogo fora do boneco, região por região |
 | `python tools/looks/anime.py --check-image` / `--report` / `--against-pose` | o `ANIME.BIN`: 204 animações, a varredura que fecha no EOF, os três ângulos de cada peça de cada quadro, e o confronto com a pose capturada |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |

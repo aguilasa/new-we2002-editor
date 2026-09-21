@@ -38,6 +38,7 @@ Usage:
     python tools/looks/confront.py --silhouette-styles [SLOT]   # hair, in the close-up
     python tools/looks/confront.py --silhouette-stature [SLOT]  # HEIG and BODY, by shape
     python tools/looks/confront.py --kit-control    # another team's uniform scores worse
+    python tools/looks/confront.py --outside [SLOT]  # our screen against the game's, outside the figure
 """
 
 from __future__ import annotations
@@ -1906,6 +1907,136 @@ def _stature_score(data, text, figure, frame, camera, size, theirs, scene):
                                                        centre))
 
 
+OUTSIDE_FRAME = 60
+"""Counted frames after the state loads before the game's picture is taken."""
+
+OUTSIDE_SLACK = 16
+"""How far our region's ground may sit from the game's, per channel.
+
+Five bits a channel in the frame buffer is steps of eight; two steps is what a
+gradient's own banding moves between two renderers.  A region painted with a
+colour chosen by eye misses by far more: the help box's grey border colour,
+which the v2 filled it with, is 142 away.
+"""
+
+OUTSIDE_REGIONS = ("panel", "rows", "help")
+"""The regions whose ground colour this cycle has MEASURED (`oracle.py
+--scenery`), and so the ones this comparison asserts.  The rest of the screen
+-- the title band, the plate, the shirt box -- is printed beside them and not
+asserted, because nothing measured says what it should be yet."""
+
+
+def ground_colour(frame, box, skip=None):
+    """The ground of a region: the median of each channel, figure left out.
+
+    The median and not the commonest colour, and it was the commonest first:
+    on a GRADIENT the commonest shade is decided by ties and by the console's
+    dithering -- the help box's came out (8, 64, 96) in the game and
+    (0, 40, 64) in our window, with both gradients running from the same
+    colour to the same colour.  The median of a gradient is its middle, on
+    either side, and the letters on it are too few to move it.  *skip* is a
+    mask the size of the box, 1 where the figure is.
+    """
+    left, top, right, bottom = box
+    width = right - left + 1
+    channels = ([], [], [])
+    for y in range(top, bottom + 1):
+        for x in range(left, right + 1):
+            if skip is not None and skip[(y - top) * width + (x - left)]:
+                continue
+            for index, value in enumerate(frame[y][x][:3]):
+                channels[index].append(value)
+    if not channels[0]:
+        return None
+    middle = len(channels[0]) // 2
+    return tuple(sorted(one)[middle] for one in channels)
+
+
+def colour_distance(one, two):
+    return max(abs(a - b) for a, b in zip(one, two))
+
+
+def check_outside(slots=(2, 1), verbose=True) -> int:
+    """`--outside [SLOT]`: our screen against the game's, outside the figure.
+
+    What LOOKS-TASK-31 asks of the furniture: the same picture as the game's
+    where the figure is not.  For each region `screen.json` names, the ground
+    colour -- the commonest, with the figure's own pixels left out -- of the
+    game's frame and of our window at native size.
+
+    **The control first:** the game photographed twice at the same counted
+    frame has to give the same ground everywhere, or no distance below means
+    anything.  The regions whose colours were measured (`OUTSIDE_REGIONS`) are
+    asserted within `OUTSIDE_SLACK`; the rest of the screen is printed, so
+    what is still drawn by eye says so.
+    """
+    import oracle
+    import screen
+    import ui_check
+
+    ready = oracle.preflight()
+    table = screen.load()
+    display = table["display"]
+    box = table["regions"]["panel"]["native"]
+    python, app = _python_and_app()
+    problems = []
+    theirs = {}
+    with oracle.Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            frames = []
+            for _ in range(2):
+                oracle.restore_state(slot, verbose=False)
+                game.load_looks(slot, label="outside-%d" % slot)
+                game.step(OUTSIDE_FRAME)
+                frames.append(still_frame(game, display, oracle, screen))
+            theirs[slot] = frames
+    for slot in slots:
+        print("  -- slot %d --" % slot)
+        first, again = theirs[slot]
+        figure = panel_mask(first, box)
+        control = [name for name in sorted(table["regions"])
+                   if ground_colour(first, table["regions"][name]["native"])
+                   != ground_colour(again, table["regions"][name]["native"])]
+        if control:
+            problems.append("slot %d: the game photographed twice has another "
+                            "ground in %s, so nothing below is measured"
+                            % (slot, ", ".join(control)))
+            continue
+        print("    control: the game photographed twice, the same ground in "
+              "all %d region(s)" % len(table["regions"]))
+        out = os.path.join(out_dir(), "ours-outside-%d.png" % slot)
+        code, output = ui_check.run_app(
+            python, app, ["--state", str(slot), "--scale", "1",
+                          "--screenshot", out], ui_check.environment())
+        if code or not os.path.isfile(out):
+            problems.append("slot %d: our window did not draw -- %s"
+                            % (slot, output.strip()[-300:]))
+            continue
+        shot = ui_check.picture(out)
+        width, height, channels, rows = shot
+        ours = [[tuple(row[x * channels:x * channels + 3])
+                 for x in range(width)] for row in rows]
+        for name in sorted(table["regions"]):
+            region = table["regions"][name]["native"]
+            skip = figure if name == "panel" else None
+            game_ground = ground_colour(first, region, skip)
+            our_ground = ground_colour(ours, region, skip)
+            gap = colour_distance(game_ground, our_ground)
+            asserted = name in OUTSIDE_REGIONS
+            print("    %-8s game %-15s ours %-15s %3d apart%s"
+                  % (name, game_ground, our_ground, gap,
+                     "" if asserted else "  (not measured, not asserted)"))
+            if asserted and gap > OUTSIDE_SLACK:
+                problems.append("slot %d, %s: our ground is %d from the "
+                                "game's, over the %d a measured colour takes"
+                                % (slot, name, gap, OUTSIDE_SLACK))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("confront --outside: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
 def glyph_mask(shot, box) -> frozenset:
     """The set of glyph pixels inside a box -- what the LABEL is, blink-free.
 
@@ -2012,6 +2143,8 @@ def main(argv: list[str]) -> int:
             if argv[1] == "--silhouette-stature":
                 return check_silhouette_stature(chosen)
             return check_silhouette(chosen)
+        if len(argv) >= 2 and argv[1] == "--outside":
+            return check_outside(tuple(int(a) for a in argv[2:]) or (2, 1))
         if len(argv) >= 2 and argv[1] == "--kit-control":
             return check_kit_control(tuple(int(a) for a in argv[2:]) or (2, 1))
         if len(argv) == 3 and argv[1] == "--reach":

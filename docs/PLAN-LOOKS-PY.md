@@ -2999,6 +2999,13 @@ barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou d
 > páginas vizinhas não derrubam nada — e a da fonte derruba **um** ladrilho
 > só, o que diz que ela é reenviada a cada quadro. Medir o que o caminho de
 > impressão manda ao GPU, comando a comando, é a continuação desta task.
+>
+> **E a janela, comparada com o jogo fora do boneco** (`confront.py
+> --outside`, 2026-09-21): o chão de cada região — a mediana de cada canal,
+> sem os pixels do boneco — no quadro do jogo e na janela em escala nativa,
+> com o jogo fotografado duas vezes de controle. O painel fica a **4**, a
+> caixa de ajuda a **3** e as faixas a **11**, nos dois slots; as cores que a
+> v2 tinha escolhido a olho ficavam a 24 e a 142.
 
 **(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
 interpola entre quadros-chave, e se o tronco que balança é da animação ou da

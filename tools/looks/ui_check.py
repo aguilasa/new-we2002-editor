@@ -1122,13 +1122,45 @@ def stature_keys(table: dict, steps) -> list:
     return out
 
 
+PANEL_INK_APART = 24
+"""How far a pixel of the panel has to sit from its ROW's ground to be figure.
+
+Per row, because the panel's ground is the game's vertical gradient since
+LOOKS-TASK-31: one ground colour for the whole panel -- what `ink_box` takes --
+made every row of the gradient "ink", and the stature ratios all came out
+1.000."""
+
+
 def panel_ink(shot: tuple, box, scale: int) -> tuple:
-    """`ink_box` of the panel alone, cut out of a picture of the whole screen."""
+    """(width, height, pixels) of the figure inside the panel.
+
+    The ground is taken per row -- the commonest colour of that row of the
+    panel -- so a vertical gradient behind the figure is ground everywhere and
+    the figure is what differs from it.
+    """
     _width, _height, channels, rows = shot
     left, top, right, bottom = [one * scale for one in box]
-    cut = [row[left * channels:(right + scale) * channels]
-           for row in rows[top:bottom + scale]]
-    return ink_box((right + scale - left, len(cut), channels, cut))
+    first = last = None
+    low = high = None
+    drawn = 0
+    for y in range(top, bottom + scale):
+        line = [tuple(rows[y][x * channels:x * channels + 3])
+                for x in range(left, right + scale)]
+        counts: dict = {}
+        for pixel in line:
+            counts[pixel] = counts.get(pixel, 0) + 1
+        ground = max(counts, key=counts.get)
+        for x, pixel in enumerate(line):
+            if max(abs(a - b) for a, b in zip(pixel, ground)) <= PANEL_INK_APART:
+                continue
+            drawn += 1
+            first = x if first is None else min(first, x)
+            last = x if last is None else max(last, x)
+            low = y if low is None else min(low, y)
+            high = y if high is None else max(high, y)
+    if not drawn:
+        return (0, 0, 0)
+    return (last - first + 1, high - low + 1, drawn)
 
 
 def measure_stature(python: str, app: str, where: str, env: dict) -> tuple:
@@ -1227,6 +1259,109 @@ STATURE_BREAKS = (
 """The window whose rows stop at the text, and the rule with the height on the
 wrong axis -- the negative control LOOKS-TASK-29 asks for, judged by the
 picture the window draws."""
+
+
+# ---- the screen's furniture (LOOKS-TASK-31) --------------------------------
+
+SCENERY_INSET = 3
+"""How far inside a packet's top-left corner the window is sampled, in native
+pixels: past the edge the neighbour's colour bleeds in, and before the text of
+a row, which starts further in."""
+
+SCENERY_SLACK = 16
+"""How far the window's pixel may sit from the colour the table measured.
+
+The window paints eight bits a channel and the table holds what the game's
+packet declared; two five-bit steps is the room confront.py --outside needed
+between the two renderers."""
+
+
+def measure_scenery(python: str, app: str, where: str, env: dict) -> tuple:
+    """The window's furniture against the table it was drawn from.
+
+    `(bad, broke, sampled)`; sampled is None when there is no measured table
+    on disc, and the caller says so instead of judging.  What is judged is the
+    PICTURE: each packet of `work/looks-scenery/slot2.json` is sampled just
+    inside its top-left corner, and the pixel has to be the packet's colour at
+    that row -- the top colour, or the gradient a few rows down.
+    """
+    import json
+
+    table_path = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
+                              "work", "looks-scenery", "slot2.json")
+    if not os.path.isfile(table_path):
+        return ([], "", None)
+    with open(table_path, encoding="utf-8") as handle:
+        packets = json.load(handle)["packets"]
+    out = os.path.join(where, "scenery.png")
+    code, output = run_app(python, app, ["--state", "2", "--scale", "1",
+                                         "--screenshot", out], env)
+    if code != 0 or not os.path.isfile(out):
+        return ([], "the screen did not draw: %s" % output.rstrip(), None)
+    _width, _height, channels, rows = picture(out)
+    bad, sampled = [], 0
+    for packet in packets:
+        xs = [one[0] for one in packet["points"]]
+        ys = [one[1] for one in packet["points"]]
+        left, top, bottom = min(xs), min(ys), max(ys)
+        if bottom - top <= 2 * SCENERY_INSET:
+            continue
+        colours = packet["colours"]
+        corners = packet["points"]
+        high = colours[min(range(len(corners)), key=lambda i: corners[i][1])]
+        low = colours[max(range(len(corners)), key=lambda i: corners[i][1])]
+        share = SCENERY_INSET / float(bottom - top) if packet["gradient"] else 0
+        want = [a + (b - a) * share for a, b in zip(high, low)]
+        x, y = left + SCENERY_INSET, top + SCENERY_INSET
+        got = rows[y][x * channels:x * channels + 3]
+        sampled += 1
+        gap = max(abs(a - b) for a, b in zip(want, got))
+        if gap > SCENERY_SLACK:
+            bad.append("the packet at (%d,%d)-(%d,%d) is %s in the table and "
+                       "the window paints %s there, %d apart"
+                       % (left, top, max(xs), bottom,
+                          tuple(int(v) for v in want), tuple(got), gap))
+    return (bad, "", sampled)
+
+
+def plant_scenery(python: str, env: dict, name: str, where: str, old: str,
+                  new: str) -> tuple:
+    """A defect in a copy of the tree, judged by `measure_scenery` alone.
+
+    The measured table comes along into the copy, like the camera does for the
+    stature controls: without it the window paints no furniture and the
+    judgement does not run -- a green that proved nothing.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, where, old, new)
+        if sandbox is None:
+            return (False, why)
+        tables = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
+                              "work", "looks-scenery")
+        shutil.copytree(tables, os.path.join(tmp, "work", "looks-scenery"))
+        shots = os.path.join(tmp, "shots")
+        os.makedirs(shots)
+        app = os.path.join(sandbox, "ui", "app.py")
+        bad, broke, sampled = measure_scenery(python, app, shots, env)
+        if broke or sampled is None:
+            return (False, "the planted tree for %s did not judge the "
+                           "furniture, so nothing was proved: %s"
+                    % (name, broke or "no table in the copy"))
+        if not bad:
+            return (False, "%s :: %s was broken (%s -> %s) and the furniture "
+                           "still passed" % (where, name, old.strip(),
+                                             new.strip()))
+        return (True, bad[0])
+
+
+SCENERY_BREAKS = (
+    ("the measured furniture reaching the window",
+     os.path.join("ui", "looks_set.py"),
+     "        self._paint_scenery(painter)\n",
+     "        pass\n"),
+)
+"""The window that measured its furniture and painted its own colours anyway
+-- the defect this judgement exists for."""
 
 
 # ---- the gate itself ------------------------------------------------------
@@ -1367,7 +1502,35 @@ def main(argv: list | None = None) -> int:
         print("  HEIG and BODY not judged: the window has no game camera "
               "(oracle.py --camera), and the v1 orbit carries no stature")
 
+    with tempfile.TemporaryDirectory() as tmp:
+        bad, broke, sampled = measure_scenery(python, APP, tmp, env)
+    if broke:
+        print("FAIL: %s" % broke)
+        return 1
+    if bad:
+        for line in bad:
+            print("FAIL: %s" % line)
+        return 1
+    judged_scenery = sampled is not None
+    if judged_scenery:
+        print("  the furniture the window paints is the measured table's: %d "
+              "packet(s) sampled, every one within %d"
+              % (sampled, SCENERY_SLACK))
+    else:
+        print("  the furniture not judged: no work/looks-scenery/ table "
+              "(oracle.py --scenery --write)")
+
     failed = 0
+    if judged_scenery:
+        for name, where, old, new in SCENERY_BREAKS:
+            red, why = plant_scenery(python, env, name, where, old, new)
+            if red:
+                print("negative: breaking %s reddens the furniture -- %s"
+                      % (name, why))
+                PLANTED.append(name)
+            else:
+                print("FAIL: %s" % why)
+                failed += 1
     if judged_stature:
         for name, where, old, new in STATURE_BREAKS:
             red, why = plant_stature(python, env, name, where, old, new)
@@ -1399,7 +1562,8 @@ def main(argv: list | None = None) -> int:
     print("looks_ui: %d of %d negative control(s) red, and the window drew "
           "every tuple it was asked for and answered every key with what the "
           "game shows" % (len(PLANTED), len(BREAKS) + len(KEY_BREAKS)
-                          + (len(STATURE_BREAKS) if judged_stature else 0)))
+                          + (len(STATURE_BREAKS) if judged_stature else 0)
+                          + (len(SCENERY_BREAKS) if judged_scenery else 0)))
     return 0
 
 

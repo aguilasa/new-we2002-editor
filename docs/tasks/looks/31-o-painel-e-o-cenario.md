@@ -132,24 +132,59 @@ desenhados; o título, a placa, a camisa, as setas e os textos não, e o motivo
   as que nada amostra: o boneco anda entre as duas capturas. O controle certo
   são duas corridas do mesmo comprimento a partir do state (armadilha 83).
 
+### Terceira passada, 2026-09-21
+
+- **A comparação fora da silhueta existe, e passa** (`confront.py --outside`,
+  novo): o chão de cada região no quadro do jogo e na janela em escala nativa,
+  com o jogo fotografado duas vezes de controle. **Painel a 4, ajuda a 3,
+  faixas a 11**, nos dois slots. É o critério 3, para as regiões medidas.
+- **Duas coisas a métrica ensinou.** "A cor mais comum" de um degradê é
+  decidida por empate e pelo pontilhado do console — a ajuda saiu (8,64,96) no
+  jogo e (0,40,64) aqui, com os dois degradês iguais —, e a mediana de cada
+  canal resolve (armadilha 85). E o painel ficava **24** longe porque o viewer
+  OpenGL limpava com uma cor só: agora ele pinta o degradê medido por
+  `QPainter` por trás do boneco.
+- **O `looks_ui` julga a mobília** contra a tabela medida, sem emulador: os 28
+  pacotes amostrados dentro do canto, todos a menos de 16, e o controle
+  plantado (a janela que não pinta o medido) fica vermelho.
+- **O alinhamento está medido, e não aplicado.** O objeto de texto dos valores
+  que o `SCREEN_PRINT` recebe é uma caixa de largura 296 a partir de x 176 —
+  borda direita em **472** —, e os valores desenhados pelo `SCREEN_GLYPH`
+  terminam contra ela (`23` começa em 448, `TYPE` em 425, `Unknown` em 392).
+  Levar isso à janela pede o `screen.json` com as caixas dos objetos, que é
+  mudar o gerador e rodar o `--screen --write` e o `--screen` de novo.
+- **Problema encontrado:** o degradê do painel quebrou o juiz de estatura do
+  `looks_ui`. O `panel_ink` tomava uma cor só como fundo do painel inteiro, e
+  num degradê isso faz de toda linha "tinta" — as quatro razões deram 1,000.
+  O fundo passou a ser tomado **por linha**, e os números voltaram aos de
+  antes (100×187, 88×165, 122×222, 123×188).
+- **Arquivos desta passada:** `tools/looks/confront.py` (`--outside`,
+  `ground_colour`); `tools/looks/ui/looks_set.py` (degradê pelo canto de cima
+  de fato, e o painel manda o degradê ao viewer); `tools/looks/ui/viewer.py`
+  (`clear_gradient`, pintado por `QPainter` com o boneco por cima);
+  `tools/looks/ui_check.py` (`measure_scenery`, `plant_scenery`,
+  `SCENERY_BREAKS`, e o `panel_ink` com fundo por linha); `docs/PLAN-LOOKS-PY.md`,
+  `docs/prompts/perfil-looks.md` (armadilha 85, duas linhas de gate e a do
+  `looks_ui`) e `CLAUDE.md`.
+
 ### O que falta para fechar esta task
 
-- **A barra de título, a placa (`GK`/`CB`), a caixa da camisa e as setas
-  `◀ ▶`.** Não são pacote na RAM, não são cópia de VRAM e não somem quando as
-  páginas conhecidas são estragadas. O que resta é ler o que o caminho de
-  impressão manda ao GPU comando a comando — parar em `layout.SCREEN_PRINT` e
-  seguir o que ele escreve, em vez de procurar o desenho já pronto.
-- **A comparação do nosso quadro com o do emulador fora da silhueta**, com o
-  controle do emulador contra ele mesmo — critério 3, intocado.
+- **A barra de título, a borda, a placa (`GK`/`CB`), a caixa da camisa e as
+  setas `◀ ▶`.** Não são pacote na RAM, não são cópia de VRAM e não somem
+  quando as páginas conhecidas são estragadas. O que resta é ler o que o
+  caminho de impressão manda ao GPU comando a comando — parar em
+  `layout.SCREEN_PRINT` e seguir o que ele escreve.
+- **A fonte desenhada do disco.** Ela está medida (página (704,0) do
+  `DAT2D.BIN`), mas a janela ainda escreve com uma fonte do Qt; o critério 2
+  pede o que é imagem lido do disco pela guarda.
+- **O alinhamento à direita**, medido acima e não aplicado.
 - **A câmera do close-up por linha**, que o contexto desta task traz da
-  LOOKS-TASK-22: a janela desenha sempre a câmera de corpo inteiro, e a
-  LOOKS-TASK-28 já mediu que o jogo aproxima na cabeça quando a linha sob o
-  cursor é de cabeça.
-- **O alinhamento à direita do valor dentro da caixa do cursor**, também da
-  LOOKS-TASK-22.
+  LOOKS-TASK-22: a janela desenha sempre a câmera de corpo inteiro.
 
 **Gates, na árvore commitada:** `selftest` 0 falhas, 90 de 90 controles
 vermelhos; `cli check` 10 de 10; `oracle.py --scenery` 0 problemas (28
 pacotes, iguais nas duas leituras); `oracle.py --repaint` 0 problemas;
 `oracle.py --pages` 0 problemas, com as duas corridas sem dano idênticas;
-`looks_ui` 10 de 10 controles vermelhos; `check_tasks` 138 ok.
+`confront.py --outside` 0 problemas nos dois slots; `looks_ui` 11 de 11
+controles vermelhos;
+`check_tasks` 138 ok.
