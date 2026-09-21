@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-37
 severity: low
 done_on: 2026-08-25
-done_commit: 602218d
+done_commit: f779b58
 ---
 
 # CORR-WTE-115: o `check_carregado.py` não tem par de teste

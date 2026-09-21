@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-15
 severity: low
 done_on: 2026-08-10
-done_commit: 602218d
+done_commit: 003bc9b
 ---
 
 # CORR-WTE-035: quatro das cinco decisões têm teste nomeado; a do `_url.txt` não

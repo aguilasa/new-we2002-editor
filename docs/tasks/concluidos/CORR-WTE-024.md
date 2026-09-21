@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-11
 severity: low
 done_on: 2026-08-09
-done_commit: 602218d
+done_commit: 323a5de
 ---
 
 # CORR-WTE-024: a WTE-TASK-11 delegou duas coisas e nenhum destinatário foi avisado

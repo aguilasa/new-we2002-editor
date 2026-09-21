@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-27
 severity: low
 done_on: 2026-08-20
-done_commit: 602218d
+done_commit: 7418586
 ---
 
 # CORR-WTE-069: `IndiceDoBlocoMl`, `ParDoIndiceLinearMl` e `PrimeiroBlocoLivreMl` sem teste

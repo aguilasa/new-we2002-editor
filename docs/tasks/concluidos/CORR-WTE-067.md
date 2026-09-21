@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-33
 severity: low
 done_on: 2026-08-19
-done_commit: 602218d
+done_commit: ccde354
 ---
 
 # CORR-WTE-067: o desbloqueio escrito na WTE-TASK-27 não corresponde à API entregue

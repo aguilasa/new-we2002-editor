@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-24
 severity: low
 done_on: 2026-08-11
-done_commit: 602218d
+done_commit: b57f17d
 ---
 
 # CORR-WTE-055: 322 é o total de imports, não o das duas BPLs — e o Log da própria task diz 267

@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-22
 severity: low
 done_on: 2026-08-11
-done_commit: 602218d
+done_commit: 1e19f1a
 ---
 
 # CORR-WTE-053: 11.952 bytes numa faixa contra 11.955 em nove, e nenhum dos dois diz de qual imagem fala

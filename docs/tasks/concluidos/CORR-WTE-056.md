@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-24
 severity: low
 done_on: 2026-08-11
-done_commit: 602218d
+done_commit: ce86fac
 ---
 
 # CORR-WTE-056: o procedimento para refazer o projeto Ghidra cita um arquivo que não existe

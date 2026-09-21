@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-39
 severity: low
 done_on: 2026-08-26
-done_commit: 602218d
+done_commit: ff6052f
 ---
 
 # CORR-WTE-118: a instrução de renomear ficou de pé depois de revogada

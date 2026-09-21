@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-37
 severity: medium
 done_on: 2026-08-25
-done_commit: 602218d
+done_commit: e247f8f
 ---
 
 # CORR-WTE-114: as três candidatas da UI não chegaram ao `divergencias.md`

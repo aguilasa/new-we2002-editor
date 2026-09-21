@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-11
 severity: high
 done_on: 2026-08-09
-done_commit: 602218d
+done_commit: b60d955
 ---
 
 # CORR-WTE-023: os três números do critério de compilação não reproduzem

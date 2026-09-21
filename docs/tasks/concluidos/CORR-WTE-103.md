@@ -8,7 +8,7 @@ depends_on: []
 origin: WTE-TASK-31
 severity: low
 done_on: 2026-08-24
-done_commit: 602218d
+done_commit: c3ccd5d
 ---
 
 # CORR-WTE-103: linha em branco que só existe quando há o que listar
