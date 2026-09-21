@@ -2,6 +2,7 @@
 cycle: looks
 prefix: LOOKS
 profile: /docs/prompts/perfil-looks.md
+order: [LOOKS-TASK-01, LOOKS-TASK-02, LOOKS-TASK-03, LOOKS-TASK-04, LOOKS-TASK-05, LOOKS-TASK-06, LOOKS-TASK-07, LOOKS-TASK-08, LOOKS-TASK-09, LOOKS-TASK-10, LOOKS-TASK-11, LOOKS-TASK-12, LOOKS-TASK-13, LOOKS-TASK-14, LOOKS-TASK-15, LOOKS-TASK-16, LOOKS-TASK-17, LOOKS-TASK-18, LOOKS-TASK-19, LOOKS-TASK-20, LOOKS-TASK-21, LOOKS-TASK-22, LOOKS-TASK-23, LOOKS-TASK-24, LOOKS-TASK-25, LOOKS-TASK-26, LOOKS-TASK-27, LOOKS-TASK-28, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40, LOOKS-TASK-32, LOOKS-TASK-33, LOOKS-TASK-34, LOOKS-TASK-35]
 ---
 # Progresso — visualizador 3D da aparência do jogador
 
@@ -78,15 +79,15 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose | 9 | investigação | LOOKS-TASK-22, LOOKS-TASK-28 | done | 2026-09-18 | 2026-09-19 |
 | [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | implementação | LOOKS-TASK-20 | done | 2026-09-20 | 2026-09-20 |
 | [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | implementação | LOOKS-TASK-22, LOOKS-TASK-28 | done | 2026-09-21 | 2026-09-21 |
-| [LOOKS-TASK-32](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) | Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço | 11 | investigação | LOOKS-TASK-26 | pending | — | — |
-| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | implementação | LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40 | pending | — | — |
-| [LOOKS-TASK-34](/docs/tasks/looks/34-o-goleiro-andando.md) | O goleiro — figura 1 montada e andando na tela, conferida no slot 1 | 11 | verificação | LOOKS-TASK-33 | pending | — | — |
-| [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | documentação | LOOKS-TASK-23, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-34, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40 | pending | — | — |
 | [LOOKS-TASK-36](/docs/tasks/looks/36-os-sprites-estaticos.md) | Os sprites estáticos da tela — placa, caixas, ícone, barra, título e setas, lidos do disco | 10 | implementação | LOOKS-TASK-31 | pending | — | — |
 | [LOOKS-TASK-37](/docs/tasks/looks/37-a-tabela-de-glifos.md) | A tabela de glifos — o texto da tela desenhado com a fonte do `EDT_2D.BIN` | 10 | implementação | LOOKS-TASK-31 | pending | — | — |
 | [LOOKS-TASK-38](/docs/tasks/looks/38-o-alinhamento-dos-valores.md) | O alinhamento dos valores — a caixa do objeto de texto no `screen.json`, e o valor à direita | 10 | implementação | LOOKS-TASK-37 | pending | — | — |
 | [LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md) | O texto da ajuda — quem escreve a página (832,256) na VRAM, e de onde | 10 | investigação | LOOKS-TASK-37 | pending | — | — |
 | [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md) | A câmera do close-up — o painel aproxima na cabeça quando a linha é de cabeça | 10 | implementação | LOOKS-TASK-28 | pending | — | — |
+| [LOOKS-TASK-32](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) | Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço | 11 | investigação | LOOKS-TASK-26 | pending | — | — |
+| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | implementação | LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40 | pending | — | — |
+| [LOOKS-TASK-34](/docs/tasks/looks/34-o-goleiro-andando.md) | O goleiro — figura 1 montada e andando na tela, conferida no slot 1 | 11 | verificação | LOOKS-TASK-33 | pending | — | — |
+| [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | documentação | LOOKS-TASK-23, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-34, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40 | pending | — | — |
 <!-- rite:end -->
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
