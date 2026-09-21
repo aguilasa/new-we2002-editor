@@ -3,8 +3,12 @@ id: CORR-LOOKS-036
 title: "Correção: o critério da LOOKS-TASK-15 conta 11.789 linhas e a árvore dela tem 11.831"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-15
+severity: low
+done_on: 2026-09-16
+done_commit: 98deb91
 ---
 
 # CORR-LOOKS-036: a varredura da regra 1 foi anotada antes do fim da task

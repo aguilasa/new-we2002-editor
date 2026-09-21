@@ -3,8 +3,12 @@ id: CORR-PES2-017
 title: "Correção: o perfil do ciclo não tem seção de Fase 7, e a Fase 7 já teve quatro tasks executadas"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-29
+severity: medium
+done_on: 2026-09-01
+done_commit: 3e2ccb6
 ---
 
 # CORR-PES2-017: A Fase 7 não tem verificações escritas no perfil
@@ -20,7 +24,7 @@ A Fase 7 entrou no quadro em 2026-09-01 com seis tasks (26 a 31), e desde
 então **quatro delas foram executadas** — 26, 27, 28 e 29 — e **três foram
 revisadas** sem que o revisor tivesse um checklist escrito para a fase.
 
-O [`docs/prompts/02-revisar.md`](/docs/prompts/02-revisar.md) manda,
+O [`docs/prompts/02-revisar.md`](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/02-revisar.md) manda,
 literalmente: *"Se o perfil não tiver entrada para essa fase, **diga isso na
 saída** em vez de improvisar — fase sem verificação escrita é achado, e vira
 CORR."* Foi o que aconteceu nesta revisão.

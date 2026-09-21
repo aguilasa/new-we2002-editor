@@ -4,9 +4,13 @@ title: "Decidir o mapeamento de tipo C++ → Pascal"
 type: decisão
 category: dados
 phase: 3
-depends_on: ["WTE-TASK-02"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 3 item 2, §8.6 e §8.11"
-status: concluído
+depends_on: [WTE-TASK-02]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-09
+review_commit: null
+done_on: 2026-08-09
+done_commit: f50d263
 ---
 
 # WTE-TASK-15: Mapeamento de tipo
@@ -94,7 +98,7 @@ Como o gerador implementa. Aqui se decide **o quê**, a WTE-TASK-17 faz o **como
 
 - **Resumo do que foi feito:**
 
-  [`../../wte/re/tipos.md`](../../../wte/re/tipos.md) fechado, e a tabela da
+  [`../../wte/re/tipos.md`](/wte/re/tipos.md) fechado, e a tabela da
   Fase 3 item 2 do plano ganhou as duas linhas que faltavam mais o ponteiro
   para ele. A tabela não saiu do enunciado: saiu do **inventário do que a
   entrada real usa** — os cinco `.cpp` (`Database`, `Player`, `CdImage`,

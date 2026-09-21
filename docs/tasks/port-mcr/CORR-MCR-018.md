@@ -3,8 +3,12 @@ id: CORR-MCR-018
 title: "Correção: quem arrasta é quem corrige a prova — a conversão de volta do arraste é julgada pela própria aritmética que ela usa"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-12
+severity: high
+done_on: 2026-09-08
+done_commit: 40b489d
 ---
 
 # CORR-MCR-018: a armadilha 7, no sentido que só existe desde esta task, não tem juiz

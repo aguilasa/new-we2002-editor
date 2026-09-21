@@ -4,9 +4,13 @@ title: "tools/port_database_pas.py — transpilar o we2002_core"
 type: ferramenta
 category: dados
 phase: 3
-depends_on: ["WTE-TASK-15", "WTE-TASK-16"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.5 e Fase 3 item 1"
-status: concluído
+depends_on: [WTE-TASK-15, WTE-TASK-16]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.5"
+reviewed_on: 2026-08-10
+review_commit: null
+done_on: 2026-08-09
+done_commit: 8ae9170
 ---
 
 # WTE-TASK-17: Transpilador da camada de dados
@@ -30,7 +34,7 @@ src/core/include/we2002/Types.hpp   147
 > **Medido na execução: são 2.504 linhas, não ~2.150.** A lista acima veio do
 > `tipos.md` e omite os cabeçalhos que declaram os registros — em especial o
 > `Team.hpp`, com `Team`, `MlTeam` e `Formation`. O inventário real e a razão de
-> cada exclusão estão em [`../../wte/re/transpilador.md`](../../../wte/re/transpilador.md).
+> cada exclusão estão em [`../../wte/re/transpilador.md`](/wte/re/transpilador.md).
 > O `tipos.md` e a §4.5 do plano **já foram reconciliados**, em 2026-08-10, pela
 > [CORR-WTE-034](/docs/tasks/concluidos/CORR-WTE-034.md) — não há trabalho pendente aqui; o
 > "~2.150" e a lista de cinco arquivos ficam como texto original da task.

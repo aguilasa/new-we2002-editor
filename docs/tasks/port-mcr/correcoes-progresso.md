@@ -1,6 +1,8 @@
 # Correções — port em Python do editor de `.mcr` do WE2002
 
-Correções abertas pelo `/revisar` sobre as tasks deste ciclo. O andamento das
+Correções abertas pelo `/rite:review` (até a migração para o Rite, pelo
+`/revisar` — [prompt da época](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/02-revisar.md)) sobre as
+tasks deste ciclo. O andamento das
 **tarefas** fica em [`progresso.md`](/docs/tasks/port-mcr/progresso.md).
 
 **O prefixo deste pool é `CORR-MCR-`**, com numeração contínua a partir de
@@ -12,41 +14,44 @@ ciclo arquivado, o dele em
 
 ## Resumo
 
-| ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
-| -- | -------------- | ------ | ----------- | ------ | ------------ |
-| [CORR-MCR-001](/docs/tasks/port-mcr/CORR-MCR-001.md) | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | `.claude/rules/tasks.md` afirma que os prompts apontam para `docs/tasks/progresso.md`, o que deixou de ser verdade em 2026-09-07 | Alta | [x] concluída | 2026-09-07 |
-| [CORR-MCR-002](/docs/tasks/port-mcr/CORR-MCR-002.md) | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | a verificação de Fase 0 do `perfil-mcr.md` pede um `grep` de escopo que não tem como sair vazio | Alta | [x] concluída | 2026-09-07 |
-| [CORR-MCR-003](/docs/tasks/port-mcr/CORR-MCR-003.md) | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | o link do `progresso.md` no `correcoes-progresso.template.md` aponta para o ciclo raso, contra a própria frase ao lado | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-004](/docs/tasks/port-mcr/CORR-MCR-004.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | o inventário atribui todo o cache do WebView2 a `bin/`/`obj/`, e 164 arquivos dele são a linha `packages/` | Alta | [x] concluída | 2026-09-07 |
-| [CORR-MCR-005](/docs/tasks/port-mcr/CORR-MCR-005.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | os três `PlayerStatsSkills.dll` são declarados fora da conta e estão dentro da linha "o fonte que importa" | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-006](/docs/tasks/port-mcr/CORR-MCR-006.md) | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | a citação da fixture compartilhada aponta a linha da constante cravada e atribui `WTE_MCR_ENTRADA` a um arquivo que não a tem | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | o `card.py` está em português e a regra de idioma do código passou a ser en-US | Média | [x] concluída | 2026-09-07 |
-| [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md) | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | destino faltando mata o `layout.py` no import, e a tabela de controles não diz que ali o `--self-check` não roda | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | a tabela dos cinco controles descreve o defeito em prosa, e duas das cinco contagens de falha não reproduzem | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-010](/docs/tasks/port-mcr/CORR-MCR-010.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | o plano diz que **um** nome enche os dez bytes e são dois: os slots 5 e 20 | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | a tabela de controles voltou à prosa, e a linha que ela descreve aparece duas vezes no arquivo | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-012](/docs/tasks/port-mcr/CORR-MCR-012.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | o check chamado "e nada mais" só afirma que algum byte mudou, e a exclusividade do caminho do dorsal fica sem guarda | Alta | [x] concluída | 2026-09-08 |
-| [CORR-MCR-013](/docs/tasks/port-mcr/CORR-MCR-013.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | a §3.2 do plano ainda põe `Card` como dataclass do `model.py`, não cita o `Save`, e a task atribui a frase à §5.1 | Baixa | [x] concluída | 2026-09-08 |
-| [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | a varredura da Regra 1 e a de idioma usam `os.listdir` e param no topo: a `tools/mcr/ui/` da MCR-TASK-11 fica invisível para as duas | Alta | [x] concluída | 2026-09-08 |
-| [CORR-MCR-015](/docs/tasks/port-mcr/CORR-MCR-015.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | o bloco do `mcr_ui` entrou entre o comentário do `pes2_boot` e o `add_test` dele, e o `pes2_boot` ficou sem comentário | Baixa | [x] concluída | 2026-09-08 |
-| [CORR-MCR-016](/docs/tasks/port-mcr/CORR-MCR-016.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | "os três últimos nasceram na MCR-TASK-10" aponta `cli`/`selftest`/`ui_check`, e os três são `harness`/`controls`/`ui_check` | Baixa | [x] concluída | 2026-09-08 |
-| [CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | o perfil promete 15 controles vermelhos e o `mcr_selftest` exige 16, e a frase só descreve um dos dois tipos | Alta | [x] concluída | 2026-09-08 |
-| [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o valor esperado do arraste vem da própria conversão sob teste: parar de dividir por `X_SCALE` deixa os dois gates verdes | Alta | [x] concluída | 2026-09-08 |
-| [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da 14 ficou sem a evidência que cita | Baixa | [x] concluída | 2026-09-08 |
-| [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [x] concluída | 2026-09-08 |
-| [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | a tabela "Estado medido" ficou em 16/16 controles e a ferramenta imprime 20 de 20 — a CORR-MCR-017 tirou o número do perfil e não daqui | Alta | [x] concluída | 2026-09-08 |
-| [CORR-MCR-022](/docs/tasks/port-mcr/CORR-MCR-022.md) | [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | a Fase 5 nasceu sem entrada em "Verificações específicas por fase", que é onde o `/revisar` procura o que perguntar de uma fase | Baixa | [x] concluída | 2026-09-09 |
-| [CORR-MCR-023](/docs/tasks/port-mcr/CORR-MCR-023.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o critério conta quatro cartões de PES2 e cinco recusas, e a ferramenta mede cinco e seis | Alta | [x] concluída | 2026-09-09 |
-| [CORR-MCR-024](/docs/tasks/port-mcr/CORR-MCR-024.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o `mcr_container` entrou e a §4.4 do plano continua com três alvos, e o perfil com `1 passed, 2 skipped` | Alta | [x] concluída | 2026-09-09 |
-| [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo | Alta | [x] concluída | 2026-09-09 |
-| [CORR-MCR-026](/docs/tasks/port-mcr/CORR-MCR-026.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | a regra da soma é creditada a sete cartões independentes e dois de terceiros, e a medição dá seis padrões distintos e um de terceiro | Alta | [x] concluída | 2026-09-10 |
-| [CORR-MCR-027](/docs/tasks/port-mcr/CORR-MCR-027.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | "as faixas válidas começam todas em `0x02044`" é falso como escrito, e o fim da segunda faixa está medido em `0x04e30` | Baixa | [x] concluída | 2026-09-10 |
-| [CORR-MCR-028](/docs/tasks/port-mcr/CORR-MCR-028.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | o mapa diz que três imagens de `roms/` declaram `SLPM-87056`, e são cinco | Baixa | [x] concluída | 2026-09-10 |
-| [CORR-MCR-029](/docs/tasks/port-mcr/CORR-MCR-029.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | "a diferença entre `c-opcao` e `c-opcao2` é a câmera e nada mais" omite os 15 bytes de `0x02035` | Baixa | [x] concluída | 2026-09-10 |
-| [CORR-MCR-030](/docs/tasks/port-mcr/CORR-MCR-030.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | a Fase 5 pede captura no Log, e as dez sondas do mapa só têm testemunho | Baixa | [x] concluída | 2026-09-10 |
+<!-- rite:begin fixes -->
+| ID | Title | Origin | Severity | Status | Done on |
+| --- | --- | --- | --- | --- | --- |
+| [CORR-MCR-001](/docs/tasks/port-mcr/CORR-MCR-001.md) | Correção: `.claude/rules/tasks.md` ainda afirma que os prompts apontam para `docs/tasks/progresso.md` | MCR-TASK-01 | high | done | 2026-09-07 |
+| [CORR-MCR-002](/docs/tasks/port-mcr/CORR-MCR-002.md) | Correção: a verificação de Fase 0 do perfil pede um `grep` que não tem como sair vazio | MCR-TASK-01 | high | done | 2026-09-07 |
+| [CORR-MCR-003](/docs/tasks/port-mcr/CORR-MCR-003.md) | Correção: o link do `progresso.md` no `correcoes-progresso.template.md` não leva o segmento do ciclo | MCR-TASK-01 | low | done | 2026-09-07 |
+| [CORR-MCR-004](/docs/tasks/port-mcr/CORR-MCR-004.md) | Correção: o cache do WebView2 não mora todo em `bin/`/`obj/` — um terço dele é a linha `packages/` | MCR-TASK-02 | high | done | 2026-09-07 |
+| [CORR-MCR-005](/docs/tasks/port-mcr/CORR-MCR-005.md) | Correção: os três `PlayerStatsSkills.dll` estão dentro do resto, não fora da conta | MCR-TASK-02 | low | done | 2026-09-07 |
+| [CORR-MCR-006](/docs/tasks/port-mcr/CORR-MCR-006.md) | Correção: a citação da fixture compartilhada aponta para a linha errada, e para um arquivo que não tem a variável | MCR-TASK-03 | low | done | 2026-09-07 |
+| [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) | Correção: retraduzir o `card.py` para en-US e fechar a dívida aberta da §3.5 | MCR-TASK-04 | medium | done | 2026-09-07 |
+| [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md) | Correção: destino faltando mata o `layout.py` no import, e o `--self-check` não chega a rodar | MCR-TASK-05 | low | done | 2026-09-07 |
+| [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | Correção: a tabela de controles da MCR-TASK-06 descreve o defeito em prosa, e duas das cinco contagens não reproduzem | MCR-TASK-06 | low | done | 2026-09-07 |
+| [CORR-MCR-010](/docs/tasks/port-mcr/CORR-MCR-010.md) | Correção: são dois os nomes que enchem os dez bytes, não um — o slot 5 também | MCR-TASK-07 | low | done | 2026-09-07 |
+| [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md) | Correção: a tabela de controles da MCR-TASK-07 voltou à prosa, e a linha ambígua custa duas tentativas | MCR-TASK-07 | low | done | 2026-09-07 |
+| [CORR-MCR-012](/docs/tasks/port-mcr/CORR-MCR-012.md) | Correção: o check chamado "e nada mais" só afirma "algo mudou", e a exclusividade do dorsal fica sem guarda | MCR-TASK-09 | high | done | 2026-09-08 |
+| [CORR-MCR-013](/docs/tasks/port-mcr/CORR-MCR-013.md) | Correção: a §3.2 do plano ainda põe `Card` como dataclass do `model.py`, e a task cita a §5.1 no lugar dela | MCR-TASK-09 | low | done | 2026-09-08 |
+| [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md) | Correção: as duas varreduras de desenho param no topo, e a `tools/mcr/ui/` que a MCR-TASK-11 vai criar fica invisível para as duas | MCR-TASK-10 | high | done | 2026-09-08 |
+| [CORR-MCR-015](/docs/tasks/port-mcr/CORR-MCR-015.md) | Correção: o bloco do `mcr_ui` entrou entre o comentário do `pes2_boot` e o teste dele | MCR-TASK-10 | low | done | 2026-09-08 |
+| [CORR-MCR-016](/docs/tasks/port-mcr/CORR-MCR-016.md) | Correção: "os três últimos nasceram na MCR-TASK-10" não são os três últimos da lista | MCR-TASK-10 | low | done | 2026-09-08 |
+| [CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) | Correção: o perfil promete 15 controles vermelhos e o `mcr_selftest` exige 16, do décimo sexto o perfil não conhece nem a forma | MCR-TASK-11 | high | done | 2026-09-08 |
+| [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) | Correção: quem arrasta é quem corrige a prova — a conversão de volta do arraste é julgada pela própria aritmética que ela usa | MCR-TASK-12 | high | done | 2026-09-08 |
+| [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | Correção: o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da MCR-TASK-14 ficou apoiada num fato que deixou de valer | MCR-TASK-12 | low | done | 2026-09-08 |
+| [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | Correção: um cobrador ou capitão fora do onze aparece na tela como 10, calado — o núcleo preserva o byte e a janela mostra outro | MCR-TASK-13 | low | done | 2026-09-08 |
+| [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) | Correção: a tabela "Estado medido" do ciclo ficou em 16/16 controles enquanto a ferramenta imprime 20 de 20 — a task de fechamento não a reconciliou | MCR-TASK-14 | high | done | 2026-09-08 |
+| [CORR-MCR-022](/docs/tasks/port-mcr/CORR-MCR-022.md) | Correção: a Fase 5 nasceu sem entrada em "Verificações específicas por fase", que é o único lugar onde o `/revisar` procura o que perguntar de uma fase | MCR-TASK-15 | low | done | 2026-09-09 |
+| [CORR-MCR-023](/docs/tasks/port-mcr/CORR-MCR-023.md) | Correção: a MCR-TASK-16 conta quatro cartões de PES2 e cinco recusas, e são cinco e seis | MCR-TASK-16 | high | done | 2026-09-09 |
+| [CORR-MCR-024](/docs/tasks/port-mcr/CORR-MCR-024.md) | Correção: o `mcr_container` entrou e o plano continua com três alvos de `ctest`, e o perfil com `1 passed, 2 skipped` | MCR-TASK-16 | high | done | 2026-09-09 |
+| [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md) | Correção: o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo | MCR-TASK-16 | high | done | 2026-09-09 |
+| [CORR-MCR-026](/docs/tasks/port-mcr/CORR-MCR-026.md) | Correção: a regra da soma é creditada a sete cartões independentes e dois de terceiros, e a medição dá seis padrões distintos e um de terceiro | MCR-TASK-17 | high | done | 2026-09-10 |
+| [CORR-MCR-027](/docs/tasks/port-mcr/CORR-MCR-027.md) | Correção: "as faixas válidas começam todas em 0x02044" é falso como escrito, e o que se mediu é outra coisa | MCR-TASK-17 | low | done | 2026-09-10 |
+| [CORR-MCR-028](/docs/tasks/port-mcr/CORR-MCR-028.md) | Correção: o mapa diz que três imagens de roms/ declaram SLPM-87056, e são cinco | MCR-TASK-17 | low | done | 2026-09-10 |
+| [CORR-MCR-029](/docs/tasks/port-mcr/CORR-MCR-029.md) | Correção: "a diferença entre c-opcao e c-opcao2 é a câmera e nada mais" omite os 15 bytes de alta entropia | MCR-TASK-17 | low | done | 2026-09-10 |
+| [CORR-MCR-030](/docs/tasks/port-mcr/CORR-MCR-030.md) | Correção: a Fase 5 pede captura de tela no Log, e as dez sondas da MCR-TASK-17 só têm testemunho | MCR-TASK-17 | low | done | 2026-09-10 |
+<!-- rite:end -->
 
-**Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
-**Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
+edite dentro dela. **Status:** `pending` · `in-progress` · `done` · `stale`. **Severidade:**
+`critical` · `high` · `medium` · `low`.
 
 ---
 

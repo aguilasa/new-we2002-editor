@@ -4,9 +4,13 @@ title: "Handlers de carga — abrir a imagem e popular as telas"
 type: implementação
 category: comportamento
 phase: 4
-depends_on: ["WTE-TASK-22", "WTE-TASK-23", "WTE-TASK-24"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 4"
-status: concluído
+depends_on: [WTE-TASK-22, WTE-TASK-23, WTE-TASK-24]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-11
+review_commit: null
+done_on: 2026-08-11
+done_commit: cc04442
 ---
 
 # WTE-TASK-25: Handlers de carga
@@ -70,7 +74,7 @@ carga.
 **O item 3 está errado, e a medição é que diz.** Abrir a imagem **grava**:
 `boton_dialogo_weClick` injeta sete setores vindos de `dat.bin[0x20000..]` a
 partir de `0x2e08`, com salto de `0x130` entre um e o seguinte
-([`assets.md` §8.2](../../../wte/re/assets.md)). São 11.952 bytes em 7 faixas na
+([`assets.md` §8.2](/wte/re/assets.md)). São 11.952 bytes em 7 faixas na
 ROM japonesa, e são exatamente as sete primeiras `conhecida:` que a
 [WTE-TASK-22](/docs/tasks/concluidos/22-harness-golden.md) declarou no roteiro do gate.
 
@@ -182,7 +186,7 @@ e não simula comportamento.
       antigo: os `dorsal1..23` mostram o byte cru onde o original mostra
       byte + 1, e o `iguala_nombres` não é desabilitado no time-modelo. Os dois
       estão medidos em
-      [`wte/re/spec/MainForm.lista_equiposChange.md`](../../../wte/re/spec/MainForm.lista_equiposChange.md)
+      [`wte/re/spec/MainForm.lista_equiposChange.md`](/wte/re/spec/MainForm.lista_equiposChange.md)
       e **pedem correção própria** — não são deste critério, que é de
       conferência
 - [x] Medido **o que** o grupo escreve na imagem, e que não escreve mais que
@@ -282,11 +286,11 @@ e não simula comportamento.
   declaração no `.h`, e o C++Builder não as mantém em sincronia. O mapa certo
   vem da *published field table* que o VMT aponta em **-56**, irmã da published
   method table da WTE-TASK-04 e viva pelo mesmo motivo: sem ela o formulário
-  não carrega. Está em [`dump_campos.py`](../../../wte/tools/dump_campos.py) →
+  não carrega. Está em [`dump_campos.py`](/wte/tools/dump_campos.py) →
   `wte/re/campos.tsv`, e é o que torna legível todo o resto da fase 4.
 
   **Os 18 não são todos triviais, e a medição é que diz.**
-  [`dump_arranque.py`](../../../wte/tools/dump_arranque.py) casa o corpo de cada um
+  [`dump_arranque.py`](/wte/tools/dump_arranque.py) casa o corpo de cada um
   contra um padrão de bytes e os separa em quatro formas: **11** são uma
   chamada só a `TControl::SetColor` sobre a própria instância, **1** é um `ret`
   vazio (`ficha_about`), **1** é `BitBtn2.SetFocus` (`ficha_enlaza.FormShow`,
@@ -381,7 +385,7 @@ e não simula comportamento.
   diz *onde*, o core diz *o que aquilo significa*.
 
   Isso virou guarda de build, não nota de rodapé: o
-  [`check_barras.py`](../../../wte/tools/check_barras.py) decodifica as constantes
+  [`check_barras.py`](/wte/tools/check_barras.py) decodifica as constantes
   do **próprio corpo do handler** e reprova se a conta deixar de cair na
   `OFS_TEAM_BARS`. Ele não abre imagem — a parte que depende de `roms/` fica na
   spec, com o comando; a parte que dá para conferir a cada build fica no
@@ -452,7 +456,7 @@ e não simula comportamento.
 
   **A tabela de auxiliares escrita à mão estava curta, e essa é a lição da
   passagem.** A spec do `lista_equiposChange` listava cinco endereços. Medido
-  pelo [`dump_auxiliares.py`](../../../wte/tools/dump_auxiliares.py), que percorre
+  pelo [`dump_auxiliares.py`](/wte/tools/dump_auxiliares.py), que percorre
   o corpo instrução a instrução e separa chamada interna de importada pelo
   `jmp DWORD PTR ds:<IAT>`, o handler chama **treze**. Parte da diferença é
   rotina de biblioteca que uma lista à mão descartaria de propósito — mas
@@ -488,7 +492,7 @@ e não simula comportamento.
   `0x0040b188` ficou inteira: apaga a camisa marcada, acha a nova por
   `FindComponent('dorsal' + N)` e a destaca, com os nomes de propriedade vindos
   dos símbolos importados do `vcl60.bpl` em vez de inferência. É a outra
-  metade da história da [`crash-causa.md`](../../../wte/re/crash-causa.md) — a
+  metade da história da [`crash-causa.md`](/wte/re/crash-causa.md) — a
   rotina que grava o ponteiro `0x004335e4` sem conferir.
 
 - **Por que o Pascal continua não escrito:**
@@ -575,7 +579,7 @@ e não simula comportamento.
   Win32 não dispara `CBN_SELCHANGE` em `SetCurSel`; o Qt **dispara**
   `currentIndexChanged` em `setCurrentIndex`, e o `newWe2002` precisou de
   `QSignalBlocker` nas cargas de time por causa disso. Medido em gtk2 com o
-  [`test_lcl_combo.pas`](../../../wte/tests/test_lcl_combo.pas): **nenhum dos
+  [`test_lcl_combo.pas`](/wte/tests/test_lcl_combo.pas): **nenhum dos
   cinco casos dispara** — nem `ItemIndex :=`, nem reatribuir o mesmo índice,
   nem `Items.Clear` com item selecionado. A LCL se comporta como o original, e
   os corpos da fase 4 ficam iguais ao que a spec descreve, sem bloqueio de
@@ -891,7 +895,7 @@ e não simula comportamento.
 
   A spec da terceira passagem trazia `<controle>` e `<lista>` no pseudocódigo,
   porque os deslocamentos não tinham sido cruzados com o
-  [`campos.tsv`](../../../wte/re/campos.tsv). Cruzados agora: `help_team`,
+  [`campos.tsv`](/wte/re/campos.tsv). Cruzados agora: `help_team`,
   `lista_jugadores_2`, `mostrar_jugador_2`, `mostrar_estrategia_2` e `pabajo`.
 
   **E veio uma correção junto:** o teste dos cinco botões de troca é contra
@@ -907,7 +911,7 @@ e não simula comportamento.
 - **O que NÃO foi verificado, e como verificar:**
 
   O veredito fica `aberto` porque o
-  [`compara_tela.sh`](../../../wte/tools/compara_tela.sh) dirige hoje só o combo
+  [`compara_tela.sh`](/wte/tools/compara_tela.sh) dirige hoje só o combo
   titular. Para julgar este handler ele precisa dirigir também o
   `lista_equipos_2` e recortar a metade de baixo da janela. Enquanto isso não
   existir, o corpo está escrito a partir de spec medida e **não conferido
@@ -1038,8 +1042,8 @@ e não simula comportamento.
 
 A reconferência de UI com a lógica ligada comparou os dois lados no **mesmo
 estado**, e dois achados são deste grupo de carga. Os dois estão medidos em
-[`wte/re/visual.md`](../../../wte/re/visual.md) (achados 9 e 10), com captura em
-[`wte/re/visual/carregado/`](../../../wte/re/visual/carregado).
+[`wte/re/visual.md`](/wte/re/visual.md) (achados 9 e 10), com captura em
+[`wte/re/visual/carregado/`](/wte/re/visual/carregado).
 
 **1. O time-modelo de Master League mostra três campos vazios.** Índice 95
 (`95 Master L.`):

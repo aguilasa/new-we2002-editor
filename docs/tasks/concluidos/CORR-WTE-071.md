@@ -3,15 +3,19 @@ id: CORR-WTE-071
 title: "Correção: o mapa do .mcr diz 16 destinos, e a tabela dele tem 17"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-28
+severity: high
+done_on: 2026-08-20
+done_commit: e99f582
 ---
 
 # CORR-WTE-071: o mapa do `.mcr` diz 16 destinos, e a tabela dele tem 17
 
 ## Problema identificado
 
-O `LAYOUT` do [`wte/tools/dump_mcr.py`](../../../wte/tools/dump_mcr.py) tem **17**
+O `LAYOUT` do [`wte/tools/dump_mcr.py`](/wte/tools/dump_mcr.py) tem **17**
 destinos de escrita. Cinco lugares afirmam **16** — e um deles é o título de
 seção do markdown gerado, logo acima da tabela que lista os 17.
 

@@ -4,9 +4,13 @@ title: "Contador de slots livres de Master League"
 type: implementação
 category: features
 phase: 5
-depends_on: ["WTE-TASK-20"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §5.4"
-status: concluído
+depends_on: [WTE-TASK-20]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#5.4"
+reviewed_on: 2026-08-19
+review_commit: null
+done_on: 2026-08-19
+done_commit: 3bf2a65
 ---
 
 # WTE-TASK-33: Slots livres de ML
@@ -128,7 +132,7 @@ com eles **nenhum roteiro do gate declara faixa `conhecida:`**.
 
 ### E a causa do travamento da ROM europeia, que estava em aberto
 
-O [`crash-causa.md`](../../../wte/re/crash-causa.md) mediu `0x004335e4`,
+O [`crash-causa.md`](/wte/re/crash-causa.md) mediu `0x004335e4`,
 `0x00433624` e `0x00433628` mudando de `0x0` para `0x00010001` com a europeia e
 não com a japonesa, e encerrou dizendo que nomear a instrução exigiria um
 watchpoint de hardware que esta máquina não permite. **A instrução é o
@@ -140,11 +144,11 @@ que esta task calcula e o mesmo que o rótulo mostra.
 **Os índices alcançados são oito, e os quatro DWORDs previstos são os quatro
 medidos.** A europeia alcança 480, 481, 488, 489 e 512..515 — `0x004335e4`,
 `0x004335f4`, `0x00433624` e `0x00433628` —, e a lista sai medida de
-[`ml-slots-fora.tsv`](../../../wte/re/ml-slots-fora.tsv), não escrita à mão
+[`ml-slots-fora.tsv`](/wte/re/ml-slots-fora.tsv), não escrita à mão
 ([CORR-WTE-066](/docs/tasks/concluidos/CORR-WTE-066.md)). A transcrição do dump de
 2026-08-11 trazia três, e foi este modelo que apontou a quarta: refeita a
 sessão em **2026-08-20**, o `0x004335f4` muda no mesmo instante das outras
-([`crash-causa.md`](../../../wte/re/crash-causa.md)). O índice 462, o do próprio
+([`crash-causa.md`](/wte/re/crash-causa.md)). O índice 462, o do próprio
 contador, é alcançável em tese e **não** é alcançado por nenhuma das duas.
 
 ## Log de Execução
@@ -197,7 +201,7 @@ contador, é alcançável em tese e **não** é alcançado por nenhuma das duas.
     número plausível sem nada que o sustente. **A margem é medida, não
     afirmada:** o maior `b0` é **116** na japonesa e **111** na europeia — 4 de
     folga até 120 —, e sai da coluna `max_b0` de
-    [`ml-slots-medido.tsv`](../../../wte/re/ml-slots-medido.tsv), escrita pelo
+    [`ml-slots-medido.tsv`](/wte/re/ml-slots-medido.tsv), escrita pelo
     `conta_ml.py --medir`. Enquanto a margem foi lida da lista de pares **fora
     do vetor**, este texto disse `43`, que é o maior `b0` daquele recorte e não
     do conjunto — número de recorte lido como máximo global

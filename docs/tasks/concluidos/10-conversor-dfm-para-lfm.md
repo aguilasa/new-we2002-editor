@@ -4,9 +4,13 @@ title: "tools/dfm2lfm.py — gerador dos .lfm e do esqueleto das units"
 type: ferramenta
 category: ui
 phase: 2
-depends_on: ["WTE-TASK-03", "WTE-TASK-04", "WTE-TASK-07"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.4 e Fase 2 item 1"
-status: concluído
+depends_on: [WTE-TASK-03, WTE-TASK-04, WTE-TASK-07]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.4"
+reviewed_on: 2026-08-09
+review_commit: null
+done_on: 2026-08-06
+done_commit: a868d7a
 ---
 
 # WTE-TASK-10: Conversor DFM → LFM
@@ -215,6 +219,6 @@ sintetizada, com a razão escrita, e `--check` refeito. Não editar `.lfm` à m�
 os 18 são gerados.
 
 **Critério de aceite, já mecânico:** `rotulos_divergentes` zerado em
-[`wte/re/carregado.tsv`](../../../wte/re/carregado.tsv) depois de refazer as
+[`wte/re/carregado.tsv`](/wte/re/carregado.tsv) depois de refazer as
 capturas com `wte/tools/captura_ui.sh`. Medida e evidência em
-[`wte/re/visual.md`](../../../wte/re/visual.md), achado 6 da segunda passada.
+[`wte/re/visual.md`](/wte/re/visual.md), achado 6 da segunda passada.

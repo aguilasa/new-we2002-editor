@@ -4,9 +4,13 @@ title: "Decidir o formato de re/spec/ e o vocabulário de veredito"
 type: decisão
 category: comportamento
 phase: 4
-depends_on: ["WTE-TASK-09"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §2 e Fase 4"
-status: concluído
+depends_on: [WTE-TASK-09]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#2"
+reviewed_on: 2026-08-10
+review_commit: null
+done_on: 2026-08-09
+done_commit: 08d07f1
 ---
 
 # WTE-TASK-23: Formato da spec

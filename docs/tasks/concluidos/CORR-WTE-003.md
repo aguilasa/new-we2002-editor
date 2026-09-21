@@ -3,8 +3,12 @@ id: CORR-WTE-003
 title: "Correção: a seção `wte/` do `.gitignore` ignora `lib/` e `backup/` no repositório inteiro"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-02
+severity: low
+done_on: 2026-08-05
+done_commit: ee1ac7d
 ---
 
 # CORR-WTE-003: dois padrões da seção do `wte/` vazam para o `newWe2002`

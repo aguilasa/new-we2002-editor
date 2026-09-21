@@ -3,8 +3,12 @@ id: CORR-WTE-134
 title: "Correção: o `Escape` nos dez combos de papel do `DefaultTacticsDialog` diverge do original"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-06
+severity: high
+done_on: 2026-08-31
+done_commit: 2d317a6
 ---
 
 # CORR-WTE-134: o `Escape` do combo de papel dentro do diálogo de presets
@@ -17,7 +21,7 @@ cobrador). O `DefaultTacticsDialog` tem **outros dez combos de papel**
 (`CMB_SLOT_ROLE2..11`, os `TCMB_TAT2..11` do `.rc`), que escrevem os mesmos
 `ruoli[]` — só que nos **presets**, não no time — e **eles não foram
 alcançados**: não há `installEventFilter` nenhum em
-[`src/app/DefaultTacticsDialog.cpp`](../../../src/app/DefaultTacticsDialog.cpp).
+[`src/app/DefaultTacticsDialog.cpp`](/src/app/DefaultTacticsDialog.cpp).
 
 O item 3 da §8.7 (`Escape` depois de navegar um combo de papel) está marcado
 `[x]` no inventário e na [PAR-TASK-06](/docs/tasks/concluidos/PAR-TASK-06.md), e a §8.7
@@ -77,7 +81,7 @@ Reproduzir aqui o que a CORR-WTE-127 fez no `MainWindow`: instalar o
 a navegação deixou na linha corrente da view, antes de o Qt desfazê-la. O
 diálogo já é `QDialog`; basta ele mesmo ser o filtro (`installEventFilter(this)`
 nos dez `cmb_role_[i]` e nas dez `view()`), com o mesmo corpo do filtro de
-[`src/app/MainWindow.cpp`](../../../src/app/MainWindow.cpp) (o laço que casa
+[`src/app/MainWindow.cpp`](/src/app/MainWindow.cpp) (o laço que casa
 `watched` contra as views e repõe `setCurrentIndex`).
 
 Cuidado com o commit: no `MainWindow` a escrita acontece no `FocusOut`; aqui

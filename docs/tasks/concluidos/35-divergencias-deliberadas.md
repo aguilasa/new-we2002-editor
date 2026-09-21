@@ -4,9 +4,13 @@ title: "Registro das divergências deliberadas"
 type: verificação
 category: verificação
 phase: 6
-depends_on: ["WTE-TASK-34"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 6 item 2 e §0"
-status: concluído
+depends_on: [WTE-TASK-34]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-25
+review_commit: null
+done_on: 2026-08-25
+done_commit: e247f8f
 ---
 
 # WTE-TASK-35: Divergências deliberadas
@@ -90,9 +94,9 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   o glifo do vizinho para a mesma cor de fundo dá 513 px, não 0. A regra é o
   grayscale, e o número fecha dos dois lados: `boton_nombres2iso` tem **280
   pixels não-cinza** no glifo e muda **280 px** no app rodando. Detalhe em
-  [`MainForm.iguala_nombresClick`](../../../wte/re/spec/MainForm.iguala_nombresClick.md).
+  [`MainForm.iguala_nombresClick`](/wte/re/spec/MainForm.iguala_nombresClick.md).
   *Onde o teste sabe:*
-  [`check_glifos_disabled.py`](../../../wte/tools/check_glifos_disabled.py) varre
+  [`check_glifos_disabled.py`](/wte/tools/check_glifos_disabled.py) varre
   os **59** botões com glifo dos 18 formulários e declara os **5** invariantes —
   `iguala_nombres`, `parriba`, `pabajo` (`MainForm`), `oscurecer` e `aclarar`
   (`color`). Glifo que entre ou saia desse conjunto derruba o
@@ -132,9 +136,9 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   escreve a regra: *"Exclusão sem dono nomeado é buraco, e este projeto já
   pagou por isso na 25."* Esta entrada é o dono.
   *Evidência:* o efeito visível está escrito na spec do handler
-  ([`jugador.flechasapaClick`](../../../wte/re/spec/jugador.flechasapaClick.md)) —
+  ([`jugador.flechasapaClick`](/wte/re/spec/jugador.flechasapaClick.md)) —
   rótulo muda, desenho não. As medições vêm da §5, da §5.1 e da §6 do
-  [`assets.md`](../../../wte/re/assets.md): as três tabelas de cor em `.data` —
+  [`assets.md`](/wte/re/assets.md): as três tabelas de cor em `.data` —
   pele `0x00423998` (0x40 bytes, 16 entradas a partir da 10, passo 64, 4 tons),
   cabelo `0x00423a98` (0x14 bytes, 5 entradas, passo 20, 8 cores) e barba
   `0x00423b38` (0x0c bytes, 3 entradas, passo 12) —, o `careto_base.bmp` único
@@ -156,15 +160,15 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   *Onde o teste sabe:* **nenhuma régua alcança o formulário `jugador`**, e por
   isso esta entrada não pede exceção nomeada em lugar nenhum. A bateria de bytes
   não passa por aqui — o handler não grava na imagem. A de pixel também não: o
-  [`compara_tela.py`](../../../wte/tools/compara_tela.py) mede a janela do
+  [`compara_tela.py`](/wte/tools/compara_tela.py) mede a janela do
   `MainForm` (as cinco barras de força, e a mudança de aparência no
   `--habilitacao`), e os três modos do
-  [`compara_tela.sh`](../../../wte/tools/compara_tela.sh) — `--edicao`, `--nomes`,
+  [`compara_tela.sh`](/wte/tools/compara_tela.sh) — `--edicao`, `--nomes`,
   `--habilitacao` — partem todos dali; o
-  [`check_edicao.py`](../../../wte/tools/check_edicao.py) já registra, para os
+  [`check_edicao.py`](/wte/tools/check_edicao.py) já registra, para os
   handlers da ficha, *"sub-dialogo que nenhuma regua de tela alcanca"*. O
   instrumento nomeado do `flechasapaClick` naquela tabela é o
-  [`check_bitfields.py`](../../../wte/tools/check_bitfields.py), que prende a
+  [`check_bitfields.py`](/wte/tools/check_bitfields.py), que prende a
   **identidade** dos campos de aparência — os 12 registros de `0x00423708`
   contra o `Player.Decode` do `we2002_core` — e não diz nada sobre desenho.
   Se alguma passagem futura criar régua para o `jugador`, ela nasce com as três
@@ -180,7 +184,7 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   *Razão:* o original **anda pelo arquivo** a cada troca de time, medindo a
   largura do registro como "bytes não-zero até o próximo não-zero". O port não
   reabre a imagem — decisão medida, escrita no cabeçalho do
-  [`lista_equiposChange.inc`](../../../wte/src/impl/ep2002_mainform.lista_equiposChange.inc)
+  [`lista_equiposChange.inc`](/wte/src/impl/ep2002_mainform.lista_equiposChange.inc)
   — e tira o número de `TEAM_NAME_KANJI_LEN`, do `we2002_core`. Os dois
   caminhos dão o mesmo resultado quando o slot de kanji contém kanji. Na
   European Deluxe nomes latinos foram escritos em slot de kanji e deixaram
@@ -201,18 +205,18 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   [CORR-WTE-095](/docs/tasks/concluidos/CORR-WTE-095.md) em 2026-08-24, e, como as três
   entradas acima, **não é hipótese**: é o que o port faz hoje, por
   `ULTIMO_SLOT_PRECADO = 21` no
-  [`base_teamClick.inc`](../../../wte/src/impl/ep2002_mainform.base_teamClick.inc).
+  [`base_teamClick.inc`](/wte/src/impl/ep2002_mainform.base_teamClick.inc).
   *O que diverge:* o `MainForm.base_teamClick` do original percorre os 23 slots
   de um time e grava **22** bytes de preço, de `OFS_COST_NATIONAL + 23·t` até
   `+ 21`. O do slot 22 fica com o valor de fábrica. O port reproduz.
   *Natureza:* **bug do original**, e não do formato: o slot 22 é endereçável e o
   próprio editor o grava por outro caminho — o
-  [`io-medido.tsv`](../../../wte/re/io-medido.tsv), sessão `27-mcr2iso`, traz
+  [`io-medido.tsv`](/wte/re/io-medido.tsv), sessão `27-mcr2iso`, traz
   `W 3067473 3067495 23`, o import de `.mcr` escrevendo os 23 bytes
   condicionais do time 3.
   *Decisão:* reproduzir.
   *Razão:* o gate da feature é byte a byte contra o oráculo
-  ([`golden-22-precos`](../../../wte/tests/roteiros/golden-22-precos.txt)), e §0
+  ([`golden-22-precos`](/wte/tests/roteiros/golden-22-precos.txt)), e §0
   permite não reproduzir bug do original mas exige registro — aqui reproduzir é
   o que mantém o gate honesto. Gravar o 23º byte faria o port divergir do
   oráculo num byte por time em toda a operação, e a "correção" seria uma escolha
@@ -220,7 +224,7 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   *Evidência:* três réguas independentes, todas de 2026-08-24.
   **(1) Plantio** — `0xFF` posto nos slots 20, 21 e 22 do time 2; depois da
   corrida os dois primeiros voltam **26** e **21**, o `previsto` do
-  [`preco.tsv`](../../../wte/re/preco.tsv), e o terceiro continua **255**. Separa
+  [`preco.tsv`](/wte/re/preco.tsv), e o terceiro continua **255**. Separa
   "não grava" de "grava o valor que já estava lá".
   **(2) `strace`** (`diff_dirigido.sh`) — o oráculo **lê** o byte condicional do
   slot 22 em 3067472, com o mesmo número de seeks dos outros 22, e a
@@ -240,7 +244,7 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   *Onde o teste sabe:* em dois lugares, e nenhum precisa de exceção nomeada,
   porque o port **reproduz**. O `golden-22-precos` compara imagem inteira e
   fecha byte-idêntico com 22 bytes dos dois lados; e o
-  [`check_preco.py`](../../../wte/tools/check_preco.py) **recusa** qualquer linha
+  [`check_preco.py`](/wte/tools/check_preco.py) **recusa** qualquer linha
   de slot 22 marcada como medida no `preco.tsv` — se a regra cair, o
   `ULTIMO_SLOT_PRECADO` está errado e o `make -C wte check` diz isso.
 - **O vaivém dos cobradores na segunda gravação — não existe no `wte.exe`** —
@@ -262,7 +266,7 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   gravar duas vezes. A afirmação morava em dois sítios e os dois já dizem
   `ed.exe`: o enunciado da
   [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-completa.md), reconciliado, e a
-  prosa gerada do [`golden.md`](../../../wte/re/golden.md). Resultado negativo
+  prosa gerada do [`golden.md`](/wte/re/golden.md). Resultado negativo
   escrito de propósito: quem reler daqui a um mês não refaz a busca.
   *Fora daqui, e maior:* quatro sítios do lado WTE atribuem a
   não-idempotência ao *"editor original"* — que neste projeto lê-se `wte.exe`,
@@ -270,13 +274,13 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   tática. Está aberto na [CORR-WTE-109](/docs/tasks/concluidos/CORR-WTE-109.md).
   *Evidência:* o terceiro ponto, medido num time em que a troca **seria**
   visível — uma gravação de tática contra duas, pelo
-  [`golden-24-gravacao-dupla`](../../../wte/tests/roteiros/golden-24-gravacao-dupla.txt)
+  [`golden-24-gravacao-dupla`](/wte/tests/roteiros/golden-24-gravacao-dupla.txt)
   e por ele mesmo truncado depois da descarga. As duas imagens são **iguais**
   (0 bytes), e os seis cobradores do time 5 saem intactos dos três estados:
   `[9, 5, 5, 5, 7, 5]` na ROM virgem, depois de uma gravação e depois de duas.
   E as duas gravações **aconteceram** — 11.962 bytes diferem da ROM virgem —,
   o que impede o zero de ser dois lados parados. Está publicado em
-  [`golden.md`](../../../wte/re/golden.md), pelo `check_golden.py`.
+  [`golden.md`](/wte/re/golden.md), pelo `check_golden.py`.
   *Por que o time importa:* até a CORR-WTE-104 o roteiro gravava no time 2,
   cujos dois primeiros cobradores são iguais (`[7, 7, …]`). Ali a troca é a
   identidade e a medição **não podia** responder em nenhum dos dois sentidos —
@@ -337,7 +341,7 @@ obrigação de abrir a entrada, e o `check_divergencias.py` aborta se não abrir
       nomeadas, as 3 com entrada**: `glifo_cinza` e `INVARIANTES` (§2) e
       `ULTIMO_SLOT_PRECADO` (§5). Mecanizado nos **dois** sentidos, e as
       recusas ficaram **versionadas** em
-      [`test_check_divergencias.py`](../../../wte/tools/test_check_divergencias.py)
+      [`test_check_divergencias.py`](/wte/tools/test_check_divergencias.py)
       pela [CORR-WTE-106](/docs/tasks/concluidos/CORR-WTE-106.md) — 20 casos, com os
       quatro sentidos plantados. Este critério dizia *"com as três recusas
       vistas"*, e ver não é deixar visto: as recusas da execução não
@@ -360,10 +364,10 @@ obrigação de abrir a entrada, e o `check_divergencias.py` aborta se não abrir
 
 - **Resumo do que foi feito:**
 
-  Escrito o [`wte/re/divergencias.md`](../../../wte/re/divergencias.md) — **seis
+  Escrito o [`wte/re/divergencias.md`](/wte/re/divergencias.md) — **seis
   entradas** com os seis campos que o enunciado pede, mais três seções que o
   enunciado não previa e a execução exigiu. E mecanizada a metade que dá para
-  mecanizar, no [`check_divergencias.py`](../../../wte/tools/check_divergencias.py).
+  mecanizar, no [`check_divergencias.py`](/wte/tools/check_divergencias.py).
 
   **O achado é uma exceção que sobreviveu à própria causa.** O grupo
   `pendente_32` do `compara_tela.py` isentava `bandera`, `home1` e `home2` de
@@ -428,16 +432,16 @@ obrigação de abrir a entrada, e o `check_divergencias.py` aborta se não abrir
 ## Candidatas posteriores — WTE-TASK-37 (2026-08-25)
 
 Três medidas da reconferência de UI com a lógica ligada que pediam decisão de
-registro. Todas em [`wte/re/visual.md`](../../../wte/re/visual.md), segunda
+registro. Todas em [`wte/re/visual.md`](/wte/re/visual.md), segunda
 passada, com captura em
-[`wte/re/visual/carregado/`](../../../wte/re/visual/carregado).
+[`wte/re/visual/carregado/`](/wte/re/visual/carregado).
 
 > **As três foram destinadas em 2026-08-25 pela
 > [CORR-WTE-114](/docs/tasks/concluidos/CORR-WTE-114.md), e esta seção virou índice.**
 > Ela existia porque o repasse foi escrito na task que criou o formato — e
 > esta task já estava `concluído`, então ninguém a executaria de novo. O
 > registro que o formato produz é o
-> [`divergencias.md`](../../../wte/re/divergencias.md), e é lá que as entradas
+> [`divergencias.md`](/wte/re/divergencias.md), e é lá que as entradas
 > moram agora.
 
 1. **`ficha_warning` não é levantado pelo port** (achado 8). O aviso de tamanho

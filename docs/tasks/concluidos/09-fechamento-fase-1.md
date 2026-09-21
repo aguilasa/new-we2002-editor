@@ -1,12 +1,16 @@
 ---
 id: WTE-TASK-09
 title: "Fechamento da fase 1 — a extração estática está completa?"
-type: fechamento
+type: closing
 category: engenharia-reversa
 phase: 1
-depends_on: ["WTE-TASK-03", "WTE-TASK-04", "WTE-TASK-05", "WTE-TASK-06", "WTE-TASK-07", "WTE-TASK-08"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 1, critério de pronto"
-status: concluído
+depends_on: [WTE-TASK-03, WTE-TASK-04, WTE-TASK-05, WTE-TASK-06, WTE-TASK-07, WTE-TASK-08]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-06
+review_commit: null
+done_on: 2026-08-06
+done_commit: 1131b90
 ---
 
 # WTE-TASK-09: Fechamento da fase 1
@@ -48,7 +52,7 @@ descartável. Remedir com as ferramentas versionadas e **reconciliar**:
 | 70 strings com padding | `dump_strings.py` |
 | 13 unidades `Tep2002_*` | `objdump -x` |
 | 322 imports, sendo 300 de `rtl60.bpl`/`vcl60.bpl` (§1.2) | `dump_units.py` |
-| 197 bitmaps + `dat.bin` (§1.2 e §1.8) | `find -iname '*.bmp'` — ver [`assets.md`](../../../wte/re/assets.md) |
+| 197 bitmaps + `dat.bin` (§1.2 e §1.8) | `find -iname '*.bmp'` — ver [`assets.md`](/wte/re/assets.md) |
 
 A última linha não tem gerador: a WTE-TASK-08 decidiu rota inline para os
 assets, com o comando ao lado de cada número. A coluna "onde remedir" aponta o

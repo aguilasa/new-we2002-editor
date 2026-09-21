@@ -5,8 +5,12 @@ type: decisão
 category: infra
 phase: 0
 depends_on: []
-fonte_de_verdade: "/docs/PES2-AJUSTES.md §7.1"
-status: concluído
+status: done
+source_of_truth: "/docs/PES2-AJUSTES.md#7.1"
+reviewed_on: 2026-09-01
+review_commit: null
+done_on: 2026-09-01
+done_commit: 5e2b8bd
 ---
 
 # PES2-TASK-01: Ferramental das fases 3 e 4

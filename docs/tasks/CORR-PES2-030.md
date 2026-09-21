@@ -3,8 +3,12 @@ id: CORR-PES2-030
 title: "Correção: o `pes2_boot` prova vida exigindo que dois quadros difiram, e falha na tela de intro que não anima"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: CORR-PES2-027
+severity: high
+done_on: 2026-09-03
+done_commit: 6f8e285
 ---
 
 # CORR-PES2-030: o gate de boot é intermitente — 1 falha em 3 corridas seguidas, com o emulador saudável

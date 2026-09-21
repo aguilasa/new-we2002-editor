@@ -3,8 +3,12 @@ id: CORR-WTE-069
 title: "Correção: as três funções novas do we2002_ml entraram no caminho de gravação sem um teste sequer"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-27
+severity: low
+done_on: 2026-08-20
+done_commit: 7418586
 ---
 
 # CORR-WTE-069: `IndiceDoBlocoMl`, `ParDoIndiceLinearMl` e `PrimeiroBlocoLivreMl` sem teste
@@ -173,3 +177,7 @@ cobre o que importa.
 
 - `wte/tests/test_ml.pas`
 - `wte/tools/test_conta_ml.py`
+
+## Log de Execução
+
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

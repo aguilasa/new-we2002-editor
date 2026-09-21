@@ -3,8 +3,12 @@ id: CORR-LOOKS-020
 title: "Correção: quatro seções têm DOIS parceiros de espelho, e o `mirrors()` fica com o primeiro sem dizer que havia escolha"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-09
+severity: medium
+done_on: 2026-09-15
+done_commit: e674f10
 ---
 
 # CORR-LOOKS-020: o pareamento resolve uma ambiguidade que não sabe que tem

@@ -4,9 +4,13 @@ title: "Incógnita (r) — `DEFAUL` e `NAT`: a nação escolhida e o default que
 type: implementação
 category: montagem
 phase: 8
-depends_on: ["LOOKS-TASK-22"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (r)"
-status: concluído
+depends_on: [LOOKS-TASK-22]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: 2026-09-17
+review_commit: null
+done_on: 2026-09-17
+done_commit: cc8a6d1
 ---
 
 # LOOKS-TASK-23: O default por nacionalidade

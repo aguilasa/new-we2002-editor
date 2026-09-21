@@ -3,8 +3,12 @@ id: CORR-PES2-008
 title: "Correção: a varredura do `poke.py` só enxerga registro delimitado por NUL, e o disco tem tabela de largura fixa"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-02
+severity: low
+done_on: 2026-09-01
+done_commit: 32c110b
 ---
 
 # CORR-PES2-008: a varredura que mede o conjunto de cópias assume um esquema de registro

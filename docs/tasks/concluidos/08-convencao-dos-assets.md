@@ -4,9 +4,13 @@ title: "Convenção de nome dos 198 bitmaps e do dat.bin"
 type: extração
 category: engenharia-reversa
 phase: 1
-depends_on: ["WTE-TASK-05"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §1.8 e Fase 1 item 6"
-status: concluído
+depends_on: [WTE-TASK-05]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#1.8"
+reviewed_on: 2026-08-06
+review_commit: null
+done_on: 2026-08-06
+done_commit: a868d7a
 ---
 
 # WTE-TASK-08: Convenção dos assets
@@ -92,7 +96,7 @@ teste destrutivo barato — em cópia da pasta, nunca na original.
 
 - **Resumo do que foi feito:**
 
-  Criado [`wte/re/assets.md`](../../../wte/re/assets.md). **Rota escolhida: comando
+  Criado [`wte/re/assets.md`](/wte/re/assets.md). **Rota escolhida: comando
   inline, sem gerador** — o produto são ~15 medidas e um texto que as amarra, não
   uma enumeração; cada número traz o comando que o reproduz, como a CORR-WTE-002
   exigiu do `ambiente.md`. As três tabelas de 95 entradas, que *são* enumeráveis,

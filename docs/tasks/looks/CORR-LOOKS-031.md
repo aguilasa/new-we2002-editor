@@ -3,8 +3,12 @@ id: CORR-LOOKS-031
 title: "Correção: a constante `AGREEMENT` justifica o piso com 0,005 e a medição dá 0,008"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-14
+severity: low
+done_on: 2026-09-16
+done_commit: "0819598"
 ---
 
 # CORR-LOOKS-031: o número que justifica o piso do corpus não é o número medido
@@ -119,3 +123,4 @@ sobram são de outro assunto — a deriva de célula do `oracle.py`, 0,005265 e
 - `tools/looks/assembly.py` — o docstring do `AGREEMENT`
 - `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
 - `docs/tasks/looks/CORR-LOOKS-031.md` — este arquivo
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

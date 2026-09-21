@@ -3,8 +3,12 @@ id: CORR-LOOKS-040
 title: "Correção: o `looks_ui` só julga a cabeça, e passa com a figura inteira apagada"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-16
+severity: medium
+done_on: 2026-09-16
+done_commit: 3c65af4
 ---
 
 # CORR-LOOKS-040: onze das doze peças estão fora do gate da UI
@@ -157,3 +161,4 @@ o teto; está dito aqui porque é o que alguém confundiria ao ler o gate passar
 - `docs/tasks/looks/16-contratos-da-ui.md` — o contexto
 - `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
 - `docs/tasks/looks/CORR-LOOKS-040.md` — este arquivo
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

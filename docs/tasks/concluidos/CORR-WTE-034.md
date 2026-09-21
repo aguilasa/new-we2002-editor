@@ -3,15 +3,19 @@ id: CORR-WTE-034
 title: "Correção: a \"entrada real medida\" do `tipos.md` omite os cabeçalhos que declaram os campos que a tabela mapeia"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-15
+severity: high
+done_on: 2026-08-10
+done_commit: 102dd1d
 ---
 
 # CORR-WTE-034: o inventário de entrada lista 5 arquivos, e a tabela mapeia campos de 4 outros
 
 ## Problema identificado
 
-[`wte/re/tipos.md`](../../../wte/re/tipos.md) abre declarando de onde a tabela
+[`wte/re/tipos.md`](/wte/re/tipos.md) abre declarando de onde a tabela
 saiu:
 
 > **Entrada real medida** — os tipos que de fato aparecem em

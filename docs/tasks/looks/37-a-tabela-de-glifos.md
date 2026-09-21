@@ -4,9 +4,13 @@ title: "A tabela de glifos — o texto da tela desenhado com a fonte do `EDT_2D.
 type: implementação
 category: render
 phase: 10
-depends_on: ["LOOKS-TASK-31"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (o)"
-status: pendente
+depends_on: [LOOKS-TASK-31]
+status: pending
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # LOOKS-TASK-37: A tabela de glifos

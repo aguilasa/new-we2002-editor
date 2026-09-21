@@ -3,8 +3,12 @@ id: CORR-LOOKS-037
 title: "Correção: as alturas da cabeça e da chuteira estão escritas com o sinal trocado"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-15
+severity: low
+done_on: 2026-09-16
+done_commit: efd4440
 ---
 
 # CORR-LOOKS-037: "a cabeça de y -15 a 48" é a do render, não a do arquivo
@@ -119,3 +123,4 @@ de texto.
 - `docs/tasks/looks/15-visualizador-opengl.md` — o Log
 - `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
 - `docs/tasks/looks/CORR-LOOKS-037.md` — este arquivo
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

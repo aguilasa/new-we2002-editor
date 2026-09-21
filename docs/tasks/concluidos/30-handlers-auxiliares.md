@@ -4,9 +4,13 @@ title: "Handlers dos 13 diálogos auxiliares"
 type: implementação
 category: comportamento
 phase: 4
-depends_on: ["WTE-TASK-25"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 4"
-status: concluído
+depends_on: [WTE-TASK-25]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-23
+review_commit: null
+done_on: 2026-08-21
+done_commit: fb640cd
 ---
 
 # WTE-TASK-30: Handlers auxiliares
@@ -93,7 +97,7 @@ o que o `Save` usa para reconstruir as all-star. Um diálogo que edita link **n�
 no `.dfm`, sem `OnClick`; os únicos handlers publicados dos dois são
 `FormCreate` (e um `FormShow` no `ficha_enlaza`), que a
 [WTE-TASK-25](/docs/tasks/concluidos/25-handlers-de-carga.md) já julgou `trivial` por
-serem da forma "cor" do [`wte/re/arranque.md`](../../../wte/re/arranque.md).
+serem da forma "cor" do [`wte/re/arranque.md`](/wte/re/arranque.md).
 
 O aviso do enunciado continua certo e o dono é outro: **quem toca dados é o
 chamador**, não a janela. `trivial` aqui não é preguiça: é que a janela
@@ -105,12 +109,12 @@ seção juntou os dois numa frase só** — corrigido pela
 
 - **`ficha_movertodos` — medido.** O `paderecha2Click` abre o modal e só segue
   com `mrYes`, e o lote roda no `MoveTodosOsJogadores` do
-  [`ep2002_mainform.aux.inc`](../../../wte/src/impl/ep2002_mainform.aux.inc), onde
+  [`ep2002_mainform.aux.inc`](/wte/src/impl/ep2002_mainform.aux.inc), onde
   o `if ficha_movertodos.ShowModal <> mrYes then` está escrito;
 - **`ficha_enlaza` — não medido, e o dono não é o `pabajoClick`.** Aquele
   handler não menciona vínculo nem na spec nem no `.inc`. Quem alcança o modal
   é o
-  [`MainForm.mostrar_jugadorClick`](../../../wte/re/spec/MainForm.mostrar_jugadorClick.md),
+  [`MainForm.mostrar_jugadorClick`](/wte/re/spec/MainForm.mostrar_jugadorClick.md),
   que continua **`aberto`** — e é ali, não aqui, que a rota de vínculo será
   fechada.
 
@@ -170,7 +174,7 @@ quantos bytes ela toca.
   A [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md) contava seis
   gravações; medido, são **nove**. Nenhuma das três primeiras podia ser
   implementada aqui: cada uma exige roteiro golden novo dos dois lados, com
-  controle antes, e a régua do [`GABARITO.md`](../../../wte/re/spec/GABARITO.md)
+  controle antes, e a régua do [`GABARITO.md`](/wte/re/spec/GABARITO.md)
   para gravação é byte. As três ficaram `aberto` **com spec completa e
   justificativa escrita**, que é o que a
   [WTE-TASK-31](/docs/tasks/concluidos/31-fechamento-fase-4.md) vai encontrar — e **elas

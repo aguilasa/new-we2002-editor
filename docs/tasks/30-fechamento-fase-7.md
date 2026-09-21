@@ -5,8 +5,12 @@ type: verificação
 category: formato
 phase: 7
 depends_on: [PES2-TASK-27, PES2-TASK-28, PES2-TASK-29]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §5, Fase 7"
-status: pendente
+status: pending
+source_of_truth: "/docs/PLAN-PES2-PSX.md#5"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-30: Fechamento da Fase 7

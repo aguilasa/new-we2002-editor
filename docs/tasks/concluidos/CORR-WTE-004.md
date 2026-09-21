@@ -3,8 +3,12 @@ id: CORR-WTE-004
 title: "Correção: `--check` fica vermelho num clone limpo, porque `blobs/` é gitignored e o modo de conferência nunca o materializa"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-03
+severity: low
+done_on: 2026-08-05
+done_commit: 68ca9eb
 ---
 
 # CORR-WTE-004: `--check` não distingue "gerado editado à mão" de "blob ainda não materializado"

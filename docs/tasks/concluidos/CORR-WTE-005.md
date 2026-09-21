@@ -3,8 +3,12 @@ id: CORR-WTE-005
 title: "Correção: os streams sintéticos que sustentam \"os 21 TValueType exercitados\" não são versionados"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-03
+severity: low
+done_on: 2026-08-06
+done_commit: 279f9df
 ---
 
 # CORR-WTE-005: a cobertura afirmada pelo Log da WTE-TASK-03 não tem rota de volta

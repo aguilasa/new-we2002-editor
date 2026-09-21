@@ -3,8 +3,12 @@ id: CORR-PES2-032
 title: "Correção: o fork morre calado durante execução livre, e toda ferramenta relata isso como \"não está rodando\""
 type: correção
 category: ferramental
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-33
+severity: high
+done_on: 2026-09-03
+done_commit: "6665565"
 ---
 
 # CORR-PES2-032: a queda intermitente do emulador de trabalho não está escrita em lugar nenhum

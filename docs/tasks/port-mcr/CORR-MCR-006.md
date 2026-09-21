@@ -3,8 +3,12 @@ id: CORR-MCR-006
 title: "Correção: a citação da fixture compartilhada aponta para a linha errada, e para um arquivo que não tem a variável"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-03
+severity: low
+done_on: 2026-09-07
+done_commit: 0d45b8e
 ---
 
 # CORR-MCR-006: quem aponta para `work/entrada.mcr` do lado `wte/`

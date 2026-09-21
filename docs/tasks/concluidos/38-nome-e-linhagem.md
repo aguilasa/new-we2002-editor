@@ -4,9 +4,13 @@ title: "Decidir o nome do produto e registrar a linhagem"
 type: decisão
 category: empacotamento
 phase: 7
-depends_on: ["WTE-TASK-35"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §2 e Fase 7"
-status: concluído
+depends_on: [WTE-TASK-35]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#2"
+reviewed_on: 2026-08-25
+review_commit: null
+done_on: 2026-08-25
+done_commit: "0277199"
 ---
 
 # WTE-TASK-38: Nome e linhagem
@@ -19,7 +23,7 @@ status: concluído
 
 O `we-team-editor.exe` é obra do **Obocaman (2002)**, sem licença concedida —
 mesma situação do código herdado do Moriero e do thyddralisk que o
-[`NOTICE.md`](../../../NOTICE.md) já registra. O repositório **não tem `LICENSE`** e
+[`NOTICE.md`](/NOTICE.md) já registra. O repositório **não tem `LICENSE`** e
 não deve ganhar um.
 
 ---
@@ -94,14 +98,14 @@ dois repasses.)*
       definida — **`WE2002 - Lazarus Editor`**, escolhido pelo usuário, com a
       alusão a Lázaro; slug `we2002Lazarus`, appid
       `io.github.aguilasa.we2002Lazarus`, formato `we2002` (inalterado). A
-      tabela dos quatro papéis está no [`wte/README.md`](../../../wte/README.md) e
+      tabela dos quatro papéis está no [`wte/README.md`](/wte/README.md) e
       repetida na Fase 7 do plano
 - [x] Seção de linhagem escrita no `NOTICE.md` — *Lineage of WE2002 - Lazarus
       Editor*, mais a linha do Obocaman na tabela de linhagem e a ressalva de
       licença passando a nomear os três autores
 - [x] Decidido o que acontece quando a pasta de assets falta — **o app não
       encerra**; registrado como divergência **12** em
-      [`wte/re/divergencias.md`](../../../wte/re/divergencias.md), com a mensagem
+      [`wte/re/divergencias.md`](/wte/re/divergencias.md), com a mensagem
       ("o que falta **e onde pôr**") encaminhada à
       [WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md)
 - [x] Registrado que publicar depende de confirmação do usuário — na §2 do
@@ -135,7 +139,7 @@ dois repasses.)*
 
 - **Arquivos criados/modificados:** conferido contra `git show --stat`.
 
-  `NOTICE.md`, [`wte/README.md`](../../../wte/README.md) (a decisão 3 e o
+  `NOTICE.md`, [`wte/README.md`](/wte/README.md) (a decisão 3 e o
   parágrafo de estado, que ainda dizia "Fase 0"),
   `docs/PLAN-WTE-LAZARUS.md` (§2, Fase 7 **e a fração da §4.4**),
   `wte/wte.lpr` + `wte/wte.lpi` (o `Application.Title`),
@@ -150,7 +154,7 @@ dois repasses.)*
   cópia do binário num diretório vazio morre num diálogo da LCL — `File not
   found. / Press OK to ignore and risk data corruption. / Press Abort to kill
   the program.` — **antes de qualquer janela**. A causa é o log de trace:
-  `ResolveArquivo` do [`retrace.pas`](../../../wte/src/retrace.pas) resolve
+  `ResolveArquivo` do [`retrace.pas`](/wte/src/retrace.pas) resolve
   `<dir do executável>/../re/trace.log` e o `Rewrite` levanta `EInOutError`
   quando o diretório não existe.
 

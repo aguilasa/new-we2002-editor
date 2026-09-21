@@ -3,8 +3,12 @@ id: CORR-LOOKS-049
 title: "Correção: nas cabeças que não são A1, a pele pinta só a testa e a barba não aparece — os índices emprestados da seção 24 erram"
 type: correção
 category: render
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-18
+severity: high
+done_on: 2026-09-16
+done_commit: a82f922
 ---
 
 # CORR-LOOKS-049: `COLOUR BY BORROWED INDEX` está medido errado, pelo corpus

@@ -14,85 +14,89 @@ e o ciclo arquivado, o dele em
 
 ## Resumo
 
-| ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
-| -- | -------------- | ------ | ----------- | ------ | ------------ |
-| [CORR-LOOKS-001](/docs/tasks/looks/CORR-LOOKS-001.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | A raiz do Superpack tem treze pastas de jogo, não catorze | Baixa | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-002](/docs/tasks/looks/CORR-LOOKS-002.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | O comentário do `.gitignore` guarda o número que a própria task derrubou | Baixa | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-003](/docs/tasks/looks/CORR-LOOKS-003.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | `superpack_count.py` descarta entrada ilegível em silêncio | Média | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-004](/docs/tasks/looks/CORR-LOOKS-004.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | A LOOKS-TASK-18 se contradiz sobre as 50 tuplas em dois bullets seguidos | Baixa | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-005](/docs/tasks/looks/CORR-LOOKS-005.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | A guarda dos dois discos não tem quem a chame, e nada obriga a 03 a chamá-la | Alta | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-006](/docs/tasks/looks/CORR-LOOKS-006.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | A recusa do `/SELECT.BIN` sai como `digest mismatch` pelado | Média | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-007](/docs/tasks/looks/CORR-LOOKS-007.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | O `layout.py` diz que não faz I/O, e faz | Baixa | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-008](/docs/tasks/looks/CORR-LOOKS-008.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | O `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum | Média | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-009](/docs/tasks/looks/CORR-LOOKS-009.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | A varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu | Alta | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-010](/docs/tasks/looks/CORR-LOOKS-010.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `EDT_MOD.BIN` tem 20 seções e duas listas de onze — a varredura começou a 15.704 | Alta | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-011](/docs/tasks/looks/CORR-LOOKS-011.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `sweep_addresses()` guarda duas regex mortas com o nome das vivas | Baixa | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-012](/docs/tasks/looks/CORR-LOOKS-012.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O perfil promete o `looks_image` desde a 05, e `ctest -R looks` sai 0 sem achar teste | Alta | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-013](/docs/tasks/looks/CORR-LOOKS-013.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O cabeçalho do `MODEL.BIN` foi descrito por metade — duas corridas, e a lista 0 declara o 1816 | Média | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-014](/docs/tasks/looks/CORR-LOOKS-014.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O título da LOOKS-TASK-05 ainda diz onze seções; a tabela já diz vinte | Baixa | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-015](/docs/tasks/looks/CORR-LOOKS-015.md) | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | O gate obrigatório não é alcançável por `ctest` nesta máquina, e pedir por ele sai 0 | Alta | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-016](/docs/tasks/looks/CORR-LOOKS-016.md) | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | Os dois alvos de `looks` ficaram fora do `if(Python3_FOUND)` que guarda os outros oito | Média | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-017](/docs/tasks/looks/CORR-LOOKS-017.md) | [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | Sem `WE2002_LOOKS_IMAGE` o `--check-live` sobe o emulador e morre num traceback, em vez de pular com 77 | Média | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-018](/docs/tasks/looks/CORR-LOOKS-018.md) | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | A palavra de página declara a profundidade da CLUT, e 1.039 das 2.841 primitivas dizem 8 bits | Alta | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-019](/docs/tasks/looks/CORR-LOOKS-019.md) | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | O `--tmds` promete dizer se algum campo move um TMD e não pergunta: a metade negativa do veredito não sai de comando | Média | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-020](/docs/tasks/looks/CORR-LOOKS-020.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Quatro seções têm dois parceiros de espelho, e o `mirrors()` fica com o primeiro sem dizer que havia escolha | Média | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-021](/docs/tasks/looks/CORR-LOOKS-021.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | "Mesma malha, uniforme diferente" não vale para quatro das onze peças, e o tronco está do lado errado da conta | Média | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-022](/docs/tasks/looks/CORR-LOOKS-022.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | Os "2.151 registros a mais em 40 contêineres" que decidem onde o conserto mora não reproduzem por nenhuma leitura | Alta | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-023](/docs/tasks/looks/CORR-LOOKS-023.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A exclusividade da paleta de chuteira é conferida só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram | Baixa | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-024](/docs/tasks/looks/CORR-LOOKS-024.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A §1.7 ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo | Média | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | Cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | Média | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-026](/docs/tasks/looks/CORR-LOOKS-026.md) | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | A grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 | Média | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-027](/docs/tasks/looks/CORR-LOOKS-027.md) | [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | O cross-check contra os 50 JPGs é critério marcado e não existe comando que o rode | Baixa | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-028](/docs/tasks/looks/CORR-LOOKS-028.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O `draw_list` aplica a primeira das faixas que o `HAIR_MAP` mediu e descarta as outras, sem dizer | Alta | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-029](/docs/tasks/looks/CORR-LOOKS-029.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O `HEAD_RUNS` diz "todo corpo distinto, cada um com sua janela" e o disco diz doze corpos e catorze janelas | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-030](/docs/tasks/looks/CORR-LOOKS-030.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A décima terceira seção do mapa de cabelo — o `E2` na 54 — não está em nenhuma das três listas | Baixa | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-031](/docs/tasks/looks/CORR-LOOKS-031.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A constante `AGREEMENT` justifica o piso do corpus com 0,005 e a medição dá 0,008 | Baixa | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-032](/docs/tasks/looks/CORR-LOOKS-032.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O bloco de gates da LOOKS-TASK-14 ficou na primeira passagem — 29 controles contra 32 | Baixa | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-033](/docs/tasks/looks/CORR-LOOKS-033.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A §6(c) do plano ainda se declara medida em parte, com a task pendente | Baixa | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-034](/docs/tasks/looks/CORR-LOOKS-034.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | Nenhum campo de cor alcança a cabeça quando o cabelo não é da família A | Alta | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-035](/docs/tasks/looks/CORR-LOOKS-035.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A definição de pronto do plano pede uma tupla que a tabela recusa | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-036](/docs/tasks/looks/CORR-LOOKS-036.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | O critério da LOOKS-TASK-15 conta 11.789 linhas e a árvore dela tem 11.831 | Baixa | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-037](/docs/tasks/looks/CORR-LOOKS-037.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | As alturas da cabeça e da chuteira estão escritas com o sinal trocado | Baixa | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-038](/docs/tasks/looks/CORR-LOOKS-038.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A cor de barba troca a superfície e não muda um pixel do quadro | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-039](/docs/tasks/looks/CORR-LOOKS-039.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | Os pares do `looks_ui` nunca saem da família A, e o defeito da CORR-LOOKS-034 passou por eles | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-040](/docs/tasks/looks/CORR-LOOKS-040.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O `looks_ui` só julga a cabeça, e passa com a figura inteira apagada | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-041](/docs/tasks/looks/CORR-LOOKS-041.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O bloco de gates da LOOKS-TASK-16 diz 12.609 linhas e a árvore dela tem 12.613 | Baixa | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-042](/docs/tasks/looks/CORR-LOOKS-042.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Os quads de cabelo saem uma linha curtos — o jogo desenha v 15 onde o disco guarda 14 | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-043](/docs/tasks/looks/CORR-LOOKS-043.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O goleiro desenha qualquer estilo de cabelo como família A, e não recusa | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-044](/docs/tasks/looks/CORR-LOOKS-044.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | A tabela diz que a tela da barba alcança cinco valores, e a tela alcança sete | Alta | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-045](/docs/tasks/looks/CORR-LOOKS-045.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-046](/docs/tasks/looks/CORR-LOOKS-046.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Um `.refused` velho faz o `--score` pular uma tupla que já desenha, e o gate passa sem julgá-la | Alta | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-047](/docs/tasks/looks/CORR-LOOKS-047.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O mapa de cabelo do goleiro não foi medido, e 136 dos 179 goleiros do disco são recusados | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-048](/docs/tasks/looks/CORR-LOOKS-048.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-049](/docs/tasks/looks/CORR-LOOKS-049.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Nas cabeças que não são A1, a pele pinta só a testa e a barba não aparece — os índices emprestados da seção 24 erram | Alta | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-050](/docs/tasks/looks/CORR-LOOKS-050.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | O `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-051](/docs/tasks/looks/CORR-LOOKS-051.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | O `looks_live` perde a sessão MCP no primeiro `pause`, uma vez em catorze corridas | Média | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-052](/docs/tasks/looks/CORR-LOOKS-052.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | "O `modelfile` roda primeiro" é regra com controle, e a ordem não muda o veredito do `cli.py check` | Baixa | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | O `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | Baixa | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-056](/docs/tasks/looks/CORR-LOOKS-056.md) | [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | O `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto | Baixa | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-057](/docs/tasks/looks/CORR-LOOKS-057.md) | [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | O docstring do `layout.PLAYER_NATION` ensina a regra `código = índice − 1` que a própria task desmentiu | Média | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-058](/docs/tasks/looks/CORR-LOOKS-058.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O docstring do `layout.POSE_MATRIX` reparte as 40 paradas de um jeito que a ferramenta não reproduz | Baixa | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-059](/docs/tasks/looks/CORR-LOOKS-059.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo | Baixa | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-060](/docs/tasks/looks/CORR-LOOKS-060.md) | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | "Todos os outros ficam abaixo de 2,3x" — a corrida imprime 2,5x na cabeça do slot 2 | Baixa | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-061](/docs/tasks/looks/CORR-LOOKS-061.md) | [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | O `--against-pose` descarta metade das capturas sem dizer, e o "96 de 96" se lê como cobertura inteira | Média | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-062](/docs/tasks/looks/CORR-LOOKS-062.md) | [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | A segunda chuteira é posta por espelho em z, cai a 258 unidades da própria canela, e nenhum gate pode ver isso | Média | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-063](/docs/tasks/looks/CORR-LOOKS-063.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | O `--silhouette-styles` decide por mínimo, sem controle e sem margem, e o "estilo trocado discorda" não é asserção | Alta | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-064](/docs/tasks/looks/CORR-LOOKS-064.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | "603 a 1.680" e "1,4x a 4,4x" não são o que as corridas imprimem, e três textos ainda dizem o que a quinta sessão desmentiu | Baixa | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-065](/docs/tasks/looks/CORR-LOOKS-065.md) | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Três medições da LOOKS-TASK-29 sobre o ritmo e a mistura ficaram "para o leitor de pose", sem linha na task que as mede | Baixa | [x] concluída | 2026-09-20 |
-| [CORR-LOOKS-066](/docs/tasks/looks/CORR-LOOKS-066.md) | [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | A divisão da LOOKS-TASK-31 não chegou a cinco textos — a §10.3 (o) segue "PARCIAL", e o close-up e o cenário ainda apontam para a 31 | Baixa | [ ] pendente | — |
+<!-- rite:begin fixes -->
+| ID | Title | Origin | Severity | Status | Done on |
+| --- | --- | --- | --- | --- | --- |
+| [CORR-LOOKS-001](/docs/tasks/looks/CORR-LOOKS-001.md) | Correção: a raiz do Superpack tem treze pastas de jogo, não catorze | LOOKS-TASK-01 | low | done | 2026-09-14 |
+| [CORR-LOOKS-002](/docs/tasks/looks/CORR-LOOKS-002.md) | Correção: o comentário do `.gitignore` guarda o número que a própria task derrubou | LOOKS-TASK-01 | low | done | 2026-09-14 |
+| [CORR-LOOKS-003](/docs/tasks/looks/CORR-LOOKS-003.md) | Correção: `superpack_count.py` descarta entrada ilegível em silêncio | LOOKS-TASK-01 | medium | done | 2026-09-14 |
+| [CORR-LOOKS-004](/docs/tasks/looks/CORR-LOOKS-004.md) | Correção: a LOOKS-TASK-18 se contradiz sobre as 50 tuplas em dois bullets seguidos | LOOKS-TASK-01 | low | done | 2026-09-14 |
+| [CORR-LOOKS-005](/docs/tasks/looks/CORR-LOOKS-005.md) | Correção: a guarda dos dois discos não tem quem a chame, e nada obriga a 03 a chamá-la | LOOKS-TASK-02 | high | done | 2026-09-14 |
+| [CORR-LOOKS-006](/docs/tasks/looks/CORR-LOOKS-006.md) | Correção: a recusa do `/SELECT.BIN` sai como `digest mismatch` pelado | LOOKS-TASK-02 | medium | done | 2026-09-14 |
+| [CORR-LOOKS-007](/docs/tasks/looks/CORR-LOOKS-007.md) | Correção: o `layout.py` diz que não faz I/O, e faz | LOOKS-TASK-02 | low | done | 2026-09-14 |
+| [CORR-LOOKS-008](/docs/tasks/looks/CORR-LOOKS-008.md) | Correção: o `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum | LOOKS-TASK-03 | medium | done | 2026-09-14 |
+| [CORR-LOOKS-009](/docs/tasks/looks/CORR-LOOKS-009.md) | Correção: a varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu | LOOKS-TASK-03 | high | done | 2026-09-14 |
+| [CORR-LOOKS-010](/docs/tasks/looks/CORR-LOOKS-010.md) | Correção: o `EDT_MOD.BIN` tem 20 seções e duas listas de onze — a varredura começou a 15.704 e chamou o resto de EOF exato | LOOKS-TASK-04 | high | done | 2026-09-14 |
+| [CORR-LOOKS-011](/docs/tasks/looks/CORR-LOOKS-011.md) | Correção: o `sweep_addresses()` guarda duas regex mortas com o nome das vivas | LOOKS-TASK-04 | low | done | 2026-09-14 |
+| [CORR-LOOKS-012](/docs/tasks/looks/CORR-LOOKS-012.md) | Correção: o perfil promete o `looks_image` a partir desta task, e `ctest -R looks` sai 0 dizendo que não achou teste | LOOKS-TASK-05 | high | done | 2026-09-14 |
+| [CORR-LOOKS-013](/docs/tasks/looks/CORR-LOOKS-013.md) | Correção: o cabeçalho do `MODEL.BIN` foi descrito por metade — são duas corridas de ponteiros, e a primeira lista declara o 1816 | LOOKS-TASK-05 | medium | done | 2026-09-14 |
+| [CORR-LOOKS-014](/docs/tasks/looks/CORR-LOOKS-014.md) | Correção: o título da LOOKS-TASK-05 ainda diz onze seções; a tabela do progresso já diz vinte | LOOKS-TASK-05 | low | done | 2026-09-14 |
+| [CORR-LOOKS-015](/docs/tasks/looks/CORR-LOOKS-015.md) | Correção: o gate obrigatório não é alcançável por `ctest` nesta máquina, e pedir por ele continua saindo 0 | LOOKS-TASK-06 | high | done | 2026-09-14 |
+| [CORR-LOOKS-016](/docs/tasks/looks/CORR-LOOKS-016.md) | Correção: os dois alvos de `looks` são registrados fora do `if(Python3_FOUND)` que guarda os outros oito | LOOKS-TASK-06 | medium | done | 2026-09-14 |
+| [CORR-LOOKS-017](/docs/tasks/looks/CORR-LOOKS-017.md) | Correção: sem `WE2002_LOOKS_IMAGE` o `--check-live` sobe o emulador e morre num traceback, em vez de pular com 77 | LOOKS-TASK-07 | medium | done | 2026-09-14 |
+| [CORR-LOOKS-018](/docs/tasks/looks/CORR-LOOKS-018.md) | Correção: a página de textura declara a profundidade da CLUT, e 1.039 das 2.841 primitivas dizem 8 bits — o plano só registra 4 | LOOKS-TASK-08 | high | done | 2026-09-15 |
+| [CORR-LOOKS-019](/docs/tasks/looks/CORR-LOOKS-019.md) | Correção: o `--tmds` promete dizer se algum campo move um TMD, e não pergunta — a metade negativa do veredito não sai de comando nenhum | LOOKS-TASK-08 | medium | done | 2026-09-15 |
+| [CORR-LOOKS-020](/docs/tasks/looks/CORR-LOOKS-020.md) | Correção: quatro seções têm DOIS parceiros de espelho, e o `mirrors()` fica com o primeiro sem dizer que havia escolha | LOOKS-TASK-09 | medium | done | 2026-09-15 |
+| [CORR-LOOKS-021](/docs/tasks/looks/CORR-LOOKS-021.md) | Correção: "mesma malha, uniforme diferente" não vale para quatro das onze peças, e o tronco está do lado errado da conta | LOOKS-TASK-09 | medium | done | 2026-09-15 |
+| [CORR-LOOKS-022](/docs/tasks/looks/CORR-LOOKS-022.md) | Correção: os "2.151 registros a mais em 40 contêineres" que justificam não tocar o `bin_archive.py` não reproduzem por nenhuma leitura | LOOKS-TASK-10 | high | done | 2026-09-15 |
+| [CORR-LOOKS-023](/docs/tasks/looks/CORR-LOOKS-023.md) | Correção: "nenhuma outra peça toca a paleta das chuteiras" é conferido só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram | LOOKS-TASK-10 | low | done | 2026-09-15 |
+| [CORR-LOOKS-024](/docs/tasks/looks/CORR-LOOKS-024.md) | Correção: a §1.7 do plano ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo — as duas a task 11 desmentiu | LOOKS-TASK-11 | medium | done | 2026-09-15 |
+| [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | Correção: cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | LOOKS-TASK-11 | medium | done | 2026-09-15 |
+| [CORR-LOOKS-026](/docs/tasks/looks/CORR-LOOKS-026.md) | Correção: a grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 e não andam com campo nenhum | LOOKS-TASK-12 | medium | done | 2026-09-15 |
+| [CORR-LOOKS-027](/docs/tasks/looks/CORR-LOOKS-027.md) | Correção: o cross-check contra os 50 JPGs é critério marcado e não existe comando que o rode | LOOKS-TASK-13 | low | done | 2026-09-15 |
+| [CORR-LOOKS-028](/docs/tasks/looks/CORR-LOOKS-028.md) | Correção: o `draw_list` joga fora a segunda faixa que o `HAIR_MAP` mediu, e não diz | LOOKS-TASK-14 | high | done | 2026-09-16 |
+| [CORR-LOOKS-029](/docs/tasks/looks/CORR-LOOKS-029.md) | Correção: o `HEAD_RUNS` diz "todo corpo distinto, cada um com sua janela" e o disco diz doze corpos e catorze janelas | LOOKS-TASK-14 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-030](/docs/tasks/looks/CORR-LOOKS-030.md) | Correção: a treze seções de cabelo faltou uma na lista — o `E2` e a seção 54 não aparecem em lugar nenhum | LOOKS-TASK-14 | low | done | 2026-09-16 |
+| [CORR-LOOKS-031](/docs/tasks/looks/CORR-LOOKS-031.md) | Correção: a constante `AGREEMENT` justifica o piso com 0,005 e a medição dá 0,008 | LOOKS-TASK-14 | low | done | 2026-09-16 |
+| [CORR-LOOKS-032](/docs/tasks/looks/CORR-LOOKS-032.md) | Correção: o bloco de gates da LOOKS-TASK-14 ficou na primeira passagem — 29 controles contra 32 | LOOKS-TASK-14 | low | done | 2026-09-16 |
+| [CORR-LOOKS-033](/docs/tasks/looks/CORR-LOOKS-033.md) | Correção: a §6(c) do plano ainda se declara medida em parte, com a task pendente | LOOKS-TASK-14 | low | done | 2026-09-16 |
+| [CORR-LOOKS-034](/docs/tasks/looks/CORR-LOOKS-034.md) | Correção: nenhum campo de cor alcança a cabeça quando o cabelo não é da família A | LOOKS-TASK-15 | high | done | 2026-09-16 |
+| [CORR-LOOKS-035](/docs/tasks/looks/CORR-LOOKS-035.md) | Correção: a definição de pronto do plano pede uma tupla que a tabela recusa | LOOKS-TASK-15 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-036](/docs/tasks/looks/CORR-LOOKS-036.md) | Correção: o critério da LOOKS-TASK-15 conta 11.789 linhas e a árvore dela tem 11.831 | LOOKS-TASK-15 | low | done | 2026-09-16 |
+| [CORR-LOOKS-037](/docs/tasks/looks/CORR-LOOKS-037.md) | Correção: as alturas da cabeça e da chuteira estão escritas com o sinal trocado | LOOKS-TASK-15 | low | done | 2026-09-16 |
+| [CORR-LOOKS-038](/docs/tasks/looks/CORR-LOOKS-038.md) | Correção: a cor de barba troca a superfície e não muda um pixel do quadro | LOOKS-TASK-15 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-039](/docs/tasks/looks/CORR-LOOKS-039.md) | Correção: os pares do `looks_ui` nunca saem da família A, e o defeito da CORR-LOOKS-034 passou por eles | LOOKS-TASK-16 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-040](/docs/tasks/looks/CORR-LOOKS-040.md) | Correção: o `looks_ui` só julga a cabeça, e passa com a figura inteira apagada | LOOKS-TASK-16 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-041](/docs/tasks/looks/CORR-LOOKS-041.md) | Correção: o bloco de gates da LOOKS-TASK-16 diz 12.609 linhas e a árvore dela tem 12.613 | LOOKS-TASK-16 | low | done | 2026-09-16 |
+| [CORR-LOOKS-042](/docs/tasks/looks/CORR-LOOKS-042.md) | Correção: os quads de cabelo saem uma linha curtos — o jogo desenha v 15 onde o disco guarda 14 | LOOKS-TASK-17 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-043](/docs/tasks/looks/CORR-LOOKS-043.md) | Correção: o goleiro desenha qualquer estilo de cabelo como família A, e não recusa | LOOKS-TASK-17 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-044](/docs/tasks/looks/CORR-LOOKS-044.md) | Correção: a tabela diz que a tela da barba alcança cinco valores, e a tela alcança sete | LOOKS-TASK-17 | high | done | 2026-09-16 |
+| [CORR-LOOKS-045](/docs/tasks/looks/CORR-LOOKS-045.md) | Correção: o veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno | LOOKS-TASK-17 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-046](/docs/tasks/looks/CORR-LOOKS-046.md) | Correção: um `.refused` velho faz o `--score` pular uma tupla que já desenha, e o gate passa sem julgá-la | LOOKS-TASK-17 | high | done | 2026-09-16 |
+| [CORR-LOOKS-047](/docs/tasks/looks/CORR-LOOKS-047.md) | Correção: o mapa de cabelo do goleiro não foi medido, e 136 dos 179 goleiros do disco são recusados | LOOKS-TASK-17 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-048](/docs/tasks/looks/CORR-LOOKS-048.md) | Correção: ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados | LOOKS-TASK-17 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-049](/docs/tasks/looks/CORR-LOOKS-049.md) | Correção: nas cabeças que não são A1, a pele pinta só a testa e a barba não aparece — os índices emprestados da seção 24 erram | LOOKS-TASK-18 | high | done | 2026-09-16 |
+| [CORR-LOOKS-050](/docs/tasks/looks/CORR-LOOKS-050.md) | Correção: o `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho | LOOKS-TASK-18 | medium | done | 2026-09-16 |
+| [CORR-LOOKS-051](/docs/tasks/looks/CORR-LOOKS-051.md) | Correção: o `looks_live` perde a sessão MCP no primeiro `pause`, uma vez em catorze corridas | LOOKS-TASK-19 | medium | done | 2026-09-17 |
+| [CORR-LOOKS-052](/docs/tasks/looks/CORR-LOOKS-052.md) | Correção: "o `modelfile` roda primeiro" é regra com controle, e a ordem não muda o veredito do `cli.py check` | LOOKS-TASK-19 | low | done | 2026-09-17 |
+| [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | Correção: a LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | LOOKS-TASK-19 | low | done | 2026-09-17 |
+| [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | Correção: o `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | LOOKS-TASK-21 | low | done | 2026-09-17 |
+| [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | Correção: `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | LOOKS-TASK-21 | medium | done | 2026-09-17 |
+| [CORR-LOOKS-056](/docs/tasks/looks/CORR-LOOKS-056.md) | Correção: o `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto | LOOKS-TASK-22 | low | done | 2026-09-17 |
+| [CORR-LOOKS-057](/docs/tasks/looks/CORR-LOOKS-057.md) | Correção: o docstring do `layout.PLAYER_NATION` ensina a regra `código = índice − 1` que a própria task desmentiu | LOOKS-TASK-23 | medium | done | 2026-09-17 |
+| [CORR-LOOKS-058](/docs/tasks/looks/CORR-LOOKS-058.md) | Correção: o docstring do `layout.POSE_MATRIX` reparte as 40 paradas de um jeito que a ferramenta não reproduz | LOOKS-TASK-24 | low | done | 2026-09-18 |
+| [CORR-LOOKS-059](/docs/tasks/looks/CORR-LOOKS-059.md) | Correção: o plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo | LOOKS-TASK-24 | low | done | 2026-09-18 |
+| [CORR-LOOKS-060](/docs/tasks/looks/CORR-LOOKS-060.md) | Correção: "todos os outros ficam abaixo de 2,3x" — a corrida imprime 2,5x na cabeça do slot 2 | LOOKS-TASK-25 | low | done | 2026-09-18 |
+| [CORR-LOOKS-061](/docs/tasks/looks/CORR-LOOKS-061.md) | Correção: o `--against-pose` descarta metade das capturas sem dizer, e o "96 de 96" se lê como cobertura inteira | LOOKS-TASK-26 | medium | done | 2026-09-18 |
+| [CORR-LOOKS-062](/docs/tasks/looks/CORR-LOOKS-062.md) | Correção: a segunda chuteira é posta por espelho em z, cai a 258 unidades da própria canela, e nenhum gate pode ver isso | LOOKS-TASK-27 | medium | done | 2026-09-18 |
+| [CORR-LOOKS-063](/docs/tasks/looks/CORR-LOOKS-063.md) | Correção: o `--silhouette-styles` decide por mínimo, sem controle e sem margem, e o "estilo trocado discorda" não é asserção | LOOKS-TASK-28 | high | done | 2026-09-18 |
+| [CORR-LOOKS-064](/docs/tasks/looks/CORR-LOOKS-064.md) | Correção: "603 a 1.680" e "1,4x a 4,4x" não são o que as corridas imprimem, e três textos ainda dizem o que a quinta sessão desmentiu | LOOKS-TASK-28 | low | done | 2026-09-18 |
+| [CORR-LOOKS-065](/docs/tasks/looks/CORR-LOOKS-065.md) | Correção: três medições da LOOKS-TASK-29 sobre o ritmo e a mistura ficaram "para o leitor de pose", sem linha na task que as mede | LOOKS-TASK-29 | low | done | 2026-09-20 |
+| [CORR-LOOKS-066](/docs/tasks/looks/CORR-LOOKS-066.md) | Correção: a divisão da LOOKS-TASK-31 não chegou a cinco textos — a §10.3 (o) segue "PARCIAL", e o close-up e o cenário ainda apontam para a 31 | LOOKS-TASK-31 | low | pending | — |
+<!-- rite:end -->
 
-**Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
+edite dentro dela. **Status:** `pending` · `in-progress` · `done` · `stale`. **Severidade:**
+`critical` · `high` · `medium` · `low`.
 
-**Criticidade** é sobre o efeito, não sobre o tamanho do conserto:
+**Severidade** é sobre o efeito, não sobre o tamanho do conserto:
 
-- **Alta** — a task entregou algo que mede errado, ou um gate que passa sem
+- **`high`** — a task entregou algo que mede errado, ou um gate que passa sem
   medir. Neste ciclo isso inclui qualquer guarda que fique verde lendo o disco
   errado, porque esse erro não tem sintoma.
-- **Média** — o resultado está certo mas a evidência não sustenta, ou o código
+- **`medium`** — o resultado está certo mas a evidência não sustenta, ou o código
   viola uma das três regras de desenho.
-- **Baixa** — documentação, número que não reproduz, link ou nome.
+- **`low`** — documentação, número que não reproduz, link ou nome.
 
 ## Checklist
 

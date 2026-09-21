@@ -5,8 +5,13 @@ type: verificação
 category: ui
 projeto: newWe2002
 depends_on: []
-fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.10"
-status: concluído
+status: done
+source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.10"
+phase: null
+reviewed_on: 2026-09-01
+review_commit: null
+done_on: 2026-08-31
+done_commit: b9c10aa
 ---
 
 # PAR-TASK-09: Ciclo de vida da janela

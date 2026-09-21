@@ -3,8 +3,12 @@ id: CORR-WTE-035
 title: "Correção: a decisão 5 do `tipos.md` não tem o \"teste que prova\", e o critério que o exige está marcado"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-15
+severity: low
+done_on: 2026-08-10
+done_commit: 003bc9b
 ---
 
 # CORR-WTE-035: quatro das cinco decisões têm teste nomeado; a do `_url.txt` não
@@ -16,7 +20,7 @@ O critério de conclusão da
 
 > - [x] Cada decisão com o teste que a prova nomeado
 
-[`wte/re/tipos.md`](../../../wte/re/tipos.md) tem cinco decisões e **quatro**
+[`wte/re/tipos.md`](/wte/re/tipos.md) tem cinco decisões e **quatro**
 blocos "Teste que prova". A que ficou sem é a decisão 5 — o sidecar `_url.txt`
 por `TFileStream` com `#10` à mão, em vez de `TStringList`.
 
@@ -123,3 +127,7 @@ o `[x]` descreve existe a partir deste commit.
 
 - `wte/re/tipos.md`
 - `docs/tasks/concluidos/15-mapeamento-de-tipo.md`
+
+## Log de Execução
+
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

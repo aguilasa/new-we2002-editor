@@ -3,8 +3,12 @@ id: CORR-MCR-010
 title: "Correção: são dois os nomes que enchem os dez bytes, não um — o slot 5 também"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-07
+severity: low
+done_on: 2026-09-07
+done_commit: 7751aef
 ---
 
 # CORR-MCR-010: o slot 5 enche os dez bytes e não está registrado

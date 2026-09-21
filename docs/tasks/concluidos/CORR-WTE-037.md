@@ -3,8 +3,12 @@ id: CORR-WTE-037
 title: "Correção: a linha das recusas medidas na saída está deslocada, e o worklist da WTE-TASK-18 aponta para a linha errada"
 type: correção
 category: verificação
-status: envelhecida
+status: stale
 depends_on: []
+origin: WTE-TASK-17
+severity: high
+done_on: 2026-08-10
+done_commit: null
 ---
 
 # CORR-WTE-037: 493 das 498 recusas trazem número de linha da saída, não da entrada

@@ -3,8 +3,12 @@ id: CORR-WTE-106
 title: "Correção: o check_divergencias.py é o único gate de recusa sem teste — as \"três recusas vistas\" não deixaram artefato"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-35
+severity: medium
+done_on: 2026-08-25
+done_commit: f0879de
 ---
 
 # CORR-WTE-106: o gate das divergências não tem teste
@@ -13,7 +17,7 @@ depends_on: []
 
 A [WTE-TASK-35](/docs/tasks/concluidos/35-divergencias-deliberadas.md) mecanizou a metade
 mecanizável do registro no
-[`check_divergencias.py`](../../../wte/tools/check_divergencias.py), e o critério
+[`check_divergencias.py`](/wte/tools/check_divergencias.py), e o critério
 de conclusão afirma:
 
 > **Mecanizado nos dois sentidos, com as três recusas vistas**

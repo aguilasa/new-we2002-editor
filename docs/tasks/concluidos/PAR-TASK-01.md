@@ -5,8 +5,13 @@ type: verificação
 category: ui
 projeto: newWe2002
 depends_on: []
-fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.1"
-status: concluído
+status: done
+source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.1"
+phase: null
+reviewed_on: 2026-08-28
+review_commit: null
+done_on: 2026-08-28
+done_commit: c86e794
 ---
 
 # PAR-TASK-01: Nomes e abreviações de time, pela tela

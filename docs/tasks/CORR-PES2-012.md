@@ -3,8 +3,12 @@ id: CORR-PES2-012
 title: "Correção: o estado medido diz 208 contêineres no PES2 e 195 no WE2002; os quatro discos medem 208, 210, 177 e 195"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-26
+severity: low
+done_on: 2026-09-01
+done_commit: 87bf4da
 ---
 
 # CORR-PES2-012: a contagem de contêineres é por disco, não por jogo

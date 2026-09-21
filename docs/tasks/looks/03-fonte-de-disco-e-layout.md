@@ -4,9 +4,13 @@ title: "`iso_source.py` e `layout.py` — a fachada de disco e o monopólio de e
 type: implementação
 category: núcleo
 phase: 1
-depends_on: ["LOOKS-TASK-02"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §3.1"
-status: concluído
+depends_on: [LOOKS-TASK-02]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#3.1"
+reviewed_on: 2026-09-14
+review_commit: null
+done_on: 2026-09-14
+done_commit: f6db86f
 ---
 
 # LOOKS-TASK-03: A fachada de disco e o monopólio de endereço

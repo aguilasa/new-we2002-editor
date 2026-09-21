@@ -3,8 +3,12 @@ id: CORR-WTE-090
 title: "Correção: três vereditos `aberto` esperando decisão que já foi tomada, ou que pertence a outra fase"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: high
+done_on: 2026-08-24
+done_commit: e30773d
 ---
 
 # CORR-WTE-090: `aberto` não é onde se guarda decisão de escopo

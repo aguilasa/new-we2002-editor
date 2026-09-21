@@ -3,8 +3,12 @@ id: CORR-LOOKS-012
 title: "Correção: o perfil promete o `looks_image` a partir desta task, e `ctest -R looks` sai 0 dizendo que não achou teste"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-05
+severity: high
+done_on: 2026-09-14
+done_commit: d524d8c
 ---
 
 # CORR-LOOKS-012: o `looks_image` não existe, e pedir por ele sai verde

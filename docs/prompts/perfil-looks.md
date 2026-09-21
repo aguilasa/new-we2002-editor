@@ -7,12 +7,12 @@ mora aqui.
 
 Fonte: [`PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md). Onde este perfil e o plano
 divergirem, **o plano ganha** — aqui só mora o resumo operacional, e o
-`fonte_de_verdade` de cada task aponta para a seção que a mede.
+`source_of_truth` de cada task aponta para a seção que a mede.
 
 **Este ciclo mora numa subpasta.** Os comandos o recebem por argumento:
-`/executar looks`, `/revisar looks`, `/corrigir looks`. Sem argumento, os
-comandos continuam no `docs/tasks/` raso, que é o ciclo de PES2. A regra está no
-"Passo 0" de cada prompt.
+`/rite:execute looks`, `/rite:review looks`, `/rite:fix looks`. Sem argumento, os
+comandos continuam no `docs/tasks/` raso, que é o ciclo de PES2 — a regra é o
+`rite resolve-cycle`.
 
 ---
 
@@ -105,7 +105,7 @@ Não se revertem sem o usuário pedir.
    registra: a tela fica igual e parece botão errado. Cruz abre `Exit?` com
    `CANCEL` já selecionado.
 8. **Uma tecla de cada vez.** Confirmação em laço fecha a caixa seguinte junto —
-   regra do [CLAUDE.md](../../CLAUDE.md), que custou uma corrida no ciclo `wte/`.
+   regra do [CLAUDE.md](/CLAUDE.md), que custou uma corrida no ciclo `wte/`.
 9. **O nome do save state não diz de que disco ele veio.** O arquivo se chama
    `SLPM-87056_N.sav` — serial **japonês** — mesmo quando o state foi feito na
    imagem inglesa. Um state da japonesa teria exatamente o mesmo nome e traria
@@ -934,7 +934,7 @@ sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
 - `NOTICE.md` — tocado pela 01 e reconferido pela 20.
 - `docs/PLAN-LOOKS-PY.md` — **o plano se corrige na seção que muda**, nunca num
   apêndice de erratas.
-- [`CLAUDE.md`](../../CLAUDE.md) — **tem seção deste ciclo, e envelhece com
+- [`CLAUDE.md`](/CLAUDE.md) — **tem seção deste ciclo, e envelhece com
   ele.** Ela é a porta de entrada de quem ainda não sabe que existe plano, e
   por isso não é coberta por nenhuma varredura do rito: o plano, o perfil e as
   tasks se reconciliam entre si e ela fica para trás sozinha. Aconteceu em
@@ -964,9 +964,9 @@ sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
 **A LOOKS-TASK-13 pode ser antecipada** assim que a 09 fechar, e provavelmente
 deve: ela depende só da 09, é a task mais barata do ciclo — transcrição
 conferida contra quatro implementações que já concordam — e tanto o `--looks` da
-UI quanto o parser de tupla do corpus dependem dela. É o padrão que o
-`01-executar.md` já autoriza: tarefa de fase adiante de que uma tarefa da fase
-corrente precisa.
+UI quanto o parser de tupla do corpus dependem dela. É o que o
+`/rite:execute looks <ID>` faz quando o usuário pede: tarefa de fase adiante de
+que uma tarefa da fase corrente precisa.
 
 **O que não se antecipa:** nada que dependa da LOOKS-TASK-08. Enquanto a
 incógnita (a) estiver aberta, escrever montagem ou caçar paleta é trabalhar

@@ -3,8 +3,12 @@ id: CORR-WTE-136
 title: "Correção: a §8.7 conta seis roteiros onde há oito, e o Log erra o ordinal do item da CORR-WTE-127"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-06
+severity: low
+done_on: 2026-08-31
+done_commit: def9e77
 ---
 
 # CORR-WTE-136: duas contagens da §8.7 que não batem com a árvore

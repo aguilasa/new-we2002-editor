@@ -3,8 +3,12 @@ id: CORR-WTE-105
 title: "Correção: a pendência que a WTE-TASK-34 encaminhou para a 35 não existe na 35"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-34
+severity: low
+done_on: 2026-08-25
+done_commit: e07dbca
 ---
 
 # CORR-WTE-105: pendência encaminhada para a WTE-TASK-35 e ausente dela

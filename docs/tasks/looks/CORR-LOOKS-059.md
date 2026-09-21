@@ -3,8 +3,12 @@ id: CORR-LOOKS-059
 title: "Correção: o plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-24
+severity: low
+done_on: 2026-09-18
+done_commit: 165e29c
 ---
 
 # CORR-LOOKS-059: a base errada não é o que a regra responde, é o que sobra dela
@@ -164,3 +168,4 @@ Nenhum.
 - `docs/tasks/looks/24-de-onde-vem-a-pose.md` — o bloco do controle vermelho
 - `tools/looks/layout.py` — o fecho do docstring do `ANIME_BASE`
 - `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

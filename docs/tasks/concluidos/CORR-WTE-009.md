@@ -3,8 +3,12 @@ id: CORR-WTE-009
 title: "Correção: a §8.8 e a pendência do progresso.md ainda tratam o binário espanhol como única rota para as mensagens decepadas"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-05
+severity: low
+done_on: 2026-08-06
+done_commit: 75c05f1
 ---
 
 # CORR-WTE-009: as mensagens que o tradutor decepou estão dentro do próprio `.exe`

@@ -3,8 +3,12 @@ id: CORR-PES2-018
 title: "Correção: são 9 de 13 entradas que recomprimem no orçamento, não 10 de 3, e a folga vai a 3 bytes, não 4"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-29
+severity: high
+done_on: 2026-09-01
+done_commit: 38b5e90
 ---
 
 # CORR-PES2-018: Dois números da §1.14(g) não batem com a ferramenta

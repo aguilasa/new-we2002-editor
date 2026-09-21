@@ -3,8 +3,12 @@ id: CORR-PES2-006
 title: "Correção: o `poke.py` mede oito listas e continua dizendo cinco — inclusive no que imprime"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-02
+severity: high
+done_on: 2026-09-01
+done_commit: 12b631c
 ---
 
 # CORR-PES2-006: o `poke.py` afirma cinco listas e trabalha com oito

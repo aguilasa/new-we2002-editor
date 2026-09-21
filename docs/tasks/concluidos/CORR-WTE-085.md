@@ -3,8 +3,12 @@ id: CORR-WTE-085
 title: "Correção: o plano e o progresso ainda dizem \"seis gravações\" onde a ferramenta mede dezessete"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-30
+severity: high
+done_on: 2026-08-23
+done_commit: e39da48
 ---
 
 # CORR-WTE-085: o plano e o progresso ainda dizem "seis gravações"
@@ -15,8 +19,8 @@ A [WTE-TASK-30](/docs/tasks/concluidos/30-handlers-auxiliares.md) refutou a cont
 gravações — mediu **nove** — e a
 [WTE-TASK-31](/docs/tasks/concluidos/31-fechamento-fase-4.md) a remediu por ferramenta:
 são **dezessete**. O número corrente entrou no
-[`wte/re/fase-4.md`](../../../wte/re/fase-4.md) (gerado pelo
-[`check_fase4.py`](../../../wte/tools/check_fase4.py)) e na Fase 4 do plano, mas
+[`wte/re/fase-4.md`](/wte/re/fase-4.md) (gerado pelo
+[`check_fase4.py`](/wte/tools/check_fase4.py)) e na Fase 4 do plano, mas
 **duas linhas vivas continuam afirmando seis**, uma delas no próprio plano, que
 é a fonte de verdade do projeto:
 
@@ -110,12 +114,12 @@ A guarda opcional **entrou**, e o desenho mudou em um ponto em relação ao que
 esta correção esboçou. A sugestão era excluir `docs/tasks/*.md` do perímetro,
 mas um dos dois sítios vivos é o próprio `docs/tasks/concluidos/progresso.md`: com aquela
 exclusão, a guarda não cobriria metade do que ela existe para pegar. O que se
-usou foi o perímetro que o [`check_fase1.py`](../../../wte/tools/check_fase1.py)
+usou foi o perímetro que o [`check_fase1.py`](/wte/tools/check_fase1.py)
 já tem escrito e testado — ele deixa de fora a `NARRACAO` (onde está o
 `correcoes-progresso.md`), as `CORR-WTE-*.md`, as tasks `NN-*.md` com
 `status: concluído` e tudo o que vem depois do `## Log de Execução` —, e ele é
 **importado**, não copiado, pela regra de código duplicado do
-[`wte/tools/README.md`](../../../wte/tools/README.md).
+[`wte/tools/README.md`](/wte/tools/README.md).
 
 O alvo é a forma **por extenso** (`seis gravações`, `nove gravações`), nunca o
 dígito, e o número corrente sai de `len(m['escritores'])`, a mesma medida que

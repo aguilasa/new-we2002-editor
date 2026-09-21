@@ -3,8 +3,12 @@ id: CORR-WTE-124
 title: "Correção: CMD_DEFAULT_NUMBERS grava 37 faixas no port contra 20 no ed.exe"
 type: correção
 category: paridade
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-02
+severity: high
+done_on: 2026-08-29
+done_commit: "3273033"
 ---
 
 # CORR-WTE-124: `CMD_DEFAULT_NUMBERS` diverge do oráculo

@@ -3,15 +3,19 @@ id: CORR-WTE-030
 title: "Correção: o `tipos.md` conta 38 `strcpy`, e o `Database.cpp` tem 40 — os dois que faltam são `std::strcpy`"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-15
+severity: high
+done_on: 2026-08-10
+done_commit: f50d263
 ---
 
 # CORR-WTE-030: 38 `strcpy` é a contagem de dentro do `Load()`, não a do arquivo
 
 ## Problema identificado
 
-A decisão 1 de [`wte/re/tipos.md`](../../../wte/re/tipos.md) — a que manda o
+A decisão 1 de [`wte/re/tipos.md`](/wte/re/tipos.md) — a que manda o
 gerador emitir cópia com semântica de C — sustenta o argumento num número:
 
 > Isso não basta sozinho, porque a entrada tem **38 `strcpy` e 10 `strcat`** em

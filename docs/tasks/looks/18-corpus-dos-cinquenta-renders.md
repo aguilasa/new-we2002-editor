@@ -4,9 +4,13 @@ title: "Os 50 renders do Superpack como corpus independente"
 type: verificação
 category: oráculo
 phase: 6
-depends_on: ["LOOKS-TASK-17"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §5.4"
-status: concluído
+depends_on: [LOOKS-TASK-17]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#5.4"
+reviewed_on: 2026-09-16
+review_commit: null
+done_on: 2026-09-16
+done_commit: 0efd5e2
 ---
 
 # LOOKS-TASK-18: O corpus dos cinquenta

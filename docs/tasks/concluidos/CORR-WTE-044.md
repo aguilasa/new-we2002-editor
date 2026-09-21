@@ -3,8 +3,12 @@ id: CORR-WTE-044
 title: "Correção: o oráculo comportamental está morto e a fase 4 é circular"
 type: correção
 category: comportamento
-status: concluído
-depends_on: ["WTE-TASK-24"]
+status: done
+depends_on: [WTE-TASK-24]
+origin: WTE-TASK-19
+severity: high
+done_on: 2026-08-10
+done_commit: b9562ce
 ---
 
 # CORR-WTE-044: quebrar a circularidade do oráculo A
@@ -31,8 +35,8 @@ supõe, sem dizer, que o oráculo A funciona; com estas ROMs, não funciona.
 ## Evidência
 
 Medida na WTE-TASK-19, gerada por
-[`wte/tools/analisar_crash.py`](../../../wte/tools/analisar_crash.py) e escrita em
-[`wte/re/crash.md`](../../../wte/re/crash.md):
+[`wte/tools/analisar_crash.py`](/wte/tools/analisar_crash.py) e escrita em
+[`wte/re/crash.md`](/wte/re/crash.md):
 
 | | |
 |---|---|
@@ -44,8 +48,8 @@ Medida na WTE-TASK-19, gerada por
 | chamadores | `lista_equiposChange`, `lista_jugadores_1Change`, `dorsalClick`, `dorsalMouseDown` (todos `MainForm`) |
 
 A atribuição é medida, não lida da tela: os roteiros
-[07](../../../wte/tests/roteiros/07-controle-sem-time.txt) e
-[08](../../../wte/tests/roteiros/08-so-troca-de-time.txt) são iguais linha a linha
+[07](/wte/tests/roteiros/07-controle-sem-time.txt) e
+[08](/wte/tests/roteiros/08-so-troca-de-time.txt) são iguais linha a linha
 até `= ARRANQUE` e o 08 só acrescenta a troca de time — **0 violações de acesso
 contra 309**.
 

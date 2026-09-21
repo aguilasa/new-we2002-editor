@@ -4,9 +4,13 @@ title: "`ui_check.py` — a UI julgada de fora, e o alvo `looks_ui`"
 type: implementação
 category: verificação
 phase: 5
-depends_on: ["LOOKS-TASK-15"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §4.4"
-status: concluído
+depends_on: [LOOKS-TASK-15]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#4.4"
+reviewed_on: 2026-09-16
+review_commit: null
+done_on: 2026-09-16
+done_commit: b1316e0
 ---
 
 # LOOKS-TASK-16: Os contratos da UI

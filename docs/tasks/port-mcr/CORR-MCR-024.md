@@ -3,8 +3,12 @@ id: CORR-MCR-024
 title: "Correção: o `mcr_container` entrou e o plano continua com três alvos de `ctest`, e o perfil com `1 passed, 2 skipped`"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-16
+severity: high
+done_on: 2026-09-09
+done_commit: e2d1c11
 ---
 
 # CORR-MCR-024: o quarto gate não chegou ao plano nem ao perfil

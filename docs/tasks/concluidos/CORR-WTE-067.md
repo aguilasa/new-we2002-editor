@@ -3,8 +3,12 @@ id: CORR-WTE-067
 title: "Correção: a nota nova da WTE-TASK-27 põe a AtualizaBlocosLivresDeMl na unidade errada e promete um mapa que não existe"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-33
+severity: low
+done_on: 2026-08-19
+done_commit: ccde354
 ---
 
 # CORR-WTE-067: o desbloqueio escrito na WTE-TASK-27 não corresponde à API entregue
@@ -126,3 +130,7 @@ não o atribui ao `we2002_ml`. Nada a reconciliar.
 **Arquivos criados/modificados:**
 
 - `docs/tasks/concluidos/27-handlers-de-gravacao.md`
+
+## Log de Execução
+
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

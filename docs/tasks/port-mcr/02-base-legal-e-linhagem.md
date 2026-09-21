@@ -4,9 +4,13 @@ title: "Base legal, linhagem e o SHA fixado do upstream"
 type: documentação
 category: processo
 phase: 0
-depends_on: ["MCR-TASK-01"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §2"
-status: concluído
+depends_on: [MCR-TASK-01]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#2"
+reviewed_on: 2026-09-07
+review_commit: null
+done_on: 2026-09-07
+done_commit: 6870da3
 ---
 
 # MCR-TASK-02: Base legal e linhagem
@@ -20,7 +24,7 @@ status: concluído
   2026-09-07.
 - O repositório já vive nessa posição com `legacy/mfc/` (Moriero 2002,
   thyddralisk 2015), e por isso **não tem `LICENSE`**. A linhagem mora em
-  [`NOTICE.md`](../../../NOTICE.md).
+  [`NOTICE.md`](/NOTICE.md).
 
 ---
 

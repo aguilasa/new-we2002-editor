@@ -3,8 +3,12 @@ id: CORR-MCR-019
 title: "Correção: o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da MCR-TASK-14 ficou apoiada num fato que deixou de valer"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-12
+severity: low
+done_on: 2026-09-08
+done_commit: c7b86fa
 ---
 
 # CORR-MCR-019: uma decisão medida revertida em silêncio, e o item aberto que ela invalida

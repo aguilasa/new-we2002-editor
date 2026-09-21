@@ -4,9 +4,13 @@ title: "`selftest.py`, o CLI e os três alvos de `ctest` — fecha a Fase 1"
 type: ferramenta
 category: ferramental
 phase: 2
-depends_on: ["MCR-TASK-09"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §5.2"
-status: concluído
+depends_on: [MCR-TASK-09]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#5.2"
+reviewed_on: 2026-09-08
+review_commit: null
+done_on: 2026-09-08
+done_commit: 298856b
 ---
 
 # MCR-TASK-10: O gate

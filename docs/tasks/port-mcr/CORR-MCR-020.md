@@ -3,8 +3,12 @@ id: CORR-MCR-020
 title: "Correção: um cobrador ou capitão fora do onze aparece na tela como 10, calado — o núcleo preserva o byte e a janela mostra outro"
 type: correção
 category: ui
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-13
+severity: low
+done_on: 2026-09-08
+done_commit: 40b489d
 ---
 
 # CORR-MCR-020: o único lugar deste port que normaliza um valor em silêncio

@@ -3,8 +3,12 @@ id: CORR-LOOKS-063
 title: "Correção: o `--silhouette-styles` decide por mínimo, sem controle e sem margem, e o \"estilo trocado discorda\" não é asserção"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-28
+severity: high
+done_on: 2026-09-18
+done_commit: 50bb614
 ---
 
 # CORR-LOOKS-063: o gate dos estilos no close-up não tem controle nem margem

@@ -4,9 +4,13 @@ title: "Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela 
 type: investigação
 category: montagem
 phase: 9
-depends_on: ["LOOKS-TASK-22", "LOOKS-TASK-28"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (s)"
-status: concluído
+depends_on: [LOOKS-TASK-22, LOOKS-TASK-28]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: 2026-09-19
+review_commit: null
+done_on: 2026-09-18
+done_commit: d85ada8
 ---
 
 # LOOKS-TASK-29: Altura e corpo

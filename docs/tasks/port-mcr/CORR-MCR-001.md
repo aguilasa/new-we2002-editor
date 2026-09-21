@@ -3,8 +3,12 @@ id: CORR-MCR-001
 title: "Correção: `.claude/rules/tasks.md` ainda afirma que os prompts apontam para `docs/tasks/progresso.md`"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-01
+severity: high
+done_on: 2026-09-07
+done_commit: e9500c9
 ---
 
 # CORR-MCR-001: a regra ficou com a afirmação que a MCR-TASK-01 tornou falsa

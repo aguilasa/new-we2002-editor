@@ -3,8 +3,12 @@ id: CORR-WTE-101
 title: "Correção: \"seis seções obrigatórias\" onde o gabarito e a ferramenta têm cinco, e a conta de 481 é só delas"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: medium
+done_on: 2026-08-24
+done_commit: c1635ff
 ---
 
 # CORR-WTE-101: são cinco seções obrigatórias, não seis
@@ -19,7 +23,7 @@ SECOES = ("Entrada", "Saida", "Bytes tocados",
           "Pre-condicoes", "Comportamento de erro")   # spec_index.py:41
 ```
 
-O próprio [`GABARITO.md`](../../../wte/re/spec/GABARITO.md) se contradiz na mesma
+O próprio [`GABARITO.md`](/wte/re/spec/GABARITO.md) se contradiz na mesma
 página: o modelo mostra cinco seções com `**Evidência:**` mais uma `## Notas`
 declarada **opcional**, e o parágrafo logo abaixo diz *"As seis seções são
 obrigatórias e nesta ordem; `## Notas` é opcional. Cada uma das seis carrega

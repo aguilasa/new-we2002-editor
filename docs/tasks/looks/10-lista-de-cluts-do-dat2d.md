@@ -4,9 +4,13 @@ title: "A lista de CLUTs do `DAT2D.BIN` que o `bin_archive.py` não acha"
 type: engenharia-reversa
 category: textura
 phase: 3
-depends_on: ["LOOKS-TASK-08"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §1.7"
-status: concluído
+depends_on: [LOOKS-TASK-08]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#1.7"
+reviewed_on: 2026-09-15
+review_commit: null
+done_on: 2026-09-15
+done_commit: d5e334d
 ---
 
 # LOOKS-TASK-10: A lista de paletas que falta

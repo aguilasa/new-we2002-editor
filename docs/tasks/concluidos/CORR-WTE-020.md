@@ -3,8 +3,12 @@ id: CORR-WTE-020
 title: "Correção: a tabela de propriedades do dfm2lfm.py diz ter sido medida na LCL 3.0, e nada remede — LCL_VERSAO é código morto"
 type: correção
 category: ui
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-10
+severity: high
+done_on: 2026-08-09
+done_commit: 2e70784
 ---
 
 # CORR-WTE-020: a tabela `ACEITA`/`DESCARTA` não tem remedição versionada

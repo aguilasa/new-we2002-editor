@@ -3,8 +3,12 @@ id: CORR-PES2-025
 title: "Correção: a §3.2 do plano ainda chama a morada do fork de \"item aberto da PES2-TASK-34\""
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-34
+severity: low
+done_on: 2026-09-03
+done_commit: 648e60d
 ---
 
 # CORR-PES2-025: uma linha da §3.2 ficou para trás da reconciliação da §6.14

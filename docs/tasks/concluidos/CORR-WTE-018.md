@@ -3,15 +3,19 @@ id: CORR-WTE-018
 title: "Correção: o `02-revisar.md` cita ~430, 70 e 197 como “o que já está no plano”, e o plano não diz mais isso"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-09
+severity: low
+done_on: 2026-08-09
+done_commit: dac5638
 ---
 
 # CORR-WTE-018: o prompt de revisão dá exemplo com três números aposentados
 
 ## Problema identificado
 
-A etapa 2 do [`02-revisar.md`](/docs/prompts/02-revisar.md) manda remedir toda
+A etapa 2 do [`02-revisar.md`](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/02-revisar.md) manda remedir toda
 contagem que a task afirma, e dá a lista de exemplos (linha 88):
 
 ```
@@ -45,7 +49,7 @@ no plano e pode ter mudado: 18 formulários, ~430 componentes, 96 handlers, 19 d
 69 offsets, 70 strings com padding, 13 unidades, 197 bitmaps.
 ```
 
-Contra a §5 do [`fase-1.md`](../../../wte/re/fase-1.md), que é o quadro de
+Contra a §5 do [`fase-1.md`](/wte/re/fase-1.md), que é o quadro de
 reconciliação gerado:
 
 ```

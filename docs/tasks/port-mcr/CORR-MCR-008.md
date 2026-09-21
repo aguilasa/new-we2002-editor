@@ -3,8 +3,12 @@ id: CORR-MCR-008
 title: "Correção: destino faltando mata o `layout.py` no import, e o `--self-check` não chega a rodar"
 type: correção
 category: núcleo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-05
+severity: low
+done_on: 2026-09-07
+done_commit: d663d76
 ---
 
 # CORR-MCR-008: o harness do `layout.py` morre antes de começar

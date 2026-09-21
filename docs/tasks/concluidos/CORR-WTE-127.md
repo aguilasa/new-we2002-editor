@@ -3,8 +3,12 @@ id: CORR-WTE-127
 title: "Correção: o Escape da CORR-WTE-125 continua divergindo nos dez combos de papel, e a razão dada para excluí-los não bate com o código"
 type: correção
 category: ui
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-03
+severity: high
+done_on: 2026-08-29
+done_commit: 295fa5d
 ---
 
 # CORR-WTE-127: o mesmo `Escape`, o outro combo — medido divergindo

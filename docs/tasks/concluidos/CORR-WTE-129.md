@@ -3,8 +3,12 @@ id: CORR-WTE-129
 title: "Correção: o Log da PAR-TASK-04 põe o CMD_SKILLS1 em dlu (392,36); o controle está em (382,32)"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-04
+severity: low
+done_on: 2026-08-29
+done_commit: e6940a7
 ---
 
 # CORR-WTE-129: a coordenada que o Log deixou para quem retomar está errada

@@ -72,13 +72,15 @@ if(Python3_FOUND)
         COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/apply_glossary.py --check)
 
-    # The prompts under docs/prompts/ are project-agnostic: they read the
-    # progress files and each task states its own source of truth in the
-    # `fonte_de_verdade` frontmatter field. This enforces the four conventions
-    # that make that work -- see .claude/rules/tasks.md.
+    # Tasks and fixes follow the Rite plugin's conventions (rite.toml): state
+    # in frontmatter, a source of truth per task, links, depends_on inside a
+    # cycle, phase entries in the cycle profile. check_tasks.py runs
+    # `rite.py check` over every cycle and skips when the plugin is not
+    # installed on this machine -- see .claude/rules/tasks.md.
     add_test(NAME tasks
         COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/check_tasks.py)
+    set_tests_properties(tasks PROPERTIES SKIP_RETURN_CODE 77)
 
     # PES2 (docs/PLAN-PES2-PSX.md) is a separate project that shares no code
     # with we2002_core, but its tools are Python and belong in the same run.

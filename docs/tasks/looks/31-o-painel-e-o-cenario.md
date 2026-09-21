@@ -4,9 +4,13 @@ title: "Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU"
 type: implementação
 category: render
 phase: 10
-depends_on: ["LOOKS-TASK-22", "LOOKS-TASK-28"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (o)"
-status: concluído
+depends_on: [LOOKS-TASK-22, LOOKS-TASK-28]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: 2026-09-21
+review_commit: null
+done_on: 2026-09-21
+done_commit: "8164261"
 ---
 
 # LOOKS-TASK-31: O painel e o cenário

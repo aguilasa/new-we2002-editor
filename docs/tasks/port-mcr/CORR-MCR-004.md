@@ -3,8 +3,12 @@ id: CORR-MCR-004
 title: "Correção: o cache do WebView2 não mora todo em `bin/`/`obj/` — um terço dele é a linha `packages/`"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-02
+severity: high
+done_on: 2026-09-07
+done_commit: 6870da3
 ---
 
 # CORR-MCR-004: a atribuição do WebView2 contradiz a tabela que ela anota

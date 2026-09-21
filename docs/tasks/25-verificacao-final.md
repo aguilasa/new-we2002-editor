@@ -1,12 +1,16 @@
 ---
 id: PES2-TASK-25
 title: "Verificação final — o projeto contra a definição de pronto"
-type: fechamento
+type: closing
 category: verificação
 phase: 6
-depends_on: ["PES2-TASK-24"]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §0 (definição de pronto)"
-status: pendente
+depends_on: [PES2-TASK-24]
+status: pending
+source_of_truth: "/docs/PLAN-PES2-PSX.md#0"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-25: Verificação final
@@ -50,7 +54,7 @@ Preencher a coluna de estado com **medida**, não com "feito".
 - [ ] Mover as tasks e os dois arquivos de progresso para
       `docs/tasks/concluidos/`, **juntos** — a pasta é um conjunto fechado, e
       o `check_tasks.py` confere cada task contra o `progresso.md` que mora
-      ao lado dela ([.claude/rules/tasks.md](../../.claude/rules/tasks.md)).
+      ao lado dela ([.claude/rules/tasks.md](/.claude/rules/tasks.md)).
 
 ### O que **não** fechar sem dizer
 
@@ -66,7 +70,7 @@ custa mais caro do que projeto que fecha com a lista.
 - [ ] A tabela dos sete entregáveis preenchida com medida.
 - [ ] `ctest -R pes2` verde: `pes2_selftest`, `pes2_image`, `pes2_boot`.
 - [ ] `python3 tools/check_tasks.py` verde.
-- [ ] A conferência de links da [.claude/rules/links.md](../../.claude/rules/links.md)
+- [ ] A conferência de links da [.claude/rules/links.md](/.claude/rules/links.md)
       verde para o que as tasks acrescentaram.
 - [ ] O que ficou aberto, listado, com o custo de cada item.
 

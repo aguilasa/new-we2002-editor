@@ -3,8 +3,12 @@ id: CORR-WTE-141
 title: "Correção: `Return` na janela principal encerra o `ed.exe` e não faz nada no port"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-09
+severity: medium
+done_on: 2026-08-31
+done_commit: b9c10aa
 ---
 
 # CORR-WTE-141: o `Return` que fecha o editor original

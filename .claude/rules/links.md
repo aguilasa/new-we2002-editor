@@ -11,7 +11,7 @@ raiz do repositório. Nunca caminho relativo.
 | `docs/PLAN-LINUX.md` | `/docs/PLAN-LINUX.md` | `PLAN-LINUX.md`, `../PLAN-LINUX.md` |
 | `docs/tasks/concluidos/01-ferramental.md` | `/docs/tasks/concluidos/01-ferramental.md` | `01-ferramental.md`, `tasks/01-ferramental.md` |
 | `docs/tasks/concluidos/CORR-WTE-001.md` | `/docs/tasks/concluidos/CORR-WTE-001.md` | `./CORR-WTE-001.md` |
-| `docs/prompts/03-corrigir.md` | `/docs/prompts/03-corrigir.md` | `../prompts/03-corrigir.md` |
+| `docs/prompts/perfil-mcr.md` | `/docs/prompts/perfil-mcr.md` | `../prompts/perfil-mcr.md` |
 
 Vale **de qualquer arquivo para qualquer arquivo** dentro de `docs/`, inclusive
 entre irmãos no mesmo diretório: o `progresso.md` linka
@@ -30,28 +30,23 @@ ferramenta servindo nada — quem resolve é o GitHub, a partir da raiz do
 repositório. Por isso o prefixo `/docs/`: copiar a forma do `snes` produziria
 link quebrado.
 
-## Template em bloco de código conta
+## Nos arquivos de ciclo, tudo é absoluto — e quem confere é o Rite
 
-A regra alcança o link escrito **dentro de bloco de código** quando o bloco é
-modelo do que vira markdown de verdade. É o caso dos templates de tabela de
-`docs/prompts/`: o link do modelo é o que o `/executar` e o `/revisar` copiam
-para o `progresso.md` e o `correcoes-progresso.md`. Os destinos ali são
-placeholder (`/docs/tasks/CORR-<PREFIXO>-XXX.md`,
-`/docs/tasks/XX-nome-do-arquivo.md`) — não são link quebrado, e ficam **fora**
-da conferência de existência abaixo.
+Desde a migração para o Rite (`rite.toml`, `link_style = "root-absolute"`), os
+arquivos que ele governa — tasks, CORRs, os dois arquivos de progresso de cada
+ciclo e os perfis de `docs/prompts/` — usam caminho a partir da raiz **para
+qualquer alvo**, inclusive fora de `docs/`: `/CLAUDE.md`, `/src/app/X.hpp`. O
+`rite.py check` reprova link relativo nesses arquivos, e o `rite.py relink`
+converte. O GitHub resolve os dois do mesmo jeito; a regra única é o que deixa a
+conferência mecânica.
 
-Vale pelo mesmo motivo para os **`*.template.md` de `docs/tasks/`**
-(`progresso.template.md`, `correcoes-progresso.template.md`): eles são o modelo
-dos dois arquivos de progresso, e os destinos das linhas de exemplo
-(`/docs/<PLANO>.md`, `/docs/tasks/CORR-<PREFIXO>-001.md`) são placeholder — a
-**forma** do link continua valendo e é conferida; só a existência do destino
-fica de fora. O `tools/check_tasks.py` também os ignora, pelo sufixo: template
-não tem frontmatter de task.
+As tabelas desses arquivos são geradas pelo Rite, então os modelos de tabela
+que moravam nos prompts antigos e nos `*.template.md` deixaram de existir.
 
-## Alvo fora de `docs/`
+## Alvo fora de `docs/`, no resto de `docs/`
 
-`CLAUDE.md`, `NOTICE.md`, `README.md`, `wte/re/*`, `src/*`, `.claude/*`
-continuam com **link relativo comum**, como está hoje:
+Fora dos arquivos de ciclo, `CLAUDE.md`, `NOTICE.md`, `README.md`, `wte/re/*`,
+`src/*`, `.claude/*` continuam com **link relativo comum**, como está hoje:
 
 ```markdown
 [NOTICE.md](../NOTICE.md)
@@ -78,16 +73,12 @@ grep -rnoE '\]\([^)]*\.md[^)]*\)' --include='*.md' docs |
 Deve sobrar só alvo fora de `docs/` (`../NOTICE.md`, `../CLAUDE.md`,
 `../../wte/...`) e URL absoluta.
 
-**O `](/<CICLO>/…)` dos prompts é a mesma forma, com a pasta por resolver.**
-Desde 2026-09-07 os cinco prompts de `docs/prompts/` não cravam mais
-`docs/tasks/`: eles resolvem a pasta do ciclo no Passo 0 e escrevem
-`<CICLO>` no lugar dela. Um link de modelo lá — `/<CICLO>/XX-nome.md` — vira
-`/docs/tasks/XX-nome.md` num ciclo raso e `/docs/tasks/<subpasta>/XX-nome.md`
-num ciclo em subpasta. É placeholder, como os `<PREFIXO>`, e por isso sai da
-conferência de forma junto com eles.
+**Nos arquivos de ciclo, a conferência é do Rite:** `rite.py check --all
+--include-archived` confere forma e existência de todo link, fora de bloco de
+código e de crases — é a distinção "consciente de cerca" da seção abaixo, feita
+por ferramenta. Os comandos daqui servem para o resto de `docs/`.
 
-Destino existe (`docs/prompts/`, os `*.template.md` e o arquivo de
-`docs/tasks/concluidos/` ficam de fora — ver abaixo):
+Destino existe (o arquivo de `docs/tasks/concluidos/` fica de fora — ver abaixo):
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
@@ -113,8 +104,8 @@ Saída vazia é o esperado. Rode antes de commitar doc que ganhou link novo.
 ## O arquivo de `docs/tasks/concluidos/`
 
 Projeto encerrado vai inteiro para `docs/tasks/concluidos/` — tasks, correções e
-os dois arquivos de progresso juntos —, e `docs/tasks/` fica só com os
-`*.template.md`, que são a base do próximo. **A regra do `/docs/` continua
+os dois arquivos de progresso juntos (`rite.py archive` faz o `git mv` e
+reescreve os links). **A regra do `/docs/` continua
 valendo lá dentro**, com o caminho completo: `/docs/tasks/concluidos/CORR-WTE-001.md`.
 
 O que muda é a **conferência de existência**, e por um motivo específico: os

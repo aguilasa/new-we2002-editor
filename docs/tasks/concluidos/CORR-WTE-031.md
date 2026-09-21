@@ -3,8 +3,12 @@ id: CORR-WTE-031
 title: "Correção: o `wte/tests/README.md` diz que a pasta está vazia e é só Pascal, e a WTE-TASK-16 pôs dois arquivos lá, um deles C++"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-16
+severity: low
+done_on: 2026-08-10
+done_commit: d754d38
 ---
 
 # CORR-WTE-031: o README de `wte/tests/` descreve uma pasta que não existe mais

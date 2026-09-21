@@ -3,8 +3,12 @@ id: CORR-WTE-092
 title: "Correção: dois handlers sem estímulo — o ramo do reserva e o arrasto de bola"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: high
+done_on: 2026-08-24
+done_commit: "6150942"
 ---
 
 # CORR-WTE-092: os dois estímulos que o harness não sabia produzir

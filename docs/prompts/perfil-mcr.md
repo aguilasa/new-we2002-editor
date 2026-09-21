@@ -7,12 +7,12 @@ deste ciclo mora aqui.
 
 Fonte: [`PLAN-MCR-PY.md`](/docs/PLAN-MCR-PY.md). Onde este perfil e o plano
 divergirem, **o plano ganha** — aqui só mora o resumo operacional, e o
-`fonte_de_verdade` de cada task aponta para a seção que a mede.
+`source_of_truth` de cada task aponta para a seção que a mede.
 
 **Este ciclo mora numa subpasta**, e é o primeiro que mora. Os comandos o
-recebem por argumento: `/executar port-mcr`, `/revisar port-mcr`,
-`/corrigir port-mcr`. Sem argumento, os comandos continuam no `docs/tasks/`
-raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
+recebem por argumento: `/rite:execute port-mcr`, `/rite:review port-mcr`,
+`/rite:fix port-mcr`. Sem argumento, os comandos continuam no `docs/tasks/`
+raso, que é o ciclo de PES2 — a regra é o `rite resolve-cycle`.
 
 ---
 
@@ -109,8 +109,8 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 
 | pergunta | quem responde |
 |---|---|
-| onde fica cada campo | [`wte/re/mcr.md`](../../wte/re/mcr.md) — 17 destinos medidos do `we-team-editor.exe` |
-| como se empacotam os 12 bytes | [`src/core/Player.cpp`](../../src/core/Player.cpp) — **normativo** |
+| onde fica cada campo | [`wte/re/mcr.md`](/wte/re/mcr.md) — 17 destinos medidos do `we-team-editor.exe` |
+| como se empacotam os 12 bytes | [`src/core/Player.cpp`](/src/core/Player.cpp) — **normativo** |
 | o contêiner PSX | spec pública do nocash, já implementada em `wte/tools/dump_mcr.py` |
 | o que significam X, Y, papéis e os domínios | o upstream — **rótulo de terceiro, não medição** |
 | o `0x6500` | **o capitão** — medido na MCR-TASK-13 por quatro caminhos independentes (§1.8 do plano). O domínio é o onze inicial, `0..10`, e não os 23 slots |
@@ -191,18 +191,20 @@ do leitor, não da UI, e o veredito do `0x6500` decide se a tela da MCR-TASK-12
 tem um campo "capitão" ou seis cobradores. **Não foi antecipada**, e a 12 fechou
 com o byte em leitura; a 13 abriu a tela de novo para pôr o campo. O precedente
 fica com o custo medido: antecipar teria poupado uma reabertura.
-É o padrão que o `01-executar.md` já
-autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
+É o que o `/rite:execute port-mcr <ID>` faz
+quando o usuário pede — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
 
 ---
 
 ## Verificações específicas por fase
 
-- **Fase 0** — `grep -rn 'port-mcr' docs/prompts/0*.md docs/prompts/geral.md
-  .claude/commands` vazio: o **rito** não conhece ciclo pelo nome. As duas
+- **Fase 0** — o **rito** não conhece ciclo pelo nome. Até a migração para o
+  Rite isso se media com `grep -rn 'port-mcr'` vazio nos prompts e wrappers
+  ([`docs/prompts/` da época](https://github.com/aguilasa/new-we2002-editor/tree/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts)); hoje o rito é o plugin, fora
+  do repositório, e o ciclo só existe no `rite.toml`. As duas
   regras de `.claude/rules/` e este perfil **citam** `port-mcr`, e devem —
   convenção sem caso concreto vira prosa, e elas já nomeiam `PES2` e `WTE` do
-  mesmo jeito. `/executar` sem argumento escolhe a mesma task de antes;
+  mesmo jeito. `/rite:execute` sem argumento escolhe a mesma task de antes;
   `pip freeze` do venv no Log.
 - **Fase 1** — todo módulo novo traz `self_check()` com **caso vermelho**; nenhum
   endereço fora de `layout.py`; round-trip nas duas formas; e **nada em

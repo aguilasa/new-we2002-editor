@@ -3,8 +3,12 @@ id: CORR-MCR-002
 title: "Correção: a verificação de Fase 0 do perfil pede um `grep` que não tem como sair vazio"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-01
+severity: high
+done_on: 2026-09-07
+done_commit: 20886ae
 ---
 
 # CORR-MCR-002: o perfil ficou com o escopo velho do `grep`

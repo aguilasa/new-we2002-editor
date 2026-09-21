@@ -3,8 +3,12 @@ id: CORR-LOOKS-062
 title: "Correção: a segunda chuteira é posta por espelho em z, cai a 258 unidades da própria canela, e nenhum gate pode ver isso"
 type: correção
 category: render
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-27
+severity: medium
+done_on: 2026-09-18
+done_commit: c264779
 ---
 
 # CORR-LOOKS-062: o pé que a task ia medir saiu espelhado, e a asserção que o cobriria é vazia

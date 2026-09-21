@@ -3,8 +3,12 @@ id: CORR-WTE-086
 title: "Correção: o dono do ficha_enlaza não é o pabajoClick — nenhuma spec ou código liga os dois"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-30
+severity: low
+done_on: 2026-08-23
+done_commit: e82403c
 ---
 
 # CORR-WTE-086: o dono do `ficha_enlaza` não é o `pabajoClick`
@@ -83,7 +87,7 @@ como se valesse para os dois.
 Na seção *"E a resposta dos dois é a mesma, medida"*, separar as duas metades:
 o `ficha_movertodos` sai do `paderecha2Click` / `MoveTodosOsJogadores`, com o
 `mrYes` medido; o `ficha_enlaza` é alcançado pelo
-[`MainForm.mostrar_jugadorClick`](../../../wte/re/spec/MainForm.mostrar_jugadorClick.md),
+[`MainForm.mostrar_jugadorClick`](/wte/re/spec/MainForm.mostrar_jugadorClick.md),
 que continua `aberto` — e é ali, não aqui, que a rota de vínculo será fechada.
 
 Vale escrever o que **não** foi medido: qual condição faz o

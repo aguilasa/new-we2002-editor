@@ -3,8 +3,12 @@ id: CORR-PES2-029
 title: "Correção: estado ausente despeja traceback no `savestate.py`, e o `except` do `selftest.py` vira NameError"
 type: correção
 category: ferramenta
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-32
+severity: low
+done_on: 2026-09-03
+done_commit: 5e8d16a
 ---
 
 # CORR-PES2-029: dois caminhos de falha saem como traceback onde deviam sair como recusa

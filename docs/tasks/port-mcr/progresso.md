@@ -1,3 +1,8 @@
+---
+cycle: port-mcr
+prefix: MCR
+profile: /docs/prompts/perfil-mcr.md
+---
 # Progresso — port em Python do editor de `.mcr` do WE2002
 
 Rastreamento das tasks de [`/docs/PLAN-MCR-PY.md`](/docs/PLAN-MCR-PY.md), que é
@@ -7,7 +12,7 @@ do plano.
 
 **Pasta deste ciclo:** `docs/tasks/port-mcr/`. Todos os caminhos deste arquivo
 e das tasks ao lado dele saem daqui, e é o nome desta pasta que os comandos
-recebem como argumento (`/executar port-mcr`). Sem argumento, os comandos
+recebem como argumento (`/rite:execute port-mcr`). Sem argumento, os comandos
 continuam lendo `docs/tasks/` raso — o ciclo de PES2 —, exatamente como antes.
 
 **Perfil deste ciclo:** [`/docs/prompts/perfil-mcr.md`](/docs/prompts/perfil-mcr.md).
@@ -18,7 +23,7 @@ em [`/docs/tasks/port-mcr/correcoes-progresso.md`](/docs/tasks/port-mcr/correcoe
 **Projeto separado do `newWe2002`, do `wte/` e do PES2.** Não compartilha build
 nem código: `tools/mcr/` é Python 3 puro, e a UI é PySide6 num venv. O que
 compartilha é **conhecimento de formato** — os 17 destinos medidos em
-[`../wte/re/mcr.md`](../../../wte/re/mcr.md) e o codec de 12 bytes de
+[`../wte/re/mcr.md`](/wte/re/mcr.md) e o codec de 12 bytes de
 `src/core/Player.cpp`, que a §1.4 do plano mostra ser o mesmo do upstream. A
 §0 do plano **proíbe** estender o `we2002_core`; o que for compartilhado é
 copiado com atribuição no comentário.
@@ -32,31 +37,34 @@ por princípio.
 
 ## Resumo
 
-| ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
-| -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | — | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | 01 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | 01 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | 03 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | `layout.py` e o cross-check dos 17 destinos | 1 | 04 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | `attributes.py` × `Player::Decode/Encode` | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | `numbers.py` e `text.py` — os 5 bits e o cp932 | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-08](/docs/tasks/port-mcr/08-formacao-e-dominios.md) | `formation.py` e `domains.py` — X/Y/papéis, cobradores, presets | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | `model.py`, `mcrio.py` e o round-trip byte-idêntico | 1 | 06, 07, 08 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | `selftest.py`, o CLI e os três alvos de `ctest` — **fecha a Fase 1** | 2 | 09 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco, ficha em leitura | 3 | 10 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação, dorsais | 3 | 11 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio, o veredito do console | 3 | 09 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | 12, 13 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível | 5 | 12 | ✅ Concluído | 2026-09-09 | 2026-09-09 |
-| [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos | 5 | 15 | ✅ Concluído | 2026-09-09 | 2026-09-09 |
-| [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | Onde o option file guarda os times secretos e a Master League no modo exibição | 5 | 09 | ✅ Concluído | 2026-09-10 | 2026-09-10 |
+<!-- rite:begin tasks -->
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | infraestrutura | — | done | 2026-09-07 | 2026-09-07 |
+| [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | documentação | MCR-TASK-01 | done | 2026-09-07 | 2026-09-07 |
+| [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | ferramenta | MCR-TASK-01 | done | 2026-09-07 | 2026-09-07 |
+| [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | implementação | MCR-TASK-03 | done | 2026-09-07 | 2026-09-07 |
+| [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | `layout.py` e o cross-check dos 17 destinos | 1 | implementação | MCR-TASK-04 | done | 2026-09-07 | 2026-09-07 |
+| [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | `attributes.py` — o codec de 12 bytes, contra `Player::Decode/Encode` | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 |
+| [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | `numbers.py` e `text.py` — os 5 bits e o cp932 | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 |
+| [MCR-TASK-08](/docs/tasks/port-mcr/08-formacao-e-dominios.md) | `formation.py` e `domains.py` — X/Y, papéis, cobradores e presets | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 |
+| [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | `model.py`, `mcrio.py` e o round-trip byte-idêntico | 1 | implementação | MCR-TASK-06, MCR-TASK-07, MCR-TASK-08 | done | 2026-09-08 | 2026-09-08 |
+| [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | `selftest.py`, o CLI e os três alvos de `ctest` — fecha a Fase 1 | 2 | ferramenta | MCR-TASK-09 | done | 2026-09-08 | 2026-09-08 |
+| [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco e ficha em leitura | 3 | implementação | MCR-TASK-10 | done | 2026-09-08 | 2026-09-08 |
+| [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação e dorsais | 3 | implementação | MCR-TASK-11 | done | 2026-09-08 | 2026-09-08 |
+| [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio e o veredito do console | 3 | verificação | MCR-TASK-09 | done | 2026-09-08 | 2026-09-08 |
+| [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | verificação | MCR-TASK-12, MCR-TASK-13 | done | 2026-09-08 | 2026-09-08 |
+| [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível | 5 | implementação | MCR-TASK-12 | done | 2026-09-09 | 2026-09-09 |
+| [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos | 5 | implementação | MCR-TASK-15 | done | 2026-09-09 | 2026-09-09 |
+| [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | Onde o option file guarda os times secretos e a opção de Master League no modo exibição | 5 | verificação | MCR-TASK-09 | done | 2026-09-10 | 2026-09-10 |
+<!-- rite:end -->
 
-**Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada task — não edite
+dentro dela. **Status:** `pending` · `in-progress` · `done` · `blocked` · `skipped`.
 
-**Concluída em** é a data em que a task passou a ✅; **Revisado em** é a data em
-que o `/revisar` passou por ela. `⬜ pendente` na segunda coluna significa que a
-revisão ainda não aconteceu.
+- **"Done on"** — a data do commit de trabalho, escrita pelo `rite close`. Tarefa pendente leva `—`.
+- **"Reviewed on"** — `pending` enquanto a tarefa concluída espera revisão; a data, depois do
+  `rite mark-reviewed`; `—` se a tarefa nem começou.
 
 ---
 

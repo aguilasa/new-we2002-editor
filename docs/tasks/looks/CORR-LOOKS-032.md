@@ -3,8 +3,12 @@ id: CORR-LOOKS-032
 title: "Correção: o bloco de gates da LOOKS-TASK-14 ficou na primeira passagem — 29 controles contra 32"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-14
+severity: low
+done_on: 2026-09-16
+done_commit: 7665e20
 ---
 
 # CORR-LOOKS-032: os gates transcritos na task são de antes dos controles que ela mesma criou

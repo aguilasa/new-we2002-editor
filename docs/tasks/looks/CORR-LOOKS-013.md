@@ -3,8 +3,12 @@ id: CORR-LOOKS-013
 title: "Correção: o cabeçalho do `MODEL.BIN` foi descrito por metade — são duas corridas de ponteiros, e a primeira lista declara o 1816"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-05
+severity: medium
+done_on: 2026-09-14
+done_commit: 61d1d5d
 ---
 
 # CORR-LOOKS-013: o cabeçalho do `MODEL.BIN` foi descrito por metade

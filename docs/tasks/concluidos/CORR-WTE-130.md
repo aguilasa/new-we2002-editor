@@ -3,8 +3,12 @@ id: CORR-WTE-130
 title: "Correção: o roteiro da §8.5 troca completa por incompleta, e o PAR_INCOMPLETE=1 roda a completa"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-05
+severity: medium
+done_on: 2026-08-29
+done_commit: 8f049c2
 ---
 
 # CORR-WTE-130: a caixa marcada é a substituição **completa**, e o roteiro diz o contrário

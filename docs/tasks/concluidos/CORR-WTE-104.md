@@ -3,8 +3,12 @@ id: CORR-WTE-104
 title: "Correção: o golden-24 grava duas vezes num time cujos dois primeiros cobradores são iguais — o vaivém seria invisível"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-34
+severity: high
+done_on: 2026-08-25
+done_commit: bd1a550
 ---
 
 # CORR-WTE-104: o `golden-24` é cego para o vaivém que ele existe para medir
@@ -16,7 +20,7 @@ O terceiro critério da [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-c
 fase 6: o `ed.exe` **não é idempotente** — `Load`+`Save` troca os dois primeiros
 cobradores (`OFS_KICKER`) de cada clube de ML, e gravar duas vezes volta ao
 início. O
-[`golden-24-gravacao-dupla`](../../../wte/tests/roteiros/golden-24-gravacao-dupla.txt)
+[`golden-24-gravacao-dupla`](/wte/tests/roteiros/golden-24-gravacao-dupla.txt)
 escolheu a tática justamente por ser a gravação que carrega cobrador.
 
 **O roteiro grava no time 2, e os dois primeiros cobradores do time 2 são
@@ -138,7 +142,7 @@ o resultado**, que é decisivo nos dois sentidos:
   [WTE-TASK-35](/docs/tasks/concluidos/35-divergencias-deliberadas.md) com o offset medido.
 
 O lugar do registro é o gerador do
-[`golden.md`](../../../wte/re/golden.md) — hoje ele descreve o terceiro ponto
+[`golden.md`](/wte/re/golden.md) — hoje ele descreve o terceiro ponto
 como coisa a fazer (*"o terceiro ponto de cada um é o par que grava uma vez
 pelo mesmo caminho"*) e não carrega resultado nenhum.
 

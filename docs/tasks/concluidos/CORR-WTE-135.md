@@ -3,8 +3,12 @@ id: CORR-WTE-135
 title: "Correção: o item 5 da §8.7 (`.t2002`) foi fechado sem veredito de golden"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-06
+severity: high
+done_on: 2026-08-31
+done_commit: b3658f4
 ---
 
 # CORR-WTE-135: o `.t2002` fechou por prosa, não por comparação

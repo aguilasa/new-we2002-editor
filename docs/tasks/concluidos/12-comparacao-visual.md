@@ -4,9 +4,13 @@ title: "Comparação visual dos 18 formulários contra o original"
 type: verificação
 category: ui
 phase: 2
-depends_on: ["WTE-TASK-11"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §6 e Fase 2 item 3"
-status: concluído
+depends_on: [WTE-TASK-11]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#6"
+reviewed_on: 2026-08-09
+review_commit: null
+done_on: 2026-08-09
+done_commit: 588508b
 ---
 
 # WTE-TASK-12: Comparação visual
@@ -85,7 +89,7 @@ de coordenadas foi levantado dali. **Selecionar um time derruba o original**:
 310 `EXCEPTION_ACCESS_VIOLATION`, começando por leitura em ponteiro nulo + `0x1c`
 em `ip=0x005f5ea0` e terminando em `stack overflow`. Determinístico, com cópia
 byte-idêntica a `roms/`. Diagnóstico completo, o que foi descartado como causa e
-o comando de reprodução em [`../../wte/re/visual.md`](../../../wte/re/visual.md),
+o comando de reprodução em [`../../wte/re/visual.md`](/wte/re/visual.md),
 achado 1.
 
 Sem time, o original só habilita `Sobre...` e `Sair` — e ambos funcionam, o que
@@ -130,7 +134,7 @@ resolver; o crash em si é bloqueio da
 - **Resumo do que foi feito:**
 
   Os 18 formulários do port capturados e inspecionados um a um, 4 do original,
-  e cinco achados em [`../../wte/re/visual.md`](../../../wte/re/visual.md).
+  e cinco achados em [`../../wte/re/visual.md`](/wte/re/visual.md).
 
   O que decidiu a task foi parar de clicar às cegas e **levantar o gatilho do
   DFM**: cada controle tem `Left`/`Top` e `OnClick` no DFM extraído, então dá

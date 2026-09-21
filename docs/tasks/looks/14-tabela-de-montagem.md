@@ -4,9 +4,13 @@ title: "`assembly.py` — campo de LOOKS → peça + paleta"
 type: engenharia-reversa
 category: núcleo
 phase: 4
-depends_on: ["LOOKS-TASK-12", "LOOKS-TASK-13"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §6"
-status: concluído
+depends_on: [LOOKS-TASK-12, LOOKS-TASK-13]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#6"
+reviewed_on: 2026-09-16
+review_commit: null
+done_on: 2026-09-16
+done_commit: 1c64ea6
 ---
 
 # LOOKS-TASK-14: A tabela de montagem

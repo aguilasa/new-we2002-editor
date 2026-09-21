@@ -4,9 +4,13 @@ title: "re/offsets.md — a tabela em .data cruzada com Offsets.hpp"
 type: extração
 category: engenharia-reversa
 phase: 1
-depends_on: ["WTE-TASK-02"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §1.7 e Fase 1 item 4"
-status: concluído
+depends_on: [WTE-TASK-02]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#1.7"
+reviewed_on: 2026-08-06
+review_commit: null
+done_on: 2026-08-05
+done_commit: 9907df9
 ---
 
 # WTE-TASK-06: Mapa de offsets
@@ -18,7 +22,7 @@ status: concluído
   formato do arquivo-alvo; este começa.
 
 Medido: **19 dos 69 `OFS_*`** de
-[`Offsets.hpp`](../../../src/core/include/we2002/Offsets.hpp) aparecem literalmente
+[`Offsets.hpp`](/src/core/include/we2002/Offsets.hpp) aparecem literalmente
 no binário do Obocaman, quase todos num bloco contíguo de `.data` a partir de
 `0x004231a0`:
 

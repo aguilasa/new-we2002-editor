@@ -3,8 +3,12 @@ id: CORR-WTE-117
 title: "Correção: o app procura os assets em quatro lugares e a mensagem promete três, sem dizer o que é o quarto"
 type: correção
 category: empacotamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-39
+severity: medium
+done_on: 2026-08-26
+done_commit: 04b28d8
 ---
 
 # CORR-WTE-117: quatro candidatos no código, três na mensagem
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 O `RaizDosAssets` do
-[`wte_datafiles.pas`](../../../wte/src/wte_datafiles.pas) percorre **quatro**
+[`wte_datafiles.pas`](/wte/src/wte_datafiles.pas) percorre **quatro**
 candidatos:
 
 ```pascal
@@ -28,7 +32,7 @@ A `MensagemDeAssetsAusentes`, logo abaixo no mesmo arquivo, lista **três** — 
 `[3]` não aparece. O critério de conclusão da
 [WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md) repete o número da mensagem
 (*"os três diretórios onde o app procura"*), e o
-[`wte/README.md`](../../../wte/README.md) também.
+[`wte/README.md`](/wte/README.md) também.
 
 Duas consequências, e nenhuma é grave sozinha:
 
@@ -111,7 +115,7 @@ do mesmo molde.
 
 E então corrigir o número nos dois documentos que dizem três: o critério da
 [WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md) e a seção do
-[`wte/README.md`](../../../wte/README.md).
+[`wte/README.md`](/wte/README.md).
 
 ### Se for sobra — `wte/src/wte_datafiles.pas`
 

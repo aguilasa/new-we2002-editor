@@ -3,8 +3,12 @@ id: CORR-WTE-078
 title: "Correção: o Log da sétima passagem conta 7 casos novos no test_dump_zonas.py, e são 9"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-29
+severity: low
+done_on: 2026-08-21
+done_commit: 63691d6
 ---
 
 # CORR-WTE-078: o Log da sétima passagem conta 7 casos novos no `test_dump_zonas.py`, e são 9

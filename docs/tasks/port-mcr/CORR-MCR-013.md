@@ -3,8 +3,12 @@ id: CORR-MCR-013
 title: "Correção: a §3.2 do plano ainda põe `Card` como dataclass do `model.py`, e a task cita a §5.1 no lugar dela"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-09
+severity: low
+done_on: 2026-09-08
+done_commit: 181b447
 ---
 
 # CORR-MCR-013: o inventário de módulos do plano não acompanhou o que a MCR-TASK-09 entregou

@@ -3,8 +3,12 @@ id: CORR-LOOKS-035
 title: "Correção: a definição de pronto do plano pede uma tupla que a tabela recusa"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-15
+severity: medium
+done_on: 2026-09-16
+done_commit: 0a2a6cf
 ---
 
 # CORR-LOOKS-035: o item 3 da definição de pronto sai 2
@@ -133,3 +137,4 @@ próprio antes deste.
 - `docs/PLAN-LOOKS-PY.md` — a Definição de pronto, item 3
 - `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
 - `docs/tasks/looks/CORR-LOOKS-035.md` — este arquivo
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

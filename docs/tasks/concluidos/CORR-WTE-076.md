@@ -3,8 +3,12 @@ id: CORR-WTE-076
 title: "Correção: o plano e a task dizem 758 linhas de DFM no ficha_color, e o extrator dá 866"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-29
+severity: high
+done_on: 2026-08-21
+done_commit: 5af1b0b
 ---
 
 # CORR-WTE-076: o plano e a task dizem 758 linhas de DFM no `ficha_color`, e o extrator dá 866

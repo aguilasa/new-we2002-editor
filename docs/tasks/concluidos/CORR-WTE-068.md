@@ -3,8 +3,12 @@ id: CORR-WTE-068
 title: "Correção: três specs de gravação ainda dizem que o gate passa \"só as duas faixas do arranque\", e hoje ele é byte-idêntico"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-27
+severity: high
+done_on: 2026-08-20
+done_commit: 4c2383b
 ---
 
 # CORR-WTE-068: a régua escrita nas specs envelheceu na própria task

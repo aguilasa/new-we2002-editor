@@ -3,8 +3,12 @@ id: CORR-WTE-083
 title: "Correção: dez times desenham bandeira preta — o ed.exe não lê a paleta deles, e o editor do Obocaman lê"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: high
+done_on: 2026-08-23
+done_commit: 5bd7216
 ---
 
 # CORR-WTE-083: dez times desenham bandeira preta
@@ -39,8 +43,8 @@ O `flag_shape` deles **não** é o problema: o time 56 traz `flag_shape = 4`, e
 ## Evidência
 
 Dump da camada de dados sobre a ROM japonesa, pelo
-[`dump_estado.pas`](../../../wte/tests/dump_estado.pas) — o mesmo que o
-[`compara_tela.sh`](../../../wte/tools/compara_tela.sh) gera como terceira ponta da
+[`dump_estado.pas`](/wte/tests/dump_estado.pas) — o mesmo que o
+[`compara_tela.sh`](/wte/tools/compara_tela.sh) gera como terceira ponta da
 conferência:
 
 ```text
@@ -83,7 +87,7 @@ bash wte/tools/compara_tela.sh 56
   nenhuma, e paleta que ele não desenha ele também não precisa gravar;
 - **Oráculo A, o `wte.exe` do Obocaman**, desenha, e lê a cor de cada time pela
   tabela de offsets em `.data` que cobre os 95 slots —
-  [`re/offsets.md`](../../../wte/re/offsets.md), a rotina `0x004050D0`.
+  [`re/offsets.md`](/wte/re/offsets.md), a rotina `0x004050D0`.
 
 O port herdou a camada de dados do B e a tela do A. Onde os dois discordam de
 **alcance**, a tela do port fica sem dado. É a mesma classe de achado da
@@ -99,16 +103,16 @@ não descobri-lo:
 1. **Medir** onde a `0x004050D0` busca `flag_colours` para os dez —
    a global de offset é `[0x004331DC]`, preenchida pela varredura da tabela em
    `.data` (`0x0040CBC8`, seis colunas por linha). O
-   [`dump_offsets.py`](../../../wte/tools/dump_offsets.py) já lê essa tabela;
+   [`dump_offsets.py`](/wte/tools/dump_offsets.py) já lê essa tabela;
 2. **Decidir onde o valor entra.** Duas rotas, e a escolha é do executor:
    - **rota A** — estender o laço do `we2002_database.pas`. Isso mexe em
      arquivo **gerado**, então a mudança entra no
-     [`port_database_pas.py`](../../../wte/tools/port_database_pas.py) e sai
+     [`port_database_pas.py`](/wte/tools/port_database_pas.py) e sai
      regerada. Mas ela faz o port divergir do `we2002_core` na carga, e o
      `compare_dumps.py` da WTE-TASK-20 reprova por construção: os dumps Pascal
      e C++ deixariam de ser idênticos;
    - **rota B** — carregar os dez à parte, fora da camada transpilada, como a
-     [`wte_cor`](../../../wte/src/wte_cor.pas) já faz com o que é do editor e não
+     [`wte_cor`](/wte/src/wte_cor.pas) já faz com o que é do editor e não
      do formato. O dump continua idêntico e a tela ganha a cor.
 
    **A rota B é a recomendada**, e a razão é a regra da §4.5 do plano: a camada
@@ -171,7 +175,7 @@ mediu os dois desvios e nenhum era da tela: a bandeira do 85 bate em 0 de
 **Resumo do que foi feito:**
 
 Escolhida a **rota B**, como a própria correção recomendava. A
-`CarregaBandeirasQueOCoreNaoLe`, na [`wte_cor`](../../../wte/src/wte_cor.pas),
+`CarregaBandeirasQueOCoreNaoLe`, na [`wte_cor`](/wte/src/wte_cor.pas),
 percorre os 95 slots e, para cada um cuja paleta o `Database.Load` deixou
 inteiramente zerada, lê os 32 bytes da imagem pelo offset da tabela do Obocaman
 e os põe no `Jogo`. Ela é chamada pelos **dois** caminhos que abrem imagem —
@@ -180,7 +184,7 @@ dele: o `dump_estado.pas` chama o `Load` direto e não passa por aqui, e é por
 isso que o `compare_dumps.py` continua comparando duas cargas idênticas.
 
 **O offset não precisou ser medido: já estava extraído.** A
-[`dump_blococor.py`](../../../wte/tools/dump_blococor.py), da
+[`dump_blococor.py`](/wte/tools/dump_blococor.py), da
 [CORR-WTE-081](/docs/tasks/concluidos/CORR-WTE-081.md), lê do `.exe` a tabela de 95 bytes
 de `0x00423247` e a converte com a mesma aritmética do `0x00404E70`, com oito
 âncoras conferidas contra `OFS_*` do `we2002_core`.

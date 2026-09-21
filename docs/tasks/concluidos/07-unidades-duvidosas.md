@@ -4,9 +4,13 @@ title: "Veredito sobre Registry, Printers, Comobj e Winhelpviewer"
 type: extração
 category: engenharia-reversa
 phase: 1
-depends_on: ["WTE-TASK-02"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §5 e Fase 1 item 5"
-status: concluído
+depends_on: [WTE-TASK-02]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#5"
+reviewed_on: 2026-08-06
+review_commit: null
+done_on: 2026-08-05
+done_commit: a4cbc67
 ---
 
 # WTE-TASK-07: As quatro unidades duvidosas

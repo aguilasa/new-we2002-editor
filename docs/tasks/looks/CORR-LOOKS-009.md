@@ -3,8 +3,12 @@ id: CORR-LOOKS-009
 title: "Correção: a varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-03
+severity: high
+done_on: 2026-09-14
+done_commit: f6db86f
 ---
 
 # CORR-LOOKS-009: a varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu

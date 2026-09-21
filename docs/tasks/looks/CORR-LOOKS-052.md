@@ -3,8 +3,12 @@ id: CORR-LOOKS-052
 title: "Correção: \"o `modelfile` roda primeiro\" é regra com controle, e a ordem não muda o veredito do `cli.py check`"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-19
+severity: low
+done_on: 2026-09-17
+done_commit: 44a158e
 ---
 
 # CORR-LOOKS-052: um controle vermelho por uma propriedade que o gate não tem

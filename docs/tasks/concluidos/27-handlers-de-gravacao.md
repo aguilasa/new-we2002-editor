@@ -4,9 +4,13 @@ title: "Handlers de gravação — escrever na imagem de CD"
 type: implementação
 category: comportamento
 phase: 4
-depends_on: ["WTE-TASK-26"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 4 e §6"
-status: concluído
+depends_on: [WTE-TASK-26]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-20
+review_commit: null
+done_on: 2026-08-20
+done_commit: a660ac7
 ---
 
 # WTE-TASK-27: Handlers de gravação
@@ -158,7 +162,7 @@ e aí os dois lados deixam de receber a mesma entrada.
 ## Critério de conclusão
 
 - [x] Diff de controle medido e registrado antes de qualquer edição
-      — 2026-08-18, em [`wte/re/gravacao-controle.md`](../../../wte/re/gravacao-controle.md),
+      — 2026-08-18, em [`wte/re/gravacao-controle.md`](/wte/re/gravacao-controle.md),
       gerado. Gravar sem editar **muda** 22 bytes: katakana virando ASCII
 - [x] As quatro com spec e com golden verde — 2026-08-19
       (`boton_barras2iso`, `boton_nombres2iso`, `boton_tex2iso`,
@@ -191,9 +195,9 @@ e aí os dois lados deixam de receber a mesma entrada.
 
       | ramo | quando | gate |
       |---|---|---|
-      | destino de seleção | 2026-08-19 | [`golden-09-mover`](../../../wte/tests/roteiros/golden-09-mover.txt) |
-      | destino de ML, libera bloco | 2026-08-20 | [`golden-10-mover-ml`](../../../wte/tests/roteiros/golden-10-mover-ml.txt) |
-      | destino de ML, aloca bloco | 2026-08-20 | [`golden-11-descarte-ml`](../../../wte/tests/roteiros/golden-11-descarte-ml.txt) |
+      | destino de seleção | 2026-08-19 | [`golden-09-mover`](/wte/tests/roteiros/golden-09-mover.txt) |
+      | destino de ML, libera bloco | 2026-08-20 | [`golden-10-mover-ml`](/wte/tests/roteiros/golden-10-mover-ml.txt) |
+      | destino de ML, aloca bloco | 2026-08-20 | [`golden-11-descarte-ml`](/wte/tests/roteiros/golden-11-descarte-ml.txt) |
 
       Os três **byte-idênticos, sem faixa declarada** — o que só passou a ser
       possível quando os dois remendos de arranque foram portados.
@@ -206,7 +210,7 @@ e aí os dois lados deixam de receber a mesma entrada.
       nem de cabeçalho de setor. As três sessões novas são as de Master League
       da oitava passagem, e a conta as absorveu sozinha: ela enumera pelo
       prefixo `27-`, então sonda nova entra sem ninguém somar nada. A conta é do
-      [`gravacao_controle.py`](../../../wte/tools/gravacao_controle.py), sobre o
+      [`gravacao_controle.py`](/wte/tools/gravacao_controle.py), sobre o
       `cmp-medido.tsv` que as corridas já versionaram — não precisou de medição
       nova. A forma forte do critério migrou inteira para a
       [WTE-TASK-28](/docs/tasks/concluidos/28-import-de-mcr.md), onde a pergunta é real:
@@ -289,7 +293,7 @@ coisas diferentes:
    quem o `parriba` **lê**. Com só o de baixo, nenhum dos dois lados grava.
 
 A ordem que serve está no cabeçalho de
-[`27-descarte-ml.txt`](../../../wte/tests/roteiros/27-descarte-ml.txt), e o
+[`27-descarte-ml.txt`](/wte/tests/roteiros/27-descarte-ml.txt), e o
 diagnóstico saiu do `port-trace.log`: o `pabajoClick` aparecia lá e a execução
 **parava** logo depois — sinal de `ShowModal`, não de `Exit`.
 
@@ -453,8 +457,8 @@ candidatos do `.text`) e ninguém as cruzou com a faixa que o gate declarava.
   e o golden acusaria a gravação por um defeito que seria de fidelidade.
 
   A medição é a sessão `27-gravacao-controle` do `diff_dirigido.sh`, e o
-  registro é gerado — [`wte/re/gravacao-controle.md`](../../../wte/re/gravacao-controle.md),
-  do novo [`gravacao_controle.py`](../../../wte/tools/gravacao_controle.py), que
+  registro é gerado — [`wte/re/gravacao-controle.md`](/wte/re/gravacao-controle.md),
+  do novo [`gravacao_controle.py`](/wte/tools/gravacao_controle.py), que
   **não mede nada sozinho**: cruza as duas réguas já versionadas. Os offsets
   desta medição são a seção `Bytes tocados` das seis specs que vêm, e
   copiá-los à mão de dois TSV seria a forma conhecida de o número envelhecer
@@ -468,8 +472,8 @@ candidatos do `.text`) e ninguém as cruzou com a faixa que o gate declarava.
   noutro ponto do mesmo arquivo.
 
   Medido com um par de sondas de **uma** variável de diferença, agora
-  versionadas — [`27-descarga-sem.txt`](../../../wte/tests/roteiros/27-descarga-sem.txt)
-  e [`27-descarga-com.txt`](../../../wte/tests/roteiros/27-descarga-com.txt),
+  versionadas — [`27-descarga-sem.txt`](/wte/tests/roteiros/27-descarga-sem.txt)
+  e [`27-descarga-com.txt`](/wte/tests/roteiros/27-descarga-com.txt),
   iguais linha a linha, e o `-com` troca de time depois do clique: **zero**
   escrita no `-sem`, os 5 bytes em 2328184 no `-com`. O
   `test_gravacao_controle.py` compara os dois corpos e exige que o resultado
@@ -659,7 +663,7 @@ candidatos do `.text`) e ninguém as cruzou com a faixa que o gate declarava.
   faixas que o `27-gravacao-controle` registrou são fronteiras de **descarga**
   do buffer do runtime C, não gravações lógicas: duas gravações vizinhas caem
   na mesma faixa. A sonda
-  [`27-nomes-editados.txt`](../../../wte/tests/roteiros/27-nomes-editados.txt)
+  [`27-nomes-editados.txt`](/wte/tests/roteiros/27-nomes-editados.txt)
   digita texto distinto nos três campos antes de gravar, e aí o `cmp` atribui
   cada bloco ao seu campo. Resultado: **dez** blocos, com offset, tamanho e
   conteúdo — 2 de `edit_nombre1`, 5 de `edit_nombre2` e 3 de `edit_nombre3`.
@@ -919,7 +923,7 @@ candidatos do `.text`) e ninguém as cruzou com a faixa que o gate declarava.
   52. A que falta é `0x6479`, o nibble alto do byte 1 da tática: para o time 2
   ele vale zero, que é o que o molde já tinha. Gravação de valor igual nenhum
   `cmp` enxerga, que é a mesma distinção que o
-  [`gravacao_controle.py`](../../../wte/tools/gravacao_controle.py) faz entre
+  [`gravacao_controle.py`](/wte/tools/gravacao_controle.py) faz entre
   `escreveu` e `mudou`. A conferência que fecha isso não é o `cmp`: é ler os
   quatro bytes de tática da imagem e comparar com os seis destinos.
 
@@ -1021,7 +1025,7 @@ candidatos do `.text`) e ninguém as cruzou com a faixa que o gate declarava.
   handler.
 
   **O gate novo julga duas gravações numa corrida.** O
-  [`golden-08-dorsal-mcr`](../../../wte/tests/roteiros/golden-08-dorsal-mcr.txt)
+  [`golden-08-dorsal-mcr`](/wte/tests/roteiros/golden-08-dorsal-mcr.txt)
   edita o número, grava na imagem pelo `dorsalClick` e emite o `.mcr` pelo
   `grabar_memory`. Os dois juntos porque o número é o **único** campo do cartão
   que não vem do disco nem do molde: gravar o cartão sem editar número nenhum

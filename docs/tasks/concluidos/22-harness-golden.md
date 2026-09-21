@@ -4,9 +4,13 @@ title: "golden_check.sh — o gate: wte.exe contra o app Lazarus"
 type: ferramenta
 category: verificação
 phase: 4
-depends_on: ["WTE-TASK-11", "WTE-TASK-21"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §6"
-status: concluído
+depends_on: [WTE-TASK-11, WTE-TASK-21]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#6"
+reviewed_on: 2026-08-11
+review_commit: null
+done_on: 2026-08-10
+done_commit: e139f46
 ---
 
 # WTE-TASK-22: Harness golden
@@ -93,7 +97,7 @@ teste, e não há Wine de sistema.
 **Quase toda operação do editor começa por escolher um time**, então isto foi
 bloqueante do dia da WTE-TASK-12 até a
 [CORR-WTE-044](/docs/tasks/concluidos/CORR-WTE-044.md). Diagnóstico e comando de
-reprodução em [`../../wte/re/visual.md`](../../../wte/re/visual.md), achado 1.
+reprodução em [`../../wte/re/visual.md`](/wte/re/visual.md), achado 1.
 
 **Deixou de ser bloqueante em 2026-08-10, e o que resolveu foi a imagem.** A
 CORR-WTE-044 mediu a causa: o ponteiro global `0x004335e4`, que a rotina de
@@ -115,7 +119,7 @@ e parece defeito do harness. E o gate deve tratar `code=c0000005` no
 que este caminho é imune com a japonesa, não que a imagem inteira seja.
 
 As três ressalvas e o que ficou sem resposta estão em
-[`../../wte/re/crash-causa.md`](../../../wte/re/crash-causa.md).
+[`../../wte/re/crash-causa.md`](/wte/re/crash-causa.md).
 
 ### 2. O controle **não** é "imagem intocada"
 
@@ -165,7 +169,7 @@ byte na europeia — daí ela não aparecer lá.
 
 **Não copie os extremos do `cmp -l`:** ele numera bytes a partir de 1 e imprime
 `11797..26528` para a faixa da europeia. O comando que mede na base certa está
-em [`../../wte/re/visual.md`](../../../wte/re/visual.md), achado 2.
+em [`../../wte/re/visual.md`](/wte/re/visual.md), achado 2.
 
 *Original contra original* continua dando zero — os dois lados gravam os mesmos
 bytes. Mas o port terá de **reproduzir** essa gravação, ou o harness terá de
@@ -174,7 +178,7 @@ declarar a faixa como exceção conhecida, no mesmo espírito dos 16 bytes do sl
 
 **Decidido: declarar.** O roteiro do gate nasceu com as **nove** faixas acima
 como `conhecida:`. Quantas estão declaradas **hoje** não se lê aqui — se lê no
-[`golden-01-arranque.txt`](../../../wte/tests/roteiros/golden-01-arranque.txt),
+[`golden-01-arranque.txt`](/wte/tests/roteiros/golden-01-arranque.txt),
 que é o arquivo que o veredito consulta; a WTE-TASK-25 já baixou para **duas**
 ao fazer o port injetar os sete setores a partir do `dat.bin`. Número de faixa
 copiado para prosa envelhece com o primeiro handler que fecha uma delas.
@@ -227,7 +231,7 @@ arquivo nos dois lados.
       roteiro, zero divergência
 - [x] Decidido: a faixa vira **exceção declarada**, e no roteiro, não no script
       — nove linhas `conhecida:` no
-      [`golden-01-arranque.txt`](../../../wte/tests/roteiros/golden-01-arranque.txt),
+      [`golden-01-arranque.txt`](/wte/tests/roteiros/golden-01-arranque.txt),
       offsets 0-based e inclusivos. **E a declaração que some reprova** (código
       3): gate que só subtrai exceção passa verde quando o roteiro para de
       exercitar o que dizia
@@ -261,13 +265,13 @@ arquivo nos dois lados.
   WTE-TASK-19 já tinha o dialeto, a busca de janela por nome e por tamanho e a
   fixação do `:99`; duplicar aquilo no gate seria duas cópias divergindo em
   silêncio, com o sintoma de sempre — diff de bytes com cara de bug do port.
-  Extraí para [`roteiro.sh`](../../../wte/tools/roteiro.sh), e o `diff_dirigido`
+  Extraí para [`roteiro.sh`](/wte/tools/roteiro.sh), e o `diff_dirigido`
   passou a usá-lo. Regressão medida: roteiro 07 refeito, mesmas 9 faixas, as
   duas réguas fechando.
 
   **O veredito é Python, e o gate é shell.** A parte que decide — faixa
   declarada contra faixa medida — mora no
-  [`golden_veredito.py`](../../../wte/tools/golden_veredito.py), com 18 testes;
+  [`golden_veredito.py`](/wte/tools/golden_veredito.py), com 18 testes;
   shell não é testável e esta é a peça que não pode errar.
 
   ```

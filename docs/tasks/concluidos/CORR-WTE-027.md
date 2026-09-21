@@ -3,15 +3,19 @@ id: CORR-WTE-027
 title: "Correção: o `fase-2.md` emite link `/docs/...` de dentro de `wte/re/`, fora do perímetro da regra"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-14
+severity: low
+done_on: 2026-08-10
+done_commit: b252de3
 ---
 
 # CORR-WTE-027: seis links do `fase-2.md` usam a forma que a regra reserva a `docs/`
 
 ## Problema identificado
 
-O [`wte/re/fase-2.md`](../../../wte/re/fase-2.md), gerado pelo
+O [`wte/re/fase-2.md`](/wte/re/fase-2.md), gerado pelo
 `wte/tools/check_fase2.py` (WTE-TASK-14), escreve seis links para `docs/` na
 forma absoluta `/docs/tasks/...`:
 

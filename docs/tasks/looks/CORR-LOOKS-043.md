@@ -3,8 +3,12 @@ id: CORR-LOOKS-043
 title: "Correção: o goleiro desenha qualquer estilo de cabelo como família A, e não recusa"
 type: correção
 category: render
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-17
+severity: medium
+done_on: 2026-09-16
+done_commit: 6b6b671
 ---
 
 # CORR-LOOKS-043: a recusa do `head_of` só vale para a figura 0

@@ -3,8 +3,12 @@ id: CORR-LOOKS-001
 title: "Correção: a raiz do Superpack tem treze pastas de jogo, não catorze"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-01
+severity: low
+done_on: 2026-09-14
+done_commit: efd8c15
 ---
 
 # CORR-LOOKS-001: a raiz do Superpack tem treze pastas de jogo, não catorze

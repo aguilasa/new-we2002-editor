@@ -4,9 +4,14 @@ title: "Bandeira, uniformes e os times sem bandeira própria"
 type: verificação
 category: ui
 projeto: newWe2002
-depends_on: ["PAR-TASK-01"]
-fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.8"
-status: concluído
+depends_on: [PAR-TASK-01]
+status: done
+source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.8"
+phase: null
+reviewed_on: 2026-09-01
+review_commit: null
+done_on: 2026-08-31
+done_commit: 7cb962a
 ---
 
 # PAR-TASK-07: Bandeira, uniformes e os times sem bandeira própria

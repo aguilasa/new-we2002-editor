@@ -1,12 +1,16 @@
 ---
 id: WTE-TASK-14
 title: "Fechamento da fase 2 — a casca está fiel?"
-type: fechamento
+type: closing
 category: ui
 phase: 2
-depends_on: ["WTE-TASK-12", "WTE-TASK-13"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 2, critério de pronto"
-status: concluído
+depends_on: [WTE-TASK-12, WTE-TASK-13]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-09
+review_commit: null
+done_on: 2026-08-09
+done_commit: b252de3
 ---
 
 # WTE-TASK-14: Fechamento da fase 2
@@ -85,7 +89,7 @@ bateria pelo `wildcard` do Makefile, sem editar alvo nenhum.
 
 - **Resumo do que foi feito:**
 
-  A fase 2 fecha. O produto é o [`../../wte/re/fase-2.md`](../../../wte/re/fase-2.md),
+  A fase 2 fecha. O produto é o [`../../wte/re/fase-2.md`](/wte/re/fase-2.md),
   **gerado** pelo `check_fase2.py` — o `fase-2.md` é só número, e número em doc
   tem de sair de ferramenta, como o `fase-1.md` já fazia.
 

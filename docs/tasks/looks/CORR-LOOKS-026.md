@@ -3,8 +3,12 @@ id: CORR-LOOKS-026
 title: "Correção: a grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 e não andam com campo nenhum"
 type: correção
 category: textura
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-12
+severity: medium
+done_on: 2026-09-15
+done_commit: db56eb8
 ---
 
 # CORR-LOOKS-026: as dezesseis colunas estão "explicadas" por três campos que não alcançam a maioria de quem as usa

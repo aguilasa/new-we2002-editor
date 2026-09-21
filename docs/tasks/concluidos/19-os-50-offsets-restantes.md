@@ -4,9 +4,13 @@ title: "Descobrir os offsets que o Obocaman tem e nós não"
 type: extração
 category: dados
 phase: 3
-depends_on: ["WTE-TASK-06", "WTE-TASK-18"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.2 e Fase 3 item 4"
-status: concluído
+depends_on: [WTE-TASK-06, WTE-TASK-18]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.2"
+reviewed_on: 2026-08-10
+review_commit: null
+done_on: 2026-08-10
+done_commit: 9ab8527
 ---
 
 # WTE-TASK-19: Os offsets restantes
@@ -95,7 +99,7 @@ arquivo gerado.
       **17 restantes com veredito estrutural**, tirado do `Database.cpp`: 14
       são ponto de retomada em fronteira de setor e 3 são base de varredura.
       Tabela linha a linha em
-      [`wte/re/offsets-novos.md`](../../../wte/re/offsets-novos.md), e o
+      [`wte/re/offsets-novos.md`](/wte/re/offsets-novos.md), e o
       `test_todo_offset_ausente_tem_veredito` reprova se algum voltar a ficar
       sem
 - [x] As seis áreas da tabela cobertas
@@ -131,10 +135,10 @@ o que a tela mostra. A ausência deles num trace é a previsão do papel que tê
 - **Resumo do que foi feito:**
 
   Dois roteiros, porque os 35 pendentes não faltavam pelo mesmo motivo. O
-  [`10-telas-que-faltavam.txt`](../../../wte/tests/roteiros/10-telas-que-faltavam.txt)
+  [`10-telas-que-faltavam.txt`](/wte/tests/roteiros/10-telas-que-faltavam.txt)
   abriu o que ninguém tinha aberto — estratégia, ficha do jogador, dorsal, o
   lado direito da janela, a extração do uniforme, o diálogo de textura. O
-  [`11-varredura-de-times.txt`](../../../wte/tests/roteiros/11-varredura-de-times.txt)
+  [`11-varredura-de-times.txt`](/wte/tests/roteiros/11-varredura-de-times.txt)
   desceu na lista: times 60, 120 e 180. **18 `OFS_*` saíram de hipótese** —
   de 15 para 33 endereçados.
 
@@ -202,7 +206,7 @@ o que a tela mostra. A ausência deles num trace é a previsão do papel que tê
 
   A [CORR-WTE-044](/docs/tasks/concluidos/CORR-WTE-044.md) tinha diagnosticado o
   travamento e achado o contorno; esta passagem **usa** o contorno. Roteiro
-  novo, [`09-areas-com-time.txt`](../../../wte/tests/roteiros/09-areas-com-time.txt),
+  novo, [`09-areas-com-time.txt`](/wte/tests/roteiros/09-areas-com-time.txt),
   que troca de time **primeiro** e só então exercita cada área — a ordem que o
   06 não podia ter. Sobre cópia de `roms/japanese-shift-jis.bin`: **60 faixas**,
   as seis áreas cobertas, e as duas réguas fechando (19 faixas do `cmp` contidas
@@ -342,7 +346,7 @@ o que a tela mostra. A ausência deles num trace é a previsão do papel que tê
   **A causa foi medida na terceira passagem, e não é a imagem.** Basta rodar a
   mesma corrida com `WINEDEBUG=+seh,+loaddll`: o Wine diz qual instrução
   faltou e onde cada módulo foi carregado. Resultado, em
-  [`crash.md`](../../../wte/re/crash.md):
+  [`crash.md`](/wte/re/crash.md):
 
   - a violação de acesso cai em `0x005f5ea0`, que é o `vcl60.bpl`
     **realocado** para `0x005f0000` — sem a linha do `+loaddll` o endereço não
@@ -436,7 +440,7 @@ A tela não é a causa: `NomeDoTime` cai em `Jogo.ml_default` para índice ≥
 **Falta o offset do nome do time-modelo de Master League**, que nem o
 `we2002_core` traz nem esta task endereçou.
 
-Medida e captura em [`wte/re/visual.md`](../../../wte/re/visual.md), achado 9 da
+Medida e captura em [`wte/re/visual.md`](/wte/re/visual.md), achado 9 da
 segunda passada; a linha irmã está na
 [WTE-TASK-25](/docs/tasks/concluidos/25-handlers-de-carga.md), que é dona do caminho de
 tela.

@@ -4,9 +4,13 @@ title: "`attributes.py` — o codec de 12 bytes, contra `Player::Decode/Encode`"
 type: implementação
 category: núcleo
 phase: 1
-depends_on: ["MCR-TASK-05"]
-fonte_de_verdade: "/docs/PLAN-MCR-PY.md §1.4"
-status: concluído
+depends_on: [MCR-TASK-05]
+status: done
+source_of_truth: "/docs/PLAN-MCR-PY.md#1.4"
+reviewed_on: 2026-09-07
+review_commit: null
+done_on: 2026-09-07
+done_commit: 7feacf6
 ---
 
 # MCR-TASK-06: O codec de atributos
@@ -15,7 +19,7 @@ status: concluído
 
 - **Referência:** [`/docs/PLAN-MCR-PY.md`](/docs/PLAN-MCR-PY.md) §1.4 e §5.4.
 - **Esta é a única parte do port que já nasce com oráculo dentro de casa.**
-  [`src/core/Player.cpp`](../../../src/core/Player.cpp) decodifica o mesmo blob
+  [`src/core/Player.cpp`](/src/core/Player.cpp) decodifica o mesmo blob
   de 12 bytes — `skin_colour = raw[4]&0x03`, `strength = 12 + ((raw[5]>>6)&0x03)
   + ((raw[6]<<2)&0x04)`, `foot = (raw[11]>>6)&0x03`,
   `out_of_position = (raw[3]>>7)&0x01` — e ainda decodifica o dorsal que o

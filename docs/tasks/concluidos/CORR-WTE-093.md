@@ -3,8 +3,12 @@ id: CORR-WTE-093
 title: "Correção: os dois últimos corpos da fase 4 — a tela de tática e o diálogo de textura"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-31
+severity: high
+done_on: 2026-08-24
+done_commit: b46fa17
 ---
 
 # CORR-WTE-093: os dois corpos que sobravam fora de preço
@@ -40,7 +44,7 @@ A suspeita da spec era razoável e estava errada: não são as 11 bolas, são as
 posições de **cada uma das 18 formações**.
 
 **O port não reproduz os laços**, e não deve: o
-[`dump_formacoes.py`](../../../wte/tools/dump_formacoes.py) já extrai a mesma
+[`dump_formacoes.py`](/wte/tools/dump_formacoes.py) já extrai a mesma
 tabela para `wte_formacoes.pas`. Reproduzi-los seria montar à mão o que já é
 gerado.
 

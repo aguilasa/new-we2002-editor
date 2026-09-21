@@ -5,8 +5,12 @@ type: documentação
 category: legal
 phase: 0
 depends_on: []
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §2"
-status: concluído
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#2"
+reviewed_on: 2026-09-14
+review_commit: null
+done_on: 2026-09-14
+done_commit: b6c5575
 ---
 
 # LOOKS-TASK-01: Base legal e linhagem
@@ -16,7 +20,7 @@ status: concluído
 - **Referência:** [`/docs/PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md) §2.
 - Este projeto se apoia em três materiais de fora, com três situações legais
   **diferentes**, e misturá-las é o erro a evitar.
-- O repositório já tem o hábito: o [NOTICE.md](../../../NOTICE.md) registra o
+- O repositório já tem o hábito: o [NOTICE.md](/NOTICE.md) registra o
   `WECompressor` e o `Easy-Mcr` do mesmo jeito.
 
 ---

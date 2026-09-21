@@ -3,8 +3,12 @@ id: CORR-WTE-057
 title: "Correção: a conferência de tela cobre 3 dos 5 grupos de campo que o critério enumera"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-25
+severity: high
+done_on: 2026-08-11
+done_commit: 0cdfbe4
 ---
 
 # CORR-WTE-057: a conferência de tela cobre 3 dos 5 grupos de campo que o critério enumera
@@ -22,8 +26,8 @@ redação que ficou **enumera cinco grupos de campo**:
 > WTE-TASK-29.
 
 O aparato entregue —
-[`compara_tela.sh`](../../../wte/tools/compara_tela.sh) +
-[`compara_tela.py`](../../../wte/tools/compara_tela.py) — compara um recorte de
+[`compara_tela.sh`](/wte/tools/compara_tela.sh) +
+[`compara_tela.py`](/wte/tools/compara_tela.py) — compara um recorte de
 **520×240 px do canto superior esquerdo** da janela. O próprio comentário do
 script diz o que está lá dentro, e são três dos cinco:
 
@@ -48,7 +52,7 @@ lá.
 ## Evidência
 
 Posição absoluta dos controles no `MainForm`, somando `Left`/`Top` pela cadeia
-de pais do [`MainForm.dfm`](../../../wte/re/dfm/MainForm.dfm):
+de pais do [`MainForm.dfm`](/wte/re/dfm/MainForm.dfm):
 
 | Controle | Posição absoluta | Dentro do recorte 520×240? |
 |---|---|---|
@@ -134,7 +138,7 @@ porque é essa a única régua que a seção Saída `nao medido` ainda pode rece
 Estender a seção "A conferência de tela" com o veredito dos três grupos novos, um
 por um. Se o estado de habilitação bater com o do original nos três times, a
 seção Saída pode subir de `nao medido` para `observação de tela` — que é
-exatamente o valor que o [`GABARITO.md`](../../../wte/re/spec/GABARITO.md) define
+exatamente o valor que o [`GABARITO.md`](/wte/re/spec/GABARITO.md) define
 para "inferido do efeito visível, sem confirmar nos bytes", e é a verdade sobre
 como aquele Pascal foi escrito.
 

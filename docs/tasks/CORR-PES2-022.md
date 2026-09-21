@@ -3,8 +3,12 @@ id: CORR-PES2-022
 title: "Correção: a coluna \"Revisado em\" das PES2-TASK-32 e 33 diz `✅ Concluído`, e nenhuma das duas foi revisada"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-34
+severity: high
+done_on: 2026-09-03
+done_commit: 77ca8d3
 ---
 
 # CORR-PES2-022: duas tasks saíram da fila de revisão sem terem sido revisadas

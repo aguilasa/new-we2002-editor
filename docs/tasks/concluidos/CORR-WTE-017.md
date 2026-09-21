@@ -3,15 +3,19 @@ id: CORR-WTE-017
 title: "Correção: o `fase-1.md` separa offset em tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-09
+severity: low
+done_on: 2026-08-06
+done_commit: b5a918b
 ---
 
 # CORR-WTE-017: `"0x0042" not in va` é teste de faixa escrito como teste de texto
 
 ## Problema identificado
 
-A §3 do [`fase-1.md`](../../../wte/re/fase-1.md) responde a pergunta da
+A §3 do [`fase-1.md`](/wte/re/fase-1.md) responde a pergunta da
 WTE-TASK-09 — "algum dos 19 caiu fora do limite da tabela?" — partindo os
 confirmados em dois grupos:
 
@@ -133,7 +137,7 @@ if len(confirmados) - len(fora_da_tabela) != len(slots_com_nome):
 
 Preferir `DATA_VA` extraído do `dump_offsets.py`, se ele já expuser a faixa,
 a redeclará-la aqui — duplicar constante medida é o que o
-[`README.md`](../../../wte/tools/README.md) do diretório manda evitar.
+[`README.md`](/wte/tools/README.md) do diretório manda evitar.
 
 ### Arquivo: `wte/tools/test_check_fase1.py`
 
@@ -186,7 +190,7 @@ O que existe é melhor: a coluna `nota` do `offsets.tsv`, que o `dump_offsets.py
 preenche com o nome da seção de **cada ocorrência**, lida do PE. Então `DATA_VA`
 ficou declarada aqui e o corte por faixa é confrontado com a `nota` a cada
 rodada — a constante duplicada não fica sem guarda, que é o que o
-[`README.md`](../../../wte/tools/README.md) do diretório pede.
+[`README.md`](/wte/tools/README.md) do diretório pede.
 
 Prova de que os dois cortes discordam, com a entrada plantada `0x00422abc`
 somada aos 19 confirmados reais:

@@ -3,8 +3,12 @@ id: CORR-MCR-017
 title: "Correção: o perfil promete 15 controles vermelhos e o `mcr_selftest` exige 16, do décimo sexto o perfil não conhece nem a forma"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-11
+severity: high
+done_on: 2026-09-08
+done_commit: 0dce63e
 ---
 
 # CORR-MCR-017: o número do gate obrigatório envelheceu no arquivo onde se lê o gate

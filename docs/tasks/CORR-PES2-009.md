@@ -3,8 +3,12 @@ id: CORR-PES2-009
 title: "Correção: o `--check` do `lzss.py` não sabe ficar vermelho — o bug de porte que a própria task nomeia passa verde"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-26
+severity: high
+done_on: 2026-09-01
+done_commit: 6eb0641
 ---
 
 # CORR-PES2-009: o gate do codec LZSS é decorativo

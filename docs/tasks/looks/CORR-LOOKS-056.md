@@ -3,8 +3,12 @@ id: CORR-LOOKS-056
 title: "Correção: o `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-22
+severity: low
+done_on: 2026-09-17
+done_commit: 06749b0
 ---
 
 # CORR-LOOKS-056: a porta de entrada do repositório ficou na v1

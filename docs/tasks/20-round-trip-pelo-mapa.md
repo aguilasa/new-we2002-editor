@@ -4,9 +4,13 @@ title: "Round-trip headless pelo mapa"
 type: verificação
 category: verificação
 phase: 5
-depends_on: ["PES2-TASK-19"]
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §0 (definição de pronto)"
-status: pendente
+depends_on: [PES2-TASK-19]
+status: pending
+source_of_truth: "/docs/PLAN-PES2-PSX.md#0"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-20: Round-trip pelo mapa

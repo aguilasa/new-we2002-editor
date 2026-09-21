@@ -4,9 +4,13 @@ title: "tools/dfm_extract.py — os 18 formulários, completos"
 type: ferramenta
 category: engenharia-reversa
 phase: 1
-depends_on: ["WTE-TASK-02"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §1.6 e Fase 1 item 1"
-status: concluído
+depends_on: [WTE-TASK-02]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#1.6"
+reviewed_on: 2026-08-05
+review_commit: null
+done_on: 2026-08-05
+done_commit: 353db82
 ---
 
 # WTE-TASK-03: Extrator de DFM

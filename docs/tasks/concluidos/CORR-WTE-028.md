@@ -3,8 +3,12 @@ id: CORR-WTE-028
 title: "Correção: `conferir_vereditos()` guarda a coluna `Original`, não o veredito"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-14
+severity: low
+done_on: 2026-08-10
+done_commit: b252de3
 ---
 
 # CORR-WTE-028: o dicionário de vereditos do `check_fase2.py` guarda a coluna errada

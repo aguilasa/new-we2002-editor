@@ -3,8 +3,12 @@ id: CORR-PES2-011
 title: "Correção: o prefixo de registro citado na §1.14(e) é o do quarto registro, não a forma deles"
 type: correção
 category: formato
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-26
+severity: low
+done_on: 2026-09-01
+done_commit: 969917b
 ---
 
 # CORR-PES2-011: `0f 80 0a 00 20 02 80 01` é uma instância, não o formato

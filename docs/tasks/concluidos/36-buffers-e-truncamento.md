@@ -4,9 +4,13 @@ title: "Buffers de tamanho fixo e comportamento de truncamento"
 type: verificação
 category: verificação
 phase: 6
-depends_on: ["WTE-TASK-26", "WTE-TASK-34"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 6 item 3"
-status: concluído
+depends_on: [WTE-TASK-26, WTE-TASK-34]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-25
+review_commit: null
+done_on: 2026-08-25
+done_commit: 5b13092
 ---
 
 # WTE-TASK-36: Buffers e truncamento
@@ -34,7 +38,7 @@ O original do Obocaman é C++Builder, com `char` fixo, e o mesmo padrão.
 > candidatas do enunciado dela decididas. Sobrou **uma** linha aberta, e é esta:
 > *"comportamento de truncamento de campo, se o Pascal não reproduzir o do
 > buffer fixo"*. Está na §7 do
-> [`wte/re/divergencias.md`](../../../wte/re/divergencias.md) como **em aberto, com
+> [`wte/re/divergencias.md`](/wte/re/divergencias.md) como **em aberto, com
 > dono** — que é o que separa pendência de buraco.
 >
 > **O que a 36 deve devolver para a 35, e em que forma.** Se algum campo
@@ -45,7 +49,7 @@ O original do Obocaman é C++Builder, com `char` fixo, e o mesmo padrão.
 > como as outras três candidatas.
 >
 > **E se a régua ganhar exceção nomeada, ela tem de passar pelo
-> [`check_divergencias.py`](../../../wte/tools/check_divergencias.py):** isenção que
+> [`check_divergencias.py`](/wte/tools/check_divergencias.py):** isenção que
 > faz um teste deixar de reprovar precisa da entrada correspondente, e o gate
 > aborta nos dois sentidos. A 35 achou uma isenção (`pendente_32`) que tinha
 > sobrevivido à própria causa por duas tasks; a guarda existe para isso não se
@@ -130,7 +134,7 @@ confere estaticamente contra a capacidade do vetor.
       Um inventário que olhasse só o DFM concluiria que esses dois não têm
       limite, que é o contrário da verdade
 - [x] Os quatro casos de borda testados por campo — em
-      [`test_bordas.pas`](../../../wte/tests/test_bordas.pas), **25 de 25**
+      [`test_bordas.pas`](/wte/tests/test_bordas.pas), **25 de 25**
       conferências, headless. Eram 10 quando esta task fechou, e todas num
       vetor só: os grupos 1 e 2 tocavam `names` (20 B) e mais nada, de modo
       que a medição era por **classe**, num representante, e não por campo
@@ -144,7 +148,7 @@ confere estaticamente contra a capacidade do vetor.
       decodificado, e `raw_kanji_name` (40 B) é exatamente o dobro de
       `kanji_name` (20 B). A conta fecha e o teste a prende
 - [x] Comportamento do original reproduzido — **não há divergência**, e a
-      linha da §7 do [`divergencias.md`](../../../wte/re/divergencias.md) foi
+      linha da §7 do [`divergencias.md`](/wte/re/divergencias.md) foi
       fechada no sentido negativo: os quatro campos de texto têm limite que
       cabe no vetor, e os dois numéricos são guardados por validação de faixa
       no handler
@@ -160,9 +164,9 @@ confere estaticamente contra a capacidade do vetor.
 - **Resumo do que foi feito:**
 
   Inventariados os **seis** campos de tamanho fixo que o usuário digita, por
-  ferramenta ([`dump_buffers.py`](../../../wte/tools/dump_buffers.py) →
-  [`buffers.md`](../../../wte/re/buffers.md)), e medidas as bordas em
-  [`test_bordas.pas`](../../../wte/tests/test_bordas.pas). **Nenhuma divergência**:
+  ferramenta ([`dump_buffers.py`](/wte/tools/dump_buffers.py) →
+  [`buffers.md`](/wte/re/buffers.md)), e medidas as bordas em
+  [`test_bordas.pas`](/wte/tests/test_bordas.pas). **Nenhuma divergência**:
   a linha da §7 do registro fechou no sentido negativo.
 
   **O enunciado previa duas fontes e são três.** `MaxLength` não está só no

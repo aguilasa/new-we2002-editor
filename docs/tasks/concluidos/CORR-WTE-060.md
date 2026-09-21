@@ -3,8 +3,12 @@ id: CORR-WTE-060
 title: "Correção: o `iguala_nombres` não acinzenta no port, e o defeito atravessou duas tasks sem correção própria"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-26
+severity: high
+done_on: 2026-08-18
+done_commit: 1dfb765
 ---
 
 # CORR-WTE-060: o botão que não acinzenta, e a correção que ninguém abriu
@@ -82,7 +86,7 @@ isso elas estão aqui, na correção, e não lá.
    depois um glifo cuja cor de canto seja `C0C0C0`. A que mudar o pixel é a
    causa;
 3. só então corrigir — no `.lfm` se for propriedade, e no
-   [`dfm2lfm.py`](../../../wte/tools/dfm2lfm.py) se for conversão, **nunca** no
+   [`dfm2lfm.py`](/wte/tools/dfm2lfm.py) se for conversão, **nunca** no
    `.lfm` gerado à mão.
 
 Se a causa for da LCL e não do port, o resultado é

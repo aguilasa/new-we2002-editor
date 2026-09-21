@@ -3,8 +3,12 @@ id: CORR-WTE-016
 title: "Correção: a varredura de sítios para em `docs/` e `wte/re/`, e o `wte/README.md` continua afirmando que a §1 do plano registra 197 bitmaps"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-09
+severity: low
+done_on: 2026-08-06
+done_commit: dac5638
 ---
 
 # CORR-WTE-016: o perímetro da varredura não alcança `wte/*.md`

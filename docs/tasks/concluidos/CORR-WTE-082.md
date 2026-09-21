@@ -3,8 +3,12 @@ id: CORR-WTE-082
 title: "Correção: a tela de tática não é enchida, e sem isso o ` Accept` do estrategia grava as coordenadas do .lfm"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: CORR-WTE-081
+severity: high
+done_on: 2026-08-21
+done_commit: c0e9d7a
 ---
 
 # CORR-WTE-082: encher a tela de tática antes de deixar alguém gravá-la
@@ -31,7 +35,7 @@ apontaria para o escritor, e o defeito está no leitor que não existe.
 ## Evidência
 
 A rotina que enche a tela é a `0x0040A0B4`, e ela continua sem port. Medido com
-o decodificador do [`dump_auxiliares.py`](../../../wte/tools/dump_auxiliares.py)
+o decodificador do [`dump_auxiliares.py`](/wte/tools/dump_auxiliares.py)
 sobre o `.text`, em 2026-08-21:
 
 ```text
@@ -55,7 +59,7 @@ Os dois chamadores estão `aberto`, e os dois pela mesma razão. O corpo do
 Ele resolve o time em edição e chama `estrategia.ShowModal`. Nada mais.
 
 **E há um segundo buraco, neste caso na spec.** A seção *Bytes tocados* do
-[`estrategia.BitBtn3Click`](../../../wte/re/spec/estrategia.BitBtn3Click.md) traz,
+[`estrategia.BitBtn3Click`](/wte/re/spec/estrategia.BitBtn3Click.md) traz,
 literalmente:
 
 > Os tamanhos exatos da tática saem da segunda metade do corpo, que esta spec
@@ -95,25 +99,25 @@ das duas.
 2. **Portar a `0x0040A0B4`** (1.443 bytes) — encher a tela de tática a partir
    da imagem. Ela **não grava**: é a leitora, e por isso fecha sem golden de
    gravação, pela régua de leitura do
-   [`GABARITO.md`](../../../wte/re/spec/GABARITO.md);
+   [`GABARITO.md`](/wte/re/spec/GABARITO.md);
 3. **Trocar o veredito dos dois chamadores** que ela destrava —
-   [`estrategia.BitBtn1Click`](../../../wte/re/spec/estrategia.BitBtn1Click.md) e
-   [`MainForm.mostrar_estrategiaClick`](../../../wte/re/spec/MainForm.mostrar_estrategiaClick.md)
+   [`estrategia.BitBtn1Click`](/wte/re/spec/estrategia.BitBtn1Click.md) e
+   [`MainForm.mostrar_estrategiaClick`](/wte/re/spec/MainForm.mostrar_estrategiaClick.md)
    — e regerar o `INDICE.md`.
 
 **Onde a rotina mora é decisão desta correção, e o precedente é fresco.** A
 `0x0040A0B4` alcança os componentes do `estrategia` e é chamada de um handler
 do `MainForm`; é o mesmo formato de problema que o `PreencheFicha` tem, e que a
-CORR-WTE-081 resolveu criando a [`wte_ficha`](../../../wte/src/wte_ficha.pas) —
+CORR-WTE-081 resolveu criando a [`wte_ficha`](/wte/src/wte_ficha.pas) —
 uma unidade que nenhum dos dois formulários possui, com o `ep2002_estrategia`
 usado só na implementação. Reaproveitar a forma poupa a discussão; inventar
 outra exige justificar por que esta não serve.
 
 **A conferência é de tela, não de byte.** A régua natural é o
-[`compara_tela.sh`](../../../wte/tools/compara_tela.sh) sobre o formulário
+[`compara_tela.sh`](/wte/tools/compara_tela.sh) sobre o formulário
 `estrategia` — as onze posições em campo e a lista de formações, nos dois
 lados, para pelo menos três times distintos. O `wte/re/malhas.tsv` e a
-[`wte_zonas`](../../../wte/src/wte_zonas.pas) já descrevem a malha.
+[`wte_zonas`](/wte/src/wte_zonas.pas) já descrevem a malha.
 
 ## Arquivos a criar ou modificar
 
@@ -197,7 +201,7 @@ dois**, mais as duas auxiliares que a `0x0040A0B4` chama (`0x004099BC`, 227 B, e
 no handler de navegação.
 
 E há um terceiro beneficiário já nomeado: o
-[`lista_formacionesClick`](../../../wte/re/spec/estrategia.lista_formacionesClick.md)
+[`lista_formacionesClick`](/wte/re/spec/estrategia.lista_formacionesClick.md)
 está `implementado` **com divergência nomeada** — o item `DEFAULT` não faz nada
 porque o buffer vivo do time (`0x00432E88`) é justamente o que a `0x0040A0B4`
 preenche. Fechar o passo 2 fecha aquela divergência também.

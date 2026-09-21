@@ -3,7 +3,7 @@
 **Este arquivo é o perfil do ciclo `wte/` Lazarus**, e é carregado pelos
 prompts de `docs/prompts/` quando o `progresso.md` em vigor o nomeia no campo
 `perfil:`. Os prompts têm o **rito** — ler o progresso, achar a próxima
-pendente, conferir `depends_on`, medir contra o `fonte_de_verdade` da task,
+pendente, conferir `depends_on`, medir contra o `source_of_truth` da task,
 varrer discrepância, `[x]` só depois do commit. O que é **deste ciclo** mora
 aqui.
 
@@ -22,7 +22,7 @@ aqui.
 **Leia isto antes de tocar em qualquer arquivo.** São decisões já tomadas que
 **não devem ser revertidas** sem o usuário pedir. A fonte delas é o
 [`PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md); se a task em mãos declarar
-outro `fonte_de_verdade`, leia o dela.
+outro `source_of_truth`, leia o dela.
 
 - **O original é Borland C++Builder 6, não Delphi.** Os dois usam a mesma VCL,
   os mesmos `rtl60.bpl`/`vcl60.bpl` e o mesmo `.dfm`; o que separa é o mangling
@@ -53,7 +53,7 @@ outro `fonte_de_verdade`, leia o dela.
 ## Armadilhas medidas neste ciclo
 
 Cada uma custou tempo real, aqui ou no `newWe2002`. As de GUI e de cópia valem
-para o repositório inteiro e estão no [`CLAUDE.md`](../../CLAUDE.md); as
+para o repositório inteiro e estão no [`CLAUDE.md`](/CLAUDE.md); as
 específicas deste ciclo são as de engenharia reversa e de gerador.
 
 1. **Ghidra assume `__cdecl`; o C++Builder passa `this` em `EAX`.** Sem
@@ -156,7 +156,7 @@ ctest --preset debug                           # o newWe2002 nao regrediu
 | `src/core/` | `ctest --preset debug` e o golden do `newWe2002` verdes |
 
 **Contagens que a task afirma se remede, não se relê.** Os valores correntes
-estão na §5 de [`wte/re/fase-1.md`](../../wte/re/fase-1.md), que é **gerada** —
+estão na §5 de [`wte/re/fase-1.md`](/wte/re/fase-1.md), que é **gerada** —
 não os copie para cá, senão esta linha vira mais um sítio a reconciliar.
 Exemplos do que já mudou uma vez: componentes (`~430` → 441), strings com
 enchimento (70 → 13), bitmaps (197 → 198), imports de `rtl60`/`vcl60`

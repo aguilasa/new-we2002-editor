@@ -3,8 +3,12 @@ id: CORR-WTE-119
 title: "Correção: o nativo.md repete os sete valores do nativo.tsv e nada amarra os dois"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-40
+severity: medium
+done_on: 2026-08-26
+done_commit: 061ea53
 ---
 
 # CORR-WTE-119: a evidência da condição 3 não tem `--check`
@@ -12,9 +16,9 @@ depends_on: []
 ## Problema identificado
 
 A [WTE-TASK-40](/docs/tasks/concluidos/40-verificacao-final.md) mediu a condição 3 com
-ferramenta — o [`nativo_check.sh`](../../../wte/tools/nativo_check.sh) escreve as
-sete medidas em [`nativo.tsv`](../../../wte/re/nativo.tsv) — e escreveu o
-[`nativo.md`](../../../wte/re/nativo.md) à mão, declarando isso no topo:
+ferramenta — o [`nativo_check.sh`](/wte/tools/nativo_check.sh) escreve as
+sete medidas em [`nativo.tsv`](/wte/re/nativo.tsv) — e escreveu o
+[`nativo.md`](/wte/re/nativo.md) à mão, declarando isso no topo:
 
 > **Escrito à mão; todo número vem de ferramenta.**
 
@@ -31,7 +35,7 @@ de novo, e desta vez no documento que sustenta uma das três condições da §0.
 
 O projeto já resolveu isto duas vezes, e do mesmo jeito: o `divergencias.md`
 também é escrito à mão, e ganhou o
-[`check_divergencias.py`](../../../wte/tools/check_divergencias.py) para amarrar o
+[`check_divergencias.py`](/wte/tools/check_divergencias.py) para amarrar o
 que dá para amarrar ([CORR-WTE-106](/docs/tasks/concluidos/CORR-WTE-106.md)). O
 `buffers.md` e o `golden.md` nascem de gerador com `--check`. O `nativo.md` é o
 único documento de fechamento sem nenhum dos dois.
@@ -127,7 +131,7 @@ As três recusas plantadas, que é o que esta casa cobra desde a
 [CORR-WTE-106](/docs/tasks/concluidos/CORR-WTE-106.md): valor divergente, medida a mais no
 `.md`, e veredito `reprovou` no TSV.
 
-**Vale medir junto a guarda do [`sem_wine.sh`](../../../wte/tools/sem_wine.sh)**,
+**Vale medir junto a guarda do [`sem_wine.sh`](/wte/tools/sem_wine.sh)**,
 que também não tem teste: rodar o script com um alvo fora da lista de máscaras e
 exigir a recusa. Feito à mão nesta revisão, ela sai como
 `ERRO: /home/ingmar/.var/app/com.usebottles.bottles nao ficou vazio` — o caso

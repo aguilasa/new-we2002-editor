@@ -3,8 +3,12 @@ id: CORR-LOOKS-048
 title: "Correção: ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados"
 type: correção
 category: engenharia-reversa
-status: concluído
-depends_on: ["CORR-LOOKS-046"]
+status: done
+depends_on: [CORR-LOOKS-046]
+origin: LOOKS-TASK-17
+severity: medium
+done_on: 2026-09-16
+done_commit: cf7e0c6
 ---
 
 # CORR-LOOKS-048: a tela da barba oferece sete, e a tabela sabe cinco

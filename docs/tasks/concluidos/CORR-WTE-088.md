@@ -3,8 +3,12 @@ id: CORR-WTE-088
 title: "Correção: nove comentários de comportamento corrente ainda dizem :99 depois da mudança para o :98"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-30
+severity: low
+done_on: 2026-08-23
+done_commit: d2ef858
 ---
 
 # CORR-WTE-088: comentário de comportamento corrente ainda diz `:99`
@@ -12,13 +16,13 @@ depends_on: []
 ## Problema identificado
 
 O display dos gates virou `:98` em 2026-08-20, e o
-[CLAUDE.md](../../../CLAUDE.md) é explícito sobre o que fica e o que muda:
+[CLAUDE.md](/CLAUDE.md) é explícito sobre o que fica e o que muda:
 **registro histórico continua dizendo `:99`**; texto que descreve o
 comportamento de hoje, não.
 
 Nove comentários de ferramenta viva continuam descrevendo o presente com o
 número velho, e o mais visível deles é a lista de guardas do
-[`golden_check.sh`](../../../wte/tools/golden_check.sh) — o cabeçalho que se lê
+[`golden_check.sh`](/wte/tools/golden_check.sh) — o cabeçalho que se lê
 justamente para saber o que o gate garante:
 
 ```text

@@ -3,8 +3,12 @@ id: CORR-WTE-120
 title: "Correção: a guarda do sem_wine.sh é creditada à metade que nesta máquina não pode disparar"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-40
+severity: low
+done_on: 2026-08-26
+done_commit: 17cc31a
 ---
 
 # CORR-WTE-120: a guarda tem duas metades, e a prosa credita a inerte
@@ -18,7 +22,7 @@ ambiente fabricado é honesto:
 > ainda responder lá dentro: ambiente que só *parece* limpo mede tão pouco
 > quanto não medir.
 
-O cabeçalho do [`sem_wine.sh`](../../../wte/tools/sem_wine.sh) diz o mesmo. Medido
+O cabeçalho do [`sem_wine.sh`](/wte/tools/sem_wine.sh) diz o mesmo. Medido
 nesta revisão: **essa metade não pode disparar nesta máquina.** O `command -v`
 de `wine`, `wine64`, `wineserver` e `winecfg` já falha **fora** de qualquer
 namespace — o Wine daqui é o runner do Bottles, em `~/.var/app/`, e nunca
@@ -169,3 +173,7 @@ infundada, e fica registrada porque a próxima pessoa vai desconfiar igual.
 - `docs/tasks/concluidos/40-verificacao-final.md` — o Log e o resumo
 - `docs/PLAN-WTE-LAZARUS.md`, `docs/tasks/concluidos/progresso.md`, `wte/re/nativo.md`,
   `wte/tools/README.md`, `wte/tools/nativo_check.sh` — a varredura
+
+## Log de Execução
+
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

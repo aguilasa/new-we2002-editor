@@ -3,8 +3,12 @@ id: CORR-WTE-095
 title: "Investigar: o editor do Obocaman nunca preça o slot 22, e o `ed.exe` diz que ele tem preço"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-32
+severity: medium
+done_on: 2026-08-24
+done_commit: 0d1044a
 ---
 
 # CORR-WTE-095: os dois editores discordam sobre o 23º slot
@@ -119,7 +123,7 @@ desfizeram a contradição, e nenhuma delas estava na lista da correção.
 ### 1. `strace`, e o `je` cai
 
 O instrumento não era depurador, e já existia: o
-[`diff_dirigido.sh`](../../../wte/tools/diff_dirigido.sh) da WTE-TASK-19 roda o
+[`diff_dirigido.sh`](/wte/tools/diff_dirigido.sh) da WTE-TASK-19 roda o
 oráculo sob `strace`, e o cabeçalho dele diz exatamente por quê — *"`cmp` não vê
 LEITURA nenhuma, e leitura é metade da resposta"*.
 
@@ -148,7 +152,7 @@ dirigido até o time selecionado, o depurador ligado, e só então o clique.
 | `0x0040342a` | o `fputc` dentro da `0x403400` | **23** |
 
 E o retorno de cada `fputc`, lido em `0x0040342f`, bate um a um com a coluna
-`previsto` do [`preco.tsv`](../../../wte/re/preco.tsv) para o time 2 — inclusive o
+`previsto` do [`preco.tsv`](/wte/re/preco.tsv) para o time 2 — inclusive o
 da 23ª volta, que devolve **20**, o preço do slot 22. Nenhum devolve `EOF`.
 
 O arquivo recebe **22** `write` de 1 byte, o último com `"\25"` (21, o slot 21).
@@ -165,7 +169,7 @@ de setor MODE2/2352 (`ftell % 2352 == 2072` → `fseek(+304)`), não um flush.
 
 ### 4. Corroboração que já estava versionada
 
-O [`io-medido.tsv`](../../../wte/re/io-medido.tsv), sessão `27-mcr2iso`, traz
+O [`io-medido.tsv`](/wte/re/io-medido.tsv), sessão `27-mcr2iso`, traz
 `W 3067473 3067495 23`: o import de `.mcr` escreve os **23** bytes condicionais
 do time 3. O slot é endereçável, e o próprio editor o grava por outro caminho —
 o que confirma que a lacuna é deste handler, não do formato.

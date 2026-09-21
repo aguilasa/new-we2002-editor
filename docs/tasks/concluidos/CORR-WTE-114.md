@@ -3,8 +3,12 @@ id: CORR-WTE-114
 title: "Correção: três divergências novas ficaram numa task concluída, e o registro que existe para elas não as tem"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-37
+severity: medium
+done_on: 2026-08-25
+done_commit: e247f8f
 ---
 
 # CORR-WTE-114: as três candidatas da UI não chegaram ao `divergencias.md`
@@ -18,7 +22,7 @@ posteriores — WTE-TASK-37"*. O critério dela pede *"achado que volta para out
 fase registrado com a task de destino"*, e por essa letra está cumprido.
 
 **Só que a WTE-TASK-35 está `concluído`.** Ninguém vai executá-la de novo, e o
-artefato que ela produziu — o [`wte/re/divergencias.md`](../../../wte/re/divergencias.md),
+artefato que ela produziu — o [`wte/re/divergencias.md`](/wte/re/divergencias.md),
 que é o registro guardado pelo `check_divergencias.py` — **não tem nenhuma das
 três**. A primeira delas diz isso com todas as letras:
 
@@ -179,3 +183,7 @@ o gate sai com **código 2**.
 - `docs/tasks/concluidos/35-divergencias-deliberadas.md` — a seção virou índice
 - `wte/tools/check_divergencias.py` — `PENDENCIA_DECLARADA` e a varredura
 - `wte/tools/test_check_divergencias.py` — `TestPendenciaDeclarada`, 4 casos
+
+## Log de Execução
+
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

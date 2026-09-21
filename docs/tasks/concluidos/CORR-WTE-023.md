@@ -3,8 +3,12 @@ id: CORR-WTE-023
 title: "Correção: o critério de build da WTE-TASK-11 diz 2.482 linhas e atribui os 2 hints ao Lazarus; são 2.562 e vêm do /etc/fpc.cfg"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-11
+severity: high
+done_on: 2026-08-09
+done_commit: b60d955
 ---
 
 # CORR-WTE-023: os três números do critério de compilação não reproduzem
@@ -155,3 +159,4 @@ entra o `Build Project: nothing to do.`. O critério diz os dois casos.
 - `docs/tasks/concluidos/11-app-com-a-casca-completa.md` (critério 1)
 - `docs/tasks/concluidos/correcoes-progresso.md` (bloco de detalhe desta CORR — o
   2.562 do diagnóstico ganhou a nota do deslocamento)
+_Migrated on 2026-09-21: done_commit approximated from the last commit touching this file._

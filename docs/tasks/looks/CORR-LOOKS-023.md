@@ -3,8 +3,12 @@ id: CORR-LOOKS-023
 title: "Correção: \"nenhuma outra peça toca a paleta das chuteiras\" é conferido só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram"
 type: correção
 category: textura
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-10
+severity: low
+done_on: 2026-09-15
+done_commit: "3592126"
 ---
 
 # CORR-LOOKS-023: a exclusividade da paleta de chuteira é medida em metade do modelo

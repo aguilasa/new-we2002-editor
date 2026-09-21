@@ -3,8 +3,12 @@ id: CORR-WTE-140
 title: "Correção: cancelar o diálogo de abertura encerra o port e deixa o `ed.exe` com a janela vazia"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: PAR-TASK-09
+severity: medium
+done_on: 2026-08-31
+done_commit: 759e4d9
 ---
 
 # CORR-WTE-140: `return FALSE` no `OnInitDialog` não fecha diálogo nenhum
@@ -23,7 +27,7 @@ Os dois mostram o mesmo aviso (`Impossible editing without CD image !`) antes
 disso.
 
 **E o comentário do port afirma o contrário do que o original faz.** Em
-[`src/app/main.cpp`](../../../src/app/main.cpp):
+[`src/app/main.cpp`](/src/app/main.cpp):
 
 ```cpp
 // The original asked for the image inside OnInitDialog and bailed out of

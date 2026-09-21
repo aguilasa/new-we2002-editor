@@ -3,8 +3,12 @@ id: CORR-PES2-004
 title: "Correção: os prompts ficaram agnósticos de plano e de prefixo, e continuam cheios de corpo WTE-específico"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: [CORR-PES2-003]
+origin: CORR-PES2-003
+severity: medium
+done_on: 2026-09-01
+done_commit: 5e2b8bd
 ---
 
 # CORR-PES2-004: agnóstico no cabeçalho, WTE-específico no corpo
@@ -12,7 +16,7 @@ depends_on: [CORR-PES2-003]
 ## Problema identificado
 
 Três correções seguidas tiraram dos prompts o que a regra proíbe **por nome**:
-o plano ([`fonte_de_verdade` na task](../../.claude/rules/tasks.md)), o prefixo
+o plano ([`fonte_de_verdade` na task](/.claude/rules/tasks.md)), o prefixo
 de correção ([CORR-PES2-002](/docs/tasks/CORR-PES2-002.md)) e o prefixo de task
 ([CORR-PES2-003](/docs/tasks/CORR-PES2-003.md)). O que sobrou é maior que os
 três, e a varredura da 003 é que o mostrou: **os prompts continuam carregando

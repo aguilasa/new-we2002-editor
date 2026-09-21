@@ -3,8 +3,12 @@ id: CORR-LOOKS-006
 title: "Correção: a recusa do `/SELECT.BIN` sai como `digest mismatch` pelado"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-02
+severity: medium
+done_on: 2026-09-14
+done_commit: d524d8c
 ---
 
 # CORR-LOOKS-006: a recusa do `/SELECT.BIN` sai como `digest mismatch` pelado

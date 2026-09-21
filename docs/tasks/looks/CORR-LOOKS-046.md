@@ -3,8 +3,12 @@ id: CORR-LOOKS-046
 title: "Correção: um `.refused` velho faz o `--score` pular uma tupla que já desenha, e o gate passa sem julgá-la"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-17
+severity: high
+done_on: 2026-09-16
+done_commit: af50760
 ---
 
 # CORR-LOOKS-046: o `confront.run` apaga o PNG velho e deixa a recusa velha

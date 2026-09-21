@@ -3,8 +3,12 @@ id: CORR-WTE-048
 title: "Correção: o `fase-3.md` ainda diz que o `wte.exe` não passa da tela de carga"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-20
+severity: low
+done_on: 2026-08-10
+done_commit: d575092
 ---
 
 # CORR-WTE-048: a afirmação aposentada sobrevive num quinto sítio, e ele é gerado
@@ -19,7 +23,7 @@ a [CORR-WTE-044](/docs/tasks/concluidos/CORR-WTE-044.md) mediu **0 violação de
 oráculo por dois roteiros novos.
 
 Ele varreu quatro arquivos. O quinto ficou:
-[`wte/re/fase-3.md`](../../../wte/re/fase-3.md), produto da
+[`wte/re/fase-3.md`](/wte/re/fase-3.md), produto da
 [WTE-TASK-20](/docs/tasks/concluidos/20-round-trip-headless.md), abre a seção do oráculo
 com
 

@@ -3,8 +3,12 @@ id: CORR-MCR-027
 title: "Correção: \"as faixas válidas começam todas em 0x02044\" é falso como escrito, e o que se mediu é outra coisa"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-17
+severity: low
+done_on: 2026-09-10
+done_commit: 3bf77d4
 ---
 
 # CORR-MCR-027: as faixas da soma não começam todas no mesmo byte

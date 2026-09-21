@@ -3,15 +3,19 @@ id: CORR-WTE-059
 title: "Correção: a spec do `lista_equiposChange` dá para o veredito `aberto` uma razão que a seção seguinte desmente"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-25
+severity: low
+done_on: 2026-08-11
+done_commit: 783fb5b
 ---
 
 # CORR-WTE-059: a razão escrita do `aberto` já não é a razão verdadeira
 
 ## Problema identificado
 
-Em [`wte/re/spec/MainForm.lista_equiposChange.md`](../../../wte/re/spec/MainForm.lista_equiposChange.md),
+Em [`wte/re/spec/MainForm.lista_equiposChange.md`](/wte/re/spec/MainForm.lista_equiposChange.md),
 o bloco que justifica o veredito termina assim:
 
 > É o custo de ainda não ter conferido contra a tela, e a razão de o veredito

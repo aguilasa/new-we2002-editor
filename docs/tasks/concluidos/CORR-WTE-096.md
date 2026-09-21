@@ -3,8 +3,12 @@ id: CORR-WTE-096
 title: "Correção: chave duplicada no GOLDEN_DE apaga o gate do base_teamClick, e o fase-4.md publica \"nenhum\""
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-32
+severity: high
+done_on: 2026-08-24
+done_commit: 2731f2f
 ---
 
 # CORR-WTE-096: chave duplicada no `GOLDEN_DE` apaga o gate do `base_teamClick`
@@ -12,15 +16,15 @@ depends_on: []
 ## Problema identificado
 
 A [WTE-TASK-32](/docs/tasks/concluidos/32-preco-do-jogador.md) criou o
-[`golden-22-precos`](../../../wte/tests/roteiros/golden-22-precos.txt) — a régua de
+[`golden-22-precos`](/wte/tests/roteiros/golden-22-precos.txt) — a régua de
 byte da feature de preço — e o registrou no `GOLDEN_DE` do
-[`check_fase4.py`](../../../wte/tools/check_fase4.py). **O registro é inerte:** o
+[`check_fase4.py`](/wte/tools/check_fase4.py). **O registro é inerte:** o
 dicionário tem `"MainForm.base_teamClick"` **duas vezes**, e em Python a última
 ocorrência ganha. A segunda é a entrada velha, da época em que o handler estava
 `aberto`, e o valor dela é a tupla vazia.
 
 O efeito é visível no documento gerado: o
-[`wte/re/fase-4.md`](../../../wte/re/fase-4.md) publica
+[`wte/re/fase-4.md`](/wte/re/fase-4.md) publica
 
 ```text
 | `0x00410ff4` | MainForm.base_teamClick | auxiliar | implementado | **nenhum** |

@@ -3,8 +3,12 @@ id: CORR-MCR-023
 title: "Correção: a MCR-TASK-16 conta quatro cartões de PES2 e cinco recusas, e são cinco e seis"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-16
+severity: high
+done_on: 2026-09-09
+done_commit: 66c801f
 ---
 
 # CORR-MCR-023: quatro/cinco no critério, cinco/seis na ferramenta

@@ -1,3 +1,9 @@
+---
+cycle: looks
+prefix: LOOKS
+profile: /docs/prompts/perfil-looks.md
+order: [LOOKS-TASK-01, LOOKS-TASK-02, LOOKS-TASK-03, LOOKS-TASK-04, LOOKS-TASK-05, LOOKS-TASK-06, LOOKS-TASK-07, LOOKS-TASK-08, LOOKS-TASK-09, LOOKS-TASK-10, LOOKS-TASK-11, LOOKS-TASK-12, LOOKS-TASK-13, LOOKS-TASK-14, LOOKS-TASK-15, LOOKS-TASK-16, LOOKS-TASK-17, LOOKS-TASK-18, LOOKS-TASK-19, LOOKS-TASK-20, LOOKS-TASK-21, LOOKS-TASK-22, LOOKS-TASK-23, LOOKS-TASK-24, LOOKS-TASK-25, LOOKS-TASK-26, LOOKS-TASK-27, LOOKS-TASK-28, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40, LOOKS-TASK-32, LOOKS-TASK-33, LOOKS-TASK-34, LOOKS-TASK-35]
+---
 # Progresso — visualizador 3D da aparência do jogador
 
 Rastreamento das tasks de [`/docs/PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md),
@@ -7,8 +13,8 @@ favor do plano.
 
 **Pasta deste ciclo:** `docs/tasks/looks/`. Todos os caminhos deste arquivo e
 das tasks ao lado dele saem daqui, e é o nome desta pasta que os comandos
-recebem como argumento (`/executar looks`, `/revisar looks`,
-`/corrigir looks`). Sem argumento, os comandos continuam lendo `docs/tasks/`
+recebem como argumento (`/rite:execute looks`, `/rite:review looks`,
+`/rite:fix looks`). Sem argumento, os comandos continuam lendo `docs/tasks/`
 raso — o ciclo de PES2.
 
 **Perfil deste ciclo:** [`/docs/prompts/perfil-looks.md`](/docs/prompts/perfil-looks.md).
@@ -39,50 +45,53 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 
 ## Resumo
 
-| ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
-| -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | Base legal e linhagem — `we3d` (MIT), Superpack e o fonte `en_we2000edit` | 0 | — | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | Ambiente — o venv, os dois discos e seus papéis, e a armadilha do MSYS | 0 | 01 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | `iso_source.py` e `layout.py` — a fachada de disco e o monopólio de endereço | 1 | 02 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | `section.py` — primitiva de 24 B, vértice de 8 B e o separador de zeros | 1 | 03 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | `modelfile.py` — as 106 seções do `MODEL.BIN` e as 20 do `EDT_MOD.BIN` | 1 | 04 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | `harness.py`, `controls.py` e `selftest.py` — o gate e os primeiros casos vermelhos | 1 | 05 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | `oracle.py` — o emulador por MCP e a rota até a tela `LOOKS SET` | 2 | 06 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | Incógnita (a) — de onde vem o boneco: `EDT_MOD.BIN` ou os TMDs de `0x00168xxx` | 2 | 07 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Incógnita (b) — nomear as onze peças pelo emulador, não pelo tamanho | 2 | 08 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
-| [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A lista de CLUTs do `DAT2D.BIN` que o `bin_archive.py` não acha | 3 | 08 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
-| [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A contradição 8 × 3.568 — qual imagem do `DAT2D.BIN` é o cabelo | 3 | 10 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
-| [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | Incógnita (d) — pele é troca de paleta ou de cor de vértice? | 3 | 11 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
-| [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | `looks.py` — os doze campos, seus domínios e os rótulos | 4 | 09 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
-| [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | `assembly.py` — campo de LOOKS → peça + paleta | 4 | 12, 13 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | `ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela | 5 | 14 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | 15 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Confronto — nosso quadro contra o quadro do emulador, na mesma tupla | 6 | 16 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os quatro alvos de `ctest` | 7 | 18 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
-| [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | 19 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
-| [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | Incógnita (q) — a tela `LOOKS SET` medida no jogo: texto de cada valor, ajuda, cursor e valores iniciais | 8 | 20 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
-| [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | A tela `LOOKS SET` na janela — doze linhas trocáveis, e o boneco redesenhado a cada troca | 8 | 21 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
-| [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | Incógnita (r) — `DEFAUL` e `NAT`: a nação escolhida e o default que ela aplica | 8 | 22 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
-| [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tabela | 9 | 20 | ✅ Concluído | 2026-09-17 | 2026-09-18 |
-| [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | A pose de referência — as matrizes de cada peça num quadro contado, e a hierarquia | 9 | 24 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
-| [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | `anime.py` — o formato do `ANIME.BIN`, medido contra a pose capturada | 9 | 25 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
-| [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado | 9 | 22, 26 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
-| [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | A câmera do jogo — projeção medida, e a silhueta como testemunha de forma | 9 | 27 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
-| [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose | 9 | 22, 28 | ✅ Concluído | 2026-09-18 | 2026-09-19 |
-| [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | 20 | ✅ Concluído | 2026-09-20 | 2026-09-20 |
-| [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | 22, 28 | ✅ Concluído | 2026-09-21 | 2026-09-21 |
-| [LOOKS-TASK-36](/docs/tasks/looks/36-os-sprites-estaticos.md) | Os sprites estáticos da tela — placa, caixas, ícone, barra, título e setas, lidos do disco | 10 | 31 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-37](/docs/tasks/looks/37-a-tabela-de-glifos.md) | A tabela de glifos — o texto da tela desenhado com a fonte do `EDT_2D.BIN` | 10 | 31 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-38](/docs/tasks/looks/38-o-alinhamento-dos-valores.md) | O alinhamento dos valores — a caixa do objeto de texto no `screen.json`, e o valor à direita | 10 | 37 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md) | O texto da ajuda — quem escreve a página (832,256) na VRAM, e de onde | 10 | 37 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md) | A câmera do close-up — o painel aproxima na cabeça quando a linha é de cabeça | 10 | 28 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-32](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) | Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço | 11 | 26 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | 28, 32, 40 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-34](/docs/tasks/looks/34-o-goleiro-andando.md) | O goleiro — figura 1 montada e andando na tela, conferida no slot 1 | 11 | 33 | ⬜ Pendente | — | — |
-| [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | 23, 29, 30, 31, 34, 36, 37, 38, 39, 40 | ⬜ Pendente | — | — |
+<!-- rite:begin tasks -->
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | Base legal e linhagem — `we3d` (MIT), Superpack e o fonte `en_we2000edit` | 0 | documentação | — | done | 2026-09-14 | 2026-09-14 |
+| [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | Ambiente — o venv, os dois discos e seus papéis, e a armadilha do MSYS | 0 | infraestrutura | LOOKS-TASK-01 | done | 2026-09-14 | 2026-09-14 |
+| [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | `iso_source.py` e `layout.py` — a fachada de disco e o monopólio de endereço | 1 | implementação | LOOKS-TASK-02 | done | 2026-09-14 | 2026-09-14 |
+| [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | `section.py` — primitiva de 24 B, vértice de 8 B e o separador de zeros | 1 | implementação | LOOKS-TASK-03 | done | 2026-09-14 | 2026-09-14 |
+| [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | `modelfile.py` — as 106 seções do `MODEL.BIN` e as 20 do `EDT_MOD.BIN` | 1 | implementação | LOOKS-TASK-04 | done | 2026-09-14 | 2026-09-14 |
+| [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | `harness.py`, `controls.py` e `selftest.py` — o gate e os primeiros casos vermelhos | 1 | implementação | LOOKS-TASK-05 | done | 2026-09-14 | 2026-09-14 |
+| [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | `oracle.py` — o emulador por MCP e a rota até a tela `LOOKS SET` | 2 | implementação | LOOKS-TASK-06 | done | 2026-09-14 | 2026-09-14 |
+| [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | Incógnita (a) — de onde vem o boneco: `EDT_MOD.BIN` ou os TMDs de `0x00168xxx` | 2 | engenharia-reversa | LOOKS-TASK-07 | done | 2026-09-14 | 2026-09-14 |
+| [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Incógnita (b) — nomear as onze peças pelo emulador, não pelo tamanho | 2 | engenharia-reversa | LOOKS-TASK-08 | done | 2026-09-15 | 2026-09-15 |
+| [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A lista de CLUTs do `DAT2D.BIN` que o `bin_archive.py` não acha | 3 | engenharia-reversa | LOOKS-TASK-08 | done | 2026-09-15 | 2026-09-15 |
+| [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A contradição 8 × 3.568 — qual imagem do `DAT2D.BIN` é o cabelo | 3 | engenharia-reversa | LOOKS-TASK-10 | done | 2026-09-15 | 2026-09-15 |
+| [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | Incógnita (d) — pele é troca de paleta ou de cor de vértice? | 3 | engenharia-reversa | LOOKS-TASK-11 | done | 2026-09-15 | 2026-09-15 |
+| [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | `looks.py` — os doze campos, seus domínios e os rótulos | 4 | implementação | LOOKS-TASK-09 | done | 2026-09-15 | 2026-09-15 |
+| [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | `assembly.py` — campo de LOOKS → peça + paleta | 4 | engenharia-reversa | LOOKS-TASK-12, LOOKS-TASK-13 | done | 2026-09-16 | 2026-09-16 |
+| [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | `ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela | 5 | implementação | LOOKS-TASK-14 | done | 2026-09-16 | 2026-09-16 |
+| [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | implementação | LOOKS-TASK-15 | done | 2026-09-16 | 2026-09-16 |
+| [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Confronto — nosso quadro contra o quadro do emulador, na mesma tupla | 6 | verificação | LOOKS-TASK-16 | done | 2026-09-16 | 2026-09-16 |
+| [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | verificação | LOOKS-TASK-17 | done | 2026-09-16 | 2026-09-16 |
+| [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os quatro alvos de `ctest` | 7 | implementação | LOOKS-TASK-18 | done | 2026-09-17 | 2026-09-17 |
+| [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | documentação | LOOKS-TASK-19 | done | 2026-09-17 | 2026-09-17 |
+| [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | Incógnita (q) — a tela `LOOKS SET` medida no jogo: texto de cada valor, ajuda, cursor e valores iniciais | 8 | investigação | LOOKS-TASK-20 | done | 2026-09-17 | 2026-09-17 |
+| [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | A tela `LOOKS SET` na janela — doze linhas trocáveis, e o boneco redesenhado a cada troca | 8 | implementação | LOOKS-TASK-21 | done | 2026-09-17 | 2026-09-17 |
+| [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | Incógnita (r) — `DEFAUL` e `NAT`: a nação escolhida e o default que ela aplica | 8 | implementação | LOOKS-TASK-22 | done | 2026-09-17 | 2026-09-17 |
+| [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tabela | 9 | investigação | LOOKS-TASK-20 | done | 2026-09-17 | 2026-09-18 |
+| [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | A pose de referência — as matrizes de cada peça num quadro contado, e a hierarquia | 9 | investigação | LOOKS-TASK-24 | done | 2026-09-18 | 2026-09-18 |
+| [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | `anime.py` — o formato do `ANIME.BIN`, medido contra a pose capturada | 9 | implementação | LOOKS-TASK-25 | done | 2026-09-18 | 2026-09-18 |
+| [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado | 9 | implementação | LOOKS-TASK-22, LOOKS-TASK-26 | done | 2026-09-18 | 2026-09-18 |
+| [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | A câmera do jogo — projeção medida, e a silhueta como testemunha de forma | 9 | implementação | LOOKS-TASK-27 | done | 2026-09-18 | 2026-09-18 |
+| [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose | 9 | investigação | LOOKS-TASK-22, LOOKS-TASK-28 | done | 2026-09-18 | 2026-09-19 |
+| [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | implementação | LOOKS-TASK-20 | done | 2026-09-20 | 2026-09-20 |
+| [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | implementação | LOOKS-TASK-22, LOOKS-TASK-28 | done | 2026-09-21 | 2026-09-21 |
+| [LOOKS-TASK-36](/docs/tasks/looks/36-os-sprites-estaticos.md) | Os sprites estáticos da tela — placa, caixas, ícone, barra, título e setas, lidos do disco | 10 | implementação | LOOKS-TASK-31 | pending | — | — |
+| [LOOKS-TASK-37](/docs/tasks/looks/37-a-tabela-de-glifos.md) | A tabela de glifos — o texto da tela desenhado com a fonte do `EDT_2D.BIN` | 10 | implementação | LOOKS-TASK-31 | pending | — | — |
+| [LOOKS-TASK-38](/docs/tasks/looks/38-o-alinhamento-dos-valores.md) | O alinhamento dos valores — a caixa do objeto de texto no `screen.json`, e o valor à direita | 10 | implementação | LOOKS-TASK-37 | pending | — | — |
+| [LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md) | O texto da ajuda — quem escreve a página (832,256) na VRAM, e de onde | 10 | investigação | LOOKS-TASK-37 | pending | — | — |
+| [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md) | A câmera do close-up — o painel aproxima na cabeça quando a linha é de cabeça | 10 | implementação | LOOKS-TASK-28 | pending | — | — |
+| [LOOKS-TASK-32](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) | Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço | 11 | investigação | LOOKS-TASK-26 | pending | — | — |
+| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | implementação | LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40 | pending | — | — |
+| [LOOKS-TASK-34](/docs/tasks/looks/34-o-goleiro-andando.md) | O goleiro — figura 1 montada e andando na tela, conferida no slot 1 | 11 | verificação | LOOKS-TASK-33 | pending | — | — |
+| [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | documentação | LOOKS-TASK-23, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-34, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40 | pending | — | — |
+<!-- rite:end -->
 
-**Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
+**A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada task — não edite
+dentro dela. **Status:** `pending` · `in-progress` · `done` · `blocked` · `skipped`.
 
 **As duas colunas de data são datas de commit**, não datas de intenção.
 
@@ -90,11 +99,12 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 2026-09-21, a pedido do usuário, a LOOKS-TASK-31 fechou com a medição e a
 mobília, e o que faltava dela virou as tasks 36 a 40, na fase 10 — com IDs
 novos e as linhas logo depois da 31, porque renumerar arrastaria as tasks 32
-a 35 e todo link para elas.
+a 35 e todo link para elas. Essa ordem mora no `order:` do frontmatter deste arquivo, que é o
+que o `rite next` e a tabela seguem.
 
-- **"Concluída em"** — o commit que fechou a tarefa. Tarefa pendente leva `—`.
-- **"Revisado em"** — o commit da revisão. Tarefa concluída e ainda não revisada
-  leva `⬜ pendente`; tarefa que nem começou leva `—`.
+- **"Done on"** — a data do commit de trabalho, escrita pelo `rite close`. Tarefa pendente leva `—`.
+- **"Reviewed on"** — `pending` enquanto a tarefa concluída espera revisão; a data, depois do
+  `rite mark-reviewed`; `—` se a tarefa nem começou.
 
 ---
 

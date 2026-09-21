@@ -4,9 +4,13 @@ title: "Handlers de edição — nomes, números, atributos, mover jogador"
 type: implementação
 category: comportamento
 phase: 4
-depends_on: ["WTE-TASK-25"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 4"
-status: concluído
+depends_on: [WTE-TASK-25]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-18
+review_commit: null
+done_on: 2026-08-18
+done_commit: e7fc23d
 ---
 
 # WTE-TASK-26: Handlers de edição
@@ -44,7 +48,7 @@ global `0x00432e48` (`_ficha_movertodos`, exportado pelo próprio `.exe`).
 
 **São 28 handlers, e a tabela acima está completa** — conferido em 2026-08-12
 contra a coluna `grupo` do
-[`published_methods.tsv`](../../../wte/re/published_methods.tsv). O grupo `edicao`
+[`published_methods.tsv`](/wte/re/published_methods.tsv). O grupo `edicao`
 tem 44 linhas lá; as 16 de diferença carregam na coluna `nota` o dono fora
 desta task: **11 do `ficha_color`** mais `colorearClick` e os dois
 `mallaNMouseDown` são da
@@ -141,15 +145,15 @@ estímulo quando um lado diverge. Reconciliado junto com a
 - [x] Todo handler do grupo com spec, incluindo regra de validação — **28 de
       28** (2026-08-13): barras 2, número 4, nomes 5, mover 8, atributos 2,
       tática 7. Nove fecham `aberto` com dono nomeado, como a opção A previu
-- [x] Comportamento de truncamento documentado por campo — [`wte/re/truncamento.md`](../../../wte/re/truncamento.md) (2026-08-13), gerado pelo [`dump_truncamento.py`](../../../wte/tools/dump_truncamento.py)
+- [x] Comportamento de truncamento documentado por campo — [`wte/re/truncamento.md`](/wte/re/truncamento.md) (2026-08-13), gerado pelo [`dump_truncamento.py`](/wte/tools/dump_truncamento.py)
 - [x] ~~Golden verde para cada edição, uma por rodada~~ ~~conferência de tela
       verde para cada edição, uma por rodada~~ **Reescrito duas vezes, ambas por
       decisão do usuário** (2026-08-12 e 2026-08-18 — ver "As duas reescritas do
       critério de tela" abaixo): **conferência verde para cada grupo de edição,
       uma por rodada — de tela onde o alvo é mensurável em pixel, estática onde
       já se mediu que não é.** Mecanizado pelo
-      [`check_edicao.py`](../../../wte/tools/check_edicao.py) →
-      [`wte/re/edicao-cobertura.md`](../../../wte/re/edicao-cobertura.md): os 28
+      [`check_edicao.py`](/wte/tools/check_edicao.py) →
+      [`wte/re/edicao-cobertura.md`](/wte/re/edicao-cobertura.md): os 28
       handlers com instrumento nomeado, os estáticos rodando `--check`, e os de
       tela conferidos contra a **evidência de trace da própria corrida**. O
       golden por byte da mesma edição é critério da
@@ -181,13 +185,13 @@ alcança tudo:
   das linhas 2 a 16 — de 16 `imghab`, só o primeiro dá medida. Isso atinge os
   grupos **atributos** e metade do de **números**;
 - o substituto **já existe e já foi aceito**: o
-  [`check_bitfields.py`](../../../wte/tools/check_bitfields.py) confere a ordem de
+  [`check_bitfields.py`](/wte/tools/check_bitfields.py) confere a ordem de
   preenchimento da ficha contra os descritores de bit em `.data`. Ele mede
   **identidade de campo**, que é mais forte do que largura de pixel, e roda sem
   `:99` e sem Wine;
 - o mesmo vale para o campinho da **tática**: a passagem 18 conferiu o arrasto
   na tela por inspeção dirigida, e o que sustenta a geometria é o
-  [`dump_zonas.py`](../../../wte/tools/dump_zonas.py), que confere cada retângulo
+  [`dump_zonas.py`](/wte/tools/dump_zonas.py), que confere cada retângulo
   contra o tamanho do `campo` no `.lfm`.
 
 **O que a reescrita não afrouxa.** A régua de **byte** desses handlers continua
@@ -209,7 +213,7 @@ estimados.)*
 ### A decisão que o plano precisou primeiro: **opção A**, do usuário, 2026-08-12
 
 `0x00404820` **grava** (oitava passagem). Logo, os 8 handlers de mover são como
-o [`dorsalClick`](../../../wte/re/spec/MainForm.dorsalClick.md): editam e escrevem
+o [`dorsalClick`](/wte/re/spec/MainForm.dorsalClick.md): editam e escrevem
 no fim, e pela decisão (b) a metade de escrita é da
 [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
@@ -247,7 +251,7 @@ na oitava passagens. O que ela precisa escrever no port:
 - a comparação de identidade (`+0x16`, `+0x17`) e o `MostraCodigo` da
   `0x00403e20`, com as duas mensagens medidas.
 
-Fecha de tabela o [`casilla_dorsalKeyPress`](../../../wte/re/spec/jugador.casilla_dorsalKeyPress.md):
+Fecha de tabela o [`casilla_dorsalKeyPress`](/wte/re/spec/jugador.casilla_dorsalKeyPress.md):
 o buffer é exatamente o que faltava para ele avaliar a condição do `SetFocus`.
 
 **Passagem 10.** `parriba` 807 B, `flechasapa` 981 B, `paderechaeizquierda`
@@ -325,7 +329,7 @@ do `--edicao`; e o `iguala_nombres`.
   valor velho — e o golden acusaria a **gravação** por um defeito que é da
   edição. Entrou como `BarrasEmEdicao` no `.aux.inc`, separado de
   `Jogo.teams[].bar_*`. A coincidência dos quatro endereçamentos virou guarda
-  no [`check_barras.py`](../../../wte/tools/check_barras.py), junto com a
+  no [`check_barras.py`](/wte/tools/check_barras.py), junto com a
   conferência de que `11*v + 9` é **a mesma sequência de bytes** na carga e na
   edição — se divergirem, uma barra carregada e uma editada com o mesmo valor
   deixam de ter a mesma largura, e a comparação de tela passa a medir a coisa
@@ -489,7 +493,7 @@ do `--edicao`; e o `iguala_nombres`.
      `track_barra.Position := ...`, e isso reentra no `track_barraChange` — que
      regrava o mesmo valor e redesenha a mesma largura, então é inofensivo,
      mas está na conta que o script confere. É a pergunta que o
-     [`check_lcl_combo.py`](../../../wte/tools/check_lcl_combo.py) respondeu para
+     [`check_lcl_combo.py`](/wte/tools/check_lcl_combo.py) respondeu para
      `TComboBox` (**não** dispara), com resposta oposta para `TTrackBar`.
   2. **As coordenadas de clique não são as mesmas nos dois lados abaixo de
      certa altura.** A `track_barra` do oráculo aceita clique em y 190..200 e a
@@ -506,7 +510,7 @@ do `--edicao`; e o `iguala_nombres`.
   conferidos —, e o veredito passaria a medir a ordem das tasks em vez do
   estado do handler. Passou a dizer "a régua da task do handler verde", com uma
   tabela nomeando qual é qual por grupo, no
-  [`GABARITO.md`](../../../wte/re/spec/GABARITO.md). A metade por byte não sumiu:
+  [`GABARITO.md`](/wte/re/spec/GABARITO.md). A metade por byte não sumiu:
   virou linha de critério de conclusão da
   [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md), com o par
   gravação × edição escrito.
@@ -792,7 +796,7 @@ do `--edicao`; e o `iguala_nombres`.
 - **Por que parar aqui em vez de emendar o lote:**
 
   Os 8 handlers de mover jogador parecem pequenos — 312 a 981 bytes — e não
-  são. Medido pelo [`dump_auxiliares.py`](../../../wte/tools/dump_auxiliares.py),
+  são. Medido pelo [`dump_auxiliares.py`](/wte/tools/dump_auxiliares.py),
   eles alcançam **24 rotinas internas**, e **8 delas somam 3.585 bytes sem
   papel lido**:
 
@@ -836,7 +840,7 @@ do `--edicao`; e o `iguala_nombres`.
      as duas chamadas são **leituras**. Ver abaixo. Os 164 bytes dela continuam
      sendo o alvo mais barato do lote, e foram lidos.
   2. **`0x00404820` devolve valor e o valor governa o fluxo** (`< 0` pula o
-     bloco). A [spec do `mostrar_jugadorClick`](../../../wte/re/spec/MainForm.mostrar_jugadorClick.md)
+     bloco). A [spec do `mostrar_jugadorClick`](/wte/re/spec/MainForm.mostrar_jugadorClick.md)
      a descrevia como "enche a ficha", herdado da WTE-TASK-25; ela faz mais que
      isso, e chama a escritora de número de camisa `0x00404048` que a quarta
      passagem mediu. **A descrição herdada está incompleta**, e isso está
@@ -917,7 +921,7 @@ do `--edicao`; e o `iguala_nombres`.
   edição**, com `1` e `2` sendo os dois lados que os handlers de mover usam.
 
 - **Uma descrição herdada que ficou sob suspeita:** a
-  [spec do `mostrar_jugadorClick`](../../../wte/re/spec/MainForm.mostrar_jugadorClick.md)
+  [spec do `mostrar_jugadorClick`](/wte/re/spec/MainForm.mostrar_jugadorClick.md)
   descreve `0x00404820` como "enche a ficha", herdado da WTE-TASK-25. Ela
   devolve valor que governa fluxo, chama a escritora de número de camisa
   (`0x00404048`) e a escritora de bytes (`0x00403400`) — comportamento de quem
@@ -996,7 +1000,7 @@ do `--edicao`; e o `iguala_nombres`.
   atalho para a regra*. Aqui as duas mensagens **e** a regra estão medidas.
 
 - **Duas linhas de spec corrigidas.** A
-  [spec do `mostrar_jugadorClick`](../../../wte/re/spec/MainForm.mostrar_jugadorClick.md)
+  [spec do `mostrar_jugadorClick`](/wte/re/spec/MainForm.mostrar_jugadorClick.md)
   dizia `0x004046e8` "não lida" e `0x00404820` "enche a ficha" — escritas na
   décima passagem da WTE-TASK-25 a partir do que o handler *parecia* precisar.
   As duas estão trocadas pelo que foi medido. **O que aquele handler faz com
@@ -1315,7 +1319,7 @@ do `--edicao`; e o `iguala_nombres`.
   ficha.** A camada de dados já a tem, e agora isso é medido em vez de suposto —
   que é a diferença entre "provavelmente dá para reusar" e um gate de build.
 
-  Virou o [`check_bitfields.py`](../../../wte/tools/check_bitfields.py), que lê as
+  Virou o [`check_bitfields.py`](/wte/tools/check_bitfields.py), que lê as
   duas tabelas do `.exe`, gera a expressão canônica de cada registro e exige que
   ela esteja no `we2002_player.pas`. `make -C wte check` o roda. Testado contra
   três erros plantados antes de entrar: endereço de tabela deslocado em 4 bytes
@@ -1500,7 +1504,7 @@ do `--edicao`; e o `iguala_nombres`.
   janela no `:99`): é a LCL reescalando o formulário inteiro.
 
 - **E isso desmente uma explicação que já estava escrita no código.** O
-  `calibra()` do [`compara_tela.py`](../../../wte/tools/compara_tela.py) dizia,
+  `calibra()` do [`compara_tela.py`](/wte/tools/compara_tela.py) dizia,
   desde a segunda passagem: *"o oráculo dá (0, 0) e o port dá (6, 6): o gtk2
   desenha uma borda que o Wine não desenha"*. A borda não existe.
 
@@ -1564,7 +1568,7 @@ do `--edicao`; e o `iguala_nombres`.
   correção minha.** O log da décima terceira dizia que desligar a escala
   "muda a janela do port para todo mundo, inclusive para o `golden_gui`".
   **Errado, e conferido antes de mexer:** o `golden_gui.sh` mora em
-  [`tools/`](../../../tools/golden_gui.sh), na raiz do repositório, e é do
+  [`tools/`](/tools/golden_gui.sh), na raiz do repositório, e é do
   `newWe2002` — o port Qt. O harness de tela deste projeto é o
   `wte/tools/compara_tela.sh` e o `golden_run_laz.sh`. O alcance da mudança é o
   `wte` e só.
@@ -1644,7 +1648,7 @@ do `--edicao`; e o `iguala_nombres`.
 - **O risco que sobrava era exatamente o que a tela não pega**: campo trocado de
   lugar entre os 28: número plausível no rótulo errado. Ele fecha **sem tela**,
   e é a segunda conferência do
-  [`check_bitfields.py`](../../../wte/tools/check_bitfields.py):
+  [`check_bitfields.py`](/wte/tools/check_bitfields.py):
 
   1. para cada descritor, gera a expressão canônica e acha a linha do
      `TPlayer.Decode` que a contém — **casamento único exigido**, porque dois
@@ -1769,7 +1773,7 @@ do `--edicao`; e o `iguala_nombres`.
   sozinho esconderia: as três carregadoras de bitmap abrem o `.bmp` em `"r+b"`
   e **regravam a paleta dentro do arquivo de asset**. Mexer numa seta de cabelo
   altera o arquivo que todos os jogadores compartilham. Já estava medido na §6
-  da [`assets.md`](../../../wte/re/assets.md); aparece aqui porque é este handler
+  da [`assets.md`](/wte/re/assets.md); aparece aqui porque é este handler
   que fecha o ciclo, e porque "não grava" dito sem essa ressalva seria falso.
 
 - **São dois despachantes em fila, e a leitura apressada veria um.** O primeiro
@@ -1789,7 +1793,7 @@ do `--edicao`; e o `iguala_nombres`.
   legendas de projeto do `.lfm` (`Gl`, `A`, `A1`, `Dire.`, `NO`) iguais para
   todo jogador, que é pior do que branco porque parece dado.
 
-  O novo [`dump_legendas.py`](../../../wte/tools/dump_legendas.py) percorre o
+  O novo [`dump_legendas.py`](/wte/tools/dump_legendas.py) percorre o
   inicializador (`0x00401da8`..`0x0040295e`, 150 chamadas ao construtor de
   `AnsiString`) e emite o par (slot, cadeia) que **o binário monta**. As
   cadeias sairiam num `strings`; o que só está na ordem das chamadas é **qual
@@ -1875,7 +1879,7 @@ do `--edicao`; e o `iguala_nombres`.
 
   1. **`0x0040a0b4` não é deste lote.** Quem o chama é o
      `MainForm.mostrar_estrategiaClick`, do grupo de carga — está na coluna de
-     chamadores da [`auxiliares.tsv`](../../../wte/re/auxiliares.tsv) desde a
+     chamadores da [`auxiliares.tsv`](/wte/re/auxiliares.tsv) desde a
      WTE-TASK-25. Os 7 handlers **não chamam auxiliar interna nenhuma**: todas
      as chamadas dos 2.088 bytes vão para a VCL.
   2. **`campoMouseMove` tem 52 bytes, não 1.404.** A conta de 1.404 é a
@@ -1903,7 +1907,7 @@ do `--edicao`; e o `iguala_nombres`.
   diferente dos outros três. Transcrever a olho trocaria um `x2` por um `y1` e
   produziria um retângulo plausível.
 
-  O novo [`dump_zonas.py`](../../../wte/tools/dump_zonas.py) decodifica e confere
+  O novo [`dump_zonas.py`](/wte/tools/dump_zonas.py) decodifica e confere
   contra o `.lfm`, que é outra fonte: **nenhum retângulo pode sair do `campo`**
   (395×246) e a contagem tem de bater com os `bolaN` do formulário.
 
@@ -2312,12 +2316,12 @@ do `--edicao`; e o `iguala_nombres`.
   cobria o quê; handler novo entraria sem instrumento, script mudaria de nome,
   conferência passaria a ser pulada — e o texto continuaria afirmando cobertura.
 
-  O novo [`check_edicao.py`](../../../wte/tools/check_edicao.py) mecaniza a frase.
+  O novo [`check_edicao.py`](/wte/tools/check_edicao.py) mecaniza a frase.
   Ele **não mede tela nem byte**: confere que cada um dos 28 handlers tem
   instrumento nomeado, que o instrumento existe, que o estático passa no próprio
   `--check`, e — a parte que faltava — que o de tela **aparece na evidência de
   trace da corrida que diz cobri-lo**. Produto:
-  [`wte/re/edicao-cobertura.md`](../../../wte/re/edicao-cobertura.md).
+  [`wte/re/edicao-cobertura.md`](/wte/re/edicao-cobertura.md).
 
 - **O grupo `mover` não pode ter régua de tela, e isso foi MEDIDO.** Antes de
   escrever uma, li o Pascal: o `GravaJogador` do port devolve o código do
@@ -2334,7 +2338,7 @@ do `--edicao`; e o `iguala_nombres`.
 
   O conserto é a evidência de trace: o `compara_tela.sh` passou a gravar, por
   modo, quais handlers dispararam de fato
-  ([`wte/re/edicao-tela.tsv`](../../../wte/re/edicao-tela.tsv), versionada), e o
+  ([`wte/re/edicao-tela.tsv`](/wte/re/edicao-tela.tsv), versionada), e o
   `check_edicao.py` exige que todo handler de classe `tela` esteja lá. Rodado, o
   `dorsalMouseDown` reprovou na hora. Ele é `estatico`: dispara com o botão
   **direito** e termina abrindo a ficha do jogador, sub-diálogo que nenhuma

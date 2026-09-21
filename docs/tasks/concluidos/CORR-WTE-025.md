@@ -3,8 +3,12 @@ id: CORR-WTE-025
 title: "Correção: a faixa `11797..26528` é numeração 1-based do `cmp`, e vai virar exceção declarada como se fosse offset"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-12
+severity: high
+done_on: 2026-08-09
+done_commit: 588508b
 ---
 
 # CORR-WTE-025: a faixa da gravação do aviso está deslocada em um byte

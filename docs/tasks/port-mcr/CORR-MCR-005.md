@@ -3,8 +3,12 @@ id: CORR-MCR-005
 title: "Correção: os três `PlayerStatsSkills.dll` estão dentro do resto, não fora da conta"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-02
+severity: low
+done_on: 2026-09-07
+done_commit: 6870da3
 ---
 
 # CORR-MCR-005: o "resto" do inventário não é só fonte

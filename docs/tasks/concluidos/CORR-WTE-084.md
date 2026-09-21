@@ -3,8 +3,12 @@ id: CORR-WTE-084
 title: "Correção: a bandeira do ml_teams[22] sai 2 px mais abaixo, e a barra `equipe` do oráculo sai fora da grade"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: CORR-WTE-083
+severity: medium
+done_on: 2026-08-23
+done_commit: 657b349
 ---
 
 # CORR-WTE-084: o time 85 diverge por posição, não por cor
@@ -30,7 +34,7 @@ tenha provado que são:
 ## Evidência
 
 Medido em 2026-08-22, ROM japonesa, com o
-[`compara_tela.sh`](../../../wte/tools/compara_tela.sh) — **duas corridas, mesmo
+[`compara_tela.sh`](/wte/tools/compara_tela.sh) — **duas corridas, mesmo
 resultado nas duas**:
 
 ```text
@@ -86,7 +90,7 @@ esta correção começa por descartar ou confirmar isso.
    isto não é bug do port — é **divergência deliberada**, e o lugar dela é a
    [WTE-TASK-35](/docs/tasks/concluidos/35-divergencias-deliberadas.md), não um conserto;
 2. **Medir o deslocamento da bandeira** com a mesma régua: onde o `wte.exe`
-   ancora o desenho, e onde a [`wte_render2d`](../../../wte/src/wte_render2d.pas)
+   ancora o desenho, e onde a [`wte_render2d`](/wte/src/wte_render2d.pas)
    o ancora. Dois pixels em 48 é 1/24 — pode ser origem do recorte, pode ser
    arredondamento de escala vertical (16 linhas de origem para 48 de destino);
 3. **Não generalizar a partir de um time.** Nove fecham em zero. Qualquer
@@ -123,7 +127,7 @@ esta correção começa por descartar ou confirmar isso.
 O passo 1 da Correção mandava decidir de quem é o defeito antes de mexer em
 código, e a medição respondeu por um terceiro caminho que a correção não
 previa: o defeito é do
-[`compara_tela.py`](../../../wte/tools/compara_tela.py).
+[`compara_tela.py`](/wte/tools/compara_tela.py).
 
 **A barra `equipe`.** O oráculo desenha 75 px contíguos, de `x = 92` a
 `x = 166` — exatamente `11 * 6 + 9`, e portanto dentro da grade. Os 76 vinham

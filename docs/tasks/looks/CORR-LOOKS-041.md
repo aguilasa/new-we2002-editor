@@ -3,8 +3,12 @@ id: CORR-LOOKS-041
 title: "Correção: o bloco de gates da LOOKS-TASK-16 diz 12.609 linhas e a árvore dela tem 12.613"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-16
+severity: low
+done_on: 2026-09-16
+done_commit: c3bbbdd
 ---
 
 # CORR-LOOKS-041: a varredura foi anotada antes da última edição, outra vez

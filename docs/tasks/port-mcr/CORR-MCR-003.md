@@ -3,8 +3,12 @@ id: CORR-MCR-003
 title: "Correção: o link do `progresso.md` no `correcoes-progresso.template.md` não leva o segmento do ciclo"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-01
+severity: low
+done_on: 2026-09-07
+done_commit: e9500c9
 ---
 
 # CORR-MCR-003: o template aponta para o progresso do ciclo raso

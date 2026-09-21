@@ -3,8 +3,12 @@ id: CORR-WTE-014
 title: "Correção: o 197 bitmaps ficou sem dono — não está no quadro de reconciliação da WTE-TASK-09 e sobrevive em nove lugares"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-08
+severity: high
+done_on: 2026-08-06
+done_commit: b46460b
 ---
 
 # CORR-WTE-014: são 198, e o número errado não tem quem o conserte
@@ -140,7 +144,7 @@ que é a dona da reconciliação; esta correção só garante que ela saiba.
 
 O quadro de reconciliação da WTE-TASK-09 ganhou a sétima linha — "197 bitmaps +
 `dat.bin` (§1.2 e §1.8)", remedida por `find -iname '*.bmp'` com o
-[`assets.md`](../../../wte/re/assets.md) ao lado, já que a WTE-TASK-08 decidiu rota
+[`assets.md`](/wte/re/assets.md) ao lado, já que a WTE-TASK-08 decidiu rota
 inline e não há gerador de assets. O critério de conclusão passou de "os seis
 números" para "os sete".
 

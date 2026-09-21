@@ -3,8 +3,12 @@ id: CORR-LOOKS-044
 title: "Correção: a tabela diz que a tela da barba alcança cinco valores, e a tela alcança sete"
 type: correção
 category: montagem
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-17
+severity: high
+done_on: 2026-09-16
+done_commit: 6b6b671
 ---
 
 # CORR-LOOKS-044: `FACE` com `reach` 5 recusa `F` e `G`, que a tela oferece

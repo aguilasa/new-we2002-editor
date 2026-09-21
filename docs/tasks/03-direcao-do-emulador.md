@@ -5,8 +5,12 @@ type: ferramenta
 category: verificação
 phase: 2
 depends_on: []
-fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §3.4"
-status: em andamento
+status: in-progress
+source_of_truth: "/docs/PLAN-PES2-PSX.md#3.4"
+reviewed_on: null
+review_commit: null
+done_on: null
+done_commit: null
 ---
 
 # PES2-TASK-03: Direção do emulador
@@ -14,7 +18,7 @@ status: em andamento
 ## Contexto
 
 - **Referência:** `docs/PLAN-PES2-PSX.md` §3.4 e §6.11, e a regra do `:98` do
-  [CLAUDE.md](../../CLAUDE.md).
+  [CLAUDE.md](/CLAUDE.md).
 - **Sem oráculo, o jogo é o oráculo** (§4.1). Um campo só está mapeado quando
   um `poke` nele muda o que a tela mostra. Isso exige chegar à tela.
 

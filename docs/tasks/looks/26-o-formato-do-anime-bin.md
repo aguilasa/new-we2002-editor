@@ -4,9 +4,13 @@ title: "`anime.py` — o formato do `ANIME.BIN`, medido contra a pose capturada"
 type: implementação
 category: formato
 phase: 9
-depends_on: ["LOOKS-TASK-25"]
-fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (l)"
-status: concluído
+depends_on: [LOOKS-TASK-25]
+status: done
+source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
+reviewed_on: 2026-09-18
+review_commit: null
+done_on: 2026-09-18
+done_commit: d8ce2ee
 ---
 
 # LOOKS-TASK-26: O formato do `ANIME.BIN`

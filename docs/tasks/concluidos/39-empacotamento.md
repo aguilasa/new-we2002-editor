@@ -4,9 +4,13 @@ title: "Ícone, .desktop, AppStream e regras de instalação"
 type: implementação
 category: empacotamento
 phase: 7
-depends_on: ["WTE-TASK-38"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 7"
-status: concluído
+depends_on: [WTE-TASK-38]
+status: done
+source_of_truth: /docs/PLAN-WTE-LAZARUS.md
+reviewed_on: 2026-08-26
+review_commit: null
+done_on: 2026-08-26
+done_commit: a868d7a
 ---
 
 # WTE-TASK-39: Empacotamento
@@ -15,7 +19,7 @@ status: concluído
 
 - **Referência:** `docs/PLAN-WTE-LAZARUS.md` Fase 7.
 - Copiar o padrão que o `newWe2002` já tem em
-  [`packaging/`](../../../packaging/) — não inventar.
+  [`packaging/`](/packaging) — não inventar.
 
 **Formato de pacote fica de fora.** AppImage e Flatpak foram deliberadamente
 excluídos no plano Linux do `newWe2002` e a decisão vale aqui: só as regras de
@@ -42,7 +46,7 @@ Instalação limpa num prefixo, com os arquivos nos lugares certos.
 
 **O binário acha os dados relativo a si mesmo**, não por caminho absoluto
 compilado. A ordem de busca de
-[`DataFiles.cpp`](../../../src/app/DataFiles.cpp) é: variável de ambiente, ao lado
+[`DataFiles.cpp`](/src/app/DataFiles.cpp) é: variável de ambiente, ao lado
 do executável, o prefixo instalado, o diretório de fonte. Isso permite mover a
 árvore instalada.
 
@@ -128,7 +132,7 @@ resultado** — é a única coisa gerada que teste nenhum julga.
   trace**, que resolvia `<exe>/../re/trace.log` e derrubava o app com um
   diálogo genérico da LCL antes de qualquer janela. As duas resoluções de
   caminho viraram uma, no
-  [`wte_datafiles.pas`](../../../wte/src/wte_datafiles.pas), com a mesma ordem de
+  [`wte_datafiles.pas`](/wte/src/wte_datafiles.pas), com a mesma ordem de
   busca — e o `retrace` passou a **desligar o log** quando o arquivo não abre,
   em vez de matar o programa. Um log é diagnóstico; diagnóstico que mata o
   paciente é pior que nenhum, e este matou.
@@ -199,7 +203,7 @@ O slug é camelCase por simetria com o irmão (`newWe2002` já ocupa `bin/` e
 `share/` assim), e sem hífen porque a forma reversa de DNS do appid não os
 aceita. A razão completa está na
 [WTE-TASK-38](/docs/tasks/concluidos/38-nome-e-linhagem.md) e no
-[`wte/README.md`](../../../wte/README.md).
+[`wte/README.md`](/wte/README.md).
 
 **O `Caption` dos 18 formulários não entra nessa lista.** Ele continua sendo o
 do DFM mais o sufixo ` [Lazarus]` — critério de fidelidade de tela, e é o que
@@ -210,7 +214,7 @@ lado port.
 
 > **O repasse previa isto e a execução decidiu o contrário.** Ver o Log desta
 > mesma task e a seção *"O binário se chama `wte` na árvore e `we2002Lazarus`
-> instalado"* do [`wte/README.md`](../../../wte/README.md), que traz a razão:
+> instalado"* do [`wte/README.md`](/wte/README.md), que traz a razão:
 > `wte.lpi`, `wte.lpr` e `build/wte` **continuam** com o nome da árvore, e o
 > slug entra no `install`. A árvore concorda — os três seguem com o nome
 > antigo, e só o binário instalado leva o slug.
@@ -247,7 +251,7 @@ Press Abort to kill the program.
 ```
 
 A causa é o log de trace, não os assets: `ResolveArquivo` em
-[`wte/src/retrace.pas`](../../../wte/src/retrace.pas) resolve
+[`wte/src/retrace.pas`](/wte/src/retrace.pas) resolve
 `<dir do executável>/../re/trace.log` quando `WTE_TRACE_FILE` não está
 definida, e o `Rewrite` levanta `EInOutError` porque o diretório não existe.
 **Controle:** com o binário em `<algum>/sub/wte`, criar `<algum>/re/` — o `re/`
@@ -273,7 +277,7 @@ Duas consequências para esta task:
 ### A mensagem de assets ausentes
 
 Decidido na WTE-TASK-38 e registrado como divergência 12 em
-[`wte/re/divergencias.md`](../../../wte/re/divergencias.md): o app **não encerra**
+[`wte/re/divergencias.md`](/wte/re/divergencias.md): o app **não encerra**
 quando falta a pasta — encerrar mataria todo roteiro do lado port, que abre o
 app antes de tudo. O que falta é a **mensagem**: hoje o rótulo diz
 `data/dat.bin nao encontrado`, que diz o que falta e não onde pôr. O critério

@@ -3,8 +3,12 @@ id: CORR-WTE-010
 title: "Correção: a §8.7 do plano e o enunciado da WTE-TASK-06 apontam o lado errado, e o ASCII citado não é o do binário"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-06
+severity: high
+done_on: 2026-08-06
+done_commit: 3ce86bf
 ---
 
 # CORR-WTE-010: o dword que obriga a medir está **abaixo** da tabela, e é `lmno`
@@ -89,7 +93,7 @@ relatório dela, sem mandato para editar o plano.
 continua exigindo limite medido — o que muda é que o vizinho ASCII (`lmno`, em
 `0x00423190`) fica **abaixo** dele e é o que obriga a medir o limite *inferior*,
 enquanto o superior sai por conteúdo e por referência, medidas que concordam.
-Vale apontar para [`../../wte/re/offsets.md`](../../../wte/re/offsets.md), que traz
+Vale apontar para [`../../wte/re/offsets.md`](/wte/re/offsets.md), que traz
 o critério escrito.
 
 O título "O 32º byte da tabela não é offset" também não descreve o que foi

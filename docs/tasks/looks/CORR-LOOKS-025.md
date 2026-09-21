@@ -3,8 +3,12 @@ id: CORR-LOOKS-025
 title: "Correção: cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o \"casa e fora\" é inferência sem medição"
 type: correção
 category: textura
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-11
+severity: medium
+done_on: 2026-09-15
+done_commit: f7fea11
 ---
 
 # CORR-LOOKS-025: o uniforme foi localizado, e a contagem que veio junto não bate

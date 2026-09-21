@@ -4,9 +4,13 @@ title: "re/strings.tsv — strings com endereço e quem as usa"
 type: extração
 category: engenharia-reversa
 phase: 1
-depends_on: ["WTE-TASK-02"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §1.5 e Fase 1 item 3"
-status: concluído
+depends_on: [WTE-TASK-02]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#1.5"
+reviewed_on: 2026-08-06
+review_commit: null
+done_on: 2026-08-05
+done_commit: 09bc32c
 ---
 
 # WTE-TASK-05: Inventário de strings

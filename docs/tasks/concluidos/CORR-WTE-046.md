@@ -3,8 +3,12 @@ id: CORR-WTE-046
 title: "Correção: três vereditos citam `case N` onde o `Database.cpp` tem `if(i == N)`"
 type: correção
 category: dados
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-19
+severity: low
+done_on: 2026-08-10
+done_commit: 01f63b3
 ---
 
 # CORR-WTE-046: a prova do veredito aponta para uma construção que não está lá
@@ -12,7 +16,7 @@ depends_on: []
 ## Problema identificado
 
 A tabela **"Os 50, um a um — o veredito de cada"** do
-[`wte/re/offsets-novos.md`](../../../wte/re/offsets-novos.md) fecha o critério da
+[`wte/re/offsets-novos.md`](/wte/re/offsets-novos.md) fecha o critério da
 [WTE-TASK-19](/docs/tasks/concluidos/19-os-50-offsets-restantes.md): 33 endereçados, 14
 `retomada de fronteira`, 3 `base de varredura`. A coluna **prova** de cada
 `retomada` diz `` `case N` no `Database.cpp` ``.

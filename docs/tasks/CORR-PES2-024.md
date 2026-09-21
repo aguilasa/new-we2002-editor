@@ -3,8 +3,12 @@ id: CORR-PES2-024
 title: "Correção: o `--measure-menu` é gate, não confere se está no menu, e nenhum comando versionado o coloca lá"
 type: correção
 category: comportamento
-status: concluído
+status: done
 depends_on: []
+origin: PES2-TASK-34
+severity: medium
+done_on: 2026-09-03
+done_commit: 62f880d
 ---
 
 # CORR-PES2-024: o caso vermelho depende de um estado que nada versionado produz, e não confere a tela

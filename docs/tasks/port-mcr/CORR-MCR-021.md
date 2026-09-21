@@ -3,8 +3,12 @@ id: CORR-MCR-021
 title: "Correção: a tabela \"Estado medido\" do ciclo ficou em 16/16 controles enquanto a ferramenta imprime 20 de 20 — a task de fechamento não a reconciliou"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-14
+severity: high
+done_on: 2026-09-08
+done_commit: 0dce63e
 ---
 
 # CORR-MCR-021: o número que a CORR-MCR-017 tirou do perfil continuou no progresso

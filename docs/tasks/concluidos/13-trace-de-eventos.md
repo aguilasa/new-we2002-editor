@@ -4,9 +4,13 @@ title: "Trace de eventos — a ordem de disparo dos dois lados"
 type: verificação
 category: comportamento
 phase: 2
-depends_on: ["WTE-TASK-11"]
-fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.3 item 3 e Fase 2 item 4"
-status: concluído
+depends_on: [WTE-TASK-11]
+status: done
+source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.3"
+reviewed_on: 2026-08-09
+review_commit: null
+done_on: 2026-08-09
+done_commit: af424c0
 ---
 
 # WTE-TASK-13: Trace de eventos
@@ -72,7 +76,7 @@ dependia de não disparar, a carga de time precisa de bloqueio de sinal — o
 > user actions not program actions"*. O precedente do Qt não transfere, e a
 > carga de time **não** precisa de bloqueio. A tabela completa das seis ações
 > programáticas, com o arquivo e a rotina de cada linha, está em
-> [`../../wte/re/eventos.md`](../../../wte/re/eventos.md), achado 2. O parágrafo
+> [`../../wte/re/eventos.md`](/wte/re/eventos.md), achado 2. O parágrafo
 > acima fica como estava: é a premissa que a task carregava, e vê-la derrubada
 > é metade do valor dela.
 
@@ -107,7 +111,7 @@ dependia de não disparar, a carga de time precisa de bloqueio de sinal — o
 - **Resumo do que foi feito:**
 
   Cinco roteiros fixos versionados e o
-  [`../../wte/re/eventos.md`](../../../wte/re/eventos.md) com quatro achados. O
+  [`../../wte/re/eventos.md`](/wte/re/eventos.md) com quatro achados. O
   método escolhido foi **inferência por efeito**, e não o Ghidra com
   breakpoint: caro de montar, e a WTE-TASK-12 mostrou que o gargalo do lado
   original não é instrumentação, é navegação — um breakpoint nos 96 endereços

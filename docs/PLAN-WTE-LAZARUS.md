@@ -996,6 +996,7 @@ tasks citam essas sub-seções pelo número, e ela fica estável:
 | 5.3 camisa 2D | WTE-TASK-29 | **4** |
 | 5.4 slots de ML | WTE-TASK-33 | 5 |
 
+<a id="5.1"></a>
 **5.1 Preço derivado dos atributos.** São **dois** handlers, e a feature só
 está inteira com os dois: o `jugador.etiqprecioClick` (`0x00408bb8`), que mostra
 o preço de **um** jogador na tela, e o `MainForm.base_teamClick`
@@ -1015,6 +1016,7 @@ task rendeu e este plano não previa: o preço de um jogador só se lê por OCR 
 passou a valer 22 amostras em vez de uma, e foi assim que a amostra chegou a
 **132 jogadores em 6 times, com 100% de acerto**.
 
+<a id="5.2"></a>
 **5.2 Import de `.mcr`.** `boton_mcrClick` (`0x0040c2c8`) e
 `boton_mcr2isoClick` (`0x0040c46c`). Formato de memory card do PSX —
 parcialmente documentado publicamente, o que ajuda. `data/dat.bin` começa com
@@ -1023,6 +1025,7 @@ parcialmente documentado publicamente, o que ajuda. `data/dat.bin` começa com
 `grabar_memoryClick` (`0x0040f69c`) escreve `.mcr` — dá para gerar fixture com
 o próprio original.
 
+<a id="5.3"></a>
 **5.3 Camisa e bandeira 2D.** `colorearClick`, `grabar_camisetaClick`,
 `malla1/2MouseDown`, `gradienteClick`, `oscurecerClick`, `aclararClick`,
 `lista_col0..3Change`, e o formulário `ficha_color` (866 linhas de DFM,
@@ -1040,6 +1043,7 @@ bpp, com a paleta consumida — daí a `wte/src/we2002_bmp.pas`.
 **Fidelidade de cor exige atenção**: paleta e arredondamento de gradiente têm
 que bater, e a verificação é diff de bitmap contra captura do original.
 
+<a id="5.4"></a>
 **5.4 Slots livres de Master League.** O menor dos quatro: varre a região de ML
 e conta vagos. Depende só da Fase 3.
 

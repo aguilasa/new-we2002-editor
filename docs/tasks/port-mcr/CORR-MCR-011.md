@@ -3,8 +3,12 @@ id: CORR-MCR-011
 title: "Correção: a tabela de controles da MCR-TASK-07 voltou à prosa, e a linha ambígua custa duas tentativas"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: MCR-TASK-07
+severity: low
+done_on: 2026-09-07
+done_commit: 7751aef
 ---
 
 # CORR-MCR-011: a convenção da CORR-MCR-009 não alcançou a task seguinte

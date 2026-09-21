@@ -3,15 +3,19 @@ id: CORR-WTE-040
 title: "Correção: o GABARITO diz quatro famílias de `BitBtnNClick`, e são três"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-23
+severity: high
+done_on: 2026-08-10
+done_commit: 77864c6
 ---
 
 # CORR-WTE-040: o número que justifica o nome de arquivo não foi medido
 
 ## Problema identificado
 
-O [`wte/re/spec/GABARITO.md`](../../../wte/re/spec/GABARITO.md), linhas 12-14,
+O [`wte/re/spec/GABARITO.md`](/wte/re/spec/GABARITO.md), linhas 12-14,
 justifica o nome `<formulario>.<handler>.md`:
 
 > Os 96 pares são únicos, mas os nomes soltos não: há 16 `FormCreate`, 2
@@ -68,7 +72,7 @@ Trocar por uma frase medida. Uma forma que sobrevive a recontagem:
 > três.
 
 O mesmo trecho aparece no
-[`wte/re/spec/README.md`](../../../wte/re/spec/README.md) na forma curta — "há 16
+[`wte/re/spec/README.md`](/wte/re/spec/README.md) na forma curta — "há 16
 `FormCreate`" —, que está correta e não precisa mudar.
 
 O enunciado da [WTE-TASK-23](/docs/tasks/concluidos/23-formato-da-spec.md) repete o número

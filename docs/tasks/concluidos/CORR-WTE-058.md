@@ -3,8 +3,12 @@ id: CORR-WTE-058
 title: "Correção: o `visual.md` manda rodar o `capture_forms.sh`, que a WTE-TASK-25 removeu"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-25
+severity: low
+done_on: 2026-08-11
+done_commit: 74394e1
 ---
 
 # CORR-WTE-058: documentos que a remoção do andaime deixou apontando para o vazio
@@ -90,7 +94,7 @@ Nas três linhas, dizer o que passou a valer:
 
 - a reprodução do lado port não é mais um script — a WTE-TASK-25 pôs navegação
   de verdade no lugar do andaime, e quem dirige o app hoje é o
-  [`compara_tela.sh`](../../../wte/tools/compara_tela.sh) (e será a
+  [`compara_tela.sh`](/wte/tools/compara_tela.sh) (e será a
   [WTE-TASK-37](/docs/tasks/concluidos/37-reconferencia-de-ui.md), que reconfere a UI com a
   lógica ligada);
 - as 18 capturas **estão commitadas** em `wte/re/visual/lazarus/` e continuam

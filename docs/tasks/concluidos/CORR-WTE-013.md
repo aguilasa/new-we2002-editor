@@ -3,8 +3,12 @@ id: CORR-WTE-013
 title: "Correção: o decodificador x86 do dump_units.py é cópia verbatim do dump_strings.py e nenhum teste o alcança"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: WTE-TASK-07
+severity: low
+done_on: 2026-08-06
+done_commit: d516f69
 ---
 
 # CORR-WTE-013: a cópia do decodificador está livre para divergir da testada

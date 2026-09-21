@@ -3,8 +3,12 @@ id: CORR-LOOKS-024
 title: "Correção: a §1.7 do plano ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo — as duas a task 11 desmentiu"
 type: correção
 category: engenharia-reversa
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-11
+severity: medium
+done_on: 2026-09-15
+done_commit: 420c6b0
 ---
 
 # CORR-LOOKS-024: o plano guarda, na seção anterior, as afirmações que a §1.8 acabou de derrubar

@@ -3,8 +3,12 @@ id: CORR-LOOKS-014
 title: "Correção: o título da LOOKS-TASK-05 ainda diz onze seções; a tabela do progresso já diz vinte"
 type: correção
 category: processo
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-05
+severity: low
+done_on: 2026-09-14
+done_commit: 03ef739
 ---
 
 # CORR-LOOKS-014: o título da task e o da tabela discordam

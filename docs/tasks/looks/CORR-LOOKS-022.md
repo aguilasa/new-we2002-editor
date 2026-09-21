@@ -3,8 +3,12 @@ id: CORR-LOOKS-022
 title: "Correção: os \"2.151 registros a mais em 40 contêineres\" que justificam não tocar o `bin_archive.py` não reproduzem por nenhuma leitura"
 type: correção
 category: verificação
-status: concluído
+status: done
 depends_on: []
+origin: LOOKS-TASK-10
+severity: high
+done_on: 2026-09-15
+done_commit: a698002
 ---
 
 # CORR-LOOKS-022: o número que decide onde o conserto mora não reproduz
