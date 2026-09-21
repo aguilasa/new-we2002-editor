@@ -71,7 +71,7 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | A câmera do jogo — projeção medida, e a silhueta como testemunha de forma | 9 | 27 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
 | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose | 9 | 22, 28 | ✅ Concluído | 2026-09-18 | 2026-09-19 |
 | [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | 20 | ✅ Concluído | 2026-09-20 | 2026-09-20 |
-| [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | 22, 28 | ✅ Concluído | 2026-09-21 | ⬜ pendente |
+| [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | 22, 28 | ✅ Concluído | 2026-09-21 | 2026-09-21 |
 | [LOOKS-TASK-36](/docs/tasks/looks/36-os-sprites-estaticos.md) | Os sprites estáticos da tela — placa, caixas, ícone, barra, título e setas, lidos do disco | 10 | 31 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-37](/docs/tasks/looks/37-a-tabela-de-glifos.md) | A tabela de glifos — o texto da tela desenhado com a fonte do `EDT_2D.BIN` | 10 | 31 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-38](/docs/tasks/looks/38-o-alinhamento-dos-valores.md) | O alinhamento dos valores — a caixa do objeto de texto no `screen.json`, e o valor à direita | 10 | 37 | ⬜ Pendente | — | — |

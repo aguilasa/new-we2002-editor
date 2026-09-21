@@ -81,6 +81,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-063](/docs/tasks/looks/CORR-LOOKS-063.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | O `--silhouette-styles` decide por mínimo, sem controle e sem margem, e o "estilo trocado discorda" não é asserção | Alta | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-064](/docs/tasks/looks/CORR-LOOKS-064.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | "603 a 1.680" e "1,4x a 4,4x" não são o que as corridas imprimem, e três textos ainda dizem o que a quinta sessão desmentiu | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-065](/docs/tasks/looks/CORR-LOOKS-065.md) | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Três medições da LOOKS-TASK-29 sobre o ritmo e a mistura ficaram "para o leitor de pose", sem linha na task que as mede | Baixa | [x] concluída | 2026-09-20 |
+| [CORR-LOOKS-066](/docs/tasks/looks/CORR-LOOKS-066.md) | [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | A divisão da LOOKS-TASK-31 não chegou a cinco textos — a §10.3 (o) segue "PARCIAL", e o close-up e o cenário ainda apontam para a 31 | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -160,6 +161,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-063 — o gate dos estilos no close-up não tem controle nem margem
 - [x] CORR-LOOKS-064 — os números e a prosa da LOOKS-TASK-28 ficaram atrás das próprias corridas
 - [x] CORR-LOOKS-065 — o que a 29 achou sobre a caminhada não chegou à 32
+- [ ] CORR-LOOKS-066 — a 31 fechou dividida, e cinco textos ainda a leem aberta
 
 ## Detalhes por correção
 
@@ -1149,3 +1151,17 @@ e o ciclo arquivado, o dele em
 - **Como foi detectado:** `oracle.py --stature` recorrido (a passada recusada
   do goleiro) e `git log`/`grep` da task 32, intocada desde `85ca349`
 - **Fix:** item datado no Contexto da 32 com as três medições e o comando
+
+### CORR-LOOKS-066
+
+- **Arquivo com problema:** `docs/PLAN-LOOKS-PY.md` §10.3 (o), `CLAUDE.md`,
+  `docs/tasks/looks/progresso.md`, `tools/looks/ui/looks_set.py`
+- **Sintoma:** cabeçalho da (o) em "PARCIAL em 2026-09-20"; `CLAUDE.md` com
+  "tasks 21 a 35", o cenário e o close-up como da task 31; o progresso com
+  "21 a 35"; a docstring da janela dizendo que as cores não estão medidas; e
+  "17 ladrilhos do painel cada" onde o slot 1 imprime 12 e 18, sobre ajuda e
+  painel
+- **Como foi detectado:** `grep` das referências à 31 depois do `4772b67` e
+  `oracle.py --pages` recorrido
+- **Fix:** cabeçalho `FECHADA em 2026-09-21`, 21 a 40, close-up na 40, a
+  docstring com o que está pintado, e os ladrilhos dos dois slots
