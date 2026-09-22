@@ -3112,7 +3112,7 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > vários objetos: `A1 TYPE` é o `A1` de um e o `TYPE` de outro. O estilo
 > gravado por linha é o do objeto do último pedaço. O `oracle.py --glyphs`
 > mede o avanço: cada glifo ganha o seu objeto por um fluxo de paradas em
-> `SCREEN_PRINT` e `SCREEN_GLYPH`, e os 86 avanços de cada slot, dispostas
+> `SCREEN_PRINT` e `SCREEN_GLYPH`, e os 86 avanços de cada slot, dispostos
 > pelo `Font.run` a partir do primeiro glifo de cada trecho, dão 0 fora; com
 > o espaçamento forçado a 0 ficam 24 trechos fora, e a 2, quatro
 > ([`CORR-LOOKS-071`](/docs/tasks/looks/CORR-LOOKS-071.md)). O `\t` começa
