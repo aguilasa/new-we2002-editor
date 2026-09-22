@@ -3,7 +3,7 @@ id: CORR-LOOKS-071
 title: "Hold the rule's pen advance against the game, not only the uv"
 origin: LOOKS-TASK-37
 severity: high
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/oracle.py, tools/looks/glyphs.py, tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -77,3 +77,14 @@ posições ficaram para a LOOKS-TASK-38 sem separar "onde a string começa"
 - Sem o plantio, `python tools/looks/oracle.py --glyphs` imprime `0 problem(s)`.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `16550b53`: **reproduzida**.
+
+```text
+oracle.py:5149-5151  draws = [(code, x, y) for code, x, y, passing in calls if not passing]
+                     point = (x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1])   # glyphs.Font.run nunca chamado
+# cópia plantada (git archive HEAD tools), glyphs.py:147 `x += width + spacing` -> `x += width + 2`
+$ python glyphs.py    -> glyphs.py: 0 failure(s)
+$ python selftest.py  -> controls: 0 failure(s), 100 of 100 controls red; glyphs e screen sem falha
+  (a 1 falha do looks_selftest é da cópia sem src/ e data/, não do plantio)
+```

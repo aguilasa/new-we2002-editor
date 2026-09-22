@@ -3,7 +3,7 @@ id: CORR-LOOKS-072
 title: "Say 'within 16 per channel', not 'pixel a pixel', for the labels"
 origin: LOOKS-TASK-37
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md, tools/looks/confront.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -65,3 +65,17 @@ docs/prompts/perfil-looks.md tools/looks/confront.py` mostra cada ocorrência
 qualificada pela folga.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `16550b53`: **reproduzida**.
+
+```text
+1913:OUTSIDE_SLACK = 16
+$ python tools/looks/confront.py --outside
+labels, pixel for pixel: 0 of 16416 differ (the game against itself: 0; the game one pixel off: 2875)   [slots 2 e 1]
+labels       game (0, 49, 49)     ours (0, 53, 55)       6 apart
+confront --outside: 0 problem(s) over 2 slot(s)
+# varredura de folga (rascunho sobre ink_differences, caixa text_regions()["labels"]), os dois slots:
+slack 0 differ 11839 / slack 4 differ 11839 / slack 8 differ 0 / slack 16 differ 0
+# grep "pixel a pixel|pixel for pixel", nenhuma qualificada pela folga:
+tools/looks/confront.py:2101, 2109; docs/PLAN-LOOKS-PY.md:3115; docs/prompts/perfil-looks.md:761
+```

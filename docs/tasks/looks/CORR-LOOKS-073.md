@@ -3,7 +3,7 @@ id: CORR-LOOKS-073
 title: Fix the width-0 self-check that claims the pen stays put
 origin: LOOKS-TASK-37
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/glyphs.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -59,3 +59,14 @@ asserção do self-check concordam com ele; `python tools/looks/glyphs.py` segue
 com `0 failure(s)`.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `16550b53`: **reproduzida**.
+
+```text
+glyphs.py:146  x += width + spacing
+glyphs.py:152  return sum(self.glyph(ord(char))[2] + spacing for char in text)
+glyphs.py:192  ok("a code of width 0 draws nothing and does not move the pen", ... empty.width("@", 0) == 0)
+glyphs.py:252  # does not move the pen -- ...
+$ python -c "... glyphs.Font(bytes(b)).width('@',2)"
+2
+```
