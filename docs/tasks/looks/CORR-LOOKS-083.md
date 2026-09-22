@@ -5,10 +5,10 @@ origin: CORR-LOOKS-082
 severity: low
 files: [tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 6c9e0cdc
 ---
 
 # CORR-LOOKS-083 — Plantar o controle do parse_keys que ignora a contagem
@@ -122,3 +122,7 @@ registro do que a ferramenta dizia, e reescrever seria falsificá-lo. Nenhum
 documento guarda a contagem viva: o `/CLAUDE.md` e o
 [/docs/PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md) dizem, de propósito, que ela é
 contada pela ferramenta e não escrita em prosa. Nada a atualizar fora daqui.
+- **Closed** — commit `6c9e0cdc` (2026-09-22): test(looks): plant the control for a parse_keys that ignores the count
+  - Files (`git show --name-status 6c9e0cdc`):
+    - `M docs/tasks/looks/CORR-LOOKS-083.md`
+    - `M tools/looks/controls.py`
