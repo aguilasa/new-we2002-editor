@@ -3110,7 +3110,14 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > ((128,128,128) em rótulos, placa e camisa; (112,112,240) nos valores). O
 > `screen.json` grava o estilo de cada texto. Um valor pode ser montado de
 > vários objetos: `A1 TYPE` é o `A1` de um e o `TYPE` de outro. O estilo
-> gravado por linha é o do objeto do último pedaço. A janela escreve com
+> gravado por linha é o do objeto do último pedaço. O `oracle.py --glyphs`
+> mede o avanço: cada glifo ganha o seu objeto por um fluxo de paradas em
+> `SCREEN_PRINT` e `SCREEN_GLYPH`, e os 86 avanços de cada slot, dispostas
+> pelo `Font.run` a partir do primeiro glifo de cada trecho, dão 0 fora; com
+> o espaçamento forçado a 0 ficam 24 trechos fora, e a 2, quatro
+> ([`CORR-LOOKS-071`](/docs/tasks/looks/CORR-LOOKS-071.md)). O `\t` começa
+> trecho novo: `A1` é `\t\x12A\t\x1e1`, e o pixel entre `A` e `1` é coluna
+> (LOOKS-TASK-38), não espaçamento. A janela escreve com
 > esses glifos, e os rótulos, alinhados à esquerda no x do objeto, batem
 > **pixel a pixel dentro de `OUTSIDE_SLACK` (16) por canal** com o quadro do
 > jogo (0 de 16.416 nos dois slots, com o quadro deslocado um pixel
