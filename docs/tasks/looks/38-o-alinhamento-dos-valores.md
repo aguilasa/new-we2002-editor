@@ -7,8 +7,8 @@ phase: 10
 depends_on: [LOOKS-TASK-37]
 status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-22
+review_commit: 84c8f97f
 done_on: 2026-09-22
 done_commit: 19bcdf0a
 ---
@@ -220,3 +220,4 @@ deles só mudou prosa.
     - `M tools/looks/ui/app.py`
     - `M tools/looks/ui/looks_set.py`
     - `M tools/looks/ui_check.py`
+- **Reviewed** (2026-09-22) at `84c8f97f`: CORR-LOOKS-075, CORR-LOOKS-076, CORR-LOOKS-077, CORR-LOOKS-078, CORR-LOOKS-079, CORR-LOOKS-080
