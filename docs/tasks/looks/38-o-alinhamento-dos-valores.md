@@ -132,6 +132,11 @@ screen.py: 0 failure(s)
 $ python tools/looks/oracle.py --screen --write        # 19 min 8 s
 oracle --screen --write: wrote tools/looks/screen.json
 
+$ python tools/looks/oracle.py --screen     # a remedicao, em CORR-LOOKS-076: 19 min 54 s
+  screen measured in 1190s
+  the arrows' CLUT, read off the list: < (80,497), > (80,497)
+oracle --screen: 0 difference(s) from screen.json
+
 $ python tools/looks/oracle.py --keys "" 2             # e 1
   control: the same sequence twice in the game gives the same twelve rows, the same help, the same arrows, the same cursor box and the same 121 glyph(s)
 oracle --keys: 0 difference(s) after 19 press(es), across the game, screen.json and our window
@@ -181,10 +186,12 @@ deixa o `--keys` vermelho linha por linha:
   checkout --`, que apagou as mudanças ainda não commitadas do arquivo. O
   backup estava em `/tmp`, e o arquivo voltou idêntico (mesmo self-check, 68
   inserções). A forma segura é a do `controls.py`, que planta numa cópia.
-- **O `--screen` não foi re-rodado para remedir o arquivo recém-gravado**
-  (seriam mais 19 min). O `screen.validate` fechou no gerador — e agora ele
-  também exige que os pedaços de cada valor **soletrem** o texto dele —, e o
-  `--keys` confere o arquivo contra o jogo em cinco sequências.
+- **O `--screen` não foi re-rodado na corrida desta task** (seriam mais 19
+  min). O `screen.validate` fechou no gerador — e agora ele também exige que os
+  pedaços de cada valor **soletrem** o texto dele —, e o `--keys` confere o
+  arquivo contra o jogo em cinco sequências. A remedição foi rodada depois, na
+  [`CORR-LOOKS-076`](/docs/tasks/looks/CORR-LOOKS-076.md) (2026-09-22): **0
+  diferença**, transcrita na Evidência acima.
 
 ### Gates
 
