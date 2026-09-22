@@ -132,7 +132,12 @@ class Font:
 
         The pen starts at *point* -- the top-left of the first glyph, in
         native pixels -- and moves on by each glyph's width plus *spacing*.
-        A space moves it and draws nothing, as the game's list shows.
+        A space moves it and draws nothing, as the game's list shows.  A
+        code of width 0 (`@`, `^`, `~` in this font) draws nothing either,
+        and is left out too -- but the game DOES emit a 0-wide sprite for
+        it: its draw pass skips the `GsSortSprite` for the space alone
+        (0x8010C93C).  The empty sprite is omitted here on purpose, and
+        `oracle.font_sprites` drops it from the game's side (CORR-LOOKS-074).
         """
         out, x = [], point[0]
         for char in text:

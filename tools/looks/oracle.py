@@ -5246,6 +5246,21 @@ def measured_gaps(font, obj):
     return sorted(gaps)
 
 
+def font_sprites(sprites):
+    """The sprites of a frame that are font glyphs with something to draw.
+
+    On the font's page, and wider than 0.  The game's draw pass skips the
+    `GsSortSprite` (0x8003E8BC) for the space alone (the branch at
+    0x8010C93C), so a code whose width is 0 -- `@`, `^` and `~` in this font
+    -- still hands the GPU a sprite 0 texels wide, which draws nothing.
+    `Font.run` leaves it out, as it leaves the space out, and this is where
+    the game's side drops it to match (CORR-LOOKS-074): a count of font
+    sprites is a count of glyphs that can put a pixel on screen.
+    """
+    return [one for one in sprites
+            if tuple(one["page"]) == layout.GLYPH_PAGE and one["size"][0]]
+
+
 def check_glyphs(slots=(2, 1), verbose=True):
     """`--glyphs [SLOT]`: the font rule against what the frame drew.
 
@@ -5298,13 +5313,12 @@ def check_glyphs(slots=(2, 1), verbose=True):
                             read, GLYPH_REPEAT, GLYPH_LIMIT + OBJECT_LIMIT)
             calls = [stop[1:] for stop in stream if stop[0] == "glyph"]
             objects = glyph_objects(stream)
-            drawn = [one for one in sprites_of(frame_commands(game))
-                     if tuple(one["page"]) == layout.GLYPH_PAGE]
+            drawn = font_sprites(sprites_of(frame_commands(game)))
             at = {tuple(one["point"]): one for one in drawn}
             draws = [(code, x, y) for code, x, y, passing in calls
                      if not passing]
             equal, spaces, wrong, claimed = 0, 0, [], set()
-            control = 0
+            control, empty = 0, 0
             for code, x, y in draws:
                 point = (x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1])
                 u, v, width = font.glyph(code)
@@ -5313,6 +5327,11 @@ def check_glyphs(slots=(2, 1), verbose=True):
                     spaces += 1
                     if found is not None:
                         wrong.append("a space at %r has a sprite" % (point,))
+                    continue
+                if not width:
+                    # Its 0-wide sprite was dropped by `font_sprites`, and
+                    # `Font.run` emits none (CORR-LOOKS-074).
+                    empty += 1
                     continue
                 if found is None:
                     wrong.append("%r at %r has no sprite" % (chr(code), point))
@@ -5334,9 +5353,10 @@ def check_glyphs(slots=(2, 1), verbose=True):
             unclaimed = [one["point"] for one in drawn
                          if tuple(one["point"]) not in claimed]
             print("  -- slot %d --" % slot)
-            print("    %d glyph(s) drawn, %d space(s); %d of %d font sprite(s) "
-                  "equal to the rule in uv, size and CLUT, %d unclaimed"
-                  % (len(draws), spaces, equal, len(drawn), len(unclaimed)))
+            print("    %d glyph(s) drawn, %d space(s), %d of width 0; %d of %d "
+                  "font sprite(s) equal to the rule in uv, size and CLUT, %d "
+                  "unclaimed" % (len(draws), spaces, empty, equal, len(drawn),
+                                 len(unclaimed)))
             print("    control: the table read %d pair(s) off matches %d of "
                   "them" % (GLYPH_CONTROL, control))
             problems += ["slot %d: %s" % (slot, line) for line in wrong]
@@ -8257,6 +8277,31 @@ def _checks(c) -> None:
            len(sprite_texels(glyph)) == 2 * 12, len(sprite_texels(glyph)))
     ok("and the quad behind them is still furniture",
        len(furniture_of(nodes)) == 1, len(furniture_of(nodes)))
+
+    # A width-0 code (CORR-LOOKS-074): the game hands the GPU a 0-wide sprite
+    # for it, `Font.run` hands nothing, and `font_sprites` is what makes the
+    # two lists count alike.  The toy table with `@` made 0 wide; the game's
+    # list is what `Font.run` lays, the 0-wide sprite put in where the game
+    # would, and a sprite off the font's page.
+    import glyphs
+
+    toy = bytearray(glyphs._toy_table())
+    toy[2 * (ord("@") - glyphs.FIRST) + 1] = 0
+    laid = glyphs.Font(bytes(toy)).run("A@B", (0, 0), 1, (128,) * 3)
+    blank = {"point": (0, 0), "size": (0, layout.GLYPH_HEIGHT),
+             "page": layout.GLYPH_PAGE}
+    other = {"point": (0, 0), "size": (16, 16), "page": (832, 256)}
+    game_list = [dict(laid[0], page=layout.GLYPH_PAGE), blank,
+                 dict(laid[1], page=layout.GLYPH_PAGE), other]
+    ok("Font.run lays no sprite for a 0-wide code",
+       [one["code"] for one in laid] == [ord("A"), ord("B")],
+       [one["code"] for one in laid])
+    ok("the game's font sprites, the 0-wide one dropped, count as Font.run's",
+       len(font_sprites(game_list)) == len(laid),
+       (len(font_sprites(game_list)), len(laid)))
+    ok("and without the drop they would not: the control",
+       len([one for one in game_list
+            if tuple(one["page"]) == layout.GLYPH_PAGE]) == len(laid) + 1)
 
     # The window's cursor box off its picture (CORR-LOOKS-070): a picture at
     # scale 2 with DEFAUL's box drawn the way the window draws it -- a one-
