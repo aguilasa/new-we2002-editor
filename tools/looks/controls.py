@@ -964,6 +964,15 @@ CONTROLS = (
         "the bands applied to a routine nobody read: a table next to other "
         "code is indexed by rules transcribed from somewhere else",
     ),
+    Control(
+        "glyphs-pen-ignores-spacing", "glyphs.py", "Font.run",
+        "            x += width + spacing",
+        "            x += width + 2",
+        ("glyphs",),
+        "the pen moved by the labels' gap whatever the object says: `SHIRT N`, "
+        "the digits and `Unknown` come out spread, and every gate that only "
+        "looks at the labels stays green (CORR-LOOKS-071)",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

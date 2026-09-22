@@ -197,6 +197,18 @@ def _checks(c) -> None:
     wa, ws = font.glyph(ord("A"))[2], font.glyph(ord(" "))[2]
     ok("the pen moves by width plus the object's spacing",
        drawn[1]["point"] == [10 + wa + 2 + ws + 2, 20], "%r" % (drawn,))
+    # The labels use spacing 2, so a pen that ignored the object's spacing
+    # would pass the case above.  `SHIRT N` and the digits use 0 and
+    # `Unknown` 1 (CORR-LOOKS-071): the advance is held at both.
+    wb = font.glyph(ord("B"))[2]
+    for spacing in (0, 1):
+        tight = font.run("AB", (10, 20), spacing, (128,) * 3)
+        ok("at spacing %d the pen moves by the width plus %d" % (spacing,
+                                                                 spacing),
+           [one["point"] for one in tight] == [[10, 20],
+                                               [10 + wa + spacing, 20]]
+           and font.width("AB", spacing) == wa + wb + 2 * spacing,
+           "%r" % ([one["point"] for one in tight],))
     ok("every glyph is 12 tall, on the font's page, in its CLUT",
        all(one["size"][1] == 12 and tuple(one["page"]) == layout.GLYPH_PAGE
            and tuple(one["clut"]) == layout.GLYPH_CLUT for one in drawn))

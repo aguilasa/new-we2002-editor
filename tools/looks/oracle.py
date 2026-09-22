@@ -4132,6 +4132,10 @@ def _signed16(value):
 def _stops(game, address, read, repeat, limit):
     """What *read* makes of each stop at an execute breakpoint, one frame of them.
 
+    *address* is one address or a tuple of them; with several armed at once
+    the stops come in the order the game runs them, and *read* tells them
+    apart by the `pc` in the registers (CORR-LOOKS-071).
+
     The frame is closed by repetition, not by the clock: the first *repeat*
     stops coming round again in the same order.  The emulator is left paused.
     """
@@ -4139,10 +4143,13 @@ def _stops(game, address, read, repeat, limit):
 
     import who_writes
 
+    addresses = address if isinstance(address, tuple) else (address,)
+    address = addresses[0]
     client = game.client
     client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(address))
+    for one in addresses:
+        client.call("breakpoint", action="add", type="execute",
+                    address=who_writes.hx(one))
     out = []
     deadline = time.time() + CYCLE_SECONDS
     try:
@@ -4215,7 +4222,9 @@ TEXT_ALIGN, TEXT_SPACING, TEXT_COLOUR = 13, 14, 16
 Read on 2026-09-22 (LOOKS-TASK-37) off the eight objects of both states:
 byte 14 is the SPACING the pen adds after every glyph -- 2 for the labels, 1
 for `Unknown`, 0 for `SHIRT N` and the digits, and exactly the gap between
-two glyphs the draw pass reports --; bytes 16 to 18 are the COLOUR every glyph
+two glyphs the draw pass reports, inside a run: a `\\t` puts the pen at its
+own column, so `A1` is two runs with 1 px between them at spacing 0 --
+`check_glyphs` holds `Font.run` to it per run (CORR-LOOKS-071) --; bytes 16 to 18 are the COLOUR every glyph
 of the object is modulated by, (128, 128, 128) for the labels, the plate and
 the shirt and (112, 112, 240) for the values; byte 13 takes 0, 2 and 3 and
 reads as the alignment inside the box, which is LOOKS-TASK-38's to measure."""
@@ -5104,6 +5113,138 @@ GLYPH_CONTROL = 1
 against the frame redone with each code taking its neighbour's pair has to
 fail, or matching said nothing."""
 
+PEN_CONTROLS = (0, 2)
+"""Spacings the pen check is redone with, for EVERY object, as its control.
+
+Each has to fail somewhere: 0 proves an object with a gap was measured, and 2
+-- the labels' gap, which is what a pen ignoring the object's byte 14 would
+use -- proves one with a gap of 0 or 1 was (CORR-LOOKS-071)."""
+
+
+def pen_runs(raw):
+    """The character codes of a string, in runs the pen lays without a jump.
+
+    A run ends where the string opens a line (`\n`) or moves the pen with a
+    tab (`\t` and its byte): `\t\x12A\t\x1e1` is two runs, `A` and `1`,
+    each put at its own column (measured: the `1` lands one pixel past `A`'s
+    width plus the object's spacing 0).  Where a run STARTS is LOOKS-TASK-38's;
+    how the pen moves inside one is what the spacing byte says.  The colour
+    code moves nothing and does not end a run.
+    """
+    import screen
+
+    screen.decode(raw)  # refuses a byte that is none of the three codes
+    runs, current, at = [], [], 0
+    while at < len(raw):
+        byte = raw[at]
+        if byte in (screen.NEWLINE, screen.TAB):
+            runs.append(current)
+            current = []
+            at += 1 + (screen.TAB_ARGUMENTS if byte == screen.TAB else 0)
+        elif byte == screen.COLOUR:
+            at += 1 + screen.COLOUR_ARGUMENTS
+        else:
+            current.append(byte)
+            at += 1
+    runs.append(current)
+    return [run for run in runs if run]
+
+
+def glyph_objects(stream):
+    """[{at, spacing, text, runs, problem}] out of one frame of stops.
+
+    *stream* is the frame in the order the game ran it: `("object", at,
+    spacing, string)` where `SCREEN_PRINT` is entered, `("glyph", code, x, y,
+    measuring)` where `SCREEN_GLYPH` is.  The glyphs after an object's stop
+    are that object's, up to the next one.  The frame is a cycle that began
+    wherever the breakpoints first caught it, so it is turned to start at an
+    object: the glyphs ahead of the first object stop are the last object's.
+
+    Only the draw pass is kept, and it is cut into the runs of the object's
+    own string (`pen_runs`) -- not by where the pen went, which is the thing
+    under test.  An object whose draw pass is not its string's characters in
+    order gets a `problem` instead of runs.
+    """
+    first = next((index for index, stop in enumerate(stream)
+                  if stop[0] == "object"), None)
+    if first is None:
+        return []
+    out, current = [], None
+    for stop in stream[first:] + stream[:first]:
+        if stop[0] == "object":
+            current = {"at": stop[1], "spacing": stop[2], "text": stop[3],
+                       "draws": [], "runs": [], "problem": None}
+            out.append(current)
+            continue
+        _kind, code, x, y, measuring = stop
+        if not measuring:
+            current["draws"].append((code, x, y))
+    for obj in out:
+        draws = obj.pop("draws")
+        if not draws:
+            continue
+        try:
+            runs = pen_runs(obj["text"])
+        except Exception as exc:  # noqa: BLE001 -- screen.BadScreen, reported
+            obj["problem"] = "its string does not decode: %s" % exc
+            continue
+        codes = [code for run in runs for code in run]
+        if codes != [code for code, _x, _y in draws]:
+            obj["problem"] = ("it drew %r and its string holds %r"
+                              % ("".join(chr(c) for c, _x, _y in draws),
+                                 "".join(chr(c) for c in codes)))
+            continue
+        at = 0
+        for run in runs:
+            obj["runs"].append(draws[at:at + len(run)])
+            at += len(run)
+    return out
+
+
+def pen_problems(font, objects, spacing=None):
+    """(advances checked, [what differs]) of `Font.run` against the game.
+
+    Each run of each object is laid out by the rule from the point where the
+    game drew its first glyph -- where a run STARTS is alignment, and
+    LOOKS-TASK-38's -- with the object's own spacing, or with *spacing* for
+    every object when it is given (the control).  Every drawn glyph after the
+    first has to land on the point the game's draw call gave it.
+    """
+    import who_writes
+
+    checked, wrong = 0, []
+    for obj in objects:
+        gap = obj["spacing"] if spacing is None else spacing
+        if obj["problem"]:
+            wrong.append("object %s: %s" % (who_writes.hx(obj["at"]),
+                                            obj["problem"]))
+        for line in obj["runs"]:
+            text = "".join(chr(code) for code, _x, _y in line)
+            laid = [tuple(one["point"]) for one in
+                    font.run(text, (line[0][1], line[0][2]), gap, (128,) * 3)]
+            game = [(x, y) for code, x, y in line
+                    if code != ord(" ") and font.glyph(code)[2]]
+            checked += max(len(game) - 1, 0)
+            if laid != game:
+                at = next((index for index, pair in enumerate(zip(laid, game))
+                           if pair[0] != pair[1]), min(len(laid), len(game)))
+                wrong.append("object %s, %r at spacing %d: glyph %d laid at "
+                             "%r, the game drew it at %r"
+                             % (who_writes.hx(obj["at"]), text, gap, at,
+                                laid[at] if at < len(laid) else None,
+                                game[at] if at < len(game) else None))
+    return checked, wrong
+
+
+def measured_gaps(font, obj):
+    """The gaps the game left inside one object: each draw call's x minus the
+    previous one's x plus that glyph's width, over every run."""
+    gaps = set()
+    for line in obj["runs"]:
+        for (code, x, _y), (_after, then, _y2) in zip(line, line[1:]):
+            gaps.add(then - x - font.glyph(code)[2])
+    return sorted(gaps)
+
 
 def check_glyphs(slots=(2, 1), verbose=True):
     """`--glyphs [SLOT]`: the font rule against what the frame drew.
@@ -5115,6 +5256,13 @@ def check_glyphs(slots=(2, 1), verbose=True):
     to have NO sprite.  Every font sprite of the frame has to be claimed by a
     glyph.  And the control: the same comparison with the table read one
     pair off must fail, which is what gives "all equal" its weight.
+
+    And the pen (CORR-LOOKS-071): the print and the glyph routine are caught
+    in one stream, so every glyph is known to belong to a text object and to
+    that object's spacing byte; `Font.run` lays each line out from its first
+    glyph, and every following glyph has to land where the game drew it.  The
+    same layout with the spacing forced to each of `PEN_CONTROLS` for every
+    object has to fail somewhere.
     """
     import glyphs
     import iso_source
@@ -5128,6 +5276,7 @@ def check_glyphs(slots=(2, 1), verbose=True):
                           + table[:2 * GLYPH_CONTROL])
     problems = []
     with Oracle(ready["cue"], verbose=verbose) as game:
+        object_path = os.path.join(game.out_dir, "object.bin")
         for slot in slots:
             restore_state(slot, verbose=False)
             game.load_looks(slot)
@@ -5135,11 +5284,20 @@ def check_glyphs(slots=(2, 1), verbose=True):
 
             def read(registers):
                 value = lambda name: who_writes.register_value(registers, name)
-                return (value("a0"), _signed16(value("a1")),
+                if value("pc") == layout.SCREEN_PRINT:
+                    raw = game.read_ram(value("a0"), OBJECT_SIZE, object_path)
+                    pointer = struct.unpack_from("<I", raw, 8)[0]
+                    text = (_cstring(game, pointer)
+                            if RAM_BASE <= pointer < RAM_BASE + RAM_SIZE
+                            else b"")
+                    return ("object", value("a0"), raw[TEXT_SPACING], text)
+                return ("glyph", value("a0"), _signed16(value("a1")),
                         _signed16(value("a2")), value("a3"))
 
-            calls = _stops(game, layout.SCREEN_GLYPH, read, GLYPH_REPEAT,
-                           GLYPH_LIMIT)
+            stream = _stops(game, (layout.SCREEN_GLYPH, layout.SCREEN_PRINT),
+                            read, GLYPH_REPEAT, GLYPH_LIMIT + OBJECT_LIMIT)
+            calls = [stop[1:] for stop in stream if stop[0] == "glyph"]
+            objects = glyph_objects(stream)
             drawn = [one for one in sprites_of(frame_commands(game))
                      if tuple(one["page"]) == layout.GLYPH_PAGE]
             at = {tuple(one["point"]): one for one in drawn}
@@ -5190,6 +5348,31 @@ def check_glyphs(slots=(2, 1), verbose=True):
                 problems.append("slot %d: the shifted table matches as often "
                                 "as the real one, so equal says nothing"
                                 % slot)
+            checked, pen_wrong = pen_problems(font, objects)
+            print("    pen: %d object(s), %d advance(s) laid by Font.run from "
+                  "each run's first glyph, %d run(s) off"
+                  % (len(objects), checked, len(pen_wrong)))
+            for obj in objects:
+                first = ("".join(chr(code) for code, _x, _y in obj["runs"][0])
+                         if obj["runs"] else "")
+                more = len(obj["runs"]) - 1
+                print("      object %s  spacing byte %d  gaps drawn %s  %r%s"
+                      % (who_writes.hx(obj["at"]), obj["spacing"],
+                         measured_gaps(font, obj), first[:24],
+                         " (+%d run(s))" % more if more > 0 else ""))
+            problems += ["slot %d: pen: %s" % (slot, line)
+                         for line in pen_wrong]
+            if not checked:
+                problems.append("slot %d: pen: no advance to check -- the "
+                                "stream held no object with two glyphs" % slot)
+            for forced in PEN_CONTROLS:
+                _checked, off = pen_problems(font, objects, forced)
+                print("    control: every object at spacing %d puts %d run(s) "
+                      "off" % (forced, len(off)))
+                if not off:
+                    problems.append("slot %d: pen: spacing %d for every object "
+                                    "fits as well as the objects' own, so the "
+                                    "pen check says nothing" % (slot, forced))
     for line in problems[:20]:
         print("  FAIL  %s" % line)
     print("oracle --glyphs: %d problem(s) over %d slot(s)"
