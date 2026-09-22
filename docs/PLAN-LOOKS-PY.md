@@ -3174,11 +3174,16 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > de entre elas, recusando se as de entre variarem. Nas onze linhas de
 > valores, o ▶ aparece em x 480 enquanto houver valor à direita, e o ◀ enquanto
 > houver à esquerda, num x **fixo por linha**, que não acompanha o texto: 302
-> em `NAT`, 424 em `AGE`, 416 em `FOOT` e 384 nas outras oito. A cor delas
-> pulsa de quadro a quadro; a janela as desenha a 128, sem pulso. E o
+> em `NAT`, 424 em `AGE`, 416 em `FOOT` e 384 nas outras oito — mais o
+> `DEFAUL`, também em 384, o que faz **nove** linhas em 384 no `screen.json`.
+> A cor delas pulsa de quadro a quadro; a janela as desenha a 128, sem pulso. E o
 > `DEFAUL` mostra o ◀ com um valor só, porque `Left` **não** trava ali: leva o
 > cursor ao rótulo, com a ajuda `Undo` e o ▶ em x 276 —
-> [`CORR-LOOKS-067`](/docs/tasks/looks/CORR-LOOKS-067.md).
+> [`CORR-LOOKS-067`](/docs/tasks/looks/CORR-LOOKS-067.md). **Esta frase parava
+> em "384 nas outras oito" até 2026-09-22**, e quem contasse as linhas em 384
+> no `screen.json` acharia nove: o `DEFAUL` é a nona desde a CORR-LOOKS-067, e
+> a conta das onze linhas de valores o deixava de fora
+> ([`CORR-LOOKS-079`](/docs/tasks/looks/CORR-LOOKS-079.md)).
 >
 > **Veredito (2026-09-21): a tela é polígono e imagem, e o que é imagem é do
 > disco — menos a ajuda.** O painel, a caixa de ajuda, o fundo, a barra de título, as

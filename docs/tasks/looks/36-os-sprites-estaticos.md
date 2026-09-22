@@ -144,11 +144,17 @@ $ python tools/looks/oracle.py --screen --write        # 14 min 22 s
 oracle --screen --write: wrote tools/looks/screen.json
 ```
 
-Nas outras oito linhas (SKIN, HAIR, H.COL, FACE, H.F.COL., HEIG, BODY e BOOTS)
-o ◀ fica em x 384. O HEIG chega no meio da faixa,
+O ◀ fica em x 384 em nove linhas: SKIN, HAIR, H.COL, FACE, H.F.COL., HEIG,
+BODY, BOOTS e o DEFAUL do trecho acima. O HEIG chega no meio da faixa,
 com `<(384,127) >(480,127)`. O `screen.json` regravado só **acrescenta**
 (`git diff --stat`: 539 inserções, 0 remoções); nada do que já estava medido
 mudou.
+
+**Esta frase dizia "nas outras oito linhas" até 2026-09-22**, e a lista trazia
+os oito nomes sem o `DEFAUL` — que o trecho acima já mostra com `<(384,43)`
+desde a [`CORR-LOOKS-067`](/docs/tasks/looks/CORR-LOOKS-067.md). Contadas por
+linha distinta no `screen.json` são **nove**
+([`CORR-LOOKS-079`](/docs/tasks/looks/CORR-LOOKS-079.md)).
 
 ```text
 $ python tools/looks/oracle.py --keys "<a sequência padrão, 19 teclas>" 2

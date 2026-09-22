@@ -55,9 +55,14 @@ valores encostados na borda direita.
 
 - **Da [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md):** o ◀
   ao lado do valor tem x **fixo por linha** (302 em `NAT`, 424 em `AGE`, 416
-  em `FOOT`, 384 nas outras oito, gravado no `screen.json` pelo walk) e não
+  em `FOOT`, 384 nas outras nove, gravado no `screen.json` pelo walk) e não
   acompanha o começo do texto. Ele não serve de régua para o alinhamento — e o
-  alinhamento não precisa movê-lo.
+  alinhamento não precisa movê-lo. **Esta linha dizia "384 nas outras oito"
+  até 2026-09-22**, herdando a conta da LOOKS-TASK-36, que nomeou as linhas
+  antes de a [`CORR-LOOKS-067`](/docs/tasks/looks/CORR-LOOKS-067.md) dar seta
+  de valor ao `DEFAUL`. Contadas por linha distinta no `screen.json` são
+  **nove** — as mesmas nove da nota do cursor logo abaixo
+  ([`CORR-LOOKS-079`](/docs/tasks/looks/CORR-LOOKS-079.md)).
 - **Da [`CORR-LOOKS-070`](/docs/tasks/looks/CORR-LOOKS-070.md):** a caixa do
   cursor sobre o valor também é **por linha** — x 314 em `NAT`, 436 em `AGE`,
   428 em `FOOT`, 396 nas outras nove, sempre até 476 —, e o `screen.json` a
