@@ -31,12 +31,15 @@ of `ui_check.py` are drawn with.
 `--keys Down,Right,Right` presses buttons into the screen before reporting, as
 **Qt key events**, which is the path a keyboard takes: a gate that called
 `press()` directly would leave `keyPressEvent` untested and pass on a window
-nobody could type into.
+nobody could type into.  A part may carry a count -- `Right x41` is forty-one
+Rights, the one repetition form `screen.parse_keys` takes (CORR-LOOKS-082), and
+what keeps a sequence that walks a row to its end from being spelled out.
 
 Usage:
     <venv>/python tools/looks/ui/app.py --smoke
     <venv>/python tools/looks/ui/app.py --state 1 --visible
-    <venv>/python tools/looks/ui/app.py --keys Down,Right --screenshot out.png
+    <venv>/python tools/looks/ui/app.py --keys "Down x6,Right x41" \\
+        --screenshot out.png
     <venv>/python tools/looks/ui/app.py --looks A-I3-A-F-A --screenshot out.png
     <venv>/python tools/looks/ui/app.py --looks A-A1-A-A-A --wireframe \\
         --screenshot wire.png
@@ -299,7 +302,8 @@ def main(argv=None) -> int:
                         help="which save state the screen starts from: 1 is "
                              "the goalkeeper, 2 the outfield player")
     parser.add_argument("--keys", help="buttons to press first, like "
-                                       "Down,Down,Right")
+                                       "Down,Down,Right; a repetition is "
+                                       "written Right x41")
     parser.add_argument("--scale", type=int, default=SCALE,
                         help="window pixels per game pixel")
     parser.add_argument("--figure", type=int, default=0,

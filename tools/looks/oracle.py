@@ -43,7 +43,7 @@ Usage:
     python tools/looks/oracle.py --colour SKIN [SLOT [TUPLE ...]]  # which primitives of each head a colour row moves
     python tools/looks/oracle.py --writes [HAIR [SLOT]]  # every quad the game writes, value by value
     python tools/looks/oracle.py --screen [--write]  # LOOKS SET measured: every text, help, cursor and box; --write makes screen.json
-    python tools/looks/oracle.py --keys [SEQUENCE [SLOT]]  # the same presses in the game, in screen.json and in our window
+    python tools/looks/oracle.py --keys [SEQUENCE [SLOT]]  # the same presses in the game, in screen.json and in our window; a repetition is written Right x41
     python tools/looks/oracle.py --glyphs [SLOT]  # the font rule of glyphs.py against every font sprite the frame drew
     python tools/looks/oracle.py --default [SLOT]  # what NAT and DEFAUL do: the nationality byte, and the default that is not applied
     python tools/looks/oracle.py --pose [SLOT]  # where the pose comes from: ANIME.BIN in RAM, the entry the screen plays, and the GTE matrix load

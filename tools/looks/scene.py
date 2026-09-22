@@ -1433,7 +1433,11 @@ def screen_press(state, button: str) -> bool:
 
 
 def screen_keys(text: str) -> list:
-    """`Down,Right` to the presses it names, or this module's refusal."""
+    """`Down,Right` to the presses it names, or this module's refusal.
+
+    A part may carry a count: `Right x41` is forty-one Rights, the one
+    repetition form `screen.parse_keys` takes.
+    """
     import screen
 
     try:

@@ -5,7 +5,7 @@ origin: CORR-LOOKS-082
 severity: low
 files: [tools/looks/oracle.py, tools/looks/ui/app.py, tools/looks/scene.py, CLAUDE.md, docs/prompts/perfil-looks.md, docs/PLAN-LOOKS-PY.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -74,3 +74,32 @@ tools/looks/scene.py:1436       docstring de screen_keys                   # a C
 CLAUDE.md:869, docs/prompts/perfil-looks.md:797, docs/PLAN-LOOKS-PY.md:3216
 # e oracle.py:5088-5089 escreve o KEY_SEQUENCE padrão por extenso (19 teclas), também fora da lista
 ```
+
+Corrigida em 2026-09-22. A grafia é uma só, `Right x41`, lida do
+`screen.REPETITION_EXAMPLE` e não escolhida aqui. Sete lugares — os seis da
+CORR mais o segundo exemplo de uso do `app.py`, que é o mesmo defeito na mesma
+frase:
+
+```text
+tools/looks/oracle.py:46     linha de uso: "... in our window; a repetition is written Right x41"
+tools/looks/ui/app.py:34     o parágrafo do --keys ganhou a forma e o porquê (CORR-LOOKS-082)
+tools/looks/ui/app.py:41     o exemplo virou --keys "Down x6,Right x41"
+tools/looks/ui/app.py:306    help do argparse: "...Down,Down,Right; a repetition is written Right x41"
+tools/looks/scene.py:1438    docstring de screen_keys, segundo parágrafo
+CLAUDE.md:869                "Repetição se escreve `Right x41`, a única forma que ele aceita"
+docs/prompts/perfil-looks.md:797, docs/PLAN-LOOKS-PY.md:3217   idem, na linha do --keys
+```
+
+**O `KEY_SEQUENCE` por extenso do `oracle.py:5088` ficou como está**, e de
+propósito: ele não ensina sintaxe nenhuma — é a sequência que o `--keys` toca
+quando ninguém nomeia uma, escolhida para ser desajeitada, e o docstring ao
+lado se lê andando a caminhada tecla a tecla. Comprimir `Right,Right,Right`
+para `Right x3` daria a mesma lista (passa pelo mesmo `parse_keys`) e trocaria
+um texto que se lê por uma forma que ninguém precisa ler. Se valer a pena, é
+outro conserto.
+
+Gates, todos no `python` do sistema e **sem emulador**: `screen.py --check`
+(0 failure(s)), `selftest.py` (0 failure(s), 104 de 104 controles vermelhos),
+`cli.py check` (12 módulos, 12 ok) e `rite check --cycle looks`
+(0 erro, 0 aviso — inclusive o tamanho do perfil, que ficou em 84.225 bytes
+contra o limite de 84 KiB).

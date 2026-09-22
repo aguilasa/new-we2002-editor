@@ -866,7 +866,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/ui_check.py` | o alvo `looks_ui`: julga os PNGs de fora, sem o código sob teste, e anda as doze linhas até as duas pontas nos dois slots por tecla sintética |
 | `python tools/looks/oracle.py --check-live` | o alvo `looks_live`: sobe o fork, carrega os states e confere a RAM contra o disco |
 | `python tools/looks/oracle.py --screen` / `--screen --write` | anda as doze linhas no jogo e compara com o `screen.json`; o `--write` é o **gerador** desse arquivo (~12 min) |
-| `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` | a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle fechando antes — é quem julga a tela |
+| `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` | a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle fechando antes — é quem julga a tela. Repetição se escreve `Right x41`, a única forma que ele aceita |
 | `python tools/looks/oracle.py --pose [SLOT]` / `--pose <SLOT> <N> [N ...]` | de onde vem a pose, e a pose em si: a matriz e a translação de cada peça de um quadro contado, em `work/looks-pose/`, com a captura repetida como controle |
 | `python tools/looks/oracle.py --pose-lag` | quantas paradas o ponteiro de modelo atrasa em relação à matriz que ele nomeia, medido sobre as capturas em disco, sem emulador |
 | `python tools/looks/oracle.py --camera [SLOT [LINHA]]` | a câmera do jogo lida do GTE — `H`, os deslocamentos (zero nesta tela) e a matriz —, em `work/looks-camera/`; com `LINHA` (ex.: `HAIR`) mede a câmera do close-up |

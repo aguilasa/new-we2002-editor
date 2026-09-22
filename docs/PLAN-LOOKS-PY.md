@@ -3213,7 +3213,8 @@ antes do teste:
 
    > **Fechada em 2026-09-17** pela
    > [`LOOKS-TASK-22`](/docs/tasks/looks/22-a-tela-na-janela.md), e o comando é
-   > `oracle.py --keys [SEQUÊNCIA [SLOT]]`, ~30 s por corrida. Ele compara
+   > `oracle.py --keys [SEQUÊNCIA [SLOT]]` — repetição na SEQUÊNCIA se escreve
+   > `Right x41`, a única forma aceita —, ~30 s por corrida. Ele compara
    > **três** lados depois de uma sequência de 19 teclas: o jogo, o
    > `screen.json` e a nossa janela — as doze linhas e a caixa de ajuda.
    > Medido: **0 diferença** no slot 2 e **0 no slot 1**, com o controle —
