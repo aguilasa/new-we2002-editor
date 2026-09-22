@@ -146,11 +146,11 @@ $ python tools/looks/oracle.py --keys "" 2             # e 1
   control: the same sequence twice in the game gives the same twelve rows, the same help, the same arrows, the same cursor box and the same 121 glyph(s)
 oracle --keys: 0 difference(s) after 19 press(es), across the game, screen.json and our window
 
-$ python tools/looks/oracle.py --keys "<Right x10>" 2                  # NAT numa nacao: a caixa anda
+$ python tools/looks/oracle.py --keys "Right,Right,Right,Right,Right,Right,Right,Right,Right,Right" 2  # NAT numa nacao: a caixa anda
 oracle --keys: 0 difference(s) after 10 press(es), ...
-$ python tools/looks/oracle.py --keys "<Down x7, Right x40>" 2          # HEIG em 210 cm
+$ python tools/looks/oracle.py --keys "Down,Down,Down,Down,Down,Down,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right" 2  # HEIG em 210 cm
 oracle --keys: 0 difference(s) after 47 press(es), ...
-$ python tools/looks/oracle.py --keys "<Down x2, Right x30>" 2          # SKIN na ponta
+$ python tools/looks/oracle.py --keys "Down,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right" 2  # SKIN na ponta
 oracle --keys: 0 difference(s) after 32 press(es), ...
 $ python tools/looks/oracle.py --keys "Up,Left" 2                       # o rotulo do DEFAUL
 oracle --keys: 0 difference(s) after 2 press(es), ...
@@ -197,6 +197,17 @@ deixa o `--keys` vermelho linha por linha:
   arquivo contra o jogo em cinco sequências. A remedição foi rodada depois, na
   [`CORR-LOOKS-076`](/docs/tasks/looks/CORR-LOOKS-076.md) (2026-09-22): **0
   diferença**, transcrita na Evidência acima.
+- **Três linhas `--keys` da Evidência tinham sido abreviadas à mão** — `"<Right
+  x10>"`, `"<Down x7, Right x40>"`, `"<Down x2, Right x30>"` —, e o
+  `screen.parse_keys` não tem sintaxe de repetição: copiadas, elas erravam em
+  vez de medir. Foram escritas por extenso na
+  [`CORR-LOOKS-075`](/docs/tasks/looks/CORR-LOOKS-075.md) e rodadas de novo, com
+  a mesma contagem de teclas e 0 diferença. **A divisão entre `Down` e `Right`
+  da abreviação não levava à linha que o próprio comentário nomeia** (sete
+  `Down` a partir de `NAT` param em `BODY`, não em `HEIG`; dois, em `HAIR`, não
+  em `SKIN`): o que se mediu, e o que está escrito, é `Down` ×6 + `Right` ×41
+  (`HEIG` em `210 cm`) e `Down` ×1 + `Right` ×31 (`SKIN` em `D TYPE`) — o alvo
+  do comentário, com as 47 e 32 teclas da transcrição.
 
 ### Gates
 
