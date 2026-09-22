@@ -98,7 +98,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-079](/docs/tasks/looks/CORR-LOOKS-079.md) | A seta esquerda está em x 384 em nove linhas, não oito | LOOKS-TASK-38 | low | done | 2026-09-22 |
 | [CORR-LOOKS-080](/docs/tasks/looks/CORR-LOOKS-080.md) | Marcar as entregas da Fase 10 das tasks 36, 37 e 38 no progresso | LOOKS-TASK-38 | low | done | 2026-09-22 |
 | [CORR-LOOKS-081](/docs/tasks/looks/CORR-LOOKS-081.md) | Plantar o controle do pulo por acumulador no controls.py | CORR-LOOKS-077 | low | done | 2026-09-22 |
-| [CORR-LOOKS-082](/docs/tasks/looks/CORR-LOOKS-082.md) | Dar ao parse_keys uma sintaxe de repetição, em vez de linhas de 317 caracteres | CORR-LOOKS-075 | low | in-progress | — |
+| [CORR-LOOKS-082](/docs/tasks/looks/CORR-LOOKS-082.md) | Dar ao parse_keys uma sintaxe de repetição, em vez de linhas de 317 caracteres | CORR-LOOKS-075 | low | done | 2026-09-22 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não

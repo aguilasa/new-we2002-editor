@@ -5,10 +5,10 @@ origin: CORR-LOOKS-075
 severity: low
 files: [tools/looks/screen.py, docs/tasks/looks/38-o-alinhamento-dos-valores.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 9246c32a
 ---
 
 # CORR-LOOKS-082 — Dar ao parse_keys uma sintaxe de repetição, em vez de linhas de 317 caracteres
@@ -234,3 +234,8 @@ check: 0 error(s), 0 warning(s) in 1 cycle(s)
   (linha 46), a ajuda do `--keys` do `ui/app.py` (31 e 301) e o docstring do
   `scene.screen_keys` continuam dizendo `Down,Right,Right`. São arquivos fora
   desta correção; encaminhados.
+- **Closed** — commit `9246c32a` (2026-09-22): feat(looks): give parse_keys one repetition form, `Right x41`
+  - Files (`git show --name-status 9246c32a`):
+    - `M docs/tasks/looks/38-o-alinhamento-dos-valores.md`
+    - `M docs/tasks/looks/CORR-LOOKS-082.md`
+    - `M tools/looks/screen.py`
