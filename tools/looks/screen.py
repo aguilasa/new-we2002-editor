@@ -42,6 +42,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import re
 import sys
 import unicodedata
 
@@ -1090,13 +1091,59 @@ class State:
         return [self.press(button) for button in buttons]
 
 
+REPETITION = re.compile(r"^([A-Za-z]+)\s*x([0-9]+)$")
+"""The ONE repetition form `parse_keys` takes: `Right x41` is forty-one Rights.
+
+`41*Right` was the other candidate and is refused, so that a sequence has one
+spelling and a reader of a log never has to ask which one is in force.  The
+blank before the `x` is optional (`Right x41` and `Rightx41` are the same
+sequence, as `Down, Right ,Up` already was); the `x` is not, it is lowercase,
+and the count is a decimal of at least one.
+
+Why a syntax at all: the sequences that walk a row to its end are long, and a
+log that has to spell them out either wraps -- the `--keys` line of
+LOOKS-TASK-38 reached 317 characters -- or gets abbreviated by hand into
+something no tool reads, which is how `<Right x10>` ended up in that log
+measuring nothing (CORR-LOOKS-075, CORR-LOOKS-082).
+"""
+
+REPETITION_EXAMPLE = "Right x41"
+"""What a refusal shows, so the message teaches the form it wants."""
+
+
+def _not_a_button(shown: str) -> BadScreen:
+    return BadScreen("%r is not one of the four this screen answers to: %s "
+                     "(a repetition is written %r)"
+                     % (shown, ", ".join(BUTTONS), REPETITION_EXAMPLE))
+
+
 def parse_keys(text: str) -> list:
-    """`Down,Down,Right` to the three presses it names, refusing the rest."""
-    buttons = [part.strip() for part in text.split(",") if part.strip()]
-    for button in buttons:
+    """`Down,Down,Right` to the three presses it names, refusing the rest.
+
+    A part may carry a count: `Right x41` is forty-one Rights, and
+    `Down x6,Right x41` the forty-seven presses that take slot 2 from `NAT` to
+    `HEIG` and `HEIG` to `210 cm`.  The written-out form still parses, and the
+    two give the same list -- which is the control of CORR-LOOKS-082.
+    """
+    buttons = []
+    for part in text.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        found = REPETITION.match(part)
+        if found is None:
+            if part not in BUTTONS:
+                raise _not_a_button(part)
+            buttons.append(part)
+            continue
+        button, count = found.group(1), int(found.group(2))
         if button not in BUTTONS:
-            raise BadScreen("%r is not one of the four this screen answers "
-                            "to: %s" % (button, ", ".join(BUTTONS)))
+            raise _not_a_button(button)
+        if count < 1:
+            raise BadScreen("%r counts no press; a repetition is at least "
+                            "one, and a sequence of none is the empty string"
+                            % part)
+        buttons.extend([button] * count)
     return buttons
 
 
@@ -1552,6 +1599,35 @@ def _state_checks(c, table: dict) -> None:
             lambda: parse_keys("Down,Cross,Up"), "is not one of the four")
     ok("a key sequence parses to the presses it names",
        parse_keys("Down, Right ,Up") == ["Down", "Right", "Up"])
+
+    # The repetition form (CORR-LOOKS-082).  The control is the pair: the
+    # abbreviated sequence and the written-out one have to be the same list,
+    # or the short line in a log measures something else than the long one it
+    # replaced.
+    written_out = ",".join(["Down"] * 6 + ["Right"] * 41)
+    ok("the abbreviated sequence and the written-out one are the same "
+       "presses -- the control of the repetition form",
+       parse_keys("Down x6,Right x41") == parse_keys(written_out)
+       and len(parse_keys("Down x6,Right x41")) == 47,
+       "%d press(es)" % len(parse_keys("Down x6,Right x41")))
+    ok("a count repeats its own button and nothing else",
+       parse_keys("Right x41") == ["Right"] * 41)
+    ok("counted and plain parts mix, and the blank before the x is optional",
+       parse_keys("Down, Right x2 ,Upx3")
+       == ["Down", "Right", "Right", "Up", "Up", "Up"],
+       "%r" % parse_keys("Down, Right x2 ,Upx3"))
+    ok("a count of one is the button alone",
+       parse_keys("Down x1,Right x31") == parse_keys("Down,Right x31"))
+    refuses("a stranger with a count is refused like a stranger without one",
+            lambda: parse_keys("Cross x3"), "is not one of the four")
+    refuses("the other spelling of a repetition is refused, not guessed at",
+            lambda: parse_keys("41*Right"), "is not one of the four")
+    refuses("and so is the hand abbreviation a log once carried",
+            lambda: parse_keys("<Right x10>"), "is not one of the four")
+    refuses("a count with no number is not a button either",
+            lambda: parse_keys("Right x"), "is not one of the four")
+    refuses("a count of zero is refused, not read as no press",
+            lambda: parse_keys("Right x0"), "at least one")
 
 
 def _toy_table() -> dict:
