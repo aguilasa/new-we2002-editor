@@ -5,12 +5,12 @@ type: implementação
 category: render
 phase: 10
 depends_on: [LOOKS-TASK-31]
-status: pending
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 0297ea1c
 ---
 
 # LOOKS-TASK-37: A tabela de glifos
@@ -191,3 +191,24 @@ check: 0 error(s), 11 warning(s) in 4 cycle(s)
 O `looks_ui` (16 de 16), o `looks_live`, o `--keys` e o `--outside`
 rodaram sobre o código do commit e estão transcritos acima. Depois deles só
 mudou prosa.
+- **Closed** — commit `0297ea1c` (2026-09-22): feat(looks): write the screen's text with the game's own glyphs
+  - Files (`git show --name-status 0297ea1c`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/37-a-tabela-de-glifos.md`
+    - `M docs/tasks/looks/38-o-alinhamento-dos-valores.md`
+    - `M tools/looks/cli.py`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/controls.py`
+    - `A tools/looks/glyphs.py`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/screen.json`
+    - `M tools/looks/screen.py`
+    - `M tools/looks/selftest.py`
+    - `M tools/looks/ui/app.py`
+    - `M tools/looks/ui/looks_set.py`
+    - `M tools/looks/ui_check.py`
