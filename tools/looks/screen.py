@@ -699,6 +699,13 @@ def _layout_problems(name: str, row: dict) -> list:
     an alignment, a spacing and the line's tokens.  Joined the way the rows
     are composed -- stripped, a space apart -- they have to spell the text,
     or the walk paired a layout with the wrong value.
+
+    A value whose pieces are malformed is not spelled out -- there is no
+    reading `tokens` that `_piece_problems` just refused --, and that skip is
+    the value's own: it is decided on the faults of THAT value, never on the
+    accumulator.  Read off the shared list, the first faulty piece anywhere in
+    the row silenced the spelling of every value after it, and a table with two
+    faults reported one (CORR-LOOKS-077).
     """
     layouts = row.get("layouts")
     texts = row.get("texts", [])
@@ -708,10 +715,12 @@ def _layout_problems(name: str, row: dict) -> list:
                    len(texts))]
     problems = []
     for text, pieces in zip(texts, layouts):
+        malformed = []
         for number, piece in enumerate(pieces):
-            problems += _piece_problems("row %s, %r, piece %d"
-                                        % (name, text, number), piece)
-        if problems:
+            malformed += _piece_problems("row %s, %r, piece %d"
+                                         % (name, text, number), piece)
+        problems += malformed
+        if malformed:
             continue
         spelled = " ".join(tokens_text(piece["tokens"]).strip()
                            for piece in pieces)
@@ -1272,6 +1281,24 @@ def _checks(c) -> None:
     broken["rows"]["SKIN"]["layouts"][0][0]["align"] = 1
     ok("an alignment no object carries is refused",
        any("aligned" in p for p in validate(broken)))
+    # Two faults on two values of the same row: the piece fault on the first
+    # used to silence the spelling of every value after it, and the table went
+    # red saying half of what was wrong (CORR-LOOKS-077).
+    broken = json.loads(json.dumps(table))
+    broken["rows"]["SKIN"]["layouts"][0][0]["align"] = 1
+    broken["rows"]["SKIN"]["layouts"][3][0]["tokens"] = [["text", "ZZZ"]]
+    found = [p for p in validate(broken) if "SKIN" in p]
+    ok("a table with a piece fault on one value and a misspelling on another "
+       "reports both, not the first",
+       len(found) == 2 and any("aligned" in p for p in found)
+       and any("spell" in p for p in found), "%r" % found)
+    broken = json.loads(json.dumps(table))
+    broken["rows"]["SKIN"]["layouts"][2][0]["tokens"] = "CB"
+    found = [p for p in validate(broken) if "SKIN" in p]
+    ok("and the value whose own pieces are malformed is still not spelled "
+       "out -- there is no reading the tokens just refused",
+       found == ["row SKIN, 'C TYPE', piece 0 has the tokens 'CB'"],
+       "%r" % found)
     broken = json.loads(json.dumps(table))
     del broken["rows"]["NAT"]["layouts"][-1]
     ok("a row with a value and no layout is refused",
