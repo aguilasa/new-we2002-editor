@@ -5,10 +5,10 @@ origin: LOOKS-TASK-38
 severity: low
 files: [tools/looks/screen.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 4b5b26c5
 ---
 
 # CORR-LOOKS-077 — _layout_problems pula a soletração dos valores depois da primeira falta
@@ -141,3 +141,7 @@ looks_selftest: 0 failure(s)   # 102 de 102 controles vermelhos
 $ python tools/looks/cli.py check
 cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
 ```
+- **Closed** — commit `4b5b26c5` (2026-09-22): fix(looks): report every value's spelling, not just up to the first faulty piece
+  - Files (`git show --name-status 4b5b26c5`):
+    - `M docs/tasks/looks/CORR-LOOKS-077.md`
+    - `M tools/looks/screen.py`
