@@ -37,10 +37,10 @@ read them (`screen.State.arrows`).
 MEASURED since LOOKS-TASK-37: the typeface.  The labels, the values, the
 plate and the shirt are written with the game's own glyphs -- the font rule of
 `glyphs.py`, read off the overlay -- in the colour and with the spacing of the
-text object that writes each (`screen.State.style`).  NOT measured yet: where
-each string STARTS inside its box -- the values are right-aligned by the game
-and the plate and the shirt centred -- which is LOOKS-TASK-38's; until then
-they start at their box's left edge.  Nor the pulse
+text object that writes each (`screen.State.style`).  And, since LOOKS-TASK-38,
+where each one STARTS: every value in the pieces the walk read for it -- each
+text object's box, alignment and tabs --, and the plate and the shirt centred
+in theirs, which is where the game puts every glyph.  NOT measured: the pulse
 of the arrows: the game dims and brightens them frame to frame, and the
 window draws them at 128, unmodulated -- the animation is phase 11's.
 
@@ -92,11 +92,6 @@ class LooksSet(QtWidgets.QWidget):
         self.builds = 0
         self.drawn = None
         self.tuple_text = state.tuple_text()
-        # The plate's and the shirt's text, in the game's glyphs but not yet
-        # where the game puts them inside their box (LOOKS-TASK-38): they
-        # land on sprite pixels the game leaves bare, so the gate that judges
-        # the sprites photographs the window without them.
-        self.unplaced_text = True
         self.glyph_images = {}
         # Where the game's camera comes from, handed in by whoever built the
         # window: a callable of the rows' values.  The window does not compose
@@ -212,32 +207,26 @@ class LooksSet(QtWidgets.QWidget):
                 QtGui.QImage.Format.Format_RGBA8888).copy()
         return self.glyph_images[key]
 
-    def _write(self, painter, text: str, point, style: dict) -> None:
-        """*text* in the game's glyphs, the pen starting at *point*."""
-        s = self.scale
-        for sprite in self.builder.text_sprites(text, point, style):
-            picture = self._glyph_image(sprite)
-            x, y = sprite["point"]
-            painter.drawImage(QtCore.QRect(x * s, y * s, picture.width() * s,
-                                           picture.height() * s), picture)
+    def glyphs(self) -> list:
+        """Every glyph sprite this window writes now, in native pixels.
 
-    def texts(self) -> list:
-        """What this window writes, `[(text, point, style)]` in native pixels:
-        the rows' names and values, and -- unless left out -- the plate and
-        the shirt.  `paintEvent` writes exactly these."""
+        The rows' names from the labels' own x, left-aligned as the game has
+        them; each value in the pieces the walk read for it -- the box, the
+        alignment and the tabs of every text object that writes a part of it
+        (LOOKS-TASK-38) --; and the plate and the shirt, centred in theirs.
+        `paintEvent` draws exactly these, and `report` gives them to the gate.
+        """
+        if self.builder is None:
+            return []
         places, out = self.places, []
         for index, name in enumerate(self.state.order):
             y = places["rows_y"] + places["pitch"] * index
-            out.append((name, (places["labels_x"], y),
-                        self.state.style("labels")))
-            box = self.state.value_box(name)
-            out.append((self.state.text_of(name), (box[0] + 2, y),
-                        self.state.value_style(name)))
-        if self.unplaced_text:
-            out.append((self.state.plate(), tuple(places["plate"]),
-                        self.state.style("plate")))
-            out.append((self.state.shirt(), tuple(places["shirt"]),
-                        self.state.style("shirt")))
+            out += self.builder.text_sprites(name, (places["labels_x"], y),
+                                             self.state.style("labels"))
+            for piece in self.state.value_layout(name):
+                out += self.builder.placed_sprites(piece)
+        for role in ("plate", "shirt"):
+            out += self.builder.placed_sprites(self.state.style(role))
         return out
 
     def _font(self, size: int) -> QtGui.QFont:
@@ -362,6 +351,8 @@ class LooksSet(QtWidgets.QWidget):
                         for one in self.sprites},
             "sprites_note": self.sprites_note,
             "arrows": self.arrows(),
+            "glyphs": sorted((one["point"][0], one["point"][1], one["uv"][0],
+                              one["uv"][1]) for one in self.glyphs()),
         }
 
     # -- the drawing -------------------------------------------------------
@@ -415,8 +406,12 @@ class LooksSet(QtWidgets.QWidget):
             painter.drawImage(QtCore.QRect(x * s, y * s, picture.width() * s,
                                            picture.height() * s), picture)
         if self.builder is not None:
-            for text, point, style in self.texts():
-                self._write(painter, text, point, style)
+            for sprite in self.glyphs():
+                picture = self._glyph_image(sprite)
+                x, y = sprite["point"]
+                painter.drawImage(QtCore.QRect(x * s, y * s,
+                                               picture.width() * s,
+                                               picture.height() * s), picture)
         else:
             # No disc to cut the glyphs from: Qt's font stands in, and says
             # nothing about the game's.

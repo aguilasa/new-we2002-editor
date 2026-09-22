@@ -743,6 +743,10 @@ def read_screen(output: str) -> dict:
                                 for name, _, clut in
                                 (part.rpartition(" clut ")
                                  for part in body.split(", "))})
+        elif text.startswith("glyphs "):
+            seen["glyphs"] = sorted(
+                tuple(int(v) for v in one.split(","))
+                for one in text[len("glyphs "):].split())
         elif text.startswith("arrows "):
             body = text[len("arrows "):]
             seen["arrows"] = [] if body == "none" else [
@@ -1443,11 +1447,8 @@ def measure_sprites(python: str, app: str, where: str, env: dict) -> tuple:
         if not spots:
             return ([], "", None)
         out = os.path.join(where, "sprites-%d.png" % slot)
-        # Without the plate's and the shirt's text: it is in the game's
-        # glyphs but not yet where the game puts it (LOOKS-TASK-38), and it
-        # covers sprite pixels the game leaves bare.
         code, output = run_app(python, app, ["--state", str(slot), "--scale",
-                                             "1", "--no-unplaced-text",
+                                             "1",
                                              "--screenshot", out], env)
         if code != 0 or not os.path.isfile(out):
             return ([], "slot %d: the screen did not draw: %s"
@@ -1582,7 +1583,7 @@ def measure_arrows(python: str, app: str, where: str, env: dict) -> tuple:
             out = os.path.join(where, "arrows-%d-%d.png"
                                % (slot, len(keys)))
             arguments = ["--state", str(slot), "--scale", "1",
-                         "--no-unplaced-text", "--screenshot", out]
+                         "--screenshot", out]
             if keys:
                 arguments[2:2] = ["--keys", ",".join(keys)]
             code, output = run_app(python, app, arguments, env)

@@ -821,8 +821,8 @@ a caixa de ajuda e o boneco no painel. Entregues a tela (fase 8) e o boneco
 montado, na pose e na câmera do jogo, com altura e corpo (fase 9) e com o
 uniforme do time (task 30), o painel e a mobília medidos e pintados (task
 31), os sprites estáticos e as setas lidos do disco (task 36), e o texto
-escrito com a fonte do jogo (task 37); faltam o alinhamento, a ajuda e o
-close-up (tasks 38 a 40) e a caminhada (fase 11).
+escrito com a fonte do jogo, no lugar em que o jogo o escreve (tasks 37 e
+38); faltam a ajuda e o close-up (tasks 39 e 40) e a caminhada (fase 11).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool

@@ -1986,20 +1986,22 @@ def text_regions(table):
             "values": (left, top, right, bottom)}
 
 
-LABEL_INK_SLACK = 0
-"""Pixels of the labels' column allowed to differ from the game's frame."""
+TEXT_INK_SLACK = {"labels": 0, "values": 0}
+"""Pixels of each text column allowed to differ from the game's frame."""
 
 
 def _area(box):
     return (box[2] - box[0] + 1) * (box[3] - box[1] + 1)
 
 
-def ink_differences(one, two, box):
-    """Pixels of *box* where the two frames differ past `OUTSIDE_SLACK`."""
+def ink_differences(one, two, box, skip=frozenset()):
+    """Pixels of *box* where the two frames differ past `OUTSIDE_SLACK`,
+    leaving out the pixels in *skip*."""
     left, top, right, bottom = box
     return sum(1 for y in range(top, bottom + 1)
                for x in range(left, right + 1)
-               if colour_distance(one[y][x], two[y][x]) > OUTSIDE_SLACK)
+               if (x, y) not in skip
+               and colour_distance(one[y][x], two[y][x]) > OUTSIDE_SLACK)
 
 
 def ground_colour(frame, box, skip=None):
@@ -2104,26 +2106,35 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
         # same frame photographed again as the floor. Without the slack
         # 11839 of 16416 differ, because our band's ground sits ~6 from the
         # game's (CORR-LOOKS-072).
-        label_box = text_regions(table)["labels"]
-        floor = ink_differences(first, again, label_box)
-        apart = ink_differences(first, ours, label_box)
-        shifted = [row[1:] + row[:1] for row in first]
-        control = ink_differences(shifted, ours, label_box)
-        print("    labels, pixel for pixel within %d per channel: %d of %d "
-              "differ (the game against itself: %d; the game one pixel "
-              "off: %d)" % (OUTSIDE_SLACK, apart, _area(label_box), floor,
-                            control))
-        if not control:
-            problems.append("slot %d: the labels one pixel off do not differ "
-                            "either, so equal says nothing" % slot)
-        if floor:
-            problems.append("slot %d: the labels differ from themselves in %d "
-                            "pixel(s), so the comparison has no floor"
-                            % (slot, floor))
-        elif apart > LABEL_INK_SLACK:
-            problems.append("slot %d: %d pixel(s) of the labels differ from the "
-                            "game's, over the %d allowed"
-                            % (slot, apart, LABEL_INK_SLACK))
+        # The cursor box pulses in the game (trap 36) and is a fixed colour in
+        # our window: its outline is not text, and is left out of the columns.
+        cursor = table["rows"][table["cursor_on_load"]]["cursor"]
+        outline = {(x, y) for x in range(cursor[0], cursor[2] + 1)
+                   for y in range(cursor[1], cursor[3] + 1)
+                   if x in (cursor[0], cursor[2]) or y in (cursor[1],
+                                                           cursor[3])}
+        for column, box in sorted(text_regions(table).items()):
+            floor = ink_differences(first, again, box, outline)
+            apart = ink_differences(first, ours, box, outline)
+            shifted = [row[1:] + row[:1] for row in first]
+            control = ink_differences(shifted, ours, box, outline)
+            print("    %s, pixel for pixel within %d per channel: %d of %d "
+                  "differ (the game against itself: %d; the game one pixel "
+                  "off: %d)" % (column, OUTSIDE_SLACK, apart, _area(box),
+                                floor, control))
+            if not control:
+                problems.append("slot %d: the %s one pixel off do not differ "
+                                "either, so equal says nothing"
+                                % (slot, column))
+            if floor:
+                problems.append("slot %d: the %s differ from themselves in %d "
+                                "pixel(s), so the comparison has no floor"
+                                % (slot, column, floor))
+            elif apart > TEXT_INK_SLACK[column]:
+                problems.append("slot %d: %d pixel(s) of the %s differ from "
+                                "the game's, over the %d allowed"
+                                % (slot, apart, column,
+                                   TEXT_INK_SLACK[column]))
         for name in sorted(regions):
             region = regions[name]
             skip = figure if name == "panel" else None

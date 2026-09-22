@@ -4227,7 +4227,8 @@ own column, so `A1` is two runs with 1 px between them at spacing 0 --
 `check_glyphs` holds `Font.run` to it per run (CORR-LOOKS-071) --; bytes 16 to 18 are the COLOUR every glyph
 of the object is modulated by, (128, 128, 128) for the labels, the plate and
 the shirt and (112, 112, 240) for the values; byte 13 takes 0, 2 and 3 and
-reads as the alignment inside the box, which is LOOKS-TASK-38's to measure."""
+is the alignment inside the box -- left, right, centred -- measured against
+the draw calls by LOOKS-TASK-38 (`glyphs.ALIGNMENTS`)."""
 
 
 def text_style(raw):
@@ -4237,23 +4238,81 @@ def text_style(raw):
             "align": raw[TEXT_ALIGN]}
 
 
-def text_styles(reading, orders, labels):
+def value_layout(reading, name, orders, display, shown):
+    """The pieces *name*'s value is written in, as the game lays them.
+
+    `[{box, align, spacing, colour, tokens}]`, left to right in the measured
+    order: one per text object that writes a line on this row -- `A TYPE` is
+    the `A` of one object, centred in its box, and the `TYPE` of another,
+    against the right edge of its own.  `box` is the object's (x, y, width)
+    in native pixels with y the line's; `tokens` are the line's
+    `screen.line_tokens`, tabs and trailing blanks included, since both move
+    the pen.  The boxes change with the value -- NAT's object sits 24 pixels
+    left once it holds a nation -- which is why this is read on every value
+    and not once (LOOKS-TASK-38).
+    """
+    import looks
+    import screen
+
+    origin = (display[0] // 2, display[1] // 2)
+    index = looks.SCREEN.index(name)
+    by_key = {obj["at"]: obj for obj in reading.objects}
+    pieces = []
+    for key in orders[name]:
+        if key not in reading.pieces[name]:
+            continue
+        obj = by_key[key]
+        lines = screen.line_tokens(obj["raw"])
+        number = next(n for n in range(len(lines))
+                      if screen.row_of(obj["y"] + n * reading.geometry["pitch"],
+                                       reading.geometry["row0_y"],
+                                       reading.geometry["pitch"]) == index)
+        pieces.append({"box": [obj["x"] + origin[0],
+                               obj["y"] + number * reading.geometry["pitch"]
+                               + origin[1], obj["width"]],
+                       "align": obj["style"]["align"],
+                       "spacing": obj["style"]["spacing"],
+                       "colour": screen.colour_at(lines, number,
+                                                  obj["style"]["colour"]),
+                       "tokens": lines[number]})
+    joined = " ".join(screen.tokens_text(piece["tokens"]).strip()
+                      for piece in pieces)
+    if joined != shown:
+        raise OracleError("%s: the pieces spell %r and the row reads %r"
+                          % (name, joined, shown))
+    return pieces
+
+
+def placed_style(obj, display):
+    """An object outside the rows as the window needs it: its style, its box
+    in native pixels and its one line's tokens."""
+    import screen
+
+    lines = screen.line_tokens(obj["raw"])
+    return dict(obj["style"],
+                box=[obj["x"] + display[0] // 2, obj["y"] + display[1] // 2,
+                     obj["width"]],
+                tokens=lines[0])
+
+
+def text_styles(reading, orders, labels, display):
     """How each text of the screen is written: the labels, the plate, the
     shirt, and each row's value.
 
     A value can be put together from more than one object -- `A1 TYPE` is the
     `A1` of one and the `TYPE` of another, with spacings 0 and 2 -- and which
     objects make it up changes with the value.  What is kept per row is the
-    style of the object that writes its LAST piece; splitting a value by
-    object, and where each piece starts, is layout and LOOKS-TASK-38's.
+    style of the object that writes its LAST piece.  Splitting a value by
+    object, and where each piece starts, is `value_layout`, read per value by
+    the walk (LOOKS-TASK-38).
     """
     import looks
 
     by_key = {obj["at"]: obj for obj in reading.objects}
     outside = reading.outside()
     out = {"labels": labels["style"],
-           "plate": outside["plate"]["style"],
-           "shirt": outside["shirt"]["style"], "values": {}}
+           "plate": placed_style(outside["plate"], display),
+           "shirt": placed_style(outside["shirt"], display), "values": {}}
     for name in looks.SCREEN:
         keys = [key for key in orders[name] if key in reading.pieces[name]]
         if not keys:
@@ -4613,7 +4672,8 @@ def measure_screen(game, verbose=True):
         table["initial"][str(slot)] = dict(
             outside, rows=reading.rows(orders),
             help=screen_help(game), cursor=looks.SCREEN[cursor_row],
-            record=record, styles=text_styles(reading, slot_orders, labels))
+            record=record, styles=text_styles(reading, slot_orders, labels,
+                                              display))
         say = print if verbose else (lambda *a: None)
         say("  slot %d on load: %s, plate %s, cursor on %s, help %r; %d "
             "glyph string(s) checked against %d object(s); the title object "
@@ -4776,6 +4836,7 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
 
     arrows_now = []
     help_now = [None]
+    layout_now = []
 
     def read():
         reading = ScreenReading(geometry, screen_objects(game))
@@ -4783,6 +4844,8 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
         value = screen_record(game)[field.name] if field else None
         arrows_now[:] = frame_arrows(game)
         help_now[0] = screen_help(game)
+        layout_now[:] = value_layout(reading, name, orders, display,
+                                     rows[name])
         return rows, value
 
     def rest():
@@ -4840,6 +4903,7 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
             values.append(value)
             if direction == "Right":
                 between.append((rows[name], list(arrows_now)))
+                layouts.append(list(layout_now))
         raise OracleError("%s walked %s %d times without an end"
                           % (name, direction, SCREEN_WALK_LIMIT))
 
@@ -4859,6 +4923,13 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
         left_end = list(arrows_now)
     # After the label, if there was one: _walk_label ends back on the value.
     cursor_ends = [value_box("at the left end")]
+    # The left end's pieces, read on the value itself -- after a label, the
+    # last reading was taken on the row's name.
+    rows, _value = read()
+    if rows[name] != left_texts[-1]:
+        raise OracleError("%s: back from the left end the row reads %r, not "
+                          "%r" % (name, rows[name], left_texts[-1]))
+    layouts = [list(layout_now)]
     texts, values = [left_texts[-1]], [left_values[-1]]
     right = go("Right", texts, values)
     if right == "wraps":
@@ -4885,6 +4956,7 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
            "label": label,
            "cursor": cursor,
            "moves_beside": sorted(moved, key=looks.SCREEN.index),
+           "layouts": layouts,
            "arrows": {"arrival": arrival, "left_end": left_end,
                       "between": inner[0] if inner else None,
                       "right_end": right_end}}
@@ -5043,6 +5115,36 @@ def frame_commands(game):
     return commands_of(nodes)
 
 
+def frame_glyphs(game):
+    """The font glyphs of the frame on screen, `[(x, y, u, v)]` sorted.
+
+    Every one the game can put a pixel with (`font_sprites`): the rows'
+    names and values, the plate and the shirt.  Where each starts is what
+    LOOKS-TASK-38 holds the window to, and the `uv` says which glyph it is."""
+    return sorted((one["point"][0], one["point"][1], one["uv"][0],
+                   one["uv"][1])
+                  for one in font_sprites(sprites_of(frame_commands(game))))
+
+
+def _glyph_differences(game, window):
+    """What differs between the game's glyphs and the window's, by line.
+
+    Empty when the two lists are the same glyph for glyph.  Otherwise one
+    sentence per line of the screen that differs, with the first glyph each
+    side has there -- the start of a misplaced value is the thing to read.
+    """
+    lines = sorted({one[1] for one in game} | {one[1] for one in window})
+    out = []
+    for y in lines:
+        theirs = [one for one in game if one[1] == y]
+        ours = [one for one in window if one[1] == y]
+        if theirs != ours:
+            out.append("the glyphs on line y %d: the game draws %d starting "
+                       "%s, our window %d starting %s"
+                       % (y, len(theirs), theirs[:1], len(ours), ours[:1]))
+    return out
+
+
 def frame_arrows(game):
     """The arrows beside the cursor's value in the frame on screen.
 
@@ -5127,8 +5229,9 @@ def pen_runs(raw):
     A run ends where the string opens a line (`\n`) or moves the pen with a
     tab (`\t` and its byte): `\t\x12A\t\x1e1` is two runs, `A` and `1`,
     each put at its own column (measured: the `1` lands one pixel past `A`'s
-    width plus the object's spacing 0).  Where a run STARTS is LOOKS-TASK-38's;
-    how the pen moves inside one is what the spacing byte says.  The colour
+    width plus the object's spacing 0).  Where a run STARTS is the alignment
+    and the tab (`glyphs.Font.place`, LOOKS-TASK-38); how the pen moves
+    inside one is what the spacing byte says.  The colour
     code moves nothing and does not end a run.
     """
     import screen
@@ -5205,8 +5308,8 @@ def pen_problems(font, objects, spacing=None):
     """(advances checked, [what differs]) of `Font.run` against the game.
 
     Each run of each object is laid out by the rule from the point where the
-    game drew its first glyph -- where a run STARTS is alignment, and
-    LOOKS-TASK-38's -- with the object's own spacing, or with *spacing* for
+    game drew its first glyph -- where a run STARTS is the alignment, held
+    by `--keys` since LOOKS-TASK-38 -- with the object's own spacing, or with *spacing* for
     every object when it is given (the control).  Every drawn glyph after the
     first has to land on the point the game's draw call gave it.
     """
@@ -5419,7 +5522,8 @@ def _press_sequence(game, slot, buttons, geometry, orders, table):
     _row, box = _cursor_row(frames, regions, geometry,
                             (display[0] // 2, display[1] // 2))
     return {"rows": reading.rows(orders), "help": screen_help(game),
-            "arrows": frame_arrows(game), "cursor": list(box)}
+            "arrows": frame_arrows(game), "cursor": list(box),
+            "glyphs": frame_glyphs(game)}
 
 
 def window_cursor(rows, width, table):
@@ -5523,6 +5627,8 @@ def check_keys(sequence=None, slot=2, verbose=True):
         control.append(("help", first["help"], again["help"]))
     if first["arrows"] != again["arrows"]:
         control.append(("arrows", first["arrows"], again["arrows"]))
+    if first["glyphs"] != again["glyphs"]:
+        control.append(("glyphs", len(first["glyphs"]), len(again["glyphs"])))
     if first["cursor"] != again["cursor"]:
         control.append(("the cursor box", first["cursor"], again["cursor"]))
     for name, one, two in control:
@@ -5533,8 +5639,8 @@ def check_keys(sequence=None, slot=2, verbose=True):
               "would mean anything")
         return 1
     print("  control: the same sequence twice in the game gives the same "
-          "twelve rows, the same help, the same arrows and the same cursor "
-          "box")
+          "twelve rows, the same help, the same arrows, the same cursor "
+          "box and the same %d glyph(s)" % len(first["glyphs"]))
 
     state = screen.State(table, slot)
     state.press_all(buttons)
@@ -5571,6 +5677,8 @@ def check_keys(sequence=None, slot=2, verbose=True):
         bad.append("the arrows: the game draws %s and our window draws %s"
                    % (_say_arrows(first["arrows"]),
                       _say_arrows(window.get("arrows"))))
+    if window is not None:
+        bad += _glyph_differences(first["glyphs"], window.get("glyphs") or [])
     if ours["cursor"] != first["cursor"]:
         bad.append("the cursor box: the game draws %r and screen.json says %r"
                    % (first["cursor"], ours["cursor"]))

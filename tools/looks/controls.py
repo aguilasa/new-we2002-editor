@@ -957,6 +957,14 @@ CONTROLS = (
         "width, and the text is legible nonsense",
     ),
     Control(
+        "glyphs-aligned-left", "glyphs.py", "ALIGNMENTS",
+        "    2: lambda room: room,",
+        "    2: lambda room: 0,",
+        ("glyphs",),
+        "the values laid from the box's left edge: every one of them ends "
+        "where the game ends it only by chance -- LOOKS-TASK-38's control",
+    ),
+    Control(
         "glyphs-routine-unchecked", "glyphs.py", "table_of",
         "    if len(routine) != end - start or got != layout.GLYPH_ROUTINE_DIGEST:",
         "    if False:",

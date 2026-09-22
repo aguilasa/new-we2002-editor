@@ -3123,9 +3123,34 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > jogo (0 de 16.416 nos dois slots, com o quadro deslocado um pixel
 > divergindo em 2.875). Sem a folga, 11.839 dos 16.416 divergem, porque o
 > fundo da faixa nosso fica a ~6 do do jogo; com folga 8 já são 0
-> ([`CORR-LOOKS-072`](/docs/tasks/looks/CORR-LOOKS-072.md)). Onde cada valor, a placa e
-> a camisa **começam** dentro da caixa é a
-> [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md).
+> ([`CORR-LOOKS-072`](/docs/tasks/looks/CORR-LOOKS-072.md)).
+>
+> **O alinhamento, e a cor no meio da string** (2026-09-22,
+> [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md)). O
+> byte 13 do objeto é o **modo de alinhamento**, medido contra as chamadas de
+> desenho: **0** começa a linha na esquerda da caixa, **2** a encosta na
+> borda direita (`x + largura − largura da linha`, o espaçamento de cada
+> glifo incluso) e **3** a centra, arredondando para baixo. O `\t` põe a
+> caneta em `x + byte`, por cima do que o alinhamento decidiu. E a tabela de
+> saltos do código de controle, em 0x800FC048 do `/SELECTC.BIN`, mostra que o
+> **código 13 grava três bytes como a cor do objeto**: por isso o `O.K.` do
+> `DEFAUL` sai cinza num objeto lavanda, e a cor **persiste nas linhas
+> abaixo** dele.
+>
+> **A caixa muda com o valor, e um valor vem de vários objetos.** O objeto do
+> `NAT` fica em x −80 com `Unknown` e em −104 com uma nação, as duas caixas de
+> 296. Então o walk grava, **por valor de cada linha**, os pedaços que a
+> escrevem — caixa, alinhamento, espaçamento, cor em vigor e tokens
+> (`rows[*].layouts`) —, e não uma caixa por linha. A janela desenha por essa
+> tabela, e o resultado é **pixel a pixel** o do jogo nas duas colunas de
+> texto: 0 de 16.416 nos rótulos e 0 de 23.472 nos valores, nos dois slots,
+> contra 2.875 e 3.075 com o quadro do jogo deslocado um pixel de controle (a
+> borda da caixa do cursor fica de fora, que é pulso e não texto). O
+> `oracle.py --keys` compara o **conjunto inteiro de glifos**, ponto e `uv`:
+> 121 iguais nos dois slots, e 0 diferença em cinco sequências — uma com o
+> `NAT` numa nação, outra com o `HEIG` em 210 cm, outra no rótulo do `DEFAUL`.
+> Com o alinhamento pela esquerda plantado, o `--keys` fica vermelho no
+> primeiro valor.
 >
 > **Os estáticos e as setas, desenhados** (2026-09-21,
 > [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md)). O

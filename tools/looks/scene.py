@@ -543,6 +543,18 @@ class Builder:
         except glyphs.BadGlyph as exc:
             raise BadScene(str(exc)) from exc
 
+    def placed_sprites(self, piece: dict) -> list:
+        """One piece of text -- `{box, align, spacing, colour, tokens}` --
+        laid out the way the game lays it (`glyphs.Font.place`)."""
+        import glyphs
+
+        try:
+            return self.font().place(piece["tokens"], piece["box"],
+                                     piece["align"], piece["spacing"],
+                                     piece["colour"])
+        except glyphs.BadGlyph as exc:
+            raise BadScene(str(exc)) from exc
+
     def sprite_rgba(self, sprite: dict) -> bytes:
         """One sprite as RGBA, row by row (`sprites.image`)."""
         import sprites

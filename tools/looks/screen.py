@@ -164,6 +164,60 @@ def decode(raw: bytes) -> list:
     return lines
 
 
+def line_tokens(raw: bytes) -> list:
+    """Each line of a string as the tokens its pen follows.
+
+    `[["tab", column] | ["colour", [r, g, b]] | ["text", characters], ...]`
+    per line: a tab puts the pen at `column` pixels from the object's x, a
+    colour is what every glyph after it is modulated by -- and it holds into
+    the lines below, since the game writes it into the object --, and text is
+    laid from wherever the pen is.  Read off the print routine's jump table
+    (0x800FC048 in /SELECTC.BIN): code 9 goes to 0x8010C690, which sets the
+    pen to the object's x plus the byte, and code 13 to 0x8010C730, which
+    stores the three bytes as the object's colour.  This is what
+    `glyphs.Font.place` lays out (LOOKS-TASK-38).
+    """
+    decode(raw)  # refuses a byte that is none of the three codes
+    lines, current, at = [[]], None, 0
+    while at < len(raw):
+        byte = raw[at]
+        if byte == NEWLINE:
+            lines.append([])
+            current = None
+            at += 1
+        elif byte == TAB:
+            lines[-1].append(["tab", raw[at + 1]])
+            current = None
+            at += 1 + TAB_ARGUMENTS
+        elif byte == COLOUR:
+            lines[-1].append(["colour",
+                              list(raw[at + 1:at + 1 + COLOUR_ARGUMENTS])])
+            current = None
+            at += 1 + COLOUR_ARGUMENTS
+        else:
+            if current is None:
+                current = ["text", ""]
+                lines[-1].append(current)
+            current[1] += chr(byte)
+            at += 1
+    return lines
+
+
+def colour_at(lines, number: int, colour) -> list:
+    """The colour in force as line *number* of an object starts: the object's
+    own, changed by every colour code of the lines above it."""
+    for line in lines[:number]:
+        for kind, value in line:
+            if kind == "colour":
+                colour = value
+    return list(colour)
+
+
+def tokens_text(tokens) -> str:
+    """The characters of a line's tokens, tabs left out."""
+    return "".join(value for kind, value in tokens if kind == "text")
+
+
 def make_printable(stream) -> bool:
     """Let *stream* carry the text the game draws, whatever the console is.
 
@@ -468,6 +522,7 @@ def validate(table: dict) -> list:
                                 % (name, end, row.get(end)))
         helps.append(row.get("help"))
         problems += _arrow_problems(name, row)
+        problems += _layout_problems(name, row)
         problems += _cursor_problems(name, row, table)
         label = row.get("label", "missing")
         if label == "missing":
@@ -612,6 +667,60 @@ SPACING_MAX = 8
 measured ones are 0, 1 and 2 (LOOKS-TASK-37)."""
 
 
+ALIGNMENTS = (0, 2, 3)
+"""The alignment bytes a text object of this screen carries (LOOKS-TASK-38)."""
+
+
+def _piece_problems(what: str, piece) -> list:
+    """One piece of text -- a box, how it is written and its tokens."""
+    if not isinstance(piece, dict):
+        return ["%s is %r" % (what, piece)]
+    problems = []
+    box = piece.get("box")
+    if not (isinstance(box, list) and len(box) == 3
+            and all(isinstance(one, int) for one in box)):
+        problems.append("%s has the box %r" % (what, box))
+    if piece.get("align") not in ALIGNMENTS:
+        problems.append("%s is aligned %r" % (what, piece.get("align")))
+    if not 0 <= piece.get("spacing", -1) <= SPACING_MAX:
+        problems.append("%s is spaced %r" % (what, piece.get("spacing")))
+    tokens = piece.get("tokens")
+    if not (isinstance(tokens, list) and all(
+            isinstance(one, list) and len(one) == 2
+            and one[0] in ("tab", "colour", "text") for one in tokens)):
+        problems.append("%s has the tokens %r" % (what, tokens))
+    return problems
+
+
+def _layout_problems(name: str, row: dict) -> list:
+    """Every value of a row says how it is laid out, and spells its text.
+
+    `layouts[i]` is how the game writes `texts[i]`: its pieces, each a box,
+    an alignment, a spacing and the line's tokens.  Joined the way the rows
+    are composed -- stripped, a space apart -- they have to spell the text,
+    or the walk paired a layout with the wrong value.
+    """
+    layouts = row.get("layouts")
+    texts = row.get("texts", [])
+    if not isinstance(layouts, list) or len(layouts) != len(texts):
+        return ["row %s says how %s of its %d value(s) are laid out"
+                % (name, len(layouts) if isinstance(layouts, list) else "none",
+                   len(texts))]
+    problems = []
+    for text, pieces in zip(texts, layouts):
+        for number, piece in enumerate(pieces):
+            problems += _piece_problems("row %s, %r, piece %d"
+                                        % (name, text, number), piece)
+        if problems:
+            continue
+        spelled = " ".join(tokens_text(piece["tokens"]).strip()
+                           for piece in pieces)
+        if spelled != text:
+            problems.append("row %s: the pieces of %r spell %r"
+                            % (name, text, spelled))
+    return problems
+
+
 def _style_problems(slot, state: dict) -> list:
     """Every text the window writes has to say how the game writes it.
 
@@ -637,6 +746,9 @@ def _style_problems(slot, state: dict) -> list:
                 or not all(0 <= one <= 255 for one in colour)):
             problems.append("slot %s: the %s is coloured %r"
                             % (slot, what, colour))
+    for role in ("plate", "shirt"):
+        problems += _piece_problems("slot %s's %s" % (slot, role),
+                                    styles.get(role))
     return problems
 
 
@@ -852,10 +964,11 @@ class State:
         `{spacing, colour, align}` off the text object's own bytes."""
         return dict(self.table["initial"][self.slot]["styles"][role])
 
-    def value_style(self, row: str) -> dict:
-        """How the game writes *row*'s value -- the style of the object that
-        writes its last piece, as the state loads (LOOKS-TASK-37)."""
-        return dict(self.table["initial"][self.slot]["styles"]["values"][row])
+    def value_layout(self, row: str) -> list:
+        """The pieces *row*'s value is written in now, as the walk read them:
+        `[{box, align, spacing, colour, tokens}]` (LOOKS-TASK-38)."""
+        found = self.table["rows"][row]["layouts"][self.indices[row]]
+        return [dict(piece, box=list(piece["box"])) for piece in found]
 
     def plate(self) -> str:
         return self.table["initial"][self.slot]["plate"]
@@ -1152,6 +1265,28 @@ def _checks(c) -> None:
     ok("a whole toy table validates", validate(table) == [],
        "%r" % validate(table))
     broken = json.loads(json.dumps(table))
+    broken["rows"]["SKIN"]["layouts"][1][0]["tokens"] = [["text", "C TYPE"]]
+    ok("a layout that spells another value is refused",
+       any("spell" in p for p in validate(broken)))
+    broken = json.loads(json.dumps(table))
+    broken["rows"]["SKIN"]["layouts"][0][0]["align"] = 1
+    ok("an alignment no object carries is refused",
+       any("aligned" in p for p in validate(broken)))
+    broken = json.loads(json.dumps(table))
+    del broken["rows"]["NAT"]["layouts"][-1]
+    ok("a row with a value and no layout is refused",
+       any("laid out" in p for p in validate(broken)))
+    ok("line_tokens keeps a tab's column and a colour code's three bytes",
+       line_tokens(b"\t\x12A\t\x1e1\n\rpp\xf023")
+       == [[["tab", 18], ["text", "A"], ["tab", 30], ["text", "1"]],
+           [["colour", [112, 112, 240]], ["text", "23"]]],
+       "%r" % (line_tokens(b"\t\x12A\t\x1e1\n\rpp\xf023"),))
+    ok("a colour code holds into the lines below it",
+       colour_at(line_tokens(b"\r\x80\x80\x80O.K.\nA\n\rpp\xf0\nB"), 1,
+                 [1, 2, 3]) == [128, 128, 128]
+       and colour_at(line_tokens(b"\r\x80\x80\x80O.K.\nA\n\rpp\xf0\nB"),
+                     3, [1, 2, 3]) == [112, 112, 240])
+    broken = json.loads(json.dumps(table))
     del broken["initial"]["1"]["styles"]["values"]["AGE"]
     ok("a row whose value says nothing of how it is written is refused",
        any("value of AGE" in p for p in validate(broken)))
@@ -1410,10 +1545,16 @@ def _toy_table() -> dict:
                           "right_end": [{"side": "left", "point": [300, 43]}]}}
     rows["SKIN"]["texts"] = ["A TYPE", "B TYPE", "C TYPE", "D TYPE"]
     style = {"spacing": 2, "colour": [128, 128, 128], "align": 0}
+    placed = dict(style, box=[16, 53, 48], tokens=[["text", "CB"]])
+    for name in looks.SCREEN:
+        rows[name]["layouts"] = [
+            [dict(style, box=[176, 41, 296], align=2,
+                  tokens=[["text", text]])]
+            for text in rows[name]["texts"]]
     initial = {slot: {"rows": {name: rows[name]["texts"][0]
                                for name in looks.SCREEN},
-                      "styles": {"labels": style, "plate": style,
-                                 "shirt": style,
+                      "styles": {"labels": style, "plate": placed,
+                                 "shirt": placed,
                                  "values": {name: style
                                             for name in looks.SCREEN}},
                       "title": title_drawn("LOOKS SET  "),

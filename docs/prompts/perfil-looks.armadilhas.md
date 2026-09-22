@@ -95,6 +95,14 @@ e os termos que a disparam.
     agora saem nos glifos do jogo, mas do x do objeto, e não de onde o jogo as
     centra. A opção virou `--no-unplaced-text` e vale até a
     [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md).
+95. **A caixa de um texto muda com o texto, e a cor vem de dentro da
+    string.** O objeto do `NAT` fica em x −80 com `Unknown` e em −104 com uma
+    nação: uma caixa medida na carga alinha errado todo valor depois da
+    primeira tecla. E o código de controle 13 grava três bytes como a cor do
+    objeto — o `O.K.` do `DEFAUL` é cinza num objeto lavanda —, e essa cor
+    **persiste nas linhas abaixo**. Quem lê a cor do byte 16 do objeto e para
+    aí escreve um valor na cor errada, com todo o resto no lugar: foram 514
+    pixels de 23.472 na primeira corrida do `--outside` (LOOKS-TASK-38).
 94. **A rotina de um endereço pode morar em outra overlay.** A de glifo
     (0x8010BB04) fica depois do fim do `/SELECT8.BIN` (0x800E98F8), no
     **`/SELECTC.BIN`**, carregado em 0x800FC000. Quem a procurar no arquivo

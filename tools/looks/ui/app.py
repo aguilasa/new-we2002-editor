@@ -210,6 +210,8 @@ def _screen_report(window: LooksSet, moved: list) -> dict:
             for name, clut in sorted(seen["sprites"].items())))
     else:
         print("  sprites none: %s" % seen["sprites_note"])
+    print("  glyphs %s" % " ".join("%d,%d,%d,%d" % one
+                                   for one in seen["glyphs"]))
     print("  arrows %s" % (" ".join(
         "%s@%d,%d" % (one["side"], one["point"][0], one["point"][1])
         for one in seen["arrows"]) or "none"))
@@ -243,7 +245,6 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
                            else args.frame)
 
     window = LooksSet(state, builder, args.scale)
-    window.unplaced_text = not args.no_unplaced_text
     window.viewer.shelved = False
     # The panel draws with the camera the game projects with, when there is a
     # measured one on disc.  Without it the window says so and keeps the v1
@@ -329,11 +330,6 @@ def main(argv=None) -> int:
                              "without it the one the save states showed")
     parser.add_argument("--visible", action="store_true",
                         help="show the window where the user can see it")
-    parser.add_argument("--no-unplaced-text", action="store_true",
-                        help="leave out the plate's and the shirt's text, "
-                             "which is in the game's glyphs but not yet where "
-                             "the game puts it inside its box (LOOKS-TASK-38), "
-                             "and covers sprite pixels the game leaves bare")
     args = parser.parse_args(argv)
 
     app = QtWidgets.QApplication(sys.argv[:1])

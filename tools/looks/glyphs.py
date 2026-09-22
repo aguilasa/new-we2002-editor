@@ -25,7 +25,8 @@ through the guard (`/SELECTC.BIN` differs between the discs, in its text).
 How far the pen moves after a glyph is its width plus the SPACING of the text
 object being printed -- byte 14 of the object `SCREEN_PRINT` receives (2 for
 the labels, 1 for `Unknown`, 0 for `SHIRT N` and the digits).  Where a string
-STARTS inside its object's box is alignment, and that is LOOKS-TASK-38's.
+STARTS inside its object's box is the alignment byte and the tabs, `place`
+below (LOOKS-TASK-38).
 
 What the routine does with the other codes -- 161 to 223 by arithmetic, and a
 search of two-byte Shift-JIS codes above that -- is recorded in the plan and
@@ -72,6 +73,16 @@ is `sb zero`: the space's row is 0, and it draws nothing anyway.  So `A` to
 the page packs the font eleven-odd glyphs a row, not alphabet by alphabet."""
 
 TABLE_PAIRS = LAST - FIRST + 1
+
+ALIGNMENTS = {
+    0: lambda room: 0,
+    2: lambda room: room,
+    3: lambda room: room // 2,
+}
+"""Where the pen starts, by byte 13 of the text object, given the room the
+box leaves beside the line: left, right, centred rounding down.  Measured
+against the game's draw calls (LOOKS-TASK-38): 0 is the labels, 2 the values
+that end at the rows box's edge, 3 the digits, the plate and the shirt."""
 
 
 class BadGlyph(Exception):
@@ -152,6 +163,45 @@ class Font:
             x += width + spacing
         return out
 
+    def place(self, tokens, box, align: int, spacing: int, colour) -> list:
+        """One line of a text object laid out as the game lays it.
+
+        *tokens* are the line's `screen.line_tokens`, *box* the object's
+        `(x, y, width)` in native pixels with *y* the line's own.  Read off
+        the game's draw calls on 2026-09-22 (LOOKS-TASK-38), 56 objects in
+        eight states of both slots, every glyph where the game put it:
+
+          * the pen starts by the ALIGNMENT byte -- 0 at the box's left, 2
+            so the line ends at its right edge, 3 centred, rounding down --
+            against the width of every character of the line, spacing
+            included (`width`);
+          * a tab then puts the pen `column` pixels from the box's left,
+            whatever the alignment said, and a colour token changes what the
+            glyphs after it are modulated by -- `DEFAUL`'s `O.K.` is grey in
+            an object whose own colour is lavender.
+
+        A mode no object of this screen carries is refused.
+        """
+        x, y, width = box
+        text = "".join(value for kind, value in tokens if kind == "text")
+        if align not in ALIGNMENTS:
+            raise BadGlyph("alignment %r is not one this screen was measured "
+                           "with (%s)" % (align, ", ".join(map(str,
+                                                               ALIGNMENTS))))
+        pen = x + ALIGNMENTS[align](width - self.width(text, spacing))
+        out = []
+        for kind, value in tokens:
+            if kind == "tab":
+                pen = x + value
+                continue
+            if kind == "colour":
+                colour = value
+                continue
+            drawn = self.run(value, (pen, y), spacing, colour)
+            out += drawn
+            pen += self.width(value, spacing)
+        return out
+
     def width(self, text: str, spacing: int) -> int:
         """How far *text* moves the pen -- the measuring pass's answer."""
         return sum(self.glyph(ord(char))[2] + spacing for char in text)
@@ -224,6 +274,33 @@ def _checks(c) -> None:
            and tuple(one["clut"]) == layout.GLYPH_CLUT for one in drawn))
     ok("the measuring pass agrees with the drawing one",
        font.width("A B", 2) == wa + ws + font.glyph(ord("B"))[2] + 3 * 2)
+
+    # The alignment (LOOKS-TASK-38): a box 100 wide at x 50, "AB" at spacing 2.
+    line = [["text", "AB"]]
+    wide = font.width("AB", 2)
+    for align, first in ((0, 50), (2, 150 - wide), (3, 50 + (100 - wide) // 2)):
+        laid = font.place(line, (50, 7, 100), align, 2, (128,) * 3)
+        ok("alignment %d starts the line at %d" % (align, first),
+           laid[0]["point"] == [first, 7], "%r" % (laid[0]["point"],))
+    ok("centring rounds down, as the game's shift does",
+       font.place([["text", "A"]], (0, 0, wa + 1), 3, 0,
+                  (128,) * 3)[0]["point"] == [0, 0])
+    tabbed = font.place([["tab", 18], ["text", "A"], ["tab", 30],
+                         ["text", "1"]], (130, 0, 64), 3, 0, (128,) * 3)
+    ok("a tab puts the pen at its column from the box's left, whatever the "
+       "alignment", [one["point"][0] for one in tabbed] == [148, 160],
+       "%r" % ([one["point"] for one in tabbed],))
+    tinted = font.place([["text", "A"], ["colour", [1, 2, 3]], ["text", "B"]],
+                        (0, 0, 100), 0, 2, (128,) * 3)
+    ok("a colour token tints the glyphs after it and not before",
+       [one["colour"] for one in tinted] == [[128] * 3, [1, 2, 3]],
+       "%r" % ([one["colour"] for one in tinted],))
+    try:
+        font.place(line, (0, 0, 100), 1, 2, (128,) * 3)
+    except BadGlyph:
+        ok("an alignment no object carries is refused", True)
+    else:
+        ok("an alignment no object carries is refused", False)
 
     # -- red: what must not pass ------------------------------------------
     for code in (31, 127, 0x82):  # not-an-address: character codes
