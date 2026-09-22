@@ -2528,6 +2528,12 @@ inventado a partir do rótulo é o erro que a armadilha 17 descreve.
 >   `(176,37)-(496,185)`, ajuda `(16,187)-(496,221)`, cursor na linha `NAT`
 >   `(314,53)-(476,64)` e um passo de 12 por linha. Os textos estão em
 >   coordenadas do centro do display, com as linhas a partir de `y=-79`.
+>   **A caixa do cursor é por linha**, e o passo só a desce: ela começa em
+>   x 314 em `NAT`, 436 em `AGE`, 428 em `FOOT` e 396 nas outras nove, igual
+>   nos dois slots e em todo valor da linha — medido em 2026-09-22
+>   ([CORR-LOOKS-070](/docs/tasks/looks/CORR-LOOKS-070.md)). Até essa data
+>   este item dava só a de `NAT` e o passo, e a tabela carregava aquela caixa
+>   para as outras onze linhas.
 
 **(r) `DEFAUL` e `NAT`.** Qual nação é qual valor da linha `NAT`, e se `DEFAUL`
 aplica exatamente a linha do `data/defaultlook.txt` — medido no jogo, nunca

@@ -58,6 +58,12 @@ valores encostados na borda direita.
   em `FOOT`, 384 nas outras oito, gravado no `screen.json` pelo walk) e não
   acompanha o começo do texto. Ele não serve de régua para o alinhamento — e o
   alinhamento não precisa movê-lo.
+- **Da [`CORR-LOOKS-070`](/docs/tasks/looks/CORR-LOOKS-070.md):** a caixa do
+  cursor sobre o valor também é **por linha** — x 314 em `NAT`, 436 em `AGE`,
+  428 em `FOOT`, 396 nas outras nove, sempre até 476 —, e o `screen.json` a
+  grava em `rows[*].cursor`. O `layout()["cursor"]` (e o `values_x`) continua
+  sendo a caixa de `NAT` descida pelo passo; é dele que a janela escreve os
+  valores hoje, e é esse o ponto que esta task troca pela caixa do objeto.
 
 ## Log de Execução
 
