@@ -5,10 +5,10 @@ origin: LOOKS-TASK-38
 severity: low
 files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md, docs/PLAN-LOOKS-PY.md, docs/tasks/looks/36-os-sprites-estaticos.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 8d920cde
 ---
 
 # CORR-LOOKS-079 — A seta esquerda está em x 384 em nove linhas, não oito
@@ -155,3 +155,9 @@ nenhuma outra afirmação viva sobre a contagem do ◀ — a armadilha 92 do
 $ sh <rite> check --quick --cycle looks
 check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ```
+- **Closed** — commit `8d920cde` (2026-09-22): docs(looks): the left arrow sits at x 384 in nine rows, not eight
+  - Files (`git show --name-status 8d920cde`):
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/tasks/looks/36-os-sprites-estaticos.md`
+    - `M docs/tasks/looks/38-o-alinhamento-dos-valores.md`
+    - `M docs/tasks/looks/CORR-LOOKS-079.md`
