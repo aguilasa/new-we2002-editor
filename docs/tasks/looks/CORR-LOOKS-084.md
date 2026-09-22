@@ -5,10 +5,10 @@ origin: CORR-LOOKS-082
 severity: low
 files: [tools/looks/oracle.py, tools/looks/ui/app.py, tools/looks/scene.py, CLAUDE.md, docs/prompts/perfil-looks.md, docs/PLAN-LOOKS-PY.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 73a4419a
 ---
 
 # CORR-LOOKS-084 — As ajudas e os docs do `--keys` não nomeiam a forma de repetição
@@ -103,3 +103,12 @@ Gates, todos no `python` do sistema e **sem emulador**: `screen.py --check`
 `cli.py check` (12 módulos, 12 ok) e `rite check --cycle looks`
 (0 erro, 0 aviso — inclusive o tamanho do perfil, que ficou em 84.225 bytes
 contra o limite de 84 KiB).
+- **Closed** — commit `73a4419a` (2026-09-22): docs(looks): name the repetition form `Right x41` wherever `--keys` is taught
+  - Files (`git show --name-status 73a4419a`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/CORR-LOOKS-084.md`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/ui/app.py`

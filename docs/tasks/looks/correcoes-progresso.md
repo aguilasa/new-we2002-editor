@@ -100,7 +100,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-081](/docs/tasks/looks/CORR-LOOKS-081.md) | Plantar o controle do pulo por acumulador no controls.py | CORR-LOOKS-077 | low | done | 2026-09-22 |
 | [CORR-LOOKS-082](/docs/tasks/looks/CORR-LOOKS-082.md) | Dar ao parse_keys uma sintaxe de repetição, em vez de linhas de 317 caracteres | CORR-LOOKS-075 | low | done | 2026-09-22 |
 | [CORR-LOOKS-083](/docs/tasks/looks/CORR-LOOKS-083.md) | Plantar o controle do parse_keys que ignora a contagem | CORR-LOOKS-082 | low | done | 2026-09-22 |
-| [CORR-LOOKS-084](/docs/tasks/looks/CORR-LOOKS-084.md) | As ajudas e os docs do --keys não nomeiam a forma de repetição | CORR-LOOKS-082 | low | in-progress | — |
+| [CORR-LOOKS-084](/docs/tasks/looks/CORR-LOOKS-084.md) | As ajudas e os docs do --keys não nomeiam a forma de repetição | CORR-LOOKS-082 | low | done | 2026-09-22 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
