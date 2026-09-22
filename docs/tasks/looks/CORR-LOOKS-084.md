@@ -60,3 +60,17 @@ plano), com o mesmo exemplo — `Right x41` — para não haver duas grafias.
 do `--keys` sem mencioná-la.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `edcae5df`: **reproduzida**. Os seis
+lugares existem e nenhum nomeia a forma; `Right x41` só aparece no `screen.py` e
+em `docs/tasks/looks/*.md`.
+
+```text
+tools/looks/oracle.py:46        --keys [SEQUENCE [SLOT]]
+tools/looks/ui/app.py:31        `--keys Down,Right,Right` ...
+tools/looks/ui/app.py:39        --keys Down,Right --screenshot out.png     # um segundo exemplo, fora da lista da CORR
+tools/looks/ui/app.py:302       help do argparse: "Down,Down,Right"        # a CORR dizia 301
+tools/looks/scene.py:1436       docstring de screen_keys                   # a CORR dizia 1435
+CLAUDE.md:869, docs/prompts/perfil-looks.md:797, docs/PLAN-LOOKS-PY.md:3216
+# e oracle.py:5088-5089 escreve o KEY_SEQUENCE padrão por extenso (19 teclas), também fora da lista
+```

@@ -5,7 +5,7 @@ origin: CORR-LOOKS-082
 severity: low
 files: [tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -59,3 +59,12 @@ exigindo vermelho no `screen`. A contagem vai de 103 para 104.
 tools/looks/selftest.py` segue verde com 104 de 104.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `edcae5df`: **reproduzida**.
+
+```text
+$ grep -n "parse_keys" tools/looks/controls.py      -> nada (saída 1)
+$ python tools/looks/controls.py | tail -1
+controls: 103 of 103 red (103 substitutions)
+# alvo da substituição: tools/looks/screen.py:1146, `buttons.extend([button] * count)`, dentro do parse_keys (1120)
+```
