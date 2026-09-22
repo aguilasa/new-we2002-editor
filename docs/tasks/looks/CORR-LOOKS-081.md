@@ -5,7 +5,7 @@ origin: CORR-LOOKS-077
 severity: low
 files: [tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -75,3 +75,54 @@ controls: 102 of 102 red (102 substitutions)
 screen.py: 1 failure(s)   (saída 1)
 # na árvore, sem plantio: screen.py: 0 failure(s)
 ```
+
+### Execução em 2026-09-22
+
+Reproduzido antes de editar, pela própria máquina do `controls.py` — um
+`Control` de sondagem passado ao `plant()`, sem tocar na árvore:
+
+```text
+$ python - <<'EOF'   # Control("probe", "screen.py", "_layout_problems",
+                     #         "        if malformed:", "        if problems:", ("screen",), ...)
+matched: 1 red: ['screen'] green: [] good: True
+```
+
+O literal foi conferido contra o `screen.py` de hoje antes de versionar a
+entrada: `        if malformed:` casa **uma vez** no arquivo (e
+`        if problems:` casa zero), que é o que separa um controle vermelho de um
+controle quebrado. A entrada entrou no fim do catálogo, que é por onde ele
+cresce, no formato dos vizinhos.
+
+Verificação do item, nos dois sentidos:
+
+```text
+$ python tools/looks/controls.py --only screen-layout-skip-on-the-accumulator
+  RED    screen-layout-skip-on-the-accumulator screen.py :: _layout_problems
+controls: 1 of 1 red (1 substitution)          (saída 0)
+
+$ python tools/looks/selftest.py
+  ok    every planted control goes red
+  ..... 103 of 103 controls red                # eram 102 antes desta edição
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)                   (saída 0)
+```
+
+Gates, todos verdes:
+
+```text
+$ python tools/looks/controls.py
+controls: 103 of 103 red (103 substitutions)   # nenhum GREEN, nenhum BROKEN
+$ python tools/looks/selftest.py               looks_selftest: 0 failure(s)
+$ python tools/looks/screen.py --check         screen.py: 0 failure(s)
+$ python tools/looks/cli.py check              12 module(s), 12 ok, 0 skipped, 0 failed -- ok
+```
+
+**A varredura da contagem não teve o que consertar, e isso é de propósito.** As
+oito menções a "102" em `docs/` são **transcrição de corrida**: cada task e CORR
+do ciclo guarda o número que o `selftest.py` imprimiu no dia dela — 8, 9, 11,
+15, ... 102 —, e reescrevê-las falsificaria evidência. Fora delas não existe
+contagem em prosa: o `controls.py` diz na própria `run_all()` que o número é
+**reportado, nunca escrito em documento**, "a count that lives as a number in a
+document is a count that disagrees with the tool the first time somebody adds
+one" — e foi exatamente este commit. O perfil, as armadilhas, o
+`/docs/PLAN-LOOKS-PY.md` e o `/CLAUDE.md` não citam quantidade nenhuma.

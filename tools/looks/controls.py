@@ -981,6 +981,17 @@ CONTROLS = (
         "the digits and `Unknown` come out spread, and every gate that only "
         "looks at the labels stays green (CORR-LOOKS-071)",
     ),
+    Control(
+        "screen-layout-skip-on-the-accumulator", "screen.py", "_layout_problems",
+        "        if malformed:",
+        "        if problems:",
+        ("screen",),
+        "the per-value skip decided on the row-wide accumulator instead of on "
+        "that value's own faults: the first faulty piece anywhere in a row "
+        "silences the spelling of every value after it, so a row with a piece "
+        "fault on one value and a misspelling on another reports one of the two "
+        "and the table reads as measured (CORR-LOOKS-077)",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}
