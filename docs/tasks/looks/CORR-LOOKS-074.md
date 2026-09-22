@@ -5,10 +5,10 @@ origin: CORR-LOOKS-073
 severity: low
 files: [tools/looks/glyphs.py, tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 4e210d9d
 ---
 
 # CORR-LOOKS-074 — Um código de largura 0 entra na lista de sprites do jogo e não na do Font.run
@@ -121,3 +121,8 @@ $ python tools/looks/cli.py check     -> 12 module(s), 12 ok, 0 skipped, 0 faile
 
 Não medido ao vivo: o `0 of width 0` confirma que a tela não exercita o caso;
 o descarte só é provado pelo self-check sintético.
+- **Closed** — commit `4e210d9d` (2026-09-22): fix(looks): drop the game's 0-wide font sprites in --glyphs, as Font.run emits none
+  - Files (`git show --name-status 4e210d9d`):
+    - `M docs/tasks/looks/CORR-LOOKS-074.md`
+    - `M tools/looks/glyphs.py`
+    - `M tools/looks/oracle.py`

@@ -90,7 +90,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-071](/docs/tasks/looks/CORR-LOOKS-071.md) | Hold the rule's pen advance against the game, not only the uv | LOOKS-TASK-37 | high | done | 2026-09-22 |
 | [CORR-LOOKS-072](/docs/tasks/looks/CORR-LOOKS-072.md) | Say 'within 16 per channel', not 'pixel a pixel', for the labels | LOOKS-TASK-37 | medium | done | 2026-09-22 |
 | [CORR-LOOKS-073](/docs/tasks/looks/CORR-LOOKS-073.md) | Fix the width-0 self-check that claims the pen stays put | LOOKS-TASK-37 | low | done | 2026-09-22 |
-| [CORR-LOOKS-074](/docs/tasks/looks/CORR-LOOKS-074.md) | Um código de largura 0 entra na lista de sprites do jogo e não na do Font.run | CORR-LOOKS-073 | low | pending | — |
+| [CORR-LOOKS-074](/docs/tasks/looks/CORR-LOOKS-074.md) | Um código de largura 0 entra na lista de sprites do jogo e não na do Font.run | CORR-LOOKS-073 | low | done | 2026-09-22 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
