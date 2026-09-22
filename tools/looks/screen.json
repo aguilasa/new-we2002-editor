@@ -295,6 +295,12 @@
      }
     ]
    },
+   "cursor": [
+    436,
+    149,
+    476,
+    160
+   ],
    "help": "Age",
    "label": null,
    "left": "locks",
@@ -416,6 +422,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    137,
+    476,
+    148
+   ],
    "help": "Body",
    "label": null,
    "left": "locks",
@@ -489,6 +501,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    161,
+    476,
+    172
+   ],
    "help": "Boots   ■ Turn",
    "label": null,
    "left": "locks",
@@ -547,6 +565,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    41,
+    476,
+    52
+   ],
    "help": "Confirm",
    "label": {
     "arrows": [
@@ -625,6 +649,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    101,
+    476,
+    112
+   ],
    "help": "Kind of Face Hair   ■ Turn",
    "label": null,
    "left": "locks",
@@ -696,6 +726,12 @@
      }
     ]
    },
+   "cursor": [
+    428,
+    173,
+    476,
+    184
+   ],
    "help": "Foot",
    "label": null,
    "left": "locks",
@@ -759,6 +795,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    89,
+    476,
+    100
+   ],
    "help": "Hair Colour   ■ Turn",
    "label": null,
    "left": "locks",
@@ -832,6 +874,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    113,
+    476,
+    124
+   ],
    "help": "Hair Face Colour   ■ Turn",
    "label": null,
    "left": "locks",
@@ -903,6 +951,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    77,
+    476,
+    88
+   ],
    "help": "Kind of Hair   ■ Turn",
    "label": null,
    "left": "locks",
@@ -1031,6 +1085,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    125,
+    476,
+    136
+   ],
    "help": "Height",
    "label": null,
    "left": "locks",
@@ -1200,6 +1260,12 @@
      }
     ]
    },
+   "cursor": [
+    314,
+    53,
+    476,
+    64
+   ],
    "help": "Nation",
    "label": null,
    "left": "locks",
@@ -1335,6 +1401,12 @@
      }
     ]
    },
+   "cursor": [
+    396,
+    65,
+    476,
+    76
+   ],
    "help": "Skin Colour   ■ Turn",
    "label": null,
    "left": "locks",

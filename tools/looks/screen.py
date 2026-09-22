@@ -468,6 +468,7 @@ def validate(table: dict) -> list:
                                 % (name, end, row.get(end)))
         helps.append(row.get("help"))
         problems += _arrow_problems(name, row)
+        problems += _cursor_problems(name, row, table)
         label = row.get("label", "missing")
         if label == "missing":
             problems.append("row %s does not say whether Left takes the "
@@ -499,6 +500,30 @@ def validate(table: dict) -> list:
     if sorted(table.get("initial", {})) != ["1", "2"]:
         problems.append("the initial values are not those of slots 1 and 2")
     return problems
+
+
+def _cursor_problems(name: str, row: dict, table: dict) -> list:
+    """The cursor box on a row's value, as the walk read it off VRAM.
+
+    Per row, because the game sizes it per row: measured on 2026-09-22 on
+    every row of both slots, at arrival, both ends and the middle value, it
+    starts at x 314 on NAT, 436 on AGE, 428 on FOOT and 396 on the other
+    nine, and no row moves it from value to value (CORR-LOOKS-070).  A table
+    that carried NAT's box down by the pitch drew eleven rows wrong.
+    """
+    box = row.get("cursor")
+    if (not isinstance(box, list) or len(box) != 4
+            or not all(isinstance(v, int) for v in box)
+            or not box[0] <= box[2] or not box[1] <= box[3]):
+        return ["row %s: the cursor box on its value is %r, and the walk "
+                "reads one on every row" % (name, box)]
+    if "row0_y" in table and "display" in table:
+        line = (table["row0_y"] + table["pitch"] * looks.SCREEN.index(name)
+                + table["display"][1] // 2)
+        if not box[1] <= line <= box[3]:
+            return ["row %s: the cursor box %r does not cover the row's line "
+                    "at y %d" % (name, box, line)]
+    return []
 
 
 LABEL_MOVES = {"enter": "Left", "leave": "Right", "left": "locks",
@@ -771,14 +796,17 @@ class State:
         return [dict(one, point=list(one["point"])) for one in found]
 
     def cursor_box(self) -> list:
-        """The yellow box, in native pixels: over the row's value, carried
-        down by the pitch from the box the walk measured -- or over the row's
-        name, where the walk measured it, when the cursor is on the label."""
+        """The yellow box, in native pixels, where the walk measured it: over
+        the row's value, a box per row -- or over the row's name when the
+        cursor is on the label.
+
+        Not carried down by the pitch from the row the state loads on: that
+        row is NAT, whose box starts at x 314, and nine of the other eleven
+        start at 396 (CORR-LOOKS-070)."""
+        row = self.table["rows"][self.row]
         if self.on_label:
-            return list(self.table["rows"][self.row]["label"]["cursor"])
-        x0, y0, x1, y1 = self.layout()["cursor"]
-        step = self.table["pitch"] * self.cursor
-        return [x0, y0 + step, x1, y1 + step]
+            return list(row["label"]["cursor"])
+        return list(row["cursor"])
 
     def plate(self) -> str:
         return self.table["initial"][self.slot]["plate"]
@@ -1136,6 +1164,32 @@ def _checks(c) -> None:
     del broken["rows"]["SKIN"]["label"]["cursor"]
     ok("a label position with no cursor box is refused",
        any("cursor box on the label" in p for p in validate(broken)))
+    boxed = json.loads(json.dumps(table))
+    boxed["rows"]["NAT"]["cursor"] = [314, 53, 476, 64]
+    walked = State(boxed, 2)
+    walked.press("Up")
+    at_nat = walked.cursor_box()
+    walked.press("Up")
+    ok("the cursor box is the row's own, not the box of another row carried "
+       "down by the pitch: NAT at x 314 and DEFAUL above it at 396 "
+       "(CORR-LOOKS-070)", at_nat == [314, 53, 476, 64]
+       and walked.row == "DEFAUL"
+       and walked.cursor_box() == [396, 41, 476, 52],
+       "%r then %r on %s" % (at_nat, walked.cursor_box(), walked.row))
+    broken = json.loads(json.dumps(table))
+    del broken["rows"]["DEFAUL"]["cursor"]
+    ok("a row with no cursor box on its value is refused, which is the table "
+       "the walk wrote before CORR-LOOKS-070",
+       any("cursor box on its value" in p for p in validate(broken)),
+       "%r" % validate(broken))
+    broken = json.loads(json.dumps(table))
+    broken.update(row0_y=-79, pitch=12, display=[512, 240])
+    ok("with the row grid known, a toy table whose boxes sit on their lines "
+       "validates", validate(broken) == [], "%r" % validate(broken))
+    broken["rows"]["SKIN"]["cursor"] = [396, 41, 476, 52]
+    ok("and a cursor box that does not cover its row's line is refused",
+       any("does not cover the row's line" in p for p in validate(broken)),
+       "%r" % validate(broken))
     broken = json.loads(json.dumps(table))
     del broken["rows"]["DEFAUL"]["label"]
     ok("a row that does not say whether it has a label is refused, which is "
@@ -1264,6 +1318,12 @@ def _state_checks(c, table: dict) -> None:
            not on.on_label
            and on.help_text() == table["rows"]["DEFAUL"]["help"]
            and on.arrows() == table["rows"]["DEFAUL"]["arrows"]["arrival"])
+        ok("and the box back on the value is DEFAUL's own, not NAT's carried "
+           "up by the pitch (CORR-LOOKS-070)",
+           on.cursor_box() == table["rows"]["DEFAUL"]["cursor"]
+           and on.cursor_box()[0] != table["rows"]["NAT"]["cursor"][0],
+           "%r against NAT's %r" % (on.cursor_box(),
+                                    table["rows"]["NAT"]["cursor"]))
 
     refuses("a button this screen does not answer to is refused, not ignored",
             lambda: State(table, 2).press("Cross"), "is not one of the four")
@@ -1284,6 +1344,7 @@ def _toy_table() -> dict:
                       "help": "help %d" % number,
                       "stored": field.name if field else None,
                       "label": None,
+                      "cursor": [396, 41 + 12 * number, 476, 52 + 12 * number],
                       "arrows": {
                           "arrival": [{"side": "right", "point": [480, 43]}],
                           "left_end": [{"side": "right", "point": [480, 43]}],

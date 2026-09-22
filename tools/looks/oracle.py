@@ -4593,6 +4593,12 @@ def measure_screen(game, verbose=True):
         table["rows"][name].update(
             _walk_row(game, walk_slot, name, table, geometry, orders,
                       verbose, regions, display))
+        # Two walks read the same box: the cursor walk on arrival from the
+        # row above or below, and the row walk on arrival and at both ends.
+        if table["rows"][name]["cursor"] != list(boxes_by_row[name]):
+            raise OracleError("%s: the cursor walk read the box %r and the "
+                              "row walk %r" % (name, list(boxes_by_row[name]),
+                                               table["rows"][name]["cursor"]))
 
     table["regions"] = {}
     for name, box in sorted(regions.items()):
@@ -4698,6 +4704,19 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
                           "reads %r" % (button, abs(target - here), name,
                                         screen_help(game)))
     field = looks.BY_ROW.get(name)
+    origin = (display[0] // 2, display[1] // 2)
+
+    def value_box(where):
+        """The cursor box off VRAM, on this row's value: per row, because
+        the game sizes it per row -- x 314 on NAT, 396 on DEFAUL
+        (CORR-LOOKS-070) -- and the same on every value of it, which the
+        three readings below assert rather than assume."""
+        frames, _ = screen_frames(game, display)
+        row, box = _cursor_row(frames, regions, geometry, origin)
+        if row != target:
+            raise OracleError("%s: %s the cursor box is on row %s"
+                              % (name, where, looks.SCREEN[row]))
+        return list(box)
 
     arrows_now = []
     help_now = [None]
@@ -4716,6 +4735,7 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
     rows, value = read()
     initial = dict(rows)
     arrival = list(arrows_now)
+    cursor = value_box("on arrival")
     # On the row the state loads on the help still reads "Visual" (trap 35),
     # and the first press makes it say the row whatever else it does -- so
     # that change is no evidence of anything, and the baseline is the row's.
@@ -4781,12 +4801,20 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
         left_end = list(entered)
     else:
         left_end = list(arrows_now)
+    # After the label, if there was one: _walk_label ends back on the value.
+    cursor_ends = [value_box("at the left end")]
     texts, values = [left_texts[-1]], [left_values[-1]]
     right = go("Right", texts, values)
     if right == "wraps":
         raise OracleError("%s wraps going Right after locking going Left"
                           % name)
     right_end = list(arrows_now)
+    cursor_ends.append(value_box("at the right end"))
+    if any(box != cursor for box in cursor_ends):
+        raise OracleError("%s: the cursor box moved along the row: %r on "
+                          "arrival, %r at the left end and %r at the right "
+                          "end; one box per row is all the table can say"
+                          % (name, cursor, cursor_ends[0], cursor_ends[1]))
     if list(reversed(left_texts)) != texts[:len(left_texts)]:
         raise OracleError("%s: Left walked %r and Right came back %r"
                           % (name, left_texts, texts))
@@ -4799,6 +4827,7 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
     out = {"texts": texts, "left": left, "right": right,
            "stored": field.name if field else None,
            "label": label,
+           "cursor": cursor,
            "moves_beside": sorted(moved, key=looks.SCREEN.index),
            "arrows": {"arrival": arrival, "left_end": left_end,
                       "between": inner[0] if inner else None,
@@ -4813,6 +4842,8 @@ def _walk_row(game, slot, name, table, geometry, orders, verbose, regions,
               "%s, at the right end %s"
               % tuple(_say_arrows(out["arrows"][key]) for key in
                       ("arrival", "left_end", "between", "right_end")))
+        print("            cursor on the value: %s, the same on arrival and "
+              "at both ends" % cursor)
         if label is not None:
             print("            label: Left from the first value, help %r, "
                   "arrows %s, cursor %s; there Left %s, Up %s, Down %s, and "
@@ -5027,14 +5058,47 @@ def _screen_geometry(table):
             "left": table["rows_left"], "top": table["rows_top"]}
 
 
-def _press_sequence(game, slot, buttons, geometry, orders):
-    """*buttons* from a fresh `load_state`, and what the screen then shows."""
+def _press_sequence(game, slot, buttons, geometry, orders, table):
+    """*buttons* from a fresh `load_state`, and what the screen then shows --
+    the cursor box included, read off VRAM (CORR-LOOKS-070)."""
     game.load_looks(slot)
     for button in buttons:
         tap(game, button)
     reading = ScreenReading(geometry, screen_objects(game))
+    display = tuple(table["display"])
+    regions = {name: box["native"] for name, box in table["regions"].items()}
+    frames, _ = screen_frames(game, display)
+    _row, box = _cursor_row(frames, regions, geometry,
+                            (display[0] // 2, display[1] // 2))
     return {"rows": reading.rows(orders), "help": screen_help(game),
-            "arrows": frame_arrows(game)}
+            "arrows": frame_arrows(game), "cursor": list(box)}
+
+
+def window_cursor(rows, width, table):
+    """The yellow box in a picture of OUR window, in the game's native pixels.
+
+    Read off the picture the window wrote, never asked of the window: its
+    report says which row the cursor is on, not where it drew the box, and
+    the box is what CORR-LOOKS-070 found wrong.  The picture is the display
+    times the window's scale, so the scale is the width over the display's
+    and has to divide it; the box is looked for inside the rows box, the way
+    `_cursor_row` looks for the game's.
+    """
+    import screen
+
+    native_width, _native_height = table["display"]
+    if width % native_width:
+        raise OracleError("the window's picture is %d wide, which is not a "
+                          "whole multiple of the display's %d"
+                          % (width, native_width))
+    scale = width // native_width
+    x0, y0, x1, y1 = table["regions"]["rows"]["native"]
+    found = screen.cursor(rows, (x0 * scale, y0 * scale,
+                                 (x1 + 1) * scale - 1, (y1 + 1) * scale - 1))
+    if found is None:
+        return None
+    return [found[0] // scale, found[1] // scale,
+            found[2] // scale, found[3] // scale]
 
 
 def _window_sequence(slot, buttons, verbose=True, shot=None):
@@ -5097,8 +5161,8 @@ def check_keys(sequence=None, slot=2, verbose=True):
         if verbose:
             print("  pressing %d button(s) in slot %d: %s"
                   % (len(buttons), slot, ",".join(buttons)))
-        first = _press_sequence(game, slot, buttons, geometry, orders)
-        again = _press_sequence(game, slot, buttons, geometry, orders)
+        first = _press_sequence(game, slot, buttons, geometry, orders, table)
+        again = _press_sequence(game, slot, buttons, geometry, orders, table)
         # The pair a person looks at, both written by tool: the game's frame
         # after the presses, and ours after the same ones.
         theirs = game.capture("keys-slot%d" % slot)
@@ -5111,6 +5175,8 @@ def check_keys(sequence=None, slot=2, verbose=True):
         control.append(("help", first["help"], again["help"]))
     if first["arrows"] != again["arrows"]:
         control.append(("arrows", first["arrows"], again["arrows"]))
+    if first["cursor"] != again["cursor"]:
+        control.append(("the cursor box", first["cursor"], again["cursor"]))
     for name, one, two in control:
         print("  FAIL  control: the game answered the same sequence with %s "
               "%r and then %r" % (name, one, two))
@@ -5119,16 +5185,21 @@ def check_keys(sequence=None, slot=2, verbose=True):
               "would mean anything")
         return 1
     print("  control: the same sequence twice in the game gives the same "
-          "twelve rows, the same help and the same arrows")
+          "twelve rows, the same help, the same arrows and the same cursor "
+          "box")
 
     state = screen.State(table, slot)
     state.press_all(buttons)
     ours = {"rows": state.texts(), "help": state.help_text(),
-            "arrows": state.arrows()}
+            "arrows": state.arrows(), "cursor": state.cursor_box()}
     window = _window_sequence(slot, buttons, verbose, ours_shot)
     if window is not None:
+        import atlas
+
         print("  the pair to look at: the game %s, our window %s"
               % (theirs.path, ours_shot))
+        width, _height, pixels = atlas.read_png(ours_shot)
+        window["cursor"] = window_cursor(pixels, width, table)
 
     bad = []
     for name in table["order_of_rows"]:
@@ -5152,6 +5223,12 @@ def check_keys(sequence=None, slot=2, verbose=True):
         bad.append("the arrows: the game draws %s and our window draws %s"
                    % (_say_arrows(first["arrows"]),
                       _say_arrows(window.get("arrows"))))
+    if ours["cursor"] != first["cursor"]:
+        bad.append("the cursor box: the game draws %r and screen.json says %r"
+                   % (first["cursor"], ours["cursor"]))
+    if window is not None and window.get("cursor") != first["cursor"]:
+        bad.append("the cursor box: the game draws %r and our window draws %r"
+                   % (first["cursor"], window.get("cursor")))
     for line in bad:
         print("  FAIL  %s" % line)
     if verbose and not bad:
@@ -5159,6 +5236,7 @@ def check_keys(sequence=None, slot=2, verbose=True):
             print("    %-9s %r" % (name, first["rows"][name]))
         print("    help      %r" % first["help"])
         print("    arrows    %s" % _say_arrows(first["arrows"]))
+        print("    cursor    %r" % (first["cursor"],))
     _say_arrow_cluts()
     print("oracle --keys: %d difference(s) after %d press(es), across the "
           "game, screen.json and %s"
@@ -7851,6 +7929,30 @@ def _checks(c) -> None:
            len(sprite_texels(glyph)) == 2 * 12, len(sprite_texels(glyph)))
     ok("and the quad behind them is still furniture",
        len(furniture_of(nodes)) == 1, len(furniture_of(nodes)))
+
+    # The window's cursor box off its picture (CORR-LOOKS-070): a picture at
+    # scale 2 with DEFAUL's box drawn the way the window draws it -- a one-
+    # pixel outline of the scaled rectangle -- comes back in native pixels.
+    table = {"display": [512, 240],
+             "regions": {"rows": {"native": [176, 37, 496, 185]}}}
+    scale, drawn = 2, (396, 41, 476, 52)
+    picture = [[(0, 32, 48)] * (512 * scale) for _ in range(240 * scale)]
+    left, top = drawn[0] * scale, drawn[1] * scale
+    right, bottom = (drawn[2] + 1) * scale - 1, (drawn[3] + 1) * scale - 1
+    for x in range(left, right + 1):
+        picture[top][x] = picture[bottom][x] = (181, 181, 57)
+    for y in range(top, bottom + 1):
+        picture[y][left] = picture[y][right] = (181, 181, 57)
+    ok("the window's cursor box reads back off its picture in native pixels",
+       window_cursor(picture, 512 * scale, table) == list(drawn),
+       window_cursor(picture, 512 * scale, table))
+    ok("and a picture with no yellow in the rows box has no cursor box",
+       window_cursor([[(0, 32, 48)] * 512 for _ in range(240)], 512, table)
+       is None)
+    c.refusing(OracleError)(
+        "a picture whose width is not a multiple of the display's is refused",
+        lambda: window_cursor(picture, 512 * scale + 1, table),
+        "whole multiple")
 
 
 # --- entry point ----------------------------------------------------------
