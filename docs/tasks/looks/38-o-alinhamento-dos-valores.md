@@ -5,12 +5,12 @@ type: implementação
 category: ui
 phase: 10
 depends_on: [LOOKS-TASK-37]
-status: pending
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 19bcdf0a
 ---
 
 # LOOKS-TASK-38: O alinhamento dos valores
@@ -203,3 +203,20 @@ check: 0 error(s), 11 warning(s) in 4 cycle(s)
 O `looks_ui` (16 de 16 controles vermelhos, 4 min), o `--keys` e o
 `--outside` rodaram sobre o código do commit e estão transcritos acima; depois
 deles só mudou prosa.
+- **Closed** — commit `19bcdf0a` (2026-09-22): feat(looks): put every text where the game puts it inside its box
+  - Files (`git show --name-status 19bcdf0a`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/38-o-alinhamento-dos-valores.md`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/glyphs.py`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/screen.json`
+    - `M tools/looks/screen.py`
+    - `M tools/looks/ui/app.py`
+    - `M tools/looks/ui/looks_set.py`
+    - `M tools/looks/ui_check.py`
