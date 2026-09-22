@@ -5,10 +5,10 @@ origin: CORR-LOOKS-077
 severity: low
 files: [tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 49e44b46
 ---
 
 # CORR-LOOKS-081 — Plantar o controle do pulo por acumulador no controls.py
@@ -126,3 +126,7 @@ contagem em prosa: o `controls.py` diz na própria `run_all()` que o número é
 document is a count that disagrees with the tool the first time somebody adds
 one" — e foi exatamente este commit. O perfil, as armadilhas, o
 `/docs/PLAN-LOOKS-PY.md` e o `/CLAUDE.md` não citam quantidade nenhuma.
+- **Closed** — commit `49e44b46` (2026-09-22): test(looks): plant the accumulator-wide layout skip as a control
+  - Files (`git show --name-status 49e44b46`):
+    - `M docs/tasks/looks/CORR-LOOKS-081.md`
+    - `M tools/looks/controls.py`
