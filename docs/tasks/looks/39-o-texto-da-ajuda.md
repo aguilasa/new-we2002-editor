@@ -5,12 +5,12 @@ type: investigação
 category: render
 phase: 10
 depends_on: [LOOKS-TASK-37]
-status: in-progress
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 42c4ebfa
 ---
 
 # LOOKS-TASK-39: O texto da ajuda
@@ -168,3 +168,13 @@ confront --outside: 0 problem(s) over 2 slot(s)
 $ python tools/check_tasks.py
 check: 0 error(s), 11 warning(s) in 4 cycle(s)
 ```
+- **Closed** — commit `42c4ebfa` (2026-09-22): feat(looks): measure where the help box's text comes from
+  - Files (`git show --name-status 42c4ebfa`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/39-o-texto-da-ajuda.md`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/oracle.py`
