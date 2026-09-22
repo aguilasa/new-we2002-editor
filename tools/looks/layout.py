@@ -79,6 +79,7 @@ ANIME = "/BIN/ANIME.BIN"
 SELECT8 = "/SELECT8.BIN"
 EDT_2D = "/BIN/EDT_2D.BIN"
 SELECTC = "/SELECTC.BIN"
+BOOT = "/SLPM_870.56"
 
 KIT_DIR = "/BIN/"
 KIT_PREFIX = "TEX_"
@@ -126,6 +127,14 @@ DIGEST = {
     # cycle reads -- are byte for byte the same in both and in the running
     # game's RAM (`GLYPH_ROUTINE`, `GLYPH_TABLE`).
     SELECTC: "205ec241d0b8a316bc2efda07f4b989bcc7b2a610c14112735d355f9122bd03a",
+    # Japanese only, measured 2026-09-22 (LOOKS-TASK-39).  The English disc
+    # has 983b71cf6ce6d08ede9f57c6f370b9c9ad6b93cad4075206d92f8008d825fd28
+    # here.  The three windows this cycle decodes out of it -- the help box's
+    # glyph call (`HELP_GLYPH_CALL`), the lookup around it and the BIOS stub
+    # (`KROM_STUB`) -- are byte for byte the same in both, which is what makes
+    # an address measured on the English disc the emulator drives good on the
+    # Japanese one it is read from.
+    BOOT: "7da7745d5b1501b7ad4433711f2c89e1264568b9c90f58240417b9acd31169b6",
 }
 
 KIT_DIGEST = {
@@ -372,7 +381,7 @@ def kit_tag(disc_path: str) -> str:
     return disc_path[len(head):-len(tail)]
 
 
-CODE_FILES = frozenset({SELECT8, SELECTC})
+CODE_FILES = frozenset({SELECT8, SELECTC, BOOT})
 """Japanese-only as well, and CODE: the overlay the LOOKS SET screen runs.
 
 Read for the stature rule (`STATURE_*` below), which is the same instructions
@@ -412,6 +421,7 @@ LBA = {
     SELECT8: 1800,
     EDT_2D: 3900,
     SELECTC: 1950,
+    BOOT: 24,
 }
 
 SIZE = {
@@ -423,6 +433,7 @@ SIZE = {
     SELECT8: 125176,
     EDT_2D: 40360,
     SELECTC: 106966,
+    BOOT: 337920,
 }
 
 # --- Where each model file loads in RAM -----------------------------------
@@ -1771,6 +1782,119 @@ The setter at 0x800CFCC8 compares its argument against this pointer with
 `strcmp` and redraws only when they differ, so this is the text on screen, not
 the text asked for.  Found by a read watchpoint on `Skin Colour` in Shift-JIS,
 which fired inside that `strcmp` when Down moved the cursor to SKIN.
+"""
+
+# --- The help box's text, and where its glyphs come from -------------------
+#
+# Measured 2026-09-22 (LOOKS-TASK-39).  The help box's letters are not cut
+# from any image on the disc: the game asks the CONSOLE for each one.  The
+# chain, and every address of it, is below; `oracle.py --help-box` re-measures
+# it against the running game and refuses each instruction that is not what it
+# is said to be.
+
+BOOT_MAGIC = b"PS-X EXE"
+BOOT_HEADER = 2048  # not-an-address: the bytes of the PS-EXE header
+BOOT_LOAD_FIELD = 0x18  # not-an-address: `t_addr` in that header
+BOOT_SIZE_FIELD = 0x1C  # not-an-address: `t_size`, the word after it
+BOOT_BASE = 0x80010000
+"""Where `/SLPM_870.56` loads, read out of its own PS-EXE header.
+
+The constant is what the header is checked AGAINST, the way `BASE` is checked
+against `derive_base()`: a file offset of an address is
+`BOOT_HEADER + address - BOOT_BASE`, and if the header ever says otherwise the
+offsets below are pointing at the wrong bytes and the guard should say so.
+"""
+
+HELP_PAGE = (832, 256)
+HELP_CLUT = (64, 496)
+HELP_ICON_CLUT = (32, 498)
+"""The VRAM page the help box's text is drawn from, and the two CLUTs its
+sprites carry: the letters take the first, the button glyph `■` the second --
+the game's own exception list (22 codes, at `HELP_ICON_CODES`) is what puts a
+code on the other palette.
+
+Nothing on the disc holds this page's texels, and nothing can: the game writes
+them from the console's character ROM, one 16x16 tile per character of the
+string, every time the help text changes.
+"""
+
+HELP_TILE = 16
+HELP_GLYPH_SIZE = (16, 15)
+HELP_GLYPH_BYTES = 30
+"""One character: a 16x15 bitmap of 30 bytes in the console's ROM, one bit a
+pixel and each row a big-endian halfword, drawn into a 16x16 tile of the page.
+"""
+
+HELP_GLYPH_CALL = 0x800331B8
+HELP_GLYPH_RETURN = 0x800331C0
+"""The `jal` that asks for one character's bitmap, and the instruction the
+answer comes back to -- the call's delay slot sits between them.
+
+`s3` there is the walk over the Shift-JIS string (two bytes a letter, one for
+a space), and `v0` on return is the address of the bitmap.
+"""
+
+HELP_GLYPH_LOOKUP = 0x8003BEEC
+HELP_LOOKUP_WORDS = 40
+"""The routine that call reaches, and how far into it the BIOS call is looked
+for.  It range-checks the Shift-JIS code against three windows -- 895, 599 and
+4052 codes wide -- and hands what survives to the stub below; a code outside
+them all comes back as the code for a blank.
+"""
+
+HELP_SPECIAL_SPAN = (0x80033000, 0x80033130)
+HELP_SPECIAL_COUNT = 4
+"""The span of the renderer's dispatch that names the codes it does NOT ask
+the ROM for, and how many there are.
+
+Four of them, each an `ori v0, zero, <code>` inside the span: `0x819A`,
+`0x819C`, `0x81A1` and `0x81A3`.  A code in the set is drawn from a fixed
+place in VRAM rather than rendered, which is why the `■` of `Skin Colour   ■
+Turn` is the one sprite of the box on `HELP_ICON_CLUT` -- and which is why
+there are fourteen lookups for fifteen tiles.  Where ITS texels come from was
+not measured.
+"""
+
+HELP_ICON_CODES = 0x800BCA58
+HELP_ICON_COUNT = 22
+"""A table of 22 halfwords the renderer compares every code against before it
+draws, and which decides the palette: a code in it comes out on
+`HELP_ICON_CLUT`, which is how `■` is the one sprite of the box on another
+CLUT.
+
+Recorded, not read: this cycle draws none of it, and which file the table is
+loaded from was not measured -- it sits below every overlay this cycle knows.
+"""
+
+KROM_STUB = 0x8003873C
+KROM_TABLE = 0xB0
+KROM_FUNCTION = 0x51
+"""The BIOS call the lookup ends in: `addiu t2, zero, 0xB0` / `jr t2` /
+`addiu t1, zero, 0x51`, which is the kernel's B table, function 0x51 -- the
+character-ROM lookup (`Krom2RawAdd` in the psx-spx notes).
+
+What it answers is an address in `BIOS_ROM`, and that is the measurement this
+cycle needed: the texels are the console's, not the disc's.
+"""
+
+HELP_IMAGE_LOAD = 0x8003A780
+HELP_UPLOAD = 0x8003A950
+HELP_COPY_COMMAND = 0xA0  # not-an-address: the GP0 code for a CPU-to-VRAM copy
+"""The library routine that copies one tile into the page, and the instruction
+a VRAM write watchpoint over the page stops at.
+
+`a0` there is `0xA0000000` -- the GP0 command that copies a rectangle from
+memory into VRAM -- and the rectangle is four halfwords by sixteen rows, which
+at four bits a texel is exactly one 16x16 tile.
+"""
+
+BIOS_ROM = (0xBFC00000, 0x80000)
+"""The console's ROM window: base and size.
+
+A pointer inside it is not on the disc and never will be.  This is the whole
+answer to "where do the help box's texels come from", and it is why the window
+keeps drawing that box's text with a stand-in instead of with the game's own
+glyphs.
 """
 
 PLAYER_RAM = (0x8007DF60, 0x800E9450)

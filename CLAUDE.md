@@ -822,7 +822,9 @@ montado, na pose e na câmera do jogo, com altura e corpo (fase 9) e com o
 uniforme do time (task 30), o painel e a mobília medidos e pintados (task
 31), os sprites estáticos e as setas lidos do disco (task 36), e o texto
 escrito com a fonte do jogo, no lugar em que o jogo o escreve (tasks 37 e
-38); faltam a ajuda e o close-up (tasks 39 e 40) e a caminhada (fase 11).
+38), e a ajuda medida — ela vem da **ROM do console**, não do disco, e por
+isso a janela a mantém numa fonte de apoio (task 39); faltam o close-up
+(task 40) e a caminhada (fase 11).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
@@ -867,6 +869,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --check-live` | o alvo `looks_live`: sobe o fork, carrega os states e confere a RAM contra o disco |
 | `python tools/looks/oracle.py --screen` / `--screen --write` | anda as doze linhas no jogo e compara com o `screen.json`; o `--write` é o **gerador** desse arquivo (~12 min) |
 | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` | a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle fechando antes — é quem julga a tela. Repetição se escreve `Right x41`, a única forma que ele aceita |
+| `python tools/looks/oracle.py --help-box [SLOT]` | quem escreve a tira (832,256) da caixa de ajuda e de onde vêm os texels: a cópia `0xA0` de um ladrilho por caractere, e o bitmap 16×15 que a **ROM do console** devolve a cada chamada de BIOS — nada disso está no disco |
 | `python tools/looks/oracle.py --pose [SLOT]` / `--pose <SLOT> <N> [N ...]` | de onde vem a pose, e a pose em si: a matriz e a translação de cada peça de um quadro contado, em `work/looks-pose/`, com a captura repetida como controle |
 | `python tools/looks/oracle.py --pose-lag` | quantas paradas o ponteiro de modelo atrasa em relação à matriz que ele nomeia, medido sobre as capturas em disco, sem emulador |
 | `python tools/looks/oracle.py --camera [SLOT [LINHA]]` | a câmera do jogo lida do GTE — `H`, os deslocamentos (zero nesta tela) e a matriz —, em `work/looks-camera/`; com `LINHA` (ex.: `HAIR`) mede a câmera do close-up |

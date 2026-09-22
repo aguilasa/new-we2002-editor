@@ -1968,12 +1968,18 @@ def sprite_regions(slot):
     return boxes
 
 
+HELP_INSET = 2
+"""Pixels taken off the help box before its text is compared: the border of
+the box is furniture, measured and asserted by its own region."""
+
+
 def text_regions(table):
-    """{labels, values: box} -- the two columns of text in the rows box.
+    """{labels, values, help: box} -- the text of the screen, in three boxes.
 
     Off `screen.json` and nothing else: the labels from their object's x to
     the left edge of the leftmost value box, the values from there to the
-    right edge of the widest one, both over the twelve lines (LOOKS-TASK-37).
+    right edge of the widest one, both over the twelve lines (LOOKS-TASK-37);
+    and the inside of the help box (LOOKS-TASK-39).
     """
     width, height = table["display"]
     x0 = table["initial"]["2"]["anchors"]["labels"][0] + width // 2
@@ -1982,12 +1988,23 @@ def text_regions(table):
     boxes = [table["rows"][name]["cursor"] for name in table["order_of_rows"]]
     left = min(box[0] for box in boxes)
     right = max(box[2] for box in boxes)
+    box = table["regions"]["help"]["native"]
     return {"labels": (x0, top, left - 1, bottom),
-            "values": (left, top, right, bottom)}
+            "values": (left, top, right, bottom),
+            "help": (box[0] + HELP_INSET, box[1] + HELP_INSET,
+                     box[2] - HELP_INSET, box[3] - HELP_INSET)}
 
 
 TEXT_INK_SLACK = {"labels": 0, "values": 0}
-"""Pixels of each text column allowed to differ from the game's frame."""
+"""Pixels of each text column allowed to differ from the game's frame.
+
+The help box is measured and NOT in here, which is the whole of what
+LOOKS-TASK-39 found: the game draws that text with the console's own character
+ROM (`oracle.py --help-box`), which is not on the disc and not this
+repository's to ship, so the window draws it with a stand-in and the pixels
+cannot agree.  The line is printed with its floor and its shifted control, so
+what it costs is on the record rather than hidden by leaving the box out.
+"""
 
 
 def _area(box):
@@ -2120,8 +2137,11 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
             control = ink_differences(shifted, ours, box, outline)
             print("    %s, pixel for pixel within %d per channel: %d of %d "
                   "differ (the game against itself: %d; the game one pixel "
-                  "off: %d)" % (column, OUTSIDE_SLACK, apart, _area(box),
-                                floor, control))
+                  "off: %d)%s" % (column, OUTSIDE_SLACK, apart, _area(box),
+                                  floor, control,
+                                  "" if column in TEXT_INK_SLACK
+                                  else "  (the console's font, not ours to "
+                                       "draw: not asserted)"))
             if not control:
                 problems.append("slot %d: the %s one pixel off do not differ "
                                 "either, so equal says nothing"
@@ -2130,6 +2150,8 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
                 problems.append("slot %d: the %s differ from themselves in %d "
                                 "pixel(s), so the comparison has no floor"
                                 % (slot, column, floor))
+            elif column not in TEXT_INK_SLACK:
+                continue
             elif apart > TEXT_INK_SLACK[column]:
                 problems.append("slot %d: %d pixel(s) of the %s differ from "
                                 "the game's, over the %d allowed"

@@ -226,7 +226,7 @@ foi feita em 2026-09-14 comparando os arquivos inteiros, não os primeiros bytes
 | `/BIN/MODEL.BIN` | 8100 / 64.800 | **idêntico** (`0b3814bb0d3b`) |
 | `/BIN/DAT2D.BIN` | 5300 / 81.124 | **difere** |
 | `/SELECT.BIN` | 850 / 300.648 | **difere** |
-| `/SLPM_870.56` | 24 / 337.920 | **difere** |
+| `/SLPM_870.56` | 24 / 337.920 | **difere** — menos as janelas de código da ajuda, idênticas ([`LOOKS-TASK-39`](/docs/tasks/looks/39-o-texto-da-ajuda.md)) |
 
 **Esta é a linha mais operacional do plano**, e decide como se trabalha:
 
@@ -3194,6 +3194,48 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > execução. A [`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md) fecha com a medição e a mobília; desenhar
 > os sprites, o texto, o alinhamento, a ajuda e a câmera do close-up são as
 > [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) a [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md).
+>
+> **A ajuda não vem do disco, e não pode vir: vem da ROM do console**
+> (2026-09-22, [`LOOKS-TASK-39`](/docs/tasks/looks/39-o-texto-da-ajuda.md)).
+> Quem remede é o `oracle.py --help-box`, e a cadeia é esta, ponta a ponta:
+>
+> - **quem escreve a página (832,256):** o próprio jogo, por **cópia de
+>   memória para a VRAM** — o comando GP0 `0xA0` — de um retângulo de **4
+>   meias-palavras por 16 linhas**, que a 4 bits é exatamente **um ladrilho
+>   16×16**. A página é uma **tira**: um ladrilho por caractere da string, e a
+>   escrita só acontece quando o texto muda. O controle é o silêncio: com nada
+>   apertado, um watchpoint de escrita sobre a tira não dispara em 6 s;
+> - **de onde vêm os texels:** de **dentro do console**. Para cada caractere
+>   de dois bytes o jogo chama `0x8003BEEC`, que checa o código contra três
+>   faixas e cai numa **chamada de BIOS** (`0x8003873C`: `t2` = `0xB0`, `t1` =
+>   `0x51`, a busca na ROM de caracteres). O endereço que volta cai **sempre**
+>   em `0xBFC00000+0x80000`, a ROM do console: 14 de 14 respostas nos dois
+>   slots. Os 30 bytes de lá são um bitmap **16×15**, uma linha por
+>   meia-palavra **big-endian** — é por isso que o jogo troca os bytes de cada
+>   linha ao copiá-la para o scratchpad —, e esse bitmap **é** o ladrilho: 14
+>   de 14 ladrilhos são a tinta do bitmap mais o contorno de um pixel que o
+>   jogo esfrega em volta (índice 15 na letra, 3 no contorno). O controle: o
+>   bitmap do caractere **seguinte** não cabe em nenhum deles (0 de 14);
+> - **um ladrilho de quinze não é da ROM.** A `Skin Colour   ■ Turn` tem 15
+>   caracteres que desenham — espaço de um byte só anda a caneta, 8 px, sem
+>   desenhar — e 14 chamadas. O que falta é o `■`, e o motivo está na
+>   instrução: o despacho nomeia **quatro** códigos (`0x819A`, `0x819C`,
+>   `0x81A1`, `0x81A3`) que ele desenha de um lugar fixo da VRAM em vez de
+>   renderizar, e é por isso que o `■` é o único sprite da caixa na CLUT
+>   (32,498). **De onde saem os texels DESSE ladrilho não foi medido.** E há
+>   um segundo desvio, medido e não lido: 22 códigos (kanji e área
+>   privada) têm bitmap próprio no `/SELECT.BIN`, no offset 253.728 (os
+>   códigos) e 253.772 (os bitmaps de 32 bytes) — nenhum deles aparece nesta
+>   tela.
+>
+> **A consequência para a janela é que ela não desenha essa fonte.** A ROM do
+> console não está no disco, não é deste repositório, e a regra do ciclo é ler
+> do disco pela guarda; então a caixa de ajuda continua escrita com o texto
+> medido do `screen.json` numa fonte de apoio do Qt. O que isso custa está
+> medido, não escondido: o `confront.py --outside` compara a caixa pixel a
+> pixel e imprime **323 de 14.787** diferentes nos dois slots, com piso 0 e
+> controle 316 (o quadro do jogo deslocado um pixel) — a única região de texto
+> da tela que a comparação **não** afirma, e a linha diz por quê.
 
 **(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
 interpola entre quadros-chave, e se o tronco que balança é da animação ou da

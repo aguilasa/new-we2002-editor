@@ -66,12 +66,24 @@ e os termos que a disparam.
     watchpoint na porta de comando desmentiu: nada escreve nela. Parta o nó
     em comandos pelo comprimento que o código de cada um declara
     (`oracle.commands_of`) antes de perguntar o que ele desenha.
-90. **Página sem registro no disco pode ser escrita pelo jogo.** O texto da
-    ajuda são seis ladrilhos 16×16 da página (832,256), e nenhuma imagem de
-    contêiner nenhum a cobre inteira — o `DATSEL3.BIN` tem um registro ali e
-    bate só em parte. A CLUT é do disco; os texels, o jogo os escreve na VRAM
-    em tempo de execução. "Não está no disco" é resultado, não falha do
-    leitor, desde que o controle da comparação feche no resto.
+90. **Página sem registro no disco pode ser escrita pelo jogo — e a fonte
+    pode ser do console.** O texto da ajuda são ladrilhos 16×16 da página
+    (832,256), e nenhuma imagem de contêiner nenhum a cobre inteira — o
+    `DATSEL3.BIN` tem um registro ali e bate só em parte. A CLUT é do disco;
+    os texels o jogo os escreve na VRAM em tempo de execução, e **da ROM do
+    console**: uma chamada de BIOS por caractere devolve um bitmap 16×15 em
+    `0xBFC00000+0x80000` (LOOKS-TASK-39). "Não está no disco" é resultado,
+    não falha do leitor, desde que o controle da comparação feche no resto —
+    e aqui é mais que isso: **não está no disco porque não pode estar**, e
+    procurar mais no disco era trabalho perdido.
+96. **O `pc` de um watchpoint de VRAM não é quem escreveu.** A cópia de
+    memória para a VRAM é feita por DMA, então o programa já andou quando o
+    GPU toca a memória de vídeo: o `last_hit` da tira da ajuda deu
+    `0x8003A950` em duas corridas seguidas — estável o bastante para parecer
+    medida — e `0x8003F2F4` e `0x8010A910` nas duas seguintes. O que o
+    watchpoint afirma é o **retângulo** e que a tecla o causou; quem escreve
+    se lê no código (LOOKS-TASK-39). E ele reporta **um** acerto por tecla, o
+    último do lote, não um por ladrilho: contar ladrilhos por ali dá 1 de 15.
 91. **Sprite na lista não é sprite que desenha.** A "barra vazia ao lado da
     placa" é um sprite de 96×12 do `EDT_2D.BIN` com os 1.152 texels
     transparentes; o verde que ocupa o lugar é a caixa da camisa, do

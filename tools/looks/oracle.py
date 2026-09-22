@@ -45,6 +45,7 @@ Usage:
     python tools/looks/oracle.py --screen [--write]  # LOOKS SET measured: every text, help, cursor and box; --write makes screen.json
     python tools/looks/oracle.py --keys [SEQUENCE [SLOT]]  # the same presses in the game, in screen.json and in our window; a repetition is written Right x41
     python tools/looks/oracle.py --glyphs [SLOT]  # the font rule of glyphs.py against every font sprite the frame drew
+    python tools/looks/oracle.py --help-box [SLOT]  # who writes the help page, and that its glyphs are the console's, not the disc's
     python tools/looks/oracle.py --default [SLOT]  # what NAT and DEFAUL do: the nationality byte, and the default that is not applied
     python tools/looks/oracle.py --pose [SLOT]  # where the pose comes from: ANIME.BIN in RAM, the entry the screen plays, and the GTE matrix load
     python tools/looks/oracle.py --pose <SLOT> <N> [N ...]  # the pose ITSELF: the matrix and translation of every piece of frame N, and the hierarchy
@@ -5541,6 +5542,573 @@ def check_glyphs(slots=(2, 1), verbose=True):
     return 1 if problems else 0
 
 
+# --- The help box: who writes its page, and where the texels come from ----
+
+HELP_CONTROL_SECONDS = 6
+"""Seconds the page is watched with NOTHING pressed before it is called still.
+
+The control of the whole measurement: the page is written when the help text
+changes, not every frame, so a hit here would mean the watchpoint is answering
+about something else.  The frame cuts sprites from the page every frame; the
+page's texels are not rewritten (2026-09-22)."""
+
+HELP_FIRST_SECONDS = 12
+HELP_NEXT_SECONDS = 4
+"""How long the glyph lookup is waited for: the first stop after the press, and
+each one after it.  A run of stops ends by SILENCE -- the string is rendered
+once per press, so there is no repetition to close a frame with."""
+
+HELP_STOP_LIMIT = 64
+"""Stops taken before a run is refused.  The longest help string this screen
+shows is 26 characters."""
+
+JAL, ADDIU, ORI, JR_FUNCT = 3, 9, 13, 8
+"""The instruction forms the chain below is decoded with: `jal`, `addiu`,
+`ori`, and the function field of `jr`."""
+
+HELP_TILES = 16
+"""Tiles of the help page this watches and reads: the strip a help string is
+rendered into, as wide as the longest string this screen shows."""
+
+HELP_SPACE = 0x20  # not-an-address: the one-byte space of a help string
+SJIS_FIRST = 0x8100  # not-an-address: the first two-byte Shift-JIS code
+
+T1, T2, ZERO = 9, 10, 0
+"""Register numbers of `t1`, `t2` and `zero`, for the BIOS stub."""
+
+REGISTER_FIELD = 0x1F  # not-an-address: five bits of a register number
+IMMEDIATE_FIELD = 0xFFFF  # not-an-address: sixteen bits of an immediate
+JUMP_FIELD = 0x03FFFFFF  # not-an-address: twenty-six bits of a jal
+FUNCT_FIELD = 0x3F  # not-an-address: six bits of a special instruction
+
+
+def boot_code():
+    """The boot executable's text segment and its load base, through the guard.
+
+    The base is READ OUT OF THE FILE and checked against `layout.BOOT_BASE`,
+    not taken from it: every address below becomes a file offset through it,
+    and a header that said something else would make each of them point at the
+    wrong bytes in silence.
+    """
+    import iso_source
+    import who_writes
+
+    ready = preflight()
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = disc.read(layout.BOOT)
+    if data[:len(layout.BOOT_MAGIC)] != layout.BOOT_MAGIC:
+        raise OracleError("%s does not open with %r, so it is not the boot "
+                          "executable" % (layout.BOOT, layout.BOOT_MAGIC))
+    base = struct.unpack_from("<I", data, layout.BOOT_LOAD_FIELD)[0]
+    size = struct.unpack_from("<I", data, layout.BOOT_SIZE_FIELD)[0]
+    if base != layout.BOOT_BASE:
+        raise OracleError("%s says it loads at %s and this cycle's addresses "
+                          "are read against %s"
+                          % (layout.BOOT, who_writes.hx(base),
+                             who_writes.hx(layout.BOOT_BASE)))
+    return data[layout.BOOT_HEADER:layout.BOOT_HEADER + size], base
+
+
+def boot_word(code, base, address):
+    """The instruction at *address*, out of the file's text segment."""
+    import who_writes
+
+    at = address - base
+    if not 0 <= at <= len(code) - INSTRUCTION_SIZE:
+        raise OracleError("%s is outside the boot executable's %d byte(s)"
+                          % (who_writes.hx(address), len(code)))
+    return struct.unpack_from("<I", code, at)[0]
+
+
+def _jal_target(word):
+    """Where a `jal` goes, or None if the word is not one."""
+    if word >> 26 != JAL:
+        return None
+    return (word & JUMP_FIELD) << 2 | RAM_BASE
+
+
+def _addiu(word):
+    """(rt, rs, immediate) of an `addiu`, or None if the word is not one."""
+    if word >> 26 != ADDIU:
+        return None
+    return ((word >> 16) & REGISTER_FIELD, (word >> 21) & REGISTER_FIELD,
+            word & IMMEDIATE_FIELD)
+
+
+def help_chain(code, base):
+    """The instructions that make the help box's glyphs the console's.
+
+    Decoded out of `/SLPM_870.56`, each one refused unless it is what `layout`
+    says it is.  What the chain says, in order:
+
+      * `HELP_GLYPH_CALL` is a `jal` to `HELP_GLYPH_LOOKUP`, and the answer
+        comes back at `HELP_GLYPH_RETURN`, two instructions later -- the delay
+        slot between them is what finishes the Shift-JIS code;
+      * the lookup reaches `KROM_STUB`, once per range of codes it accepts;
+      * the stub is a BIOS call -- `t2` the kernel's jump vector `KROM_TABLE`,
+        `t1` the function number `KROM_FUNCTION`.
+
+    Returns what was found, for the report to print.
+    """
+    import who_writes
+
+    call = boot_word(code, base, layout.HELP_GLYPH_CALL)
+    target = _jal_target(call)
+    if target != layout.HELP_GLYPH_LOOKUP:
+        raise OracleError("%s is not a jal to %s: %#010x"
+                          % (who_writes.hx(layout.HELP_GLYPH_CALL),
+                             who_writes.hx(layout.HELP_GLYPH_LOOKUP), call))
+    if layout.HELP_GLYPH_RETURN != layout.HELP_GLYPH_CALL + 2 * INSTRUCTION_SIZE:
+        raise OracleError("%s is not the instruction after the call's delay "
+                          "slot" % who_writes.hx(layout.HELP_GLYPH_RETURN))
+    calls = [at for at in range(layout.HELP_GLYPH_LOOKUP,
+                                layout.HELP_GLYPH_LOOKUP
+                                + layout.HELP_LOOKUP_WORDS * INSTRUCTION_SIZE,
+                                INSTRUCTION_SIZE)
+             if _jal_target(boot_word(code, base, at)) == layout.KROM_STUB]
+    if not calls:
+        raise OracleError("%s never reaches %s in its first %d instruction(s)"
+                          % (who_writes.hx(layout.HELP_GLYPH_LOOKUP),
+                             who_writes.hx(layout.KROM_STUB),
+                             layout.HELP_LOOKUP_WORDS))
+    vector = _addiu(boot_word(code, base, layout.KROM_STUB))
+    jump = boot_word(code, base, layout.KROM_STUB + INSTRUCTION_SIZE)
+    number = _addiu(boot_word(code, base,
+                              layout.KROM_STUB + 2 * INSTRUCTION_SIZE))
+    if vector != (T2, ZERO, layout.KROM_TABLE):
+        raise OracleError("%s does not load %s into t2: %r"
+                          % (who_writes.hx(layout.KROM_STUB),
+                             who_writes.hx(layout.KROM_TABLE), vector))
+    if (jump >> 26 or jump & FUNCT_FIELD != JR_FUNCT
+            or (jump >> 21) & REGISTER_FIELD != T2):
+        raise OracleError("the word after %s is not `jr t2`: %#010x"
+                          % (who_writes.hx(layout.KROM_STUB), jump))
+    if number != (T1, ZERO, layout.KROM_FUNCTION):
+        raise OracleError("%s does not load %#x into t1: %r"
+                          % (who_writes.hx(layout.KROM_STUB
+                                           + 2 * INSTRUCTION_SIZE),
+                             layout.KROM_FUNCTION, number))
+    return {"lookup": layout.HELP_GLYPH_LOOKUP, "calls": calls,
+            "table": layout.KROM_TABLE, "function": layout.KROM_FUNCTION}
+
+
+def help_special_codes(code, base):
+    """The character codes the renderer draws from VRAM instead of rendering.
+
+    Read out of the dispatch itself (`layout.HELP_SPECIAL_SPAN`): every
+    `ori v0, zero, <code>` in it whose immediate is a two-byte Shift-JIS code.
+    Refused unless there are as many as `layout.HELP_SPECIAL_COUNT` -- a span
+    that stopped naming them would otherwise turn "not asked of the ROM" into
+    a silent miss instead of a measurement.
+    """
+    import who_writes
+
+    out = []
+    for at in range(layout.HELP_SPECIAL_SPAN[0], layout.HELP_SPECIAL_SPAN[1],
+                    INSTRUCTION_SIZE):
+        word = boot_word(code, base, at)
+        if word >> 26 != ORI or (word >> 21) & REGISTER_FIELD != ZERO:
+            continue
+        immediate = word & IMMEDIATE_FIELD
+        if immediate >= SJIS_FIRST and immediate not in out:
+            out.append(immediate)
+    if len(out) != layout.HELP_SPECIAL_COUNT:
+        raise OracleError("%s to %s names %d code(s) and this cycle measured "
+                          "%d: %s"
+                          % (who_writes.hx(layout.HELP_SPECIAL_SPAN[0]),
+                             who_writes.hx(layout.HELP_SPECIAL_SPAN[1]),
+                             len(out), layout.HELP_SPECIAL_COUNT,
+                             ["%#06x" % one for one in out]))
+    return sorted(out)
+
+
+def krom_ink(raw):
+    """The set pixels of one character of the console's ROM.
+
+    Thirty bytes, fifteen rows of sixteen bits, each row a BIG-endian halfword
+    -- which is why the game byte-swaps every row on its way to the
+    scratchpad.
+    """
+    if len(raw) < layout.HELP_GLYPH_BYTES:
+        raise OracleError("a glyph is %d bytes and this is %d"
+                          % (layout.HELP_GLYPH_BYTES, len(raw)))
+    width, height = layout.HELP_GLYPH_SIZE
+    return {(x, y) for y in range(height) for x in range(width)
+            if struct.unpack_from(">H", raw, 2 * y)[0] & (1 << (width - 1 - x))}
+
+
+def tile_ink(rows, bits=4):
+    """The texels of one tile of a page that are not the transparent index.
+
+    *rows* are VRAM halfwords, as `_halfword` reads them: the fork hands VRAM
+    back as a PNG, so the top bit of each halfword does not survive
+    (`COLOUR_BITS`).  That is enough here and only here -- what is asked of a
+    texel is whether it is zero, and the two indices this page is drawn with
+    are 15 and 3, of which 15 in the top nibble reads back as 7, still ink.
+    """
+    per = TEXELS_PER_HALFWORD[bits]
+    out = set()
+    for y, row in enumerate(rows):
+        for index, value in enumerate(row):
+            for texel in range(per):
+                if (value >> (bits * texel)) & ((1 << bits) - 1):
+                    out.add((per * index + texel, y))
+    return out
+
+
+def _dilated(ink):
+    """*ink* grown by one pixel in every direction -- the outline the game
+    smears around a glyph before it uploads the tile."""
+    return {(x + dx, y + dy) for x, y in ink
+            for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+
+
+def glyph_in_tile(bitmap, ink):
+    """What separates the tile the game uploaded from the ROM's bitmap.
+
+    `(missing, extra)`: pixels the ROM sets that the tile has no texel for, and
+    texels outside the bitmap grown by one.  The game draws the glyph in one
+    index and smears a one-pixel outline in another, so the tile's ink is the
+    bitmap plus at most that ring.
+    """
+    return sorted(bitmap - ink), sorted(ink - _dilated(bitmap))
+
+
+def help_tiles(game, count):
+    """The first *count* tiles of the help page, each as its set of ink."""
+    x, y = layout.HELP_PAGE
+    per = TEXELS_PER_HALFWORD[4]
+    wide = layout.HELP_TILE // per
+    out = []
+    for index in range(count):
+        rows = vram_region(game, x + wide * index, y, wide, layout.HELP_TILE)
+        out.append(tile_ink([[_halfword(pixel) for pixel in row]
+                             for row in rows]))
+    return out
+
+
+def help_page_sprites(game):
+    """The sprites of the frame that are cut from the help page."""
+    heads = gpu_list_heads(game)
+    first, size, step = layout.SCENERY_SWEEP
+    ram = b"".join(game.read_ram(base, step, os.path.join(
+        game.out_dir, "help-%08x.bin" % base))
+        for base in range(first, first + size, step))
+    nodes = []
+    for head in dict.fromkeys(heads[len(heads) // 2:]):
+        nodes += walk_gpu_list(ram, head)
+    return [one for one in sprites_of(commands_of(nodes))
+            if tuple(one["page"]) == layout.HELP_PAGE]
+
+
+def _page_still(game):
+    """True if nothing wrote the help page while nothing was pressed."""
+    game.client.call("continue")
+    return not _wait_for_hit(game, HELP_CONTROL_SECONDS)
+
+
+
+def krom_answers(game, button="Down"):
+    """(string pointer, glyph address) at every glyph lookup one press makes.
+
+    Ends in SILENCE: the string is rendered once, when the help text changes,
+    so there is no frame coming round to close the run with.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.HELP_GLYPH_RETURN))
+    out = []
+    try:
+        client.call("continue")
+        client.call("press_button", button=button,
+                    duration_frames=CONFIRM_FRAMES)
+        while True:
+            if not _wait_for_hit(game, HELP_FIRST_SECONDS if not out
+                                 else HELP_NEXT_SECONDS):
+                return out
+            registers = client.call("read_registers", group="gpr")
+            out.append((who_writes.register_value(registers, "s3"),
+                        who_writes.register_value(registers, "v0")))
+            if len(out) > HELP_STOP_LIMIT:
+                raise OracleError(
+                    "%s stopped more than %d time(s) for one press"
+                    % (who_writes.hx(layout.HELP_GLYPH_RETURN),
+                       HELP_STOP_LIMIT))
+            client.call("continue")
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _in_bios(address):
+    base, size = layout.BIOS_ROM
+    return base <= address < base + size
+
+
+def _help_writes(game):
+    """Every write to the help page one press causes: (rect, pc) each.
+
+    The rectangle is the measurement; the pc beside it is NOT.  The copy is a
+    DMA, so the program counter at the moment the GPU touches VRAM is wherever
+    the CPU has got to by then -- it read 0x8003A950 twice in a row while this
+    was being written and then 0x8003F2F4 and 0x8010A910 on the next two runs,
+    which is what a number with no meaning looks like when it is stable.
+
+    The run ends in silence, and one press gives ONE hit: the watch reports
+    the last write of the batch rather than every one of them, so what this
+    says is the shape of the write and which tile it landed in, never how
+    many tiles the press wrote.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("press_button", button="Down", duration_frames=CONFIRM_FRAMES)
+    out = []
+    while _wait_for_hit(game, HELP_FIRST_SECONDS if not out
+                        else HELP_NEXT_SECONDS):
+        hit = client.call("vram_watch", action="last_hit")
+        out.append(((hit.get("x"), hit.get("y"), hit.get("width"),
+                     hit.get("height")), hit.get("pc")))
+        if len(out) > HELP_STOP_LIMIT:
+            raise OracleError("the page was written more than %d time(s) for "
+                              "one press" % HELP_STOP_LIMIT)
+        client.call("continue")
+    if not out:
+        raise OracleError("Down wrote nothing to the page at %r in %ds, so "
+                          "the watchpoint has nothing to say"
+                          % (layout.HELP_PAGE, HELP_FIRST_SECONDS))
+    return out
+
+
+def help_bytes(game):
+    """The help box's string as the overlay holds it: Shift-JIS, with the
+    single-byte spaces that move the pen without drawing."""
+    path = os.path.join(game.out_dir, "help-string.bin")
+    pointer = struct.unpack("<I", game.read_ram(layout.SCREEN_HELP, 4,
+                                                path))[0]
+    if not RAM_BASE <= pointer < RAM_BASE + RAM_SIZE:
+        raise OracleError("the help pointer holds %#x, which is not RAM"
+                          % pointer)
+    return _cstring(game, pointer)
+
+
+def help_pieces(raw, special):
+    """[(code, from the ROM?)] for the characters of a help string that draw.
+
+    A single-byte space moves the pen and draws nothing, so it takes no tile.
+    Every other character is two bytes, big-endian, and takes one -- asked of
+    the console's ROM unless its code is one of *special*, the handful the
+    renderer draws from VRAM instead.
+    """
+    out, at = [], 0
+    while at < len(raw):
+        if raw[at] == HELP_SPACE:
+            at += 1
+            continue
+        if at + 1 >= len(raw):
+            raise OracleError("the help string ends inside a character: %r"
+                              % raw[-4:])
+        code = raw[at] << 8 | raw[at + 1]
+        out.append((code, code not in special))
+        at += 2
+    return out
+
+
+def check_help_box(slots=(2, 1), verbose=True):
+    """`--help-box [SLOT]`: who writes the help page, and where from.
+
+    The question of section 10.3 (o) about the help box, and the answer is
+    that the disc has nothing to do with it.  What is measured, each with its
+    control:
+
+      **the page is still** unless the help text changes -- a VRAM write
+          watchpoint over it hears nothing with nothing pressed;
+      **one press writes it** one 16x16 tile at a time -- four halfwords by
+          sixteen rows of a 4-bit page, inside the strip.  How MANY tiles is
+          not read off the watchpoint: it reports one hit for the press, the
+          last of the batch, and the count comes from the lookups and the
+          sprites below, which are exact;
+      **every letter comes from the console's ROM** -- the address the lookup
+          answers with is inside `layout.BIOS_ROM` for every character asked
+          of it, and the characters NOT asked are exactly the codes the
+          dispatch names (`help_special_codes`), of which `■` is one;
+      **the ROM's bitmap IS the tile** -- the 16x15 bits at that address are
+          the tile's ink up to the one-pixel outline the game smears around
+          them, and the next character's bitmap is not.
+    """
+    import screen
+    import who_writes
+
+    table = screen.load()
+    code, base = boot_code()
+    chain = help_chain(code, base)
+    special = help_special_codes(code, base)
+    row = ROWS[ROWS.index(CURSOR_STARTS_ON) + 1]
+    wide = layout.HELP_TILE // TEXELS_PER_HALFWORD[4]
+    print("  the chain, decoded from %s (%d bytes of code):"
+          % (layout.BOOT, len(code)))
+    print("    %s jal %s, which calls %s at %s -- the BIOS vector %s, "
+          "function %#x"
+          % (who_writes.hx(layout.HELP_GLYPH_CALL),
+             who_writes.hx(chain["lookup"]), who_writes.hx(layout.KROM_STUB),
+             ", ".join(who_writes.hx(one) for one in chain["calls"]),
+             who_writes.hx(chain["table"]), chain["function"]))
+    print("    and %d code(s) the dispatch draws from VRAM instead: %s"
+          % (len(special), ", ".join("%#06x" % one for one in special)))
+    problems = []
+    ready = preflight()
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        client = game.client
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, SLOTS[slot]))
+            restore_state(slot, verbose=False)
+            game.load_looks(slot, label="help-%d" % slot)
+            game.step(SCENERY_SETTLE)
+            client.call("breakpoint", action="clear")
+            watch = client.call("vram_watch", action="add",
+                                x=layout.HELP_PAGE[0], y=layout.HELP_PAGE[1],
+                                width=wide * HELP_TILES,
+                                height=layout.HELP_TILE)
+            try:
+                still = _page_still(game)
+                print("    control: with nothing pressed, nothing wrote the "
+                      "page in %ds: %s"
+                      % (HELP_CONTROL_SECONDS,
+                         "still" if still else "IT FIRED"))
+                if not still:
+                    problems.append("slot %d: the page is written with "
+                                    "nothing pressed, so the press below "
+                                    "proves nothing" % slot)
+                writes = _help_writes(game)
+            finally:
+                client.call("vram_watch", action="remove",
+                            id=watch.get("id", 1))
+            shapes = {one[0][2:] for one in writes}
+            tiles_written = sorted({(one[0][0] - layout.HELP_PAGE[0]) // wide
+                                    for one in writes})
+            print("    one Down wrote the page: %d hit(s), %s, tile(s) %s "
+                  "of the strip"
+                  % (len(writes),
+                     ", ".join("%sx%s" % one for one in sorted(shapes)),
+                     ",".join("%d" % one for one in tiles_written)))
+            print("      (the pc at each: %s -- printed, not asserted: the "
+                  "copy is a DMA, and the watch reports one hit for the "
+                  "press, not one per tile)"
+                  % ", ".join(sorted({str(one[1]) for one in writes})))
+            if shapes != {(wide, layout.HELP_TILE)}:
+                problems.append("slot %d: the page was written in %s, not in "
+                                "%dx%d tiles of a 4-bit page"
+                                % (slot, sorted(shapes), wide,
+                                   layout.HELP_TILE))
+            if any(one < 0 or one >= HELP_TILES for one in tiles_written):
+                problems.append("slot %d: the press wrote tile(s) %s, outside "
+                                "the %d of the strip"
+                                % (slot, tiles_written, HELP_TILES))
+            answers, pieces = None, None
+            runs = []
+            for _ in range(2):
+                restore_state(slot, verbose=False)
+                game.load_looks(slot)
+                game.step(SCENERY_SETTLE)
+                runs.append(krom_answers(game))
+            if runs[0] != runs[1]:
+                problems.append("slot %d: the same press read twice asks for "
+                                "%d and %d glyph(s), so nothing below is "
+                                "measured"
+                                % (slot, len(runs[0]), len(runs[1])))
+                continue
+            answers = runs[0]
+            print("    control: the same press twice asks for the same %d "
+                  "glyph(s)" % len(answers))
+            game.step(SCENERY_SETTLE)
+            raw = help_bytes(game)
+            text = screen.help_text(raw)
+            pieces = help_pieces(raw, special)
+            asked = [one for one in pieces if one[1]]
+            print("    the box now shows the %s help, %r: %d character(s) "
+                  "that draw, %d of them asked of the ROM and %d drawn from "
+                  "VRAM (%s)"
+                  % (row, text, len(pieces), len(asked),
+                     len(pieces) - len(asked),
+                     ", ".join("%#06x" % one for one, ask in pieces
+                               if not ask) or "none"))
+            if text != table["rows"][row]["help"]:
+                problems.append("slot %d: the box shows %r and the table says "
+                                "%r" % (slot, text,
+                                        table["rows"][row]["help"]))
+            outside = [one for _at, one in answers if not _in_bios(one)]
+            print("    %d lookup(s), %d answer(s) outside the console's ROM "
+                  "at %s+%#x; the first %s -> %s, the last %s -> %s"
+                  % (len(answers), len(outside),
+                     who_writes.hx(layout.BIOS_ROM[0]), layout.BIOS_ROM[1],
+                     who_writes.hx(answers[0][0]),
+                     who_writes.hx(answers[0][1]),
+                     who_writes.hx(answers[-1][0]),
+                     who_writes.hx(answers[-1][1])))
+            if outside:
+                problems.append("slot %d: %d glyph address(es) are not in the "
+                                "console's ROM, the first %s"
+                                % (slot, len(outside),
+                                   who_writes.hx(outside[0])))
+            if len(answers) != len(asked):
+                problems.append("slot %d: %d lookup(s) for the %d character(s)"
+                                " of the %s help that are not a special code"
+                                % (slot, len(answers), len(asked), row))
+                continue
+            drawn = help_page_sprites(game)
+            print("    the frame cuts %d sprite(s) from the page, %d of them "
+                  "on the CLUT %r"
+                  % (len(drawn), sum(1 for one in drawn
+                                     if tuple(one["clut"])
+                                     == layout.HELP_CLUT),
+                     list(layout.HELP_CLUT)))
+            if len(drawn) != len(pieces):
+                problems.append("slot %d: %d sprite(s) off the page against "
+                                "%d character(s) that draw"
+                                % (slot, len(drawn), len(pieces)))
+            tiles = help_tiles(game, len(pieces))
+            bitmaps, waiting = {}, list(answers)
+            for index, (_code, ask) in enumerate(pieces):
+                if ask:
+                    _at, address = waiting.pop(0)
+                    bitmaps[index] = krom_ink(game.read_ram(
+                        address, layout.HELP_GLYPH_BYTES,
+                        os.path.join(game.out_dir, "help-glyph.bin")))
+            same, off, control = 0, [], 0
+            for index, bitmap in sorted(bitmaps.items()):
+                missing, extra = glyph_in_tile(bitmap, tiles[index])
+                if not missing and not extra:
+                    same += 1
+                else:
+                    off.append("tile %d: %d pixel(s) of the ROM's glyph are "
+                               "not in it, and %d texel(s) fall outside that "
+                               "glyph's outline"
+                               % (index, len(missing), len(extra)))
+                if index + 1 < len(tiles) and index + 1 in bitmaps:
+                    control += not any(glyph_in_tile(bitmap,
+                                                     tiles[index + 1]))
+            print("    %d of %d tile(s) are the ROM's bitmap plus its "
+                  "one-pixel outline; control: the NEXT character's tile "
+                  "takes %d of those bitmaps" % (same, len(bitmaps), control))
+            problems += ["slot %d: %s" % (slot, line) for line in off]
+            if control:
+                problems.append("slot %d: %d bitmap(s) fit the next "
+                                "character's tile as well, so equal says "
+                                "nothing" % (slot, control))
+    for line in problems[:20]:
+        print("  FAIL  %s" % line)
+    print("oracle --help-box: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+
 def _screen_geometry(table):
     """The four numbers `ScreenReading` needs, out of the measured table."""
     return {"row0_y": table["row0_y"], "pitch": table["pitch"],
@@ -7843,6 +8411,52 @@ FIXED_ONE = 4096  # not-an-address: 1.0 in the 4.12 fixed point the GTE uses
 SPAN = 4096  # not-an-address: the size of the made-up file the check builds
 
 
+def _jal(target):
+    """A `jal <target>` word, for the self-check's synthetic code."""
+    return JAL << 26 | (target & ~RAM_BASE) >> 2
+
+
+def _addiu_word(register, immediate):
+    """An `addiu <register>, zero, <immediate>` word, likewise."""
+    return ADDIU << 26 | register << 16 | (immediate & IMMEDIATE_FIELD)
+
+
+def _synthetic_boot():
+    """(code, base) of a made-up text segment carrying the help box's chain.
+
+    Everything else in it is zero, which is what makes each refusal below the
+    word it names: there is nothing else in the segment for `help_chain` to
+    take for the chain.
+    """
+    base = layout.BOOT_BASE
+    end = max(layout.HELP_GLYPH_CALL, layout.HELP_GLYPH_LOOKUP,
+              layout.KROM_STUB) + 0x100  # not-an-address: room past the last word
+    code = bytearray(end - base)
+    for address, word in (
+            (layout.HELP_GLYPH_CALL, _jal(layout.HELP_GLYPH_LOOKUP)),
+            (layout.HELP_GLYPH_LOOKUP, _jal(layout.KROM_STUB)),
+            (layout.KROM_STUB, _addiu_word(T2, layout.KROM_TABLE)),
+            (layout.KROM_STUB + INSTRUCTION_SIZE,
+             T2 << 21 | JR_FUNCT),
+            (layout.KROM_STUB + 2 * INSTRUCTION_SIZE,
+             _addiu_word(T1, layout.KROM_FUNCTION))):
+        struct.pack_into("<I", code, address - base, word)
+    return bytes(code), base
+
+
+def _boot_without(address, word):
+    """The synthetic segment with one word of the chain replaced."""
+    code, base = _synthetic_boot()
+    broken = bytearray(code)
+    struct.pack_into("<I", broken, address - base, word)
+    return bytes(broken)
+
+
+def _synthetic_glyph(rows):
+    """One character of the ROM, as its fifteen big-endian rows."""
+    return struct.pack(">%dH" % len(rows), *rows)
+
+
 class _FakeSection:
     """A section span for the self-check, with only what `attribute()` reads."""
 
@@ -8123,6 +8737,59 @@ def _checks(c) -> None:
     c.refuses("a slot this cycle does not have is refused",
               lambda: game.load_looks(3), "not one of this cycle's two",
               OracleError)
+
+    # -- the help box's chain, and the console's glyph ----------------------
+    #
+    # The chain is three instructions of `/SLPM_870.56` and the check is that
+    # each is what it is said to be, so the cases are built here rather than
+    # read: a synthetic text segment with the chain in it, then one word of it
+    # broken at a time.
+    code, base = _synthetic_boot()
+    found = attempt("the chain of a synthetic boot segment",
+                    lambda: help_chain(code, base))
+    ok("the chain reads the lookup and the BIOS call out of the code",
+       found is not None and found["calls"] == [layout.HELP_GLYPH_LOOKUP]
+       and found["table"] == layout.KROM_TABLE, "%s" % (found,))
+    for label, address, word in (
+            ("the call is not a jal", layout.HELP_GLYPH_CALL, 0),
+            ("the call goes somewhere else", layout.HELP_GLYPH_CALL,
+             _jal(layout.KROM_STUB)),
+            ("the lookup never reaches the BIOS stub",
+             layout.HELP_GLYPH_LOOKUP, 0),
+            ("the stub does not load the kernel's vector", layout.KROM_STUB,
+             _addiu_word(T2, layout.KROM_TABLE + 1)),
+            ("the stub does not jump through it",
+             layout.KROM_STUB + INSTRUCTION_SIZE, 0),
+            ("the stub asks for another function",
+             layout.KROM_STUB + 2 * INSTRUCTION_SIZE,
+             _addiu_word(T1, layout.KROM_FUNCTION + 1))):
+        broken = _boot_without(address, word)
+        c.refuses("%s: refused" % label,
+                  lambda one=broken: help_chain(one, base), "", OracleError)
+    c.refuses("a header that loads somewhere else is refused",
+              lambda: boot_word(code, base, layout.BOOT_BASE - 4), "outside",
+              OracleError)
+
+    # One character of the console's ROM: fifteen big-endian rows, and the
+    # tile the game uploads is those bits plus a one-pixel ring.
+    glyph = _synthetic_glyph([0] + [0b0000001111000000] * 4 + [0] * 10)
+    ink = krom_ink(glyph)
+    ok("a glyph's rows are read big-endian, one bit a pixel",
+       ink == {(x, y) for y in range(1, 5) for x in range(6, 10)},
+       "%s" % (sorted(ink),))
+    c.refuses("a glyph shorter than the ROM's 30 bytes is refused",
+              lambda: krom_ink(glyph[:8]), "30 bytes", OracleError)
+    # Two halfwords a row, four texels each: the second nibble of the first
+    # halfword is texel 1, and the fourth nibble of the second is texel 7.
+    tile = [[0x00F0, 0x0000], [0x0000, 0x3000]]  # not-an-address: two rows of texels
+    ok("a 4-bit tile's ink is every texel that is not index 0",
+       tile_ink(tile) == {(1, 0), (7, 1)}, "%s" % (sorted(tile_ink(tile)),))
+    ok("the glyph is in the tile when the tile is it plus the outline",
+       glyph_in_tile(ink, _dilated(ink)) == ([], []))
+    ok("and it is not when a row of it is missing",
+       glyph_in_tile(ink, {one for one in ink if one[1] != 2})[0] != [])
+    ok("nor when the tile has ink two pixels off the glyph",
+       glyph_in_tile(ink, ink | {(20, 20)})[1] == [(20, 20)])
 
     # -- the state's media, read from inside the file -----------------------
     with tempfile.TemporaryDirectory() as tmp:
@@ -8583,6 +9250,8 @@ def main(argv):
             return check_assembly(rows=tuple(argv[2:]) or None)
         if len(argv) in (2, 3) and argv[1] == "--glyphs":
             return check_glyphs((int(argv[2]),) if len(argv) > 2 else (2, 1))
+        if len(argv) in (2, 3) and argv[1] == "--help-box":
+            return check_help_box((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) in (2, 3) and argv[1] == "--pages":
             return check_pages((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) in (2, 3) and argv[1] == "--repaint":
