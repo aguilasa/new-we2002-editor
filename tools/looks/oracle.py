@@ -5126,22 +5126,60 @@ def frame_glyphs(game):
                   for one in font_sprites(sprites_of(frame_commands(game))))
 
 
+def _glyphs_only_here(mine, theirs):
+    """The glyphs of *mine* the other side does not draw too, sorted.
+
+    A difference of multisets and not of sets: the same glyph twice on a line
+    is two glyphs, and a value that lost one of a repeated pair differs by
+    that one.
+    """
+    left = list(theirs)
+    out = []
+    for one in mine:
+        if one in left:
+            left.remove(one)
+        else:
+            out.append(one)
+    return sorted(out)
+
+
 def _glyph_differences(game, window):
     """What differs between the game's glyphs and the window's, by line.
 
     Empty when the two lists are the same glyph for glyph.  Otherwise one
-    sentence per line of the screen that differs, with the first glyph each
-    side has there -- the start of a misplaced value is the thing to read.
+    sentence per line of the screen that differs, naming the first glyph each
+    side draws that the other does not -- the start of a misplaced value is
+    the thing to read.
+
+    **The first glyph OF THE LINE is not that** (CORR-LOOKS-078).  Until this
+    the sentence printed `theirs[:1]` and `ours[:1]`, and a row whose label
+    sits left of its value -- which is every row on this screen -- had the
+    unchanged label as the leftmost glyph on both sides: the two halves of
+    the sentence printed the same tuple and said nothing about the value that
+    had moved.  It read as informative in LOOKS-TASK-38 only because the
+    planted defect happened to move a value to the LEFT of its label.
+
+    A line is reported when one side has a glyph the other does not, which is
+    what the sentence names.  Both sides arrive sorted (`frame_glyphs`,
+    `ui_check.read_screen`), so that is the same set of lines the old
+    element-by-element comparison reported -- minus the one case it could
+    only have reported with nothing to say.
     """
+    game = [tuple(one) for one in game]
+    window = [tuple(one) for one in window]
     lines = sorted({one[1] for one in game} | {one[1] for one in window})
     out = []
     for y in lines:
         theirs = [one for one in game if one[1] == y]
         ours = [one for one in window if one[1] == y]
-        if theirs != ours:
-            out.append("the glyphs on line y %d: the game draws %d starting "
-                       "%s, our window %d starting %s"
-                       % (y, len(theirs), theirs[:1], len(ours), ours[:1]))
+        only_theirs = _glyphs_only_here(theirs, ours)
+        only_ours = _glyphs_only_here(ours, theirs)
+        if only_theirs or only_ours:
+            out.append("the glyphs on line y %d: the game draws %d, the "
+                       "first the window lacks %s; our window %d, the first "
+                       "the game lacks %s"
+                       % (y, len(theirs), only_theirs[:1], len(ours),
+                          only_ours[:1]))
     return out
 
 
@@ -8410,6 +8448,35 @@ def _checks(c) -> None:
     ok("and without the drop they would not: the control",
        len([one for one in game_list
             if tuple(one["page"]) == layout.GLYPH_PAGE]) == len(laid) + 1)
+
+    # The line that differs to the RIGHT of an unchanged label
+    # (CORR-LOOKS-078).  The leftmost glyph of a row is the label's, and a
+    # misplaced value moves nothing about it, so a sentence that named the
+    # first glyph of the line named the label on both sides and said nothing.
+    # What it has to name is the first glyph each side draws and the other
+    # does not.
+    label = (200, 41, 184, 146)  # not-an-address: a glyph, (x, y, u, v)
+    in_game = (421, 41, 46, 158)  # not-an-address: idem, where the game put it
+    in_window = (176, 41, 46, 158)  # not-an-address: idem, where we put it
+    # Sorted on both sides, the way the two readers hand them over: our copy
+    # of the value is LEFT of the label it belongs to, and the game's right
+    # of it, so the leftmost glyph of the line is the label on one side only.
+    sentences = _glyph_differences([label, in_game], [in_window, label])
+    ok("a value moved beside an unchanged label names the moved glyph",
+       len(sentences) == 1 and "%s" % (in_game,) in sentences[0]
+       and "%s" % (in_window,) in sentences[0], "%s" % (sentences,))
+    ok("and not the label, which the two sides draw alike",
+       bool(sentences) and "%s" % (label,) not in sentences[0],
+       "%s" % (sentences,))
+    ok("a line drawn the same on both sides says nothing",
+       _glyph_differences([label, in_game], [label, in_game]) == [],
+       "%s" % (_glyph_differences([label, in_game], [label, in_game]),))
+    ok("a glyph one side draws and the other does not is named on its own",
+       _glyph_differences([label, in_game], [label])
+       == ["the glyphs on line y 41: the game draws 2, the first the window "
+           "lacks [(421, 41, 46, 158)]; our window 1, the first the game "
+           "lacks []"],
+       "%s" % (_glyph_differences([label, in_game], [label]),))
 
     # The window's cursor box off its picture (CORR-LOOKS-070): a picture at
     # scale 2 with DEFAUL's box drawn the way the window draws it -- a one-

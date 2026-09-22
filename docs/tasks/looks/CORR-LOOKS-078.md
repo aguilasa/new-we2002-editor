@@ -5,7 +5,7 @@ origin: LOOKS-TASK-38
 severity: low
 files: [tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -58,3 +58,65 @@ Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `edb4dbfa`: **reproduzida**
 $ python -c "... oracle._glyph_differences([(200,41,184,146),(421,41,46,158)],[(200,41,184,146),(176,41,46,158)])"
 ['the glyphs on line y 41: the game draws 2 starting [(200, 41, 184, 146)], our window 2 starting [(200, 41, 184, 146)]']
 ```
+
+### O conserto
+
+`_glyph_differences` passou a nomear, de cada lado, o **primeiro glifo que o
+outro lado não desenha** — a diferença de multiconjuntos da linha, calculada
+por um auxiliar novo, `_glyphs_only_here`. Multiconjunto e não conjunto: o
+mesmo glifo duas vezes na linha são dois glifos, e um valor que perdeu um de
+um par repetido difere por esse um.
+
+Duas consequências, as duas dentro do escopo do defeito:
+
+- a linha entra no relatório quando **há um glifo a nomear**, em vez de por
+  comparação elemento a elemento. Como os dois lados chegam ordenados
+  (`frame_glyphs` e `ui_check.read_screen` ordenam), é o mesmo conjunto de
+  linhas de antes, menos o único caso que a regra velha reportaria sem ter o
+  que dizer;
+- as duas listas são coagidas a tuplas na entrada, para que a comparação não
+  dependa de a leitura ter passado ou não por JSON.
+
+Depois:
+
+```text
+$ python -c "... oracle._glyph_differences([(200,41,184,146),(421,41,46,158)],[(200,41,184,146),(176,41,46,158)])"
+['the glyphs on line y 41: the game draws 2, the first the window lacks [(421, 41, 46, 158)]; our window 2, the first the game lacks [(176, 41, 46, 158)]']
+```
+
+É o que a Verificação pede: `(421, 41, 46, 158)` contra `(176, 41, 46, 158)`,
+e o rótulo `(200, 41, 184, 146)` — que não se moveu — fora da frase.
+
+### O self-check
+
+Quatro asserções novas no `_checks` do `oracle.py`, sobre glifos montados ali
+mesmo (sem emulador, como o resto do gate), com o caso do rótulo intacto no
+meio:
+
+```text
+  ok    a value moved beside an unchanged label names the moved glyph
+  ok    and not the label, which the two sides draw alike
+  ok    a line drawn the same on both sides says nothing
+  ok    a glyph one side draws and the other does not is named on its own
+```
+
+A primeira é o defeito do CORR; a segunda é o **controle** que separa o
+conserto da versão antiga (com `[:1]` ela ficava vermelha, porque a frase
+nomeava o rótulo); a terceira exige silêncio onde não há diferença; a quarta
+fixa a frase inteira quando um lado tem um glifo a mais.
+
+### Gates
+
+```text
+$ python tools/looks/oracle.py --check
+oracle.py: 0 failure(s)
+$ python tools/looks/selftest.py
+looks_selftest: 0 failure(s)      (rule 1 swept 27 file(s), 30094 line(s);
+                                   102 of 102 controls red)
+$ python tools/looks/cli.py check
+cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
+```
+
+Sem emulador nesta corrida (outro trabalhador segurava o DuckStation), então
+`--keys`, que é quem imprime essa frase de verdade, não foi rodado: o que se
+mediu foi a função, direto, e é dela que a frase sai.
