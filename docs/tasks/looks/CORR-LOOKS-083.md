@@ -1,0 +1,61 @@
+---
+id: CORR-LOOKS-083
+title: Plantar o controle do parse_keys que ignora a contagem
+origin: CORR-LOOKS-082
+severity: low
+files: [tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
+resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
+status: pending
+depends_on: []
+done_on: null
+done_commit: null
+---
+
+# CORR-LOOKS-083 — Plantar o controle do parse_keys que ignora a contagem
+
+Origin: [CORR-LOOKS-082](/docs/tasks/looks/CORR-LOOKS-082.md)
+
+## Problema identificado
+
+A [CORR-LOOKS-082](/docs/tasks/looks/CORR-LOOKS-082.md) deu ao `parse_keys` a
+forma `Right x41` e deixou onze self-checks no `screen.py`, com os casos de
+recusa. O que não existe é o **controle plantado** no `tools/looks/controls.py`:
+nada replanta na árvore um `parse_keys` que **ignora a contagem** — que devolve
+uma tecla onde a sequência pede 41 — para exigir o vermelho. É a mesma falta que
+a [CORR-LOOKS-081](/docs/tasks/looks/CORR-LOOKS-081.md) acabou de cobrir para o
+pulo do `_layout_problems`.
+
+O risco é concreto: sem o controle, um `parse_keys` que perdesse a expansão
+deixaria o `--keys` medindo uma sequência mais curta do que a escrita, com os
+dois lados concordando e o gate verde.
+
+## Evidência
+
+```text
+$ python tools/looks/controls.py | tail -1
+controls: 103 of 103 red (103 substitutions)
+$ grep -n "parse_keys" tools/looks/controls.py
+# nenhuma entrada
+```
+
+## Causa raiz
+
+O item da 082 pedia a sintaxe e os self-checks; o `controls.py` estava com o
+worker da 081 na mesma onda, e o controle ficou como encaminhamento.
+
+## Correção
+
+Acrescentar ao `tools/looks/controls.py` a entrada que troca a expansão por uma
+tecla só (`buttons.extend([button] * count)` por `buttons.append(button)`),
+exigindo vermelho no `screen`. A contagem vai de 103 para 104.
+
+## Arquivos a criar ou modificar
+
+- `tools/looks/controls.py`
+
+## Verificação
+
+`python tools/looks/controls.py --only <id novo>` fica **vermelho**, e `python
+tools/looks/selftest.py` segue verde com 104 de 104.
+
+## Log de Execução
