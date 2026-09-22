@@ -5,10 +5,10 @@ origin: LOOKS-TASK-38
 severity: low
 files: [docs/tasks/looks/progresso.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 9b7be2ac
 ---
 
 # CORR-LOOKS-080 — Marcar as entregas da Fase 10 das tasks 36, 37 e 38 no progresso
@@ -145,3 +145,6 @@ $ git diff --unified=0 docs/tasks/looks/progresso.md | grep -E '^@@'
 $ sh <rite> check --quick --cycle looks
 check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ```
+- **Closed** — commit `9b7be2ac` (2026-09-22): docs(looks): tick the Phase 10 deliveries of tasks 36, 37 and 38
+  - Files (`git show --name-status 9b7be2ac`):
+    - `M docs/tasks/looks/CORR-LOOKS-080.md`

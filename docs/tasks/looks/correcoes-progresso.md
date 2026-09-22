@@ -96,7 +96,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-077](/docs/tasks/looks/CORR-LOOKS-077.md) | _layout_problems pula a soletração dos valores depois da primeira falta | LOOKS-TASK-38 | low | done | 2026-09-22 |
 | [CORR-LOOKS-078](/docs/tasks/looks/CORR-LOOKS-078.md) | A linha de falha de glifo mostra o primeiro da linha, não o que difere | LOOKS-TASK-38 | low | done | 2026-09-22 |
 | [CORR-LOOKS-079](/docs/tasks/looks/CORR-LOOKS-079.md) | A seta esquerda está em x 384 em nove linhas, não oito | LOOKS-TASK-38 | low | pending | — |
-| [CORR-LOOKS-080](/docs/tasks/looks/CORR-LOOKS-080.md) | Marcar as entregas da Fase 10 das tasks 36, 37 e 38 no progresso | LOOKS-TASK-38 | low | in-progress | — |
+| [CORR-LOOKS-080](/docs/tasks/looks/CORR-LOOKS-080.md) | Marcar as entregas da Fase 10 das tasks 36, 37 e 38 no progresso | LOOKS-TASK-38 | low | done | 2026-09-22 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
