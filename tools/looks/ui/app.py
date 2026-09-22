@@ -243,7 +243,7 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
                            else args.frame)
 
     window = LooksSet(state, builder, args.scale)
-    window.stand_in_text = not args.no_stand_in_text
+    window.unplaced_text = not args.no_unplaced_text
     window.viewer.shelved = False
     # The panel draws with the camera the game projects with, when there is a
     # measured one on disc.  Without it the window says so and keeps the v1
@@ -329,9 +329,10 @@ def main(argv=None) -> int:
                              "without it the one the save states showed")
     parser.add_argument("--visible", action="store_true",
                         help="show the window where the user can see it")
-    parser.add_argument("--no-stand-in-text", action="store_true",
-                        help="leave out the plate's and the shirt's text in "
-                             "Qt's font, which stands in for the game's font "
+    parser.add_argument("--no-unplaced-text", action="store_true",
+                        help="leave out the plate's and the shirt's text, "
+                             "which is in the game's glyphs but not yet where "
+                             "the game puts it inside its box (LOOKS-TASK-38), "
                              "and covers sprite pixels the game leaves bare")
     args = parser.parse_args(argv)
 

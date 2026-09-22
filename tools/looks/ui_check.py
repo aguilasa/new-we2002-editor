@@ -1443,10 +1443,11 @@ def measure_sprites(python: str, app: str, where: str, env: dict) -> tuple:
         if not spots:
             return ([], "", None)
         out = os.path.join(where, "sprites-%d.png" % slot)
-        # Without the stand-in text: Qt's font is wider than the game's and
-        # covers sprite pixels the game leaves bare (LOOKS-TASK-37's to fix).
+        # Without the plate's and the shirt's text: it is in the game's
+        # glyphs but not yet where the game puts it (LOOKS-TASK-38), and it
+        # covers sprite pixels the game leaves bare.
         code, output = run_app(python, app, ["--state", str(slot), "--scale",
-                                             "1", "--no-stand-in-text",
+                                             "1", "--no-unplaced-text",
                                              "--screenshot", out], env)
         if code != 0 or not os.path.isfile(out):
             return ([], "slot %d: the screen did not draw: %s"
@@ -1581,7 +1582,7 @@ def measure_arrows(python: str, app: str, where: str, env: dict) -> tuple:
             out = os.path.join(where, "arrows-%d-%d.png"
                                % (slot, len(keys)))
             arguments = ["--state", str(slot), "--scale", "1",
-                         "--no-stand-in-text", "--screenshot", out]
+                         "--no-unplaced-text", "--screenshot", out]
             if keys:
                 arguments[2:2] = ["--keys", ",".join(keys)]
             code, output = run_app(python, app, arguments, env)

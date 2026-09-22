@@ -34,8 +34,13 @@ painted over the furniture once, which is the order the game's list draws
 them in.  And the two arrows beside the cursor's value, where the screen walk
 read them (`screen.State.arrows`).
 
-NOT measured, and therefore not claimed: the typeface.  The text is drawn in
-Qt's font until the game's glyph table is read (LOOKS-TASK-37).  Nor the pulse
+MEASURED since LOOKS-TASK-37: the typeface.  The labels, the values, the
+plate and the shirt are written with the game's own glyphs -- the font rule of
+`glyphs.py`, read off the overlay -- in the colour and with the spacing of the
+text object that writes each (`screen.State.style`).  NOT measured yet: where
+each string STARTS inside its box -- the values are right-aligned by the game
+and the plate and the shirt centred -- which is LOOKS-TASK-38's; until then
+they start at their box's left edge.  Nor the pulse
 of the arrows: the game dims and brightens them frame to frame, and the
 window draws them at 128, unmodulated -- the animation is phase 11's.
 
@@ -87,11 +92,12 @@ class LooksSet(QtWidgets.QWidget):
         self.builds = 0
         self.drawn = None
         self.tuple_text = state.tuple_text()
-        # The plate's and the shirt's text in Qt's font, standing in for the
-        # game's until LOOKS-TASK-37 reads its glyphs.  It is wider than the
-        # game's and lands on sprite pixels the game leaves bare, so the gate
-        # that judges the sprites photographs the window without it.
-        self.stand_in_text = True
+        # The plate's and the shirt's text, in the game's glyphs but not yet
+        # where the game puts them inside their box (LOOKS-TASK-38): they
+        # land on sprite pixels the game leaves bare, so the gate that judges
+        # the sprites photographs the window without them.
+        self.unplaced_text = True
+        self.glyph_images = {}
         # Where the game's camera comes from, handed in by whoever built the
         # window: a callable of the rows' values.  The window does not compose
         # it -- that is the core's (`scene.panel_camera`), and the camera is
@@ -192,6 +198,47 @@ class LooksSet(QtWidgets.QWidget):
                 rgba, width, height, 4 * width,
                 QtGui.QImage.Format.Format_RGBA8888).copy()
         return self.arrow_images[side]
+
+    def _glyph_image(self, sprite: dict) -> QtGui.QImage:
+        """One glyph off the disc, as the core cuts it, once per code and
+        colour -- the same letter comes grey in a label and lavender in a
+        value."""
+        key = (sprite["code"], tuple(sprite["colour"]))
+        if key not in self.glyph_images:
+            width, height = sprite["size"]
+            rgba = self.builder.sprite_rgba(dict(sprite, point=[0, 0]))
+            self.glyph_images[key] = QtGui.QImage(
+                rgba, width, height, 4 * width,
+                QtGui.QImage.Format.Format_RGBA8888).copy()
+        return self.glyph_images[key]
+
+    def _write(self, painter, text: str, point, style: dict) -> None:
+        """*text* in the game's glyphs, the pen starting at *point*."""
+        s = self.scale
+        for sprite in self.builder.text_sprites(text, point, style):
+            picture = self._glyph_image(sprite)
+            x, y = sprite["point"]
+            painter.drawImage(QtCore.QRect(x * s, y * s, picture.width() * s,
+                                           picture.height() * s), picture)
+
+    def texts(self) -> list:
+        """What this window writes, `[(text, point, style)]` in native pixels:
+        the rows' names and values, and -- unless left out -- the plate and
+        the shirt.  `paintEvent` writes exactly these."""
+        places, out = self.places, []
+        for index, name in enumerate(self.state.order):
+            y = places["rows_y"] + places["pitch"] * index
+            out.append((name, (places["labels_x"], y),
+                        self.state.style("labels")))
+            box = self.state.value_box(name)
+            out.append((self.state.text_of(name), (box[0] + 2, y),
+                        self.state.value_style(name)))
+        if self.unplaced_text:
+            out.append((self.state.plate(), tuple(places["plate"]),
+                        self.state.style("plate")))
+            out.append((self.state.shirt(), tuple(places["shirt"]),
+                        self.state.style("shirt")))
+        return out
 
     def _font(self, size: int) -> QtGui.QFont:
         font = QtGui.QFont("Consolas")
@@ -355,14 +402,6 @@ class LooksSet(QtWidgets.QWidget):
                              (self.places["title"][1] + 10) * s,
                              self.state.title())
         painter.setFont(small)
-        if self.stand_in_text:
-            painter.drawText(self.places["plate"][0] * s,
-                             (self.places["plate"][1] + 9) * s,
-                             self.state.plate())
-            painter.setPen(DIM)
-            painter.drawText(self.places["shirt"][0] * s,
-                             (self.places["shirt"][1] + 8) * s,
-                             self.state.shirt())
 
         # The rows.  The cursor rectangle first, so the text sits on top --
         # where the state says it is, which on DEFAUL's label is over the
@@ -375,15 +414,21 @@ class LooksSet(QtWidgets.QWidget):
             x, y = arrow["point"]
             painter.drawImage(QtCore.QRect(x * s, y * s, picture.width() * s,
                                            picture.height() * s), picture)
-        for index, name in enumerate(self.state.order):
-            box = self._row_rect(index)
-            painter.setFont(small)
-            painter.setPen(DIM)
-            painter.drawText(self.places["labels_x"] * s, box.bottom() - s,
-                             name)
-            painter.setPen(INK if index == self.state.cursor else DIM)
-            painter.drawText(self.places["values_x"] * s + 2 * s,
-                             box.bottom() - s, self.state.text_of(name))
+        if self.builder is not None:
+            for text, point, style in self.texts():
+                self._write(painter, text, point, style)
+        else:
+            # No disc to cut the glyphs from: Qt's font stands in, and says
+            # nothing about the game's.
+            for index, name in enumerate(self.state.order):
+                box = self._row_rect(index)
+                painter.setFont(small)
+                painter.setPen(DIM)
+                painter.drawText(self.places["labels_x"] * s,
+                                 box.bottom() - s, name)
+                painter.setPen(INK)
+                painter.drawText(self.places["values_x"] * s + 2 * s,
+                                 box.bottom() - s, self.state.text_of(name))
 
         # The help box, which carries the refusal when there is one.
         help_box = self._rect(self.places["help"])

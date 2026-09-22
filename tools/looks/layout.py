@@ -78,6 +78,7 @@ SELECT = "/SELECT.BIN"
 ANIME = "/BIN/ANIME.BIN"
 SELECT8 = "/SELECT8.BIN"
 EDT_2D = "/BIN/EDT_2D.BIN"
+SELECTC = "/SELECTC.BIN"
 
 KIT_DIR = "/BIN/"
 KIT_PREFIX = "TEX_"
@@ -118,6 +119,13 @@ DIGEST = {
     # and every texel LOOKS SET samples from it decodes to what VRAM shows
     # (`oracle.py --scenery`).
     EDT_2D: "ec4bebf15b702080313972c982777974a2406cd12438cad6f23660027a1458eb",
+    # Japanese only, measured 2026-09-22 (LOOKS-TASK-37).  The English disc has
+    # 26a350a937eded8a4d4b2edf021b15e2d7089bb71cc1dc6a9132f44e7f5a37c0 here:
+    # the two files differ in 5,201 bytes between 0x2B8 and 0x5A26, the text
+    # the patch translated.  The glyph routine and its table -- what this
+    # cycle reads -- are byte for byte the same in both and in the running
+    # game's RAM (`GLYPH_ROUTINE`, `GLYPH_TABLE`).
+    SELECTC: "205ec241d0b8a316bc2efda07f4b989bcc7b2a610c14112735d355f9122bd03a",
 }
 
 KIT_DIGEST = {
@@ -364,7 +372,7 @@ def kit_tag(disc_path: str) -> str:
     return disc_path[len(head):-len(tail)]
 
 
-CODE_FILES = frozenset({SELECT8})
+CODE_FILES = frozenset({SELECT8, SELECTC})
 """Japanese-only as well, and CODE: the overlay the LOOKS SET screen runs.
 
 Read for the stature rule (`STATURE_*` below), which is the same instructions
@@ -403,6 +411,7 @@ LBA = {
     ANIME: 3000,
     SELECT8: 1800,
     EDT_2D: 3900,
+    SELECTC: 1950,
 }
 
 SIZE = {
@@ -413,6 +422,7 @@ SIZE = {
     ANIME: 396804,
     SELECT8: 125176,
     EDT_2D: 40360,
+    SELECTC: 106966,
 }
 
 # --- Where each model file loads in RAM -----------------------------------
@@ -1716,6 +1726,43 @@ libgs `GsSPRITE` in the scratchpad at 0x1F8000B8 -- width off a table, height
 its caller hands that to the sprite sort with the frame's own `GsOT`, whose tag
 is the head GPU_LIST_SUBMIT sends.  So the text IS in the list, as sprites.
 """
+
+SELECTC_BASE = 0x800FC000
+"""Where `/SELECTC.BIN` loads in RAM while LOOKS SET runs.
+
+Measured by content on 2026-09-22 (LOOKS-TASK-37): the 64 bytes at
+SCREEN_GLYPH occur once on each disc, at offset 0xFB04 of this file, and the
+glyph table at 0x8010D008 at 0x11008 -- the same distance apart as in RAM.
+SELECT8.BIN, the overlay the stature rule is in, ends at 0x800E98F8 and holds
+neither.
+"""
+
+GLYPH_ROUTINE = (0x8010BB04, 0x8010C0D8)
+GLYPH_ROUTINE_DIGEST = (
+    "3610cf53539d5c36a55f71d5a57ff2f8e85e180715a46121fda17545f420fcfe"
+)
+"""The glyph routine, SCREEN_GLYPH up to the word after its `jr ra`, and the
+sha256 of its bytes.
+
+`glyphs.py` transcribes the routine's code ranges -- which code takes its `u`
+and width from the table and which `v` each band of codes gets -- and a
+transcription is only as good as the code it was read from.  So the rule is
+refused unless these bytes are the ones it was read from: the same on the
+Japanese disc, the English disc and the running game's RAM (2026-09-22).
+"""
+
+GLYPH_TABLE = 0x8010D008
+"""(u, width) byte pairs, one per character code from 32 up.
+
+The routine indexes it by `code - 32` for codes 32 to 127, and by `code - 65`
+for 161 to 166 -- which reads pairs 96 to 101, right after the ASCII ones.
+"""
+
+GLYPH_PAGE = (704, 256)
+GLYPH_CLUT = (0, 497)
+GLYPH_HEIGHT = 12
+"""What the routine writes into every glyph's `GsSPRITE`, whatever the code:
+page word 27 -- VRAM (704, 256) at 4 bits --, CLUT (0, 497), height 12."""
 
 SCREEN_HELP = 0x800E8338
 """A pointer to the help string the box at the bottom shows.

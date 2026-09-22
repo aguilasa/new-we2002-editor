@@ -74,6 +74,7 @@ CHECK_IMAGE = (
     "modelfile",
     "texture",
     "sprites",
+    "glyphs",
     "atlas",
     "skin",
     "looks",

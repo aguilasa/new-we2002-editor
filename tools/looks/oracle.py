@@ -44,6 +44,7 @@ Usage:
     python tools/looks/oracle.py --writes [HAIR [SLOT]]  # every quad the game writes, value by value
     python tools/looks/oracle.py --screen [--write]  # LOOKS SET measured: every text, help, cursor and box; --write makes screen.json
     python tools/looks/oracle.py --keys [SEQUENCE [SLOT]]  # the same presses in the game, in screen.json and in our window
+    python tools/looks/oracle.py --glyphs [SLOT]  # the font rule of glyphs.py against every font sprite the frame drew
     python tools/looks/oracle.py --default [SLOT]  # what NAT and DEFAUL do: the nationality byte, and the default that is not applied
     python tools/looks/oracle.py --pose [SLOT]  # where the pose comes from: ANIME.BIN in RAM, the entry the screen plays, and the GTE matrix load
     python tools/looks/oracle.py --pose <SLOT> <N> [N ...]  # the pose ITSELF: the matrix and translation of every piece of frame N, and the hierarchy
@@ -4085,8 +4086,9 @@ def _tmd_headers(data):
 # the boxes are.  `--screen --write` writes screen.json; `--screen` walks it
 # all again and fails on any difference.
 
-OBJECT_SIZE = 16
-"""The bytes of a text object that layout.SCREEN_PRINT documents."""
+OBJECT_SIZE = 20
+"""The bytes of a text object that layout.SCREEN_PRINT documents -- the
+sixteen it lists, and the colour after them (LOOKS-TASK-37)."""
 
 STRING_READ = 256
 """How much of a string is read before its terminating zero is looked for.
@@ -4201,8 +4203,53 @@ def screen_objects(game):
         out.append({"at": at, "x": x, "y": y,
                     "width": struct.unpack_from("<H", raw, 6)[0],
                     "kind": kind, "raw": text,
+                    "style": text_style(raw),
                     "lines": (screen.decode(text) if kind in ASCII_KINDS
                               else None)})
+    return out
+
+
+TEXT_ALIGN, TEXT_SPACING, TEXT_COLOUR = 13, 14, 16
+"""Where a text object keeps how it is written, past the kind at byte 12.
+
+Read on 2026-09-22 (LOOKS-TASK-37) off the eight objects of both states:
+byte 14 is the SPACING the pen adds after every glyph -- 2 for the labels, 1
+for `Unknown`, 0 for `SHIRT N` and the digits, and exactly the gap between
+two glyphs the draw pass reports --; bytes 16 to 18 are the COLOUR every glyph
+of the object is modulated by, (128, 128, 128) for the labels, the plate and
+the shirt and (112, 112, 240) for the values; byte 13 takes 0, 2 and 3 and
+reads as the alignment inside the box, which is LOOKS-TASK-38's to measure."""
+
+
+def text_style(raw):
+    """{spacing, colour, align} of one text object's bytes."""
+    return {"spacing": raw[TEXT_SPACING],
+            "colour": list(raw[TEXT_COLOUR:TEXT_COLOUR + 3]),
+            "align": raw[TEXT_ALIGN]}
+
+
+def text_styles(reading, orders, labels):
+    """How each text of the screen is written: the labels, the plate, the
+    shirt, and each row's value.
+
+    A value can be put together from more than one object -- `A1 TYPE` is the
+    `A1` of one and the `TYPE` of another, with spacings 0 and 2 -- and which
+    objects make it up changes with the value.  What is kept per row is the
+    style of the object that writes its LAST piece; splitting a value by
+    object, and where each piece starts, is layout and LOOKS-TASK-38's.
+    """
+    import looks
+
+    by_key = {obj["at"]: obj for obj in reading.objects}
+    outside = reading.outside()
+    out = {"labels": labels["style"],
+           "plate": outside["plate"]["style"],
+           "shirt": outside["shirt"]["style"], "values": {}}
+    for name in looks.SCREEN:
+        keys = [key for key in orders[name] if key in reading.pieces[name]]
+        if not keys:
+            raise OracleError("row %s shows no piece, so it has no style" % name)
+        out["values"][name] = by_key[keys[-1]]["style"]
     return out
 
 
@@ -4557,7 +4604,7 @@ def measure_screen(game, verbose=True):
         table["initial"][str(slot)] = dict(
             outside, rows=reading.rows(orders),
             help=screen_help(game), cursor=looks.SCREEN[cursor_row],
-            record=record)
+            record=record, styles=text_styles(reading, slot_orders, labels))
         say = print if verbose else (lambda *a: None)
         say("  slot %d on load: %s, plate %s, cursor on %s, help %r; %d "
             "glyph string(s) checked against %d object(s); the title object "
@@ -5050,6 +5097,104 @@ def _say_arrows(arrows):
     return " ".join("%s(%d,%d)" % ({"left": "<", "right": ">"}[one["side"]],
                                     one["point"][0], one["point"][1])
                     for one in arrows)
+
+
+GLYPH_CONTROL = 1
+"""Pairs the control reads the glyph table off by: the whole comparison
+against the frame redone with each code taking its neighbour's pair has to
+fail, or matching said nothing."""
+
+
+def check_glyphs(slots=(2, 1), verbose=True):
+    """`--glyphs [SLOT]`: the font rule against what the frame drew.
+
+    For every glyph the draw pass reports -- code, x, y -- the rule of
+    `glyphs.py`, read off the Japanese disc, says the `uv` and the size, and
+    the frame's own list has to hold a sprite at that point with exactly
+    those, on the font's page and in its CLUT.  Spaces draw nothing and have
+    to have NO sprite.  Every font sprite of the frame has to be claimed by a
+    glyph.  And the control: the same comparison with the table read one
+    pair off must fail, which is what gives "all equal" its weight.
+    """
+    import glyphs
+    import iso_source
+    import who_writes
+
+    ready = preflight()
+    with iso_source.open_disc(ready["image"]) as disc:
+        table = glyphs.table_of(disc.read(layout.SELECTC))
+    font = glyphs.Font(table)
+    shifted = glyphs.Font(table[2 * GLYPH_CONTROL:]
+                          + table[:2 * GLYPH_CONTROL])
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            restore_state(slot, verbose=False)
+            game.load_looks(slot)
+            game.step(SCENERY_SETTLE)
+
+            def read(registers):
+                value = lambda name: who_writes.register_value(registers, name)
+                return (value("a0"), _signed16(value("a1")),
+                        _signed16(value("a2")), value("a3"))
+
+            calls = _stops(game, layout.SCREEN_GLYPH, read, GLYPH_REPEAT,
+                           GLYPH_LIMIT)
+            drawn = [one for one in sprites_of(frame_commands(game))
+                     if tuple(one["page"]) == layout.GLYPH_PAGE]
+            at = {tuple(one["point"]): one for one in drawn}
+            draws = [(code, x, y) for code, x, y, passing in calls
+                     if not passing]
+            equal, spaces, wrong, claimed = 0, 0, [], set()
+            control = 0
+            for code, x, y in draws:
+                point = (x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1])
+                u, v, width = font.glyph(code)
+                found = at.get(point)
+                if code == ord(" "):
+                    spaces += 1
+                    if found is not None:
+                        wrong.append("a space at %r has a sprite" % (point,))
+                    continue
+                if found is None:
+                    wrong.append("%r at %r has no sprite" % (chr(code), point))
+                    continue
+                claimed.add(point)
+                if (found["uv"] == (u, v) and found["size"] == (width,
+                                                              layout.GLYPH_HEIGHT)
+                        and tuple(found["clut"]) == layout.GLYPH_CLUT):
+                    equal += 1
+                else:
+                    wrong.append("%r at %r: the rule says uv %r size %r and "
+                                 "the frame drew uv %r size %r"
+                                 % (chr(code), point, (u, v),
+                                    (width, layout.GLYPH_HEIGHT),
+                                    found["uv"], found["size"]))
+                su, sv, swidth = shifted.glyph(code)
+                control += (found["uv"] == (su, sv)
+                            and found["size"][0] == swidth)
+            unclaimed = [one["point"] for one in drawn
+                         if tuple(one["point"]) not in claimed]
+            print("  -- slot %d --" % slot)
+            print("    %d glyph(s) drawn, %d space(s); %d of %d font sprite(s) "
+                  "equal to the rule in uv, size and CLUT, %d unclaimed"
+                  % (len(draws), spaces, equal, len(drawn), len(unclaimed)))
+            print("    control: the table read %d pair(s) off matches %d of "
+                  "them" % (GLYPH_CONTROL, control))
+            problems += ["slot %d: %s" % (slot, line) for line in wrong]
+            if unclaimed:
+                problems.append("slot %d: %d font sprite(s) no glyph claims, "
+                                "the first at %r" % (slot, len(unclaimed),
+                                                     unclaimed[0]))
+            if control == equal:
+                problems.append("slot %d: the shifted table matches as often "
+                                "as the real one, so equal says nothing"
+                                % slot)
+    for line in problems[:20]:
+        print("  FAIL  %s" % line)
+    print("oracle --glyphs: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
 
 
 def _screen_geometry(table):
@@ -8033,6 +8178,8 @@ def main(argv):
             return check_where(row=argv[2] if len(argv) > 2 else "HAIR")
         if len(argv) >= 2 and argv[1] == "--assembly":
             return check_assembly(rows=tuple(argv[2:]) or None)
+        if len(argv) in (2, 3) and argv[1] == "--glyphs":
+            return check_glyphs((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) in (2, 3) and argv[1] == "--pages":
             return check_pages((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) in (2, 3) and argv[1] == "--repaint":

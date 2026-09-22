@@ -3086,6 +3086,37 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > do Qt, e o texto muda com a tecla, então o que a janela precisa é da tabela
 > de glifos do jogo (código → `u`, `v` e largura), não da foto de um quadro.
 >
+> **A fonte, lida da rotina** (2026-09-22,
+> [`LOOKS-TASK-37`](/docs/tasks/looks/37-a-tabela-de-glifos.md)). A rotina de
+> glifo não está no `/SELECT8.BIN`: está no **`/SELECTC.BIN`**, carregado em
+> 0x800FC000, achado por conteúdo nos dois discos. O arquivo difere entre eles
+> em 5.201 bytes, que são o texto traduzido. A rotina (0x8010BB04-0x8010C0D8)
+> e a tabela (0x8010D008) são iguais byte a byte nos dois discos e na RAM do
+> jogo, e a regra se lê do **japonês**, pela guarda. Para os códigos 32 a 126,
+> `u` e largura vêm de um par de bytes da tabela (`código − 32`), e o `v` de
+> uma faixa de códigos. `A` a `J` ficam na linha dos dígitos (146), `K` a `Z`
+> na 158, e as minúsculas a partir de `g` na 170. `@`, `^` e `~` têm largura
+> 0. De 161 a 223 a rotina calcula por aritmética, e acima disso procura
+> Shift-JIS de dois bytes: **está lido e não está implementado**, porque
+> nenhuma string desta tela chega lá. O espaço tem largura 4 e não gera
+> sprite. O `oracle.py --glyphs` confere a regra contra o quadro: 121 de 121
+> sprites de fonte iguais em `uv`, tamanho e CLUT nos dois slots, com a tabela
+> lida um par adiante casando 0.
+>
+> **O avanço é a largura mais o espaçamento do objeto.** O objeto de texto
+> guarda, depois do `kind`, o que parece o **alinhamento** no byte 13 (0, 2
+> ou 3); o **espaçamento** no byte 14 (2 nos rótulos, 1 em `Unknown`, 0 em
+> `SHIRT N` e nos dígitos); e a **cor** dos glifos nos bytes 16 a 18
+> ((128,128,128) em rótulos, placa e camisa; (112,112,240) nos valores). O
+> `screen.json` grava o estilo de cada texto. Um valor pode ser montado de
+> vários objetos: `A1 TYPE` é o `A1` de um e o `TYPE` de outro. O estilo
+> gravado por linha é o do objeto do último pedaço. A janela escreve com
+> esses glifos, e os rótulos, alinhados à esquerda no x do objeto, batem
+> **pixel a pixel** com o quadro do jogo (0 de 16.416 nos dois slots, com o
+> quadro deslocado um pixel divergindo em 2.875). Onde cada valor, a placa e
+> a camisa **começam** dentro da caixa é a
+> [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md).
+>
 > **Os estáticos e as setas, desenhados** (2026-09-21,
 > [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md)). O
 > `sprites.py` monta cada sprite do disco como o GPU o corta — quatro texels

@@ -1920,7 +1920,8 @@ which the v2 filled it with, is 142 away.
 """
 
 OUTSIDE_REGIONS = ("panel", "rows", "help", "title band", "ground below",
-                   "ground left", "title", "icon", "shirt boxes", "plate")
+                   "ground left", "title", "icon", "shirt boxes", "plate",
+                   "labels", "values")
 """The regions whose ground colour this cycle has MEASURED (`oracle.py
 --scenery`), and so the ones this comparison asserts.  The rest of the screen
 -- the cursor box -- is printed beside them and not asserted, because nothing
@@ -1965,6 +1966,40 @@ def sprite_regions(slot):
         boxes[name] = (min(old[0], box[0]), min(old[1], box[1]),
                        max(old[2], box[2]), max(old[3], box[3]))
     return boxes
+
+
+def text_regions(table):
+    """{labels, values: box} -- the two columns of text in the rows box.
+
+    Off `screen.json` and nothing else: the labels from their object's x to
+    the left edge of the leftmost value box, the values from there to the
+    right edge of the widest one, both over the twelve lines (LOOKS-TASK-37).
+    """
+    width, height = table["display"]
+    x0 = table["initial"]["2"]["anchors"]["labels"][0] + width // 2
+    top = table["row0_y"] + height // 2
+    bottom = top + table["pitch"] * len(table["order_of_rows"]) - 1
+    boxes = [table["rows"][name]["cursor"] for name in table["order_of_rows"]]
+    left = min(box[0] for box in boxes)
+    right = max(box[2] for box in boxes)
+    return {"labels": (x0, top, left - 1, bottom),
+            "values": (left, top, right, bottom)}
+
+
+LABEL_INK_SLACK = 0
+"""Pixels of the labels' column allowed to differ from the game's frame."""
+
+
+def _area(box):
+    return (box[2] - box[0] + 1) * (box[3] - box[1] + 1)
+
+
+def ink_differences(one, two, box):
+    """Pixels of *box* where the two frames differ past `OUTSIDE_SLACK`."""
+    left, top, right, bottom = box
+    return sum(1 for y in range(top, bottom + 1)
+               for x in range(left, right + 1)
+               if colour_distance(one[y][x], two[y][x]) > OUTSIDE_SLACK)
 
 
 def ground_colour(frame, box, skip=None):
@@ -2039,6 +2074,7 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
                        for name in table["regions"])
         regions.update(FURNITURE_REGIONS)
         regions.update(sprite_regions(slot))
+        regions.update(text_regions(table))
         control = [name for name in sorted(regions)
                    if ground_colour(first, regions[name])
                    != ground_colour(again, regions[name])]
@@ -2061,6 +2097,29 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
         width, height, channels, rows = shot
         ours = [[tuple(row[x * channels:x * channels + 3])
                  for x in range(width)] for row in rows]
+        # The labels are left-aligned where their object says, so they are
+        # the one text that can be held pixel for pixel: the pixels of the
+        # column that differ past a measured colour's slack, the game's
+        # frame against the same frame photographed again as the floor.
+        label_box = text_regions(table)["labels"]
+        floor = ink_differences(first, again, label_box)
+        apart = ink_differences(first, ours, label_box)
+        shifted = [row[1:] + row[:1] for row in first]
+        control = ink_differences(shifted, ours, label_box)
+        print("    labels, pixel for pixel: %d of %d differ (the game against "
+              "itself: %d; the game one pixel off: %d)"
+              % (apart, _area(label_box), floor, control))
+        if not control:
+            problems.append("slot %d: the labels one pixel off do not differ "
+                            "either, so equal says nothing" % slot)
+        if floor:
+            problems.append("slot %d: the labels differ from themselves in %d "
+                            "pixel(s), so the comparison has no floor"
+                            % (slot, floor))
+        elif apart > LABEL_INK_SLACK:
+            problems.append("slot %d: %d pixel(s) of the labels differ from the "
+                            "game's, over the %d allowed"
+                            % (slot, apart, LABEL_INK_SLACK))
         for name in sorted(regions):
             region = regions[name]
             skip = figure if name == "panel" else None

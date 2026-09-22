@@ -465,7 +465,8 @@ class Builder:
     `iso_source`'s, and `ui/` may not import it.
     """
 
-    __slots__ = ("image_path", "figure", "frame", "kit", "_data", "_art")
+    __slots__ = ("image_path", "figure", "frame", "kit", "_data", "_art",
+                 "_font")
 
     def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE,
                  frame: int = None):
@@ -483,8 +484,10 @@ class Builder:
                           for name in (layout.EDT_MOD, layout.MODEL,
                                        layout.DAT2D, layout.ANIME,
                                        layout.SELECT8, layout.EDT_2D,
+                                       layout.SELECTC,
                                        layout.kit_path(self.kit))}
         self._art = None
+        self._font = None
 
     def build(self, text: str, frame: int = None) -> Scene:
         """*text* as a scene, or `BadScene` carrying the table's own sentence."""
@@ -515,6 +518,29 @@ class Builder:
         try:
             return self.art().paint(picture, size, drawn)
         except sprites.BadSprite as exc:
+            raise BadScene(str(exc)) from exc
+
+    def font(self):
+        """The game's font rule, off the Japanese overlay (`glyphs.Font`)."""
+        import glyphs
+
+        if self._font is None:
+            try:
+                self._font = glyphs.Font(glyphs.table_of(
+                    self._data[layout.SELECTC]))
+            except glyphs.BadGlyph as exc:
+                raise BadScene(str(exc)) from exc
+        return self._font
+
+    def text_sprites(self, text: str, point, style: dict) -> list:
+        """*text* as the glyph sprites the game draws, the pen starting at
+        *point* and moving by each width plus the style's spacing."""
+        import glyphs
+
+        try:
+            return self.font().run(text, point, style["spacing"],
+                                   style["colour"])
+        except glyphs.BadGlyph as exc:
             raise BadScene(str(exc)) from exc
 
     def sprite_rgba(self, sprite: dict) -> bytes:

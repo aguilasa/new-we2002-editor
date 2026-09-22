@@ -1,13 +1,46 @@
-# Armadilhas do ciclo `looks` — da 86 em diante
+# Armadilhas do ciclo `looks` — da 80 em diante
 
-As armadilhas 1 a 85 estão no
+As armadilhas 1 a 79 estão no
 [`perfil-looks.md`](/docs/prompts/perfil-looks.md), na seção "Armadilhas
-medidas neste ciclo". Este arquivo guarda da 86 em diante, desde a
+medidas neste ciclo". Este arquivo guarda da 80 em diante, desde a
 [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md), quando o perfil
 chegou ao limite de tamanho do rito (`[profile].max_kb`). O rito lê este
 arquivo **por busca**, não por inteiro, então cada entrada nomeia os caminhos
 e os termos que a disparam.
 
+80. **As bandas guardam a lista da tela ANTERIOR junto com a desta.** Andar
+    uma cadeia de nós bem formados na RAM dá 74 pacotes plausíveis que não são
+    desta tela — as faixas de lá ficam a 9 pixels, as daqui a 12. O que separa
+    é a **figura**: a cor que o pacote declara contra o pixel que o console
+    mostrou dentro do retângulo dele (`oracle.py --scenery`). Geometria
+    plausível não é evidência de que o pacote foi desenhado.
+81. **O texto da tela não está em lista nenhuma da RAM.** Varrida inteira, com
+    quads, triângulos e sprites: só aparecem o painel, a ajuda, as faixas e o
+    boneco. E o `--repaint` mostra que **tudo** é redesenhado a cada quadro —
+    então o caminho de impressão manda os comandos sem deixar nó. Procurar o
+    título e os glifos na display list é procurar onde não está.
+82. **O `gpu_dump` do fork sai em `.zst`, e esta máquina não lê zstd.** Nem
+    `zstandard` no Python, nem `zstd` no `PATH` — a mesma armadilha que o
+    `savestate.py` registra. O caminho que funciona aqui é ler a RAM e a VRAM
+    por MCP.
+83. **Diff de tela entre "antes" e "depois" mede a caminhada, não o dano.** A
+    primeira versão do `--pages` estragava uma página, andava seis quadros e
+    comparava com o quadro anterior: **48 ladrilhos mudavam para toda página**,
+    inclusive as que nada amostra. O boneco anda. O controle certo é **duas
+    corridas do mesmo comprimento** a partir do state — uma com dano e uma
+    sem —, e as duas sem dano têm de dar a mesma tela.
+84. **O que o GPU tem em vigor responde onde o pacote não existe.** A página da
+    fonte saiu do `get_gpu_state` numa parada do `SCREEN_GLYPH`, não de pacote
+    nenhum. Quando a lista não tem o desenho, pergunte ao hardware o estado em
+    que ele está desenhando.
+85. **A cor mais comum de um degradê é decidida por empate.** Comparando o chão
+    das regiões, a "mais comum" da caixa de ajuda saiu (8,64,96) no jogo e
+    (0,40,64) na janela — os dois degradês indo da mesma cor à mesma cor. O
+    pontilhado do console e as faixas de 5 bits decidem o empate. A mediana de
+    cada canal é o meio do degradê dos dois lados, e poucas letras não a
+    movem. E pintar um degradê num viewer OpenGL não se faz com `glClearColor`:
+    o painel ficou 24 longe do jogo até ser pintado por `QPainter` por trás do
+    boneco.
 86. **Filtro de cor contra o quadro descarta todo pacote semitransparente.** O
     quadro mostra a mistura, não a cor declarada: a barra de título são três
     degradês **aditivos** e sumiram da varredura da armadilha 80 inteiros, com
@@ -58,4 +91,13 @@ e os termos que a disparam.
     por isso, com o decode igual ao jogo. O `looks_ui` julga os sprites com
     `--no-stand-in-text`; quando a fonte do jogo chegar
     ([`LOOKS-TASK-37`](/docs/tasks/looks/37-a-tabela-de-glifos.md)), a opção
-    perde o motivo.
+    perde o motivo. **Chegou, e o motivo mudou de nome:** a placa e a camisa
+    agora saem nos glifos do jogo, mas do x do objeto, e não de onde o jogo as
+    centra. A opção virou `--no-unplaced-text` e vale até a
+    [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md).
+94. **A rotina de um endereço pode morar em outra overlay.** A de glifo
+    (0x8010BB04) fica depois do fim do `/SELECT8.BIN` (0x800E98F8), no
+    **`/SELECTC.BIN`**, carregado em 0x800FC000. Quem a procurar no arquivo
+    que já tem a regra de estatura não acha, e pode ler isso como "não está no
+    disco". Arquivo de código se acha **por conteúdo**: 64 bytes da RAM
+    procurados em todos os arquivos dos dois discos (LOOKS-TASK-37).

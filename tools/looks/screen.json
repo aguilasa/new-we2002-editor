@@ -61,6 +61,145 @@
     "SKIN": "A TYPE"
    },
    "shirt": "SHIRT N",
+   "styles": {
+    "labels": {
+     "align": 0,
+     "colour": [
+      128,
+      128,
+      128
+     ],
+     "spacing": 2
+    },
+    "plate": {
+     "align": 3,
+     "colour": [
+      128,
+      128,
+      128
+     ],
+     "spacing": 2
+    },
+    "shirt": {
+     "align": 3,
+     "colour": [
+      128,
+      128,
+      128
+     ],
+     "spacing": 0
+    },
+    "values": {
+     "AGE": {
+      "align": 3,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 0
+     },
+     "BODY": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "BOOTS": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "DEFAUL": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "FACE": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "FOOT": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "H.COL": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "H.F.COL.": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "HAIR": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "HEIG": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "NAT": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 1
+     },
+     "SKIN": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     }
+    }
+   },
    "title": "S SET",
    "title_object": "LOOKS SET",
    "title_skipped": "LOOK"
@@ -114,6 +253,145 @@
     "SKIN": "A TYPE"
    },
    "shirt": "SHIRT N",
+   "styles": {
+    "labels": {
+     "align": 0,
+     "colour": [
+      128,
+      128,
+      128
+     ],
+     "spacing": 2
+    },
+    "plate": {
+     "align": 3,
+     "colour": [
+      128,
+      128,
+      128
+     ],
+     "spacing": 2
+    },
+    "shirt": {
+     "align": 3,
+     "colour": [
+      128,
+      128,
+      128
+     ],
+     "spacing": 0
+    },
+    "values": {
+     "AGE": {
+      "align": 3,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 0
+     },
+     "BODY": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "BOOTS": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "DEFAUL": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "FACE": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "FOOT": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "H.COL": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "H.F.COL.": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "HAIR": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "HEIG": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     },
+     "NAT": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 1
+     },
+     "SKIN": {
+      "align": 2,
+      "colour": [
+       112,
+       112,
+       240
+      ],
+      "spacing": 2
+     }
+    }
+   },
    "title": "S SET",
    "title_object": "LOOKS SET",
    "title_skipped": "LOOK"

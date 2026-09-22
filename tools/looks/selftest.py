@@ -43,6 +43,7 @@ MODULES = (
     "modelfile",
     "texture",
     "sprites",
+    "glyphs",
     "atlas",
     "skin",
     "looks",

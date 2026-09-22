@@ -699,40 +699,7 @@ Não se revertem sem o usuário pedir.
     era `(offset, profundidade, CLUT)` e passou a incluir o contêiner: sem
     isso a página do corpo e a da cabeça colidem na tabela do viewer, e o
     desenho morre com `KeyError` numa chave que parece legítima.
-80. **As bandas guardam a lista da tela ANTERIOR junto com a desta.** Andar
-    uma cadeia de nós bem formados na RAM dá 74 pacotes plausíveis que não são
-    desta tela — as faixas de lá ficam a 9 pixels, as daqui a 12. O que separa
-    é a **figura**: a cor que o pacote declara contra o pixel que o console
-    mostrou dentro do retângulo dele (`oracle.py --scenery`). Geometria
-    plausível não é evidência de que o pacote foi desenhado.
-81. **O texto da tela não está em lista nenhuma da RAM.** Varrida inteira, com
-    quads, triângulos e sprites: só aparecem o painel, a ajuda, as faixas e o
-    boneco. E o `--repaint` mostra que **tudo** é redesenhado a cada quadro —
-    então o caminho de impressão manda os comandos sem deixar nó. Procurar o
-    título e os glifos na display list é procurar onde não está.
-82. **O `gpu_dump` do fork sai em `.zst`, e esta máquina não lê zstd.** Nem
-    `zstandard` no Python, nem `zstd` no `PATH` — a mesma armadilha que o
-    `savestate.py` registra. O caminho que funciona aqui é ler a RAM e a VRAM
-    por MCP.
-83. **Diff de tela entre "antes" e "depois" mede a caminhada, não o dano.** A
-    primeira versão do `--pages` estragava uma página, andava seis quadros e
-    comparava com o quadro anterior: **48 ladrilhos mudavam para toda página**,
-    inclusive as que nada amostra. O boneco anda. O controle certo é **duas
-    corridas do mesmo comprimento** a partir do state — uma com dano e uma
-    sem —, e as duas sem dano têm de dar a mesma tela.
-84. **O que o GPU tem em vigor responde onde o pacote não existe.** A página da
-    fonte saiu do `get_gpu_state` numa parada do `SCREEN_GLYPH`, não de pacote
-    nenhum. Quando a lista não tem o desenho, pergunte ao hardware o estado em
-    que ele está desenhando.
-85. **A cor mais comum de um degradê é decidida por empate.** Comparando o chão
-    das regiões, a "mais comum" da caixa de ajuda saiu (8,64,96) no jogo e
-    (0,40,64) na janela — os dois degradês indo da mesma cor à mesma cor. O
-    pontilhado do console e as faixas de 5 bits decidem o empate. A mediana de
-    cada canal é o meio do degradê dos dois lados, e poucas letras não a
-    movem. E pintar um degradê num viewer OpenGL não se faz com `glClearColor`:
-    o painel ficou 24 longe do jogo até ser pintado por `QPainter` por trás do
-    boneco.
-Da 86 em diante, as armadilhas moram em
+Da 80 em diante, as armadilhas moram em
 [`perfil-looks.armadilhas.md`](/docs/prompts/perfil-looks.armadilhas.md): este
 perfil chegou ao limite de tamanho do rito, e o rito lê as de lá por busca.
 ---
@@ -778,10 +745,12 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | alvo | precisa | **como se roda AQUI** | por `ctest`, onde o build configura | existe desde |
 | --- | --- | --- | --- | --- |
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
-| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os onze `--check-image` (desde a LOOKS-TASK-36, com o `sprites`; desde a LOOKS-TASK-29, com o `stature`), todos até o fim (a ordem é de leitura, não guarda — [`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
+| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os doze `--check-image` (desde a LOOKS-TASK-37, com o `glyphs`; desde a LOOKS-TASK-36, com o `sprites`; desde a LOOKS-TASK-29, com o `stature`), todos até o fim (a ordem é de leitura, não guarda — [`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
 | `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` — desde a LOOKS-TASK-36 fotografa a janela **nos dois slots** e confere os sprites estáticos contra os pixels que o **jogo** mostrou, gravados pelo `--scenery --write` (nenhuma cor sai do `sprites.py`), com dois controles plantados — os sprites que não chegam à janela e a placa na CLUT do jogador de linha; desde a CORR-LOOKS-068 também os **pixels das setas** `▶` (na carga) e `◀` (após `Up`), contra os do jogo gravados pelo mesmo `--write` e modulados pela cor do pulso, com dois controles (CLUT e `uv` trocados); desde a LOOKS-TASK-31 confere a mobília que a janela pinta contra a tabela medida em `work/looks-scenery/` (cada pacote amostrado dentro do canto, com um controle plantado), desde a LOOKS-TASK-30 exige `textured == primitives` na figura inteira (o corpo vestido), e desde a LOOKS-TASK-29 também fotografa a tela em 155, 175 e 210 cm e em `H TYPE` e exige que a tinta do painel siga as razões da regra (`STATURE_SLACK`), com dois controles plantados; sem câmera medida em `work/looks-camera/` diz que não julgou | `ctest -R looks_ui` | LOOKS-TASK-16 |
 | `looks_live` | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo) | `python tools/looks/oracle.py --check-live` | `ctest -R looks_live` | LOOKS-TASK-19 (o comando, da LOOKS-TASK-07) |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/glyphs.py --check-image` — a regra da fonte lida do `/SELECTC.BIN` japonês pela guarda, recusada se a rotina não for a transcrita, e a largura de cada código de 32 a 126 | — | LOOKS-TASK-37 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~1 min | `python tools/looks/oracle.py --glyphs [SLOT]` — a regra da fonte contra cada sprite de fonte do quadro: `uv`, tamanho e CLUT de cada código que a passada de desenho reporta, espaço sem sprite, nenhum sprite órfão, e a tabela lida um par adiante como controle | — | LOOKS-TASK-37 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/sprites.py --check-image` — os cinco grupos estáticos e as duas CLUTs da placa resolvidos no `DAT2D.BIN`, as páginas com texel no disco, e as duas setas espelho uma da outra | — | LOOKS-TASK-36 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
@@ -789,7 +758,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min (medido 2026-09-20, os dois slots) | `python tools/looks/oracle.py --kit [SLOT]` — qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer: cada retângulo que cada contêiner declara contra a VRAM, halfword a halfword, com o controle (a mesma VRAM lida duas vezes, idêntica) fechando antes. Exige **uma página e uma paleta** exatas e que nenhum outro contêiner as reproduza (armadilha 77) | — | LOOKS-TASK-30 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~6 min por slot (a RAM inteira é lida) | `python tools/looks/oracle.py --scenery [SLOT] [--write]` — os pacotes que desenham a mobília da tela, **andados da lista que o quadro entrega ao GPU** (armadilha 86) e **partidos em comandos** (armadilha 89), em ordem de desenho, com blend e polilinhas, e o controle (a tela carregada duas vezes) fechando antes; os sprites por página, com os texels amostrados decodificados do `EDT_2D.BIN` e do `DAT2D.BIN` contra a VRAM e o controle (a VRAM três linhas abaixo) tendo de divergir; o `--write` deixa `work/looks-scenery/slotN.json`, que é de onde a janela pinta — e, desde a LOOKS-TASK-36, as amostras de pixel de cada sprite estático, lidas do frame buffer com a CPU parada, que são o gabarito do `looks_ui`; desde a CORR-LOOKS-068, também as das duas setas (`ARROW_WALKS`: a carga e `Up`), com a CLUT de cada uma conferida contra `sprites.ARROW_CLUT` | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | idem; ~3 min por slot | `python tools/looks/oracle.py --repaint [SLOT]` — sobrescreve os dois buffers e deixa o jogo correr: o mapa diz que parte da tela é redesenhada a cada quadro e que parte foi pintada uma vez, com o controle do mesmo mapa duas vezes | — | LOOKS-TASK-31 |
-| *(sem alvo ainda)* | as duas variáveis, os dois states, o fork, o venv e `work/looks-scenery/`; ~2 min | `python tools/looks/confront.py --outside [SLOT]` — a nossa tela contra a do jogo **fora do boneco**: o chão de cada região pela mediana de cada canal (armadilha 85), com o jogo fotografado duas vezes de controle. Afirma as regiões cuja cor foi medida (`OUTSIDE_REGIONS`) dentro de `OUTSIDE_SLACK`, e imprime o resto sem afirmar; desde a LOOKS-TASK-36, com as caixas dos sprites estáticos — título, ícone, caixas da camisa e placa —, tiradas da tabela medida | — | LOOKS-TASK-31 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states, o fork, o venv e `work/looks-scenery/`; ~2 min | `python tools/looks/confront.py --outside [SLOT]` — a nossa tela contra a do jogo **fora do boneco**: o chão de cada região pela mediana de cada canal (armadilha 85), com o jogo fotografado duas vezes de controle. Afirma as regiões cuja cor foi medida (`OUTSIDE_REGIONS`) dentro de `OUTSIDE_SLACK`, e imprime o resto sem afirmar; desde a LOOKS-TASK-36, com as caixas dos sprites estáticos — título, ícone, caixas da camisa e placa —, tiradas da tabela medida; desde a LOOKS-TASK-37, com as colunas de rótulos e valores, e os **rótulos pixel a pixel** contra o quadro do jogo, com o quadro deslocado um pixel de controle | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min por slot | `python tools/looks/oracle.py --pages [SLOT]` — o que na tela vem de cada página da VRAM, estragando uma por vez, com duas corridas sem dano de controle (armadilha 83) | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | venv + `WE2002_LOOKS_IMAGE` e as capturas de um `--run`; **sem emulador**, ~1 min | `python tools/looks/confront.py --kit-control [SLOT]` — a mesma tupla desenhada no uniforme de outros dois times, contra a foto do jogo: o kit medido tem de ficar `KIT_CONTROL_MARGIN` mais perto. É o controle negativo do uniforme, porque o `--score` não o alcança (armadilha 78) | — | LOOKS-TASK-30 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |

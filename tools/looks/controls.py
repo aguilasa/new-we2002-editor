@@ -652,7 +652,7 @@ CONTROLS = (
         "    \"stature\",\n)",
         ")",
         ("cli",),
-        "the disc gate running ten of the eleven --check-image: green, and "
+        "the disc gate running eleven of the twelve --check-image: green, and "
         "blind to the one left out -- the shape looks_image had for five "
         "tasks, when it ran modelfile alone",
     ),
@@ -939,6 +939,30 @@ CONTROLS = (
         ("sprites",),
         "the plate drawn in the CLUT the measured table happened to hold: the "
         "screen then copies a slot instead of reading the position",
+    ),
+    Control(
+        "glyphs-band-shifted", "glyphs.py", "V_BANDS",
+        "    (75, 146),",
+        "    (76, 146),",
+        ("glyphs",),
+        "K read from the digits' row, one band boundary off: every K the "
+        "screen writes comes out as another glyph of the page",
+    ),
+    Control(
+        "glyphs-table-one-pair-on", "glyphs.py", "Font.glyph",
+        "        index = code - FIRST",
+        "        index = code - FIRST + 1",
+        ("glyphs",),
+        "the table read one pair on: each letter takes its neighbour's u and "
+        "width, and the text is legible nonsense",
+    ),
+    Control(
+        "glyphs-routine-unchecked", "glyphs.py", "table_of",
+        "    if len(routine) != end - start or got != layout.GLYPH_ROUTINE_DIGEST:",
+        "    if False:",
+        ("glyphs",),
+        "the bands applied to a routine nobody read: a table next to other "
+        "code is indexed by rules transcribed from somewhere else",
     ),
 )
 

@@ -497,6 +497,7 @@ def validate(table: dict) -> list:
                 problems.append("slot %s shows %r on %s, which the walk never "
                                 "reached" % (slot, shown, name))
         problems += _title_problems(slot, state)
+        problems += _style_problems(slot, state)
     if sorted(table.get("initial", {})) != ["1", "2"]:
         problems.append("the initial values are not those of slots 1 and 2")
     return problems
@@ -602,6 +603,40 @@ def _arrow_problems(name: str, row: dict) -> list:
             and len(row.get("texts", [])) <= 2):
         problems.append("row %s has no value between its ends and stores "
                         "arrows there" % name)
+    return problems
+
+
+TEXT_ROLES = ("labels", "plate", "shirt")
+SPACING_MAX = 8
+"""A spacing past this would be a byte read from the wrong offset: the
+measured ones are 0, 1 and 2 (LOOKS-TASK-37)."""
+
+
+def _style_problems(slot, state: dict) -> list:
+    """Every text the window writes has to say how the game writes it.
+
+    `{spacing, colour, align}` for the labels, the plate, the shirt and each
+    row's value -- off the text objects' own bytes (`oracle.text_style`).
+    """
+    styles = state.get("styles")
+    if not isinstance(styles, dict):
+        return ["slot %s does not say how its text is written" % slot]
+    problems = []
+    found = [(role, styles.get(role)) for role in TEXT_ROLES]
+    found += [("value of %s" % name, styles.get("values", {}).get(name))
+              for name in looks.SCREEN]
+    for what, style in found:
+        if not isinstance(style, dict):
+            problems.append("slot %s: no style for the %s" % (slot, what))
+            continue
+        if not 0 <= style.get("spacing", -1) <= SPACING_MAX:
+            problems.append("slot %s: the %s is spaced %r"
+                            % (slot, what, style.get("spacing")))
+        colour = style.get("colour")
+        if (not isinstance(colour, list) or len(colour) != 3
+                or not all(0 <= one <= 255 for one in colour)):
+            problems.append("slot %s: the %s is coloured %r"
+                            % (slot, what, colour))
     return problems
 
 
@@ -807,6 +842,20 @@ class State:
         if self.on_label:
             return list(row["label"]["cursor"])
         return list(row["cursor"])
+
+    def value_box(self, row: str) -> list:
+        """The box the walk measured over *row*'s value, in native pixels."""
+        return list(self.table["rows"][row]["cursor"])
+
+    def style(self, role: str) -> dict:
+        """How the game writes the labels, the plate or the shirt:
+        `{spacing, colour, align}` off the text object's own bytes."""
+        return dict(self.table["initial"][self.slot]["styles"][role])
+
+    def value_style(self, row: str) -> dict:
+        """How the game writes *row*'s value -- the style of the object that
+        writes its last piece, as the state loads (LOOKS-TASK-37)."""
+        return dict(self.table["initial"][self.slot]["styles"]["values"][row])
 
     def plate(self) -> str:
         return self.table["initial"][self.slot]["plate"]
@@ -1102,6 +1151,14 @@ def _checks(c) -> None:
     table = _toy_table()
     ok("a whole toy table validates", validate(table) == [],
        "%r" % validate(table))
+    broken = json.loads(json.dumps(table))
+    del broken["initial"]["1"]["styles"]["values"]["AGE"]
+    ok("a row whose value says nothing of how it is written is refused",
+       any("value of AGE" in p for p in validate(broken)))
+    broken = json.loads(json.dumps(table))
+    broken["initial"]["2"]["styles"]["labels"]["spacing"] = 200
+    ok("a spacing no object carries is refused",
+       any("spaced" in p for p in validate(broken)))
     walked = State(table, 2)
     ok("on arrival at the left end the right arrow shows alone",
        [one["side"] for one in walked.arrows()] == ["right"],
@@ -1352,8 +1409,13 @@ def _toy_table() -> dict:
                                       {"side": "right", "point": [480, 43]}],
                           "right_end": [{"side": "left", "point": [300, 43]}]}}
     rows["SKIN"]["texts"] = ["A TYPE", "B TYPE", "C TYPE", "D TYPE"]
+    style = {"spacing": 2, "colour": [128, 128, 128], "align": 0}
     initial = {slot: {"rows": {name: rows[name]["texts"][0]
                                for name in looks.SCREEN},
+                      "styles": {"labels": style, "plate": style,
+                                 "shirt": style,
+                                 "values": {name: style
+                                            for name in looks.SCREEN}},
                       "title": title_drawn("LOOKS SET  "),
                       "title_object": "LOOKS SET  ",
                       "title_skipped": title_skipped("LOOKS SET  ")}

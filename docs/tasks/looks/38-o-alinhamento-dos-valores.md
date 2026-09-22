@@ -65,6 +65,18 @@ valores encostados na borda direita.
   sendo a caixa de `NAT` descida pelo passo; é dele que a janela escreve os
   valores hoje, e é esse o ponto que esta task troca pela caixa do objeto.
 
+- **Da [`LOOKS-TASK-37`](/docs/tasks/looks/37-a-tabela-de-glifos.md):** o
+  byte 13 do objeto de texto parece o **modo de alinhamento**: 0 nos rótulos,
+  2 nos objetos de `TYPE`, `Unknown` e `RIGHT`, 3 nos dígitos, na placa e na
+  camisa. Ele já está gravado no `screen.json` como `align` em
+  `initial.*.styles`. Falta medir o que cada modo faz. E um valor é montado de
+  **vários objetos**, cada um com o seu espaçamento (`A1 TYPE` = `A1`, com
+  espaçamento 0 e um tab, mais `TYPE`, com 2). Hoje a janela o escreve numa
+  corrida só, com o estilo do objeto do último pedaço
+  (`State.value_style`), a partir da borda esquerda da caixa da linha. Placa
+  e camisa saem do x do objeto, e por isso o `looks_ui` julga os sprites com
+  `--no-unplaced-text`. Com o alinhamento, essa opção perde o motivo.
+
 ## Log de Execução
 
 *(preencher ao executar)*
