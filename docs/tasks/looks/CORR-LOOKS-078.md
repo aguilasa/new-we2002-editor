@@ -5,10 +5,10 @@ origin: LOOKS-TASK-38
 severity: low
 files: [tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: ac1fa29b
 ---
 
 # CORR-LOOKS-078 — A linha de falha de glifo mostra o primeiro da linha, não o que difere
@@ -120,3 +120,7 @@ cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
 Sem emulador nesta corrida (outro trabalhador segurava o DuckStation), então
 `--keys`, que é quem imprime essa frase de verdade, não foi rodado: o que se
 mediu foi a função, direto, e é dela que a frase sai.
+- **Closed** — commit `ac1fa29b` (2026-09-22): fix(looks): name the first glyph that differs, not the first of the line
+  - Files (`git show --name-status ac1fa29b`):
+    - `M docs/tasks/looks/CORR-LOOKS-078.md`
+    - `M tools/looks/oracle.py`
