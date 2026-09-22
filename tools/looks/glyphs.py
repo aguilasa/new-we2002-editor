@@ -189,9 +189,14 @@ def _checks(c) -> None:
     blank = bytearray(_toy_table())
     blank[2 * (ord("@") - FIRST) + 1] = 0
     empty = Font(bytes(blank))
-    ok("a code of width 0 draws nothing and does not move the pen",
+    # Read off the disc (CORR-LOOKS-073): the draw loop of SCREEN_PRINT adds
+    # the object's spacing after every glyph but a space's, whatever the
+    # width -- so a width-0 code still moves the pen by the spacing.
+    ok("a code of width 0 draws nothing and the pen moves by the spacing",
        empty.run("@", (0, 0), 2, (128,) * 3) == []
-       and empty.width("@", 0) == 0)
+       and empty.width("@", 2) == 2
+       and [one["point"] for one in empty.run("@A", (0, 0), 2, (128,) * 3)]
+       == [[2, 0]])
     drawn = font.run("A B", (10, 20), 2, (112, 112, 240))
     ok("a space moves the pen and draws nothing", len(drawn) == 2)
     wa, ws = font.glyph(ord("A"))[2], font.glyph(ord(" "))[2]
@@ -260,9 +265,12 @@ def _check_image(image_path: str) -> int:
         widths = [font.glyph(code)[2] for code in codes]
         print("  v %3d: %-26r widths %s" % (v, text, widths))
         empty += [chr(code) for code in codes if not font.glyph(code)[2]]
-    # Width 0 is the table's own "no glyph" -- the routine draws nothing and
-    # does not move the pen -- and is printed, not failed.  What would be a
-    # problem is a letter or a digit without one: the screen draws all of them.
+    # Width 0 is the table's own "no glyph" -- nothing shows, and the pen
+    # still moves by the object's spacing: both passes of SCREEN_PRINT
+    # (0x8010AA0C and its draw loop at 0x8010C4DC, the same bytes on both
+    # discs) add byte 14 after the width the routine returns, 0 or not
+    # (CORR-LOOKS-073).  It is printed, not failed.  What would be a problem is
+    # a letter or a digit without one: the screen draws all of them.
     print("  no glyph (width 0): %s" % " ".join(empty))
     missing = [char for char in empty if char.isalnum()]
     problems += len(missing)

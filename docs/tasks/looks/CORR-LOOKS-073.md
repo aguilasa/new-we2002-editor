@@ -5,7 +5,7 @@ origin: LOOKS-TASK-37
 severity: low
 files: [tools/looks/glyphs.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -70,3 +70,47 @@ glyphs.py:252  # does not move the pen -- ...
 $ python -c "... glyphs.Font(bytes(b)).width('@',2)"
 2
 ```
+
+Execução em 2026-09-22: **medido lendo o código do disco**, e o jogo faz o
+que o `Font` já fazia — a caneta anda o espaçamento num código de largura 0.
+Mudou o self-check e o comentário, não o código.
+
+O que se leu, em `/SELECTC.BIN` (base `0x800FC000`), com os mesmos bytes no
+disco japonês e no inglês (sha256 dos três trechos: `dc359aa0…`, `7365d847…`,
+`3610cf53…`, iguais nos dois):
+
+```text
+SCREEN_GLYPH 8010bb4c..bb74  códigos 32..127: w = tabela[2*(c-32)+1] -> sh 0x1F8000C0, sem desvio para 0
+passada que mede (SCREEN_PRINT)
+  8010ae2c  lhu v0,192(0x1F80) ; addu s5,s5,v0          largura
+  8010ae58  lb  v0,14(s4)      ; addu s5,s5,v0          espaçamento, pulado só para 0xDE/0xDF
+passada que desenha (8010c4dc, kind 32 -> jal 8010bb04 com a3=0)
+  8010c93c  espaço (32) pula o GsSortSprite (0x8003e8bc); largura 0 não pula
+  8010c9c0  lhu v0,192 ; lb v1,14(s1) ; addu v0,v0,v1 ; addu s2,a0,v0   x += w + espaçamento
+```
+
+Antes e depois:
+
+```text
+antes  ok("a code of width 0 draws nothing and does not move the pen", ... empty.width("@", 0) == 0)
+depois ok("a code of width 0 draws nothing and the pen moves by the spacing",
+          run("@")==[] and width("@", 2) == 2 and run("@A") põe o A em x = 2)
+$ python -c "... glyphs.Font(bytes(b)).width('@',2)"
+2
+$ python tools/looks/glyphs.py
+  ok    a code of width 0 draws nothing and the pen moves by the spacing
+glyphs.py: 0 failure(s)
+controle: Font.run com `x += width + (spacing if width else 0)` numa cópia
+  FAIL  a code of width 0 draws nothing and the pen moves by the spacing
+glyphs.py: 1 failure(s)
+```
+
+Gates: `selftest.py` 0 failure(s) (101 de 101 controles vermelhos), `cli.py check`
+12 ok, `glyphs.py --check-image` 0 problem(s) (`@ ^ ~` sem glifo).
+
+Não medido ao vivo: nenhuma string da tela tem `@`, `^` ou `~` (`screen.json`),
+então nenhum quadro do jogo exercita o caso; a leitura é estática, como a das
+`V_BANDS`. E ela mostra uma diferença que fica registrada, não consertada: o
+jogo **entrega** ao `GsSortSprite` um sprite de largura 0 (só o espaço é
+pulado), e o `Font.run` não põe nada na lista. Na tela não aparece nada nos
+dois casos; numa comparação de lista de sprites, apareceria.
