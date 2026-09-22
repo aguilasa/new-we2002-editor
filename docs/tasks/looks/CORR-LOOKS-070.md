@@ -5,10 +5,10 @@ origin: CORR-LOOKS-067
 severity: low
 files: [tools/looks/oracle.py, tools/looks/screen.py, tools/looks/screen.json]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 145d2798
 ---
 
 # CORR-LOOKS-070 — A caixa do cursor no valor do DEFAUL começa em x 396 no jogo, e a tabela a carrega da linha de carga em x 314
@@ -180,3 +180,9 @@ A janela não mudou: ela já desenhava `state.cursor_box()`, e o conserto do
 janela escreve os valores, continua sendo a caixa de `NAT` descida pelo passo —
 é o ponto que a [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md)
 troca, e ganhou nota lá.
+- **Closed** — commit `145d2798` (2026-09-22): fix(looks): measure the cursor box per row — NAT starts at x 314, AGE 436, FOOT 428, the other nine 396 — and compare it in --keys
+  - Files (`git show --name-status 145d2798`):
+    - `M docs/tasks/looks/CORR-LOOKS-070.md`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/screen.json`
+    - `M tools/looks/screen.py`
