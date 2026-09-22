@@ -59,3 +59,18 @@ toda linha `$ python tools/looks/oracle.py --keys …` copiada do arquivo da tas
 sai com código 0.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `ae915dba`: **reproduzida**.
+
+```text
+$ python tools/looks/oracle.py --keys "<Right x10>" 2
+oracle FAILED: '<Right x10>' is not one of the four this screen answers to: Up, Down, Left, Right
+  (saída 1; falha no parse, sem subir emulador -- oracle.py:5643 chama parse_keys antes do preflight em 5648)
+
+linha 151 do arquivo da task: 47 teclas, 317 caracteres de comando (335 com o comentário)
+linha 153: 32 teclas, 232 (249 com o comentário)
+maior linha nos outros arquivos numerados de docs/tasks/looks/: 229 (36-...:178)
+
+tools/looks/screen.py:1093  def parse_keys(text)  -- split por vírgula contra BUTTONS (screen.py:856);
+  nenhuma sintaxe de repetição. A Causa raiz desta CORR diz "perto da linha 1084": são 1093.
+```

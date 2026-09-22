@@ -62,3 +62,16 @@ fica **vermelho** (o defeito plantado é pego), e `python
 tools/looks/selftest.py` segue verde, com 103 de 103.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `ae915dba`: **reproduzida**.
+
+```text
+$ python tools/looks/controls.py
+controls: 102 of 102 red (102 substitutions)
+# nenhum id menciona o pulo por acumulador; os screen-* existentes são outros sete
+# cópia com `if problems:` replantado no _layout_problems (screen.py:723):
+  FAIL  a table with a piece fault on one value and a misspelling on another reports both, not the first
+        ["row SKIN, 'A TYPE', piece 0 is aligned 1"]
+screen.py: 1 failure(s)   (saída 1)
+# na árvore, sem plantio: screen.py: 0 failure(s)
+```
