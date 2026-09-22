@@ -5,10 +5,10 @@ origin: LOOKS-TASK-37
 severity: low
 files: [tools/looks/glyphs.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 59a3ad96
 ---
 
 # CORR-LOOKS-073 — Fix the width-0 self-check that claims the pen stays put
@@ -114,3 +114,7 @@ então nenhum quadro do jogo exercita o caso; a leitura é estática, como a das
 jogo **entrega** ao `GsSortSprite` um sprite de largura 0 (só o espaço é
 pulado), e o `Font.run` não põe nada na lista. Na tela não aparece nada nos
 dois casos; numa comparação de lista de sprites, apareceria.
+- **Closed** — commit `59a3ad96` (2026-09-22): fix(looks): say a width-0 glyph still moves the pen by the spacing, as the game's code does
+  - Files (`git show --name-status 59a3ad96`):
+    - `M docs/tasks/looks/CORR-LOOKS-073.md`
+    - `M tools/looks/glyphs.py`
