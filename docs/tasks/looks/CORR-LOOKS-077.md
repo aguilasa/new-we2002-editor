@@ -3,7 +3,7 @@ id: CORR-LOOKS-077
 title: "_layout_problems pula a soletração dos valores depois da primeira falta"
 origin: LOOKS-TASK-38
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/screen.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -57,3 +57,14 @@ O comando de duas faltas acima imprime os **dois** problemas, e
 `python tools/looks/screen.py --check` segue em `0 failure(s)`.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `edb4dbfa`: **reproduzida**.
+
+```text
+# duas faltas plantadas (align e tokens), uma relatada:
+  row SKIN, 'A TYPE', piece 0 is aligned 1
+# só a de soletração: ["row SKIN: the pieces of 'D TYPE' spell 'ZZZ TYPE'"]  -- o check funciona; o que falha é o pulo
+$ python tools/looks/screen.py --check
+screen.py: 0 failure(s)
+tools/looks/screen.py:714  if problems: continue   # lê o acumulador compartilhado
+```

@@ -3,7 +3,7 @@ id: CORR-LOOKS-079
 title: "A seta esquerda está em x 384 em nove linhas, não oito"
 origin: LOOKS-TASK-38
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md, docs/PLAN-LOOKS-PY.md, docs/tasks/looks/36-os-sprites-estaticos.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -55,3 +55,14 @@ Dizer "nove" nos dois lugares. Sem mudança de código.
 O comando `Counter` acima e a prosa concordam em nove.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `edb4dbfa`: **reproduzida**.
+
+```text
+$ python -c "... Counter(a['point'][0] ...)"
+Counter({384: 20, 424: 3, 416: 2, 302: 2})   # o screen.json de 19bcdf0a guarda uma entrada por chave de valor
+# por LINHA distinta: AGE 424, FOOT 416, NAT 302; BODY, BOOTS, DEFAUL, FACE, H.COL, H.F.COL., HAIR, HEIG, SKIN em 384 -> nove
+$ python -c "... ['rows']['DEFAUL']['arrows']['arrival']"
+[{'point': [384, 43], 'side': 'left'}]
+# a prosa ainda diz "oito": 38-...:58, PLAN-LOOKS-PY.md:3177, 36-...:147
+```

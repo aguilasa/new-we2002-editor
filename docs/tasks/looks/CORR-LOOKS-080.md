@@ -3,7 +3,7 @@ id: CORR-LOOKS-080
 title: "Marcar as entregas da Fase 10 das tasks 36, 37 e 38 no progresso"
 origin: LOOKS-TASK-38
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [docs/tasks/looks/progresso.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -58,3 +58,20 @@ Nenhum `- [ ]` sobra na lista da Fase 10 para uma task que a tabela gerada
 reporta como `done`.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `edb4dbfa`: **reproduzida**.
+
+```text
+$ sed -n '299,301p' docs/tasks/looks/progresso.md
+- [ ] Os sprites estáticos e as setas desenhados do disco ([LOOKS-TASK-36]...).
+- [ ] O texto desenhado com os glifos do `EDT_2D.BIN` ([LOOKS-TASK-37]...).
+- [ ] Os valores alinhados como no jogo ([LOOKS-TASK-38]...).
+# a tabela gerada dá as três como done (a 38 já com reviewed_on 2026-09-22)
+$ grep -n "rite:begin\|rite:end" docs/tasks/looks/progresso.md
+48:<!-- rite:begin tasks -->
+91:<!-- rite:end -->      # as caixas estão nas linhas 297-303, FORA da região gerada
+```
+
+As duas entradas já marcadas (tasks 30 e 31) trazem uma frase de resultado
+medido depois do título; marcar as três novas pede a mesma frase, não só a
+caixa.

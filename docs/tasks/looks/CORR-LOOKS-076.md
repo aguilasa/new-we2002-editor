@@ -3,7 +3,7 @@ id: CORR-LOOKS-076
 title: "O primeiro critério marca um --screen que não foi rodado"
 origin: LOOKS-TASK-38
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []

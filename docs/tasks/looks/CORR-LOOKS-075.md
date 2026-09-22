@@ -3,7 +3,7 @@ id: CORR-LOOKS-075
 title: "As linhas de --keys do log não rodam como estão escritas"
 origin: LOOKS-TASK-38
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -56,3 +56,18 @@ Toda linha `$ python tools/looks/oracle.py --keys …` copiada do arquivo da tas
 sai com código 0.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `edb4dbfa`: **reproduzida**.
+
+```text
+$ python tools/looks/oracle.py --keys "<Right x10>" 2
+oracle FAILED: '<Right x10>' is not one of the four this screen answers to: Up, Down, Left, Right   (saída 1)
+$ python tools/looks/oracle.py --keys "Right,Right,Right,Right,Right,Right,Right,Right,Right,Right" 2
+  control: ... the same 117 glyph(s)
+    NAT       'Swi'
+oracle --keys: 0 difference(s) after 10 press(es), across the game, screen.json and our window   (saída 0)
+```
+
+Correção de contagem: são **três** linhas abreviadas, não quatro — 139, 141 e
+143 do arquivo da task. A 135 passa string vazia (a sequência padrão de 19) e a
+145 é `"Up,Left"`; as duas rodam.

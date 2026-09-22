@@ -3,7 +3,7 @@ id: CORR-LOOKS-078
 title: "A linha de falha de glifo mostra o primeiro da linha, não o que difere"
 origin: LOOKS-TASK-38
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -51,3 +51,10 @@ elemento da diferença simétrica de cada lado) em vez de `[:1]`.
 O comando acima nomeia `(421, 41, 46, 158)` contra `(176, 41, 46, 158)`.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-22, HEAD `edb4dbfa`: **reproduzida**, saída idêntica à da Evidência.
+
+```text
+$ python -c "... oracle._glyph_differences([(200,41,184,146),(421,41,46,158)],[(200,41,184,146),(176,41,46,158)])"
+['the glyphs on line y 41: the game draws 2 starting [(200, 41, 184, 146)], our window 2 starting [(200, 41, 184, 146)]']
+```
