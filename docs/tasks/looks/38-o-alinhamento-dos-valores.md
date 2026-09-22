@@ -188,4 +188,18 @@ deixa o `--keys` vermelho linha por linha:
 
 ### Gates
 
-Transcritos depois do commit de trabalho.
+```text
+# na arvore de 19bcdf0a
+$ python tools/looks/selftest.py --quiet
+  ..... rule 1 swept 27 file(s), 30000 line(s)
+  ..... 102 of 102 controls red
+looks_selftest: 0 failure(s)
+$ python tools/looks/cli.py check
+cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
+$ python tools/check_tasks.py
+check: 0 error(s), 11 warning(s) in 4 cycle(s)
+```
+
+O `looks_ui` (16 de 16 controles vermelhos, 4 min), o `--keys` e o
+`--outside` rodaram sobre o código do commit e estão transcritos acima; depois
+deles só mudou prosa.
