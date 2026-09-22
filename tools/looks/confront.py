@@ -2098,17 +2098,21 @@ def check_outside(slots=(2, 1), verbose=True) -> int:
         ours = [[tuple(row[x * channels:x * channels + 3])
                  for x in range(width)] for row in rows]
         # The labels are left-aligned where their object says, so they are
-        # the one text that can be held pixel for pixel: the pixels of the
-        # column that differ past a measured colour's slack, the game's
-        # frame against the same frame photographed again as the floor.
+        # the one text that can be held pixel by pixel, within
+        # `OUTSIDE_SLACK` per channel: the pixels of the column whose largest
+        # channel distance passes that slack, the game's frame against the
+        # same frame photographed again as the floor. Without the slack
+        # 11839 of 16416 differ, because our band's ground sits ~6 from the
+        # game's (CORR-LOOKS-072).
         label_box = text_regions(table)["labels"]
         floor = ink_differences(first, again, label_box)
         apart = ink_differences(first, ours, label_box)
         shifted = [row[1:] + row[:1] for row in first]
         control = ink_differences(shifted, ours, label_box)
-        print("    labels, pixel for pixel: %d of %d differ (the game against "
-              "itself: %d; the game one pixel off: %d)"
-              % (apart, _area(label_box), floor, control))
+        print("    labels, pixel for pixel within %d per channel: %d of %d "
+              "differ (the game against itself: %d; the game one pixel "
+              "off: %d)" % (OUTSIDE_SLACK, apart, _area(label_box), floor,
+                            control))
         if not control:
             problems.append("slot %d: the labels one pixel off do not differ "
                             "either, so equal says nothing" % slot)

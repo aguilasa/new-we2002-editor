@@ -3112,8 +3112,11 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > vários objetos: `A1 TYPE` é o `A1` de um e o `TYPE` de outro. O estilo
 > gravado por linha é o do objeto do último pedaço. A janela escreve com
 > esses glifos, e os rótulos, alinhados à esquerda no x do objeto, batem
-> **pixel a pixel** com o quadro do jogo (0 de 16.416 nos dois slots, com o
-> quadro deslocado um pixel divergindo em 2.875). Onde cada valor, a placa e
+> **pixel a pixel dentro de `OUTSIDE_SLACK` (16) por canal** com o quadro do
+> jogo (0 de 16.416 nos dois slots, com o quadro deslocado um pixel
+> divergindo em 2.875). Sem a folga, 11.839 dos 16.416 divergem, porque o
+> fundo da faixa nosso fica a ~6 do do jogo; com folga 8 já são 0
+> ([`CORR-LOOKS-072`](/docs/tasks/looks/CORR-LOOKS-072.md)). Onde cada valor, a placa e
 > a camisa **começam** dentro da caixa é a
 > [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md).
 >

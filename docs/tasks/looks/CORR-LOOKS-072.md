@@ -5,7 +5,7 @@ origin: LOOKS-TASK-37
 severity: medium
 files: [docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md, tools/looks/confront.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -79,3 +79,34 @@ slack 0 differ 11839 / slack 4 differ 11839 / slack 8 differ 0 / slack 16 differ
 # grep "pixel a pixel|pixel for pixel", nenhuma qualificada pela folga:
 tools/looks/confront.py:2101, 2109; docs/PLAN-LOOKS-PY.md:3115; docs/prompts/perfil-looks.md:761
 ```
+
+Correção em 2026-09-22 (correção principal, sem emulador): as três frases
+passam a dizer "dentro de `OUTSIDE_SLACK` (16) por canal", mantendo os números
+medidos na triagem (0 de 16.416, controle 2.875; sem folga 11.839, fundo a ~6).
+O limiar alternativo não entrou: ele exigiria rodar o `--outside` para medir.
+
+- `tools/looks/confront.py`: o comentário antes de `label_box` explica a folga e
+  o número sem ela; a linha impressa vira
+  `labels, pixel for pixel within 16 per channel: …` (o 16 sai de `OUTSIDE_SLACK`).
+- `docs/PLAN-LOOKS-PY.md` §10.3 (o): "pixel a pixel dentro de `OUTSIDE_SLACK`
+  (16) por canal", mais o número sem folga e o link para esta CORR.
+- `docs/prompts/perfil-looks.md`, linha do gate `--outside`: a mesma frase.
+
+```text
+$ grep -n "pixel a pixel\|pixel for pixel" docs/PLAN-LOOKS-PY.md docs/prompts/perfil-looks.md tools/looks/confront.py
+# (antes: 3115, 761, 2101, 2109, nenhuma qualificada)
+docs/PLAN-LOOKS-PY.md:3115:> **pixel a pixel dentro de `OUTSIDE_SLACK` (16) por canal** com o quadro do
+docs/prompts/perfil-looks.md:761:… os **rótulos pixel a pixel dentro de `OUTSIDE_SLACK` (16) por canal** — sem folga divergem, o fundo fica a ~6 — …
+tools/looks/confront.py:2112:        print("    labels, pixel for pixel within %d per channel: %d of %d "
+# as demais (PLAN 112, 1707, 1830, 2394, 2469; perfil 998) falam da repetição
+# da captura e da §5.6, não dos rótulos -- fora do escopo
+$ python -c "import ast;ast.parse(open('tools/looks/confront.py',encoding='utf-8').read())"   -> ok
+$ python tools/looks/selftest.py
+..... 100 of 100 controls red
+looks_selftest: 0 failure(s)
+$ rite check --quick --cycle looks
+check: 0 error(s), 0 warning(s) in 1 cycle(s)
+```
+
+A linha impressa nova não foi vista numa corrida do `--outside` (emulador
+ocupado); a próxima corrida desse alvo a confirma.
