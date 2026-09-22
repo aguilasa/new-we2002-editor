@@ -176,4 +176,18 @@ oracle --check-live: 0 failure(s)
 
 ### Gates
 
-Transcritos depois do commit de trabalho.
+```text
+# na arvore de 0297ea1c
+$ python tools/looks/selftest.py --quiet
+  ..... rule 1 swept 27 file(s), 29385 line(s)
+  ..... 100 of 100 controls red
+looks_selftest: 0 failure(s)
+$ python tools/looks/cli.py check
+cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
+$ python tools/check_tasks.py
+check: 0 error(s), 11 warning(s) in 4 cycle(s)
+```
+
+O `looks_ui` (16 de 16), o `looks_live`, o `--keys` e o `--outside`
+rodaram sobre o código do commit e estão transcritos acima. Depois deles só
+mudou prosa.
