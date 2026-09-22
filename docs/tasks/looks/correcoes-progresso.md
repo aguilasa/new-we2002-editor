@@ -91,7 +91,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-072](/docs/tasks/looks/CORR-LOOKS-072.md) | Say 'within 16 per channel', not 'pixel a pixel', for the labels | LOOKS-TASK-37 | medium | done | 2026-09-22 |
 | [CORR-LOOKS-073](/docs/tasks/looks/CORR-LOOKS-073.md) | Fix the width-0 self-check that claims the pen stays put | LOOKS-TASK-37 | low | done | 2026-09-22 |
 | [CORR-LOOKS-074](/docs/tasks/looks/CORR-LOOKS-074.md) | Um código de largura 0 entra na lista de sprites do jogo e não na do Font.run | CORR-LOOKS-073 | low | done | 2026-09-22 |
-| [CORR-LOOKS-075](/docs/tasks/looks/CORR-LOOKS-075.md) | As linhas de --keys do log não rodam como estão escritas | LOOKS-TASK-38 | medium | pending | — |
+| [CORR-LOOKS-075](/docs/tasks/looks/CORR-LOOKS-075.md) | As linhas de --keys do log não rodam como estão escritas | LOOKS-TASK-38 | medium | done | 2026-09-22 |
 | [CORR-LOOKS-076](/docs/tasks/looks/CORR-LOOKS-076.md) | O primeiro critério marca um --screen que não foi rodado | LOOKS-TASK-38 | medium | done | 2026-09-22 |
 | [CORR-LOOKS-077](/docs/tasks/looks/CORR-LOOKS-077.md) | _layout_problems pula a soletração dos valores depois da primeira falta | LOOKS-TASK-38 | low | done | 2026-09-22 |
 | [CORR-LOOKS-078](/docs/tasks/looks/CORR-LOOKS-078.md) | A linha de falha de glifo mostra o primeiro da linha, não o que difere | LOOKS-TASK-38 | low | done | 2026-09-22 |

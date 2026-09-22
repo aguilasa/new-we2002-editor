@@ -5,10 +5,10 @@ origin: LOOKS-TASK-38
 severity: medium
 files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: cc5afa6d
 ---
 
 # CORR-LOOKS-075 — As linhas de --keys do log não rodam como estão escritas
@@ -127,3 +127,7 @@ exit=0
 caber na página; no arquivo da task elas estão inteiras, e é de lá que o `grep`
 as tirou. O controle de cada corrida — a mesma sequência duas vezes no jogo —
 fechou antes de qualquer comparação, como o `--keys` exige.)
+- **Closed** — commit `cc5afa6d` (2026-09-22): docs(looks): write out the abbreviated --keys sequences of task 38
+  - Files (`git show --name-status cc5afa6d`):
+    - `M docs/tasks/looks/38-o-alinhamento-dos-valores.md`
+    - `M docs/tasks/looks/CORR-LOOKS-075.md`
