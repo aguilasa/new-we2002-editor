@@ -5,10 +5,10 @@ origin: LOOKS-TASK-38
 severity: medium
 files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: be3df6bb
 ---
 
 # CORR-LOOKS-076 — O primeiro critério marca um --screen que não foi rodado
@@ -112,3 +112,7 @@ Nada a mudar nelas.
 $ sh <rite> check --quick --cycle looks
 check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ```
+- **Closed** — commit `be3df6bb` (2026-09-22): docs(looks): paste the --screen remeasurement into task 38's evidence
+  - Files (`git show --name-status be3df6bb`):
+    - `M docs/tasks/looks/38-o-alinhamento-dos-valores.md`
+    - `M docs/tasks/looks/CORR-LOOKS-076.md`
