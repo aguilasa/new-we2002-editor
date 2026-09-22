@@ -5,10 +5,10 @@ origin: LOOKS-TASK-37
 severity: medium
 files: [docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md, tools/looks/confront.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: e18fe0bb
 ---
 
 # CORR-LOOKS-072 — Say 'within 16 per channel', not 'pixel a pixel', for the labels
@@ -110,3 +110,9 @@ check: 0 error(s), 0 warning(s) in 1 cycle(s)
 
 A linha impressa nova não foi vista numa corrida do `--outside` (emulador
 ocupado); a próxima corrida desse alvo a confirma.
+- **Closed** — commit `e18fe0bb` (2026-09-22): docs(looks): say the labels match within OUTSIDE_SLACK per channel, not pixel for pixel
+  - Files (`git show --name-status e18fe0bb`):
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/CORR-LOOKS-072.md`
+    - `M tools/looks/confront.py`
