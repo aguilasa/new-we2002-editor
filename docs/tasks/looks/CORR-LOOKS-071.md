@@ -5,10 +5,10 @@ origin: LOOKS-TASK-37
 severity: high
 files: [tools/looks/oracle.py, tools/looks/glyphs.py, tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-22
+done_commit: 6a4944fc
 ---
 
 # CORR-LOOKS-071 — Hold the rule's pen advance against the game, not only the uv
@@ -144,3 +144,9 @@ $ python tools/looks/glyphs.py      -> glyphs.py: 0 failure(s)
 $ python tools/looks/selftest.py    -> 101 of 101 controls red; looks_selftest: 0 failure(s)
 $ python tools/looks/cli.py check   -> 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
 ```
+- **Closed** — commit `6a4944fc` (2026-09-22): fix(looks): hold Font.run's pen advance against the game's draw calls per text object
+  - Files (`git show --name-status 6a4944fc`):
+    - `M docs/tasks/looks/CORR-LOOKS-071.md`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/glyphs.py`
+    - `M tools/looks/oracle.py`
