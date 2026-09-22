@@ -68,3 +68,57 @@ $ python tools/looks/controls.py | tail -1
 controls: 103 of 103 red (103 substitutions)
 # alvo da substituição: tools/looks/screen.py:1146, `buttons.extend([button] * count)`, dentro do parse_keys (1120)
 ```
+
+Corrigida em 2026-09-22. O controle `screen-repetition-worth-one-press` entrou
+no `tools/looks/controls.py`, ao lado dos outros do `screen.py`: troca
+`buttons.extend([button] * count)` por `buttons.append(button)` no `parse_keys`
+e exige o vermelho do `screen`. A contagem, que a ferramenta imprime e nenhuma
+prosa guarda, foi de 103 para 104.
+
+O literal foi conferido **antes** de ser versionado — é a metade barata do "um
+controle quebrado não é um controle vermelho", e é o que separa o vermelho pela
+causa certa do verde por engano:
+
+```text
+$ python -c "import io; print(io.open('tools/looks/screen.py',encoding='utf-8')
+              .read().count('        buttons.extend([button] * count)'))"
+1
+```
+
+O que o defeito faria, e por isso o `why` da entrada: com o `append`,
+`Down x6,Right x41` vira **2** presses dos 47 que nomeia. Como o `--keys` dirige
+o jogo, o `screen.json` e a nossa janela a partir da **mesma** lista, os três
+concordariam numa sequência que ninguém escreveu e o gate ficaria verde.
+
+Verificação, com a saída decisiva:
+
+```text
+$ python tools/looks/controls.py --only screen-repetition-worth-one-press
+  RED    screen-repetition-worth-one-press screen.py :: parse_keys
+controls: 1 of 1 red (1 substitution)                      # saída 0
+
+$ python tools/looks/selftest.py | tail -4
+  ..... 104 of 104 controls red
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)                               # saída 0
+
+$ python tools/looks/controls.py | tail -2
+  RED    screen-repetition-worth-one-press screen.py :: parse_keys
+controls: 104 of 104 red (104 substitutions)               # nenhum GREEN, nenhum BROKEN
+
+$ python tools/looks/screen.py --check | tail -1
+screen.py: 0 failure(s)
+
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python tools/looks/cli.py check | tail -1
+cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
+```
+
+Sem emulador: `oracle.py` e `ui_check.py` não foram rodados nesta corrida.
+
+Varredura: `103 of 103` só aparece como **transcrição de corrida** nas
+[CORR-LOOKS-081](/docs/tasks/looks/CORR-LOOKS-081.md),
+[CORR-LOOKS-082](/docs/tasks/looks/CORR-LOOKS-082.md) e na evidência desta —
+registro do que a ferramenta dizia, e reescrever seria falsificá-lo. Nenhum
+documento guarda a contagem viva: o `/CLAUDE.md` e o
+[/docs/PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md) dizem, de propósito, que ela é
+contada pela ferramenta e não escrita em prosa. Nada a atualizar fora daqui.

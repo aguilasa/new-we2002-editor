@@ -992,6 +992,17 @@ CONTROLS = (
         "fault on one value and a misspelling on another reports one of the two "
         "and the table reads as measured (CORR-LOOKS-077)",
     ),
+    Control(
+        "screen-repetition-worth-one-press", "screen.py", "parse_keys",
+        "        buttons.extend([button] * count)",
+        "        buttons.append(button)",
+        ("screen",),
+        "the count parsed and then thrown away: `Right x41` presses once, and "
+        "because the game, the table and the window are all driven from the "
+        "same short list, the three agree on a sequence nobody wrote and "
+        "`--keys` comes out green having pressed 2 of the 47 that "
+        "`Down x6,Right x41` names (CORR-LOOKS-082)",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}
