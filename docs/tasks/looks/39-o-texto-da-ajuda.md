@@ -7,8 +7,8 @@ phase: 10
 depends_on: [LOOKS-TASK-37]
 status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-23
+review_commit: 378d2b3d
 done_on: 2026-09-22
 done_commit: 42c4ebfa
 ---
@@ -178,3 +178,4 @@ check: 0 error(s), 11 warning(s) in 4 cycle(s)
     - `M tools/looks/confront.py`
     - `M tools/looks/layout.py`
     - `M tools/looks/oracle.py`
+- **Reviewed** (2026-09-23) at `378d2b3d`: CORR-LOOKS-085, CORR-LOOKS-086, CORR-LOOKS-087
