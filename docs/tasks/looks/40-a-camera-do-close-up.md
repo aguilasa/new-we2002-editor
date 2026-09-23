@@ -5,12 +5,12 @@ type: implementação
 category: render
 phase: 10
 depends_on: [LOOKS-TASK-28]
-status: in-progress
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-23
+done_commit: 45734fe1
 ---
 
 # LOOKS-TASK-40: A câmera do close-up
@@ -192,3 +192,18 @@ confront --silhouette-closeups: 0 problem(s) over 2 slot(s)
 $ python tools/check_tasks.py
 check: 0 error(s), 11 warning(s) in 4 cycle(s)
 ```
+- **Closed** — commit `45734fe1` (2026-09-23): feat(looks): zoom the panel on the six rows the game zooms on
+  - Files (`git show --name-status 45734fe1`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/33-a-janela-animada.md`
+    - `M docs/tasks/looks/40-a-camera-do-close-up.md`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/ui/app.py`
+    - `M tools/looks/ui/looks_set.py`
+    - `M tools/looks/ui_check.py`
