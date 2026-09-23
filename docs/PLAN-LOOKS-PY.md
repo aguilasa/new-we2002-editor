@@ -2793,7 +2793,9 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 >   de linha e **errado para o goleiro**, cujos ângulos então não casavam com
 >   nada em 3.952 quadros;
 > - a ponte que vale é o **ponteiro que o jogo está lendo**: `s0` na instrução
->   `0x80011D48` (`layout.ANIME_UNPACK`), que anda o arquivo de oito em oito,
+>   `0x80011D48` (`layout.ANIME_UNPACK`) — desde 2026-09-23 há uma ponte
+>   melhor, `layout.ANIME_BUILD`, por onde passam as dez variantes (item (p)) —,
+>   que anda o arquivo de oito em oito,
 >   um par por peça, nos dois slots. Com ela, **96 de 96 peças trazem os
 >   ângulos que o par guarda, inteiro por inteiro** — 96 das **192**
 >   capturadas, porque oito das dezesseis capturas são postas de lado: a
@@ -2816,16 +2818,21 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 > unidade em dois terços das peças (5 de 13 exatas). Uma unidade de 4.096 é
 > invisível no desenho e total na comparação.
 >
-> **As outras seis são misturas que o jogo faz**, não erro do leitor: o
+> **As outras seis são médias que o jogo faz**, não erro do leitor: o
 > caminho em `0x80011F90` **soma a matriz recém-construída com a que ele
 > guardou e desloca um bit**, e a média de duas voltas não é a volta de coisa
 > nenhuma guardada. Quem diz isso não é a distância — é uma varredura de
 > **todos** os pares do arquivo (`anime.no_pair_explains`): nenhum deles
 > reproduz aquelas seis. A primeira testemunha era mais barata — ler a volta de
 > volta e exigir múltiplos de 16 — e **errou uma em seis**, porque a média de
-> dois trios a 32 de distância também é múltipla de 16. O que decide essa
-> mistura é o estado da animação entre quadros, e isso é a
-> [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
+> dois trios a 32 de distância também é múltipla de 16.
+>
+> **Quando o jogo faz essa média está medido desde 2026-09-23** pela
+> [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md), item (p): é
+> a visita que **abre um lado** da caminhada, uma vez por peça, 24 das 408
+> matrizes de um ciclo — e a varredura de todos os pares sob as **três** regras
+> de desempacotamento continua não explicando aquelas seis, o que as separa das
+> mirroradas, que ela explica.
 
 **(m) A câmera do jogo — FECHADA em 2026-09-18.** Projeção, deslocamento de tela
 e a translação da câmera, para que o nosso quadro e o do emulador sejam o mesmo
@@ -2976,7 +2983,8 @@ peça, ou nada — medido pela pose de dois valores de cada.
 > Três coisas que a medição teve de aprender, no perfil como armadilhas 73 a
 > 75: depois de trocar um valor, o mesmo quadro contado **não** é o mesmo
 > quadro da caminhada, e uma passada desenha dois quadros do `ANIME.BIN`
-> cortados numa peça que muda; no goleiro o quadro 0 é mistura (o controle o
+> cortados numa peça que muda; no goleiro o quadro 0 é mistura — medido no
+> item (p): é a média da visita que abre um lado da caminhada — (o controle o
 > recusa: `foot b` 92 de 4096 fora, com os ângulos iguais aos do arquivo); e
 > escalar linhas ou colunas dá a mesma matriz nesta tela, então nenhum
 > controle separa as duas.
@@ -3283,9 +3291,65 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > controle 316 (o quadro do jogo deslocado um pixel) — a única região de texto
 > da tela que a comparação **não** afirma, e a linha diz por quê.
 
-**(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
-interpola entre quadros-chave, e se o tronco que balança é da animação ou da
-câmera. [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
+**(p) O ritmo do ciclo — FECHADA em 2026-09-23.** Quantos quadros do jogo dura
+uma passada, se o jogo interpola entre quadros-chave, e se o tronco que balança
+é da animação ou da câmera.
+[`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
+
+> **Medida por `oracle.py --walk`, e o reprodutor é `anime.py --frame N`**, que
+> acerta **408 de 408** matrizes de um ciclo **entrada por entrada** nos dois
+> slots, com as translações a **0 unidade** das que o jogo carregou
+> (`anime.py --against-walk`, sem emulador).
+>
+> - **A unidade da caminhada é a PASSADA, não o quadro de vídeo.** A tela
+>   desenha a figura **uma vez a cada dois ou três quadros** contados por
+>   `frame_step` — lido no `frame_number` do emulador em cada parada —, e o
+>   ciclo fecha em **34 passadas e 77 quadros contados**, igual nos dois slots.
+>   Contar em quadros dá um relógio que não repete: o intervalo entre passadas
+>   alterna 2 e 3 sem período dentro de 500 quadros medidos, e o índice da
+>   animação avança 219 vezes em 500 quadros (0,438 por quadro, que não é
+>   fração pequena nenhuma). É por isso que o plano guarda o ciclo em passadas.
+> - **São 34 poses desenhadas a partir de 17 quadros guardados, porque o jogo
+>   ESPELHA o segundo lado.** Cada membro lê o par do membro do outro lado
+>   (`anime.WALK_SWAP`: `thigh a` lê o de `thigh b`, e volta) e os ângulos vêm
+>   virados (`anime.WALK_RULES`): cabeça e tronco negam o segundo e o terceiro
+>   ângulo, os dez membros negam o primeiro e o terceiro e somam meia volta, e
+>   os três casos negam também o `x` do lugar — sem essa negação as translações
+>   erram por 111 unidades, com ela por 0. As regras saem das **dez variantes**
+>   de desempacotamento do dispatch `0x80011DA0`, conferidas contra os ângulos
+>   que o jogo deixou no scratchpad em 516 paradas por slot.
+> - **Interpolação entre quadros-chave: NÃO, e há uma média, medida.** Fora as
+>   médias abaixo, toda matriz desenhada é a volta de um par do arquivo, exata;
+>   o jogo não mistura dois quadros vizinhos. O que ele faz é somar a matriz
+>   nova com a guardada e deslocar um bit (`(a + b) >> 1`, deslocamento
+>   **aritmético**) na visita que **abre cada lado** — 24 das 408 peças de um
+>   ciclo, as mesmas que o byte seletor de `layout.ANIME_BLEND_MODE` marca, e
+>   ali a matriz nova sozinha erra por até 202 de 4.096.
+> - **Uma passada atravessa dois quadros do arquivo, e onde ela corta é
+>   propriedade do save state.** O ponteiro de par anda o arquivo de oito em
+>   oito e não reinicia com a figura: a passada lê as vagas da vaga inicial até
+>   a 11 de um quadro e as anteriores do **seguinte**. A vaga inicial é **7** no
+>   slot 2 e **0** no slot 1, constante em toda passada de uma corrida — é a
+>   medição que a [`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md)
+>   encontrou como "uma passada atravessa dois quadros", agora com o corte
+>   nomeado.
+> - **O balanço é da ANIMAÇÃO, não da câmera — e não é do tronco.** A câmera
+>   lida na própria carga (`layout.POSE_MATRIX`) volta com as mesmas nove
+>   meias-palavras e a mesma translação 120 quadros depois — mais de um ciclo —,
+>   e o modelo acerta as 408 matrizes com **uma** câmera só. Dentro da
+>   animação, medida sobre o ciclo do slot 2, quem se move são os membros: a
+>   volta varre 4.552 de 4.096 no `foot b`, 4.268 no `foot a` e ~4.000 nas
+>   canelas, contra **185 no tronco** e 333 na cabeça; e o lugar do tronco anda
+>   8, 8 e 2 unidades contra 31, 31 e 179 do pé. O tronco é a peça mais parada
+>   da figura — o balanço que a gravação mostra é membro, não tronco, e não há
+>   raiz que translade a figura inteira.
+> - **Os controles da corrida**, nessa ordem: as seis primeiras passadas
+>   tomadas duas vezes a partir do `load_state`, idênticas número a número; as
+>   passadas diferindo entre si (uma captura que lê constante passa o primeiro
+>   controle perfeitamente); a pose voltando em 34 e em nenhuma passada antes;
+>   cada carga nomeada **duas vezes** — pela vaga do par e pelo ponteiro de
+>   modelo com o atraso da [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) —, batendo nas 516;
+>   e o modelo com **uma visita de diferença**, que cai para 34 de 408.
 
 ### 10.4 Como se verifica
 

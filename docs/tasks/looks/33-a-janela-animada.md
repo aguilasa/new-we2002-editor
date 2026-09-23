@@ -31,6 +31,20 @@ done_commit: null
 
 ---
 
+- **Da [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md):** o
+  ritmo está medido e o reprodutor existe — `anime.py --frame N` entrega a pose
+  da passada N do ciclo, do arquivo, e `oracle.py --walk` escreve o ciclo em
+  `work/looks-walk/slotN.json`. Três coisas que mudam o que esta task
+  implementa: o ciclo tem **34 passadas** (17 quadros do arquivo, o segundo
+  lado espelhado), a unidade é a **passada de desenho** e não o quadro de vídeo
+  (a tela desenha a figura a cada dois ou três quadros, sem período em
+  quadros), e a vaga de par em que uma passada abre é **propriedade do save
+  state** — a janela lê a do plano, não uma constante. O `--frame N` recusa
+  rodar sem o ciclo medido, então o gate determinístico que esta task pede já
+  tem de onde sair.
+
+---
+
 ## Objetivo
 
 O painel da tela `LOOKS SET` anima a caminhada em loop, no ritmo do jogo, com a

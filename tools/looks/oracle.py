@@ -7383,6 +7383,487 @@ def gte_projection(registers):
     }
 
 
+WALK_DIR = os.path.join(ROOT, "work", "looks-walk")
+"""Where `--walk` writes one JSON per slot: the cycle, as the game played it."""
+
+WALK_PASSES = 40
+"""Draw passes taken in one run, which has to be more than one cycle.
+
+The cycle measured is 34 passes, so 40 is the cycle plus enough of the next to
+show the first pose coming back and nothing before it coming back.  A run that
+took exactly 34 could not tell a period of 34 from a period of 34 the sequence
+never repeats at.
+"""
+
+WALK_BLEND_MODE = 1  # not-an-address: the value of layout.ANIME_BLEND_MODE
+"""What the selector byte holds when the game averages, of the three it takes.
+
+0 draws the matrix just built and keeps it, 1 draws the average of it with the
+kept one, 2 draws the kept one and drops the fresh one -- read off
+`layout.ANIME_BLEND`'s three branches.  On this screen 0 and 1 happen and 2
+never does, measured at every load of both cycles.
+"""
+
+WALK_CAMERA_GAP = 120
+"""Frames between the two camera reads of a run, which is more than a cycle.
+
+The cycle measured is 77 counted frames, so a camera that moved with the walk
+would have moved by the second read.  It is the measurement behind "the swing
+is the animation's": the pose's own matrices swing 4362 units of 4096 over the
+cycle while this comes back the same nine halfwords and the same three
+translations.
+"""
+
+WALK_CONTROL_PASSES = 6
+"""Passes taken a second time, from `load_state`, before anything is measured.
+
+The capture runs the emulator free between breakpoint stops, so a second
+capture in the same session is no longer a known number of passes from
+anywhere: the control reloads the state and takes the first few again, and
+they have to come back identical number by number.
+"""
+
+
+def _walk_stops(game, maps, names, passes, label):
+    """Every matrix load of *passes* consecutive draw passes, in one session.
+
+    Two breakpoints and one stop each, and the pair is the point: **the watch
+    is `layout.ANIME_BUILD` and not `layout.ANIME_UNPACK`** -- ten unpack
+    variants share the dispatch and only one of them is the instruction the
+    pose captures watched, so half of those passes came back with no pair on
+    any piece (`anime.split_captures`).  Every variant reaches this one call.
+    """
+    import anime
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    for address in (layout.ANIME_BUILD, layout.POSE_PIECE_MATRIX):
+        client.call("breakpoint", action="add", type="execute",
+                    address=who_writes.hx(address))
+    path = os.path.join(game.out_dir, "walk-%s.bin" % label)
+    out = []
+    pair = None
+    try:
+        while len(out) < passes * (anime.PIECE_PAIRS + 1):
+            client.call("continue")
+            if not _wait_for_hit(game, WATCH_SECONDS):
+                raise OracleError(
+                    "the draw stopped after %d matrix load(s) -- the screen is "
+                    "not drawing the figure any more" % len(out))
+            registers = client.call("read_registers", group="gpr")
+            if who_writes.register_value(registers, "pc") == layout.ANIME_BUILD:
+                pair = who_writes.register_value(
+                    registers, layout.ANIME_BUILD_BASE) - layout.ANIME_BASE
+                continue
+            if pair is None:
+                # Every load is named by the build that preceded it; a load
+                # without one would be a piece whose pose came from nowhere,
+                # and guessing it is how a cycle gets read one visit off.
+                # The run begins inside a pass whose builds are already past,
+                # so those loads are dropped -- and only those: once a build
+                # has been seen, a load without one is a failure.
+                if not out:
+                    continue
+                raise OracleError("a matrix load with no pair before it, %d "
+                                  "stop(s) in" % len(out))
+            where = _drawn_section(registers, maps)
+            base = who_writes.register_value(registers,
+                                             layout.POSE_PIECE_MATRIX_BASE)
+            rotation, translation = _matrix_struct(game, base, path)
+            out.append({
+                "pointer_section": where[1] if where else None,
+                "pointer_piece": names.get(where) if where else UNPOINTED_PIECE,
+                "rotation": rotation, "translation": translation,
+                "angles": list(struct.unpack(
+                    "<3h", game.read_ram(layout.POSE_ANGLES, 6, path))),
+                "pair": pair,
+                "mode": game.read_ram(layout.ANIME_BLEND_MODE, 1, path)[0],
+                "frame_number": client.call("get_status").get("frame_number"),
+            })
+            pair = None
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    return out
+
+
+def _walk_align(stops):
+    """Where the first whole pass begins, by the draw order repeating.
+
+    The run starts in the middle of a pass -- the state was paused mid-frame
+    -- and the frame number cannot say where the pass began, because the video
+    frame ticks INSIDE a pass (`_pose_cycle`).  What says it is the order
+    itself: twelve loads with the same model pointer in the same place, pass
+    after pass.
+    """
+    import anime
+
+    count = anime.PIECE_PAIRS
+    for offset in range(count):
+        columns = [{stops[at]["pointer_section"]
+                    for at in range(offset + column, len(stops), count)}
+                   for column in range(count)]
+        if all(len(one) == 1 for one in columns):
+            return offset
+    raise OracleError("the %d matrix loads never settle into a repeating draw "
+                      "order of %d, so no pass can be cut out of them"
+                      % (len(stops), count))
+
+
+def _walk_passes(stops, first_pair):
+    """The run cut into whole passes, each load named and each pair placed.
+
+    The piece is the model pointer of the stop after it (`DRAW_LAG`); the pair
+    slot is read out of the pair's own offset in the frame.  **Keeping both is
+    the control**: on the walk's first half the two have to be the same slot,
+    and on the second the pair has to be the SIBLING's (`anime.WALK_SWAP`) --
+    two independent readings of "whose pose is this", where one would only be
+    a convention.
+    """
+    import anime
+
+    count = anime.PIECE_PAIRS
+    offset = _walk_align(stops)
+    passes = []
+    for start in range(offset, len(stops) - count + 1, count):
+        taken = []
+        for order in range(count):
+            stop = dict(stops[start + order])
+            stop["order"] = order
+            named = stops[start + (order + DRAW_LAG) % count]["pointer_piece"]
+            stop["piece"] = named
+            stop["slot"] = anime.PIECE_ORDER.index(named)
+            stop["read"] = ((stop["pair"] - first_pair) % anime.FRAME_BYTES
+                            // anime.PAIR_BYTES)
+            taken.append(stop)
+        passes.append(taken)
+    return passes
+
+
+def _walk_first_slot(passes):
+    """Which pair slot the pass opens on, read off the pieces it draws.
+
+    The twelve loads of a pass are the twelve pieces in the file's own order,
+    started somewhere: the cursor does not restart with the figure, so where
+    it starts is whatever the save state caught (`anime.WALK_FIRST_SLOT`).
+    Every pass of a run has to open on the same slot, or the pass is not being
+    cut where the game cuts it.
+    """
+    import anime
+
+    count = anime.PIECE_PAIRS
+    found = set()
+    for one in passes:
+        slots = [stop["slot"] for stop in one]
+        if sorted(slots) != list(range(count)):
+            raise OracleError("a pass draws %r and not the twelve pieces once "
+                              "each" % (slots,))
+        if any((slots[0] + order) % count != slots[order]
+               for order in range(count)):
+            raise OracleError("a pass draws the pieces in the order %r, which "
+                              "is not the file's order started somewhere"
+                              % (slots,))
+        found.add(slots[0])
+    if len(found) != 1:
+        raise OracleError("the passes of one run open on %d different pair "
+                          "slots (%r)" % (len(found), sorted(found)))
+    return found.pop()
+
+
+def _walk_key(one):
+    return tuple((stop["slot"], tuple(stop["rotation"]),
+                  tuple(stop["translation"])) for stop in one)
+
+
+def _walk_visit(data, passes, camera, animation, first_slot):
+    """Where in the cycle the first pass sits, found by trying every place.
+
+    One visit of the 34 has to reproduce the twelve matrices of the first pass
+    exactly, and only one may: if two did, the cycle would have a repeated
+    pose and "the period" would mean nothing.
+    """
+    import anime
+
+    fits = []
+    for visit in range(anime.walk_visits(data, animation)):
+        model = {piece["slot"]: piece["matrix"]
+                 for piece in anime.walk_pose(data, animation, visit, camera,
+                                              first_slot)}
+        if all(model[stop["slot"]] == stop["rotation"] for stop in passes[0]):
+            fits.append(visit)
+    if len(fits) != 1:
+        raise OracleError(
+            "%d of the %d places in the cycle reproduce the first pass (%r) -- "
+            "the cycle cannot be counted from a pose that fits more than one "
+            "place in it" % (len(fits), anime.walk_visits(data, animation),
+                             fits))
+    return fits[0]
+
+
+def write_walk(plan):
+    """One JSON per slot in `work/looks-walk/`, which is what `anime.py
+    --frame N` reads: the cycle it must not invent."""
+    import anime
+    import json
+
+    os.makedirs(WALK_DIR, exist_ok=True)
+    path = anime.plan_path(plan["slot"])
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(plan, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    return path
+
+
+def _walk_places(data, plan):
+    """How far the model's places land from the translations the game loaded.
+
+    Both ways round the negation the mirror variants do on x, because that is
+    the measurement that says the negation is there: the same run with x left
+    alone has to land further out, or the rule is decoration.
+    """
+    import anime
+
+    camera = plan["camera"]
+    worst = {"as measured": 0, "without the x negation": 0}
+    for one in plan["cycle"]:
+        model = {piece["slot"]: piece
+                 for piece in anime.walk_pose(data, plan["animation"],
+                                              plan["visit"] + one["pass"],
+                                              camera["rotation"],
+                                              plan["first_slot"])}
+        for drawn in one["pieces"]:
+            piece = model[drawn["slot"]]
+            for name, place in (
+                    ("as measured", piece["place"]),
+                    ("without the x negation",
+                     (abs(piece["place"][0]) if piece["rule"] != "plain"
+                      else piece["place"][0],) + tuple(piece["place"][1:]))):
+                turned = [sum(camera["rotation"][axis * 3 + k] * place[k]
+                              for k in range(3)) // FIXED_ONE
+                          + camera["translation"][axis] for axis in range(3)]
+                apart = max(abs(a - b)
+                            for a, b in zip(turned, drawn["translation"]))
+                worst[name] = max(worst[name], apart)
+    return worst
+
+
+def check_walk(slot=None, verbose=True):
+    """`--walk [SLOT]`: the cycle of the walk, and the rule that draws it.
+
+    The order of the run is the argument:
+
+      **the control first** -- the state reloaded and the first passes taken
+          again, identical number by number, or the sequence is measuring the
+          emulator's mood rather than the animation;
+      **the passes differ** -- without it a capture that reads one constant
+          pose passes the control perfectly and reports a period of one;
+      **the period** -- the first pass whose twelve matrices come back to the
+          first pass's, in passes and in counted video frames;
+      **the camera** -- read at its own load once per run, and the model
+          judged against it: if the camera moved with the walk, no pose of a
+          counted frame could be compared with anything;
+      **the model** -- `anime.walk_pose` against every matrix of the cycle,
+          integer for integer, with one visit along as the negative control.
+    """
+    import anime
+    import iso_source
+
+    ready = preflight()
+    slots = (slot,) if slot else tuple(sorted(SLOTS))
+    problems = []
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = anime.read(disc)
+    animation = layout.ANIME_SCREEN_ENTRY
+    keyframes = anime.walk_visits(data, animation) // 2
+    first_pair = anime.block(data, anime.header(data)[animation])["frames"][0]
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        maps = model_maps(ready["image"])
+        names, _orders = piece_names(ready["image"])
+        for one in slots:
+            print("  -- slot %d (%s) --" % (one, SLOTS[one]))
+
+            restore_state(one, verbose=False)
+            game.load_looks(one, label="walk-control-%d" % one)
+            control = _walk_passes(_walk_stops(game, maps, names,
+                                               WALK_CONTROL_PASSES + 1,
+                                               "control-%d" % one), first_pair)
+            restore_state(one, verbose=False)
+            game.load_looks(one, label="walk-%d" % one)
+            # The camera is read AFTER the passes, and the reason is the
+            # control above: reading it first runs the game through three
+            # stops of its own, so the sequence would start further along
+            # than the control's and the two could not be compared.
+            taken = _walk_passes(_walk_stops(game, maps, names, WALK_PASSES,
+                                             "run-%d" % one), first_pair)
+            camera = _camera_matrix(game)
+            game.step(WALK_CAMERA_GAP)
+            later = _camera_matrix(game)
+            if later != camera:
+                problems.append(
+                    "slot %d: the camera read %d frame(s) later is not the "
+                    "same (%r against %r) -- on this screen it has to be, and "
+                    "if it moves with the walk then what swings is the camera "
+                    "and not the animation"
+                    % (one, WALK_CAMERA_GAP, later, camera))
+                continue
+            print("    control: the camera is the same matrix %d frame(s) "
+                  "later, so what moves over the cycle is the pose and not "
+                  "the view" % WALK_CAMERA_GAP)
+            again = [_walk_key(each) for each in taken[:WALK_CONTROL_PASSES]]
+            if [_walk_key(each) for each in control[:WALK_CONTROL_PASSES]] \
+                    != again:
+                problems.append(
+                    "slot %d: the first %d pass(es) taken twice from "
+                    "load_state differ, so the sequence is not repeatable and "
+                    "no period under it means anything"
+                    % (one, WALK_CONTROL_PASSES))
+                continue
+            print("    control: the first %d pass(es) taken twice from "
+                  "load_state, %d load(s) each, identical number by number"
+                  % (WALK_CONTROL_PASSES, anime.PIECE_PAIRS))
+
+            first_slot = _walk_first_slot(taken)
+            own = [stop for each in taken for stop in each
+                   if stop["read"] == stop["slot"]]
+            sibling = [stop for each in taken for stop in each
+                       if stop["read"] == anime.WALK_SWAP[stop["slot"]]
+                       and stop["read"] != stop["slot"]]
+            loads = sum(len(each) for each in taken)
+            strange = loads - len(own) - len(sibling)
+            if strange:
+                problems.append(
+                    "slot %d: %d of %d load(s) read a pair that is neither the "
+                    "piece's own nor its sibling's" % (one, strange, loads))
+                continue
+            print("    control: every one of the %d load(s) reads its own pair "
+                  "(%d) or its sibling's (%d), and a pass opens on pair slot "
+                  "%d" % (loads, len(own), len(sibling), first_slot))
+
+            keys = [_walk_key(each) for each in taken]
+            distinct = len(set(keys))
+            if distinct < 2:
+                problems.append(
+                    "slot %d: all %d pass(es) carry the same numbers -- the "
+                    "capture is reading a constant, not a walk"
+                    % (one, len(keys)))
+                continue
+            back = [at for at in range(1, len(keys)) if keys[at] == keys[0]]
+            if not back:
+                problems.append(
+                    "slot %d: the first pose does not come back in %d pass(es)"
+                    % (one, len(keys)))
+                continue
+            period = back[0]
+            frames = (taken[period][0]["frame_number"]
+                      - taken[0][0]["frame_number"])
+            print("    %d distinct pose(s) in %d pass(es); the first pose comes "
+                  "back after %d pass(es) and %d counted frame(s), and at no "
+                  "pass before it" % (distinct, len(keys), period, frames))
+            if distinct != period:
+                problems.append(
+                    "slot %d: %d distinct pose(s) over a period of %d -- a "
+                    "cycle repeats a pose inside itself, which no counting of "
+                    "it can survive" % (one, distinct, period))
+                continue
+            if period != 2 * keyframes:
+                problems.append(
+                    "slot %d: %d pass(es) a cycle over %d frame(s) of the file "
+                    "-- the walk is not the frames played twice, and the model "
+                    "of it assumes it is" % (one, period, keyframes))
+                continue
+
+            visit = _walk_visit(data, taken, camera["rotation"], animation,
+                                first_slot)
+            plan = {"slot": one, "state": SLOTS[one], "animation": animation,
+                    "visit": visit, "first_slot": first_slot,
+                    "passes": period, "frames": frames,
+                    "keyframes": keyframes, "camera": camera,
+                    "cycle": [{"pass": at,
+                               "frame_number": each[0]["frame_number"],
+                               "pieces": [{"slot": stop["slot"],
+                                           "piece": stop["piece"],
+                                           "order": stop["order"],
+                                           "pair": stop["pair"],
+                                           "angles": stop["angles"],
+                                           "mode": stop["mode"],
+                                           "rotation": stop["rotation"],
+                                           "translation": stop["translation"]}
+                                          for stop in each]}
+                              for at, each in enumerate(taken[:period])]}
+            print("    the cycle starts at visit %d of %d: frame %d of %d, "
+                  "side %d" % (visit, 2 * keyframes, visit % keyframes,
+                               keyframes, visit // keyframes))
+
+            found = anime.against_walk(data, plan)
+            print("    %d of %d matrices of the cycle are the file's, integer "
+                  "for integer (worst %d)"
+                  % (found["exact"], found["pieces"], found["worst"]))
+            if found["exact"] != found["pieces"]:
+                problems.append(
+                    "slot %d: %d of %d matrices are not what the file plus the "
+                    "measured rule gives, worst %d: %r"
+                    % (one, found["pieces"] - found["exact"], found["pieces"],
+                       found["worst"], found["off"][:4]))
+            wrong = anime.against_walk(data, plan, shift=1)
+            if wrong["exact"] >= found["exact"]:
+                problems.append(
+                    "slot %d: modelling every pass with the NEXT visit is as "
+                    "exact as modelling it with its own (%d of %d) -- the "
+                    "comparison cannot tell one pose of the cycle from another"
+                    % (one, wrong["exact"], wrong["pieces"]))
+            else:
+                print("    control: one visit along, %d of %d exact -- the "
+                      "neighbour is not the pose"
+                      % (wrong["exact"], wrong["pieces"]))
+
+            # Whose matrix the game averaged, by its own selector byte,
+            # against whose the model averages -- as SETS, because the two
+            # counts agreeing while the pieces differ would be a coincidence
+            # read as a rule.
+            blended = {(each["pass"], piece["slot"])
+                       for each in plan["cycle"] for piece in each["pieces"]
+                       if piece["mode"] == WALK_BLEND_MODE}
+            modelled = {(at, piece["slot"]) for at in range(period)
+                        for piece in anime.walk_pose(data, animation,
+                                                     visit + at, None,
+                                                     first_slot)
+                        if piece["blended"]}
+            print("    the averaging byte says average at %d of the %d load(s) "
+                  "of the cycle, and the model averages the same %d"
+                  % (len(blended), found["pieces"],
+                     len(blended & modelled)))
+            if blended != modelled:
+                problems.append(
+                    "slot %d: the game averaged %d piece(s) and the model %d, "
+                    "and %d of them are not the same piece of the same pass"
+                    % (one, len(blended), len(modelled),
+                       len(blended ^ modelled)))
+
+            places = _walk_places(data, plan)
+            print("    the places land %d unit(s) from the translations the "
+                  "game loaded, against %d with the mirror's x left alone"
+                  % (places["as measured"],
+                     places["without the x negation"]))
+            if places["as measured"] >= places["without the x negation"]:
+                problems.append(
+                    "slot %d: negating x on the mirrored pairs is no closer "
+                    "than leaving it alone (%d against %d), so the negation is "
+                    "not measured by this run"
+                    % (one, places["as measured"],
+                       places["without the x negation"]))
+
+            print("    wrote %s" % write_walk(plan))
+    print("oracle --walk: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    return 1 if problems else 0
+
+
 CLOSE_UP_SETTLE = 300
 """Frames let run after the cursor lands on a row, before the camera is read.
 
@@ -9305,6 +9786,8 @@ def main(argv):
         if len(argv) >= 2 and argv[1] == "--camera":
             return check_camera(int(argv[2]) if len(argv) > 2 else None,
                                 row=argv[3] if len(argv) > 3 else None)
+        if len(argv) in (2, 3) and argv[1] == "--walk":
+            return check_walk(int(argv[2]) if len(argv) == 3 else None)
         if len(argv) == 2 and argv[1] == "--pose-lag":
             return check_draw_lag()
         if len(argv) in (2, 3) and argv[1] == "--stature":

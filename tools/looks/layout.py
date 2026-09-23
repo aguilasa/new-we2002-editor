@@ -2050,6 +2050,62 @@ the walk cycle repeating, and it is why the figure keeps walking with nothing
 pressed.
 """
 
+ANIME_BUILD = 0x80011EF0
+ANIME_BUILD_BASE = "s0"
+"""The call that turns a pair's angles into a matrix, and the pair register.
+
+`jal 0x8003D4BC` -- `RotMatrix` -- with the three angles already unpacked into
+`POSE_ANGLES` and **`s0` still holding the pair they came out of**, after every
+adjustment the unpack variant made to it.
+
+**This is the stop to watch, and `ANIME_UNPACK` is not**, measured on
+2026-09-23 (LOOKS-TASK-32).  Ten unpack variants share the dispatch at
+`ANIME_VARIANT_DISPATCH`, and `ANIME_UNPACK` is one of them: a pass drawn by
+another variant stops there for nobody, which is why half the pose captures of
+LOOKS-TASK-26 carried no pair on any piece and were set aside.  Every variant
+falls through to this one call, so a watch here names the pair of all twelve
+pieces of every pass -- 480 of 480 stops over forty passes, against 132 of 480
+at the unpack.
+"""
+
+ANIME_VARIANT_DISPATCH = 0x80011DA0
+ANIME_VARIANT_TABLE = 0x80050634
+ANIME_VARIANT_COUNT = 10
+"""Where the game chooses HOW to unpack a pair, and how many ways there are.
+
+`sltiu v0, v1, 10 / lw v0, 0x634(at) / jr v0`, with `v1` two less than the
+byte the caller passed: a jump table of ten entries, entered only when the
+flag byte just before `ANIME_BLEND_MODE`'s struct is not zero.  The entries
+differ in two things and nothing else, and both are what the walk's second
+half is made of (LOOKS-TASK-32): they move `s0` by a whole number of pairs
+(`addiu s0, s0, 8` and `16`, falling through in pairs for 24) and they negate
+or turn the angles as they store them -- `anime.WALK_RULES`.
+
+Named here, and read by nothing: the rules are measured from the angles the
+game left in the scratchpad, pair by pair, and the table is what says the
+count of them is ten and not "some".
+"""
+
+ANIME_BLEND = 0x80011F90
+ANIME_BLEND_MODE = 0x80075FF8
+ANIME_BLEND_KEPT = 0x1A0
+"""The averaging path, the byte that selects it, and where it keeps a matrix.
+
+`lhu` the freshly built halfword, `lh` the kept one at `+0x1A0` of the piece's
+record, `addu`, `sra 1`, `sh` it back: `(a + b) >> 1` over the nine halfwords
+of the rotation and the three words of the place.  The byte at `0x0(s3)`
+chooses -- 0 stores the fresh matrix into the record and draws it, 1 averages
+and stores the average, 2 discards the fresh one and draws the kept one.
+
+**The byte is 1 at 24 of the 408 loads of a cycle and 0 at the other 384**,
+and 2 at none of them -- measured over both slots (LOOKS-TASK-32).  The 24 are
+the visit that opens a side of the walk, one per piece, and the average there
+is exact: the fresh matrix alone lands up to 202 units out.  So the averaging
+is real and it is narrow, which is what `anime.WALK_BLEND_AT` models; what it
+is NOT is the explanation of the whole of the walk's second half, and that is
+what it was taken for until the mirror was measured.
+"""
+
 ANIME_SCREEN_ENTRY = 5
 """The header entry the LOOKS SET screen plays.
 

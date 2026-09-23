@@ -823,8 +823,9 @@ uniforme do time (task 30), o painel e a mobília medidos e pintados (task
 31), os sprites estáticos e as setas lidos do disco (task 36), e o texto
 escrito com a fonte do jogo, no lugar em que o jogo o escreve (tasks 37 e
 38), e a ajuda medida — ela vem da **ROM do console**, não do disco, e por
-isso a janela a mantém numa fonte de apoio (task 39); faltam o close-up
-(task 40) e a caminhada (fase 11).
+isso a janela a mantém numa fonte de apoio (task 39), o close-up por linha
+(task 40) e o ciclo da caminhada medido e reproduzido do arquivo (task 32);
+falta a janela animada e o fechamento (tasks 33 a 35).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
@@ -872,6 +873,8 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --help-box [SLOT]` | quem escreve a tira (832,256) da caixa de ajuda e de onde vêm os texels: a cópia `0xA0` de um ladrilho por caractere, e o bitmap 16×15 que a **ROM do console** devolve a cada chamada de BIOS — nada disso está no disco |
 | `python tools/looks/oracle.py --pose [SLOT]` / `--pose <SLOT> <N> [N ...]` | de onde vem a pose, e a pose em si: a matriz e a translação de cada peça de um quadro contado, em `work/looks-pose/`, com a captura repetida como controle |
 | `python tools/looks/oracle.py --pose-lag` | quantas paradas o ponteiro de modelo atrasa em relação à matriz que ele nomeia, medido sobre as capturas em disco, sem emulador |
+| `python tools/looks/oracle.py --walk [SLOT]` | o ciclo da caminhada, passada a passada: 34 passadas e 77 quadros contados, a câmera parada, e a vaga de par em que a passada abre; grava `work/looks-walk/slotN.json` |
+| `python tools/looks/anime.py --against-walk [SLOT]` / `--frame N [SLOT]` | o modelo do ciclo contra o que o jogo carregou, **sem emulador** (408 de 408 entrada por entrada), e a pose de uma passada desenhada |
 | `python tools/looks/oracle.py --camera [SLOT [LINHA]]` | a câmera do jogo lida do GTE — `H`, os deslocamentos (zero nesta tela) e a matriz —, em `work/looks-camera/`; com `LINHA` (ex.: `HAIR`) mede a câmera do close-up |
 | `python tools/looks/oracle.py --closeups [SLOT]` | anda as doze linhas e diz **quais aproximam** a câmera do painel — seis, e uma delas é `BOOTS` —, gravando a câmera de cada uma em `work/looks-camera/slotN-LINHA.json` |
 | `python tools/looks/confront.py --silhouette-closeups [SLOT]` | o close-up de cada linha que aproxima contra o nosso, **sem ajustar translação**: o eixo e a translação são os medidos, e a câmera de corpo inteiro na mesma foto é o controle |
@@ -931,6 +934,16 @@ Cinco coisas que custam tempo se descobertas tarde:
   tabela — se lê das instruções do `/SELECT8.BIN` (`stature.py`), que difere
   entre os discos e por isso tem digest japonês na guarda. A janela recompõe a
   câmera quando uma das duas linhas muda (LOOKS-TASK-29).
+- **A caminhada se conta em PASSADAS de desenho, não em quadros de vídeo.** A
+  tela desenha a figura uma vez a cada dois ou três quadros, e o intervalo
+  alterna sem período dentro de 500 quadros medidos — em quadros não há
+  período; em passadas o ciclo é **34**, e foram **77 quadros contados** na
+  corrida medida (task 32). As 34 poses saem dos **17** quadros do `ANIME.BIN`
+  porque o jogo **espelha** o segundo lado: cada membro lê o par do membro do
+  outro lado e os ângulos vêm virados, com o `x` do lugar negado; e na visita
+  que abre cada lado ele soma a matriz nova com a guardada e desloca um bit
+  (24 das 408 peças de um ciclo). O reprodutor é `anime.py --frame N`, que
+  recusa rodar sem o ciclo medido em `work/looks-walk/`.
 - **O ponteiro vivo numa parada nomeia a peça ANTERIOR.** Na carga da matriz
   de uma peça os registradores ainda apontam para a peça que o jogo acabou de
   desenhar — a matriz entra no GTE antes de os ponteiros serem armados. Lido

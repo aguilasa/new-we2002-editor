@@ -505,7 +505,12 @@ Não se revertem sem o usuário pedir.
     instrução de leitura usa (`layout.ANIME_UNPACK`): com ele, **96 de 96** —
     das **192** capturadas, porque oito das dezesseis capturas não param no
     desempacotamento e são postas de lado, com os ângulos do scratchpad
-    anterior. O `--against-pose` imprime as duas contas desde a
+    anterior. **E desde a
+    [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) a ponte
+    melhor é `layout.ANIME_BUILD`**, o `jal` da `RotMatrix`, por onde passam
+    as dez variantes: as oito capturas postas de lado eram as que tomaram
+    outra variante, e ali são 480 de 480 paradas com par contra 132 de 480
+    (armadilha 99). O `--against-pose` imprime as duas contas desde a
     [`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md), e reprova se
     menos de um terço das capturas carregar par: **gate que escolhe sozinho
     o que não vai medir tem de dizer quanto deixou de fora.**
@@ -533,7 +538,12 @@ Não se revertem sem o usuário pedir.
     múltiplos de 16 — e ela **errou uma em seis**, porque a média de dois
     trios a 32 de distância também é múltipla de 16, e a peça foi acusada de
     defeito. A que vale varre **todos** os pares do arquivo e pergunta se
-    algum reproduz a matriz (`anime.no_pair_explains`).
+    algum reproduz a matriz (`anime.no_pair_explains`). **E essa também só
+    diz metade**: pose do lado espelhado da caminhada não é a volta de par
+    nenhum tampouco, e chamá-la de mistura foi o que o ciclo fez até a
+    [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md). Quem
+    separa é o `anime.walk_pose`, que reproduz as duas: as seis da task 26 são
+    médias, e a varredura sob as **três** regras continua não as explicando.
 
 58. **Literal plantado morre quando a linha muda de FORMA, não só de texto.**
     Quebrar a chamada do `from_image` em duas para caber um argumento novo fez
@@ -729,6 +739,9 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/stature.py --check-image` — a regra de `HEIG` e `BODY` decodificada das instruções do `/SELECT8.BIN`, recusando instrução que não seja a medida, e a cadeia contra quatro cargas de câmera do jogo | — | LOOKS-TASK-29 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~35 min (medido 2026-09-18, os dois slots, 34 min 6 s) | `python tools/looks/oracle.py --stature [SLOT]` — **o controle fecha antes** (o estado capturado duas vezes, idêntico, numa passada que o leitor de pose reproduz inteira — armadilha 74), depois as pontas de `HEIG`, os oito `BODY` e um cruzado **nos mesmos quadros da caminhada** (armadilha 73), cada um com vetor de escala, carga de câmera e peças contra `stature`; e a caminhada por todos os valores das duas linhas, vetor e câmera contra a regra | — | LOOKS-TASK-29 |
 | *(sem alvo ainda)* | idem, mais `work/looks-camera/` com a cadeia; ~6 min (medido 2026-09-18, os dois slots, 6 min 15 s) | `python tools/looks/confront.py --silhouette-stature [SLOT]` — a silhueta do jogo andado a 155 cm, 210 cm, `D TYPE` e `H TYPE` contra a nossa com a câmera composta para a estatura, pelos limiares da LOOKS-TASK-28; controles: o estado fotografado duas vezes, cada estatura mexendo a foto, e a nossa figura **na estatura do estado** pontuando pior | — | LOOKS-TASK-29 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~1 min 20 s por slot (medido 2026-09-23) | `python tools/looks/oracle.py --walk [SLOT]` — o ciclo da caminhada, passada a passada: **34 passadas e 77 quadros contados**, 408 matrizes exatas, a câmera igual 120 quadros depois, e a vaga de par em que a passada abre (7 no slot 2, 0 no slot 1). Controles: as seis primeiras passadas duas vezes, as passadas diferindo, cada carga nomeada pela vaga **e** pelo ponteiro, e uma visita de diferença. Escreve `work/looks-walk/slotN.json` | — | LOOKS-TASK-32 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e `work/looks-walk/` (77 sem ele); **sem emulador**, ~2 s | `python tools/looks/anime.py --against-walk [SLOT]` — o modelo contra o ciclo medido: 408 de 408 entrada por entrada, mais **oito** passadas espalhadas pelas que nenhum quadro do arquivo guarda (o lado espelhado e as médias), com uma visita de diferença de controle | — | LOOKS-TASK-32 |
+| *(sem alvo ainda)* | idem | `python tools/looks/anime.py --frame N [SLOT]` — a pose de **uma** passada desenhada, do arquivo: quadro, lado, regra por peça e o lugar. É o reprodutor que a janela animada usa, e ele **recusa** rodar sem o ciclo medido em vez de inventar um | — | LOOKS-TASK-32 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes; desde a LOOKS-TASK-38 compara o **conjunto inteiro de glifos** do quadro — ponto e `uv` —, uma linha de falha por linha da tela; desde a LOOKS-TASK-36 compara também as **setas** ao lado do valor, lidas da lista que o quadro entrega ao GPU, e desde a CORR-LOOKS-068 recusa seta cuja CLUT não seja `sprites.ARROW_CLUT`; repetição na SEQUÊNCIA se escreve `Right x41`, a única forma aceita | — | LOOKS-TASK-22 |

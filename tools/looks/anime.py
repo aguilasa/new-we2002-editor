@@ -25,26 +25,32 @@ LOOKS-TASK-24 answered *where the pose comes from* and LOOKS-TASK-25 captured
     by four; the top two bits are flags this module does not read.  **The
     matrix is not in the file.**  The game builds it from those three angles.
 
-WHAT IS EXACT, AND WHAT THE GAME BLENDS
----------------------------------------
-Both, and measured against the pose captures of both save states:
+WHAT IS EXACT, AND WHAT THE WALK IS MADE OF
+-------------------------------------------
+All of it, measured pass by pass over a whole cycle of both save states
+(LOOKS-TASK-32, `oracle.py --walk` and `--against-walk`):
 
-    96 of 96 pieces carry the angles the file holds at the pair the game was
-    reading, integer for integer;
-    90 of those 96 matrices come out EXACT -- every one of the nine
-    halfwords -- and the other 6 are matrices the game BLENDED.
+    408 of 408 matrices of the cycle come out EXACT -- every one of the nine
+    halfwords -- and so do the places, to the unit, against the translations
+    the game loaded;
+    the cycle is 34 drawn poses out of the 17 frames the file stores, and
+    77 counted video frames long: the screen draws the figure once every two
+    or three frames, so the PASS and not the frame is the walk's unit.
 
-The link is the PAIR the game reads (`layout.ANIME_UNPACK`), not the frame the
-animation state names: the state's frame is right for the outfield player and
-wrong for the goalkeeper.
+The seventeen frames are played twice and the second time is MIRRORED: each
+limb reads the pair of the limb on the other side (`WALK_SWAP`) and the angles
+are turned (`WALK_RULES`), head and torso mirroring about their own axis. On
+the one visit that opens a side the game averages the fresh matrix with the one
+it kept, `(a + b) >> 1` (`WALK_BLEND_AT`) -- 24 pieces of the 408.
+
+The link is the PAIR the game reads, at `layout.ANIME_BUILD` and not at
+`layout.ANIME_UNPACK`: ten unpack variants share a dispatch and only one of
+them is that instruction, which is why half the pose captures of
+LOOKS-TASK-26 came back with no pair on any piece.
 
 `rotation()` is the game's `RotMatrix` at 0x8003D4BC written out term by term,
 not a rotation of the same name -- the order of its twelve shifts is what
-makes it exact rather than one unit away.  The six that are not exact are the
-game's own averaging path (`(a + b) >> 1` at 0x80011F90), and they are named
-by a sweep of every pair in the file rather than by how far they missed:
-`no_pair_explains()`.  What decides that blend is the animation state across
-frames, which is LOOKS-TASK-32 and not this file.
+makes it exact rather than one unit away.
 
 Usage:
     python tools/looks/anime.py --check
@@ -52,11 +58,14 @@ Usage:
     python tools/looks/anime.py --check-image <japanese.bin>
     python tools/looks/anime.py --report [<japanese.bin>]
     python tools/looks/anime.py --against-pose  # vs work/looks-pose/
+    python tools/looks/anime.py --against-walk [SLOT]   # vs work/looks-walk/
+    python tools/looks/anime.py --frame <N> [SLOT]      # one drawn pass
 """
 
 from __future__ import annotations
 
 import math
+import os
 import struct
 import sys
 
@@ -410,22 +419,35 @@ def rotation(three: tuple) -> list:
     ]
 
 
-def compose(camera: list, three: tuple) -> list:
-    """The matrix the game hands the GTE for a piece: the camera over its turn.
+def compose_turn(camera: list, turn: list) -> list:
+    """The camera over a turn already built: the matrix the GTE is handed.
 
     One shift of twelve at the end, arithmetic -- which is what the game does
     and what `(value + 2048) >> 12` is not: rounding here misses every piece.
     """
-    return [value >> 12 for value in _product(camera, rotation(three))]
+    return [value >> 12 for value in _product(camera, turn)]
+
+
+def compose(camera: list, three: tuple) -> list:
+    """The same, for a piece whose turn is the rotation of three angles."""
+    return compose_turn(camera, rotation(three))
 
 
 def no_pair_explains(data: bytes, camera: list, matrix: list) -> bool:
     """Is this matrix the turn of NO pair in the file, under this camera?
 
-    The witness that a matrix is one the game BLENDED rather than one this
-    module got wrong.  The game has a path that averages a fresh matrix with
-    the one it kept (`(a + b) >> 1` at 0x80011F90), and the average of two
-    turns is not the turn of anything stored.
+    The witness that a matrix is one the game AVERAGED rather than one this
+    module got wrong: the game averages a fresh matrix with the one it kept
+    (`(a + b) >> 1` at `layout.ANIME_BLEND`) on the visit that opens a side of
+    the walk, and the average of two turns is not the turn of anything stored.
+
+    **It sweeps the pairs as they are stored**, which is the whole of what it
+    can say: a pose from the walk's mirrored half is not the turn of any pair
+    either, and calling that a blend is the mistake this docstring used to
+    make.  What tells the two apart is `walk_pose`, which reproduces both --
+    the six matrices LOOKS-TASK-26 could not explain are averaged ones, and a
+    sweep of every pair under all three of `WALK_RULES` still explains none of
+    them (measured 2026-09-23).
 
     **It sweeps every pair of the file, and that is the point.**  The first
     witness tried was cheaper -- undo the camera, read the turn back, and call
@@ -439,6 +461,243 @@ def no_pair_explains(data: bytes, camera: list, matrix: list) -> bool:
         if compose(camera, three) == matrix:
             return False
     return True
+
+
+WALK_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "work", "looks-walk")
+"""Where `oracle.py --walk` leaves the measured plan, one JSON per slot."""
+
+HALF_TURN = TURN // 2  # not-an-address: half a turn in angle units
+
+WALK_SWAP = (0, 1, 4, 5, 2, 3, 9, 10, 11, 6, 7, 8)
+"""Which pair a piece reads on the walk's second half: its SIBLING's.
+
+Measured on 2026-09-23 (LOOKS-TASK-32) from the pair register at
+`layout.ANIME_BUILD`, over both halves of both slots: head and torso read
+their own pair, and every limb reads the pair of the limb on the other side --
+`upper arm a` reads `upper arm b`'s, `thigh a` reads `thigh b`'s, and back.
+The jump table moves the pointer by whole pairs to do it
+(`layout.ANIME_VARIANT_TABLE`: 8, 16 and the two falling through for 24),
+which is why the shifts come out as 2 and 3 slots and never as 1.
+"""
+
+
+def _plain(three: tuple) -> tuple:
+    return tuple(three)
+
+
+def _mirror(three: tuple) -> tuple:
+    return (three[0], -three[1], -three[2])
+
+
+def _flip(three: tuple) -> tuple:
+    return (-three[0] + HALF_TURN, three[1], -three[2] + HALF_TURN)
+
+
+WALK_RULES = {"plain": _plain, "mirror": _mirror, "flip": _flip}
+"""The three ways a pair's angles reach the scratchpad, as the game writes them.
+
+Read off the unpack variants and then measured against the angles the game
+left, pair by pair (LOOKS-TASK-32):
+
+    plain    `sll 22 / sra 18`, `sll 12 / sra 22 / sll 4`, `sll 2 / sra 22 /
+             sll 4` -- the three fields, shifted left by four and nothing else;
+    mirror   the same, with `subu v0, zero, v0` on the second and third
+             (0x80011EA0 and 0x80011EBC): the piece turns the other way about
+             y and z;
+    flip     `subu` and then `addiu v0, v0, 2048` on the FIRST and THIRD
+             (0x80011DDC..0x80011E1C): turned the other way and half a turn
+             along, which is what a limb crossing to the other side needs.
+
+**And the place is negated with them**: the same variants run
+`sll 21 / sra 21 / subu` before storing x (0x80011D20), where the plain one
+stores it as it is.  Measured, not assumed: with x left alone the camera
+derived from a second-half pass spreads 190 units over its twelve pieces
+instead of 1.
+"""
+
+WALK_SIDE_RULES = (
+    tuple(["plain"] * PIECE_PAIRS),
+    ("mirror", "mirror", "flip", "flip", "flip", "flip",
+     "flip", "flip", "flip", "flip", "flip", "flip"),
+)
+"""Which rule each piece's pair takes, on each half of the walk.
+
+By PAIR SLOT -- `PIECE_ORDER` -- so entry 0 is the head and entry 11 the second
+boot.  The first half takes the file as it is; on the second, head and torso
+mirror and the ten limbs flip.  Measured over the whole cycle of both slots:
+408 of 408 second-half pieces take the rule this table names.
+"""
+
+WALK_FIRST_SLOT = 7
+"""The pair slot a pass starts reading at, and **it is a property of the state**.
+
+The pointer walks the file eight bytes at a time and does not restart with the
+figure, so a pass reads the slots from here to 11 out of the frame it is on and
+slots 0 to here out of the NEXT one -- which is what LOOKS-TASK-29 met as "a
+pass crosses two frames of ANIME.BIN".  Measured on 2026-09-23 at the pair
+register of all 960 stops of two runs: **7 on slot 2 and 0 on slot 1**, and
+constant over every pass of a run.  Where the cursor stands is whatever the
+save state caught, so this is only the default -- `walk_pose` takes the
+measured one, and `oracle.py --walk` writes it beside the cycle.
+"""
+
+
+def walk_visits(data: bytes, animation: int) -> int:
+    """How many frame visits the walk takes to come back to where it began.
+
+    Twice the frames of the animation, because the second visit to each frame
+    is the mirrored one: the drawn cycle is 34 poses out of 17 stored frames
+    (LOOKS-TASK-32).
+    """
+    entries = header(data)
+    if not 0 <= animation < len(entries):
+        raise BadAnime("animation %d, and the file names %d"
+                       % (animation, len(entries)))
+    return 2 * len(block(data, entries[animation])["frames"])
+
+
+def _visit_turn(data: bytes, frames: list, slot: int, step: int) -> dict:
+    """One piece's own pose at one frame visit, before any blend."""
+    count = len(frames)
+    side = (step // count) % 2
+    index = step % count
+    read = WALK_SWAP[slot] if side else slot
+    at = frames[index] + read * PAIR_BYTES
+    first, second = struct.unpack("<2I", data[at:at + PAIR_BYTES])
+    rule = WALK_SIDE_RULES[side][slot]
+    three = WALK_RULES[rule](angles(first))
+    place = position(first, second)
+    if rule != "plain":
+        place = (-place[0], place[1], place[2])
+    return {"slot": slot, "piece": PIECE_ORDER[slot], "read": read,
+            "visit": step, "frame": index, "side": side, "rule": rule,
+            "pair": at, "angles": tuple(three), "place": place,
+            "turn": rotation(three)}
+
+
+WALK_BLEND_AT = 0
+"""Which frame of a side the game averages on: its first, and only its first.
+
+Measured on 2026-09-23 (LOOKS-TASK-32).  A piece's matrix is the turn of its
+pair everywhere except on the visit that opens a side, and there it is
+`(fresh + kept) >> 1` -- `layout.ANIME_BLEND`, halfword by halfword, with the
+place averaged the same way and the shift ARITHMETIC, so a negative entry
+rounds down and not towards zero.  24 pieces of the 408 a cycle draws, on the
+four passes where a side switch falls inside a pass, and the average of the
+two is exact on all 24 where the fresh matrix alone is up to 202 units out.
+
+**This is what LOOKS-TASK-26 saw as "6 of 96 matrices the game blended" and
+LOOKS-TASK-29 as "a whole pass interpolated".**  It is neither a blend of
+neighbouring keyframes nor a running filter: the second operand is the pose
+the piece had one visit earlier, which at a side switch is the same frame of
+the OTHER side -- the walk's two halves meeting.
+"""
+
+
+def walk_pose(data: bytes, animation: int, visit: int,
+              camera: list = None, first_slot: int = WALK_FIRST_SLOT) -> list:
+    """The twelve pieces of one drawn pass of the walk, out of the file.
+
+    *visit* counts frame visits from the start of the animation, so it carries
+    both the frame (`visit % frames`) and the half (`visit // frames`): the
+    game plays the seventeen frames, then plays them again mirrored, and the
+    two halves are one cycle of 34 (`walk_visits`).
+
+    **A pass spans two visits**, and that is the game's: the pair pointer
+    walks the file without restarting with the figure, so slots 7 to 11 come
+    out of the visit asked for and slots 0 to 6 out of the next
+    (`WALK_FIRST_SLOT`).
+
+    Nothing here is fitted.  The frame, the sibling's pair, the rule and the
+    blend are the game's, measured at `layout.ANIME_BUILD` and
+    `layout.ANIME_BLEND`; the matrix is `rotation()` over the angles those
+    give, and the camera composed over it when one is passed.
+    """
+    entries = header(data)
+    if not 0 <= animation < len(entries):
+        raise BadAnime("animation %d, and the file names %d"
+                       % (animation, len(entries)))
+    frames = block(data, entries[animation])["frames"]
+    count = len(frames)
+    if visit < 0:
+        raise BadAnime("visit %d: the walk is counted forwards" % visit)
+    if not 0 <= first_slot < PIECE_PAIRS:
+        raise BadAnime("a pass starts at pair slot %d, and a frame has %d"
+                       % (first_slot, PIECE_PAIRS))
+    out = []
+    for slot in range(PIECE_PAIRS):
+        step = visit + (0 if slot >= first_slot else 1)
+        piece = _visit_turn(data, frames, slot, step)
+        piece["blended"] = step and step % count == WALK_BLEND_AT
+        if piece["blended"]:
+            kept = _visit_turn(data, frames, slot, step - 1)
+            piece["turn"] = [(a + b) >> 1
+                             for a, b in zip(piece["turn"], kept["turn"])]
+            piece["place"] = tuple((a + b) >> 1 for a, b
+                                   in zip(piece["place"], kept["place"]))
+            piece["kept"] = kept["visit"]
+        if camera is not None:
+            piece["matrix"] = compose_turn(camera, piece["turn"])
+        out.append(piece)
+    return out
+
+
+def walk_plan(path: str) -> dict:
+    """One slot's measured plan, as `oracle.py --walk` wrote it.
+
+    `BadAnime` when the file is not there, so a run without the measurement
+    says what is missing instead of drawing a cycle of its own invention.
+    """
+    import json
+    import os
+
+    if not os.path.isfile(path):
+        raise BadAnime("no plan at %s -- run oracle.py --walk, which is what "
+                       "measures the cycle" % path)
+    with open(path, encoding="utf-8") as handle:
+        plan = json.load(handle)
+    for key in ("slot", "animation", "visit", "passes", "camera", "cycle",
+                "first_slot"):
+        if key not in plan:
+            raise BadAnime("the plan at %s carries no %r" % (path, key))
+    return plan
+
+
+def plan_path(slot: int) -> str:
+    import os
+
+    return os.path.join(WALK_DIR, "slot%d.json" % slot)
+
+
+def against_walk(data: bytes, plan: dict, shift: int = 0) -> dict:
+    """The model against the matrices the game loaded, pass by pass.
+
+    *shift* is the negative control: model a pass with the NEXT visit's pose
+    instead of its own.  One step along is the smallest lie a reader can tell
+    about a cycle, and it has to come out red -- without it, a comparison that
+    is accidentally comparing a pose with itself passes.
+    """
+    exact = pieces = 0
+    worst = 0
+    off = []
+    for one in plan["cycle"]:
+        model = walk_pose(data, plan["animation"],
+                          plan["visit"] + one["pass"] + shift,
+                          plan["camera"]["rotation"], plan["first_slot"])
+        by_slot = {piece["slot"]: piece for piece in model}
+        for drawn in one["pieces"]:
+            pieces += 1
+            built = by_slot[drawn["slot"]]["matrix"]
+            apart = max(abs(a - b) for a, b in zip(built, drawn["rotation"]))
+            worst = max(worst, apart)
+            if apart:
+                off.append((apart, one["pass"], drawn["piece"]))
+            else:
+                exact += 1
+    return {"passes": len(plan["cycle"]), "pieces": pieces, "exact": exact,
+            "worst": worst, "off": sorted(off, reverse=True)}
 
 
 def pose(data: bytes, animation: int, index: int) -> list:
@@ -463,6 +722,13 @@ def self_check(verbose: bool = True) -> int:
 
 def _checks(c) -> None:
     ok, attempt = c.ok, c.attempt
+    # `attempt` runs something and reports the exception it did NOT expect;
+    # what demands a refusal is `refuses`, with the fragment of the message
+    # that says WHICH refusal fired.  Three checks below were written as
+    # `attempt(name, BadAnime, lambda: ...)` -- which hands `BadAnime` in as
+    # the callable, constructs an exception, returns it and asserts nothing.
+    # They passed for five days without being able to fail (LOOKS-TASK-32).
+    refuses = c.refusing(BadAnime)
 
     # -- the angle unpack, on words made here -------------------------------
     ok("zero unpacks to no turn at all", angles(0) == (0, 0, 0))
@@ -545,12 +811,13 @@ def _checks(c) -> None:
 
     broken = bytearray(made)
     broken[-4:] = struct.pack("<I", 0)
-    attempt("a block that does not close with the marker is refused",
-            BadAnime, lambda: blocks(bytes(broken)))
-    attempt("a header entry outside the file is refused", BadAnime,
-            lambda: header(struct.pack("<I", 0) * HEADER_WORDS))
-    attempt("a frame index the animation does not have is refused", BadAnime,
-            lambda: pose(made, 0, 9))
+    refuses("a block that does not close with the marker is refused",
+            lambda: blocks(bytes(broken)), "closes with")
+    refuses("a header entry outside the file is refused",
+            lambda: header(struct.pack("<I", 0) * HEADER_WORDS),
+            "outside the file")
+    refuses("a frame index the animation does not have is refused",
+            lambda: pose(made, 0, 9), "and animation 0 has")
 
     # -- what the run leaves out, and saying so (CORR-LOOKS-061) ------------
     def capture(slot, frame, paired):
@@ -574,10 +841,104 @@ def _checks(c) -> None:
        len(split_captures(thin)[0]) == 1
        and len(split_captures(thin)[0]) < JUDGED_FLOOR * len(thin))
 
+    # -- the walk, on the file made here ------------------------------------
+    ok("the cycle is the file's frames played twice",
+       walk_visits(made, 0) == 2 * len(block(made, header(made)[0])["frames"]))
+    ok("the swap is its own undoing",
+       tuple(WALK_SWAP[WALK_SWAP[slot]] for slot in range(PIECE_PAIRS))
+       == tuple(range(PIECE_PAIRS)))
+    ok("and it leaves the head and the torso where they are, and moves every "
+       "limb",
+       [slot for slot in range(PIECE_PAIRS) if WALK_SWAP[slot] == slot]
+       == [0, 1])
+    ok("mirror turns the second and third angles the other way",
+       WALK_RULES["mirror"]((16, 32, 48)) == (16, -32, -48))
+    ok("mirroring twice is not turning at all",
+       WALK_RULES["mirror"](WALK_RULES["mirror"]((16, 32, 48)))
+       == (16, 32, 48))
+    ok("flip turns the first and third the other way and half a turn along",
+       WALK_RULES["flip"]((16, 32, 48))
+       == (HALF_TURN - 16, 32, HALF_TURN - 48))
+    ok("and plain is the file as it is", WALK_RULES["plain"]((16, 32, 48))
+       == (16, 32, 48))
+
+    first = walk_pose(made, 0, 0, first_slot=0)
+    second = walk_pose(made, 0, len(block(made, header(made)[0])["frames"]),
+                       first_slot=0)
+    ok("the first side reads each piece's own pair",
+       [piece["read"] for piece in first] == list(range(PIECE_PAIRS)))
+    ok("the second reads its sibling's", [piece["read"] for piece in second]
+       == list(WALK_SWAP))
+    ok("and it is the second side that mirrors, piece by piece",
+       {piece["rule"] for piece in first} == {"plain"}
+       and {piece["rule"] for piece in second} == {"mirror", "flip"})
+    ok("a pass that opens on slot 7 takes slots 0 to 6 from the NEXT visit",
+       [piece["frame"] for piece in walk_pose(made, 0, 0, first_slot=7)]
+       == [1] * 7 + [0] * 5,
+       "%r" % ([piece["frame"] for piece in walk_pose(made, 0, 0,
+                                                      first_slot=7)],))
+    refuses("a pass opening outside the twelve slots is refused",
+            lambda: walk_pose(made, 0, 0, first_slot=PIECE_PAIRS),
+            "a pass starts at pair slot")
+    refuses("a visit before the animation began is refused",
+            lambda: walk_pose(made, 0, -1), "counted forwards")
+
+    # The average, on numbers made here: the arithmetic shift is the point,
+    # because a negative halfword rounds DOWN and `int(a / 2)` rounds towards
+    # zero -- one unit on every negative entry of every averaged matrix.
+    ok("the average is (a + b) >> 1, arithmetic",
+       [(a + b) >> 1 for a, b in zip([-3, -1, 4], [0, 0, 1])] == [-2, -1, 2])
+    opened = walk_pose(made, 0, 2, first_slot=0)
+    ok("the visit that opens a side is the averaged one, and it alone",
+       [piece["blended"] for piece in opened] == [True] * PIECE_PAIRS,
+       "%r" % ([piece["blended"] for piece in opened],))
+    ok("and the visit after it is not",
+       not any(piece["blended"]
+               for piece in walk_pose(made, 0, 3, first_slot=0)))
+
+    # -- the judge, and its negative control --------------------------------
+    identity = [ONE, 0, 0, 0, ONE, 0, 0, 0, ONE]
+    plan = {"slot": 2, "state": "made up", "animation": 0, "visit": 0,
+            "first_slot": 0, "passes": 4, "frames": 9, "keyframes": 2,
+            "camera": {"rotation": identity, "translation": [0, 0, 0]},
+            "cycle": [{"pass": at, "pieces": [
+                {"slot": piece["slot"], "piece": piece["piece"],
+                 "rotation": piece["matrix"], "translation": [0, 0, 0]}
+                for piece in walk_pose(made, 0, at, identity, 0)]}
+                for at in range(4)]}
+    found = against_walk(made, plan)
+    ok("the judge finds a cycle built the same way exact",
+       found["exact"] == found["pieces"] == 4 * PIECE_PAIRS,
+       "%r" % (found,))
+    ok("and one visit along is NOT exact, which is what makes the judge one",
+       against_walk(made, plan, shift=1)["exact"] < found["exact"],
+       "%d against %d" % (against_walk(made, plan, shift=1)["exact"],
+                          found["exact"]))
+    refuses("a cycle that was never measured is refused, not invented",
+            lambda: walk_plan(plan_path(-1)), "run oracle.py --walk")
+    refuses("and a plan with a key missing is refused too",
+            lambda: walk_plan(_written_plan()), "carries no")
+
     # -- membership in the image gate ---------------------------------------
     import cli
 
     ok("anime is in the list cli.py check runs", "anime" in cli.CHECK_IMAGE)
+
+
+def _written_plan() -> str:
+    """A plan file with nothing in it, for the check that a plan is read.
+
+    Written to a temporary file rather than passed as a dict, because what is
+    being checked is the reading of the file -- a dict handed straight to the
+    validator would not exercise it.
+    """
+    import tempfile
+
+    handle = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False,
+                                         encoding="utf-8")
+    with handle:
+        handle.write("{}")
+    return handle.name
 
 
 def _synthetic() -> bytes:
@@ -590,7 +951,10 @@ def _synthetic() -> bytes:
     body = bytearray()
     for index in range(frames):
         for pair in range(PIECE_PAIRS):
-            body += struct.pack("<2I", pair + index, 0)
+            # The angles differ from pair to pair AND from frame to frame:
+            # a made-up file whose frames are equal would let a model that
+            # ignores the frame pass every check below.
+            body += struct.pack("<2I", (pair + index) | (index + 1) << 10, 0)
     for index in range(frames):
         body += struct.pack("<I", layout.ANIME_BASE + start
                             + index * FRAME_BYTES)
@@ -782,9 +1146,10 @@ def _against_pose(image_path: str, directory: str) -> int:
           "read, integer for integer" % (found["exact"], found["pieces"]))
     print("  %d piece(s) drew before any unpack stop, so no pair names them"
           % found["unlinked"])
-    print("  %d matrices of %d are EXACT, %d are blends the game made, and %d "
-          "are neither" % (found["matrix_exact"], found["exact"],
-                           found["blended"], len(found["off"])))
+    print("  %d matrices of %d are EXACT, %d are averages the game made at a "
+          "side switch of the walk (LOOKS-TASK-32), and %d are neither"
+          % (found["matrix_exact"], found["exact"], found["blended"],
+             len(found["off"])))
     failures = 0
     if len(captures) < JUDGED_FLOOR * len(records):
         print("  FAIL  only %d of %d capture(s) carry a pair, under the %.0f%% "
@@ -803,6 +1168,144 @@ def _against_pose(image_path: str, directory: str) -> int:
               "the wrong one" % (slot, frame, name, apart))
         failures += 1
     print("anime --against-pose: %d failure(s)" % failures)
+    return 1 if failures else 0
+
+
+WALK_SLOTS = (1, 2)
+WALK_SLOT = 2
+"""Which save states have a measured cycle, and which one a run defaults to.
+
+The same two the rest of the cycle uses: slot 1 the goalkeeper and slot 2 the
+outfield player (`oracle.SLOTS`).  The default is the outfield player because
+that is the figure the walk was measured on first, and a run that means the
+other says so.
+"""
+
+WALK_SPREAD = 8
+"""How many drawn passes a run judges away from the file's own frames.
+
+The criterion of LOOKS-TASK-32 asks for eight, spread over the cycle and
+outside the stored frames, because a model that reproduces a stored frame has
+reproduced the unpack and nothing of the walk.  What is outside them is the
+mirrored half and the four passes a side switch falls inside -- 20 of the 34,
+so eight spread over them is a sample and not the whole of what is left.
+"""
+
+
+def walk_derived(data: bytes, plan: dict) -> list:
+    """Which passes of the cycle are NOT the file's frames read as they are.
+
+    A pass qualifies when a piece of it is mirrored or averaged: those are the
+    poses no frame of `ANIME.BIN` holds, and the ones a reader gets wrong by
+    playing the seventeen frames round and round.
+    """
+    out = []
+    for one in plan["cycle"]:
+        model = walk_pose(data, plan["animation"], plan["visit"] + one["pass"],
+                          None, plan["first_slot"])
+        if any(piece["side"] or piece["blended"] for piece in model):
+            out.append(one["pass"])
+    return out
+
+
+def _walk_say(data: bytes, plan: dict, index: int) -> None:
+    model = walk_pose(data, plan["animation"], plan["visit"] + index,
+                      plan["camera"]["rotation"], plan["first_slot"])
+    print("  slot %d, drawn pass %d of %d: visit %d, frame %d of %d, side %d"
+          % (plan["slot"], index % plan["passes"], plan["passes"],
+             (plan["visit"] + index) % (2 * plan["keyframes"]),
+             model[plan["first_slot"] % PIECE_PAIRS]["frame"],
+             plan["keyframes"], model[plan["first_slot"] % PIECE_PAIRS]["side"]))
+    for piece in model:
+        print("    %-12s frame %2d %-6s %-8s angles %-22s place %s"
+              % (piece["piece"], piece["frame"], piece["rule"],
+                 "averaged" if piece["blended"] else "", piece["angles"],
+                 piece["place"]))
+
+
+def _frame(image_path: str, index: int, slot: int) -> int:
+    """`--frame N [SLOT]`: the pose of one drawn pass, out of the file."""
+    import iso_source
+
+    try:
+        plan = walk_plan(plan_path(slot))
+    except BadAnime as bad:
+        print("anime --frame: skipped -- %s" % bad)
+        return 77
+    with iso_source.open_disc(image_path) as disc:
+        data = read(disc)
+    _walk_say(data, plan, index)
+    return 0
+
+
+def _against_walk(image_path: str, slot: int) -> int:
+    """`--against-walk [SLOT]`: the model against the cycle, without the emulator.
+
+    The plan carries what the game did -- the twelve matrices of each of the 34
+    passes -- and this rebuilds them from the disc.  Offline on purpose: the
+    measurement is expensive and repeated judging of it should not be.
+    """
+    import iso_source
+
+    try:
+        plan = walk_plan(plan_path(slot))
+    except BadAnime as bad:
+        print("anime --against-walk: skipped -- %s" % bad)
+        return 77
+    with iso_source.open_disc(image_path) as disc:
+        data = read(disc)
+    found = against_walk(data, plan)
+    failures = 0
+    print("  slot %d (%s): %d pass(es) of the cycle, %d matrix(es), %d frame(s) "
+          "in the file, %d counted frame(s) a cycle"
+          % (plan["slot"], plan["state"], found["passes"], found["pieces"],
+             plan["keyframes"], plan["frames"]))
+    print("  %d of %d exact, integer for integer (worst %d)"
+          % (found["exact"], found["pieces"], found["worst"]))
+    if found["exact"] != found["pieces"]:
+        for apart, index, piece in found["off"][:6]:
+            print("  FAIL  pass %d, %s is %d apart" % (index, piece, apart))
+        failures += 1
+
+    derived = walk_derived(data, plan)
+    if len(derived) < WALK_SPREAD:
+        print("  FAIL  only %d pass(es) of the cycle are off the file's own "
+              "frames, and this judges %d" % (len(derived), WALK_SPREAD))
+        failures += 1
+    else:
+        step = len(derived) / float(WALK_SPREAD)
+        chosen = [derived[int(n * step)] for n in range(WALK_SPREAD)]
+        worst = 0
+        for index in chosen:
+            one = plan["cycle"][index]
+            model = {piece["slot"]: piece["matrix"]
+                     for piece in walk_pose(data, plan["animation"],
+                                            plan["visit"] + index,
+                                            plan["camera"]["rotation"],
+                                            plan["first_slot"])}
+            apart = max(max(abs(a - b) for a, b
+                            in zip(model[drawn["slot"]], drawn["rotation"]))
+                        for drawn in one["pieces"])
+            worst = max(worst, apart)
+        print("  the %d pass(es) asked for, spread over the %d that no frame "
+              "of the file holds (%s): worst %d of %d"
+              % (len(chosen), len(derived),
+                 ", ".join(str(index) for index in chosen), worst, ONE))
+        if worst:
+            print("  FAIL  a pass off the file's frames is %d out, so the "
+                  "mirror or the average is not what this models" % worst)
+            failures += 1
+
+    control = against_walk(data, plan, shift=1)
+    if control["exact"] >= found["exact"]:
+        print("  FAIL  the same cycle modelled one visit along is as exact "
+              "(%d of %d) -- the comparison cannot tell the poses apart"
+              % (control["exact"], control["pieces"]))
+        failures += 1
+    else:
+        print("  control: one visit along, %d of %d exact"
+              % (control["exact"], control["pieces"]))
+    print("anime --against-walk: %d failure(s)" % failures)
     return 1 if failures else 0
 
 
@@ -859,6 +1362,30 @@ def main(argv: list[str]) -> int:
                 print("anime --against-pose: skipped -- %s" % exc)
                 return 77
         return _against_pose(image, directory)
+    if len(argv) in (3, 4) and argv[1] in ("--frame", "--against-walk"):
+        import iso_source
+
+        try:
+            image = iso_source.image_from_env()
+        except RuntimeError as exc:
+            print("anime %s: skipped -- %s" % (argv[1], exc))
+            return 77
+        if argv[1] == "--frame":
+            return _frame(image, int(argv[2]),
+                          int(argv[3]) if len(argv) == 4 else WALK_SLOT)
+        return _against_walk(image, int(argv[2]))
+    if len(argv) == 2 and argv[1] == "--against-walk":
+        import iso_source
+
+        try:
+            image = iso_source.image_from_env()
+        except RuntimeError as exc:
+            print("anime --against-walk: skipped -- %s" % exc)
+            return 77
+        failures = 0
+        for slot in WALK_SLOTS:
+            failures += 1 if _against_walk(image, slot) else 0
+        return 1 if failures else 0
     if len(argv) in (2, 3) and argv[1] == "--report":
         import iso_source
 

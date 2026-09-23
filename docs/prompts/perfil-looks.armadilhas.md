@@ -42,7 +42,8 @@ e os termos que a disparam.
     (`oracle._stature_frames`).
 74. **No goleiro, as peças do quadro 0 não são as do arquivo** — com os
     ângulos do scratchpad **iguais** aos do par. É a volta do ciclo, onde o jogo
-    mistura com o quadro anterior (a "mistura" da task 26), e acontece na
+    mistura com o quadro anterior (a média da visita que abre um lado, medida
+    na task 32), e acontece na
     estatura do próprio estado. Controle que caísse ali cobraria da regra de
     estatura um erro do leitor de pose; o `--stature` exige que o controle seja
     uma passada que o leitor reproduz **inteira** e imprime as que recusa.
@@ -148,6 +149,30 @@ e os termos que a disparam.
     não falha do leitor, desde que o controle da comparação feche no resto —
     e aqui é mais que isso: **não está no disco porque não pode estar**, e
     procurar mais no disco era trabalho perdido.
+100. **`attempt(nome, Exceção, lambda: ...)` não afirma nada.** No
+    `harness`, quem exige recusa é `refuses(nome, fn, trecho, tipo)`; o
+    `attempt(nome, fn, default)` **roda** `fn` e só reporta exceção
+    inesperada. Escrito com a exceção no lugar do callable, ele constrói a
+    exceção, devolve e passa verde: três controles do `anime.py` ficaram assim
+    cinco dias sem poder ficar vermelhos (LOOKS-TASK-32). Controle que não
+    pode falhar não é controle — a mesma lição da substituição que casa zero
+    vezes (armadilha 90).
+99. **Vigiar `ANIME_UNPACK` perde metade das passadas.** Dez variantes de
+    desempacotamento dividem o dispatch `0x80011DA0`, e `0x80011D48` é uma
+    delas: a passada que toma outra não para ali, e a captura volta **sem par
+    em peça nenhuma** — é a razão das oito capturas postas de lado da
+    LOOKS-TASK-26, não uma oscilação do emulador. Quem serve a todas é
+    `layout.ANIME_BUILD` (o `jal` da `RotMatrix`), onde os ângulos já estão no
+    scratchpad e `s0` ainda é o par: 480 de 480 paradas com par, contra 132 de
+    480 na outra (LOOKS-TASK-32).
+98. **Contar a caminhada em quadros de vídeo dá um relógio que não repete.**
+    A tela desenha a figura **uma vez a cada dois ou três quadros**, e o
+    intervalo alterna sem período dentro de 500 quadros medidos (219 avanços
+    de índice em 500, 0,438 por quadro). Em quadros, "o período" não existe;
+    em **passadas de desenho** ele é exato: 34, e 77 quadros contados na
+    corrida medida. Quem quiser um quadro nomeado conta passadas
+    (`oracle.py --walk`, `anime.py --frame N`) e guarda o número de quadros
+    como o que ele é — uma medição daquela corrida (LOOKS-TASK-32).
 97. **Comparação ajustada não julga close-up.** O `fit_centre` do
     `--silhouette` alinha as duas caixas de tinta, e é o certo no corpo
     inteiro (a mira é o offset de desenho do GPU, que este ciclo não mediu).

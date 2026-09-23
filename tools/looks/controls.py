@@ -779,6 +779,34 @@ CONTROLS = (
         "shows and every exact comparison does",
     ),
     Control(
+        "anime-walk-never-mirrors", "anime.py", "_visit_turn",
+        "    read = WALK_SWAP[slot] if side else slot",
+        "    read = slot",
+        ("anime",),
+        "the walk's second half read as its first: seventeen of the 34 drawn "
+        "poses become the stored frame instead of its mirror, and every one "
+        "of them is a pose the game really does draw -- half a cycle earlier "
+        "(LOOKS-TASK-32)",
+    ),
+    Control(
+        "anime-walk-averages-every-visit", "anime.py", "walk_pose",
+        '        piece["blended"] = step and step % count == WALK_BLEND_AT',
+        '        piece["blended"] = bool(step)',
+        ("anime",),
+        "the average applied at every visit instead of the one that opens a "
+        "side: the figure keeps walking and every pose is half a step behind "
+        "the one the game drew",
+    ),
+    Control(
+        "anime-walk-pass-is-one-frame", "anime.py", "walk_pose",
+        "        step = visit + (0 if slot >= first_slot else 1)",
+        "        step = visit",
+        ("anime",),
+        "a pass read as one frame of the file: the pointer does not restart "
+        "with the figure, so five pieces of every pass come out of the frame "
+        "before the other seven (LOOKS-TASK-29's two frames a pass)",
+    ),
+    Control(
         "anime-keeps-the-scratchpad-captures", "anime.py", "split_captures",
         "        (judged if paired else aside).append(one)",
         "        judged.append(one)",
