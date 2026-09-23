@@ -654,6 +654,26 @@ def _checks(c) -> None:
 
 # ---- the live run --------------------------------------------------------
 
+def _require_pillow():
+    """Refuse before the emulator starts when THIS interpreter has no Pillow.
+
+    Two interpreters run in this cycle, and they hold different packages: the
+    main one reads the game's frames (Pillow, through `drive.Frame`), and the
+    venv one draws the window (PySide6) and is SPAWNED for it by
+    `_python_and_app`.  Running this file with the venv used to die inside
+    `drive.Frame` with `'NoneType' object has no attribute 'open'`, after the
+    fork was already up -- an error that reads like a broken capture
+    (CORR-LOOKS-087).
+    """
+    import importlib.util
+
+    if importlib.util.find_spec("PIL") is None:
+        raise ConfrontError(
+            "Pillow is not installed in %s -- run confront.py with the main "
+            "python; the venv interpreter is spawned for the window"
+            % sys.executable)
+
+
 def _python_and_app():
     import ui_check
 
@@ -2255,11 +2275,21 @@ def reach(row: str, slots=(2, 1), verbose=True) -> int:
     return 1 if failures else 0
 
 
+LIVE = ("--run", "--silhouette", "--silhouette-styles",
+        "--silhouette-stature", "--outside", "--kit-control", "--reach")
+"""The commands that start the emulator, and so need Pillow here."""
+
+
 def main(argv: list[str]) -> int:
     if len(argv) == 2 and argv[1] == "--check":
         return 1 if self_check() else 0
     try:
         import oracle
+
+        # Every command that drives the emulator reads its frames with
+        # Pillow; `--score` and `--render` read PNGs without it.
+        if len(argv) >= 2 and argv[1] in LIVE:
+            _require_pillow()
 
         if len(argv) >= 2 and argv[1] in ("--run", "--score", "--render"):
             slots = tuple(int(a) for a in argv[2:]) or (2, 1)

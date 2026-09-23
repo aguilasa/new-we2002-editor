@@ -49,6 +49,22 @@ class Fail(Exception):
     """The run reached a state the route did not allow."""
 
 
+def require_pil():
+    """Refuse before the first frame is read, naming the interpreter.
+
+    Pillow stays optional at import time -- `--list`, `--self-check` and the
+    usage have to answer on a machine without it -- and the price was that a
+    missing Pillow only surfaced inside `Frame` as `'NoneType' object has no
+    attribute 'open'`, with the emulator already up.  The interpreter is in
+    the message because the callers of this module are not all run from the
+    same one (CORR-LOOKS-087).
+    """
+    if PILImage is None:
+        raise Skip("Pillow (PIL) is not installed in %s -- install it there, "
+                   "or run this tool with an interpreter that has it"
+                   % sys.executable)
+
+
 # --- the pad -----------------------------------------------------------
 #
 # **The bindings are read from the emulator's own configuration, not
@@ -187,6 +203,7 @@ class Frame:
     """
 
     def __init__(self, path):
+        require_pil()
         self.path = path
         with PILImage.open(path) as im:
             self.image = im.convert("RGB").copy()
@@ -686,8 +703,7 @@ ROUTES = {
 # caught on a machine with no DuckStation at all.
 
 def self_check():
-    if PILImage is None:
-        raise Skip("PIL is missing")
+    require_pil()
     tmp = tempfile.mkdtemp(prefix="pes2-drive-selfcheck-")
     try:
         def write(name, colour, size=(64, 48)):
@@ -748,8 +764,7 @@ def self_check():
 # --- entry point -------------------------------------------------------
 
 def preflight(cue, display):
-    if PILImage is None:
-        raise Skip("PIL is missing")
+    require_pil()
     if not cue:
         raise Fail("usage: drive.py <copy.cue> --screen NAME --out-dir DIR")
     if "/roms/" in os.path.abspath(cue):
