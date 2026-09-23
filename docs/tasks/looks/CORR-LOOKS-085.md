@@ -3,9 +3,9 @@ id: CORR-LOOKS-085
 title: "O docstring do HELP_ICON_CODES contradiz a medição"
 origin: LOOKS-TASK-39
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/layout.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -73,3 +73,20 @@ tem de imprimir `0` (imprime `1` hoje), e o docstring passa a nomear
 `/SELECT.BIN` e o offset 253.728.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-23, HEAD `dca4a96e`: **reproduzida** pelo lado do disco (o lado vivo não rodou — o emulador estava com outro agente).
+
+```text
+# /SELECT.BIN + 253728, 22 meias-palavras:
+['0x9b89','0x9bbd','0x9bc1','0x9bd4','0x9bdf','0x9c41','0x9e8a','0x9f86','0x9fba','0xe056',
+ '0xe05f','0xe1b8','0xe1c1','0xe555','0xe7b2','0xe7b3','0xe863','0xfab1','0x9b9a','0xe085',
+ '0xe54d','0xe7e9']
+special present: []      # nenhum de 0x819a/0x819c/0x81a1/0x81a3 -- o ■ inclusive
+$ grep -A6 "^HELP_ICON_CODES" tools/looks/layout.py | grep -c "which is how"
+1
+```
+
+**Um terceiro ponto, fora do vão que a Correção nomeia:** o `HELP_ICON_CLUT`
+(layout.py:1810) repete a mesma atribuição errada — "the game's own exception
+list (22 codes, at `HELP_ICON_CODES`) is what puts a code on the other
+palette". Mesmo arquivo, mesmo defeito.

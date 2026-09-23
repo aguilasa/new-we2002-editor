@@ -3,7 +3,7 @@ id: CORR-LOOKS-086
 title: Levar a ressalva da armadilha 96 ao docstring do HELP_UPLOAD
 origin: LOOKS-TASK-39
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/layout.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -58,3 +58,16 @@ não é estável (armadilha 96); o que se afirma é o retângulo mais o
 stable\|DMA"` tem de imprimir pelo menos `1` (imprime `0` hoje).
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-23, HEAD `dca4a96e`: **reproduzida** (o `--help-box` não rodou — emulador com outro agente).
+
+```text
+$ sed -n '/^HELP_IMAGE_LOAD/,/^"""$/p' tools/looks/layout.py | grep -c "96\|not stable\|DMA"
+0
+# o docstring (HELP_UPLOAD em layout.py:1881) segue sem ressalva
+# a armadilha 96 existe, em perfil-looks.armadilhas.md:79-86, e diz o contrário:
+#   0x8003A950 em duas corridas, 0x8003F2F4 e 0x8010A910 nas duas seguintes
+```
+
+Observação lateral da triagem: a numeração das armadilhas salta de `96.` para
+`91.` na linha 87 daquele arquivo.

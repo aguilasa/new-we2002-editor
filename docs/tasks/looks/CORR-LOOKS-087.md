@@ -3,7 +3,7 @@ id: CORR-LOOKS-087
 title: Dizer qual interpretador roda o confront.py --outside
 origin: LOOKS-TASK-39
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/pes2/drive.py, tools/looks/confront.py, docs/prompts/perfil-looks.md, CLAUDE.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -64,3 +64,18 @@ com mensagem nomeando o Pillow e o interpretador certo, em vez do
 `AttributeError`.
 
 ## Log de Execução
+
+Triagem do `/rite:fix-all looks` em 2026-09-23, HEAD `dca4a96e`: **reproduzida**, as quatro linhas.
+
+```text
+$ work/venv-looks/Scripts/python.exe tools/looks/confront.py --outside 2
+  ... drive.py:191, in __init__ -> AttributeError: 'NoneType' object has no attribute 'open'   (saída 1,
+  depois de subir o fork e mover a janela para fora da tela)
+$ work/venv-looks/Scripts/python.exe -c "import PIL"    -> ModuleNotFoundError: No module named 'PIL'
+$ python -c "import PySide6"                            -> ModuleNotFoundError: No module named 'PySide6'
+$ python tools/looks/confront.py --outside 2
+confront --outside: 0 problem(s) over 1 slot(s)    (13 regiões; help 323/14787, labels 0/16416, values 0/23472)
+```
+
+Uma diferença de forma: sem as duas `WE2002_LOOKS_*` exportadas, a primeira
+linha pula com saída 77 antes de chegar ao traceback.
