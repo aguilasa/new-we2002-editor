@@ -1895,12 +1895,21 @@ cycle needed: the texels are the console's, not the disc's.
 HELP_IMAGE_LOAD = 0x8003A780
 HELP_UPLOAD = 0x8003A950
 HELP_COPY_COMMAND = 0xA0  # not-an-address: the GP0 code for a CPU-to-VRAM copy
-"""The library routine that copies one tile into the page, and the instruction
-a VRAM write watchpoint over the page stops at.
+"""The library routine that copies one tile into the page, and the address a
+VRAM write watchpoint over that page reported in ONE run.
 
-`a0` there is `0xA0000000` -- the GP0 command that copies a rectangle from
-memory into VRAM -- and the rectangle is four halfwords by sixteen rows, which
-at four bits a texel is exactly one 16x16 tile.
+**`HELP_UPLOAD` is where the watch stopped, not who wrote, and it is not
+stable** (pitfall 96): the copy is a DMA, so the program has moved on by the
+time the GPU touches video memory.  The watch answered 0x8003A950 in two runs
+and 0x8003F2F4 and 0x8010A910 in the two after those.  What it does assert is
+the **rectangle**, and that the keypress caused it.
+
+Who writes is read off the disc instead, and that is the measured half: at
+0x8003A884 and 0x8003A8B8 of `/SLPM_870.56` -- the only two in the routine,
+0x8003A780 through 0x8003A980 -- sits `lui a0,0xA000` (0x3C04A000), so `a0`
+there is `0xA0000000`, the GP0 command that copies a rectangle from memory into
+VRAM, and the rectangle is four halfwords by sixteen rows, which at four bits a
+texel is exactly one 16x16 tile.
 """
 
 BIOS_ROM = (0xBFC00000, 0x80000)

@@ -5,7 +5,7 @@ origin: LOOKS-TASK-39
 severity: low
 files: [tools/looks/layout.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -71,3 +71,46 @@ $ sed -n '/^HELP_IMAGE_LOAD/,/^"""$/p' tools/looks/layout.py | grep -c "96\|not 
 
 Observação lateral da triagem: a numeração das armadilhas salta de `96.` para
 `91.` na linha 87 daquele arquivo.
+
+Corrigida em 2026-09-23, HEAD `420709ce`, sem emulador. O docstring de
+`HELP_IMAGE_LOAD`/`HELP_UPLOAD` (`tools/looks/layout.py:1895`) passou a dizer
+as duas coisas em ordem: o `pc` é onde o watchpoint parou **numa** corrida e
+não é estável — a cópia é DMA, `0x8003A950` em duas corridas e `0x8003F2F4` /
+`0x8010A910` nas duas seguintes (armadilha 96) —, e o que se afirma é o
+retângulo mais o `lui a0,0xA000` lido do disco.
+
+**Os dois endereços foram remedidos aqui, não copiados desta CORR.** Lendo o
+`/SLPM_870.56` da imagem japonesa pelo `iso_source`, com a base tirada do
+cabeçalho PS-EXE do próprio arquivo (`0x80010000`, igual ao
+`layout.BOOT_BASE`; 335.872 bytes de texto):
+
+```text
+0x8003A884: 0x3C04A000  lui a0,0xA000
+0x8003A8B8: 0x3C04A000  lui a0,0xA000
+lui a0,0xA000 entre 0x8003A780 e 0x8003A980: ['0x8003a884', '0x8003a8b8']
+```
+
+São **os dois únicos** `lui a0,0xA000` da rotina, o que o docstring agora diz
+— ninguém precisa procurar um terceiro. `a0` fica `0xA0000000`, cujo byte alto
+é o `HELP_COPY_COMMAND`.
+
+Verificação e portões, todos verdes:
+
+```text
+$ sed -n '/^HELP_IMAGE_LOAD/,/^"""$/p' tools/looks/layout.py | grep -c "96\|not stable\|DMA"
+1
+
+$ python tools/looks/selftest.py
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
+
+$ rite check --quick --cycle looks
+check: 0 error(s), 0 warning(s) in 1 cycle(s)
+```
+
+Varredura: `HELP_UPLOAD` e `HELP_IMAGE_LOAD` não aparecem em mais nenhum
+`.py` nem `.md` do repositório — são constantes **registradas, não lidas**,
+como o bloco do `HELP_ICON_CODES` ao lado. Por isso a ressalva só cabia no
+docstring: não há chamador para adverti-la.
