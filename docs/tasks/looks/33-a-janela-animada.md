@@ -53,6 +53,17 @@ figura montada e a câmera do jogo, enquanto as linhas continuam trocáveis.
 
 ---
 
+- **Da [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md):** qual
+  câmera vale em cada linha já está resolvido —
+  `scene.load_camera(slot, escala, linha)` lê o arquivo da linha quando ela
+  tem um, e `scene.close_up_rows` diz quais têm. O que fica para a janela
+  animada é o **giro**: nas cinco linhas de cabeça o jogo gira o modelo
+  continuamente, e o arquivo guarda um instante dele — medido, a vista lida
+  onde o jogo a constrói já está ~1° (61 a 80 de 4096) atrás da matriz da
+  carga no mesmo quadro, e entre capturas o giro anda +18,3°, −16,9° e
+  +16,9°. Uma janela animada terá de modelar esse giro, não interpolar entre
+  dois arquivos.
+
 ## Log de Execução
 
 *(preencher ao executar)*

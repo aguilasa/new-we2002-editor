@@ -1,12 +1,84 @@
-# Armadilhas do ciclo `looks` — da 80 em diante
+# Armadilhas do ciclo `looks` — da 70 em diante
 
-As armadilhas 1 a 79 estão no
+As armadilhas 1 a 69 estão no
 [`perfil-looks.md`](/docs/prompts/perfil-looks.md), na seção "Armadilhas
-medidas neste ciclo". Este arquivo guarda da 80 em diante, desde a
-[`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md), quando o perfil
-chegou ao limite de tamanho do rito (`[profile].max_kb`). O rito lê este
+medidas neste ciclo". Este arquivo guarda da 70 em diante — da 80 desde a
+[`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) e da 70 desde a
+[`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md), cada vez que o
+perfil chegou ao limite de tamanho do rito (`[profile].max_kb`). O rito lê este
 arquivo **por busca**, não por inteiro, então cada entrada nomeia os caminhos
 e os termos que a disparam.
+
+70. **O close-up GIRA o modelo, e a carga de câmera não traz o giro.** Com uma
+    linha de cabeça sob o cursor, cada peça carrega um giro extra em `y` —
+    +18,3°, −16,9° e +16,9° em três capturas, igual a 0,05° nas doze peças de
+    cada uma — que a carga em `layout.POSE_MATRIX` não tem. Composta com ela, a
+    translação espalha 29 unidades; derivada das peças
+    (`oracle.camera_from_pieces`), menos de uma. No corpo inteiro as duas
+    coincidem. **Câmera se deriva das peças que ela compôs**, e as doze têm de
+    concordar — é a conferência. E foto e câmera saem da **mesma parada**: o
+    giro muda de captura para captura.
+71. **Resumo de uma lista ordenada não é o intervalo dela.** Conferindo se
+    `T_peça − R·lugar` era constante no close-up, a primeira impressão mostrou
+    os quatro primeiros valores ordenados, todos a ±1, e foi lida como
+    "constante" — o intervalo inteiro era de **29** unidades. Conferência de
+    constância imprime **mínimo e máximo**, nunca a cabeça da lista.
+72. **`HEIG` e `BODY` moram na CÂMERA, não na pose.** O jogo guarda um vetor
+    de escala da figura (`layout.FIGURE_SCALE`) e escala as **colunas** da
+    rotação da figura antes de multiplicar a vista: `x = z = (h<<12)/(tabela
+    [BODY]+10)`, `y = (h<<12)/180`, `h = HEIG+148`. Então `HEIG` escala os três
+    eixos — o alto também é largo — e `BODY` só largura e profundidade. Palpite
+    de "escala linear em altura" teria errado dois eixos de três. A regra se
+    **lê do código** do `/SELECT8.BIN` (`stature.rule`), incluindo o `/180`,
+    que não é `div`: é a multiplicação mágica `0xB60B60B7` com `sra 7`.
+73. **Quadro contado igual não é quadro da caminhada igual depois de trocar um
+    valor.** Acolchoar toda captura até o mesmo quadro contado desde o
+    `load_state` devolveu passada **sem par** em 155 e 210 cm onde o estado,
+    no mesmo quadro, tinha doze: a troca de valor desloca a fase da caminhada.
+    E uma passada quase sempre desenha **dois** quadros do `ANIME.BIN` — a
+    animação avança no meio dela —, cortados numa peça que muda com a fase:
+    comparar os pares peça a peça gastou 80 passadas procurando um corte que
+    não voltava. O que nomeia a pose é o **conjunto de quadros**
+    (`oracle._stature_frames`).
+74. **No goleiro, as peças do quadro 0 não são as do arquivo** — com os
+    ângulos do scratchpad **iguais** aos do par. É a volta do ciclo, onde o jogo
+    mistura com o quadro anterior (a "mistura" da task 26), e acontece na
+    estatura do próprio estado. Controle que caísse ali cobraria da regra de
+    estatura um erro do leitor de pose; o `--stature` exige que o controle seja
+    uma passada que o leitor reproduz **inteira** e imprime as que recusa.
+75. **Escalar linhas ou colunas dá os mesmos nove inteiros nesta tela.** Com
+    `sx = sz` e a figura girada só em `y`, as duas leituras coincidem, e nenhum
+    controle as separa — um controle plantado com a troca ficou **verde**, e
+    saiu em vez de ficar fingindo. O `stature.camera` recusa qualquer outro
+    giro, que é onde a diferença começaria a aparecer.
+76. **Silhueta só ordena o que o próprio jogo separa.** `D TYPE` é 10% mais
+    largo que o estado, e a foto do jogo em `D` difere da do estado em
+    **menos** pixels do que a nossa melhor comparação já erra — então a nossa
+    figura na estatura do estado pontuou *melhor* que a certa, nos dois slots,
+    com todos os limiares da task 28 verdes. Não é defeito da regra (as peças
+    batem inteiras): é resolução, a mesma da armadilha 68. O
+    `--silhouette-stature` só afirma a ordem quando a mudança do jogo supera o
+    resíduo, e imprime o resto como "abaixo da resolução".
+77. **O uniforme é por time, e o contêiner se mede na VRAM.** São 105
+    `TEX_*.BIN` com os mesmos retângulos; o nome não diz qual a tela usa. O
+    `oracle.py --kit` compara cada retângulo declarado com o frame buffer do
+    console, halfword a halfword: o `TEX_A4` reproduz **exatas** a página
+    (576, 384) e as paletas (0, 486) e (0, 488) nos dois states, e nenhum
+    outro reproduz nenhuma delas. **Somar os sete retângulos decide nada** —
+    a tela sobe três, os outros quatro diferem em milhares para todos os 105
+    (12.138 contra 13.274). E a página (576, 256) tem um bloco de 48 linhas
+    que a tela sobrescreve, igual nos dois states: quem nomeia o kit é o
+    retângulo exato, não a menor soma.
+78. **O confronto de cor desenha só a cabeça, então não testa o uniforme.** O
+    `--render`/`--score` usa `--piece head` por decisão medida; com o kit
+    ligado os números dele não se movem **nem um milésimo** — as três
+    pontuações saíram idênticas na primeira tentativa de controle. Quem cobra
+    o kit é o `--kit-control`, que desenha a figura **inteira** com o
+    contêiner de outros dois times e mede a distância até a foto do jogo.
+79. **Dois contêineres guardam registros no mesmo offset.** A chave da textura
+    era `(offset, profundidade, CLUT)` e passou a incluir o contêiner: sem
+    isso a página do corpo e a da cabeça colidem na tabela do viewer, e o
+    desenho morre com `KeyError` numa chave que parece legítima.
 
 80. **As bandas guardam a lista da tela ANTERIOR junto com a desta.** Andar
     uma cadeia de nós bem formados na RAM dá 74 pacotes plausíveis que não são
@@ -76,6 +148,15 @@ e os termos que a disparam.
     não falha do leitor, desde que o controle da comparação feche no resto —
     e aqui é mais que isso: **não está no disco porque não pode estar**, e
     procurar mais no disco era trabalho perdido.
+97. **Comparação ajustada não julga close-up.** O `fit_centre` do
+    `--silhouette` alinha as duas caixas de tinta, e é o certo no corpo
+    inteiro (a mira é o offset de desenho do GPU, que este ciclo não mediu).
+    No close-up o que se erra **é a mira**: com ajuste, a nossa figura na
+    câmera de `HAIR` marcou 11.995 pixels contra 2.116 da câmera de corpo
+    inteiro — o ajuste centra o corpo inteiro no painel e mostra a barriga
+    onde o jogo mostra a cabeça. Sem ajuste, com o eixo medido
+    (`scene.panel_axis`) e a translação reassentada (`scene.rebased`), a
+    mesma câmera marca 15% e a errada 2,5x isso (LOOKS-TASK-40).
 96. **O `pc` de um watchpoint de VRAM não é quem escreveu.** A cópia de
     memória para a VRAM é feita por DMA, então o programa já andou quando o
     GPU toca a memória de vídeo: o `last_hit` da tira da ajuda deu

@@ -747,6 +747,10 @@ def read_screen(output: str) -> dict:
             seen["glyphs"] = sorted(
                 tuple(int(v) for v in one.split(","))
                 for one in text[len("glyphs "):].split())
+        elif text.startswith("camera note: "):
+            seen["camera_note"] = text[len("camera note: "):]
+        elif text.startswith("camera "):
+            seen["camera"] = text[len("camera "):]
         elif text.startswith("arrows "):
             body = text[len("arrows "):]
             seen["arrows"] = [] if body == "none" else [
@@ -829,6 +833,9 @@ def judge_keys(python: str, app: str, env: dict) -> list:
     for button in ("Up", "Down"):
         bad += judge_walk(python, app, env, table, 2, [button] * (rows + 1),
                           "the cursor all the way %s and one more" % button)
+    # And which camera the panel drew each row with (LOOKS-TASK-40).
+    for slot in (2, 1):
+        bad += judge_camera(python, app, env, table, slot)
     return bad
 
 
@@ -987,6 +994,117 @@ with -- the screen this task exists to avoid, where the twelve rows are a
 picture of a screen.  The third has the window report the row's NAME instead of
 the game's text, which is what a window that invented its texts would look like
 from outside.
+"""
+
+def to_row_keys(table: dict, row: str) -> list:
+    """The presses that put the cursor on *row* from where the state loads.
+
+    Down all the way round, never up: the cursor wraps, and this is the same
+    walk `oracle.py --closeups` makes in the game."""
+    order = table["order_of_rows"]
+    start = order.index(table["cursor_on_load"])
+    return ["Down"] * ((order.index(row) - start) % len(order))
+
+
+def judge_camera(python: str, app: str, env: dict, table: dict,
+                 slot: int) -> list:
+    """Which camera the panel drew with, row by row (LOOKS-TASK-40).
+
+    Six of the twelve rows have a camera of their own in `work/looks-camera/`,
+    measured in the game; the window has to draw each of them with THAT one and
+    every other row with the full figure's.  Which rows those are is read off
+    the files, never spelled here: `oracle.py --closeups` is what measured it,
+    and a list repeated in the gate would be a second answer to keep right.
+
+    The row's own camera is asked for WITH the figure's stature, as the window
+    asks for it, so a close-up that cannot be composed at the state's own
+    height comes back as `refused` and is a failure here rather than a note
+    nobody reads.
+    """
+    import scene
+
+    rows = scene.close_up_rows(slot)
+    if not rows:
+        return ["slot %d: no measured close-up camera in %s -- run `oracle.py "
+                "--closeups %d`" % (slot, scene.CAMERA_DIR, slot)]
+    bad = []
+    for row, want in ([(table["cursor_on_load"], "full figure")]
+                      + [(one, one) for one in rows]):
+        keys = to_row_keys(table, row)
+        args = ["--state", str(slot), "--smoke"]
+        if keys:
+            args = ["--state", str(slot), "--keys", ",".join(keys), "--smoke"]
+        code, output = run_app(python, app, args, env)
+        seen = read_screen(output)
+        if code != 0 or not seen.get("rows"):
+            bad.append("slot %d, %s: app.py exited %s -- %s"
+                       % (slot, row, code, output.rstrip()[-200:]))
+            continue
+        if seen.get("cursor") != row:
+            bad.append("slot %d: %d press(es) meant to reach %s and the "
+                       "window is on %s"
+                       % (slot, len(keys), row, seen.get("cursor")))
+            continue
+        if seen.get("camera") != want:
+            bad.append("slot %d, cursor on %s: the panel drew with %r and the "
+                       "measured camera for that row is %r%s"
+                       % (slot, row, seen.get("camera"), want,
+                          " (%s)" % seen["camera_note"]
+                          if seen.get("camera_note") else ""))
+    return bad
+
+
+def plant_camera(python: str, env: dict, name: str, where: str, old: str,
+                 new: str) -> tuple:
+    """One defect in a copy of the tree, for the camera walk.
+
+    Its own path for the reason `plant_keys` has one: a window that never
+    zooms draws every text, sprite and glyph exactly right, so every other
+    judgement of this gate stays green on it.
+
+    The measured cameras come along into the copy, as `plant_stature` brings
+    them: `scene` finds them beside the tree, and a sandbox without them
+    refuses every camera -- which reddens the walk for the one reason that
+    proves nothing."""
+    table = screen.load()
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, where, old, new)
+        if sandbox is None:
+            return (False, why)
+        cameras = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
+                               "work", "looks-camera")
+        shutil.copytree(cameras, os.path.join(tmp, "work", "looks-camera"))
+        app = os.path.join(sandbox, "ui", "app.py")
+        code, output = run_app(python, app, ["--smoke"], env)
+        if code != 0 or not read_screen(output).get("rows"):
+            return (False, "the planted tree for %s did not run, so nothing "
+                           "was proved: %s" % (name, output.rstrip()))
+        bad = judge_camera(python, app, env, table, 2)
+        if not bad:
+            return (False, "%s :: %s was broken (%s -> %s) and the camera "
+                           "walk still passed"
+                    % (where, name, old.strip(), new.strip()))
+        return (True, bad[0])
+
+
+CAMERA_BREAKS = (
+    ("the row reaching the camera", os.path.join("ui", "looks_set.py"),
+     "            matrix, row = self.camera_for(self.state.values(), "
+     "self.state.row)",
+     "            matrix, row = self.camera_for(self.state.values(), None)"),
+    ("the cursor moving re-aiming the panel",
+     os.path.join("ui", "looks_set.py"),
+     "              or self.state.row != row):",
+     "              or False):"),
+)
+"""(name, file, the exact line, what it becomes) -- the two ways a window
+stops zooming with the row (LOOKS-TASK-40).
+
+The first never tells the core which row the cursor is on, so the panel draws
+every row with the full figure's camera; the second tells it, but only when
+something else already made it aim -- the screen where the close-up arrives a
+press late, on the row before.  Neither changes a text, a sprite or a glyph, so
+every other judgement of this gate stays green on both.
 """
 
 PLANTED: list = []
@@ -1274,8 +1392,8 @@ def plant_stature(python: str, env: dict, name: str, where: str, old: str,
 
 STATURE_BREAKS = (
     ("the stature reaching the camera", os.path.join("ui", "looks_set.py"),
-     '        elif (now.get("height"), now.get("build")) != stature:',
-     "        elif False:"),
+     '        elif ((now.get("height"), now.get("build")) != stature',
+     "        elif (False"),
     ("the height on its own axis", "stature.py",
      '    return (across, _divide(numerator, found["height_divisor"]), across)',
      '    return (_divide(numerator, found["height_divisor"]), across,\n'
@@ -1893,6 +2011,15 @@ def main(argv: list | None = None) -> int:
         else:
             print("FAIL: %s" % why)
             failed += 1
+    for name, where, old, new in CAMERA_BREAKS:
+        red, why = plant_camera(python, env, name, where, old, new)
+        if red:
+            print("negative: breaking %s reddens the camera walk -- %s"
+                  % (name, why))
+            PLANTED.append(name)
+        else:
+            print("FAIL: %s" % why)
+            failed += 1
     for name, where, old, new in KEY_BREAKS:
         red, why = plant_keys(python, env, name, where, old, new)
         if red:
@@ -1906,6 +2033,7 @@ def main(argv: list | None = None) -> int:
     print("looks_ui: %d of %d negative control(s) red, and the window drew "
           "every tuple it was asked for and answered every key with what the "
           "game shows" % (len(PLANTED), len(BREAKS) + len(KEY_BREAKS)
+                          + len(CAMERA_BREAKS)
                           + (len(STATURE_BREAKS) if judged_stature else 0)
                           + (len(SCENERY_BREAKS) if judged_scenery else 0)
                           + (len(SPRITE_BREAKS) if judged_sprites else 0)

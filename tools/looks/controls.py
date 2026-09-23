@@ -393,6 +393,15 @@ CONTROLS = (
         "upside down and every part still looks like a part",
     ),
     Control(
+        "scene-camera-row-ignored", "scene.py", "camera_file",
+        "            return path, row",
+        "            return os.path.join(CAMERA_DIR, \"slot%d.json\" % slot), None",
+        ("scene",),
+        "six of the twelve rows draw the panel with a camera of their own "
+        "(LOOKS-TASK-40); with the row's file ignored every row draws with the "
+        "full figure's, and the picture stays a perfectly good picture",
+    ),
+    Control(
         "scene-shelf-stacks", "scene.py", "shelf",
         "        at += (high_x - low_x) + SHELF_GAP",
         "        at += 0.0",

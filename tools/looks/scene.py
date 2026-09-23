@@ -502,6 +502,33 @@ class Builder:
         """The figure's scale for the screen's `HEIG` and `BODY` (`stature`)."""
         return figure_scale(self._data, values)
 
+    def reference_place(self, frame: int = None) -> tuple:
+        """Where `REFERENCE_PIECE` stands in the frame the panel is posed in.
+
+        What `rebased` needs to aim a close-up: our own scene has that piece
+        at the origin, and the game's camera does not.
+        """
+        import anime
+
+        data = self._data[layout.ANIME]
+        entry = anime.header(data)[layout.ANIME_SCREEN_ENTRY]
+        frames = anime.block(data, entry)["frames"]
+        at = self.frame if frame is None else frame
+        if at is None:
+            return (0, 0, 0)
+        if not 0 <= at < len(frames):
+            raise BadScene("frame %d, and the screen's animation has %d"
+                           % (at, len(frames)))
+        carried = {one["piece"]: one
+                   for one in anime.frame_angles(data, frames[at])}
+        return tuple(carried[REFERENCE_PIECE]["position"])
+
+    def panel_camera(self, drawn: Scene, slot: int, size: tuple,
+                     values: dict, row: str = None):
+        """(the 4x4, the row it came from) for the panel as it stands now."""
+        return panel_camera(drawn, slot, size, self.scale(values), row,
+                            self.reference_place())
+
     def art(self):
         """The screen's 2D art laid out in VRAM, once (`sprites.Art`)."""
         import sprites
@@ -846,8 +873,86 @@ class NoCamera(BadScene):
     """No measured camera on disc, so nothing may be projected."""
 
 
-def load_camera(slot: int = 2, scale=None) -> dict:
+CHAIN_TURN_SLACK = 128
+"""How far a close-up row's chain may sit from the matrix the game loaded.
+
+On the five rows that zoom onto the head the figure TURNS, and the view matrix
+read where the game builds it is one moment older than the matrix read at the
+load: measured over the twelve close-up files, 61 to 80 of the 4096 that is 1.0
+-- about a degree -- with the translation exact.  The full figure and `BOOTS`
+come back exact, and are held to exactly, which is why this is a slack for the
+close-up and not a slack for everything.
+"""
+
+
+def close_up_rows(slot: int = 2) -> tuple:
+    """The rows `oracle.py --closeups` measured a camera of their own for.
+
+    Read off the files and nothing else: which rows move the camera is a
+    MEASUREMENT (six of the twelve, and not the six whose names sound like a
+    head -- `BOOTS` moves it onto the feet), so a list spelled here would be a
+    second answer to keep right.  No files, no close-up: the window then draws
+    every row with the full figure's camera and the report says so.
+    """
+    if not os.path.isdir(CAMERA_DIR):
+        return ()
+    head, tail = "slot%d-" % slot, ".json"
+    return tuple(sorted(name[len(head):-len(tail)]
+                        for name in os.listdir(CAMERA_DIR)
+                        if name.startswith(head) and name.endswith(tail)))
+
+
+def camera_file(slot: int = 2, row: str = None) -> tuple:
+    """(path, row) of the camera to draw *row* with: its own if one was
+    measured, the full figure's otherwise."""
+    if row:
+        path = os.path.join(CAMERA_DIR, "slot%d-%s.json" % (slot, row))
+        if os.path.isfile(path):
+            return path, row
+    return os.path.join(CAMERA_DIR, "slot%d.json" % slot), None
+
+
+def rebased(camera: dict, reference) -> dict:
+    """*camera* moved onto OUR origin, which is `REFERENCE_PIECE`.
+
+    `pose()` places every piece relative to that piece's own position, and the
+    game's camera translation is relative to the figure's origin: the two
+    differ by that position, turned by the camera.  Without this the close-up
+    is aimed a whole foot off, and the full figure hides it -- at four
+    thousand units away the same shift is a pixel.
+    """
+    rotation = camera["rotation"]
+    return dict(camera, translation=[
+        camera["translation"][axis]
+        + sum(rotation[axis * 3 + k] * reference[k] for k in range(3))
+        / float(ONE) for axis in range(3)])
+
+
+def panel_axis(table: dict = None) -> tuple:
+    """Where the camera's axis falls inside the panel, in native pixels.
+
+    Measured, not chosen: the GTE's offsets are zero on this screen
+    (`oracle.py --camera`), so the axis is the display's own middle and the
+    panel is a window onto it -- LOOKS-TASK-28 measured the two close-up masks
+    landing 3 pixels apart with nothing fitted.  It is `ROOT_AT` that is a
+    framing choice, and it is only used where the figure is drawn whole.
+    """
+    import screen
+
+    if table is None:
+        table = screen.load()
+    box = table["regions"]["panel"]["native"]
+    return (table["display"][0] / 2.0 - box[0],
+            table["display"][1] / 2.0 - box[1])
+
+
+def load_camera(slot: int = 2, scale=None, row: str = None) -> dict:
     """What `oracle.py --camera` measured, or `NoCamera`.
+
+    *row* is the row the cursor is on: with a camera of its own measured for
+    it (`oracle.py --closeups`) that one is read, and the full figure's
+    otherwise -- which is how the panel zooms on the rows that zoom in the
+    game and only on those.
 
     It is never defaulted and never guessed at: a projection invented here
     would make every silhouette comparison a comparison of two inventions, and
@@ -862,7 +967,7 @@ def load_camera(slot: int = 2, scale=None) -> dict:
     """
     import json
 
-    path = os.path.join(CAMERA_DIR, "slot%d.json" % slot)
+    path, chosen = camera_file(slot, row)
     if not os.path.isfile(path):
         raise NoCamera("no %s -- run `oracle.py --camera %d` first, which is "
                        "what measures H and the camera matrix off the GTE"
@@ -890,11 +995,19 @@ def load_camera(slot: int = 2, scale=None) -> dict:
         own = stature.camera(chain, chain["scale"])
     except stature.BadStature as exc:
         raise NoCamera("%s: %s" % (path, exc)) from exc
-    if (own["rotation"] != camera["rotation"]
-            or own["translation"] != camera["translation"]):
+    # The chain is held against the load, and on a close-up it is held to the
+    # TURN's own slack: measured 2026-09-23, the translation comes back exact
+    # on all fourteen files, and the rotation exact on the full figure and on
+    # `BOOTS` while the five rows that turn the figure drift 61 to 80 -- one
+    # frame of that turn between the build and the load.
+    turn = CHAIN_TURN_SLACK if chosen else 0
+    apart = max(abs(a - b) for a, b in zip(own["rotation"],
+                                           camera["rotation"]))
+    if apart > turn or own["translation"] != camera["translation"]:
         raise NoCamera("%s: the chain composes %r at the state's own scale, "
-                       "and the game loaded %r -- the chain is not the camera"
-                       % (path, own, record["camera"]))
+                       "and the game loaded %r -- %d apart in the rotation, "
+                       "over the %d a turning figure takes"
+                       % (path, own, record["camera"], apart, turn))
     try:
         composed = stature.camera(chain, scale)
     except stature.BadStature as exc:
@@ -1196,22 +1309,38 @@ centred per frame would make the figure bob as the walk swings.
 """
 
 
-def panel_camera(drawn: Scene, slot: int, size: tuple, scale=None) -> list:
-    """The game's camera as a 4x4 for the panel, root placed by `ROOT_AT`.
+def panel_camera(drawn: Scene, slot: int, size: tuple, scale=None,
+                 row: str = None, reference=None) -> list:
+    """The game's camera as a 4x4 for the panel, and which camera that is.
 
     *size* is the panel in NATIVE pixels, never the widget's: `H` is in the
     game's own pixels, so a viewport twice as wide scales the whole picture
     rather than halving the figure inside it.  *scale* is `figure_scale` of
     the rows on screen, so `HEIG` and `BODY` reach the drawing the way the
     game makes them reach it -- through the camera (LOOKS-TASK-29).
+
+    *row* is the row the cursor is on.  On a row whose camera was measured
+    (`close_up_rows`) the panel draws with THAT one, framed by the axis the
+    game projects about (`panel_axis`) -- nothing is fitted there, and nothing
+    has to be: the camera aims itself, which is the whole of why `BOOTS` shows
+    the feet and `HAIR` the head.  It needs *reference*, the position of
+    `REFERENCE_PIECE` in the frame the figure is posed in (`rebased`).  Every
+    other row draws the figure whole, with the root placed by `ROOT_AT`.
     """
+    chosen = row if row and row in close_up_rows(slot) else None
+    if chosen:
+        if reference is None:
+            raise BadScene("the close-up camera of %s needs the reference "
+                           "piece's place, and none was handed in" % chosen)
+        camera = rebased(load_camera(slot, scale, chosen), reference)
+        return camera_matrix(camera, size, panel_axis()), chosen
     camera = load_camera(slot, scale)
     origin = project((0.0, 0.0, 0.0), camera)
     if origin is None:
         raise BadScene("the figure's root is behind the camera")
     return camera_matrix(camera, size,
                          (size[0] * ROOT_AT[0] - origin[0],
-                          size[1] * ROOT_AT[1] - origin[1]))
+                          size[1] * ROOT_AT[1] - origin[1])), None
 
 
 def clip_to_pixel(clip, size: tuple) -> tuple:
@@ -1500,6 +1629,56 @@ def self_check(verbose: bool = True) -> int:
 def _checks(c) -> None:
     ok, attempt = c.ok, c.attempt
     refuses = c.refusing(BadScene)
+
+    # Which camera a row draws with (LOOKS-TASK-40).  Six of the twelve rows
+    # move the camera in the game, and which six is a measurement on disc, so
+    # what is checked here is the CHOICE: the row's own file when there is
+    # one, the full figure's when there is not.
+    import json
+    import tempfile
+
+    was = globals()["CAMERA_DIR"]
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            globals()["CAMERA_DIR"] = tmp
+            for name in ("slot2.json", "slot2-HAIR.json", "slot2-BOOTS.json"):
+                with open(os.path.join(tmp, name), "w",
+                          encoding="utf-8") as handle:
+                    json.dump({"projection": [{"H": 1, "OFX": 0.0,
+                                               "OFY": 0.0}],
+                               "camera": {"rotation": [ONE, 0, 0, 0, ONE, 0,
+                                                       0, 0, ONE],
+                                          "translation": [0, 0, name.count("-")
+                                                          + 1]}}, handle)
+            ok("the rows with a camera of their own are the files on disc",
+               close_up_rows(2) == ("BOOTS", "HAIR"), "%s" % (
+                   close_up_rows(2),))
+            ok("a row with a measured camera draws with it",
+               camera_file(2, "HAIR")[1] == "HAIR"
+               and load_camera(2, None, "HAIR")["translation"][2] == 2)
+            ok("a row without one draws with the full figure's",
+               camera_file(2, "AGE")[1] is None
+               and load_camera(2, "AGE" and None, "AGE")["translation"][2] == 1)
+            ok("and so does no row at all",
+               camera_file(2, None)[1] is None)
+    finally:
+        globals()["CAMERA_DIR"] = was
+    # The rebase, which is what aims a close-up: our own origin is the
+    # reference piece, and the game's camera translation is not.
+    flat = {"rotation": [ONE, 0, 0, 0, ONE, 0, 0, 0, ONE],
+            "translation": [10, 20, 30], "projection": {"H": 1, "OFX": 0.0,
+                                                        "OFY": 0.0}}
+    ok("the rebase turns the reference place and adds it",
+       rebased(flat, (1, 2, 3))["translation"] == [11.0, 22.0, 33.0],
+       "%s" % (rebased(flat, (1, 2, 3))["translation"],))
+    turned = dict(flat, rotation=[0, 0, ONE, 0, ONE, 0, -ONE, 0, 0])
+    ok("and it turns it by the camera, not by the axes",
+       rebased(turned, (1, 2, 3))["translation"] == [13.0, 22.0, 29.0],
+       "%s" % (rebased(turned, (1, 2, 3))["translation"],))
+    ok("the panel's axis is the display's middle, seen from the panel",
+       panel_axis({"display": [512, 240],
+                   "regions": {"panel": {"native": [16, 66, 161, 185]}}})
+       == (240.0, 54.0))
 
     # The furniture rasterizer (LOOKS-TASK-31): what the GPU does with a quad,
     # a semi-transparent one, a gradient across and a polyline.

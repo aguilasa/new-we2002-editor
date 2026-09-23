@@ -50,7 +50,8 @@ Usage:
     python tools/looks/oracle.py --pose [SLOT]  # where the pose comes from: ANIME.BIN in RAM, the entry the screen plays, and the GTE matrix load
     python tools/looks/oracle.py --pose <SLOT> <N> [N ...]  # the pose ITSELF: the matrix and translation of every piece of frame N, and the hierarchy
     python tools/looks/oracle.py --poses [SLOT [N ...]]  # the same over both slots and the eight spread frames
-    python tools/looks/oracle.py --stature [SLOT]  # what HEIG and BODY do: the scale, the camera and the pieces, against stature.py
+    python tools/looks/oracle.py --stature [SLOT]
+    python tools/looks/oracle.py --closeups [SLOT]  # which rows zoom the panel onto the head, and the camera of each  # what HEIG and BODY do: the scale, the camera and the pieces, against stature.py
 """
 
 from __future__ import annotations
@@ -7408,7 +7409,12 @@ def capture_camera(game, slot, frame=0, row=None):
     restore_state(slot, verbose=False)
     game.load_looks(slot, label="camera-%d-%d-%s" % (slot, frame, row or ""))
     if row is not None:
-        for _ in range(ROWS.index(row) - ROWS.index(CURSOR_STARTS_ON)):
+        # Down all the way round, never a signed count: the cursor wraps
+        # (section 10.3 (q)), and a row ABOVE the one the state loads on --
+        # `DEFAUL` is the only one -- came out as no presses at all, which
+        # measured the loading row's camera and called it that row's.
+        for _ in range((ROWS.index(row) - ROWS.index(CURSOR_STARTS_ON))
+                       % len(ROWS)):
             game.press("Down", box=FOOTER, least=ROW_MOVED)
         game.step(CLOSE_UP_SETTLE)
     game.step(frame)
@@ -7636,6 +7642,83 @@ def check_camera(slot=None, verbose=True, row=None):
     for line in problems:
         print("  FAIL  %s" % line)
     print("oracle --camera: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+def close_up_rows(slots=(2, 1), verbose=True):
+    """`--closeups [SLOT]`: which rows zoom the panel, and the camera of each.
+
+    The panel does not draw with one camera.  With a head row under the cursor
+    the game moves the camera onto the head (pitfall 67), and this is what says
+    WHICH rows do it -- every one of the twelve walked in the game, in both
+    slots, rather than the ones whose name sounds like a head.
+
+    The comparison is exact and the controls come first:
+
+      **the loading row twice** -- the camera has to come back number for
+          number, or no difference below is a difference;
+      **a row that does not zoom equals the loading row EXACTLY** -- so
+          "zooms" is a discrete answer and not a threshold;
+      **a zooming row twice** -- the same walk has to give the same camera,
+          which is what makes the file this writes worth drawing with.
+
+    Each zooming row's camera is written to `work/looks-camera/slotN-ROW.json`,
+    which is what `scene.load_camera` reads when the cursor is on that row.
+    """
+    ready = preflight()
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, SLOTS[slot]))
+            base = capture_camera(game, slot, 0, None)
+            again = capture_camera(game, slot, 0, None)
+            if base["camera"] != again["camera"] or \
+                    base["projection"] != again["projection"]:
+                problems.append("slot %d: the loading row's camera read twice "
+                                "differs, so nothing below is measured" % slot)
+                continue
+            print("    control: the loading row (%s) read twice, camera "
+                  "identical: translation %s, H %d"
+                  % (CURSOR_STARTS_ON, base["camera"]["translation"],
+                     base["projection"][0]["H"]))
+            zoomed, flat = {}, []
+            for row in ROWS:
+                record = capture_camera(game, slot, 0, row)
+                same = (record["camera"] == base["camera"]
+                        and record["projection"] == base["projection"])
+                print("    %-9s translation %-22s H %4d  %s"
+                      % (row, record["camera"]["translation"],
+                         record["projection"][0]["H"],
+                         "the loading row's camera" if same else "ZOOMS"))
+                if same:
+                    flat.append(row)
+                else:
+                    zoomed[row] = record
+            if not zoomed:
+                problems.append("slot %d: no row moved the camera, and the "
+                                "close-up is measured (LOOKS-TASK-28)" % slot)
+                continue
+            if not flat:
+                problems.append("slot %d: every row moved the camera, so "
+                                "'zooms' says nothing about the row" % slot)
+                continue
+            print("    %d row(s) zoom (%s) and %d keep the loading row's "
+                  "camera (%s)" % (len(zoomed), ", ".join(sorted(zoomed)),
+                                   len(flat), ", ".join(flat)))
+            witness = sorted(zoomed)[0]
+            twice = capture_camera(game, slot, 0, witness)
+            if twice["camera"] != zoomed[witness]["camera"]:
+                problems.append("slot %d: %s read twice gives two cameras, so "
+                                "the file would not be a measurement"
+                                % (slot, witness))
+                continue
+            print("    control: %s read twice, camera identical" % witness)
+            for row in sorted(zoomed):
+                print("    wrote %s" % write_camera(zoomed[row]))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --closeups: %d problem(s) over %d slot(s)"
           % (len(problems), len(slots)))
     return 1 if problems else 0
 
@@ -9250,6 +9333,9 @@ def main(argv):
             return check_assembly(rows=tuple(argv[2:]) or None)
         if len(argv) in (2, 3) and argv[1] == "--glyphs":
             return check_glyphs((int(argv[2]),) if len(argv) > 2 else (2, 1))
+        if len(argv) in (2, 3) and argv[1] == "--closeups":
+            return close_up_rows((int(argv[2]),) if len(argv) > 2
+                                 else (2, 1))
         if len(argv) in (2, 3) and argv[1] == "--help-box":
             return check_help_box((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) in (2, 3) and argv[1] == "--pages":

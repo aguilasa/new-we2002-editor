@@ -2878,6 +2878,52 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > primeira leitura dos estilos no corpo inteiro era defeito nosso — o `pose()`
 > só posava a cabeça de referência —, e corrigido, no corpo inteiro os estilos
 > não se separam; no close-up, sim (§6 h).
+>
+> **Quais linhas aproximam, e a janela trocando de câmera** (2026-09-23,
+> [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md)). São
+> **seis das doze**, medidas andando todas as doze no jogo nos dois slots
+> (`oracle.py --closeups`), e não são as cinco que o nome sugere:
+>
+> - `SKIN`, `HAIR`, `H.COL`, `FACE` e `H.F.COL.` aproximam na **cabeça**, com
+>   a mesma translação `[-120, 266, 999]`;
+> - **`BOOTS` aproxima nas chuteiras**, com translação própria
+>   `[-224, 90, 1934]` — a linha que a suposição "linha de cabeça" deixaria
+>   de fora;
+> - `DEFAUL`, `NAT`, `HEIG`, `BODY`, `AGE` e `FOOT` ficam com a câmera de
+>   corpo inteiro, **idêntica número a número** à da linha de carga, o que faz
+>   de "aproxima" uma resposta discreta e não um limiar. O `H` é 1376 nas
+>   doze: o zoom está na translação, não na projeção.
+>
+> **A janela troca por linha, e a troca sai do disco**, não de uma lista
+> escrita no código: quem tem `work/looks-camera/slotN-LINHA.json` desenha com
+> ele (`scene.close_up_rows`, `scene.load_camera(slot, escala, linha)`), e o
+> cursor mudando de linha é motivo para reapontar a câmera mesmo quando nada
+> da figura mudou. O `looks_ui` lê a linha `camera` do relatório da janela e
+> exige, por slot, a câmera medida de cada uma das seis e a de corpo inteiro na
+> linha de carga — com **dois controles plantados**: a linha que não chega ao
+> núcleo e o cursor que não reaponta.
+>
+> **A mira do close-up é medida, e é por isso que o confronto não a ajusta.**
+> O `confront.py --silhouette-closeups` compara a máscara do painel do jogo com
+> a nossa **sem ajustar translação nenhuma**: o eixo é o do jogo (o meio do
+> display visto de dentro do painel, `scene.panel_axis`, já que os offsets do
+> GTE são zero) e a translação é reassentada na nossa origem
+> (`scene.rebased`, a peça de referência). O que um close-up erra é a **mira**,
+> e o `fit_centre` do `--silhouette` a esconderia — medido: com ajuste, a nossa
+> figura na câmera de `HAIR` marca 11.995 pixels contra 2.116 da câmera errada,
+> porque o ajuste centra o corpo inteiro no painel. Sem ajuste, na faixa da
+> tinta do jogo: **5% a 21%** com a câmera da própria linha nas doze
+> comparações (seis linhas, dois slots), contra **2,5x a 16,9x** disso com a de
+> corpo inteiro.
+>
+> **E a cadeia da estatura ganhou a folga do giro.** `scene.load_camera` exige
+> que a cadeia recomponha a matriz que o jogo carregou antes de compor
+> qualquer outra altura; nas cinco linhas de cabeça isso falhava, porque o
+> modelo **gira** e a vista lida onde o jogo a constrói é um instante mais
+> velha que a matriz da carga. Medido nos doze arquivos: translação exata em
+> todos, rotação exata no corpo inteiro e em `BOOTS`, e 61 a 80 de 4096
+> (~1°) nas cinco de cabeça — `scene.CHAIN_TURN_SLACK` é 128, e só vale onde a
+> linha tem câmera própria.
 
 **(s) `HEIG` e `BODY` — FECHADA em 2026-09-18.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.

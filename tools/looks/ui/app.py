@@ -215,6 +215,9 @@ def _screen_report(window: LooksSet, moved: list) -> dict:
         print("  sprites none: %s" % seen["sprites_note"])
     print("  glyphs %s" % " ".join("%d,%d,%d,%d" % one
                                    for one in seen["glyphs"]))
+    print("  camera %s" % seen["camera"])
+    if seen["camera_note"]:
+        print("  camera note: %s" % seen["camera_note"])
     print("  arrows %s" % (" ".join(
         "%s@%d,%d" % (one["side"], one["point"][0], one["point"][1])
         for one in seen["arrows"]) or "none"))
@@ -254,9 +257,8 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
     # orbit -- a projection invented here would look like a measurement.
     # HEIG and BODY live in that camera, as the figure's scale (LOOKS-TASK-29),
     # so the window asks for it again whenever either row moves.
-    window.camera_for = lambda values: core.panel_camera(
-        window.drawn, int(state.slot), window.panel_native(),
-        builder.scale(values))
+    window.camera_for = lambda values, row: builder.panel_camera(
+        window.drawn, int(state.slot), window.panel_native(), values, row)
     window.aim()
     if window.camera_note is None and window.viewer.game_camera is not None:
         print("  the panel draws with the game's own camera")

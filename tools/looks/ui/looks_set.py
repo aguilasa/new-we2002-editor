@@ -99,6 +99,11 @@ class LooksSet(QtWidgets.QWidget):
         # where HEIG and BODY live (LOOKS-TASK-29).
         self.camera_for = None
         self.camera_note: str | None = None
+        # Which camera the panel is drawing with: the name of the row whose
+        # own camera was measured, or None for the full figure's.  The report
+        # carries it, because "the panel zooms on the rows that zoom" is a
+        # claim the gate has to be able to read off the window.
+        self.camera_row: str | None = None
         # The furniture the game draws, measured (LOOKS-TASK-31).  Without it
         # the window says so and keeps the colours the v2 chose by eye -- a
         # silent fallback would make the picture a description of itself.
@@ -268,16 +273,21 @@ class LooksSet(QtWidgets.QWidget):
 
         `HEIG` and `BODY` change no piece of the figure: the game puts them in
         the CAMERA, as a scale per axis, and so does this -- by asking
-        `camera_for` again with the values on screen.  Without a measured
-        camera the note says why and the v1 orbit stays.
+        `camera_for` again with the values on screen.  The row under the
+        cursor goes with them: six of the twelve move the camera in the game
+        (LOOKS-TASK-40), and `camera_for` answers which one it used.  Without
+        a measured camera the note says why and the v1 orbit stays.
         """
         if self.camera_for is None or self.drawn is None:
             return
         try:
-            self.viewer.game_camera = self.camera_for(self.state.values())
+            matrix, row = self.camera_for(self.state.values(), self.state.row)
+            self.viewer.game_camera = matrix
+            self.camera_row = row
             self.camera_note = None
         except core.BadScene as exc:
             self.viewer.game_camera = None
+            self.camera_row = None
             self.camera_note = str(exc)
         self.viewer.update()
 
@@ -304,18 +314,22 @@ class LooksSet(QtWidgets.QWidget):
     def press(self, button: str) -> bool:
         """One press, and the figure redrawn if the tuple changed.
 
-        Or re-aimed, if what changed is the figure's stature: `HEIG` and
-        `BODY` are not in the tuple, and until LOOKS-TASK-29 they moved the
-        text and nothing else.
+        Or re-aimed, if what changed is the figure's stature or the ROW: `HEIG`
+        and `BODY` are not in the tuple, and until LOOKS-TASK-29 they moved the
+        text and nothing else; and six of the twelve rows draw the panel with a
+        camera of their own (LOOKS-TASK-40), so the cursor moving is a reason
+        to aim again even when nothing about the figure changed.
         """
         before = self.state.tuple_text()
         values = self.state.values()
         stature = (values.get("height"), values.get("build"))
+        row = self.state.row
         moved = core.screen_press(self.state, button)
         now = self.state.values()
         if self.state.tuple_text() != before:
             self.redraw()
-        elif (now.get("height"), now.get("build")) != stature:
+        elif ((now.get("height"), now.get("build")) != stature
+              or self.state.row != row):
             self.aim()
         self.update()
         return moved
@@ -351,6 +365,9 @@ class LooksSet(QtWidgets.QWidget):
                         for one in self.sprites},
             "sprites_note": self.sprites_note,
             "arrows": self.arrows(),
+            "camera": ("refused" if self.camera_note is not None
+                       else self.camera_row or "full figure"),
+            "camera_note": self.camera_note,
             "glyphs": sorted((one["point"][0], one["point"][1], one["uv"][0],
                               one["uv"][1]) for one in self.glyphs()),
         }

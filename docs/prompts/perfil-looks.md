@@ -605,12 +605,16 @@ Não se revertem sem o usuário pedir.
     quadro contado 20 o painel traz 2.726 pixels de tinta contra 2.376 a 2.532
     de todos os outros, e nenhum quadro da caminhada casa melhor que 3.570 —
     pior que a própria tinta. Medição de painel começa no **60**.
-67. **A câmera do painel muda com a linha sob o cursor.** Com uma linha de
-    cabeça selecionada o jogo aproxima a câmera na cabeça: a foto é um
-    close-up, com o dobro da tinta, `Kind of Hair` na caixa de ajuda e a
-    caminhada parada. Parece tela ainda assentando e não é — trezentos quadros
-    depois continua igual. Foto de painel que se compara com a câmera de corpo
-    inteiro se tira com o cursor em `NAT`, que é onde ela foi medida.
+67. **A câmera do painel muda com a linha sob o cursor, e são seis linhas,
+    não cinco.** Com uma linha de cabeça selecionada o jogo aproxima a câmera
+    na cabeça: a foto é um close-up, com o dobro da tinta, `Kind of Hair` na
+    caixa de ajuda e a caminhada parada. Parece tela ainda assentando e não é
+    — trezentos quadros depois continua igual. Foto de painel que se compara
+    com a câmera de corpo inteiro se tira com o cursor em `NAT`, que é onde
+    ela foi medida. **E `BOOTS` também aproxima**, nas chuteiras e com
+    translação própria: quem listar as linhas pelo nome ("linha de cabeça")
+    perde essa, e quem medir as doze a acha em uma corrida
+    (`oracle.py --closeups`, LOOKS-TASK-40).
 68. **No corpo inteiro, estilo de cabelo é um punhado de pixels.** As fotos do
     próprio jogo com `A1`, `C1` e `I3` diferem **15 e 29** pixels, todos na
     cabeça; a silhueta do corpo inteiro não separa estilos, e a foto `A1` do
@@ -629,77 +633,7 @@ Não se revertem sem o usuário pedir.
     2026-09-18 ([`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md));
     o `--check-image` agora desenha três estilos e exige zero primitiva sem
     pose. **Gate que só desenha a referência mede a referência.**
-70. **O close-up GIRA o modelo, e a carga de câmera não traz o giro.** Com uma
-    linha de cabeça sob o cursor, cada peça carrega um giro extra em `y` —
-    +18,3°, −16,9° e +16,9° em três capturas, igual a 0,05° nas doze peças de
-    cada uma — que a carga em `layout.POSE_MATRIX` não tem. Composta com ela, a
-    translação espalha 29 unidades; derivada das peças
-    (`oracle.camera_from_pieces`), menos de uma. No corpo inteiro as duas
-    coincidem. **Câmera se deriva das peças que ela compôs**, e as doze têm de
-    concordar — é a conferência. E foto e câmera saem da **mesma parada**: o
-    giro muda de captura para captura.
-71. **Resumo de uma lista ordenada não é o intervalo dela.** Conferindo se
-    `T_peça − R·lugar` era constante no close-up, a primeira impressão mostrou
-    os quatro primeiros valores ordenados, todos a ±1, e foi lida como
-    "constante" — o intervalo inteiro era de **29** unidades. Conferência de
-    constância imprime **mínimo e máximo**, nunca a cabeça da lista.
-72. **`HEIG` e `BODY` moram na CÂMERA, não na pose.** O jogo guarda um vetor
-    de escala da figura (`layout.FIGURE_SCALE`) e escala as **colunas** da
-    rotação da figura antes de multiplicar a vista: `x = z = (h<<12)/(tabela
-    [BODY]+10)`, `y = (h<<12)/180`, `h = HEIG+148`. Então `HEIG` escala os três
-    eixos — o alto também é largo — e `BODY` só largura e profundidade. Palpite
-    de "escala linear em altura" teria errado dois eixos de três. A regra se
-    **lê do código** do `/SELECT8.BIN` (`stature.rule`), incluindo o `/180`,
-    que não é `div`: é a multiplicação mágica `0xB60B60B7` com `sra 7`.
-73. **Quadro contado igual não é quadro da caminhada igual depois de trocar um
-    valor.** Acolchoar toda captura até o mesmo quadro contado desde o
-    `load_state` devolveu passada **sem par** em 155 e 210 cm onde o estado,
-    no mesmo quadro, tinha doze: a troca de valor desloca a fase da caminhada.
-    E uma passada quase sempre desenha **dois** quadros do `ANIME.BIN` — a
-    animação avança no meio dela —, cortados numa peça que muda com a fase:
-    comparar os pares peça a peça gastou 80 passadas procurando um corte que
-    não voltava. O que nomeia a pose é o **conjunto de quadros**
-    (`oracle._stature_frames`).
-74. **No goleiro, as peças do quadro 0 não são as do arquivo** — com os
-    ângulos do scratchpad **iguais** aos do par. É a volta do ciclo, onde o jogo
-    mistura com o quadro anterior (a "mistura" da task 26), e acontece na
-    estatura do próprio estado. Controle que caísse ali cobraria da regra de
-    estatura um erro do leitor de pose; o `--stature` exige que o controle seja
-    uma passada que o leitor reproduz **inteira** e imprime as que recusa.
-75. **Escalar linhas ou colunas dá os mesmos nove inteiros nesta tela.** Com
-    `sx = sz` e a figura girada só em `y`, as duas leituras coincidem, e nenhum
-    controle as separa — um controle plantado com a troca ficou **verde**, e
-    saiu em vez de ficar fingindo. O `stature.camera` recusa qualquer outro
-    giro, que é onde a diferença começaria a aparecer.
-76. **Silhueta só ordena o que o próprio jogo separa.** `D TYPE` é 10% mais
-    largo que o estado, e a foto do jogo em `D` difere da do estado em
-    **menos** pixels do que a nossa melhor comparação já erra — então a nossa
-    figura na estatura do estado pontuou *melhor* que a certa, nos dois slots,
-    com todos os limiares da task 28 verdes. Não é defeito da regra (as peças
-    batem inteiras): é resolução, a mesma da armadilha 68. O
-    `--silhouette-stature` só afirma a ordem quando a mudança do jogo supera o
-    resíduo, e imprime o resto como "abaixo da resolução".
-77. **O uniforme é por time, e o contêiner se mede na VRAM.** São 105
-    `TEX_*.BIN` com os mesmos retângulos; o nome não diz qual a tela usa. O
-    `oracle.py --kit` compara cada retângulo declarado com o frame buffer do
-    console, halfword a halfword: o `TEX_A4` reproduz **exatas** a página
-    (576, 384) e as paletas (0, 486) e (0, 488) nos dois states, e nenhum
-    outro reproduz nenhuma delas. **Somar os sete retângulos decide nada** —
-    a tela sobe três, os outros quatro diferem em milhares para todos os 105
-    (12.138 contra 13.274). E a página (576, 256) tem um bloco de 48 linhas
-    que a tela sobrescreve, igual nos dois states: quem nomeia o kit é o
-    retângulo exato, não a menor soma.
-78. **O confronto de cor desenha só a cabeça, então não testa o uniforme.** O
-    `--render`/`--score` usa `--piece head` por decisão medida; com o kit
-    ligado os números dele não se movem **nem um milésimo** — as três
-    pontuações saíram idênticas na primeira tentativa de controle. Quem cobra
-    o kit é o `--kit-control`, que desenha a figura **inteira** com o
-    contêiner de outros dois times e mede a distância até a foto do jogo.
-79. **Dois contêineres guardam registros no mesmo offset.** A chave da textura
-    era `(offset, profundidade, CLUT)` e passou a incluir o contêiner: sem
-    isso a página do corpo e a da cabeça colidem na tabela do viewer, e o
-    desenho morre com `KeyError` numa chave que parece legítima.
-Da 80 em diante, as armadilhas moram em
+Da 70 em diante, as armadilhas moram em
 [`perfil-looks.armadilhas.md`](/docs/prompts/perfil-looks.armadilhas.md): este
 perfil chegou ao limite de tamanho do rito, e o rito lê as de lá por busca.
 ---
@@ -746,7 +680,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | --- | --- | --- | --- | --- |
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
 | `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os doze `--check-image` (desde a LOOKS-TASK-37, com o `glyphs`; desde a LOOKS-TASK-36, com o `sprites`; desde a LOOKS-TASK-29, com o `stature`), todos até o fim (a ordem é de leitura, não guarda — [`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
-| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` — desde a LOOKS-TASK-36 fotografa a janela **nos dois slots** e confere os sprites estáticos contra os pixels que o **jogo** mostrou, gravados pelo `--scenery --write` (nenhuma cor sai do `sprites.py`), com dois controles plantados — os sprites que não chegam à janela e a placa na CLUT do jogador de linha; desde a CORR-LOOKS-068 também os **pixels das setas** `▶` (na carga) e `◀` (após `Up`), contra os do jogo gravados pelo mesmo `--write` e modulados pela cor do pulso, com dois controles (CLUT e `uv` trocados); desde a LOOKS-TASK-31 confere a mobília que a janela pinta contra a tabela medida em `work/looks-scenery/` (cada pacote amostrado dentro do canto, com um controle plantado), desde a LOOKS-TASK-30 exige `textured == primitives` na figura inteira (o corpo vestido), e desde a LOOKS-TASK-29 também fotografa a tela em 155, 175 e 210 cm e em `H TYPE` e exige que a tinta do painel siga as razões da regra (`STATURE_SLACK`), com dois controles plantados; sem câmera medida em `work/looks-camera/` diz que não julgou | `ctest -R looks_ui` | LOOKS-TASK-16 |
+| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` — desde a LOOKS-TASK-36 fotografa a janela **nos dois slots** e confere os sprites estáticos contra os pixels que o **jogo** mostrou, gravados pelo `--scenery --write` (nenhuma cor sai do `sprites.py`), com dois controles plantados — os sprites que não chegam à janela e a placa na CLUT do jogador de linha; desde a CORR-LOOKS-068 também os **pixels das setas** `▶` (na carga) e `◀` (após `Up`), contra os do jogo gravados pelo mesmo `--write` e modulados pela cor do pulso, com dois controles (CLUT e `uv` trocados); desde a LOOKS-TASK-31 confere a mobília que a janela pinta contra a tabela medida em `work/looks-scenery/` (cada pacote amostrado dentro do canto, com um controle plantado), desde a LOOKS-TASK-30 exige `textured == primitives` na figura inteira (o corpo vestido), e desde a LOOKS-TASK-29 também fotografa a tela em 155, 175 e 210 cm e em `H TYPE` e exige que a tinta do painel siga as razões da regra (`STATURE_SLACK`), com dois controles plantados; sem câmera medida em `work/looks-camera/` diz que não julgou; desde a LOOKS-TASK-40 anda o cursor até **cada** linha que tem câmera medida e exige que o relatório da janela nomeie a câmera daquela linha — e a de corpo inteiro na linha de carga —, com dois controles plantados (a linha que não chega ao núcleo, o cursor que não reaponta) | `ctest -R looks_ui` | LOOKS-TASK-16 |
 | `looks_live` | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo) | `python tools/looks/oracle.py --check-live` | `ctest -R looks_live` | LOOKS-TASK-19 (o comando, da LOOKS-TASK-07) |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/glyphs.py --check-image` — a regra da fonte lida do `/SELECTC.BIN` japonês pela guarda, recusada se a rotina não for a transcrita, e a largura de cada código de 32 a 126 | — | LOOKS-TASK-37 |
@@ -786,8 +720,10 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~3 min | `python tools/looks/oracle.py --camera [SLOT]` — `H`, `OFX`, `OFY` e a matriz da câmera lidos do GTE na carga da matriz por peça, com três controles: o mesmo quadro duas vezes, a projeção igual nas doze cargas, e um quadro contado adiante concordando | — | LOOKS-TASK-28 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~3 min por slot (medido 2026-09-23: quinze capturas de câmera, o slot 1 em 2 min 39 s) | `python tools/looks/oracle.py --closeups [SLOT]` — anda as **doze** linhas e diz quais movem a câmera do painel: seis, cinco na cabeça e o `BOOTS` nas chuteiras, com translação própria; grava a de cada uma em `work/looks-camera/slotN-LINHA.json`, que é de onde a janela desenha. Três controles: a linha de carga lida duas vezes, uma linha que aproxima lida duas vezes, e as que não aproximam batendo **número a número** com a de carga | — | LOOKS-TASK-40 |
 | *(sem alvo ainda)* | idem, mais `work/looks-camera/`; ~1,5 min (medido 2026-09-18, os dois slots, 1 min 21 s) | `python tools/looks/confront.py --silhouette [SLOT]` — a máscara do painel no quadro nativo contra a nossa, em três quadros contados por slot: o mesmo quadro duas vezes de controle, quadros diferentes de segundo controle, com o estilo trocado **impresso e não afirmado** (armadilha 69). Testemunha a pose e o corpo, **não** o cabelo | — | LOOKS-TASK-28 |
 | *(sem alvo ainda)* | idem; ~4 min (medido 2026-09-18, os dois slots, 4 min 2 s) | `python tools/looks/confront.py --silhouette-styles [SLOT]` — **três estilos de cabelo andados no jogo, no close-up**: foto e câmera da mesma parada, a câmera derivada das peças (armadilha 70), e cada foto tem de escolher o próprio estilo pela faixa da cabeça. **O controle fecha antes** — o mesmo close-up duas vezes, 0 pixel e câmera idêntica —, e cada foto imprime a razão contra o estilo errado mais próximo (reprova abaixo de `CLOSEUP_MARGIN`) e a fração da tinta que o certo erra (reprova acima de `CLOSEUP_SHARE`), desde a CORR-LOOKS-063. No corpo inteiro não se separa (armadilha 68) | — | LOOKS-TASK-28 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states, o fork e `work/looks-camera/`; ~8 min (medido 2026-09-23, os dois slots) | `python tools/looks/confront.py --silhouette-closeups [SLOT]` — o close-up de **cada** linha que aproxima contra o nosso, **sem ajustar translação** (o eixo é o medido, `scene.panel_axis`, e a translação é reassentada na peça de referência): o que um close-up erra é a mira, e o `fit_centre` a esconderia (armadilha 97). Na faixa da tinta do jogo, 5% a 21% com a câmera da própria linha (`CLOSEUP_CAMERA_SHARE`), contra 2,5x a 16,9x disso com a de corpo inteiro na mesma foto (`CLOSEUP_CAMERA_MARGIN`), com o mesmo close-up duas vezes de controle | — | LOOKS-TASK-40 |
 | *(sem alvo ainda)* | as capturas de um `--poses` (77 sem elas); **sem emulador**, instantâneo | `python tools/looks/oracle.py --pose-lag` — quantas paradas o ponteiro de modelo atrasa em relação à matriz, medido pela dispersão do tornozelo em cada atraso candidato, com a canela errada de controle (armadilha 59) | — | LOOKS-TASK-27 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/stature.py --check-image` — a regra de `HEIG` e `BODY` decodificada das instruções do `/SELECT8.BIN`, recusando instrução que não seja a medida, e a cadeia contra quatro cargas de câmera do jogo | — | LOOKS-TASK-29 |

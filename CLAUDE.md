@@ -829,7 +829,7 @@ isso a janela a mantém numa fonte de apoio (task 39); faltam o close-up
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
 `CORR-LOOKS-`, perfil [docs/prompts/perfil-looks.md](docs/prompts/perfil-looks.md)
-(as armadilhas da 80 em diante em
+(as armadilhas da 70 em diante em
 [perfil-looks.armadilhas.md](docs/prompts/perfil-looks.armadilhas.md)), e roda por `/rite:execute looks`. Não estende o `we2002_core` e não compartilha
 build; o que empresta é leitura de disco de `tools/pes2/` (`iso.py`, `lzss.py`,
 `mcp.py`, `fork.py`) e conhecimento de formato.
@@ -873,6 +873,8 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --pose [SLOT]` / `--pose <SLOT> <N> [N ...]` | de onde vem a pose, e a pose em si: a matriz e a translação de cada peça de um quadro contado, em `work/looks-pose/`, com a captura repetida como controle |
 | `python tools/looks/oracle.py --pose-lag` | quantas paradas o ponteiro de modelo atrasa em relação à matriz que ele nomeia, medido sobre as capturas em disco, sem emulador |
 | `python tools/looks/oracle.py --camera [SLOT [LINHA]]` | a câmera do jogo lida do GTE — `H`, os deslocamentos (zero nesta tela) e a matriz —, em `work/looks-camera/`; com `LINHA` (ex.: `HAIR`) mede a câmera do close-up |
+| `python tools/looks/oracle.py --closeups [SLOT]` | anda as doze linhas e diz **quais aproximam** a câmera do painel — seis, e uma delas é `BOOTS` —, gravando a câmera de cada uma em `work/looks-camera/slotN-LINHA.json` |
+| `python tools/looks/confront.py --silhouette-closeups [SLOT]` | o close-up de cada linha que aproxima contra o nosso, **sem ajustar translação**: o eixo e a translação são os medidos, e a câmera de corpo inteiro na mesma foto é o controle |
 | `python tools/looks/confront.py --silhouette` / `--silhouette-styles` | a nossa silhueta contra a do jogo: no corpo inteiro testemunha a **pose**; no close-up, três estilos de cabelo andados no jogo, cada foto escolhendo o próprio |
 | `python tools/looks/oracle.py --stature [SLOT]` | o que `HEIG` e `BODY` fazem: o vetor de escala, a câmera e as peças contra a regra do `stature.py`, nos mesmos quadros da caminhada, e todos os valores das duas linhas |
 | `python tools/looks/confront.py --silhouette-stature [SLOT]` | a silhueta do jogo andado às pontas de `HEIG` e a dois `BODY`, contra a nossa com a câmera daquela estatura |
@@ -918,9 +920,11 @@ Cinco coisas que custam tempo se descobertas tarde:
 - **Há duas câmeras na tela, e a do close-up gira o modelo.** Com uma linha de
   cabeça sob o cursor o jogo aproxima a câmera na cabeça e gira o boneco, um
   ângulo por captura que a carga de câmera do GTE **não** traz — a câmera que
-  vale ali se deriva das próprias peças (`oracle.camera_from_pieces`). O painel
-  da nossa janela desenha com a câmera de corpo inteiro (task 28), e o close-up
-  por linha é da task 40.
+  vale ali se deriva das próprias peças (`oracle.camera_from_pieces`). **Quais
+  linhas aproximam são seis das doze, medidas** (task 40): as cinco de cabeça
+  e o **`BOOTS`**, que aproxima nas chuteiras com translação própria. A janela
+  troca de câmera por linha, e a troca sai dos arquivos de
+  `work/looks-camera/`, não de uma lista no código.
 - **`HEIG` e `BODY` moram na câmera, e escalam por eixo.** O jogo escala as
   colunas da rotação da figura por um vetor antes da vista: `HEIG` mexe nos
   três eixos, `BODY` só em largura e profundidade. A regra — bias, divisores e

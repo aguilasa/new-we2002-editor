@@ -1267,11 +1267,15 @@ def still_frame(game, display, oracle, screen):
 
 
 def game_at(game, slot, counted, oracle, anime, data, entry, table,
-            steps=()):
+            steps=(), row=None):
     """(the ANIME frame being drawn, the panel's mask) at counted *counted*.
 
     *steps* walks rows first -- `((row, text), ...)`, as `oracle.py
     --stature` walks them -- and *counted* is then counted from the last press.
+
+    *row* puts the CURSOR on a row and lets the panel settle
+    (`oracle.CLOSE_UP_SETTLE`), which is what photographs a close-up: six of
+    the twelve rows move the camera (LOOKS-TASK-40).
 
     **One run, and no frame stepped between the two halves.**  The pair says
     which frame of the file the game is drawing; the dump, taken at that same
@@ -1287,6 +1291,12 @@ def game_at(game, slot, counted, oracle, anime, data, entry, table,
     game.load_looks(slot, label="silhouette-%d-%d" % (slot, counted))
     if steps:
         oracle._stature_walk(game, slot, steps, table)
+    if row:
+        for _ in range((oracle.ROWS.index(row)
+                        - oracle.ROWS.index(oracle.CURSOR_STARTS_ON))
+                       % len(oracle.ROWS)):
+            game.press("Down", box=oracle.FOOTER, least=oracle.ROW_MOVED)
+        game.step(oracle.CLOSE_UP_SETTLE)
     game.step(counted)
     client = game.client
     client.call("breakpoint", action="clear")
@@ -1677,6 +1687,167 @@ def check_closeup_styles(slots=(2, 1), verbose=True) -> int:
     for line in problems:
         print("  FAIL  %s" % line)
     print("confront --silhouette-styles: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+CLOSEUP_CAMERA_SHARE = 0.35
+"""The most of the game's own band ink our close-up may differ by.
+
+Measured over the twelve close-ups (six rows, two slots) and written with room
+above the worst.  What it has to catch is the panel drawing a close-up row with
+the full figure's camera, which the control beside it prices at several times
+this.
+"""
+
+CLOSEUP_CAMERA_MARGIN = 1.5
+"""How much worse the FULL figure's camera must score on a row that zooms.
+
+The control of the whole comparison, and the planted defect of LOOKS-TASK-40 in
+one number: a window that did not change camera with the row would draw exactly
+that, and a comparison that could not tell the two apart would pass it.
+"""
+
+
+def band_of(mask, size, rows=HEAD_BAND) -> tuple:
+    """(first row of the mask's ink, its ink inside *rows* rows of it).
+
+    The close-up is judged on a band and not on the whole panel, for the
+    reason `HEAD_BAND` gives: under the head the game's dark kit sits on a dark
+    background and the row-by-row mask loses it, so the pixels below say more
+    about the threshold than about the figure.
+    """
+    box = scene_mask_box(mask, size)
+    if box is None:
+        raise ConfrontError("the mask is empty, so it has no band")
+    top = box[1]
+    width = size[0]
+    return top, sum(1 for index, one in enumerate(mask)
+                    if one and top <= index // width < top + rows)
+
+
+def scene_mask_box(mask, size):
+    import scene
+
+    return scene.mask_box(mask, size)
+
+
+def band_differ(theirs, ours, size, top, rows=HEAD_BAND) -> int:
+    """Pixels of the band where the two masks disagree."""
+    width = size[0]
+    return sum(1 for index, (a, b) in enumerate(zip(theirs, ours))
+               if a != b and top <= index // width < top + rows)
+
+
+def check_closeup_cameras(slots=(2, 1), verbose=True) -> int:
+    """`--silhouette-closeups [SLOT]`: the camera of every row that zooms.
+
+    Six of the twelve rows move the panel's camera (`oracle.py --closeups`):
+    five onto the head and `BOOTS` onto the feet.  This is what says our panel
+    draws each of them the way the game does -- the same shape in the same
+    place, with nothing fitted.
+
+    **Nothing fitted is the point.**  `--silhouette` fits a translation per
+    comparison, because where the panel sits inside the display is the GPU's
+    draw offset and this cycle has not measured it; a close-up cannot be judged
+    that way, since what a close-up gets WRONG is the aim.  Here the aim is the
+    measured one -- the axis of `scene.panel_axis`, the translation rebased onto
+    our own origin (`scene.rebased`) -- and a figure aimed at the belly instead
+    of the head scores badly rather than being slid into place.
+
+    Two controls, and the second is LOOKS-TASK-40's planted defect:
+
+      **the same close-up twice** -- the same walk frame and the same mask,
+          or nothing below is a measurement;
+      **the full figure's camera on the same photograph** -- it has to score
+          at least `CLOSEUP_CAMERA_MARGIN` worse, which is what a window that
+          did not change camera with the row would draw.
+    """
+    import anime
+    import iso_source
+    import layout
+    import oracle
+    import scene
+    import screen
+
+    ready = oracle.preflight()
+    table = screen.load()
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = {name: disc.read(name)
+                for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
+                             layout.ANIME,
+                             layout.kit_path(layout.KIT_ON_SCREEN))}
+    entry = anime.header(data[layout.ANIME])[layout.ANIME_SCREEN_ENTRY]
+    box = table["regions"]["panel"]["native"]
+    size = (box[2] - box[0] + 1, box[3] - box[1] + 1)
+    axis = scene.panel_axis(table)
+    builder = scene.Builder(ready["image"])
+    print("  the panel is %dx%d native pixels; the camera's axis falls at "
+          "(%.0f, %.0f) inside it" % (size + axis))
+    problems = []
+    with oracle.Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            rows = scene.close_up_rows(slot)
+            state = scene.screen_state(slot)
+            text, figure = state.tuple_text(), state.figure()
+            print("  -- slot %d (%s), %d row(s) with a camera of their own: "
+                  "%s --" % (slot, oracle.SLOTS[slot], len(rows),
+                             ", ".join(rows)))
+            if not rows:
+                problems.append("slot %d: no measured close-up camera -- run "
+                                "`oracle.py --closeups %d` first"
+                                % (slot, slot))
+                continue
+            first = game_at(game, slot, 0, oracle, anime, data[layout.ANIME],
+                            entry, table, row=rows[0])
+            again = game_at(game, slot, 0, oracle, anime, data[layout.ANIME],
+                            entry, table, row=rows[0])
+            apart = scene.masks_differ(first[1], again[1])
+            print("    control: the %s close-up twice, walk frame %d and %d, "
+                  "%d pixel(s) apart" % (rows[0], first[0], again[0], apart))
+            if apart or first[0] != again[0]:
+                problems.append("slot %d: the same close-up twice differs, so "
+                                "no row of this slot is judged" % slot)
+                continue
+            for row in rows:
+                named, theirs = (again if row == rows[0] else
+                                 game_at(game, slot, 0, oracle, anime,
+                                         data[layout.ANIME], entry, table,
+                                         row=row))
+                top, ink = band_of(theirs, size)
+                reference = builder.reference_place(named)
+                drawn = scene.build(data, looks.parse_tuple(text), figure,
+                                    named)
+                scores = {}
+                for label, camera in (
+                        ("the row's", scene.load_camera(slot, None, row)),
+                        ("the full figure's", scene.load_camera(slot))):
+                    aimed = scene.rebased(camera, reference)
+                    mask = scene.silhouette(drawn, aimed, size, axis)
+                    scores[label] = band_differ(theirs, mask, size, top)
+                ours, wrong = scores["the row's"], scores["the full figure's"]
+                ratio = wrong / float(ours or 1)
+                print("    %-9s walk frame %2d; band from row %2d: %4d of "
+                      "%4d (%3.0f%%) with its own camera, %4d with the full "
+                      "figure's (%.1fx)"
+                      % (row, named, top, ours, ink, 100.0 * ours / (ink or 1),
+                         wrong, ratio))
+                if ours > ink * CLOSEUP_CAMERA_SHARE:
+                    problems.append(
+                        "slot %d, %s: our close-up differs in %d of the %d "
+                        "band pixel(s) (%.0f%%), over the %.0f%% a matching "
+                        "aim takes"
+                        % (slot, row, ours, ink, 100.0 * ours / (ink or 1),
+                           100.0 * CLOSEUP_CAMERA_SHARE))
+                if ratio < CLOSEUP_CAMERA_MARGIN:
+                    problems.append(
+                        "slot %d, %s: the full figure's camera scores %.1fx "
+                        "this row's, under the %.1fx that tells a close-up "
+                        "from a window that did not change camera"
+                        % (slot, row, ratio, CLOSEUP_CAMERA_MARGIN))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("confront --silhouette-closeups: %d problem(s) over %d slot(s)"
           % (len(problems), len(slots)))
     return 1 if problems else 0
 
@@ -2276,7 +2447,8 @@ def reach(row: str, slots=(2, 1), verbose=True) -> int:
 
 
 LIVE = ("--run", "--silhouette", "--silhouette-styles",
-        "--silhouette-stature", "--outside", "--kit-control", "--reach")
+        "--silhouette-closeups", "--silhouette-stature", "--outside",
+        "--kit-control", "--reach")
 """The commands that start the emulator, and so need Pillow here."""
 
 
@@ -2302,6 +2474,7 @@ def main(argv: list[str]) -> int:
             return run(slots)
         if len(argv) >= 2 and argv[1] in ("--silhouette",
                                            "--silhouette-styles",
+                                           "--silhouette-closeups",
                                            "--silhouette-stature"):
             # Two commands and not one flag inside a green gate: the styles
             # walked on the game DISAGREE today (LOOKS-TASK-28), and a
@@ -2311,6 +2484,8 @@ def main(argv: list[str]) -> int:
             chosen = (int(argv[2]),) if len(argv) > 2 else (2, 1)
             if argv[1] == "--silhouette-styles":
                 return check_closeup_styles(chosen)
+            if argv[1] == "--silhouette-closeups":
+                return check_closeup_cameras(chosen)
             if argv[1] == "--silhouette-stature":
                 return check_silhouette_stature(chosen)
             return check_silhouette(chosen)
