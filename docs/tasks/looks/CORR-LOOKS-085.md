@@ -5,10 +5,10 @@ origin: LOOKS-TASK-39
 severity: medium
 files: [tools/looks/layout.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-23
+done_commit: 48d2fbcc
 ---
 
 # CORR-LOOKS-085 — O docstring do HELP_ICON_CODES contradiz a medição
@@ -129,3 +129,7 @@ Verificação: `grep -A6 "^HELP_ICON_CODES" tools/looks/layout.py | grep -c
 "which is how"` imprime `0`, e o docstring nomeia `/SELECT.BIN` + 253728 (e o
 253772 dos bitmaps). Portões: `selftest.py` 0 failure(s) (104 de 104 controles
 vermelhos), `cli.py check` 12 de 12 ok.
+- **Closed** — commit `48d2fbcc` (2026-09-23): fix(looks): name where the help-icon code table comes from
+  - Files (`git show --name-status 48d2fbcc`):
+    - `M docs/tasks/looks/CORR-LOOKS-085.md`
+    - `M tools/looks/layout.py`
