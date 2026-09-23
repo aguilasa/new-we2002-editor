@@ -5,10 +5,10 @@ origin: LOOKS-TASK-39
 severity: low
 files: [tools/pes2/drive.py, tools/looks/confront.py, docs/prompts/perfil-looks.md, CLAUDE.md]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-23
+done_commit: 95ad67c7
 ---
 
 # CORR-LOOKS-087 — Dizer qual interpretador roda o confront.py --outside
@@ -135,3 +135,10 @@ inteiro não roda **nesta máquina** por um motivo anterior a isto (lê
 Fica para quem passar: o `tools/pes2/mcp_drive.py` ainda tem o seu próprio
 `raise Skip("PIL is missing")`, que podia chamar o `drive.require_pil()` e
 ganhar o nome do interpretador de graça.
+- **Closed** — commit `95ad67c7` (2026-09-23): fix(looks): refuse early when the interpreter has no Pillow, and name it
+  - Files (`git show --name-status 95ad67c7`):
+    - `M CLAUDE.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/CORR-LOOKS-087.md`
+    - `M tools/looks/confront.py`
+    - `M tools/pes2/drive.py`
