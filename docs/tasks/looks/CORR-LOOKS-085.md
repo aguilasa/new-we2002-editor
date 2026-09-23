@@ -90,3 +90,42 @@ $ grep -A6 "^HELP_ICON_CODES" tools/looks/layout.py | grep -c "which is how"
 (layout.py:1810) repete a mesma atribuição errada — "the game's own exception
 list (22 codes, at `HELP_ICON_CODES`) is what puts a code on the other
 palette". Mesmo arquivo, mesmo defeito.
+
+### Execução, 2026-09-23 (sem emulador)
+
+A procedência foi **remedida aqui**, só pelo disco (o `oracle.py` não rodou — o
+DuckStation estava com outro agente), lendo `/SELECT.BIN` pelo
+`iso_source.open_disc(...).read(layout.SELECT)` sobre a imagem japonesa:
+
+```text
+$ python ...  # iso_source + layout.SELECT, WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin
+SELECT size 300648
+codes  ['0x9b89','0x9bbd','0x9bc1','0x9bd4','0x9bdf','0x9c41','0x9e8a','0x9f86',
+        '0x9fba','0xe056','0xe05f','0xe1b8','0xe1c1','0xe555','0xe7b2','0xe7b3',
+        '0xe863','0xfab1','0x9b9a','0xe085','0xe54d','0xe7e9']
+special present: []                       # 0x819a/0x819c/0x81a1/0x81a3 -- o ■ inclusive
+blob occurrences in SELECT: 1 first at 253728   # as 44 bytes ocorrem uma vez só
+last row of each of the 22: {0}                 # bitmaps em 253772: 16ª linha em branco
+set pixels per bitmap: min 53 max 100
+the 32 bytes after: last row 0x0303, set pixels 43   # a corrida para em 22
+```
+
+Os blocos de 32 bytes em 253.772 **parecem bitmap**, desenhados como 16 linhas
+de meia-palavra big-endian — a primeira é um glifo fechado com moldura, e as 22
+têm a 16ª linha zerada, que é o 16x15 do `HELP_GLYPH_SIZE` com uma linha de
+padding. Os 32 bytes seguintes (254.476) **não** são: caem numa rampa
+`01 01 01 02 02 03…`. Nada disso foi visto sendo carregado ou desenhado, então
+o docstring mantém a ressalva de **"registrado, não lido"** e diz que a ligação
+entre os 22 códigos e os 22 bitmaps é a adjacência e a contagem, não uma
+medição de upload. O casamento com a RAM em `0x800BCA58` continua creditado à
+LOOKS-TASK-39, que foi quem o mediu.
+
+Dois docstrings reescritos, não um: o do `HELP_ICON_CODES` (a Correção) e o do
+`HELP_ICON_CLUT` (o terceiro ponto da triagem), que agora aponta o
+`HELP_SPECIAL_SPAN` — o `■` é `0x81A1`, um dos quatro do despacho, e nenhum dos
+quatro está na tabela de 22.
+
+Verificação: `grep -A6 "^HELP_ICON_CODES" tools/looks/layout.py | grep -c
+"which is how"` imprime `0`, e o docstring nomeia `/SELECT.BIN` + 253728 (e o
+253772 dos bitmaps). Portões: `selftest.py` 0 failure(s) (104 de 104 controles
+vermelhos), `cli.py check` 12 de 12 ok.

@@ -1809,9 +1809,11 @@ HELP_PAGE = (832, 256)
 HELP_CLUT = (64, 496)
 HELP_ICON_CLUT = (32, 498)
 """The VRAM page the help box's text is drawn from, and the two CLUTs its
-sprites carry: the letters take the first, the button glyph `■` the second --
-the game's own exception list (22 codes, at `HELP_ICON_CODES`) is what puts a
-code on the other palette.
+sprites carry: the letters take the first, the button glyph `■` the second.
+What puts the `■` on that second palette is NOT `HELP_ICON_CODES`: the `■` is
+`0x81A1`, one of the four codes of `HELP_SPECIAL_SPAN`, drawn from a fixed
+place in VRAM instead of rendered, and none of those four is in the table of
+22.
 
 Nothing on the disc holds this page's texels, and nothing can: the game writes
 them from the console's character ROM, one 16x16 tile per character of the
@@ -1859,11 +1861,24 @@ HELP_ICON_CODES = 0x800BCA58
 HELP_ICON_COUNT = 22
 """A table of 22 halfwords the renderer compares every code against before it
 draws, and which decides the palette: a code in it comes out on
-`HELP_ICON_CLUT`, which is how `■` is the one sprite of the box on another
-CLUT.
+`HELP_ICON_CLUT`.
 
-Recorded, not read: this cycle draws none of it, and which file the table is
-loaded from was not measured -- it sits below every overlay this cycle knows.
+It is NOT what puts the `■` of the box on that CLUT.  The `■` is `0x81A1`,
+one of the four codes of `HELP_SPECIAL_SPAN`, which measured that -- and
+none of `0x819A`, `0x819C`, `0x81A1`, `0x81A3` is among these 22.
+
+Where the table comes from, measured on the disc 2026-09-23:
+`/SELECT.BIN` + 253728, 22 little-endian halfwords (`0x9B89`, `0x9BBD`, ...
+`0xE7E9`), and those 44 bytes occur exactly once in the file; LOOKS-TASK-39
+matched them byte for byte against the RAM at the address above.  Right
+after them, at `/SELECT.BIN` + 253772, come 22 blocks of 32 bytes that read
+as 16x16 one-bit bitmaps -- rows as big-endian halfwords, the sixteenth row
+blank in all 22, which is the 16x15 of `HELP_GLYPH_SIZE` padded -- and the
+run stops at exactly 22: the 32 bytes after it are not a bitmap.
+
+Recorded, not read: this cycle draws none of it.  That those bitmaps are the
+glyphs of these codes is their adjacency and their count, not a measured
+upload -- nothing here was watched being loaded or drawn.
 """
 
 KROM_STUB = 0x8003873C
