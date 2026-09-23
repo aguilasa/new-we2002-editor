@@ -104,6 +104,10 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-085](/docs/tasks/looks/CORR-LOOKS-085.md) | O docstring do HELP_ICON_CODES contradiz a medição | LOOKS-TASK-39 | medium | done | 2026-09-23 |
 | [CORR-LOOKS-086](/docs/tasks/looks/CORR-LOOKS-086.md) | Levar a ressalva da armadilha 96 ao docstring do HELP_UPLOAD | LOOKS-TASK-39 | low | done | 2026-09-23 |
 | [CORR-LOOKS-087](/docs/tasks/looks/CORR-LOOKS-087.md) | Dizer qual interpretador roda o confront.py --outside | LOOKS-TASK-39 | low | done | 2026-09-23 |
+| [CORR-LOOKS-088](/docs/tasks/looks/CORR-LOOKS-088.md) | O gate do close-up afrouxa um limiar que a LOOKS-TASK-28 já mediu mais apertado | LOOKS-TASK-40 | medium | pending | — |
+| [CORR-LOOKS-089](/docs/tasks/looks/CORR-LOOKS-089.md) | Marcar a linha da Fase 10 da LOOKS-TASK-40 no progresso | LOOKS-TASK-40 | medium | pending | — |
+| [CORR-LOOKS-090](/docs/tasks/looks/CORR-LOOKS-090.md) | Retitular a task: a medição desmentiu 'quando a linha é de cabeça' | LOOKS-TASK-40 | low | pending | — |
+| [CORR-LOOKS-091](/docs/tasks/looks/CORR-LOOKS-091.md) | O bloco de evidência mistura prosa à transcrição do comando | LOOKS-TASK-40 | low | pending | — |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não

@@ -7,8 +7,8 @@ phase: 10
 depends_on: [LOOKS-TASK-28]
 status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-23
+review_commit: e76d2740
 done_on: 2026-09-23
 done_commit: 45734fe1
 ---
@@ -207,3 +207,4 @@ check: 0 error(s), 11 warning(s) in 4 cycle(s)
     - `M tools/looks/ui/app.py`
     - `M tools/looks/ui/looks_set.py`
     - `M tools/looks/ui_check.py`
+- **Reviewed** (2026-09-23) at `e76d2740`: CORR-LOOKS-088, CORR-LOOKS-089, CORR-LOOKS-090, CORR-LOOKS-091
