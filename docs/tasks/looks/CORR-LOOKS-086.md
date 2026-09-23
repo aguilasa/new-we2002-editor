@@ -5,10 +5,10 @@ origin: LOOKS-TASK-39
 severity: low
 files: [tools/looks/layout.py]   # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-23
+done_commit: 336aedce
 ---
 
 # CORR-LOOKS-086 — Levar a ressalva da armadilha 96 ao docstring do HELP_UPLOAD
@@ -114,3 +114,7 @@ Varredura: `HELP_UPLOAD` e `HELP_IMAGE_LOAD` não aparecem em mais nenhum
 `.py` nem `.md` do repositório — são constantes **registradas, não lidas**,
 como o bloco do `HELP_ICON_CODES` ao lado. Por isso a ressalva só cabia no
 docstring: não há chamador para adverti-la.
+- **Closed** — commit `336aedce` (2026-09-23): docs(looks): say the help-upload pc is a DMA artefact, not a measurement
+  - Files (`git show --name-status 336aedce`):
+    - `M docs/tasks/looks/CORR-LOOKS-086.md`
+    - `M tools/looks/layout.py`

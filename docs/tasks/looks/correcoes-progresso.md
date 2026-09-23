@@ -102,7 +102,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-083](/docs/tasks/looks/CORR-LOOKS-083.md) | Plantar o controle do parse_keys que ignora a contagem | CORR-LOOKS-082 | low | done | 2026-09-22 |
 | [CORR-LOOKS-084](/docs/tasks/looks/CORR-LOOKS-084.md) | As ajudas e os docs do --keys não nomeiam a forma de repetição | CORR-LOOKS-082 | low | done | 2026-09-22 |
 | [CORR-LOOKS-085](/docs/tasks/looks/CORR-LOOKS-085.md) | O docstring do HELP_ICON_CODES contradiz a medição | LOOKS-TASK-39 | medium | done | 2026-09-23 |
-| [CORR-LOOKS-086](/docs/tasks/looks/CORR-LOOKS-086.md) | Levar a ressalva da armadilha 96 ao docstring do HELP_UPLOAD | LOOKS-TASK-39 | low | pending | — |
+| [CORR-LOOKS-086](/docs/tasks/looks/CORR-LOOKS-086.md) | Levar a ressalva da armadilha 96 ao docstring do HELP_UPLOAD | LOOKS-TASK-39 | low | done | 2026-09-23 |
 | [CORR-LOOKS-087](/docs/tasks/looks/CORR-LOOKS-087.md) | Dizer qual interpretador roda o confront.py --outside | LOOKS-TASK-39 | low | done | 2026-09-23 |
 <!-- rite:end -->
 
