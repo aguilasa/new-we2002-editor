@@ -5,12 +5,12 @@ type: investigação
 category: oráculo
 phase: 11
 depends_on: [LOOKS-TASK-26]
-status: in-progress
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-23
+done_commit: 6a2c16fb
 ---
 
 # LOOKS-TASK-32: O ciclo da caminhada
@@ -274,3 +274,16 @@ looks_ui: 18 of 18 negative control(s) red
 $ python tools/check_tasks.py
 check: 0 error(s), 11 warning(s) in 4 cycle(s)
 ```
+- **Closed** — commit `6a2c16fb` (2026-09-23): feat(looks): measure the walk cycle and reproduce it from the file
+  - Files (`git show --name-status 6a2c16fb`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/32-o-ciclo-da-caminhada.md`
+    - `M docs/tasks/looks/33-a-janela-animada.md`
+    - `M docs/tasks/looks/progresso.md`
+    - `M tools/looks/anime.py`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/oracle.py`
