@@ -4,7 +4,7 @@ title: "Recontar o 132 de 480 do par: medido 316 de 520"
 origin: LOOKS-TASK-32
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
+resources: [emulador]  # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
 done_on: null
@@ -55,10 +55,18 @@ total 520 paired 316
   29     .....PPPPPPP
   30..43 PPPPPPPPPPPP
 
-$ python - <<'EOF'   # o balanço, de work/looks-walk/slotN.json
+$ python - <<'EOF'   # o balanço, de work/looks-walk/slotN.json (escrito por oracle.py --walk)
+import json
+for n in (1, 2):
+    by = {}
+    for c in json.load(open(f"work/looks-walk/slot{n}.json"))["cycle"]:
+        for p in c["pieces"]:
+            by.setdefault(p["piece"], []).append(p["rotation"])
+    spread = max(max(r[i] for r in rs) - min(r[i] for r in rs) for rs in by.values() for i in range(9))
+    print(f"slot {n} max rotation spread {spread}")
+EOF
 slot 1 max rotation spread 4552
 slot 2 max rotation spread 4552      # o docstring diz 4362
-EOF
 
 $ grep -rn "132 de 480\|132 of 480" --include='*.md' --include='*.py' .
 ./docs/prompts/perfil-looks.armadilhas.md:166

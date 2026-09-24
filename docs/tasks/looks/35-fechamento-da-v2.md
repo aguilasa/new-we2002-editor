@@ -11,6 +11,7 @@ reviewed_on: null
 review_commit: null
 done_on: null
 done_commit: null
+resources: [emulador, tela]
 ---
 
 # LOOKS-TASK-35: Fechamento da v2
