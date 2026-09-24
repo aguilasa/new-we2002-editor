@@ -23,14 +23,28 @@ profile_file  = "perfil-{cycle}.md"
 pitfalls_file = "perfil-{cycle}.armadilhas.md"
 
 [sections]
-execution_log = "Log de Execução"
+execution_log = ["Log de Execução", "Log de Execução *(preenchido após execução)*"]
 phase_checks  = "Verificações específicas por fase"
 phase_label   = "Fase"
+evidence = "Evidência"
+verification = "Verificação"
+files = ["Arquivos a criar ou modificar", "Arquivos"]
+scope = ["Arquivos a criar ou modificar", "Arquivos criados/modificados"]
+confirmed_decisions = "Contexto essencial — decisões já confirmadas"
+gates = "Gates deste ciclo"
 
 [profile]
 # Raised to the largest legacy profile so the migration starts green; compact the profiles with
 # /rite:retro (pitfalls go to the pitfalls file) and bring this back towards 12.
 max_kb = 84
+
+[resources]
+# the profiles' "Recursos serializados", as names items can declare in `resources:`
+serialized = [
+  { name = "emulador", why = "DuckStation usa um único diretório de dados: uma instância por vez; make.ps1 pes2 derruba um we2002-play em curso" },
+  { name = "save-states", why = "os dois save states são fixture compartilhada; não se sobrescrevem sem o usuário pedir" },
+  { name = "tela", why = "nada abre janela visível: :98 no Linux, janela em -32000 no Windows" },
+]
 
 [vocab]
 task_types = ["decisão", "ferramenta", "verificação", "engenharia-reversa", "closing", "projeto", "implementação", "infra", "extração", "documentação", "infraestrutura", "investigação"]

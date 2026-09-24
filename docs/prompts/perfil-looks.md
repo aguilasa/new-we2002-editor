@@ -686,6 +686,11 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 
 ## Gates deste ciclo
 
+O gate que toda task e toda correção precisa passar antes de fechar (`rite gates` lê
+só esta lista; a tabela abaixo é o catálogo de alvos e ferramentas, não gates):
+
+- `python tools/looks/selftest.py`
+
 | alvo | precisa | **como se roda AQUI** | por `ctest`, onde o build configura | existe desde |
 | --- | --- | --- | --- | --- |
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
