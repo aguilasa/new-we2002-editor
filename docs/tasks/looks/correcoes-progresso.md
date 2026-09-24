@@ -108,6 +108,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-089](/docs/tasks/looks/CORR-LOOKS-089.md) | Marcar a linha da Fase 10 da LOOKS-TASK-40 no progresso | LOOKS-TASK-40 | medium | pending | — |
 | [CORR-LOOKS-090](/docs/tasks/looks/CORR-LOOKS-090.md) | Retitular a task: a medição desmentiu 'quando a linha é de cabeça' | LOOKS-TASK-40 | low | pending | — |
 | [CORR-LOOKS-091](/docs/tasks/looks/CORR-LOOKS-091.md) | O bloco de evidência mistura prosa à transcrição do comando | LOOKS-TASK-40 | low | pending | — |
+| [CORR-LOOKS-092](/docs/tasks/looks/CORR-LOOKS-092.md) | Recontar o 132 de 480 do par: medido 316 de 520 | LOOKS-TASK-32 | medium | pending | — |
+| [CORR-LOOKS-093](/docs/tasks/looks/CORR-LOOKS-093.md) | Recolar a transcrição dos gates: ela é anterior a 150 linhas do código entregue | LOOKS-TASK-32 | low | pending | — |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não

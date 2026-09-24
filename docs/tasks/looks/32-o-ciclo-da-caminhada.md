@@ -7,8 +7,8 @@ phase: 11
 depends_on: [LOOKS-TASK-26]
 status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-24
+review_commit: 42c23a32
 done_on: 2026-09-23
 done_commit: 6a2c16fb
 ---
@@ -287,3 +287,4 @@ check: 0 error(s), 11 warning(s) in 4 cycle(s)
     - `M tools/looks/controls.py`
     - `M tools/looks/layout.py`
     - `M tools/looks/oracle.py`
+- **Reviewed** (2026-09-24) at `42c23a32`: CORR-LOOKS-092, CORR-LOOKS-093
