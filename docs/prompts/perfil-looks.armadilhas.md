@@ -163,8 +163,11 @@ e os termos que a disparam.
     em peça nenhuma** — é a razão das oito capturas postas de lado da
     LOOKS-TASK-26, não uma oscilação do emulador. Quem serve a todas é
     `layout.ANIME_BUILD` (o `jal` da `RotMatrix`), onde os ângulos já estão no
-    scratchpad e `s0` ainda é o par: 480 de 480 paradas com par, contra 132 de
-    480 na outra (LOOKS-TASK-32).
+    scratchpad e `s0` ainda é o par: 520 de 520 cargas com par, contra 316 de
+    520 na outra — e a falta tem forma, não é razão: **uma metade espelhada
+    contígua**, 204 cargas seguidas, 17 das 34 passadas. Quem conta é
+    `oracle.py --walk-watch [SLOT]`, igual nos dois slots
+    (LOOKS-TASK-32, recontado na CORR-LOOKS-092).
 98. **Contar a caminhada em quadros de vídeo dá um relógio que não repete.**
     A tela desenha a figura **uma vez a cada dois ou três quadros**, e o
     intervalo alterna sem período dentro de 500 quadros medidos (219 avanços

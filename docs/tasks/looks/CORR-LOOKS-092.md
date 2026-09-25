@@ -5,7 +5,7 @@ origin: LOOKS-TASK-32
 severity: medium
 files: [tools/looks/layout.py, tools/looks/oracle.py, docs/prompts/perfil-looks.md, docs/prompts/perfil-looks.armadilhas.md, docs/tasks/looks/32-o-ciclo-da-caminhada.md]
 resources: [emulador, save-states]
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -144,3 +144,68 @@ $ grep -rn "132 de 480\|132 of 480" --include='*.md' --include='*.py' .
 ```
 - **blocked** (2026-09-25): the pair counts (316 of 520 against the documented 132 of 480) can only be re-measured over forty passes in the running game, and the probe that parametrizes _walk_stops is part of the fix, not yet versioned; no work started — unblocked by `python tools/looks/oracle.py --check-live`
 - **pending** (2026-09-25): python tools/looks/oracle.py --check-live now passes (0 failures) with WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin WE2002_LOOKS_DRIVE_IMAGE=C:/games/ps1/work/we2002-english.cue
+
+### 2026-09-25 — correção (`/rite:fix`, com o emulador)
+
+**Triagem: REPRODUCED** inline na HEAD `7b01d0c1`: o `grep` ainda acha `132 de 480` em `docs/prompts/perfil-looks.md:512` e `tools/looks/layout.py:2067` (e, quebrado em linha, em `perfil-looks.armadilhas.md:166` e `32-o-ciclo-da-caminhada.md:149`); o heredoc do balanço imprime 4552 nos dois slots. Desbloqueado: `python tools/looks/oracle.py --check-live` passa com `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin` e `WE2002_LOOKS_DRIVE_IMAGE=C:/games/ps1/work/we2002-english.cue`.
+
+**Mudança.** A sonda virou gerador versionado: `_walk_stops` ganhou `watch`, `pair_register` e `strict` (default: `ANIME_BUILD`, `s0`, estrito — o `--walk` não muda), e `oracle.py --walk-watch [SLOT]` toma as mesmas 520 cargas duas vezes, do mesmo state, vigiando `ANIME_BUILD` e depois `ANIME_UNPACK`, e imprime a contagem e a **forma** da falta (`pair_runs`, com dois self-checks). Os quatro lugares passam a citar 520 de 520 contra 316 de 520 e a metade espelhada contígua (204 cargas = 17 das 34 passadas), apontando o comando. O docstring do `WALK_CAMERA_GAP` (em `oracle.py`) diz 4552 e nomeia a métrica. O denominador: `--walk` pede `40 * (12 + 1) = 520` cargas, 12 por passada.
+
+Uma observação, não conclusão: no slot 1 o primeiro trecho com par tem exatamente **132** cargas (`P132 .204 P184`) — provável origem do "132" antigo, lido como total de uma corrida que começou noutro ponto do ciclo. É justamente por isso que o que se cita agora é a forma e não a razão.
+
+Fora do escopo, deixado como está: `tools/looks/oracle.py:6887` também diz "swings 4362", mas mede outra coisa (a parada do tornozelo nas capturas de pose da LOOKS-TASK-26, "tracking shin b's 4074"), não o ciclo da caminhada; não foi remedido aqui.
+
+```text
+$ python tools/looks/oracle.py --walk-watch 2
+  fork 9004 on this desktop, log C:\games\ps1\work\duckstation-fork.log
+  window 28445176
+  duckstation-mcp 1.0.0 answering
+  window moved off the visible desktop
+  -- slot 2 (outfield player): the 520 matrix loads --walk takes for its 40 passes, 12 loads a pass --
+  shot walk-watch-ANIME_BUILD-2  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\walk-watch-ANIME_BUILD-2.png
+  slot 2 restored: the outfield player, on LOOKS SET
+    ANIME_BUILD   520 of 520 matrix loads carry a pair
+      runs: P520
+  shot walk-watch-ANIME_UNPACK-2  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\walk-watch-ANIME_UNPACK-2.png
+  slot 2 restored: the outfield player, on LOOKS SET
+    ANIME_UNPACK  316 of 520 matrix loads carry a pair
+      runs: P149 .204 (17 passes) P167
+oracle --walk-watch: 0 problem(s)
+[exit 0]
+$ python tools/looks/oracle.py --walk-watch 1
+  fork 3012 on this desktop, log C:\games\ps1\work\duckstation-fork.log
+  window 2491444
+  duckstation-mcp 1.0.0 answering
+  window moved off the visible desktop
+  -- slot 1 (goalkeeper): the 520 matrix loads --walk takes for its 40 passes, 12 loads a pass --
+  shot walk-watch-ANIME_BUILD-1  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\walk-watch-ANIME_BUILD-1.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+    ANIME_BUILD   520 of 520 matrix loads carry a pair
+      runs: P520
+  shot walk-watch-ANIME_UNPACK-1  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\walk-watch-ANIME_UNPACK-1.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+    ANIME_UNPACK  316 of 520 matrix loads carry a pair
+      runs: P132 .204 (17 passes) P184
+oracle --walk-watch: 0 problem(s)
+[exit 0]
+$ python - <<'PY'   # o balanço, de work/looks-walk/slotN.json (o heredoc da Evidência)
+slot 1 max rotation spread 4552
+slot 2 max rotation spread 4552
+$ grep -rn "132 de 480\|132 of 480\|4362 units" --include='*.md' --include='*.py' tools docs/prompts docs/tasks/looks/32-o-ciclo-da-caminhada.md
+docs/tasks/looks/32-o-ciclo-da-caminhada.md:153:  `oracle.py --walk-watch`; o "480 de 480 contra 132 de 480" que estava aqui
+$ python tools/looks/oracle.py --check | tail -3
+  ok    the loads of a run come back as runs of named and unnamed
+  ok    and a run with no load is no run
+oracle.py: 0 failure(s)
+$ python tools/looks/selftest.py | tail -2
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+$ python tools/check_tasks.py | tail -1
+check: 0 error(s), 13 warning(s) in 4 cycle(s)
+$ python tools/looks/layout.py --check | tail -1
+layout: self_check ok
+$ python tools/pes2/fork.py status
+no DuckStation is running
+```
+
+A única linha que o `grep` ainda acha é a citação do número antigo, de propósito, na própria nota de recontagem da task 32.

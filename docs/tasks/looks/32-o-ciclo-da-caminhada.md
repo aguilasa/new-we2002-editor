@@ -146,8 +146,12 @@ pose de **qualquer** quadro do ciclo igual à do jogo.
   `ANIME_UNPACK`: dez variantes dividem o dispatch, e a passada que toma outra
   não para na instrução antiga — é a razão das oito capturas sem par da
   [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md), não
-  oscilação do emulador. 480 de 480 paradas trazem par na nova, contra 132 de
-  480 na antiga.
+  oscilação do emulador. 520 de 520 cargas trazem par na nova, contra 316 de
+  520 na antiga, e as 204 que faltam são uma metade espelhada contígua — 17
+  das 34 passadas. Recontado pela
+  [`CORR-LOOKS-092`](/docs/tasks/looks/CORR-LOOKS-092.md) com o
+  `oracle.py --walk-watch`; o "480 de 480 contra 132 de 480" que estava aqui
+  não saía de comando versionado.
 - **A vaga de par em que uma passada abre é propriedade do save state:** 7 no
   slot 2 e 0 no slot 1, constante em toda passada de uma corrida. É o "uma
   passada atravessa dois quadros do `ANIME.BIN`" da

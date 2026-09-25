@@ -7409,9 +7409,10 @@ WALK_CAMERA_GAP = 120
 
 The cycle measured is 77 counted frames, so a camera that moved with the walk
 would have moved by the second read.  It is the measurement behind "the swing
-is the animation's": the pose's own matrices swing 4362 units of 4096 over the
-cycle while this comes back the same nine halfwords and the same three
-translations.
+is the animation's": the pose's own matrices swing 4552 units of 4096 over the
+cycle -- the widest of the nine entries of any piece's rotation in
+`work/looks-walk/slotN.json`, both slots (CORR-LOOKS-092) -- while this comes
+back the same nine halfwords and the same three translations.
 """
 
 WALK_CONTROL_PASSES = 6
@@ -7424,7 +7425,8 @@ they have to come back identical number by number.
 """
 
 
-def _walk_stops(game, maps, names, passes, label):
+def _walk_stops(game, maps, names, passes, label, watch=None,
+                pair_register=None, strict=True):
     """Every matrix load of *passes* consecutive draw passes, in one session.
 
     Two breakpoints and one stop each, and the pair is the point: **the watch
@@ -7432,13 +7434,21 @@ def _walk_stops(game, maps, names, passes, label):
     variants share the dispatch and only one of them is the instruction the
     pose captures watched, so half of those passes came back with no pair on
     any piece (`anime.split_captures`).  Every variant reaches this one call.
+
+    *watch* and *pair_register* swap the watched stop and its pair register,
+    and are there for `--walk-watch` alone, which counts how many loads each
+    watch names (CORR-LOOKS-092).  With *strict* false a load no hit of the watch
+    named is kept with pair None instead of failing the run; the loads before
+    the first hit are dropped either way.
     """
+    if watch is None:
+        watch, pair_register = layout.ANIME_BUILD, layout.ANIME_BUILD_BASE
     import anime
     import who_writes
 
     client = game.client
     client.call("breakpoint", action="clear")
-    for address in (layout.ANIME_BUILD, layout.POSE_PIECE_MATRIX):
+    for address in (watch, layout.POSE_PIECE_MATRIX):
         client.call("breakpoint", action="add", type="execute",
                     address=who_writes.hx(address))
     path = os.path.join(game.out_dir, "walk-%s.bin" % label)
@@ -7452,9 +7462,9 @@ def _walk_stops(game, maps, names, passes, label):
                     "the draw stopped after %d matrix load(s) -- the screen is "
                     "not drawing the figure any more" % len(out))
             registers = client.call("read_registers", group="gpr")
-            if who_writes.register_value(registers, "pc") == layout.ANIME_BUILD:
+            if who_writes.register_value(registers, "pc") == watch:
                 pair = who_writes.register_value(
-                    registers, layout.ANIME_BUILD_BASE) - layout.ANIME_BASE
+                    registers, pair_register) - layout.ANIME_BASE
                 continue
             if pair is None:
                 # Every load is named by the build that preceded it; a load
@@ -7465,8 +7475,9 @@ def _walk_stops(game, maps, names, passes, label):
                 # has been seen, a load without one is a failure.
                 if not out:
                     continue
-                raise OracleError("a matrix load with no pair before it, %d "
-                                  "stop(s) in" % len(out))
+                if strict:
+                    raise OracleError("a matrix load with no pair before it, "
+                                      "%d stop(s) in" % len(out))
             where = _drawn_section(registers, maps)
             base = who_writes.register_value(registers,
                                              layout.POSE_PIECE_MATRIX_BASE)
@@ -7649,6 +7660,73 @@ def _walk_places(data, plan):
                             for a, b in zip(turned, drawn["translation"]))
                 worst[name] = max(worst[name], apart)
     return worst
+
+
+def pair_runs(stops):
+    """The loads of a run as runs of named and unnamed, in order.
+
+    `[("P", 152), (".", 204), ("P", 164)]` -- P a load a hit of the watch
+    named, `.` one it did not.  The shape is what `--walk-watch` reports and
+    not a ratio, because a ratio depends on where in the cycle the run began
+    and the shape does not: what the unpack watch misses is one contiguous
+    mirrored half at a time (CORR-LOOKS-092).
+    """
+    runs = []
+    for stop in stops:
+        mark = "." if stop["pair"] is None else "P"
+        if runs and runs[-1][0] == mark:
+            runs[-1] = (mark, runs[-1][1] + 1)
+        else:
+            runs.append((mark, 1))
+    return runs
+
+
+def check_walk_watch(slot=2, verbose=True):
+    """`--walk-watch [SLOT]`: how many loads each watch names, over one run.
+
+    The generator of the count behind `layout.ANIME_BUILD`'s "this is the
+    stop to watch" (CORR-LOOKS-092): `WALK_PASSES` passes taken twice from
+    the same state, once watching `layout.ANIME_BUILD` and once
+    `layout.ANIME_UNPACK`, each load marked by whether a hit of the watch
+    named its pair.  Reports the counts and the shape of what is missed.
+    """
+    import anime
+
+    ready = preflight()
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        maps = model_maps(ready["image"])
+        names, _orders = piece_names(ready["image"])
+        print("  -- slot %d (%s): the %d matrix loads --walk takes for its %d "
+              "passes, %d loads a pass --"
+              % (slot, SLOTS[slot], WALK_PASSES * (anime.PIECE_PAIRS + 1),
+                 WALK_PASSES, anime.PIECE_PAIRS))
+        for label, watch, register in (
+                ("ANIME_BUILD", layout.ANIME_BUILD, layout.ANIME_BUILD_BASE),
+                ("ANIME_UNPACK", layout.ANIME_UNPACK,
+                 layout.ANIME_UNPACK_BASE)):
+            restore_state(slot, verbose=False)
+            game.load_looks(slot, label="walk-watch-%s-%d" % (label, slot))
+            stops = _walk_stops(game, maps, names, WALK_PASSES,
+                                "watch-%s-%d" % (label, slot), watch=watch,
+                                pair_register=register, strict=False)
+            named = sum(1 for stop in stops if stop["pair"] is not None)
+            print("    %-13s %d of %d matrix loads carry a pair"
+                  % (label, named, len(stops)))
+            print("      runs: %s" % " ".join(
+                "%s%d" % run + ("" if run[0] == "P"
+                                or run[1] % anime.PIECE_PAIRS
+                                else " (%d passes)"
+                                % (run[1] // anime.PIECE_PAIRS))
+                for run in pair_runs(stops)))
+            if label == "ANIME_BUILD" and named != len(stops):
+                problems.append("ANIME_BUILD named %d of %d loads, and it is "
+                                "the watch every variant reaches"
+                                % (named, len(stops)))
+    print("oracle --walk-watch: %d problem(s)" % len(problems))
+    for problem in problems:
+        print("  - %s" % problem)
+    return 1 if problems else 0
 
 
 def check_walk(slot=None, verbose=True):
@@ -9733,6 +9811,14 @@ def _checks(c) -> None:
         lambda: window_cursor(picture, 512 * scale + 1, table),
         "whole multiple")
 
+    # The shape --walk-watch reports (CORR-LOOKS-092): named and unnamed
+    # loads as runs, in order, with a lone unnamed load its own run.
+    marks = [{"pair": 1}] * 3 + [{"pair": None}] * 2 + [{"pair": 4}]
+    ok("the loads of a run come back as runs of named and unnamed",
+       pair_runs(marks) == [("P", 3), (".", 2), ("P", 1)],
+       "%s" % (pair_runs(marks),))
+    ok("and a run with no load is no run", pair_runs([]) == [])
+
 
 # --- entry point ----------------------------------------------------------
 
@@ -9788,6 +9874,8 @@ def main(argv):
                                 row=argv[3] if len(argv) > 3 else None)
         if len(argv) in (2, 3) and argv[1] == "--walk":
             return check_walk(int(argv[2]) if len(argv) == 3 else None)
+        if len(argv) in (2, 3) and argv[1] == "--walk-watch":
+            return check_walk_watch(int(argv[2]) if len(argv) == 3 else 2)
         if len(argv) == 2 and argv[1] == "--pose-lag":
             return check_draw_lag()
         if len(argv) in (2, 3) and argv[1] == "--stature":

@@ -509,8 +509,9 @@ Não se revertem sem o usuário pedir.
     [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) a ponte
     melhor é `layout.ANIME_BUILD`**, o `jal` da `RotMatrix`, por onde passam
     as dez variantes: as oito capturas postas de lado eram as que tomaram
-    outra variante, e ali são 480 de 480 paradas com par contra 132 de 480
-    (armadilha 99). O `--against-pose` imprime as duas contas desde a
+    outra variante, e ali são 520 de 520 cargas com par contra 316 de 520,
+    faltando uma metade espelhada inteira — 204 cargas seguidas, 17 das 34
+    passadas (armadilha 99; `oracle.py --walk-watch`). O `--against-pose` imprime as duas contas desde a
     [`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md), e reprova se
     menos de um terço das capturas carregar par: **gate que escolhe sozinho
     o que não vai medir tem de dizer quanto deixou de fora.**

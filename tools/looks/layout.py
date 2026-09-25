@@ -2064,8 +2064,11 @@ adjustment the unpack variant made to it.
 another variant stops there for nobody, which is why half the pose captures of
 LOOKS-TASK-26 carried no pair on any piece and were set aside.  Every variant
 falls through to this one call, so a watch here names the pair of all twelve
-pieces of every pass -- 480 of 480 stops over forty passes, against 132 of 480
-at the unpack.
+pieces of every pass -- 520 of 520 of the matrix loads `--walk` takes for its
+forty passes, against 316 of 520 at the unpack, the same in both slots.  What the
+unpack misses has a shape and not a ratio: one contiguous mirrored half, 204
+loads in a row, 17 of the 34 passes.  `oracle.py --walk-watch [SLOT]` is the
+count (CORR-LOOKS-092).
 """
 
 ANIME_VARIANT_DISPATCH = 0x80011DA0
