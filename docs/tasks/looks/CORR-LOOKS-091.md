@@ -5,10 +5,10 @@ origin: LOOKS-TASK-40
 severity: low
 files: [docs/tasks/looks/40-a-camera-do-close-up.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-25
+done_commit: 5bf4c7ae
 unblocked_by: null
 ---
 
@@ -195,3 +195,7 @@ confront diff exit 0
 $ grep -n '\.\.\.\|pior caso' fence-*.txt; echo "grep exit $?"
 grep exit 1
 ```
+- **Closed** — commit `5bf4c7ae` (2026-09-25): docs(looks): paste the full close-up runs into LOOKS-TASK-40's evidence fences
+  - Files (`git show --name-status 5bf4c7ae`):
+    - `M docs/tasks/looks/40-a-camera-do-close-up.md`
+    - `M docs/tasks/looks/CORR-LOOKS-091.md`
