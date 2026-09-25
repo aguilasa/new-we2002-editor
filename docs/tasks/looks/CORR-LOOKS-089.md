@@ -5,7 +5,7 @@ origin: LOOKS-TASK-40
 severity: medium
 files: [docs/tasks/looks/progresso.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -80,4 +80,23 @@ $ sed -n '86p;302,303p' docs/tasks/looks/progresso.md
 | [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md) | A câmera do close-up — o painel aproxima na cabeça quando a linha é de cabeça | 10 | implementação | LOOKS-TASK-28 | done | 2026-09-23 | 2026-09-23 |
 - [ ] A origem do texto da ajuda medida, e desenhada se for do disco ([LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md)).
 - [ ] A câmera do close-up por linha de cabeça ([LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md)).
+```
+
+### 2026-09-25 — triagem inline (`/rite:fix-all looks CORR-LOOKS-089 CORR-LOOKS-090`, Rite 0.9.1)
+
+**REPRODUCED**, decidido inline por `rite reproduce CORR-LOOKS-089 --cycle looks --json` na HEAD `da9c76c5`. Saída idêntica à da entrada anterior.
+
+### 2026-09-25 — correção (`/rite:fix-all looks CORR-LOOKS-089 CORR-LOOKS-090`, Rite 0.9.1)
+
+**Feito.** A linha 303 do `docs/tasks/looks/progresso.md` — fora da região gerada (48-91) — passou a `- [x]` com o resumo medido de uma linha, como as das tasks 30, 31, 36, 37 e 38: seis das doze linhas aproximam (`BOOTS`, `FACE`, `H.COL`, `H.F.COL.`, `HAIR`, `SKIN`), o `BOOTS` sem ser linha de cabeça, as translações `[-120, 266, 999]` e `[-224, 90, 1934]`, `H` 1376 nas doze, a janela trocando de câmera por linha a partir de `work/looks-camera/`, e o pior caso do `confront.py --silhouette-closeups` (`SKIN` do goleiro, 402 de 1922, 21%, controle 2,5x). Todo número vem do Log de Execução da [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md). A descrição diz "por linha", não "por linha de cabeça": o título da task é da CORR-LOOKS-090. A linha da LOOKS-TASK-39 ficou como estava, por ser da revisão dela.
+
+```text
+$ grep -n "LOOKS-TASK-40" docs/tasks/looks/progresso.md | grep -c -- "- \[ \]"
+0
+$ grep -n "LOOKS-TASK-40" docs/tasks/looks/progresso.md | cut -c1-80
+5:order: [LOOKS-TASK-01, LOOKS-TASK-02, LOOKS-TASK-03, LOOKS-TASK-04, LOOKS-TASK-
+86:| [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md) | A câmera do c
+303:- [x] A câmera do close-up por linha — **seis das doze aproximam**, medidas no
+$ python tools/check_tasks.py
+check: 0 error(s), 14 warning(s) in 4 cycle(s)
 ```
