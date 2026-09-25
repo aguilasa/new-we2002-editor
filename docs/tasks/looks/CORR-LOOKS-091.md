@@ -5,7 +5,7 @@ origin: LOOKS-TASK-40
 severity: low
 files: [docs/tasks/looks/40-a-camera-do-close-up.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -142,3 +142,56 @@ vale para as linhas que ficaram nas cercas, que aparecem literais no commit
 - **pending** (2026-09-25): the literal slot-1 lines require confront.py --silhouette-closeups, which starts the emulator; rerun on a machine with duckstation and paste the tool's own output; partial work in 214af796
 - **blocked** (2026-09-25): the literal slot-1 lines need the tool's own output; partial work in 214af796 — unblocked by `python tools/looks/oracle.py --check-live`
 - **pending** (2026-09-25): python tools/looks/oracle.py --check-live now passes (0 failures) with WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin WE2002_LOOKS_DRIVE_IMAGE=C:/games/ps1/work/we2002-english.cue
+
+### 2026-09-25 — triagem e execução com o emulador (`/rite:fix`, recurso `duckstation`)
+
+**REPRODUCED** inline na HEAD `b9ce47a9`: a cerca do `--silhouette-closeups`
+no `### Evidência` da task 40 ainda terminava na linha `BOOTS` do slot 2, sem
+as seis linhas do slot 1, e a do `--closeups` sem `NAT`, `BODY`, `AGE` e o
+slot 1. **Desbloqueada** porque `python tools/looks/oracle.py --check-live`
+passa (0 falhas) com `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin` e
+`WE2002_LOOKS_DRIVE_IMAGE=C:/games/ps1/work/we2002-english.cue`.
+
+**Correção.** As duas ferramentas rodaram na HEAD `b9ce47a9` (já com o
+`CLOSEUP_CAMERA_SHARE` 0,25 da CORR-LOOKS-088) e as duas cercas do
+`### Evidência` de `/docs/tasks/looks/40-a-camera-do-close-up.md` passaram a
+ser a saída **inteira** de cada comando, navegação incluída, sem corte nem
+glosa: 259 linhas do `oracle.py --closeups` e 116 do
+`confront.py --silhouette-closeups`. O comentário `# os dois slots, ~3 min
+cada` saiu da linha `$` e virou prosa; a prosa acima de cada cerca diz o que
+ela contém e resume o pior caso (`SKIN` do slot 1, 402 de 1922, 21%, controle
+2,5x, abaixo do share 0,25). A saída não imprime limiar, então o parágrafo de
+limiares da task ficou como a CORR-LOOKS-088 o deixou.
+
+Achado de passagem, e consertado: o commit parcial `214af796` tinha aplicado a
+mesma edição também à cerca do `### Gates`, partindo-a em duas e pondo a prosa
+do "pior caso" no meio. A cerca voltou à forma de `7717326c`; `diff` do trecho
+`### Gates` contra `git show 7717326c:...` sai vazio.
+
+As duas corridas saíram com código 0, a saída foi capturada em
+`oracle.lf` e `confront.lf` no scratchpad, e a íntegra está na task 40; aqui
+só o fim de cada uma:
+
+```text
+$ tail -1 oracle.lf
+oracle --closeups: 0 problem(s) over 2 slot(s)
+$ tail -2 confront.lf
+    SKIN      walk frame 12; band from row 35:  402 of 1922 ( 21%) with its own camera,  997 with the full figure's (2.5x)
+confront --silhouette-closeups: 0 problem(s) over 2 slot(s)
+$ python tools/pes2/fork.py status
+No DuckStation is running
+```
+
+**Verificação** — cada cerca, extraída do `### Evidência`, contra a saída
+capturada da corrida (CR tirado do stdout do Windows):
+
+```text
+$ wc -l fence-oracle.txt oracle.lf fence-confront.txt confront.lf
+259 / 259 / 116 / 116
+$ diff fence-oracle.txt oracle.lf; echo "oracle diff exit $?"
+oracle diff exit 0
+$ diff fence-confront.txt confront.lf; echo "confront diff exit $?"
+confront diff exit 0
+$ grep -n '\.\.\.\|pior caso' fence-*.txt; echo "grep exit $?"
+grep exit 1
+```

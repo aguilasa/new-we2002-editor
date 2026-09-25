@@ -102,47 +102,406 @@ cabeça, e volta à de corpo inteiro nas outras, como o jogo.
 
 ### Evidência
 
-As duas cercas abaixo guardam só linhas que o comando do topo imprime, e não
-todas: a transcrição completa das duas corridas não foi guardada, e as duas
-ferramentas precisam do emulador para rodar de novo. Na do `--closeups` ficam
-de fora as linhas de `NAT`, `BODY` e `AGE` — as três com a câmera da linha de
-carga, como diz a linha de resumo — e a corrida do slot 1 inteira.
+As duas cercas abaixo são a saída inteira de cada comando, colada como ele a
+imprimiu em 2026-09-25 na HEAD `b9ce47a9`, com o emulador de pé
+(`WE2002_LOOKS_IMAGE` no disco japonês, `WE2002_LOOKS_DRIVE_IMAGE` no `.cue`
+inglês), nada cortado: as linhas de navegação (`shot ...`, `slot N restored`,
+`Down moved it by ...`) ficam junto com as de resultado. Cada corrida leva
+alguns minutos por slot.
+
+O `--closeups` dá, nos dois slots, as mesmas seis linhas que aproximam —
+`BOOTS`, `FACE`, `H.COL`, `H.F.COL.`, `HAIR` e `SKIN` — e as mesmas seis que
+ficam com a câmera da linha de carga, com a mesma translação por linha no
+goleiro e no jogador de linha.
 
 ```text
-$ python tools/looks/oracle.py --closeups          # os dois slots, ~3 min cada
+$ python tools/looks/oracle.py --closeups
+  fork 17604 on this desktop, log C:\games\ps1\work\duckstation-fork.log
+  window 1246232
+  duckstation-mcp 1.0.0 answering
+  window moved off the visible desktop
+  -- slot 2 (outfield player) --
+  shot camera-2-0-  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  shot camera-2-0-  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-.png
+  slot 2 restored: the outfield player, on LOOKS SET
     control: the loading row (NAT) read twice, camera identical: translation [-480, 192, 4125], H 1376
+  shot camera-2-0-DEFAUL  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-DEFAUL.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+  Down moved it by 0.011982
+  Down moved it by 0.010089
     DEFAUL    translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-2-0-NAT  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-NAT.png
+  slot 2 restored: the outfield player, on LOOKS SET
+    NAT       translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-2-0-SKIN  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-SKIN.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
     SKIN      translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-2-0-HAIR  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-HAIR.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
     HAIR      translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-2-0-H.COL  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-H.COL.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
     H.COL     translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-2-0-FACE  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-FACE.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
     FACE      translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-2-0-H.F.COL.  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-H.F.COL..png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
     H.F.COL.  translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-2-0-HEIG  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-HEIG.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
     HEIG      translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-2-0-BODY  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-BODY.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+    BODY      translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-2-0-AGE  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-AGE.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+    AGE       translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-2-0-BOOTS  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-BOOTS.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
     BOOTS     translation [-224, 90, 1934]       H 1376  ZOOMS
+  shot camera-2-0-FOOT  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-FOOT.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+  Down moved it by 0.011982
     FOOT      translation [-480, 192, 4125]      H 1376  the loading row's camera
     6 row(s) zoom (BOOTS, FACE, H.COL, H.F.COL., HAIR, SKIN) and 6 keep the loading row's camera (DEFAUL, NAT, HEIG, BODY, AGE, FOOT)
+  shot camera-2-0-BOOTS  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\camera-2-0-BOOTS.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
     control: BOOTS read twice, camera identical
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot2-BOOTS.json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot2-FACE.json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot2-H.COL.json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot2-H.F.COL..json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot2-HAIR.json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot2-SKIN.json
+  -- slot 1 (goalkeeper) --
+  shot camera-1-0-  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  shot camera-1-0-  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+    control: the loading row (NAT) read twice, camera identical: translation [-480, 192, 4125], H 1376
+  shot camera-1-0-DEFAUL  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-DEFAUL.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+  Down moved it by 0.011982
+  Down moved it by 0.010089
+    DEFAUL    translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-1-0-NAT  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-NAT.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+    NAT       translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-1-0-SKIN  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-SKIN.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+    SKIN      translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-1-0-HAIR  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-HAIR.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+    HAIR      translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-1-0-H.COL  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-H.COL.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+    H.COL     translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-1-0-FACE  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-FACE.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+    FACE      translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-1-0-H.F.COL.  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-H.F.COL..png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+    H.F.COL.  translation [-120, 266, 999]       H 1376  ZOOMS
+  shot camera-1-0-HEIG  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-HEIG.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+    HEIG      translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-1-0-BODY  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-BODY.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+    BODY      translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-1-0-AGE  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-AGE.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+    AGE       translation [-480, 192, 4125]      H 1376  the loading row's camera
+  shot camera-1-0-BOOTS  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-BOOTS.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+    BOOTS     translation [-224, 90, 1934]       H 1376  ZOOMS
+  shot camera-1-0-FOOT  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-FOOT.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+  Down moved it by 0.011982
+    FOOT      translation [-480, 192, 4125]      H 1376  the loading row's camera
+    6 row(s) zoom (BOOTS, FACE, H.COL, H.F.COL., HAIR, SKIN) and 6 keep the loading row's camera (DEFAUL, NAT, HEIG, BODY, AGE, FOOT)
+  shot camera-1-0-BOOTS  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\camera-1-0-BOOTS.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+    control: BOOTS read twice, camera identical
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot1-BOOTS.json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot1-FACE.json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot1-H.COL.json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot1-H.F.COL..json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot1-HAIR.json
+    wrote C:\github\new-we2002-editor\work\looks-camera\slot1-SKIN.json
 oracle --closeups: 0 problem(s) over 2 slot(s)
 ```
 
-Na do `--silhouette-closeups` fica a cabeça da corrida e a primeira linha do
-slot 2. As outras cinco do slot 2 foram guardadas com o meio cortado, e por
-isso saem da cerca: com a própria câmera, `FACE` erra 257 de 2505 pixels da
-faixa (10%) contra 1005 com a do corpo inteiro (3,9x); `H.COL` 299 de 2373
-(13%) contra 899 (3,0x); `H.F.COL.` 266 de 2516 (11%) contra 1016 (3,8x);
-`HAIR` 286 de 1972 (15%) contra 716 (2,5x); e `SKIN` 297 de 1897 (16%) contra
-915 (3,1x), todas na passada 12 e com a faixa a partir da linha 35. As seis
-linhas do slot 1 não foram guardadas; o pior caso dos dois slots é o `SKIN` do
-slot 1, 402 de 1922 (21%) contra 997 (2,5x), o número que a
-[`CORR-LOOKS-088`](/docs/tasks/looks/CORR-LOOKS-088.md) também registra. A
-corrida terminou com `0 problem(s) over 2 slot(s)`.
+No `--silhouette-closeups` o pior caso dos dois slots é o `SKIN` do slot 1,
+402 de 1922 pixels da faixa (21%) com a própria câmera contra 997 com a do
+corpo inteiro (2,5x), o número que a
+[`CORR-LOOKS-088`](/docs/tasks/looks/CORR-LOOKS-088.md) também registra, e
+abaixo do `CLOSEUP_CAMERA_SHARE` de 0,25. A corrida termina com `0 problem(s)
+over 2 slot(s)`.
 
 ```text
 $ python tools/looks/confront.py --silhouette-closeups
   the panel is 146x120 native pixels; the camera's axis falls at (240, 54) inside it
+  fork 17044 on this desktop, log C:\games\ps1\work\duckstation-fork.log
+  window 4262030
+  duckstation-mcp 1.0.0 answering
+  window moved off the visible desktop
   -- slot 2 (outfield player), 6 row(s) with a camera of their own: BOOTS, FACE, H.COL, H.F.COL., HAIR, SKIN --
+  shot silhouette-2-0  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\silhouette-2-0.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+  shot silhouette-2-0  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\silhouette-2-0.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
     control: the BOOTS close-up twice, walk frame 0 and 0, 0 pixel(s) apart
     BOOTS     walk frame  0; band from row  3:  160 of 2682 (  6%) with its own camera, 2452 with the full figure's (15.3x)
+  shot silhouette-2-0  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\silhouette-2-0.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+    FACE      walk frame 12; band from row 35:  257 of 2505 ( 10%) with its own camera, 1005 with the full figure's (3.9x)
+  shot silhouette-2-0  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\silhouette-2-0.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+    H.COL     walk frame 12; band from row 35:  299 of 2373 ( 13%) with its own camera,  899 with the full figure's (3.0x)
+  shot silhouette-2-0  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\silhouette-2-0.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+    H.F.COL.  walk frame 12; band from row 35:  266 of 2516 ( 11%) with its own camera, 1016 with the full figure's (3.8x)
+  shot silhouette-2-0  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\silhouette-2-0.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+    HAIR      walk frame 12; band from row 35:  286 of 1972 ( 15%) with its own camera,  716 with the full figure's (2.5x)
+  shot silhouette-2-0  mean=0.183158 sd=0.190350  C:\github\new-we2002-editor\work\looks-shots\silhouette-2-0.png
+  slot 2 restored: the outfield player, on LOOKS SET
+  Down moved it by 0.030911
+    SKIN      walk frame 12; band from row 35:  297 of 1897 ( 16%) with its own camera,  915 with the full figure's (3.1x)
+  -- slot 1 (goalkeeper), 6 row(s) with a camera of their own: BOOTS, FACE, H.COL, H.F.COL., HAIR, SKIN --
+  shot silhouette-1-0  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\silhouette-1-0.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+  shot silhouette-1-0  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\silhouette-1-0.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+  Down moved it by 0.035889
+  Down moved it by 0.011406
+  Down moved it by 0.008597
+  Down moved it by 0.018978
+    control: the BOOTS close-up twice, walk frame 0 and 0, 0 pixel(s) apart
+    BOOTS     walk frame  0; band from row  3:  146 of 2699 (  5%) with its own camera, 2471 with the full figure's (16.9x)
+  shot silhouette-1-0  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\silhouette-1-0.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+    FACE      walk frame 12; band from row 35:  257 of 2505 ( 10%) with its own camera, 1002 with the full figure's (3.9x)
+  shot silhouette-1-0  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\silhouette-1-0.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+    H.COL     walk frame 12; band from row 35:  297 of 2379 ( 12%) with its own camera,  910 with the full figure's (3.1x)
+  shot silhouette-1-0  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\silhouette-1-0.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+  Down moved it by 0.041667
+  Down moved it by 0.049728
+  Down moved it by 0.054816
+    H.F.COL.  walk frame 12; band from row 35:  256 of 2506 ( 10%) with its own camera, 1005 with the full figure's (3.9x)
+  shot silhouette-1-0  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\silhouette-1-0.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+  Down moved it by 0.041630
+    HAIR      walk frame 12; band from row 35:  286 of 1972 ( 15%) with its own camera,  703 with the full figure's (2.5x)
+  shot silhouette-1-0  mean=0.182425 sd=0.189376  C:\github\new-we2002-editor\work\looks-shots\silhouette-1-0.png
+  slot 1 restored: the goalkeeper, on LOOKS SET
+  Down moved it by 0.030911
+    SKIN      walk frame 12; band from row 35:  402 of 1922 ( 21%) with its own camera,  997 with the full figure's (2.5x)
+confront --silhouette-closeups: 0 problem(s) over 2 slot(s)
 ```
 
 **Os controles plantados.** No `looks_ui`, os dois jeitos de a janela parar de
@@ -203,21 +562,7 @@ looks_ui: 18 of 18 negative control(s) red, and the window drew every tuple it w
 
 $ python tools/looks/oracle.py --closeups
 oracle --closeups: 0 problem(s) over 2 slot(s)
-```
 
-Na do `--silhouette-closeups` fica a cabeça da corrida e a primeira linha do
-slot 2. As outras cinco do slot 2 foram guardadas com o meio cortado, e por
-isso saem da cerca: com a própria câmera, `FACE` erra 257 de 2505 pixels da
-faixa (10%) contra 1005 com a do corpo inteiro (3,9x); `H.COL` 299 de 2373
-(13%) contra 899 (3,0x); `H.F.COL.` 266 de 2516 (11%) contra 1016 (3,8x);
-`HAIR` 286 de 1972 (15%) contra 716 (2,5x); e `SKIN` 297 de 1897 (16%) contra
-915 (3,1x), todas na passada 12 e com a faixa a partir da linha 35. As seis
-linhas do slot 1 não foram guardadas; o pior caso dos dois slots é o `SKIN` do
-slot 1, 402 de 1922 (21%) contra 997 (2,5x), o número que a
-[`CORR-LOOKS-088`](/docs/tasks/looks/CORR-LOOKS-088.md) também registra. A
-corrida terminou com `0 problem(s) over 2 slot(s)`.
-
-```text
 $ python tools/looks/confront.py --silhouette-closeups
 confront --silhouette-closeups: 0 problem(s) over 2 slot(s)
 
