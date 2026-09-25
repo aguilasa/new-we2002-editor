@@ -387,25 +387,7 @@ def _posed(disc, parts: list, frame: int, notes: dict) -> list:
     window may not import `anime`, `layout` or `pieces`, and a pose applied at
     draw time would be a second placement to keep right beside `shelf()`.
     """
-    import pieces
-
-    places = pose(disc, frame)
-    head = (layout.MODEL, pieces.HEAD_SECTION)
-    notes["not posed"] = 0
-    out = []
-    for part in parts:
-        found = place_for(places, (part.file, part.section), head)
-        if found is None:
-            notes["not posed"] += 1
-            out.append(part)
-            continue
-        matrix, place = found
-        moved = Part(part.file, part.section, part.primitive,
-                     drawn_points(part.points, matrix, place), part.uvs,
-                     part.surface, part.why, part.clut, part.band,
-                     part.band_unmeasured)
-        out.append(moved)
-    return out
+    return posed_by(parts, pose(disc, frame), notes)
 
 
 def place_for(places: dict, where: tuple, head: tuple):
@@ -466,7 +448,8 @@ class Builder:
     """
 
     __slots__ = ("image_path", "figure", "frame", "kit", "_data", "_art",
-                 "_font")
+                 "_font", "walking", "_names", "_anchor", "_unposed",
+                 "_posed")
 
     def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE,
                  frame: int = None):
@@ -488,6 +471,14 @@ class Builder:
                                        layout.kit_path(self.kit))}
         self._art = None
         self._font = None
+        # The walk (LOOKS-TASK-33): with it on, `walk_build` poses by pass and
+        # the close-up is aimed at `walk_anchor`, the one place every pass is
+        # measured from.
+        self.walking = False
+        self._names = None
+        self._anchor = None
+        self._unposed = {}
+        self._posed = {}
 
     def build(self, text: str, frame: int = None) -> Scene:
         """*text* as a scene, or `BadScene` carrying the table's own sentence."""
@@ -497,6 +488,45 @@ class Builder:
                          self.frame if frame is None else frame, self.kit)
         except (looks.BadLooks, assembly.BadAssembly) as exc:
             raise BadScene(str(exc)) from exc
+
+    def walk_build(self, text: str, visit: int, first_slot: int) -> Scene:
+        """*text* in one pass of the walk, the unposed figure read once per
+        tuple and each pass posed once: the window asks 26 times a second."""
+        if text not in self._unposed:
+            try:
+                values = looks.parse_tuple(text)
+                self._unposed = {text: build(self._data, values, self.figure,
+                                             None, self.kit)}
+            except (looks.BadLooks, assembly.BadAssembly) as exc:
+                raise BadScene(str(exc)) from exc
+            self._posed = {}
+        visits = 2 * len(self._walk_frames())
+        # Visit 0 is the one visit that opens a side without averaging -- the
+        # walk has no pose before it -- so it is not the same pass as 34.
+        key = (visit % visits, visit == 0, first_slot)
+        if key not in self._posed:
+            if self._names is None:
+                self._names = piece_names(self._data)
+            unposed = self._unposed[text]
+            notes = dict(unposed.notes)
+            parts = posed_by(unposed.parts, walk_places(
+                self._data, visit, first_slot, self.anchor(), self._names),
+                notes)
+            self._posed[key] = Scene(parts, unposed.surfaces, unposed.values,
+                                     unposed.figure, notes)
+        return self._posed[key]
+
+    def _walk_frames(self) -> list:
+        import anime
+
+        data = self._data[layout.ANIME]
+        return anime.block(data, anime.header(data)[
+            layout.ANIME_SCREEN_ENTRY])["frames"]
+
+    def anchor(self) -> tuple:
+        if self._anchor is None:
+            self._anchor = walk_anchor(self._data)
+        return self._anchor
 
     def scale(self, values: dict) -> tuple:
         """The figure's scale for the screen's `HEIG` and `BODY` (`stature`)."""
@@ -510,6 +540,8 @@ class Builder:
         """
         import anime
 
+        if self.walking and frame is None:
+            return self.anchor()
         data = self._data[layout.ANIME]
         entry = anime.header(data)[layout.ANIME_SCREEN_ENTRY]
         frames = anime.block(data, entry)["frames"]
@@ -753,6 +785,330 @@ def pose(disc, frame: int = REFERENCE_FRAME,
                       for axis in range(3))
         out[where] = (matrix, place)
     return out
+
+
+# --- the walk, as the screen plays it (LOOKS-TASK-33) ----------------------
+
+class NoWalk(BadScene):
+    """No measured cycle on disc, so nothing may be animated."""
+
+
+class WalkCycle:
+    """One state's measured walk, as `oracle.py --walk` wrote it.
+
+    What the window needs of it and nothing more: the visit the cycle opens
+    on, the pair slot a pass opens on (a property of the STATE,
+    `anime.WALK_FIRST_SLOT`), how many passes a cycle has, and the video frame
+    each pass starts at -- the twos and threes that add up to 77.  The frames
+    are the game's, read off `frame_number` pass by pass; the window turns
+    them into time with `frame_rate()` and never the other way round.
+    """
+
+    __slots__ = ("slot", "visit", "first_slot", "passes", "frames", "starts",
+                 "keyframes", "base")
+
+    def __init__(self, plan: dict):
+        self.slot = plan["slot"]
+        self.visit = plan["visit"]
+        self.first_slot = plan["first_slot"]
+        self.passes = plan["passes"]
+        self.frames = plan["frames"]
+        self.keyframes = plan["keyframes"]
+        # The emulator's frame number of pass 0: `load_state` restores the
+        # counter, so a later run from the same state counts on the same line.
+        base = self.base = plan["cycle"][0]["frame_number"]
+        self.starts = [one["frame_number"] - base for one in plan["cycle"]]
+        if (len(self.starts) != self.passes or self.starts[0] != 0
+                or any(b <= a for a, b in zip(self.starts, self.starts[1:]))
+                or self.starts[-1] >= self.frames):
+            raise NoWalk("the plan of slot %s does not count %d passes "
+                         "forwards inside %d frames: %s"
+                         % (self.slot, self.passes, self.frames, self.starts))
+
+
+def walk_cycle(slot: int) -> WalkCycle:
+    """The measured cycle of *slot*, or `NoWalk` saying what to run."""
+    import anime
+
+    try:
+        return WalkCycle(anime.walk_plan(anime.plan_path(int(slot))))
+    except anime.BadAnime as exc:
+        raise NoWalk(str(exc)) from exc
+
+
+def frame_rate() -> float:
+    """Video frames a second of the LOOKS SET screen: the console's clock over
+    the ticks one frame takes, both measured (`oracle.py --rhythm`)."""
+    return layout.CONSOLE_CLOCK / float(layout.FRAME_TICKS)
+
+
+def walk_held_rows() -> tuple:
+    """The rows on which the game holds the figure (`layout.WALK_HELD_ROWS`),
+    for the window, which may not import `layout`."""
+    return tuple(layout.WALK_HELD_ROWS)
+
+
+def walk_other_animation() -> dict:
+    """{row: animations} the game plays instead of the walk, and this does not."""
+    return dict(layout.WALK_OTHER_ANIMATION)
+
+
+def walk_anchor(disc) -> tuple:
+    """Where `REFERENCE_PIECE` stands at visit 0 of the walk, read plain.
+
+    **One anchor for the whole walk, and that is what keeps it on the ground.**
+    `pose()` subtracts the anchor of the frame it poses, which is right for one
+    frame and wrong for a sequence: the boot moves against the body in a
+    stride, so an anchor taken per pass slides the whole figure by it.  The
+    places of `ANIME.BIN` are relative to the FIGURE, which the game's camera
+    carries; subtracting one constant from all of them moves the figure once,
+    and `ROOT_AT` and `rebased` take that one constant.
+    """
+    import anime
+
+    pieces = anime.walk_pose(disc[layout.ANIME], layout.ANIME_SCREEN_ENTRY, 0,
+                             None, 0)
+    return tuple(next(one["place"] for one in pieces
+                      if one["piece"] == REFERENCE_PIECE))
+
+
+def walk_places(disc, visit: int, first_slot: int, anchor=None,
+                names: dict = None) -> dict:
+    """{(file, section): (matrix, place)} for one drawn pass of the walk.
+
+    The pass is `anime.walk_pose`'s -- the file's frame, the sibling's pair on
+    the second half, the averaging on the visit that opens a side, all as
+    `oracle.py --walk` measured them to the integer -- and the place is taken
+    from the one `walk_anchor`, not from the pass's own boot.
+    """
+    import anime
+
+    if anchor is None:
+        anchor = walk_anchor(disc)
+    if names is None:
+        names = piece_names(disc)
+    by_name = {one["piece"]: one for one in anime.walk_pose(
+        disc[layout.ANIME], layout.ANIME_SCREEN_ENTRY, visit, None,
+        first_slot)}
+    out = {}
+    for where, name in names.items():
+        carried = by_name.get(name)
+        if carried is None:
+            continue
+        out[where] = (list(carried["turn"]),
+                      tuple(carried["place"][axis] - anchor[axis]
+                            for axis in range(3)))
+    return out
+
+
+def posed_by(parts: list, places: dict, notes: dict) -> list:
+    """*parts* turned and placed by *places*, the head styles by the head's."""
+    import pieces
+
+    head = (layout.MODEL, pieces.HEAD_SECTION)
+    notes["not posed"] = 0
+    out = []
+    for part in parts:
+        found = place_for(places, (part.file, part.section), head)
+        if found is None:
+            notes["not posed"] += 1
+            out.append(part)
+            continue
+        matrix, place = found
+        moved = Part(part.file, part.section, part.primitive,
+                     drawn_points(part.points, matrix, place), part.uvs,
+                     part.surface, part.why, part.clut, part.band,
+                     part.band_unmeasured)
+        out.append(moved)
+    return out
+
+
+def walk_scene(disc, values: dict, figure: int, visit: int, first_slot: int,
+               kit: str = None, unposed: Scene = None) -> Scene:
+    """The tuple drawn in one pass of the walk: what the window and
+    `confront.py --silhouette` both draw, so the two cannot drift apart."""
+    if unposed is None:
+        unposed = build(disc, values, figure, None, kit)
+    notes = dict(unposed.notes)
+    parts = posed_by(unposed.parts, walk_places(disc, visit, first_slot),
+                     notes)
+    return Scene(parts, unposed.surfaces, unposed.values, unposed.figure,
+                 notes)
+
+
+def pass_at_frame(cycle: WalkCycle, frame_number: int) -> int:
+    """The pass of *cycle* under way at the emulator's *frame_number*, from
+    the same `load_state` the cycle was measured from."""
+    import bisect
+
+    inside = (frame_number - cycle.base) % cycle.frames
+    return bisect.bisect_right(cycle.starts, inside) - 1
+
+
+class WalkClock:
+    """Which pass of the walk the panel shows, as a function of time.
+
+    **Pure: every time is handed in, none is read.**  The window passes its own
+    elapsed seconds and the gate passes made-up ones, so `self_check` runs the
+    whole of it with no Qt and no timer.
+
+    What it models, and every piece of it measured (`oracle.py --walk` and
+    `--rhythm`, LOOKS-TASK-32 and 33):
+
+      the passes start at the frames of `WalkCycle.starts`, 34 of them in 77
+          frames, and a frame lasts `1 / frame_rate()` seconds;
+      pass *k* of a stretch is visit `visit0 + k`, read with `first_slot`;
+      on a held row (`walk_held_rows`) the walk goes ON to the held frame and
+          stops there, reading it whole -- it does not jump -- and on leaving
+          it the next pass is the frame after, with every pass reading one
+          frame whole from then on;
+      a changed value leaves the walk alone (`layout.WALK_ON_VALUE`).
+    """
+
+    def __init__(self, cycle: WalkCycle, rate: float = None,
+                 running: bool = True, now: float = 0.0):
+        self.cycle = cycle
+        self.rate = frame_rate() if rate is None else rate
+        self.running = running
+        self.visit0 = cycle.visit
+        self.first_slot = cycle.first_slot
+        self.origin = 0.0
+        self.since = now
+        self.hold_at = None
+        # Pinned by `show_pass`: a still asked for by number stays that pass
+        # whatever row the cursor goes to, until a key moves it.
+        self.pinned = False
+
+    # -- time -------------------------------------------------------------
+
+    def frames(self, now: float) -> float:
+        """Video frames into the current stretch at *now*."""
+        if not self.running:
+            return self.origin
+        return self.origin + (now - self.since) * self.rate
+
+    def _pass_at_frames(self, frames: float) -> int:
+        import bisect
+
+        cycles, inside = divmod(frames, self.cycle.frames)
+        index = bisect.bisect_right(self.cycle.starts, inside) - 1
+        return int(cycles) * self.cycle.passes + index
+
+    def _frames_of_pass(self, number: int) -> float:
+        cycles, index = divmod(number, self.cycle.passes)
+        return float(cycles * self.cycle.frames + self.cycle.starts[index])
+
+    def pass_now(self, now: float) -> int:
+        """The pass of the stretch on screen at *now*, the hold included."""
+        number = self._pass_at_frames(self.frames(now))
+        if self.hold_at is not None:
+            number = min(number, self.hold_at)
+        return number
+
+    def held(self, now: float) -> bool:
+        return self.hold_at is not None and self.pass_now(now) >= self.hold_at
+
+    def visit(self, now: float) -> tuple:
+        """(visit, first pair slot) of the pass on screen at *now*."""
+        number = self.pass_now(now)
+        if self.hold_at is not None and number >= self.hold_at:
+            # Held, the game reads the held frame WHOLE, whatever slot the
+            # passes opened on before (measured on both states).
+            return (self.visit0 + self.hold_at, 0)
+        return (self.visit0 + number, self.first_slot)
+
+    def cycle_seconds(self) -> float:
+        """How long one cycle of the walk lasts: its frames at the rate."""
+        return self.cycle.frames / self.rate
+
+    # -- the two keys ------------------------------------------------------
+
+    def pause(self, now: float) -> None:
+        if self.running:
+            self.origin = self.frames(now)
+            if self.hold_at is not None:
+                self.origin = min(self.origin,
+                                  self._frames_of_pass(self.hold_at))
+            self.running = False
+        self.since = now
+
+    def resume(self, now: float) -> None:
+        self.pinned = False
+        if not self.running:
+            self.since = now
+            self.running = True
+
+    def toggle(self, now: float) -> bool:
+        """Pause or go on; returns whether the walk runs afterwards."""
+        (self.pause if self.running else self.resume)(now)
+        return self.running
+
+    def step(self, now: float) -> None:
+        """One pass on, and paused there -- a held walk stays where it is."""
+        number = self.pass_now(now)
+        self.pause(now)
+        self.pinned = False
+        if self.hold_at is not None and number >= self.hold_at:
+            return
+        self.origin = self._frames_of_pass(number + 1)
+
+    def show_pass(self, number: int) -> None:
+        """Stand still on pass *number* of the cycle, as `--frame N` asks."""
+        if not 0 <= number < self.cycle.passes:
+            raise NoWalk("pass %d, and the cycle has %d"
+                         % (number, self.cycle.passes))
+        self.running = False
+        self.hold_at = None
+        self.visit0 = self.cycle.visit
+        self.first_slot = self.cycle.first_slot
+        self.origin = self._frames_of_pass(number)
+        self.pinned = True
+
+    # -- what the rows do to it -------------------------------------------
+
+    def hold(self, now: float, settle: bool = False) -> None:
+        """The cursor landed on a held row: walk on to the held frame.
+
+        *settle* is for a still picture, which stands for the screen after it
+        has settled: the walk is put on the held frame at once, where a
+        running window gets there pass by pass as the game does.
+        """
+        if self.hold_at is not None or self.pinned:
+            return
+        number = self.pass_now(now)
+        visits = 2 * self.cycle.keyframes
+        self.hold_at = number + ((layout.WALK_HELD_FRAME
+                                  - (self.visit0 + number)) % visits)
+        if settle and not self.running:
+            self.origin = self._frames_of_pass(self.hold_at)
+
+    def release(self, now: float) -> None:
+        """The cursor left a held row: on from the frame after the held one."""
+        if self.hold_at is None or self.pinned:
+            return
+        if self.pass_now(now) < self.hold_at:
+            self.hold_at = None
+            return
+        self.visit0 += self.hold_at + 1
+        self.first_slot = 0
+        self.origin = 0.0
+        self.since = now
+        self.hold_at = None
+
+    def value_changed(self, now: float) -> None:
+        """A value changed: `layout.WALK_ON_VALUE` says what the walk does."""
+        if layout.WALK_ON_VALUE == "continues":
+            return
+        raise NoWalk("layout.WALK_ON_VALUE is %r, which this clock does not "
+                     "model" % layout.WALK_ON_VALUE)
+
+    def report(self, now: float) -> dict:
+        visit, first = self.visit(now)
+        return {"pass": self.pass_now(now), "visit": visit,
+                "first_slot": first, "running": self.running,
+                "held": self.held(now), "rate": self.rate,
+                "passes": self.cycle.passes, "frames": self.cycle.frames,
+                "cycle_seconds": self.cycle_seconds()}
 
 
 CHAINS = (("head", "torso", "thigh a", "shin a", "foot a"),
@@ -1629,6 +1985,76 @@ def self_check(verbose: bool = True) -> int:
 def _checks(c) -> None:
     ok, attempt = c.ok, c.attempt
     refuses = c.refusing(BadScene)
+
+    # The walk's clock (LOOKS-TASK-33), on a made-up cycle of the measured
+    # shape: 34 passes of two and three frames adding up to 77, opening on
+    # visit 4 with the pair slot 7 -- slot 2's plan.
+    starts, at = [], 0
+    for index in range(34):
+        starts.append(at)
+        at += 3 if index % 4 == 3 else 2
+    plan = {"slot": 2, "visit": 4, "first_slot": 7, "passes": 34,
+            "frames": 77, "keyframes": 17,
+            "cycle": [{"frame_number": 12949 + one}  # not-an-address: frame
+                      for one in starts]}
+    cycle = WalkCycle(plan)
+    rate = frame_rate()
+    ok("the measured rate is the console's clock over the ticks of a frame",
+       abs(rate - 59.817) < 0.001, "%.4f" % rate)
+    clock = WalkClock(cycle, running=True, now=0.0)
+    ok("a cycle of the window lasts the cycle's frames at the game's rate",
+       abs(clock.cycle_seconds() - 77 / rate) < 1e-9
+       and abs(clock.cycle_seconds() - 1.287) < 0.001,
+       "%.4f" % clock.cycle_seconds())
+    ok("one cycle of seconds later the walk is on the same pass, one cycle on",
+       clock.pass_now(clock.cycle_seconds() + 0.001) == 34
+       and clock.visit(0.0) == (4, 7))
+    ok("half a second in, the pass is the one whose frame has started",
+       clock.pass_now(0.5) == cycle.starts.index(max(
+           one for one in cycle.starts if one <= 0.5 * rate)))
+    paused = WalkClock(cycle, running=True, now=0.0)
+    paused.pause(0.3)
+    ok("paused, the walk stays where it was however long it waits",
+       paused.pass_now(0.3) == paused.pass_now(9.0) == clock.pass_now(0.3))
+    number = paused.pass_now(9.0)
+    paused.step(9.0)
+    ok("a step is one pass on, and still paused",
+       paused.pass_now(20.0) == number + 1 and not paused.running)
+    paused.toggle(20.0)
+    ok("and the other key goes on from there",
+       paused.running and paused.pass_now(20.0) == number + 1
+       and paused.pass_now(20.001 + clock.cycle_seconds()) == number + 35)
+    still = WalkClock(cycle, running=False)
+    still.show_pass(17)
+    ok("--frame 17 stands on pass 17, visit 21, and does not move",
+       still.visit(0.0) == still.visit(99.0) == (21, 7))
+    refuses("a pass the cycle does not have", lambda: still.show_pass(34),
+            "the cycle has 34")
+    still.hold(0.0, settle=True)
+    ok("a pass asked for by number stays that pass on a held row",
+       still.visit(0.0) == (21, 7))
+    held = WalkClock(cycle, running=True, now=0.0)
+    held.hold(0.0)
+    visits = [held.visit(t / 100.0) for t in range(0, 200)]
+    ok("on a held row the walk goes ON to the held frame and stops there",
+       visits[0] == (4, 7) and visits[-1] == (layout.WALK_HELD_FRAME, 0)
+       and len({one for one in visits}) == layout.WALK_HELD_FRAME - 4 + 1,
+       "%s" % sorted(set(visits)))
+    held.release(2.0)
+    ok("leaving it, the next pass is the frame after, read whole",
+       held.visit(2.0) == (layout.WALK_HELD_FRAME + 1, 0)
+       and held.visit(2.0 + 3.0 / rate)[0] == layout.WALK_HELD_FRAME + 2)
+    settled = WalkClock(cycle, running=False)
+    settled.hold(0.0, settle=True)
+    ok("a still picture on a held row is the settled one",
+       settled.visit(0.0) == (layout.WALK_HELD_FRAME, 0))
+    before = clock.visit(0.7)
+    clock.value_changed(0.7)
+    ok("a changed value leaves the walk where it was, as the game does",
+       clock.visit(0.7) == before and layout.WALK_ON_VALUE == "continues")
+    broken = dict(plan, cycle=list(reversed(plan["cycle"])))
+    refuses("a plan whose passes do not count forwards",
+            lambda: WalkCycle(broken), "forwards")
 
     # Which camera a row draws with (LOOKS-TASK-40).  Six of the twelve rows
     # move the camera in the game, and which six is a measurement on disc, so

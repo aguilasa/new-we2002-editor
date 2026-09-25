@@ -147,17 +147,27 @@ class Viewer(QOpenGLWidget):
     # -- what to draw ------------------------------------------------------
 
     def set_scene(self, scene, shelved: bool | None = None) -> None:
-        """Take a new scene; the buffers are rebuilt at the next paint."""
+        """Take a new scene; the buffers are rebuilt at the next paint.
+
+        A scene that shares its surfaces with the one before -- the same tuple
+        in another pass of the walk, which `Builder.walk_build` hands over --
+        keeps its textures, and only the points go up again: the walk asks
+        for a new pass 26 times a second, and the pictures did not change.
+        """
+        keep = (scene is not None and self._scene is not None
+                and scene.surfaces is self._scene.surfaces
+                and bool(self._textures))
         self._scene = scene
         if shelved is not None:
             self.shelved = shelved
-        self._groups = []
         if scene is not None:
             self._centre, self._radius = self._frame(scene)
         if self.isValid():
             self.makeCurrent()
-            self._upload()
+            self._upload(textures=not keep)
             self.doneCurrent()
+        else:
+            self._groups = []
         self.update()
 
     def _places(self, scene) -> dict:
@@ -241,12 +251,13 @@ class Viewer(QOpenGLWidget):
                                % self._program.log())
         self._upload()
 
-    def _upload(self) -> None:
+    def _upload(self, textures: bool = True) -> None:
         """Buffers and textures for the current scene, discarding the old."""
-        for texture in self._textures.values():
-            texture.destroy()
-        self._textures = {}
-        self._holders = []
+        if textures:
+            for texture in self._textures.values():
+                texture.destroy()
+            self._textures = {}
+            self._holders = []
         self._groups = []
         self._lines = 0
         if self._scene is None or self._program is None:
@@ -267,7 +278,7 @@ class Viewer(QOpenGLWidget):
         self._lines = len(lines) // (4 * FLOATS_PER_VERTEX)
 
         for key, _first, _count in groups:
-            if key is None:
+            if key is None or key in self._textures:
                 continue
             surface = self._scene.surfaces[key]
             # The bytes have to outlive the QImage, which does not copy them.

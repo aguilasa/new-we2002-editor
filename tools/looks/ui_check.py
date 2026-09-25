@@ -1326,8 +1326,11 @@ def measure_stature(python: str, app: str, where: str, env: dict) -> tuple:
     for name, steps, _height, _build in STATURE_SHOTS:
         out = os.path.join(where, "stature-%s.png" % name.split()[0])
         keys = stature_keys(table, steps)
+        # One pass for every stature, since the panel walks (LOOKS-TASK-33):
+        # the rows between NAT and HEIG hold and release the walk, and ink
+        # compared across two poses measures the pose.
         code, output = run_app(python, app,
-                               ["--state", "2"]
+                               ["--state", "2", "--frame", "0"]
                                + (["--keys", ",".join(keys)] if keys else [])
                                + ["--screenshot", out], env)
         if code != 0 or not os.path.isfile(out):
@@ -1366,15 +1369,18 @@ def plant_stature(python: str, env: dict, name: str, where: str, old: str,
 
     The measured camera comes along into the copy: `scene` finds it beside the
     tree, and a sandbox without it draws the orbit, where no stature judgement
-    runs -- a green that proved nothing.
+    runs -- a green that proved nothing.  And the measured walk with it, since
+    LOOKS-TASK-33: the shots stand on `--frame 0`, which needs the cycle.
     """
     with tempfile.TemporaryDirectory() as tmp:
         sandbox, why = _sandbox(tmp, name, where, old, new)
         if sandbox is None:
             return (False, why)
-        cameras = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
-                               "work", "looks-camera")
-        shutil.copytree(cameras, os.path.join(tmp, "work", "looks-camera"))
+        root = os.path.dirname(os.path.dirname(LOOKS_DIR))
+        for folder in ("looks-camera", "looks-walk"):
+            source = os.path.join(root, "work", folder)
+            if os.path.isdir(source):
+                shutil.copytree(source, os.path.join(tmp, "work", folder))
         shots = os.path.join(tmp, "shots")
         os.makedirs(shots)
         app = os.path.join(sandbox, "ui", "app.py")
@@ -1768,6 +1774,227 @@ that ran without the emulator until CORR-LOOKS-068 -- and the one that drew
 each arrow pointing the other way."""
 
 
+# ---- the walk (LOOKS-TASK-33) ------------------------------------------------
+
+WALK_SLOTS = (2, 1)
+"""Both states: their cycles open on different visits and pair slots, so a
+window that ignored the state's plan would pass on one of them."""
+
+WALK_FRAMES = (0, 17)
+"""Two passes that have to draw different pictures: the cycle's first and the
+first of its mirrored half.  Measured on 2026-09-25 on slot 2: 11,495 pixels
+apart, and pass 0 drawn twice 0 apart."""
+
+WALK_APART = 1000  # not-an-address: pixels
+"""The fewest pixels two different passes may differ by.  The nearest pair of
+passes, 0 and 1, measured 5,719; a window that drew one pose for every
+`--frame` measures 0."""
+
+WALK_RUN_SECONDS = 2.574
+"""How long `--animate-for` lets the walk run: two cycles of 1.287 s."""
+
+WALK_PASS_SLACK = 3
+"""Passes the clock may land from the rate's own count after a run of wall
+clock: the run's start and end are not on a pass boundary, and the event loop
+is sampled every few milliseconds, so a pass or two either way is the clock's
+and not a rate."""
+
+
+def read_walk(output: str) -> dict:
+    """The `walk:` line of `app.py`, as numbers, or {} when there is none."""
+    import re
+
+    for line in output.splitlines():
+        text = line.strip()
+        if not text.startswith("walk: pass "):
+            continue
+        found = re.match(
+            r"walk: pass (\d+) \((\d+) of the cycle's (\d+)\), visit (-?\d+), "
+            r"first slot (\d+), (running|still)(, held)?; ([\d.]+) frame\(s\) "
+            r"a second, a cycle of (\d+) frame\(s\) lasts ([\d.]+) s; (\d+) "
+            r"pass change\(s\) drawn", text)
+        if found is None:
+            return {"unparsed": text}
+        return {"pass": int(found.group(1)), "passes": int(found.group(3)),
+                "visit": int(found.group(4)),
+                "first_slot": int(found.group(5)),
+                "running": found.group(6) == "running",
+                "held": bool(found.group(7)),
+                "rate": float(found.group(8)), "frames": int(found.group(9)),
+                "seconds": float(found.group(10)),
+                "drawn": int(found.group(11))}
+    return {}
+
+
+def judge_frames(first: tuple, again: tuple, other: tuple, what: str) -> list:
+    """The same `--frame` twice has to be one picture, and another `--frame`
+    another one.  Pure, so the self-check can hand it made-up pictures."""
+    bad = []
+    same = differing(first, again)
+    if same:
+        bad.append("%s: the same --frame drawn twice differs in %d pixel(s), "
+                   "so no difference between two passes means anything"
+                   % (what, same))
+    apart = differing(first, other)
+    if apart < WALK_APART:
+        bad.append("%s: two different --frame differ in %d pixel(s), under "
+                   "the %d two passes of the walk take -- --frame reached "
+                   "nothing" % (what, apart, WALK_APART))
+    return bad
+
+
+def measure_walk(python: str, app: str, where: str, env: dict) -> tuple:
+    """The walk of the window, judged.  `(bad, broke, numbers)`.
+
+    Criteria 1, 2 and 5 of LOOKS-TASK-33, off the window's own pictures and its
+    own `walk:` line: two passes draw two pictures and one pass twice draws one
+    picture, in both states; a run of wall clock moves the walk at the rate
+    `layout` carries, over the cycle `--walk` measured; `.` steps a pass and
+    `Space` pauses without moving a row; and a held row stands on its frame.
+    """
+    import scene
+
+    bad, numbers = [], {}
+    rate = layout.CONSOLE_CLOCK / float(layout.FRAME_TICKS)
+    for slot in WALK_SLOTS:
+        shots = []
+        for frame in (WALK_FRAMES[0], WALK_FRAMES[0], WALK_FRAMES[1]):
+            out = os.path.join(where, "walk-%d-%d-%d.png"
+                               % (slot, frame, len(shots)))
+            code, output = run_app(python, app,
+                                   ["--state", str(slot), "--frame",
+                                    str(frame), "--screenshot", out], env)
+            if code != 0 or not os.path.isfile(out):
+                return ([], "--state %d --frame %d did not draw: %s"
+                        % (slot, frame, output.rstrip()), None)
+            seen = read_walk(output)
+            if seen.get("pass") != frame or seen.get("running"):
+                bad.append("slot %d: --frame %d reports %r, not pass %d "
+                           "standing still" % (slot, frame, seen, frame))
+            shots.append(picture(out))
+        bad += judge_frames(shots[0], shots[1], shots[2], "slot %d" % slot)
+        numbers["slot %d apart" % slot] = differing(shots[0], shots[2])
+
+        code, output = run_app(python, app,
+                               ["--state", str(slot), "--animate-for",
+                                str(WALK_RUN_SECONDS), "--smoke"], env)
+        seen = read_walk(output)
+        if code != 0 or "pass" not in seen:
+            return ([], "slot %d: --animate-for did not report a walk: %s"
+                    % (slot, output.rstrip()), None)
+        try:
+            cycle = scene.walk_cycle(slot)
+        except scene.NoWalk as exc:
+            return ([], str(exc), None)
+        want = WALK_RUN_SECONDS * rate / cycle.frames * cycle.passes
+        numbers["slot %d run" % slot] = (seen["pass"], round(want, 1),
+                                         seen["drawn"])
+        if abs(seen["rate"] - round(rate, 3)) > 0.0005 \
+                or seen["frames"] != cycle.frames \
+                or seen["passes"] != cycle.passes \
+                or abs(seen["seconds"] - cycle.frames / rate) > 0.0005:
+            bad.append("slot %d: the window walks at %.3f frame(s) a second "
+                       "over %d frame(s) and %d pass(es), and the measured "
+                       "walk is %.3f over %d and %d"
+                       % (slot, seen["rate"], seen["frames"], seen["passes"],
+                          rate, cycle.frames, cycle.passes))
+        if abs(seen["pass"] - want) > WALK_PASS_SLACK:
+            bad.append("slot %d: %.3f s of wall clock took the walk %d "
+                       "pass(es), and the game's rhythm is %.1f"
+                       % (slot, WALK_RUN_SECONDS, seen["pass"], want))
+        if seen["drawn"] < seen["pass"] // 2:
+            bad.append("slot %d: the clock went %d pass(es) and the panel "
+                       "drew %d of them -- the timer is not driving the "
+                       "picture" % (slot, seen["pass"], seen["drawn"]))
+
+    # The two keys, in slot 2: `.` twice from pass 5 is pass 7, still; with a
+    # Right before it the row moves AND the pass steps; `Space` while it runs
+    # leaves it still -- the run does not pause itself when a key was sent.
+    table = screen.load()
+    code, alone = run_app(python, app, ["--state", "2", "--frame", "5",
+                                        "--smoke"], env)
+    code, output = run_app(python, app, ["--state", "2", "--frame", "5",
+                                         "--walk-keys", "step,step",
+                                         "--smoke"], env)
+    seen = read_walk(output)
+    if seen.get("pass") != 7 or seen.get("running"):
+        bad.append("`.` twice from pass 5 reports %r, not pass 7 still"
+                   % (seen,))
+    if read_screen(output).get("rows") != read_screen(alone).get("rows"):
+        bad.append("the walk's keys moved a row: %r against %r"
+                   % (read_screen(output).get("rows"),
+                      read_screen(alone).get("rows")))
+    code, output = run_app(python, app, ["--state", "2", "--frame", "5",
+                                         "--keys", "Right", "--walk-keys",
+                                         "step", "--smoke"], env)
+    seen, rows = read_walk(output), read_screen(output).get("rows")
+    want_rows = expected(table, 2, ["Right"])["rows"]
+    if seen.get("pass") != 6 or rows != want_rows:
+        bad.append("Right then `.` from pass 5: pass %r and rows %r, where "
+                   "the screen says pass 6 and rows %r"
+                   % (seen.get("pass"), rows, want_rows))
+    code, output = run_app(python, app, ["--state", "2", "--animate-for",
+                                         "0.5", "--walk-keys", "pause",
+                                         "--smoke"], env)
+    seen = read_walk(output)
+    if seen.get("running") is not False or not seen.get("pass"):
+        bad.append("`Space` on a running walk reports %r, not a walk that "
+                   "ran and then stood still" % (seen,))
+    # A held row, from a still picture: the settled screen stands on the held
+    # frame, read whole.
+    code, output = run_app(python, app, ["--state", "2", "--keys", "Down",
+                                         "--smoke"], env)
+    seen = read_walk(output)
+    if not seen.get("held") or seen.get("visit") % (2 * 17) \
+            != layout.WALK_HELD_FRAME or seen.get("first_slot") != 0:
+        bad.append("on SKIN the walk reports %r, not held on frame %d read "
+                   "whole" % (seen, layout.WALK_HELD_FRAME))
+    return (bad, "", numbers)
+
+
+def plant_walk(python: str, env: dict, name: str, where: str, old: str,
+               new: str) -> tuple:
+    """A defect in a copy of the tree, judged by `measure_walk` alone.
+
+    The measured walk comes along into the copy, as the cameras do for the
+    stature: without `work/looks-walk/` the window refuses `--frame`, and a
+    refusal is a red for the wrong reason.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, where, old, new)
+        if sandbox is None:
+            return (False, why)
+        root = os.path.dirname(os.path.dirname(LOOKS_DIR))
+        for folder in ("looks-walk", "looks-camera", "looks-scenery"):
+            source = os.path.join(root, "work", folder)
+            if os.path.isdir(source):
+                shutil.copytree(source, os.path.join(tmp, "work", folder))
+        shots = os.path.join(tmp, "shots")
+        os.makedirs(shots)
+        app = os.path.join(sandbox, "ui", "app.py")
+        bad, broke, _numbers = measure_walk(python, app, shots, env)
+        if broke:
+            return (False, "the planted tree for %s did not judge the walk, "
+                           "so nothing was proved: %s" % (name, broke))
+        if not bad:
+            return (False, "%s :: %s was broken (%s -> %s) and the walk still "
+                           "passed" % (where, name, old.strip(), new.strip()))
+        return (True, bad[0])
+
+
+WALK_BREAKS = (
+    ("--frame reaching the clock", os.path.join("ui", "app.py"),
+     "            clock.show_pass(args.frame)\n",
+     "            pass\n"),
+    ("the step key", os.path.join("ui", "looks_set.py"),
+     "            self.clock.step(self.now())\n",
+     "            pass\n"),
+)
+"""The window whose `--frame` stops at the argument parser -- every pass the
+same picture, which criterion 5 of LOOKS-TASK-33 exists to catch -- and the
+one whose `.` does nothing."""
+
+
 # ---- the gate itself ------------------------------------------------------
 
 def skip(why: str) -> int:
@@ -1962,7 +2189,38 @@ def main(argv: list | None = None) -> int:
         print("  the arrows not judged: no arrow samples in "
               "work/looks-scenery/ (oracle.py --scenery --write)")
 
+    with tempfile.TemporaryDirectory() as tmp:
+        bad, broke, walked = measure_walk(python, APP, tmp, env)
+    if broke:
+        print("FAIL: %s" % broke)
+        return 1
+    if bad:
+        for line in bad:
+            print("FAIL: %s" % line)
+        return 1
+    print("  the walk: two --frame draw two pictures and one --frame twice "
+          "one (%s); after %.3f s the clock is on pass(es) %s against the "
+          "rhythm's count, the panel drawing %s; `.` and `Space` step and "
+          "pause without moving a row; SKIN holds frame %d"
+          % (", ".join("%s %d" % (name, count) for name, count
+                       in sorted(walked.items()) if name.endswith("apart")),
+             WALK_RUN_SECONDS,
+             ", ".join("%d (want %.1f)" % one[:2] for name, one
+                       in sorted(walked.items()) if name.endswith("run")),
+             ", ".join("%d" % one[2] for name, one in sorted(walked.items())
+                       if name.endswith("run")),
+             layout.WALK_HELD_FRAME))
+
     failed = 0
+    for name, where, old, new in WALK_BREAKS:
+        red, why = plant_walk(python, env, name, where, old, new)
+        if red:
+            print("negative: breaking %s reddens the walk -- %s"
+                  % (name, why))
+            PLANTED.append(name)
+        else:
+            print("FAIL: %s" % why)
+            failed += 1
     if judged_arrows:
         for name, where, old, new in ARROW_BREAKS:
             red, why = plant_arrows(python, env, name, where, old, new)
@@ -2033,7 +2291,7 @@ def main(argv: list | None = None) -> int:
     print("looks_ui: %d of %d negative control(s) red, and the window drew "
           "every tuple it was asked for and answered every key with what the "
           "game shows" % (len(PLANTED), len(BREAKS) + len(KEY_BREAKS)
-                          + len(CAMERA_BREAKS)
+                          + len(CAMERA_BREAKS) + len(WALK_BREAKS)
                           + (len(STATURE_BREAKS) if judged_stature else 0)
                           + (len(SCENERY_BREAKS) if judged_scenery else 0)
                           + (len(SPRITE_BREAKS) if judged_sprites else 0)
@@ -2193,7 +2451,24 @@ def _checks(c) -> None:
        arrow_gap([(0, 0, [255, 198, 0])], 60,
                  lambda x, y: (255, 198, 0))[0] > ARROW_SLACK)
 
-    for name, where, old, _new in BREAKS + ARROW_BREAKS:
+    # The walk's judge, on made-up pictures: a window that draws one pose for
+    # every --frame, and one that does not draw the same pass twice alike.
+    one, two = _walk_shot(0), _walk_shot(1)
+    ok("two passes drawn apart and one pass twice alike pass",
+       judge_frames(one, _walk_shot(0), two, "made up") == [])
+    ok("one pose for every --frame is caught",
+       judge_frames(one, one, one, "made up") != [])
+    ok("a pass that draws differently the second time is caught",
+       judge_frames(one, two, two, "made up") != [])
+    ok("the walk line reads back as numbers",
+       read_walk("  walk: pass 67 (33 of the cycle's 34), visit 71, first "
+                 "slot 7, still; 59.817 frame(s) a second, a cycle of 77 "
+                 "frame(s) lasts 1.287 s; 67 pass change(s) drawn")
+       == {"pass": 67, "passes": 34, "visit": 71, "first_slot": 7,
+           "running": False, "held": False, "rate": 59.817, "frames": 77,
+           "seconds": 1.287, "drawn": 67})
+
+    for name, where, old, _new in BREAKS + ARROW_BREAKS + WALK_BREAKS:
         path = os.path.join(LOOKS_DIR, where)
         if not os.path.isfile(path):
             c.skip("the break for %s: %s is not here yet" % (name, where))
@@ -2205,6 +2480,20 @@ def _checks(c) -> None:
 
     ok("the venv is looked for upward, not at a counted depth",
        find_upward(os.path.join("tools", "looks", "ui_check.py")) is not None)
+
+
+def _walk_shot(seed: int) -> tuple:
+    """A made-up picture in `picture()`'s shape: 100x40 RGBA, with a block
+    whose place depends on *seed*, so two seeds differ by 2,400 pixels."""
+    width, height, channels = 100, 40, 4
+    rows = []
+    for y in range(height):
+        row = bytearray()
+        for x in range(width):
+            inside = 10 + 40 * seed <= x < 40 + 40 * seed and 0 <= y < 40
+            row += bytes((200, 200, 200, 255) if inside else (0, 0, 0, 255))
+        rows.append(bytes(row))
+    return (width, height, channels, rows)
 
 
 def self_check(verbose: bool = True) -> int:

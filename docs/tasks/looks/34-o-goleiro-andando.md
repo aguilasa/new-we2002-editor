@@ -26,6 +26,17 @@ done_commit: null
 
 ---
 
+- **Da [`LOOKS-TASK-33`](/docs/tasks/looks/33-a-janela-animada.md):** o
+  `confront.py --silhouette 1` já julga **oito passadas** do ciclo no slot 1,
+  as duas metades incluídas, sem `N` na linha de comando — medido em
+  2026-09-25, a melhor passada a 13–15% da tinta do jogo e a 1–3 passadas da
+  nomeada. E o `oracle.py --rhythm` mostrou o goleiro lendo os pares da
+  **mesma entrada 5** que o jogador de linha em todas as linhas menos `FOOT`,
+  onde o jogo toca a entrada 147 nos dois slots. O que sobra para esta task é
+  olhar a janela, e o que for só da figura 1.
+
+---
+
 ## Objetivo
 
 Conferir que o slot 1 sai com a placa `GK`, a figura 1 montada, vestida e

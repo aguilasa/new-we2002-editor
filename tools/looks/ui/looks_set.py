@@ -44,6 +44,18 @@ in theirs, which is where the game puts every glyph.  NOT measured: the pulse
 of the arrows: the game dims and brightens them frame to frame, and the
 window draws them at 128, unmodulated -- the animation is phase 11's.
 
+## The walk (LOOKS-TASK-33)
+
+The panel walks by default, at the game's rhythm: the clock is `scene.WalkClock`
+over the cycle `oracle.py --walk` measured, turned into seconds by the frame
+rate `oracle.py --rhythm` measured -- 34 passes in 77 frames of 1/59.817 s.
+`Space` pauses and goes on, `.` steps one pass; neither is an arrow, and the
+arrows keep driving the rows.  On the five head rows the game walks on to one
+frame and holds it (`scene.walk_held_rows`), and so does this; a changed value
+leaves the walk alone, as it does in the game.  NOT modelled, and said in the
+report: the other animation `FOOT` plays, and the turn of the model on the
+held rows.
+
 ## Refusal is visible
 
 A tuple the assembly table refuses -- `H1` hair is the measured case -- puts
@@ -70,6 +82,16 @@ KEYS = {
 }
 """The four buttons the screen answers to, and nothing else is forwarded."""
 
+WALK_KEYS = {
+    QtCore.Qt.Key.Key_Space: "pause",
+    QtCore.Qt.Key.Key_Period: "step",
+}
+"""The two keys of the walk: neither is an arrow, so neither moves a row."""
+
+TICK_MS = 10
+"""How often the window asks the clock which pass is on: well under the two
+frames of 1/59.8 s the shortest pass lasts, so no pass is skipped by waiting."""
+
 BACKGROUND = QtGui.QColor(0, 32, 48)
 BOX = QtGui.QColor(150, 150, 150)
 INK = QtGui.QColor(232, 232, 232)
@@ -82,10 +104,21 @@ PANEL = QtGui.QColor(12, 40, 96)
 class LooksSet(QtWidgets.QWidget):
     """The screen, driven by the four buttons and redrawn on every change."""
 
-    def __init__(self, state, builder=None, scale: int = SCALE, parent=None):
+    def __init__(self, state, builder=None, scale: int = SCALE, parent=None,
+                 clock=None):
         super().__init__(parent)
         self.state = state
         self.builder = builder
+        # The walk: a `scene.WalkClock`, or None when there is no measured
+        # cycle -- then the panel stands on one frame and the report says so.
+        self.clock = clock
+        self.elapsed = QtCore.QElapsedTimer()
+        self.elapsed.start()
+        self.shown = None
+        self.passes_drawn = 0
+        self.timer = QtCore.QTimer(self)
+        self.timer.setInterval(TICK_MS)
+        self.timer.timeout.connect(self.tick)
         self.scale = scale
         self.places = state.layout()
         self.refusal: str | None = None
@@ -254,7 +287,11 @@ class LooksSet(QtWidgets.QWidget):
             self.refusal = None
             return
         try:
-            drawn = self.builder.build(self.tuple_text)
+            if self.clock is not None:
+                self.shown = self.clock.visit(self.now())
+                drawn = self.builder.walk_build(self.tuple_text, *self.shown)
+            else:
+                drawn = self.builder.build(self.tuple_text)
         except core.BadScene as exc:
             self.refusal = str(exc)
             self.drawn = None
@@ -267,6 +304,62 @@ class LooksSet(QtWidgets.QWidget):
         self.viewer.set_scene(drawn)
         self.aim()
         self.viewer.show()
+
+    # -- the walk ----------------------------------------------------------
+
+    def now(self) -> float:
+        """Seconds since the window was made: the clock's only time source."""
+        return self.elapsed.nsecsElapsed() / 1e9
+
+    def animate(self, on: bool = True) -> None:
+        """Start or stop the timer that turns the clock into pictures."""
+        if self.clock is None:
+            return
+        if on:
+            self.clock.resume(self.now())
+            self.timer.start()
+        else:
+            self.clock.pause(self.now())
+            self.timer.stop()
+
+    def tick(self) -> None:
+        """Draw the pass the clock says is on, if it is not the one shown."""
+        if self.clock is None or self.drawn is None or self.refusal:
+            return
+        visit = self.clock.visit(self.now())
+        if visit == self.shown:
+            return
+        try:
+            drawn = self.builder.walk_build(self.tuple_text, *visit)
+        except core.BadScene as exc:
+            self.refusal = str(exc)
+            return
+        self.shown = visit
+        self.passes_drawn += 1
+        self.drawn = drawn
+        self.viewer.set_scene(drawn)
+
+    def walk_key(self, name: str) -> None:
+        """`pause` or `step`, from the keyboard or from a gate."""
+        if self.clock is None:
+            return
+        if name == "pause":
+            if self.clock.toggle(self.now()):
+                self.timer.start()
+            else:
+                self.timer.stop()
+        elif name == "step":
+            self.clock.step(self.now())
+            self.timer.stop()
+        self.tick()
+
+    def walk_report(self) -> dict | None:
+        if self.clock is None:
+            return None
+        found = self.clock.report(self.now())
+        found["drawn"] = self.passes_drawn
+        found["shown"] = self.shown
+        return found
 
     def aim(self) -> None:
         """Point the panel's camera at the figure the rows now describe.
@@ -326,18 +419,37 @@ class LooksSet(QtWidgets.QWidget):
         row = self.state.row
         moved = core.screen_press(self.state, button)
         now = self.state.values()
+        if self.clock is not None:
+            # What the rows do to the walk, as the game does it: a held row
+            # walks on to its frame and stops, leaving one goes on from the
+            # next, and a value changes nothing (LOOKS-TASK-33).
+            held = core.walk_held_rows()
+            if self.state.row != row:
+                if row in held and self.state.row not in held:
+                    self.clock.release(self.now())
+                if self.state.row in held:
+                    self.clock.hold(self.now(),
+                                    settle=not self.timer.isActive())
+            if now != values:
+                self.clock.value_changed(self.now())
         if self.state.tuple_text() != before:
             self.redraw()
         elif ((now.get("height"), now.get("build")) != stature
               or self.state.row != row):
             self.aim()
+            self.tick()
         self.update()
         return moved
 
     def keyPressEvent(self, event) -> None:
         button = KEYS.get(event.key())
         if button is None:
-            super().keyPressEvent(event)
+            walk = WALK_KEYS.get(event.key())
+            if walk is None:
+                super().keyPressEvent(event)
+                return
+            self.walk_key(walk)
+            event.accept()
             return
         self.press(button)
         event.accept()
@@ -368,6 +480,7 @@ class LooksSet(QtWidgets.QWidget):
             "camera": ("refused" if self.camera_note is not None
                        else self.camera_row or "full figure"),
             "camera_note": self.camera_note,
+            "walk": self.walk_report(),
             "glyphs": sorted((one["point"][0], one["point"][1], one["uv"][0],
                               one["uv"][1]) for one in self.glyphs()),
         }

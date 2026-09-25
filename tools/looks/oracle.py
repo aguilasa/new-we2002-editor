@@ -51,6 +51,7 @@ Usage:
     python tools/looks/oracle.py --pose <SLOT> <N> [N ...]  # the pose ITSELF: the matrix and translation of every piece of frame N, and the hierarchy
     python tools/looks/oracle.py --poses [SLOT [N ...]]  # the same over both slots and the eight spread frames
     python tools/looks/oracle.py --stature [SLOT]
+    python tools/looks/oracle.py --rhythm [SLOT]  # the frame rate the walk plays at, off the console's counters, and what a press does to the step
     python tools/looks/oracle.py --closeups [SLOT]  # which rows zoom the panel onto the head, and the camera of each  # what HEIG and BODY do: the scale, the camera and the pieces, against stature.py
 """
 
@@ -7942,6 +7943,500 @@ def check_walk(slot=None, verbose=True):
     return 1 if problems else 0
 
 
+# --- the rhythm of the walk, and what a press does to it (LOOKS-TASK-33) ----
+
+RHYTHM_SPAN = 77
+"""Frames the clock is read across: one cycle of the walk, as `--walk` counts it.
+
+A cycle and not a second, because what the window converts is a cycle: the
+ticks across exactly those frames are the whole of what the rate is for.  The
+control reads twice as many and has to come back twice the ticks.
+"""
+
+NTSC_VIDEO_CLOCK = 53693175  # not-an-address: the NTSC GPU clock, in Hz
+NTSC_LINE_CYCLES = 3413  # not-an-address: GPU cycles in one NTSC scanline
+NTSC_LINES = 263
+"""Scanlines in one progressive NTSC frame, and with the two above the witness
+of what a tick IS.
+
+`frame_step` counts frames and the tick counter counts ticks, and neither says
+how long a tick lasts.  The console's video standard does: a progressive NTSC
+frame is 263 lines of 3413 cycles of a 53,693,175 Hz clock, so in ticks of
+`layout.CONSOLE_CLOCK` it is 566,204.5 -- and the counter measures 566,204.
+These three are the standard's, not measurements, and the GPU is asked whether
+it is in that standard before they are used.
+
+**Wall clock was tried and is not a witness.**  Run free at the emulator's own
+speed of 1 for five seconds, the counter moved 33,857,860 and 33,952,276 ticks
+a second on 2026-09-25 -- and 20,743,364 in the next run, 195 frames where the
+first had 302, because the host did not keep up.  What the host does to the
+emulator's pace says nothing about the console's.  The root counters were
+tried before that and are not one either: the game programs them, and over one
+cycle timer 1 came back 523 HBlanks on one state and 65,463 on the other.
+"""
+
+RHYTHM_NTSC_SLACK = 2
+"""Ticks a frame the measurement may sit from the standard's 566,204.5: the
+counter is whole ticks, and the average over 308 frames is not."""
+
+RHYTHM_TICK_SLACK = 64
+"""How far two readings of the same span may differ, in system ticks.
+
+`frame_step` stops the CPU wherever the frame ends, and that instruction is not
+the same one twice: over one frame the ticks came back 566,203 to 566,259,
+measured.  Sixty-four is a handful of instructions over a span of 43 million;
+a counter running at another rate misses by thousands.
+"""
+
+RHYTHM_BUILDS = 26
+"""Pose builds read after a stimulus: two passes of twelve and two more.
+
+Two passes because the first pass read may have begun before the stimulus
+ended, and the claim is about what comes after it.
+"""
+
+RHYTHM_SHIFT = 11
+"""Frames the positive control starts further on: about five passes.
+
+The comparison has to be able to see a walk that is somewhere else in its
+cycle, or "the same builds after the press" would be the same builds whatever
+the press did.  Eleven frames is not a whole cycle (77) and not a pass (2 or
+3), so the builds come out of other frames of the file.
+"""
+
+RHYTHM_VALUE_ROWS = ("NAT", "BOOTS", "SKIN")
+"""The rows a value is changed on, and why these three.
+
+`NAT` because the cursor is already there -- the press is the value and nothing
+else; `BOOTS` because it is a row where the figure WALKS and whose value changes
+the figure itself; `SKIN` because it is one of the rows where the walk is held
+(`layout.WALK_HELD_ROWS`), so the press lands on a figure standing still.
+"""
+
+RHYTHM_ROW_READ_GAP = 40
+"""Frames between the two readings of the walk on one row: about eighteen
+passes, so a walk that runs cannot come back to the same pairs and one that is
+held has to."""
+
+RHYTHM_ROW_SETTLE = 120
+"""Frames let run after the cursor lands on a row, before the walk is read.
+
+**The hold is not immediate, and that was measured the hard way.**  The first
+run read each row 28 frames after the press and found `SKIN` walking and then
+held: the figure WALKS ON to `layout.WALK_HELD_FRAME` and stops there, which
+from the far side of the cycle is up to 34 passes -- 77 frames.  A hundred and
+twenty clears a whole cycle and the press.
+"""
+
+RHYTHM_UP_ROWS = ("DEFAUL", "FOOT")
+"""Rows reached by pressing Up from where the states load, and not Down.
+
+Every row is reached from `load_state` on its own, so what a row does is not
+what the rows walked past left behind; these two are reached upwards because
+down is the long way round, through every other row -- `FOOT` among them,
+where another animation starts (`layout.WALK_OTHER_ANIMATION`).
+"""
+
+
+def pair_owner(data, pair):
+    """(animation, frame, slot) of the pair the game read, or None.
+
+    The screen's own animation (`layout.ANIME_SCREEN_ENTRY`) is looked in first,
+    then every other entry of the header: on `FOOT` the game reads out of
+    another one, and naming it is how that was found.
+    """
+    import anime
+
+    entries = anime.header(data)
+    order = [layout.ANIME_SCREEN_ENTRY] + [one for one in range(len(entries))
+                                           if one != layout.ANIME_SCREEN_ENTRY]
+    for entry in order:
+        try:
+            frames = anime.block(data, entries[entry])["frames"]
+        except anime.BadAnime:
+            continue
+        for index, start in enumerate(frames):
+            if start <= pair < start + anime.FRAME_BYTES:
+                return (entry, index, (pair - start) // anime.PAIR_BYTES)
+    return None
+
+
+def classify_walk(owners):
+    """What a run of builds shows: ("held", frame), ("walks", None), ("plays",
+    entries) or ("unknown", count), out of `pair_owner` of each build.
+
+    Held is ONE frame of the screen's animation over every build -- more than
+    two passes of them, which a walk moving one frame a pass cannot do.
+    """
+    if not owners or any(one is None for one in owners):
+        return ("unknown", sum(one is None for one in owners))
+    others = sorted({one[0] for one in owners} - {layout.ANIME_SCREEN_ENTRY})
+    if others:
+        return ("plays", tuple(others))
+    frames = {one[1] for one in owners}
+    if len(frames) == 1:
+        return ("held", frames.pop())
+    return ("walks", None)
+
+
+def row_walk(first, second):
+    """One row's verdict out of its two readings: ("held", frame), ("plays",
+    entries), ("walks", None) or ("unknown", why)."""
+    if first[0] == "plays" or second[0] == "plays":
+        return ("plays", tuple(sorted(set(first[1] if first[0] == "plays"
+                                          else ()) | set(
+            second[1] if second[0] == "plays" else ()))))
+    if first == second and first[0] == "held":
+        return first
+    if first[0] == second[0] == "walks":
+        return first
+    return ("unknown", "%r then %r" % (first, second))
+
+
+def clock_span(game, frames):
+    """What *frames* `frame_step`s cost, read off the emulator's counters.
+
+    Returns the frames the emulator counted, the system ticks, and how many new
+    pictures the game presented -- `internal_frame_number`, which moves once
+    per drawn pass and not once per video frame, so a cycle of the walk has to
+    present its 34.
+    """
+    before = game.client.call("get_status")
+    game.step(frames)
+    after = game.client.call("get_status")
+    return {
+        "frames": after["frame_number"] - before["frame_number"],
+        "ticks": after["global_tick_counter"] - before["global_tick_counter"],
+        "presented": (after["internal_frame_number"]
+                      - before["internal_frame_number"]),
+    }
+
+
+def judge_clock(one, two, double, passes, gpu):
+    """The problems with the clock readings, [] when they agree on one rate.
+
+    *one* and *two* are the same span read twice from `load_state`, *double*
+    a span twice as long, *passes* the drawn passes of a cycle (`--walk`) and
+    *gpu* what `get_gpu_state` said.  Pure, so `self_check` can hand it the
+    numbers a wrong counter would give.
+    """
+    problems = []
+    for name, span, want in (("the first span", one, RHYTHM_SPAN),
+                             ("the second span", two, RHYTHM_SPAN),
+                             ("the double span", double, 2 * RHYTHM_SPAN)):
+        if span["frames"] != want:
+            problems.append("%s stepped %d frame(s) and the emulator counted "
+                            "%d" % (name, want, span["frames"]))
+        # One picture a drawn pass: the cycle of 34 passes over 77 frames
+        # presents 34 of them, give or take the pass the span cuts in two.
+        if abs(span["presented"] * RHYTHM_SPAN - passes * want) > RHYTHM_SPAN:
+            problems.append("%s presented %d picture(s) over %d frame(s), "
+                            "and the walk draws %d a cycle of %d"
+                            % (name, span["presented"], want, passes,
+                               RHYTHM_SPAN))
+    if abs(one["ticks"] - two["ticks"]) > RHYTHM_TICK_SLACK:
+        problems.append("the same span read twice took %d and %d tick(s)"
+                        % (one["ticks"], two["ticks"]))
+    if abs(double["ticks"] - 2 * one["ticks"]) > 2 * RHYTHM_TICK_SLACK:
+        problems.append("twice the frames took %d tick(s), and twice one span "
+                        "is %d" % (double["ticks"], 2 * one["ticks"]))
+    if gpu.get("pal_mode") is not False or gpu.get("interlaced") is not False:
+        problems.append("the GPU says pal_mode %r and interlaced %r, and the "
+                        "standard below is progressive NTSC"
+                        % (gpu.get("pal_mode"), gpu.get("interlaced")))
+    else:
+        ticks = sum(span["ticks"] for span in (one, two, double)) / float(
+            sum(span["frames"] for span in (one, two, double)) or 1)
+        if abs(ticks - ntsc_frame_ticks()) > RHYTHM_NTSC_SLACK:
+            problems.append("%.1f tick(s) a frame, and a progressive NTSC "
+                            "frame is %.1f ticks of %d Hz -- the counter does "
+                            "not count the console's clock"
+                            % (ticks, ntsc_frame_ticks(),
+                               layout.CONSOLE_CLOCK))
+    return problems
+
+
+def ntsc_frame_ticks():
+    """A progressive NTSC frame in ticks of `layout.CONSOLE_CLOCK`."""
+    return (NTSC_LINES * NTSC_LINE_CYCLES * layout.CONSOLE_CLOCK
+            / float(NTSC_VIDEO_CLOCK))
+
+
+def pose_builds(game, count):
+    """[(frame number, pair)] of the next *count* pose builds, in one run.
+
+    The build at `layout.ANIME_BUILD` is where every unpack variant ends, with
+    the pair the game is reading in its base register (`--walk`); the frame
+    number beside it says WHEN.  Two runs that read the same list are the same
+    walk at the same moment; a walk that restarted would read the first frame
+    of the file's block where the other reads the middle of it.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.ANIME_BUILD))
+    out = []
+    try:
+        while len(out) < count:
+            client.call("continue")
+            if not _wait_for_hit(game, WATCH_SECONDS):
+                raise OracleError("the pose build stopped after %d hit(s) -- "
+                                  "the screen is not drawing the figure"
+                                  % len(out))
+            registers = client.call("read_registers", group="gpr")
+            pair = (who_writes.register_value(registers,
+                                              layout.ANIME_BUILD_BASE)
+                    - layout.ANIME_BASE)
+            out.append((client.call("get_status")["frame_number"], pair))
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    return out
+
+
+def _after(game, slot, stimulus, label):
+    """The builds after *stimulus*, from `load_state`, in one fresh run."""
+    restore_state(slot, verbose=False)
+    game.load_looks(slot, label=label)
+    stimulus()
+    return pose_builds(game, RHYTHM_BUILDS)
+
+
+def judge_press(still, again, shifted, pressed):
+    """What a press did to the walk: (verdict, why).
+
+    *still* and *again* are the same untouched run twice, *shifted* one that
+    starts `RHYTHM_SHIFT` frames further on, and *pressed* the run with the
+    stimulus.  The first two have to agree and the third has to differ, or
+    nothing below can be read -- that comes back as "unreadable".  Otherwise
+    the verdict is "continues" (the untouched run's builds, frame number and
+    pair), "moves" (its pairs, at other frame numbers) or "restarts" (pairs
+    that are in no stretch of it).
+    """
+    if still != again:
+        return ("unreadable", "the untouched run read twice differs at build "
+                "%d" % next(i for i, (a, b) in enumerate(zip(still, again))
+                            if a != b))
+    if [pair for _frame, pair in shifted] == [pair for _frame, pair in still]:
+        return ("unreadable", "a walk %d frame(s) further on reads the same "
+                "pairs, so the comparison cannot see where the walk is"
+                % RHYTHM_SHIFT)
+    if pressed == still:
+        return ("continues", "the %d build(s) after the press are the "
+                "untouched run's, frame number and pair" % len(still))
+    pairs = [pair for _frame, pair in still]
+    first = [pair for _frame, pair in pressed][:12]
+    for offset in range(len(pairs) - len(first) + 1):
+        if pairs[offset:offset + len(first)] == first:
+            return ("moves", "the pairs are the untouched run's from build %d "
+                    "on, at other frame numbers" % offset)
+    return ("restarts", "the pairs after the press are in no stretch of the "
+            "untouched run's: %s against %s" % (first[:4], pairs[:4]))
+
+
+def check_rhythm(slot=None, verbose=True):
+    """`--rhythm [SLOT]`: the rate the walk plays at, and what a press does.
+
+    Two measurements, each with its control first:
+
+      **the clock** -- `frame_step` over one cycle of the walk (77 frames,
+          `--walk`), twice from `load_state`, and over two: the system ticks
+          have to come back the same twice and double for twice the frames,
+          the HBlank timer has to count 263 lines a frame and timer 2 the
+          same clock over eight.  The rate is `layout.CONSOLE_CLOCK` over the
+          ticks a frame, and the ticks have to be `layout.FRAME_TICKS`, which
+          is where the window reads them;
+      **the step on a press** -- the pose builds after a press against the
+          same builds with nothing pressed: the untouched run twice (equal),
+          a run started further on (different pairs), then the cursor moved
+          (`Down`), then a value changed on `RHYTHM_ROW`.
+    """
+    import anime
+    import confront
+    import screen
+
+    import iso_source
+
+    ready = preflight()
+    slots = (slot,) if slot else tuple(sorted(SLOTS))
+    table = screen.load()
+    press = CONFIRM_FRAMES + SETTLE_FRAMES
+    with iso_source.open_disc(ready["image"]) as disc:
+        anime_data = anime.read(disc)
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in slots:
+            print("  -- slot %d (%s) --" % (one, SLOTS[one]))
+            try:
+                plan = anime.walk_plan(anime.plan_path(one))
+            except anime.BadAnime as exc:
+                raise Unavailable(str(exc)) from None
+            passes = plan["passes"]
+            if plan["frames"] != RHYTHM_SPAN:
+                problems.append("slot %d: --walk counted a cycle of %d "
+                                "frame(s), and this reads spans of %d"
+                                % (one, plan["frames"], RHYTHM_SPAN))
+                continue
+            spans = []
+            for frames in (RHYTHM_SPAN, RHYTHM_SPAN, 2 * RHYTHM_SPAN):
+                restore_state(one, verbose=False)
+                game.load_looks(one, label="rhythm-%d" % one)
+                spans.append(clock_span(game, frames))
+            gpu = game.client.call("get_gpu_state")
+            print("    the GPU: pal_mode %s, interlaced %s, %sx%s"
+                  % (gpu.get("pal_mode"), gpu.get("interlaced"),
+                     gpu.get("display_width"), gpu.get("display_height")))
+            for name, span in zip(("cycle", "cycle again", "two cycles"),
+                                  spans):
+                print("    %-11s %3d frame(s): %d tick(s), %d picture(s) "
+                      "presented" % (name, span["frames"], span["ticks"],
+                                     span["presented"]))
+            found = judge_clock(*spans, passes=passes, gpu=gpu)
+            if found:
+                problems += ["slot %d: %s" % (one, line) for line in found]
+                continue
+            ticks = sum(span["ticks"] for span in spans) / float(
+                sum(span["frames"] for span in spans))
+            rate = layout.CONSOLE_CLOCK / ticks
+            print("    control: the same span twice %d tick(s) apart, twice "
+                  "the frames %d from twice the ticks, one picture a drawn "
+                  "pass; a progressive NTSC frame is %.1f ticks"
+                  % (abs(spans[0]["ticks"] - spans[1]["ticks"]),
+                     abs(spans[2]["ticks"] - 2 * spans[0]["ticks"]),
+                     ntsc_frame_ticks()))
+            print("    %.1f tick(s) a frame, %.3f frame(s) a second; a cycle "
+                  "of %d frame(s) lasts %.3f s"
+                  % (ticks, rate, RHYTHM_SPAN, RHYTHM_SPAN / rate))
+            if round(ticks) != layout.FRAME_TICKS:
+                problems.append("slot %d: %.1f tick(s) a frame measured and "
+                                "layout.FRAME_TICKS says %d"
+                                % (one, ticks, layout.FRAME_TICKS))
+
+            def owners(builds):
+                return [pair_owner(anime_data, pair) for _frame, pair in builds]
+
+            # -- where the walk runs, where it holds, and what else plays --
+            here = ROWS.index(CURSOR_STARTS_ON)
+            held, plays = [], {}
+            for row in ROWS:
+                restore_state(one, verbose=False)
+                game.load_looks(one, label="rhythm-rows-%d" % one)
+                way = "Up" if row in RHYTHM_UP_ROWS else "Down"
+                count = ((here - ROWS.index(row)) if way == "Up"
+                         else (ROWS.index(row) - here)) % len(ROWS)
+                for _ in range(count):
+                    game.press(way, box=FOOTER, least=ROW_MOVED)
+                game.step(RHYTHM_ROW_SETTLE)
+                first = classify_walk(owners(pose_builds(game,
+                                                         RHYTHM_BUILDS)))
+                game.step(RHYTHM_ROW_READ_GAP)
+                second = classify_walk(owners(pose_builds(game,
+                                                          RHYTHM_BUILDS)))
+                found = row_walk(first, second)
+                print("    row %-9s (%d %s) the figure %s" % (row, count, way, {
+                    "held": "is HELD on frame %s of the walk",
+                    "walks": "walks%s",
+                    "plays": "plays animation %s instead of the walk",
+                    "unknown": "is unreadable: %s"}[found[0]]
+                    % ("" if found[1] is None else found[1],)))
+                if found[0] == "held":
+                    held.append((row, found[1]))
+                elif found[0] == "plays":
+                    plays[row] = found[1]
+                elif found[0] == "unknown":
+                    problems.append("slot %d: row %s: %s"
+                                    % (one, row, found[1]))
+            rows_held = tuple(row for row, _frame in held)
+            frames_held = {frame for _row, frame in held}
+            if rows_held != layout.WALK_HELD_ROWS \
+                    or frames_held != {layout.WALK_HELD_FRAME}:
+                problems.append("slot %d: the walk is held on %s at frame(s) "
+                                "%s, and layout says %s at %d"
+                                % (one, rows_held, sorted(frames_held),
+                                   layout.WALK_HELD_ROWS,
+                                   layout.WALK_HELD_FRAME))
+            if plays != layout.WALK_OTHER_ANIMATION:
+                problems.append("slot %d: other animations play on %r, and "
+                                "layout says %r"
+                                % (one, plays, layout.WALK_OTHER_ANIMATION))
+
+            # -- leaving a row where it is held --
+            restore_state(one, verbose=False)
+            game.load_looks(one, label="rhythm-leave-%d" % one)
+            game.press("Down", box=FOOTER, least=ROW_MOVED)
+            game.step(RHYTHM_ROW_SETTLE)
+            game.client.call("press_button", button="Up",
+                             duration_frames=CONFIRM_FRAMES)
+            after = owners(pose_builds(game, anime.PIECE_PAIRS))
+            resumed = {(entry, frame) for entry, frame, _slot in after}
+            want = {(layout.ANIME_SCREEN_ENTRY, layout.WALK_HELD_FRAME + 1)}
+            print("    leaving %s for %s: the first pass reads %s"
+                  % (ROWS[here + 1], ROWS[here], sorted(resumed)))
+            if resumed != want:
+                problems.append("slot %d: the first pass after leaving a held "
+                                "row reads %s, not the frame after the one "
+                                "held, %s" % (one, sorted(resumed),
+                                              sorted(want)))
+
+            # -- a value changed, against the same presses without it --
+            taken = {}
+
+            def run(row, change, extra=0, repeat=0):
+                """Builds after walking the cursor to *row* and, if
+                *change*, one press on its value; `extra` more frames."""
+                def stimulus():
+                    for _ in range((ROWS.index(row) - here) % len(ROWS)):
+                        game.press("Down", box=FOOTER, least=ROW_MOVED)
+                    if change:
+                        texts = table["rows"][row]["texts"]
+                        at = screen.State(table, one).indices[row]
+                        confront.press_value(
+                            game, "Right" if at + 1 < len(texts) else "Left",
+                            row, sys.modules[__name__])
+                    else:
+                        game.step(press)
+                    game.step(extra)
+
+                key = (row, change, extra, repeat)
+                if key not in taken:
+                    taken[key] = _after(game, one, stimulus,
+                                        "rhythm-%d" % one)
+                return taken[key]
+
+            for row in RHYTHM_VALUE_ROWS:
+                still, again = run(row, False), run(row, False, repeat=1)
+                shifted = run(row, False, RHYTHM_SHIFT)
+                pressed = run(row, True)
+                verdict, why = judge_press(still, again, shifted, pressed)
+                if row in layout.WALK_HELD_ROWS and verdict == "unreadable" \
+                        and still == again and still == pressed:
+                    # A held figure reads the same pairs a few frames on: the
+                    # shifted control CANNOT differ there, and that it does
+                    # not is the hold, not a blind comparison.
+                    verdict, why = ("continues", "held before the press and "
+                                    "held on the same frame after it, pair "
+                                    "for pair")
+                print("    a value changed on %s: the walk %s -- %s"
+                      % (row, verdict.upper(), why))
+                if verdict == "unreadable":
+                    problems.append("slot %d: %s: %s" % (one, row, why))
+                elif verdict != layout.WALK_ON_VALUE:
+                    problems.append("slot %d: a value changed on %s %s the "
+                                    "walk, and layout says it %s"
+                                    % (one, row, verdict,
+                                       layout.WALK_ON_VALUE))
+    print("oracle --rhythm: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    return 1 if problems else 0
+
+
 CLOSE_UP_SETTLE = 300
 """Frames let run after the cursor lands on a row, before the camera is read.
 
@@ -9819,6 +10314,69 @@ def _checks(c) -> None:
        "%s" % (pair_runs(marks),))
     ok("and a run with no load is no run", pair_runs([]) == [])
 
+    # The rhythm's judges (LOOKS-TASK-33), on the numbers of 2026-09-25 and
+    # on the numbers a wrong counter would give.
+    span = {"frames": RHYTHM_SPAN, "ticks": 43597690,  # not-an-address: ticks
+            "presented": 34}
+    double = {"frames": 2 * RHYTHM_SPAN,
+              "ticks": 87195381,  # not-an-address: ticks
+              "presented": 67}
+    ntsc = {"pal_mode": False, "interlaced": False}
+    ok("the measured spans agree on one rate, the NTSC frame's",
+       judge_clock(span, dict(span, ticks=span["ticks"] + 10), double, 34,
+                   ntsc) == [],
+       "%s" % judge_clock(span, dict(span, ticks=span["ticks"] + 10), double,
+                          34, ntsc))
+    ok("and the constant the window reads is that rate, to the tick",
+       round(ntsc_frame_ticks()) in (layout.FRAME_TICKS,
+                                     layout.FRAME_TICKS + 1)
+       and abs(span["ticks"] / float(RHYTHM_SPAN) - layout.FRAME_TICKS) < 1)
+    ok("a counter in another unit is caught by the NTSC frame",
+       any("progressive NTSC" in one for one in judge_clock(
+           dict(span, ticks=span["ticks"] * 2), dict(span,
+                                                     ticks=span["ticks"] * 2),
+           dict(double, ticks=double["ticks"] * 2), 34, ntsc)))
+    ok("a PAL picture is not measured against the NTSC frame",
+       any("pal_mode" in one for one in judge_clock(
+           span, span, double, 34, dict(ntsc, pal_mode=True))))
+    ok("a span that presented other than a picture a pass is caught",
+       any("presented" in one for one in judge_clock(
+           dict(span, presented=17), span, double, 34, ntsc)))
+    ok("two readings of one span far apart are caught",
+       any("read twice" in one for one in judge_clock(
+           span, dict(span, ticks=span["ticks"] + 10 * RHYTHM_TICK_SLACK),
+           double, 34, ntsc)))
+    walk = [(100 + i, 8 * i) for i in range(RHYTHM_BUILDS)]
+    later = [(111 + i, 8 * (i + 30)) for i in range(RHYTHM_BUILDS)]
+    ok("the untouched run again, and a press that left it alone: continues",
+       judge_press(walk, list(walk), later, list(walk))[0] == "continues")
+    ok("the same pairs at other frames: the walk moved",
+       judge_press(walk, walk, later,
+                   [(f + 3, p) for f, p in walk])[0] == "moves")
+    ok("pairs in no stretch of it: restarts",
+       judge_press(walk, walk, later,
+                   [(f, p + 1) for f, p in walk])[0] == "restarts")
+    ok("an untouched run that does not repeat reads nothing",
+       judge_press(walk, later, later, walk)[0] == "unreadable")
+    ok("nor does a comparison that cannot see a walk further on",
+       judge_press(walk, walk, walk, walk)[0] == "unreadable")
+    screen_entry = layout.ANIME_SCREEN_ENTRY
+    ok("builds of one frame of the walk, over two passes, are a hold",
+       classify_walk([(screen_entry, 12, one % 12) for one in range(26)])
+       == ("held", 12))
+    ok("builds over frames of the walk are a walk",
+       classify_walk([(screen_entry, 12 + one // 12, one % 12)
+                      for one in range(26)]) == ("walks", None))
+    ok("builds out of another animation are that animation",
+       classify_walk([(147, 18, 0), (screen_entry, 3, 0)]) == ("plays",
+                                                                (147,)))
+    ok("and a build the header does not own is unreadable",
+       classify_walk([None, (screen_entry, 1, 0)])[0] == "unknown")
+    ok("a row walking on its way to the hold is not called held",
+       row_walk(("walks", None), ("held", 12))[0] == "unknown")
+    ok("a row that plays another animation in either reading plays it",
+       row_walk(("walks", None), ("plays", (147,))) == ("plays", (147,)))
+
 
 # --- entry point ----------------------------------------------------------
 
@@ -9874,6 +10432,8 @@ def main(argv):
                                 row=argv[3] if len(argv) > 3 else None)
         if len(argv) in (2, 3) and argv[1] == "--walk":
             return check_walk(int(argv[2]) if len(argv) == 3 else None)
+        if len(argv) in (2, 3) and argv[1] == "--rhythm":
+            return check_rhythm(int(argv[2]) if len(argv) == 3 else None)
         if len(argv) in (2, 3) and argv[1] == "--walk-watch":
             return check_walk_watch(int(argv[2]) if len(argv) == 3 else 2)
         if len(argv) == 2 and argv[1] == "--pose-lag":

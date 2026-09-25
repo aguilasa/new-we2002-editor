@@ -26,6 +26,17 @@ resources: [emulador, tela]
 
 ---
 
+- **Da [`LOOKS-TASK-33`](/docs/tasks/looks/33-a-janela-animada.md):** a
+  janela anda por default, `Space` pausa e `.` anda uma passada — o `help` do
+  `.\make.ps1 looks` ainda não diz isso. Dois comandos novos com emulador,
+  sem alvo de `ctest`: `oracle.py --rhythm` (~9 min) e o `confront.py
+  --silhouette` refeito sobre oito passadas (~2 min). E ficam **abertos**, com
+  veredito a dar na §10.3: o **giro** do modelo nas cinco linhas de cabeça
+  (a janela segura o quadro 12 sem girar) e a **animação 147** que o jogo toca
+  em `FOOT` (a janela continua andando ali e o relatório diz).
+
+---
+
 ## Objetivo
 
 Fechar a v2: gates novos alcançáveis pelo `ctest`, o alvo do usuário abrindo a

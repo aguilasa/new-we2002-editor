@@ -2117,6 +2117,71 @@ once: it is the only one the screen reads.  An index, not an address, and it
 is here because `anime.py` must not choose an animation by its size.
 """
 
+CONSOLE_CLOCK = 33868800
+"""System ticks a second: the console's master clock, 44100 x 768.
+
+What the emulator's `global_tick_counter` counts, and it is checked rather than
+taken on faith: `oracle.py --rhythm` holds the ticks it measures a frame
+against a progressive NTSC frame -- 263 lines of 3413 cycles of the 53,693,175
+Hz video clock -- expressed in ticks of this clock, 566,204.5, and the counter
+comes back 566,204.
+"""
+
+FRAME_TICKS = 566204
+"""System ticks in one video frame of the LOOKS SET screen.
+
+Measured on 2026-09-25 (LOOKS-TASK-33) with `oracle.py --rhythm`: `frame_step`
+counted over a whole cycle of the walk (77 frames) and over two, from
+`load_state` in both slots, and the counter read before and after --
+43,597,690 and 43,597,704 ticks for the two single cycles of slot 2, which is
+566,203.8 a frame.  The HBlank timer counts 263 lines a frame over the same
+span, and the GPU reports NTSC and progressive: this is the non-interlaced NTSC
+frame, 263 lines of 2152.9 ticks, and the rate it gives is
+`CONSOLE_CLOCK / FRAME_TICKS` = 59.817 frames a second.
+
+It is what the window's clock converts the walk with: the cycle is counted in
+FRAMES by `oracle.py --walk` (77 for 34 drawn passes), and a second of the
+window is this many ticks' worth of them.  The user's recording is not a
+source for it and was not used -- a recorder has its own cadence.
+"""
+
+WALK_HELD_ROWS = ("SKIN", "HAIR", "H.COL", "FACE", "H.F.COL.")
+"""The rows with the cursor on which the figure does NOT walk.
+
+Measured on 2026-09-25 (LOOKS-TASK-33) with `oracle.py --rhythm`, which reads
+the pair of every pose build on each of the twelve rows, twice, forty frames
+apart: on these five the game reads the twelve pairs of one frame of the walk
+over and over (`WALK_HELD_FRAME`), and on the others the frame moves.  They
+are the five head rows of the close-up (LOOKS-TASK-40) -- and not `BOOTS`,
+which moves the camera and keeps the walk going.
+"""
+
+WALK_HELD_FRAME = 12
+"""The frame of the screen's animation the figure is held on, read plain.
+
+Both states, every one of the five rows.  Leaving the row the walk goes on
+from the NEXT frame, 13, on the very first pass -- it is a pause at 12, not a
+restart -- and it goes on with every pass reading one frame whole, whichever
+slot the save state opened the passes on (`anime.WALK_FIRST_SLOT`).
+"""
+
+WALK_OTHER_ANIMATION = {"FOOT": (147,)}
+"""Rows on which the game plays ANOTHER animation, and which.
+
+On `FOOT` the pairs come out of entry 147 of the header and not out of
+`ANIME_SCREEN_ENTRY` -- measured by `oracle.py --rhythm`, reaching past frame
+43 of it, where the walk has 17.  What that animation is and how it is played
+is not measured; the window keeps walking there, and says so.
+"""
+
+WALK_ON_VALUE = "continues"
+"""What a changed value does to the walk: it goes on, in step.
+
+Measured by `oracle.py --rhythm` on three rows of both states -- `NAT`, `BOOTS`
+and `SKIN` -- against the same presses without the value: the builds after the
+press are the untouched run's, frame number and pair.
+"""
+
 ANIME_HEADER_WORDS = 204
 """Pointer entries at the head of `ANIME.BIN`, each one an animation.
 

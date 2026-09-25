@@ -3353,6 +3353,34 @@ uma passada, se o jogo interpola entre quadros-chave, e se o tronco que balança
 >   cada carga nomeada **duas vezes** — pela vaga do par e pelo ponteiro de
 >   modelo com o atraso da [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) —, batendo nas 516;
 >   e o modelo com **uma visita de diferença**, que cai para 34 de 408.
+>
+> **E a janela anda nesse ritmo desde 2026-09-25**, pela
+> [`LOOKS-TASK-33`](/docs/tasks/looks/33-a-janela-animada.md), com o que
+> faltava medir medido por `oracle.py --rhythm`:
+>
+> - **A taxa é a do NTSC progressivo, 59,817 quadros por segundo.** O
+>   `frame_step` sobre um ciclo (77 quadros) custa 43.597.690 ticks nos dois
+>   slots, o mesmo duas vezes e o dobro em 154; são 566.204 ticks por quadro,
+>   e 263 linhas de 3.413 ciclos a 53.693.175 Hz dão 566.204,5. Um ciclo da
+>   janela dura **1,287 s** (`layout.FRAME_TICKS`, `layout.CONSOLE_CLOCK`). E o
+>   jogo apresenta **34** imagens por ciclo — uma por passada, de novo.
+> - **Trocar um valor não mexe na caminhada.** Em `NAT`, `BOOTS` e `SKIN`,
+>   nos dois slots, as 26 montagens de pose depois da troca são as da corrida
+>   sem ela, número de quadro e par (`layout.WALK_ON_VALUE`).
+> - **Mas o cursor mexe.** Nas cinco linhas de cabeça a caminhada anda até o
+>   quadro 12 e **para** ali, lendo-o inteiro; ao sair, a primeira passada lê
+>   o 13 (`layout.WALK_HELD_ROWS`, `WALK_HELD_FRAME`). Em `BOOTS` ela continua.
+>   Em `FOOT` o jogo toca **outra animação**, a entrada 147, que a janela não
+>   modela e diz que não modela (`layout.WALK_OTHER_ANIMATION`). A frase da
+>   task que previa "a animação anda com a câmera que a linha pede" nas linhas
+>   de cabeça estava errada: lá o boneco não anda, gira.
+> - **A silhueta fecha no ciclo.** Em oito passadas por slot, as duas metades
+>   do ciclo incluídas, a melhor passada fica a 13–15% da tinta do jogo, dentro
+>   dos 25% da [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), a
+>   1–3 passadas da nomeada (`confront.py --silhouette`).
+> - **Aberto:** o **giro** do modelo nas linhas de cabeça (medido na
+>   [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md)) — a
+>   janela segura o quadro 12 sem girar — e a animação de `FOOT`.
 
 ### 10.4 Como se verifica
 

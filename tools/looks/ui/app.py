@@ -35,11 +35,23 @@ nobody could type into.  A part may carry a count -- `Right x41` is forty-one
 Rights, the one repetition form `screen.parse_keys` takes (CORR-LOOKS-082), and
 what keeps a sequence that walks a row to its end from being spelled out.
 
+## The walk, and why a picture stands still
+
+In the screen the panel WALKS by default (LOOKS-TASK-33): `Space` pauses, `.`
+steps one pass.  A picture cannot walk, and a gate needs the same picture
+twice, so `--smoke` and `--screenshot` draw the load's own pass standing still
+unless asked otherwise: `--frame N` stands on pass N of the measured cycle, and
+`--animate-for SECONDS` lets the clock run that long first and reports how far
+it got.  `--walk-keys pause,step` sends the two walk keys the way `--keys`
+sends the arrows.
+
 Usage:
     <venv>/python tools/looks/ui/app.py --smoke
     <venv>/python tools/looks/ui/app.py --state 1 --visible
     <venv>/python tools/looks/ui/app.py --keys "Down x6,Right x41" \\
         --screenshot out.png
+    <venv>/python tools/looks/ui/app.py --frame 17 --screenshot pass17.png
+    <venv>/python tools/looks/ui/app.py --animate-for 2.574 --smoke
     <venv>/python tools/looks/ui/app.py --looks A-I3-A-F-A --screenshot out.png
     <venv>/python tools/looks/ui/app.py --looks A-A1-A-A-A --wireframe \\
         --screenshot wire.png
@@ -59,7 +71,7 @@ import scene as core  # noqa: E402
 from PySide6 import QtCore, QtGui, QtWidgets  # noqa: E402
 import viewer as viewer_module  # noqa: E402
 from viewer import Viewer  # noqa: E402
-from looks_set import KEYS, LooksSet, SCALE  # noqa: E402
+from looks_set import KEYS, LooksSet, SCALE, WALK_KEYS  # noqa: E402
 
 OFF_THE_DESKTOP = -32000  # not-an-address: the parking spot CLAUDE.md names
 DEFAULT_TUPLE = "A-A1-A-A-A"
@@ -194,6 +206,42 @@ def _send_keys(app: QtWidgets.QApplication, window: LooksSet,
     return moved
 
 
+def _send_walk_keys(app: QtWidgets.QApplication, window: LooksSet,
+                    names: list) -> None:
+    """The walk's two keys as Qt key events, like `_send_keys` the arrows."""
+    where = {name: key for key, name in WALK_KEYS.items()}
+    for name in names:
+        for kind in (QtCore.QEvent.Type.KeyPress,
+                     QtCore.QEvent.Type.KeyRelease):
+            app.sendEvent(window, QtGui.QKeyEvent(
+                kind, where[name], QtCore.Qt.KeyboardModifier.NoModifier))
+        app.processEvents()
+
+
+def _walk_line(window: LooksSet) -> None:
+    """The walk as the window has it: the gate reads this line."""
+    seen = window.walk_report()
+    if seen is None:
+        print("  walk: none -- %s" % window.walk_note)
+        return
+    print("  walk: pass %d (%d of the cycle's %d), visit %d, first slot %d, "
+          "%s%s; %.3f frame(s) a second, a cycle of %d frame(s) lasts %.3f s;"
+          " %d pass change(s) drawn"
+          % (seen["pass"], seen["pass"] % seen["passes"], seen["passes"],
+             seen["visit"], seen["first_slot"],
+             "running" if seen["running"] else "still",
+             ", held" if seen["held"] else "", seen["rate"], seen["frames"],
+             seen["cycle_seconds"], seen["drawn"]))
+    other = core.walk_other_animation()
+    if window.state.row in other:
+        print("  walk note: on %s the game plays animation %s instead, and "
+              "this window keeps walking" % (window.state.row,
+                                              other[window.state.row]))
+    if window.state.row in core.walk_held_rows():
+        print("  walk note: on %s the game also turns the model, and this "
+              "window does not" % window.state.row)
+
+
 def _screen_report(window: LooksSet, moved: list) -> dict:
     """What the screen shows, in the shape `ui_check.py` parses."""
     seen = window.report()
@@ -244,13 +292,28 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
             print("app: skipped -- %s" % exc)
             return core.SKIP
     # The panel opens with the figure ASSEMBLED, which is what LOOKS-TASK-27
-    # delivers: `--frame` names another frame of the walk, and the shelf is
-    # still there behind `S` for looking at one piece.
-    builder = core.Builder(image, state.figure(),
-                           core.REFERENCE_FRAME if args.frame is None
-                           else args.frame)
+    # delivers, and WALKING, which is LOOKS-TASK-33's: `--frame` names a pass
+    # of the measured cycle and stands on it.  Without the cycle the panel
+    # stands on the file's frame 0 and says why -- and `--frame` is refused,
+    # because a pass of a cycle nobody measured is a pose invented here.
+    builder = core.Builder(image, state.figure(), core.REFERENCE_FRAME)
+    clock, walk_note = None, None
+    try:
+        clock = core.WalkClock(core.walk_cycle(int(state.slot)),
+                               running=False)
+        builder.walking = True
+        if args.frame is not None:
+            clock.show_pass(args.frame)
+    except core.BadScene as exc:
+        if args.frame is not None:
+            print("app: --frame %d refused -- %s" % (args.frame, exc),
+                  file=sys.stderr)
+            return 2
+        clock, walk_note = None, str(exc)
+        builder.walking = False
 
-    window = LooksSet(state, builder, args.scale)
+    window = LooksSet(state, builder, args.scale, clock=clock)
+    window.walk_note = walk_note
     window.viewer.shelved = False
     # The panel draws with the camera the game projects with, when there is a
     # measured one on disc.  Without it the window says so and keeps the v1
@@ -269,11 +332,27 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
     _settle(app, window)
     window.setFocus()
     moved = _send_keys(app, window, buttons)
+    # A person looking gets the walk; a picture stands still unless asked to
+    # run for a while first -- a gate needs the same picture twice.
+    pictures = args.smoke or args.screenshot
+    if clock is not None and args.frame is None \
+            and (not pictures or args.animate_for):
+        window.animate(True)
+    if args.animate_for:
+        deadline = window.now() + args.animate_for
+        while window.now() < deadline:
+            app.processEvents(QtCore.QEventLoop.ProcessEventsFlag.AllEvents,
+                              5)
+    if args.walk_keys:
+        _send_walk_keys(app, window, args.walk_keys.split(","))
+    if pictures and not args.walk_keys:
+        window.animate(False)
     _settle(app, window)
 
     if window.drawn is not None:
         _report(window.viewer, window.drawn)
     _screen_report(window, moved)
+    _walk_line(window)
 
     if args.screenshot:
         picture = window.picture()
@@ -326,8 +405,15 @@ def main(argv=None) -> int:
                         help="degrees around the figure; the default faces it")
     parser.add_argument("--pitch", type=float, default=0.0)
     parser.add_argument("--frame", type=int, default=None,
-                        help="pose the figure by this frame of the screen's "
-                             "animation; without it the pieces sit on a shelf")
+                        help="in the screen, stand on this pass of the "
+                             "measured walk (0..33); with --looks, pose the "
+                             "figure by this frame of the file's animation, "
+                             "and without it the pieces sit on a shelf")
+    parser.add_argument("--animate-for", type=float, default=None,
+                        metavar="SECONDS",
+                        help="let the walk run this long before the report")
+    parser.add_argument("--walk-keys", default=None,
+                        help="the walk's keys to send, like pause,step")
     parser.add_argument("--piece", choices=("all", "head"), default="all",
                         help="head draws the section the tuple actually "
                              "changes, and nothing else")

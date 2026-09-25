@@ -39,7 +39,12 @@ e os termos que a disparam.
     animação avança no meio dela —, cortados numa peça que muda com a fase:
     comparar os pares peça a peça gastou 80 passadas procurando um corte que
     não voltava. O que nomeia a pose é o **conjunto de quadros**
-    (`oracle._stature_frames`).
+    (`oracle._stature_frames`). **A causa não era o valor**, e isso foi
+    medido depois: trocar valor em `NAT`, `BOOTS` e `SKIN` deixa as 26
+    montagens de pose iguais às da corrida sem troca, número de quadro e par
+    (`oracle.py --rhythm`). Quem desloca a fase é o **caminho do cursor** até
+    `HEIG`, que atravessa as cinco linhas de cabeça — lá a caminhada para no
+    quadro 12 e volta do 13 (armadilha 101, LOOKS-TASK-33).
 74. **No goleiro, as peças do quadro 0 não são as do arquivo** — com os
     ângulos do scratchpad **iguais** aos do par. É a volta do ciclo, onde o jogo
     mistura com o quadro anterior (a média da visita que abre um lado, medida
@@ -149,6 +154,34 @@ e os termos que a disparam.
     não falha do leitor, desde que o controle da comparação feche no resto —
     e aqui é mais que isso: **não está no disco porque não pode estar**, e
     procurar mais no disco era trabalho perdido.
+103. **Tinta de painel comparada entre duas poses mede a pose.** Com o painel
+    andando, as fotos de estatura do `looks_ui` saíam em passadas diferentes:
+    as sem tecla na passada da carga, as de `HEIG` na que o cursor deixou
+    depois de atravessar as linhas de cabeça. A largura de 210 cm contra 175
+    deu 1,411 onde a regra dá 1,200. Quem compara tinta entre fotos fixa a
+    passada (`--frame 0`), e a cópia plantada leva `work/looks-walk/` junto,
+    senão o `--frame` é recusado e o controle fica vermelho pela razão errada
+    (LOOKS-TASK-33).
+102. **Nem os contadores do console nem o relógio de parede dizem o que é um
+    tick.** O `global_tick_counter` do fork conta ticks, mas a unidade é
+    afirmação: os timers raiz não testemunham — o jogo os programa, e num
+    ciclo o timer 1 contou 523 HBlanks num state e 65.463 no outro —, e o
+    relógio de parede também não: rodando livre a velocidade 1, deu 33.857.860
+    ticks por segundo numa corrida e 20.743.364 na seguinte, com 195 quadros
+    onde a primeira teve 302, porque o host não acompanhou. Quem testemunha é
+    o **padrão de vídeo**: o GPU diz NTSC progressivo, e 263 linhas de 3.413
+    ciclos a 53.693.175 Hz dão 566.204,5 ticks, contra 566.204 medidos
+    (`oracle.py --rhythm`, LOOKS-TASK-33).
+101. **Nas cinco linhas de cabeça a caminhada PARA — e não na hora.** Com o
+    cursor em `SKIN`, `HAIR`, `H.COL`, `FACE` ou `H.F.COL.`, o jogo lê os doze
+    pares do quadro 12, inteiro, passada após passada; em `BOOTS`, que também
+    move a câmera, ela continua. Mas ela **anda até o 12** antes de parar:
+    lida 28 quadros depois da tecla, `SKIN` ainda andava, e o primeiro
+    levantamento chamou isso de ilegível. Saindo da linha, a primeira passada
+    já lê o quadro 13, cada passada um quadro inteiro. E em `FOOT` o jogo toca
+    **outra animação**, a entrada 147 do cabeçalho, que passa do quadro 43 —
+    não modelada. Quem mede é `oracle.py --rhythm`, cada linha a partir do
+    `load_state` e lida 120 quadros depois de chegar (LOOKS-TASK-33).
 100. **`attempt(nome, Exceção, lambda: ...)` não afirma nada.** No
     `harness`, quem exige recusa é `refuses(nome, fn, trecho, tipo)`; o
     `attempt(nome, fn, default)` **roda** `fn` e só reporta exceção

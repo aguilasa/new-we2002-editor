@@ -824,8 +824,9 @@ uniforme do time (task 30), o painel e a mobília medidos e pintados (task
 escrito com a fonte do jogo, no lugar em que o jogo o escreve (tasks 37 e
 38), e a ajuda medida — ela vem da **ROM do console**, não do disco, e por
 isso a janela a mantém numa fonte de apoio (task 39), o close-up por linha
-(task 40) e o ciclo da caminhada medido e reproduzido do arquivo (task 32);
-falta a janela animada e o fechamento (tasks 33 a 35).
+(task 40), o ciclo da caminhada medido e reproduzido do arquivo (task 32) e
+o painel andando no ritmo medido do jogo — `Space` pausa, `.` anda uma
+passada (task 33); falta o goleiro conferido e o fechamento (tasks 34 e 35).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
@@ -879,7 +880,8 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --camera [SLOT [LINHA]]` | a câmera do jogo lida do GTE — `H`, os deslocamentos (zero nesta tela) e a matriz —, em `work/looks-camera/`; com `LINHA` (ex.: `HAIR`) mede a câmera do close-up |
 | `python tools/looks/oracle.py --closeups [SLOT]` | anda as doze linhas e diz **quais aproximam** a câmera do painel — seis, e uma delas é `BOOTS` —, gravando a câmera de cada uma em `work/looks-camera/slotN-LINHA.json` |
 | `python tools/looks/confront.py --silhouette-closeups [SLOT]` | o close-up de cada linha que aproxima contra o nosso, **sem ajustar translação**: o eixo e a translação são os medidos, e a câmera de corpo inteiro na mesma foto é o controle |
-| `python tools/looks/confront.py --silhouette` / `--silhouette-styles` | a nossa silhueta contra a do jogo: no corpo inteiro testemunha a **pose**; no close-up, três estilos de cabelo andados no jogo, cada foto escolhendo o próprio |
+| `python tools/looks/oracle.py --rhythm [SLOT]` | o ritmo da caminhada em ticks do console (59,817 quadros por segundo, 77 quadros por ciclo) e o que o passo faz ao trocar um valor — continua — ou ao cruzar as linhas de cabeça — segura no quadro 12 |
+| `python tools/looks/confront.py --silhouette` / `--silhouette-styles` | a nossa silhueta contra a do jogo: no corpo inteiro testemunha a **pose**, em oito passadas do ciclo por slot; no close-up, três estilos de cabelo andados no jogo, cada foto escolhendo o próprio |
 | `python tools/looks/oracle.py --stature [SLOT]` | o que `HEIG` e `BODY` fazem: o vetor de escala, a câmera e as peças contra a regra do `stature.py`, nos mesmos quadros da caminhada, e todos os valores das duas linhas |
 | `python tools/looks/confront.py --silhouette-stature [SLOT]` | a silhueta do jogo andado às pontas de `HEIG` e a dois `BODY`, contra a nossa com a câmera daquela estatura |
 | `python tools/looks/oracle.py --kit [SLOT]` | qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer do console |
@@ -919,8 +921,9 @@ Cinco coisas que custam tempo se descobertas tarde:
   pelo `layout.KIT_ON_SCREEN`. Antes disso 237 primitivas do corpo saíam
   cinzas, e o cinza era medição, não defeito. A
   pose vem do `ANIME.BIN` (tasks 24 a 26) e desde a task 27 o painel abre com
-  ela: `ui/app.py --frame N` escolhe o quadro, e a prateleira da v1 continua
-  atrás do `S`.
+  ela: `ui/app.py --frame N` escolhe a passada N (0 a 33) do ciclo medido e
+  desenha parado — com `--looks`, continua sendo o quadro do arquivo —, e a
+  prateleira da v1 continua atrás do `S`.
 - **Há duas câmeras na tela, e a do close-up gira o modelo.** Com uma linha de
   cabeça sob o cursor o jogo aproxima a câmera na cabeça e gira o boneco, um
   ângulo por captura que a carga de câmera do GTE **não** traz — a câmera que

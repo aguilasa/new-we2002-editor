@@ -1122,6 +1122,32 @@ had to be one number came out as four different ones and looked like no bridge
 at all, when what it is is a lag with a known ceiling.
 """
 
+WALK_SILHOUETTE_FRAMES = (60, 70, 79, 89, 99, 108, 118, 128)
+"""Counted frames the walk is photographed at: eight passes of one cycle.
+
+Sixty on, for the reason `SILHOUETTE_FRAMES` starts there -- the screen is
+still settling before it -- and then every nine or ten frames across one cycle
+of 77, so the eight name eight different passes spread over both halves of the
+walk, the mirrored one included (LOOKS-TASK-33).  Criterion 4 of that task asks
+for at least eight N of the cycle in both states, and a model that only
+reproduced the file's own frames would be caught on the half that mirrors.
+"""
+
+PASS_LAG = 3
+"""How many passes the PICTURE may trail the pass the frame number names.
+
+**Written after it was measured, and the measurement is why it is three.**
+The stop is at the pose build of the pass under way, and the frame number
+there names that pass -- or the one before, when the stop falls before the
+pass's first matrix load, which is where `--walk` read the number.  The
+picture is one of the two frame buffers (`still_frame` takes the one the
+screen's border rule finds whole), and those hold the two passes finished
+before it.  So the picture is one to three passes behind the name: measured
+on 2026-09-25, 1, 2 and 3 over the sixteen comparisons of both states, eight
+of them at 1.  The sweep either side is eight passes, so a model that matched
+the wrong part of the cycle would still land outside this.
+"""
+
 MATCH_SHARE = 0.25
 """The most of the game's own ink the best match may differ by.
 
@@ -1466,6 +1492,92 @@ def _judged(label, theirs, named, cycle, data, text, figure, camera, size,
           "%d (%.0f%%); %s scores %d"
           % (label, named, best, behind, scores[best], ink,
              100.0 * scores[best] / ink, wrong_text, wrong_score))
+    return problems
+
+
+def walk_photo(game, slot, counted, oracle, table):
+    """(frame number, the panel's mask) at counted *counted*, on the walk.
+
+    `game_at` stops at `layout.ANIME_UNPACK`, and that is ONE of the ten
+    unpack variants: on the walk's mirrored half and on most frames of the
+    first it is never run, so the stop lands on the next pass that does use
+    it -- measured, counted frames 60, 108 and 128 all stopped at frame 13,094
+    or 13,017 and photographed the same pass.  This stops at the pose build
+    (`layout.ANIME_BUILD`), which every variant reaches, reads the frame
+    number there, and lets the frame finish before the dump, as `game_at`
+    does.
+    """
+    import layout
+    import screen as screen_module
+    import who_writes
+
+    oracle.restore_state(slot, verbose=False)
+    game.load_looks(slot, label="walk-silhouette-%d-%d" % (slot, counted))
+    game.step(counted)
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.ANIME_BUILD))
+    try:
+        client.call("continue")
+        if not oracle._wait_for_hit(game, oracle.WATCH_SECONDS):
+            raise ConfrontError("the pose build at %s never ran at frame %d"
+                                % (who_writes.hx(layout.ANIME_BUILD),
+                                   counted))
+        number = client.call("get_status")["frame_number"]
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+        except Exception:  # noqa: BLE001
+            pass
+    game.step(1)
+    frame = still_frame(game, table["display"], oracle, screen_module)
+    return number, panel_mask(frame, table["regions"]["panel"]["native"])
+
+
+def _judged_walk(label, theirs, named, cycle, data, unposed, camera, size,
+                 scene, offsets, key) -> list:
+    """One picture against the passes around the one the frame number names.
+
+    The same four questions as `_judged`, asked of the WALK: our side is the
+    pass `scene.walk_scene` draws -- what the window draws for `--frame N` --
+    and the sweep runs over passes of the cycle, the mirrored half included.
+    """
+    scores = {}
+    for step in range(-NEIGHBOURS, NEIGHBOURS + 1):
+        at = (named + step) % cycle.passes
+        drawn = scene.walk_scene(data, unposed.values, unposed.figure,
+                                 cycle.visit + at, cycle.first_slot,
+                                 unposed=unposed)
+        centre = fit_centre(theirs, scene.projected_box(drawn, camera), size)
+        scores[at] = scene.masks_differ(
+            theirs, scene.silhouette(drawn, camera, size, centre))
+    best = min(scores, key=scores.get)
+    behind = (named - best) % cycle.passes
+    offsets[key] = behind
+    ink = sum(theirs)
+    problems = []
+    if behind > PASS_LAG:
+        problems.append(
+            "%s: the frame number names pass %d and the picture matches pass "
+            "%d, %d behind -- over the %d a one-frame lag can be"
+            % (label, named, best, behind, PASS_LAG))
+    if scores[best] > ink * MATCH_SHARE:
+        problems.append(
+            "%s: the best silhouette is %d pixel(s) from the game's %d of ink "
+            "(%.0f%%), over the %.0f%% a matching figure takes"
+            % (label, scores[best], ink, 100.0 * scores[best] / ink,
+               100.0 * MATCH_SHARE))
+    if scores[best] * MATCH_MARGIN > max(scores.values()):
+        problems.append(
+            "%s: the best of the sweep beats the worst by only %.1fx, under "
+            "the %.1fx a real minimum takes"
+            % (label, max(scores.values()) / float(scores[best] or 1),
+               MATCH_MARGIN))
+    print("    %-22s names pass %2d; best at pass %2d, %d behind, %d of %d "
+          "(%.0f%%); the worst of the sweep %d"
+          % (label, named, best, behind, scores[best], ink,
+             100.0 * scores[best] / ink, max(scores.values())))
     return problems
 
 
@@ -1859,14 +1971,22 @@ def check_closeup_cameras(slots=(2, 1), verbose=True) -> int:
     return 1 if problems else 0
 
 
-def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
+def check_silhouette(slots=(2, 1), frames=WALK_SILHOUETTE_FRAMES,
                      verbose=True) -> int:
-    """`--silhouette [SLOT]`: our shape against the game's, with the camera.
+    """`--silhouette [SLOT]`: our shape against the game's, pass by pass.
 
     The measurement colour could not make (section 6 (h)): a histogram tells
     skin from skin and says nothing about which MESH was drawn.  A silhouette
     does, and it only means anything once the projection is the game's -- which
     is what `oracle.py --camera` measured and this reads off disc.
+
+    **Since LOOKS-TASK-33 it judges the WALK**, at the eight counted frames of
+    `WALK_SILHOUETTE_FRAMES`: the game photographed there against our figure in
+    the pass the emulator's frame number names (`scene.pass_at_frame`), drawn
+    by `scene.walk_scene` -- the pose the window draws for `--frame N` -- and
+    swept over the passes either side.  Until then it swept the seventeen
+    frames of the file as they are, which a walk mirrored on its second half
+    is not.
 
     Two controls, both before any comparison:
 
@@ -1875,13 +1995,10 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
       **a different counted frame** -- it has to differ, or the capture is
           reading a constant and the first control passes perfectly.
 
-    And what is asserted is not "the difference is small".  It is that the
-    frame of ANIME.BIN the game's OWN pair names is the frame whose silhouette
-    matches best, at the same offset every time: the sweep looks NEIGHBOURS
-    frames either side, and a bridge that named the wrong frame would show up
-    as a different winner here and there rather than as one constant.
+    And what is asserted is the threshold of LOOKS-TASK-28: the best pass
+    within `MATCH_SHARE` of the game's ink, that pass within `PASS_LAG` of the
+    one named, and a real minimum over the sweep (`MATCH_MARGIN`).
     """
-    import anime
     import iso_source
     import layout
     import oracle
@@ -1894,52 +2011,53 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
         data = {name: disc.read(name)
                 for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
                              layout.ANIME)}
-    entry = anime.header(data[layout.ANIME])[layout.ANIME_SCREEN_ENTRY]
-    # The walk is a CYCLE, so the sweep wraps: a window that ran off the end
-    # of the block raised instead of looking at the frame the game would play
-    # next, which is the frame either side of the join.
-    cycle = len(anime.block(data[layout.ANIME], entry)["frames"])
     box = table["regions"]["panel"]["native"]
     size = (box[2] - box[0] + 1, box[3] - box[1] + 1)
     print("  the panel is %dx%d native pixels, from screen.json" % size)
+    cycles = {}
+    for slot in slots:
+        try:
+            cycles[slot] = scene.walk_cycle(slot)
+        except scene.NoWalk as exc:
+            raise oracle.Unavailable(str(exc)) from None
 
     problems = []
     offsets = {}
     with oracle.Oracle(ready["cue"], verbose=verbose) as game:
         for slot in slots:
+            cycle = cycles[slot]
             print("  -- slot %d (%s) --" % (slot, oracle.SLOTS[slot]))
             camera = scene.load_camera(slot)
             state = scene.screen_state(slot)
             text, figure = state.tuple_text(), state.figure()
-            print("    the state shows %s, figure %d; H %d px"
-                  % (text, figure, camera["projection"]["H"]))
+            unposed = scene.build(data, looks.parse_tuple(text), figure)
+            print("    the state shows %s, figure %d; H %d px; the cycle opens "
+                  "on visit %d, pair slot %d, at frame %d"
+                  % (text, figure, camera["projection"]["H"], cycle.visit,
+                     cycle.first_slot, cycle.base))
 
-            theirs, plays = {}, {}
-            named, first = game_at(game, slot, frames[0], oracle, anime,
-                                   data[layout.ANIME], entry, table)
-            twice, again = game_at(game, slot, frames[0], oracle, anime,
-                                   data[layout.ANIME], entry, table)
-            apart = scene.masks_differ(first, again)
-            if named != twice:
-                problems.append(
-                    "slot %d: frame %d read ANIME frame %d once and %d the "
-                    "next time, so the run is not repeatable"
-                    % (slot, frames[0], named, twice))
+            theirs, named = {}, {}
+            for counted in (frames[0], frames[0]) + tuple(frames[1:]):
+                number, mask = walk_photo(game, slot, counted, oracle, table)
+                at = scene.pass_at_frame(cycle, number)
+                if counted in theirs:
+                    apart = scene.masks_differ(theirs[counted], mask)
+                    if apart or named[counted] != at:
+                        problems.append(
+                            "slot %d: frame %d photographed twice differs in "
+                            "%d pixel(s), named passes %d and %d -- the run is "
+                            "not repeatable" % (slot, counted, apart,
+                                                named[counted], at))
+                    else:
+                        print("    control: frame %d captured twice, %d "
+                              "pixel(s) of ink, identical, pass %d both times"
+                              % (counted, sum(mask), at))
+                    continue
+                theirs[counted], named[counted] = mask, at
+            if any(line.startswith("slot %d:" % slot) for line in problems):
                 continue
-            if apart:
-                problems.append(
-                    "slot %d: the panel at frame %d differs from itself in %d "
-                    "pixel(s), so no difference below means anything"
-                    % (slot, frames[0], apart))
-                continue
-            print("    control: frame %d captured twice, %d pixel(s) of ink, "
-                  "identical" % (frames[0], sum(first)))
-            theirs[frames[0]], plays[frames[0]] = first, named
-            for counted in frames[1:]:
-                plays[counted], theirs[counted] = game_at(
-                    game, slot, counted, oracle, anime, data[layout.ANIME],
-                    entry, table)
-            moved = {counted: scene.masks_differ(first, theirs[counted])
+            moved = {counted: scene.masks_differ(theirs[frames[0]],
+                                                 theirs[counted])
                      for counted in frames[1:]}
             if not any(moved.values()):
                 problems.append(
@@ -1947,20 +2065,21 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
                     "capture is reading a constant"
                     % (slot, list(frames[1:]), frames[0]))
                 continue
-            print("    control: frame(s) %s differ from it by %s pixel(s)"
-                  % (list(frames[1:]),
-                     [moved[counted] for counted in frames[1:]]))
-
+            print("    control: frame(s) %s differ from frame %d by %s "
+                  "pixel(s)" % (list(frames[1:]), frames[0],
+                                [moved[counted] for counted in frames[1:]]))
+            print("    the eight frames name passes %s of %d"
+                  % ([named[counted] for counted in frames], cycle.passes))
             for counted in frames:
-                problems += _judged(
+                problems += _judged_walk(
                     "slot %d frame %d" % (slot, counted), theirs[counted],
-                    plays[counted], cycle, data, text, figure, camera, size,
+                    named[counted], cycle, data, unposed, camera, size,
                     scene, offsets, (slot, counted))
 
     if offsets:
-        print("  the picture trails the draw by %s frame(s) of the walk over "
-              "%d comparison(s), and the bound is %d"
-              % (sorted(set(offsets.values())), len(offsets), WALK_LAG))
+        print("  the picture trails the named pass by %s pass(es) over %d "
+              "comparison(s), and the bound is %d"
+              % (sorted(set(offsets.values())), len(offsets), PASS_LAG))
     for line in problems:
         print("  FAIL  %s" % line)
     print("confront --silhouette: %d problem(s) over %d slot(s)"
