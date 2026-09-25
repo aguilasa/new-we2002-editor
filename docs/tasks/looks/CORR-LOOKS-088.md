@@ -5,11 +5,11 @@ origin: LOOKS-TASK-40
 severity: medium
 files: [tools/looks/confront.py, docs/tasks/looks/40-a-camera-do-close-up.md, docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: blocked
+status: pending
 depends_on: []
 done_on: null
 done_commit: null
-unblocked_by: python tools/looks/oracle.py --check-live
+unblocked_by: null
 ---
 
 # CORR-LOOKS-088 — O gate do close-up afrouxa um limiar que a LOOKS-TASK-28 já mediu mais apertado
@@ -112,3 +112,4 @@ confront FAILED: SLPM-87056_1.sav was recorded on 'C:\\games\\ps1\\work\\we2002-
 ```
 - **pending** (2026-09-25): plan-only run claimed it before the D1 fix
 - **blocked** (2026-09-25): the Verificação needs confront.py --silhouette-closeups rerun with CLOSEUP_CAMERA_SHARE 0.25, and that command starts the emulator; no work started — unblocked by `python tools/looks/oracle.py --check-live`
+- **pending** (2026-09-25): python tools/looks/oracle.py --check-live now passes (0 failures) with WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin WE2002_LOOKS_DRIVE_IMAGE=C:/games/ps1/work/we2002-english.cue
