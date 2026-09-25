@@ -5,7 +5,7 @@ origin: LOOKS-TASK-32
 severity: low
 files: [docs/tasks/looks/32-o-ciclo-da-caminhada.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -30,19 +30,18 @@ Os gates em si estão bem — o revisor re-rodou os quatro e estão verdes na
 
 ## Evidência
 
-```text
-$ python tools/looks/selftest.py --quiet | tail -3
-  ..... rule 1 swept 27 file(s), 32555 line(s)
-  ..... 108 of 108 controls red
-looks_selftest: 0 failure(s)
+Medido na HEAD `a3e6809b`, antes da correção (saídas do `rite-reproducer`,
+registradas no Log abaixo):
 
-$ for rev in 42c23a32 6a2c16fb 7717326c; do git ls-tree -r --name-only $rev tools/looks \
-    | grep '\.py$' | grep -v '^tools/looks/layout.py$' \
-    | while read f; do git show $rev:$f | wc -l; done | awk -v r=$rev '{s+=$1} END{print r, s}'; done
-42c23a32 32555
-6a2c16fb 32555
-7717326c 31517
+```text
+$ grep -n "rule 1 swept" docs/tasks/looks/32-o-ciclo-da-caminhada.md
+258:   ..... rule 1 swept 27 file(s), 32405 line(s)
+$ python tools/looks/selftest.py --quiet | grep "rule 1 swept"
+  ..... rule 1 swept 27 file(s), 32555 line(s)
 ```
+
+O laço sobre revisões fixas de git que ficava aqui foi trocado por estes dois comandos: ele documentava o sintoma e não
+podia verificar a correção, porque revisão de git não muda.
 
 ## Causa raiz
 
@@ -82,3 +81,39 @@ $ for rev in 42c23a32 6a2c16fb 7717326c; do git ls-tree -r --name-only $rev tool
 6a2c16fb 32555
 7717326c 31517
 ```
+
+### 2026-09-25 — triagem por agente (`/rite:fix-all looks CORR-LOOKS-091 CORR-LOOKS-093`, Rite 0.9.3)
+
+Resíduo da triagem inline: as saídas da Evidência batem com as registradas, mas nenhum comando lê a task 32, onde mora o sintoma. Um `rite-reproducer` mediu na HEAD `a3e6809b`: **REPRODUCED**.
+
+```text
+$ grep -n -E "rule 1 swept|32405|32555|só\s*mudou" docs/tasks/looks/32-o-ciclo-da-caminhada.md
+254: Todos verdes sobre esta árvore; depois deles só mudou prosa.
+258:   ..... rule 1 swept 27 file(s), 32405 line(s)
+$ python tools/looks/selftest.py --quiet | grep "rule 1 swept"
+  ..... rule 1 swept 27 file(s), 32555 line(s)
+```
+
+### 2026-09-25 — correção (`/rite:fix-all looks`, Rite 0.9.3)
+
+`git diff --stat 6a2c16fb HEAD -- tools/looks` sai vazio na HEAD `a3e6809b`: o
+código sob os gates é o entregue. Na task 32, re-rodados e recolados os quatro
+gates que não precisam de emulador nem de janela (`selftest.py --quiet`,
+`cli.py check`, `anime.py --against-walk` com `WE2002_LOOKS_IMAGE` na imagem
+japonesa, `check_tasks.py`), e a frase de abertura passou a dizer data e
+árvore. O `oracle.py --walk` (emulador) e o `ui_check.py` (janela) ficaram com
+a transcrição da corrida da task, marcada como tal. A Evidência daqui trocou o
+laço sobre revisões fixas por dois comandos sobre a árvore de trabalho, com a
+saída de antes da correção.
+
+```text
+$ grep -n "rule 1 swept" docs/tasks/looks/32-o-ciclo-da-caminhada.md
+261:$ python tools/looks/selftest.py --quiet | grep -E "rule 1 swept|controls red|^looks_selftest"
+262:  ..... rule 1 swept 27 file(s), 32555 line(s)
+$ python tools/looks/selftest.py --quiet | grep "rule 1 swept"
+  ..... rule 1 swept 27 file(s), 32555 line(s)
+$ python tools/check_tasks.py | tail -1
+check: 0 error(s), 13 warning(s) in 4 cycle(s)
+```
+
+O aviso "reads a fixed git revision" desta CORR sumiu do `check_tasks.py`.

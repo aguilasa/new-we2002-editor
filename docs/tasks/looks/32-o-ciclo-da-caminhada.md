@@ -251,28 +251,49 @@ comandos: 34 de 408 exatas contra 408 de 408.
 
 ### Gates
 
-Todos verdes sobre esta árvore; depois deles só mudou prosa.
+Quatro gates re-rodados em 2026-09-25 na HEAD `a3e6809b`, cujo `tools/looks/`
+é o do commit entregue (`git diff --stat 6a2c16fb HEAD -- tools/looks` sai
+vazio), com `WE2002_LOOKS_IMAGE` na imagem japonesa; todos verdes. A
+transcrição anterior era de uma corrida no meio da task, 150 linhas de código
+antes da entrega ([CORR-LOOKS-093](/docs/tasks/looks/CORR-LOOKS-093.md)).
 
 ```text
-$ python tools/looks/selftest.py --quiet
-  ..... rule 1 swept 27 file(s), 32405 line(s)
+$ python tools/looks/selftest.py --quiet | grep -E "rule 1 swept|controls red|^looks_selftest"
+  ..... rule 1 swept 27 file(s), 32555 line(s)
   ..... 108 of 108 controls red
 looks_selftest: 0 failure(s)
 
-$ python tools/looks/cli.py check
+$ python tools/looks/cli.py check | tail -1
 cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
 
+$ python tools/looks/anime.py --against-walk
+  slot 1 (goalkeeper): 34 pass(es) of the cycle, 408 matrix(es), 17 frame(s) in the file, 77 counted frame(s) a cycle
+  408 of 408 exact, integer for integer (worst 0)
+  the 8 pass(es) asked for, spread over the 18 that no frame of the file holds (11, 13, 15, 17, 20, 22, 24, 26): worst 0 of 4096
+  control: one visit along, 34 of 408 exact
+anime --against-walk: 0 failure(s)
+  slot 2 (outfield player): 34 pass(es) of the cycle, 408 matrix(es), 17 frame(s) in the file, 77 counted frame(s) a cycle
+  408 of 408 exact, integer for integer (worst 0)
+  the 8 pass(es) asked for, spread over the 19 that no frame of the file holds (12, 14, 16, 19, 21, 23, 26, 28): worst 0 of 4096
+  control: one visit along, 34 of 408 exact
+anime --against-walk: 0 failure(s)
+
+$ python tools/check_tasks.py | tail -1
+check: 0 error(s), 13 warning(s) in 4 cycle(s)
+```
+
+Os dois abaixo **não** foram re-rodados: são a transcrição da corrida da
+própria task, na forma em que ela a colou. O `oracle.py --walk` precisa do
+emulador e o `ui_check.py` abre janela, e a re-corrida de 2026-09-25 não tinha
+nenhum dos dois à disposição. Como o `tools/looks/` não mudou desde o
+`6a2c16fb`, o que eles mediriam é o mesmo código, mas a saída é a de antes.
+
+```text
 $ python tools/looks/oracle.py --walk
 oracle --walk: 0 problem(s) over 2 slot(s)
 
-$ python tools/looks/anime.py --against-walk
-anime --against-walk: 0 failure(s)   (os dois slots)
-
 $ python tools/looks/ui_check.py
 looks_ui: 18 of 18 negative control(s) red
-
-$ python tools/check_tasks.py
-check: 0 error(s), 11 warning(s) in 4 cycle(s)
 ```
 - **Closed** — commit `6a2c16fb` (2026-09-23): feat(looks): measure the walk cycle and reproduce it from the file
   - Files (`git show --name-status 6a2c16fb`):
