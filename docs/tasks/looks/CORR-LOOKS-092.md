@@ -5,10 +5,11 @@ origin: LOOKS-TASK-32
 severity: medium
 files: [tools/looks/layout.py, tools/looks/oracle.py, docs/prompts/perfil-looks.md, docs/prompts/perfil-looks.armadilhas.md, docs/tasks/looks/32-o-ciclo-da-caminhada.md]
 resources: [emulador, save-states]
-status: pending
+status: blocked
 depends_on: []
 done_on: null
 done_commit: null
+unblocked_by: python tools/looks/oracle.py --check-live
 ---
 
 # CORR-LOOKS-092 — Recontar o 132 de 480 do par: medido 316 de 520
@@ -141,3 +142,4 @@ $ grep -rn "132 de 480\|132 of 480" --include='*.md' --include='*.py' .
 ./docs/tasks/looks/correcoes-progresso.md:111:| [CORR-LOOKS-092](/docs/tasks/looks/CORR-LOOKS-092.md) | Recontar o 132 de 480 do par: medido 316 de 520 | LOOKS-TASK-32 | medium | pending | — |
 ./tools/looks/layout.py:2067:pieces of every pass -- 480 of 480 stops over forty passes, against 132 of 480
 ```
+- **blocked** (2026-09-25): the pair counts (316 of 520 against the documented 132 of 480) can only be re-measured over forty passes in the running game, and the probe that parametrizes _walk_stops is part of the fix, not yet versioned; no work started — unblocked by `python tools/looks/oracle.py --check-live`
