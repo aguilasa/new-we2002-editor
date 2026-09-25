@@ -5,10 +5,10 @@ origin: LOOKS-TASK-40
 severity: low
 files: [docs/tasks/looks/40-a-camera-do-close-up.md, docs/tasks/looks/progresso.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-25
+done_commit: 73d81b00
 ---
 
 # CORR-LOOKS-090 — Retitular a task: a medição desmentiu 'quando a linha é de cabeça'
@@ -101,3 +101,8 @@ check: 1 error(s), 14 warning(s) in 4 cycle(s)
 
 O único erro é a tabela gerada do `progresso.md` (linha 86), que acompanha o título novo quando o
 `rite sync` rodar; a Verificação (`0 error(s)`) fecha depois disso.
+- **Closed** — commit `73d81b00` (2026-09-25): docs(looks): retitle LOOKS-TASK-40 to the measured claim
+  - Files (`git show --name-status 73d81b00`):
+    - `M docs/tasks/looks/40-a-camera-do-close-up.md`
+    - `M docs/tasks/looks/CORR-LOOKS-090.md`
+    - `M docs/tasks/looks/progresso.md`
