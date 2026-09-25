@@ -5,7 +5,7 @@ origin: LOOKS-TASK-40
 severity: low
 files: [docs/tasks/looks/40-a-camera-do-close-up.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: pending
 depends_on: []
 done_on: null
 done_commit: null
@@ -138,3 +138,4 @@ na outra cerca) e colar as doze linhas literais. Só então a Verificação dest
 CORR — `diff` vazio contra a saída do comando — se cumpre por inteiro; hoje ela
 vale para as linhas que ficaram nas cercas, que aparecem literais no commit
 `45734fe1`, e não foi rodada contra uma corrida nova.
+- **pending** (2026-09-25): the literal slot-1 lines require confront.py --silhouette-closeups, which starts the emulator; rerun on a machine with duckstation and paste the tool's own output; partial work in 214af796
