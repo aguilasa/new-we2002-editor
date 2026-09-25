@@ -5,7 +5,7 @@ origin: LOOKS-TASK-40
 severity: low
 files: [docs/tasks/looks/40-a-camera-do-close-up.md, docs/tasks/looks/progresso.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -76,3 +76,28 @@ $ sed -n '86p' docs/tasks/looks/progresso.md
 $ grep -n "^67\. " docs/prompts/perfil-looks.md
 618:67. **A câmera do painel muda com a linha sob o cursor, e são seis linhas,
 ```
+
+### 2026-09-25 — triagem inline (`/rite:fix-all looks CORR-LOOKS-089 CORR-LOOKS-090`, Rite 0.9.1)
+
+**REPRODUCED**, decidido inline por `rite reproduce CORR-LOOKS-090 --cycle looks --json` na HEAD `da9c76c5`. Saída idêntica à da entrada anterior.
+
+### 2026-09-25 — correção (worker, `/rite:fix-all looks CORR-LOOKS-089 CORR-LOOKS-090`, Rite 0.9.1)
+
+Linha 3 do frontmatter de `docs/tasks/looks/40-a-camera-do-close-up.md` trocada pela afirmação
+medida, alinhada com a linha da Fase 10 do `progresso.md` ("seis das doze aproximam"). O H1
+(`# LOOKS-TASK-40: A câmera do close-up`) não repetia a suposição e ficou como estava; Contexto
+e Log da task não foram reescritos.
+
+```text
+$ sed -n '3p' docs/tasks/looks/40-a-camera-do-close-up.md
+title: "A câmera do close-up — o painel aproxima nas seis linhas em que o jogo aproxima"
+$ grep -rn "linha é de cabeça" docs/tasks/looks/40-a-camera-do-close-up.md; echo "rc=$?"
+rc=1
+$ python tools/check_tasks.py
+ERROR docs/tasks/looks/progresso.md: generated table out of sync with item frontmatter (run: rite.py sync)
+... (14 WARN pré-existentes: CORR-LOOKS-092/093 e PAR-TASK-01..11)
+check: 1 error(s), 14 warning(s) in 4 cycle(s)
+```
+
+O único erro é a tabela gerada do `progresso.md` (linha 86), que acompanha o título novo quando o
+`rite sync` rodar; a Verificação (`0 error(s)`) fecha depois disso.

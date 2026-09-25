@@ -1,6 +1,6 @@
 ---
 id: LOOKS-TASK-40
-title: "A câmera do close-up — o painel aproxima na cabeça quando a linha é de cabeça"
+title: "A câmera do close-up — o painel aproxima nas seis linhas em que o jogo aproxima"
 type: implementação
 category: render
 phase: 10
