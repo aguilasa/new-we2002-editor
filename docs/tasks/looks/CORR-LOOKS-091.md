@@ -5,7 +5,7 @@ origin: LOOKS-TASK-40
 severity: low
 files: [docs/tasks/looks/40-a-camera-do-close-up.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -88,3 +88,53 @@ $ WE2002_LOOKS_IMAGE=... WE2002_LOOKS_DRIVE_IMAGE=... python tools/looks/confron
 confront FAILED: SLPM-87056_1.sav was recorded on 'C:\\games\\ps1\\work\\we2002-english.cue', and this cycle drives '...'.  The file name cannot tell you this: both releases boot the serial SLPM-87056, so a state made on the Japanese disc carries the same name and brings unreadable menus with it.
 [exit 1]
 ```
+
+### 2026-09-25 — triagem inline (`/rite:fix-all looks CORR-LOOKS-091 CORR-LOOKS-093`, Rite 0.9.3)
+
+**REPRODUCED**, decidido inline por `rite reproduce CORR-LOOKS-091 --cycle looks --json` na HEAD `a3e6809b`: `sed -n '118,126p'` ainda mostra a glosa `-- slot 1 (goalkeeper) --  (o pior caso dos dois slots: SKIN, 402 de 1922, 21%, controle 2,5x)` e as linhas elididas com `...`. O `confront.py` do emulador não rodou (placeholder `...` nas variáveis) e não é preciso para decidir.
+
+### 2026-09-25 — execução (`/rite:fix-all looks CORR-LOOKS-091 CORR-LOOKS-093`, Rite 0.9.3)
+
+**Correção parcial.** A glosa saiu da cerca e as linhas elididas também, mas as
+seis linhas do slot 1 **não** foram coladas, porque nenhuma cópia literal delas
+existe e a ferramenta não pôde rodar.
+
+- O `confront.py --silhouette-closeups` abre `oracle.Oracle(...)` dentro do
+  `check_closeup_cameras`, ou seja, sobe o emulador, e este worker não tinha o
+  recurso `duckstation`. O `oracle.py --closeups` idem.
+- Não há transcrição completa guardada: `grep -rl "with its own camera" docs`
+  acha só a task 40, a CORR-LOOKS-088 e esta CORR, e `git log -S "402 of 1922"`
+  só o commit de revisão `7717326c`. A linha `SKIN` do slot 1 aparece ali com
+  recuo de 0 e de 2 espaços, e a ferramenta imprime 4 (`"    %-9s walk frame
+  ..."`): foi reescrita, não capturada, e não conta como literal. Nada em
+  `work/` guarda a saída.
+
+O que mudou em `/docs/tasks/looks/40-a-camera-do-close-up.md`:
+
+- a frase do "pior caso" saiu da cerca e virou prosa acima dela;
+- as cinco linhas do slot 2 com `...` saíram da cerca e os números delas
+  viraram prosa; na cerca ficaram só as quatro linhas guardadas inteiras
+  (cabeça, slot 2, controle, `BOOTS`);
+- a linha final `confront --silhouette-closeups: 0 problem(s) over 2 slot(s)`
+  saiu da cerca junto com o slot 1, porque abaixo do `BOOTS` do slot 2 ela
+  esconderia as linhas que faltam, e virou prosa;
+- a prosa acima da cerca do `--closeups` diz agora o que falta nela (`NAT`,
+  `BODY`, `AGE` e o slot 1 inteiro).
+
+```text
+$ python - (as cercas do bloco `### Evidência`, procurando `...` ou a glosa)
+2 fences; lines with elision or gloss: []
+$ python tools/looks/selftest.py --quiet | tail -3
+  ..... 108 of 108 controls red
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+$ python tools/check_tasks.py | tail -1
+check: 0 error(s), 13 warning(s) in 4 cycle(s)
+```
+
+**Falta**, e só com o emulador: rodar `python tools/looks/confront.py
+--silhouette-closeups` (e o `oracle.py --closeups`, para as linhas que faltam
+na outra cerca) e colar as doze linhas literais. Só então a Verificação desta
+CORR — `diff` vazio contra a saída do comando — se cumpre por inteiro; hoje ela
+vale para as linhas que ficaram nas cercas, que aparecem literais no commit
+`45734fe1`, e não foi rodada contra uma corrida nova.

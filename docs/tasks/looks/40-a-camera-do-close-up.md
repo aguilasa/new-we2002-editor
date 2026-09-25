@@ -97,6 +97,12 @@ cabeça, e volta à de corpo inteiro nas outras, como o jogo.
 
 ### Evidência
 
+As duas cercas abaixo guardam só linhas que o comando do topo imprime, e não
+todas: a transcrição completa das duas corridas não foi guardada, e as duas
+ferramentas precisam do emulador para rodar de novo. Na do `--closeups` ficam
+de fora as linhas de `NAT`, `BODY` e `AGE` — as três com a câmera da linha de
+carga, como diz a linha de resumo — e a corrida do slot 1 inteira.
+
 ```text
 $ python tools/looks/oracle.py --closeups          # os dois slots, ~3 min cada
     control: the loading row (NAT) read twice, camera identical: translation [-480, 192, 4125], H 1376
@@ -112,19 +118,26 @@ $ python tools/looks/oracle.py --closeups          # os dois slots, ~3 min cada
     6 row(s) zoom (BOOTS, FACE, H.COL, H.F.COL., HAIR, SKIN) and 6 keep the loading row's camera (DEFAUL, NAT, HEIG, BODY, AGE, FOOT)
     control: BOOTS read twice, camera identical
 oracle --closeups: 0 problem(s) over 2 slot(s)
+```
 
+Na do `--silhouette-closeups` fica a cabeça da corrida e a primeira linha do
+slot 2. As outras cinco do slot 2 foram guardadas com o meio cortado, e por
+isso saem da cerca: com a própria câmera, `FACE` erra 257 de 2505 pixels da
+faixa (10%) contra 1005 com a do corpo inteiro (3,9x); `H.COL` 299 de 2373
+(13%) contra 899 (3,0x); `H.F.COL.` 266 de 2516 (11%) contra 1016 (3,8x);
+`HAIR` 286 de 1972 (15%) contra 716 (2,5x); e `SKIN` 297 de 1897 (16%) contra
+915 (3,1x), todas na passada 12 e com a faixa a partir da linha 35. As seis
+linhas do slot 1 não foram guardadas; o pior caso dos dois slots é o `SKIN` do
+slot 1, 402 de 1922 (21%) contra 997 (2,5x), o número que a
+[`CORR-LOOKS-088`](/docs/tasks/looks/CORR-LOOKS-088.md) também registra. A
+corrida terminou com `0 problem(s) over 2 slot(s)`.
+
+```text
 $ python tools/looks/confront.py --silhouette-closeups
   the panel is 146x120 native pixels; the camera's axis falls at (240, 54) inside it
   -- slot 2 (outfield player), 6 row(s) with a camera of their own: BOOTS, FACE, H.COL, H.F.COL., HAIR, SKIN --
     control: the BOOTS close-up twice, walk frame 0 and 0, 0 pixel(s) apart
     BOOTS     walk frame  0; band from row  3:  160 of 2682 (  6%) with its own camera, 2452 with the full figure's (15.3x)
-    FACE      walk frame 12; band from row 35:  257 of 2505 ( 10%) ...,  1005 (3.9x)
-    H.COL     walk frame 12; band from row 35:  299 of 2373 ( 13%) ...,   899 (3.0x)
-    H.F.COL.  walk frame 12; band from row 35:  266 of 2516 ( 11%) ...,  1016 (3.8x)
-    HAIR      walk frame 12; band from row 35:  286 of 1972 ( 15%) ...,   716 (2.5x)
-    SKIN      walk frame 12; band from row 35:  297 of 1897 ( 16%) ...,   915 (3.1x)
-  -- slot 1 (goalkeeper) --  (o pior caso dos dois slots: SKIN, 402 de 1922, 21%, controle 2,5x)
-confront --silhouette-closeups: 0 problem(s) over 2 slot(s)
 ```
 
 **Os controles plantados.** No `looks_ui`, os dois jeitos de a janela parar de
@@ -185,7 +198,21 @@ looks_ui: 18 of 18 negative control(s) red, and the window drew every tuple it w
 
 $ python tools/looks/oracle.py --closeups
 oracle --closeups: 0 problem(s) over 2 slot(s)
+```
 
+Na do `--silhouette-closeups` fica a cabeça da corrida e a primeira linha do
+slot 2. As outras cinco do slot 2 foram guardadas com o meio cortado, e por
+isso saem da cerca: com a própria câmera, `FACE` erra 257 de 2505 pixels da
+faixa (10%) contra 1005 com a do corpo inteiro (3,9x); `H.COL` 299 de 2373
+(13%) contra 899 (3,0x); `H.F.COL.` 266 de 2516 (11%) contra 1016 (3,8x);
+`HAIR` 286 de 1972 (15%) contra 716 (2,5x); e `SKIN` 297 de 1897 (16%) contra
+915 (3,1x), todas na passada 12 e com a faixa a partir da linha 35. As seis
+linhas do slot 1 não foram guardadas; o pior caso dos dois slots é o `SKIN` do
+slot 1, 402 de 1922 (21%) contra 997 (2,5x), o número que a
+[`CORR-LOOKS-088`](/docs/tasks/looks/CORR-LOOKS-088.md) também registra. A
+corrida terminou com `0 problem(s) over 2 slot(s)`.
+
+```text
 $ python tools/looks/confront.py --silhouette-closeups
 confront --silhouette-closeups: 0 problem(s) over 2 slot(s)
 
