@@ -5,10 +5,10 @@ origin: LOOKS-TASK-40
 severity: medium
 files: [tools/looks/confront.py, docs/tasks/looks/40-a-camera-do-close-up.md, docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-25
+done_commit: 77118e44
 unblocked_by: null
 ---
 
@@ -251,3 +251,10 @@ check: 0 error(s), 13 warning(s) in 4 cycle(s)
 $ python tools/pes2/fork.py status
 no DuckStation is running
 ```
+- **Closed** — commit `77118e44` (2026-09-25): fix(looks): hold the close-up camera share to the head-band ceiling CLOSEUP_SHARE (0.25)
+  - Files (`git show --name-status 77118e44`):
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/40-a-camera-do-close-up.md`
+    - `M docs/tasks/looks/CORR-LOOKS-088.md`
+    - `M tools/looks/confront.py`
