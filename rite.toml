@@ -48,3 +48,10 @@ serialized = [
 
 [vocab]
 task_types = ["decisão", "ferramenta", "verificação", "engenharia-reversa", "closing", "projeto", "implementação", "infra", "extração", "documentação", "infraestrutura", "investigação"]
+
+[limits]
+# Measured on this repository, not inherited: a fresh reproducer costs ~85k effective tokens here
+# (large profile and plan), while holding its output inline costs far less. Break-even at 70 KB of
+# held output; re-measure with `rite tokens --suggest-limits` when the repository grows.
+# Method and numbers: the plugin's docs/tokens/2026-09-25-inline-triage-limit.md.
+inline_triage_max_output_kb = 70
