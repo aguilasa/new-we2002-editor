@@ -5,7 +5,7 @@ origin: LOOKS-TASK-40
 severity: medium
 files: [tools/looks/confront.py, docs/tasks/looks/40-a-camera-do-close-up.md, docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: pending
 depends_on: []
 done_on: null
 done_commit: null
@@ -109,3 +109,4 @@ $ WE2002_LOOKS_IMAGE=... WE2002_LOOKS_DRIVE_IMAGE=... python tools/looks/confron
 confront FAILED: SLPM-87056_1.sav was recorded on 'C:\\games\\ps1\\work\\we2002-english.cue', and this cycle drives '...'.  The file name cannot tell you this: both releases boot the serial SLPM-87056, so a state made on the Japanese disc carries the same name and brings unreadable menus with it.
 [exit 1]
 ```
+- **pending** (2026-09-25): plan-only run claimed it before the D1 fix
