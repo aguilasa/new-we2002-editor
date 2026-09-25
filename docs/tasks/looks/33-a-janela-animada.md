@@ -5,12 +5,12 @@ type: implementação
 category: render
 phase: 11
 depends_on: [LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40]
-status: in-progress
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-25
+done_commit: 7b5a01a3
 resources: [emulador, tela]
 ---
 
@@ -244,3 +244,20 @@ janela continua andando ali e diz. Os dois foram para a nota da
 negative control(s) red`; `python tools/looks/cli.py check` → `12 module(s),
 12 ok, 0 skipped, 0 failed -- ok`; `python tools/check_tasks.py` → `0
 error(s)`.
+- **Closed** — commit `7b5a01a3` (2026-09-25): feat(looks): walk the LOOKS SET panel at the game's measured rhythm
+  - Files (`git show --name-status 7b5a01a3`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/33-a-janela-animada.md`
+    - `M docs/tasks/looks/34-o-goleiro-andando.md`
+    - `M docs/tasks/looks/35-fechamento-da-v2.md`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/ui/app.py`
+    - `M tools/looks/ui/looks_set.py`
+    - `M tools/looks/ui/viewer.py`
+    - `M tools/looks/ui_check.py`
