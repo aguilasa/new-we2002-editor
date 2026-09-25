@@ -5,11 +5,11 @@ origin: LOOKS-TASK-40
 severity: low
 files: [docs/tasks/looks/40-a-camera-do-close-up.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: blocked
+status: pending
 depends_on: []
 done_on: null
 done_commit: null
-unblocked_by: python tools/looks/oracle.py --check-live
+unblocked_by: null
 ---
 
 # CORR-LOOKS-091 — O bloco de evidência mistura prosa à transcrição do comando
@@ -141,3 +141,4 @@ vale para as linhas que ficaram nas cercas, que aparecem literais no commit
 `45734fe1`, e não foi rodada contra uma corrida nova.
 - **pending** (2026-09-25): the literal slot-1 lines require confront.py --silhouette-closeups, which starts the emulator; rerun on a machine with duckstation and paste the tool's own output; partial work in 214af796
 - **blocked** (2026-09-25): the literal slot-1 lines need the tool's own output; partial work in 214af796 — unblocked by `python tools/looks/oracle.py --check-live`
+- **pending** (2026-09-25): python tools/looks/oracle.py --check-live now passes (0 failures) with WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin WE2002_LOOKS_DRIVE_IMAGE=C:/games/ps1/work/we2002-english.cue
