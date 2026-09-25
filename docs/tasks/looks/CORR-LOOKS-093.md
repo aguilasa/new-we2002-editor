@@ -5,10 +5,10 @@ origin: LOOKS-TASK-32
 severity: low
 files: [docs/tasks/looks/32-o-ciclo-da-caminhada.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-25
+done_commit: ad75e7e1
 ---
 
 # CORR-LOOKS-093 — Recolar a transcrição dos gates: ela é anterior a 150 linhas do código entregue
@@ -117,3 +117,7 @@ check: 0 error(s), 13 warning(s) in 4 cycle(s)
 ```
 
 O aviso "reads a fixed git revision" desta CORR sumiu do `check_tasks.py`.
+- **Closed** — commit `ad75e7e1` (2026-09-25): docs(looks): re-paste LOOKS-TASK-32 gate transcripts over the delivered tree
+  - Files (`git show --name-status ad75e7e1`):
+    - `M docs/tasks/looks/32-o-ciclo-da-caminhada.md`
+    - `M docs/tasks/looks/CORR-LOOKS-093.md`
