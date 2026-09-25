@@ -1691,13 +1691,18 @@ def check_closeup_styles(slots=(2, 1), verbose=True) -> int:
     return 1 if problems else 0
 
 
-CLOSEUP_CAMERA_SHARE = 0.35
+CLOSEUP_CAMERA_SHARE = CLOSEUP_SHARE
 """The most of the game's own band ink our close-up may differ by.
 
-Measured over the twelve close-ups (six rows, two slots) and written with room
-above the worst.  What it has to catch is the panel drawing a close-up row with
-the full figure's camera, which the control beside it prices at several times
-this.
+The SAME ceiling as `CLOSEUP_SHARE`, and on purpose: both count differing
+pixels over the ink of the game's `HEAD_BAND`, the same kind of count, so the
+cycle's measured ceiling for it is 0.25 and a camera's aim gets no more room
+than a hair style (CORR-LOOKS-088; it was 0.35 until then, justified against
+the whole-mask `MATCH_SHARE`, which is not this count).  Measured over the
+twelve close-ups (six rows, two slots): 5% to 21%.  What it has to catch is the
+panel drawing a close-up row with the full figure's camera -- planted, it scores
+36% to 92% (`HAIR` lowest), one point over the old 0.35 and eleven over this
+one, and the margin below reads 1.0x on all twelve.
 """
 
 CLOSEUP_CAMERA_MARGIN = 1.5
@@ -1705,7 +1710,9 @@ CLOSEUP_CAMERA_MARGIN = 1.5
 
 The control of the whole comparison, and the planted defect of LOOKS-TASK-40 in
 one number: a window that did not change camera with the row would draw exactly
-that, and a comparison that could not tell the two apart would pass it.
+that (1.0x), and a comparison that could not tell the two apart would pass it.
+Stricter than `CLOSEUP_MARGIN`'s 1.2 for the same kind of count, with the worst
+row measured at 2.5x.
 """
 
 

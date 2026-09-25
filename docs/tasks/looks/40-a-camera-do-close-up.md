@@ -86,14 +86,19 @@ cabeça, e volta à de corpo inteiro nas outras, como o jogo.
   que era mentira; agora diz `refused` com o motivo.
 - **O juiz:** `confront.py --silhouette-closeups`, uma foto por linha que
   aproxima, e o `looks_ui` andando o cursor até cada uma delas.
-- **Os limiares são novos, e por quê.** O critério pedia "dentro do limiar da
-  LOOKS-TASK-28", e os dela (`MATCH_SHARE` 0,25 sobre a máscara inteira) não
-  servem aqui: no close-up a máscara do jogo perde o corpo escuro sobre fundo
-  escuro (armadilha 68/`HEAD_BAND`), então a conta é **na faixa** da tinta,
-  como no `--silhouette-styles`. `CLOSEUP_CAMERA_SHARE` é 0,35 com o pior caso
-  medido em 21%, e `CLOSEUP_CAMERA_MARGIN` 1,5x com o pior controle em 2,5x —
-  medidos nas doze comparações e escritos com folga acima do pior, que é a
-  regra da 28.
+- **Os limiares são os da faixa da 28.** O critério pede "dentro do limiar da
+  LOOKS-TASK-28", e o que vale aqui não é o `MATCH_SHARE` dela (0,25 sobre a
+  máscara inteira): no close-up a máscara do jogo perde o corpo escuro sobre
+  fundo escuro (armadilha 68/`HEAD_BAND`), então a conta é **na faixa** da
+  tinta — a mesma conta do `--silhouette-styles`, que a 28 já limita com
+  `CLOSEUP_SHARE` 0,25 e `CLOSEUP_MARGIN` 1,2x. `CLOSEUP_CAMERA_SHARE` **é** o
+  `CLOSEUP_SHARE` (0,25, pior caso medido 21%), e `CLOSEUP_CAMERA_MARGIN` é
+  1,5x, mais apertado que o 1,2x, com o pior controle em 2,5x. Este parágrafo
+  dizia até a [CORR-LOOKS-088](/docs/tasks/looks/CORR-LOOKS-088.md) que as
+  constantes da 28 "não servem aqui" e fixava o share em 0,35 — mais frouxo
+  que o teto já medido do ciclo para a mesma contagem; com o defeito plantado
+  (`camera_file` ignorando a linha) o `HAIR` passava 1 ponto acima de 0,35 e
+  passa 11 acima de 0,25.
 
 ### Evidência
 

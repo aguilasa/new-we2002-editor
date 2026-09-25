@@ -2921,7 +2921,10 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > porque o ajuste centra o corpo inteiro no painel. Sem ajuste, na faixa da
 > tinta do jogo: **5% a 21%** com a câmera da própria linha nas doze
 > comparações (seis linhas, dois slots), contra **2,5x a 16,9x** disso com a de
-> corpo inteiro.
+> corpo inteiro. Os limiares são os da faixa: `CLOSEUP_CAMERA_SHARE` é o
+> `CLOSEUP_SHARE` de 0,25 que o `--silhouette-styles` já usa sobre a mesma
+> contagem, e `CLOSEUP_CAMERA_MARGIN` é 1,5x — o share foi 0,35 até a
+> CORR-LOOKS-088, mais frouxo que o teto medido do ciclo.
 >
 > **E a cadeia da estatura ganhou a folga do giro.** `scene.load_camera` exige
 > que a cadeia recomponha a matriz que o jogo carregou antes de compor
