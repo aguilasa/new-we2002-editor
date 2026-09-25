@@ -5,10 +5,10 @@ origin: LOOKS-TASK-40
 severity: medium
 files: [docs/tasks/looks/progresso.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-25
+done_commit: 537660fe
 ---
 
 # CORR-LOOKS-089 — Marcar a linha da Fase 10 da LOOKS-TASK-40 no progresso
@@ -100,3 +100,7 @@ $ grep -n "LOOKS-TASK-40" docs/tasks/looks/progresso.md | cut -c1-80
 $ python tools/check_tasks.py
 check: 0 error(s), 14 warning(s) in 4 cycle(s)
 ```
+- **Closed** — commit `537660fe` (2026-09-25): docs(looks): mark LOOKS-TASK-40's Fase 10 line with its measured summary
+  - Files (`git show --name-status 537660fe`):
+    - `M docs/tasks/looks/CORR-LOOKS-089.md`
+    - `M docs/tasks/looks/progresso.md`
