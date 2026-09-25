@@ -5,10 +5,10 @@ origin: LOOKS-TASK-32
 severity: medium
 files: [tools/looks/layout.py, tools/looks/oracle.py, docs/prompts/perfil-looks.md, docs/prompts/perfil-looks.armadilhas.md, docs/tasks/looks/32-o-ciclo-da-caminhada.md]
 resources: [emulador, save-states]
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-25
+done_commit: 32adb774
 unblocked_by: null
 ---
 
@@ -209,3 +209,11 @@ no DuckStation is running
 ```
 
 A única linha que o `grep` ainda acha é a citação do número antigo, de propósito, na própria nota de recontagem da task 32.
+- **Closed** — commit `32adb774` (2026-09-25): fix(looks): recount the walk watch's pair loads as 520/520 against 316/520
+  - Files (`git show --name-status 32adb774`):
+    - `M docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/32-o-ciclo-da-caminhada.md`
+    - `M docs/tasks/looks/CORR-LOOKS-092.md`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/oracle.py`
