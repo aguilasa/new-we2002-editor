@@ -3,7 +3,7 @@ id: CORR-LOOKS-089
 title: Marcar a linha da Fase 10 da LOOKS-TASK-40 no progresso
 origin: LOOKS-TASK-40
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [docs/tasks/looks/progresso.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -65,3 +65,19 @@ arquivos medidos. A linha da LOOKS-TASK-39 é da revisão dela.
 `- [ ]` para a task, e `python tools/check_tasks.py` segue em `0 error(s)`.
 
 ## Log de Execução
+
+### 2026-09-25 — triagem inline (`/rite:fix-all looks --plan`, Rite 0.8.0)
+
+**REPRODUCED**, decidido inline por `rite reproduce --all --cycle looks --json` na HEAD `de066fd5`.
+
+A linha 303 continua `- [ ]`: o sintoma. A coluna de revisão da linha 86 mudou de `pending` para `2026-09-23` desde a Evidência, o que é a revisão da task, não este defeito.
+
+```text
+$ grep -n "rite:begin\|rite:end" docs/tasks/looks/progresso.md
+48:<!-- rite:begin tasks -->
+91:<!-- rite:end -->
+$ sed -n '86p;302,303p' docs/tasks/looks/progresso.md
+| [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md) | A câmera do close-up — o painel aproxima na cabeça quando a linha é de cabeça | 10 | implementação | LOOKS-TASK-28 | done | 2026-09-23 | 2026-09-23 |
+- [ ] A origem do texto da ajuda medida, e desenhada se for do disco ([LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md)).
+- [ ] A câmera do close-up por linha de cabeça ([LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md)).
+```

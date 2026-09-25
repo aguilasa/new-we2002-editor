@@ -3,9 +3,9 @@ id: CORR-LOOKS-088
 title: "O gate do close-up afrouxa um limiar que a LOOKS-TASK-28 já mediu mais apertado"
 origin: LOOKS-TASK-40
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/confront.py, docs/tasks/looks/40-a-camera-do-close-up.md, docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -89,3 +89,23 @@ defeito plantado do `camera_file` continua vermelho nas seis linhas dos dois
 slots.
 
 ## Log de Execução
+
+### 2026-09-25 — triagem inline (`/rite:fix-all looks --plan`, Rite 0.8.0)
+
+**REPRODUCED**, decidido inline por `rite reproduce --all --cycle looks --json` na HEAD `de066fd5`.
+
+As duas primeiras saídas são as registradas, byte a byte: as constantes e a frase "os dela" continuam no lugar, e é isso o defeito. A terceira não roda aqui: `WE2002_LOOKS_*=...` é marcador, não caminho, e o `confront` recusa o save state antes de subir o emulador. Não decide nada contra a Evidência — a medição do close-up é suporte, não sintoma.
+
+```text
+$ grep -n "^HEAD_BAND = \|^CLOSEUP_MARGIN = \|^CLOSEUP_SHARE = \|^CLOSEUP_CAMERA_SHARE = \|^CLOSEUP_CAMERA_MARGIN = " tools/looks/confront.py
+1472:HEAD_BAND = 40
+1485:CLOSEUP_MARGIN = 1.2
+1502:CLOSEUP_SHARE = 0.25
+1694:CLOSEUP_CAMERA_SHARE = 0.35
+1703:CLOSEUP_CAMERA_MARGIN = 1.5
+$ grep -n "os dela" docs/tasks/looks/40-a-camera-do-close-up.md
+90:  LOOKS-TASK-28", e os dela (`MATCH_SHARE` 0,25 sobre a máscara inteira) não
+$ WE2002_LOOKS_IMAGE=... WE2002_LOOKS_DRIVE_IMAGE=... python tools/looks/confront.py --silhouette-closeups
+confront FAILED: SLPM-87056_1.sav was recorded on 'C:\\games\\ps1\\work\\we2002-english.cue', and this cycle drives '...'.  The file name cannot tell you this: both releases boot the serial SLPM-87056, so a state made on the Japanese disc carries the same name and brings unreadable menus with it.
+[exit 1]
+```

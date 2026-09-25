@@ -3,8 +3,8 @@ id: CORR-LOOKS-092
 title: "Recontar o 132 de 480 do par: medido 316 de 520"
 origin: LOOKS-TASK-32
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: [emulador]  # serialized resources this item needs (rite.toml [resources] / profile)
+files: [tools/looks/layout.py, tools/looks/oracle.py, docs/prompts/perfil-looks.md, docs/prompts/perfil-looks.armadilhas.md, docs/tasks/looks/32-o-ciclo-da-caminhada.md]
+resources: [emulador, save-states]
 status: pending
 depends_on: []
 done_on: null
@@ -112,3 +112,32 @@ ela imprime `520 of 520` e `316 of 520` contra os documentados `480 of 480` e
 `132 of 480`.
 
 ## Log de Execução
+
+### 2026-09-25 — triagem inline (`/rite:fix-all looks --plan`, Rite 0.8.0)
+
+**REPRODUCED**, decidido inline por `rite reproduce --all --cycle looks --json` na HEAD `de066fd5`.
+
+Decide pelo `grep`: `132 de 480` continua em `perfil-looks.md:512` e `layout.py:2067`. Dois dos quatro lugares da Evidência (`perfil-looks.armadilhas.md:166`, `32-o-ciclo-da-caminhada.md:149`) não saem do `grep` porque lá o número quebra linha (`132 de` / `480`) — conferido com `sed -n 166p` e `sed -n 149p`: o texto continua lá. O balanço dá 4552 nos dois slots, como registrado, e o `4362` continua em `tools/looks/oracle.py:7412` (o `WALK_CAMERA_GAP` mora no `oracle.py`, não no `layout.py` que a Correção nomeia). `run.py` e `run2.py` eram cópias de rascunho fora do repositório: o 316 de 520 só se remede com o emulador, e fica para quem corrigir.
+
+```text
+$ # cópia de rascunho do HEAD, _walk_stops parametrizado no endereço do watch,
+$ # slot 2, 40 passadas
+$ python run.py
+C:\Users\ingcvs\AppData\Local\Programs\Python\Python313\python.exe: can't open file 'C:\\github\\new-we2002-editor\\run.py': [Errno 2] No such file or directory
+[exit 2]
+$ python run2.py        # o mesmo, uma linha por passada (P = par, . = nenhum)
+C:\Users\ingcvs\AppData\Local\Programs\Python\Python313\python.exe: can't open file 'C:\\github\\new-we2002-editor\\run2.py': [Errno 2] No such file or directory
+[exit 2]
+$ python - <<'EOF'   # o balanço, de work/looks-walk/slotN.json (escrito por oracle.py --walk)  # (heredoc)
+slot 1 max rotation spread 4552
+slot 2 max rotation spread 4552
+$ grep -rn "132 de 480\|132 of 480" --include='*.md' --include='*.py' .
+./docs/prompts/perfil-looks.md:512:    outra variante, e ali são 480 de 480 paradas com par contra 132 de 480
+./docs/tasks/looks/CORR-LOOKS-092.md:3:title: "Recontar o 132 de 480 do par: medido 316 de 520"
+./docs/tasks/looks/CORR-LOOKS-092.md:14:# CORR-LOOKS-092 — Recontar o 132 de 480 do par: medido 316 de 520
+./docs/tasks/looks/CORR-LOOKS-092.md:22:`ANIME_UNPACK` nomeia o par em **132 de 480** paradas, contra 480 de 480 no
+./docs/tasks/looks/CORR-LOOKS-092.md:71:$ grep -rn "132 de 480\|132 of 480" --include='*.md' --include='*.py' .
+./docs/tasks/looks/CORR-LOOKS-092.md:112:`132 of 480`.
+./docs/tasks/looks/correcoes-progresso.md:111:| [CORR-LOOKS-092](/docs/tasks/looks/CORR-LOOKS-092.md) | Recontar o 132 de 480 do par: medido 316 de 520 | LOOKS-TASK-32 | medium | pending | — |
+./tools/looks/layout.py:2067:pieces of every pass -- 480 of 480 stops over forty passes, against 132 of 480
+```

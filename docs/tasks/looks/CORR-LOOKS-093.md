@@ -3,7 +3,7 @@ id: CORR-LOOKS-093
 title: "Recolar a transcrição dos gates: ela é anterior a 150 linhas do código entregue"
 origin: LOOKS-TASK-32
 severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [docs/tasks/looks/32-o-ciclo-da-caminhada.md]
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 depends_on: []
@@ -65,3 +65,20 @@ guarda reaproveitável é **rodar os gates por último e colar por último**.
 linha que a task cita. Hoje imprime 32555 contra os 32405 citados.
 
 ## Log de Execução
+
+### 2026-09-25 — triagem inline (`/rite:fix-all looks --plan`, Rite 0.8.0)
+
+**REPRODUCED**, decidido inline por `rite reproduce --all --cycle looks --json` na HEAD `de066fd5`.
+
+As saídas das revisões são as registradas (e sempre serão: revisão de git não muda). O sintoma em si está em `32-o-ciclo-da-caminhada.md:258`, que ainda cita `32405 line(s)` — conferido com `grep -n 32405`. O `tail -3` do selftest hoje termina em `controls: 0 failure(s)` em vez da linha `rule 1 swept`, o que muda a forma da saída, não o veredito.
+
+```text
+$ python tools/looks/selftest.py --quiet | tail -3
+  ..... 108 of 108 controls red
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+$ for rev in 42c23a32 6a2c16fb 7717326c; do git ls-tree -r --name-only $rev tools/looks \
+42c23a32 32555
+6a2c16fb 32555
+7717326c 31517
+```
