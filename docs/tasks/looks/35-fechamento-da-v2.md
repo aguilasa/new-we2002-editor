@@ -7,8 +7,8 @@ phase: 11
 depends_on: [LOOKS-TASK-23, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-34, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40]
 status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.5"
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-26
+review_commit: bff49a1c
 done_on: 2026-09-26
 done_commit: 7e462e60
 resources: [emulador, tela]
@@ -207,3 +207,4 @@ e a de forma dá 307 linhas relativas antes e depois, nenhuma nova no diff.
     - `M tools/looks/confront.py`
     - `M tools/looks/controls.py`
     - `M tools/looks/scene.py`
+- **Reviewed** (2026-09-26) at `bff49a1c`: CORR-LOOKS-098, CORR-LOOKS-099
