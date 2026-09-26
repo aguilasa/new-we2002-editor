@@ -2134,9 +2134,11 @@ Measured on 2026-09-25 (LOOKS-TASK-33) with `oracle.py --rhythm`: `frame_step`
 counted over a whole cycle of the walk (77 frames) and over two, from
 `load_state` in both slots, and the counter read before and after --
 43,597,690 and 43,597,704 ticks for the two single cycles of slot 2, which is
-566,203.8 a frame.  The HBlank timer counts 263 lines a frame over the same
-span, and the GPU reports NTSC and progressive: this is the non-interlaced NTSC
-frame, 263 lines of 2152.9 ticks, and the rate it gives is
+566,203.8 a frame.  The witness is the video standard, not a root counter:
+the GPU reports NTSC and progressive (`get_gpu_state`), and the ticks a frame
+have to be `oracle.ntsc_frame_ticks()`, the non-interlaced NTSC frame of 263
+lines of 2152.9 ticks.  The root timers were refused as a witness -- the game
+programs them (`oracle.NTSC_LINES`).  The rate it gives is
 `CONSOLE_CLOCK / FRAME_TICKS` = 59.817 frames a second.
 
 It is what the window's clock converts the walk with: the cycle is counted in

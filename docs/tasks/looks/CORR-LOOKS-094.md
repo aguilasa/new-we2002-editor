@@ -62,3 +62,15 @@ contra o `get_gpu_state`. Em `tools/looks/oracle.py`, tirar da docstring do
 imprime 2 linhas hoje e não pode imprimir nada depois do conserto.
 
 ## Log de Execução
+
+- 2026-09-26 — Reproduzido: `grep -n "HBlank" …` imprimiu as mesmas quatro
+  linhas da Evidência (`layout.py:2137`, `oracle.py:8250` com a oração falsa), e
+  `sed -n 8115,8156p tools/looks/oracle.py | grep -ci "timer\|hblank"` deu `0`:
+  o `judge_clock` não lê timer. Consertado: a docstring do `FRAME_TICKS` nomeia
+  como testemunha o padrão NTSC (`oracle.ntsc_frame_ticks()`, com o GPU em NTSC
+  progressivo por `get_gpu_state`) e diz que os timers raiz foram recusados; a
+  do `check_rhythm` troca a oração do HBlank/timer 2 pela conferência contra
+  `ntsc_frame_ticks`. Verificação: `grep -n "HBlank timer counts\|HBlank timer
+  has to" tools/looks/layout.py tools/looks/oracle.py` não imprime nada (exit
+  1). `rite gates --cycle looks`: `looks_selftest: 0 failure(s)`, 108 de 108
+  controles vermelhos.

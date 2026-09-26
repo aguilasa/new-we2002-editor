@@ -8247,10 +8247,10 @@ def check_rhythm(slot=None, verbose=True):
       **the clock** -- `frame_step` over one cycle of the walk (77 frames,
           `--walk`), twice from `load_state`, and over two: the system ticks
           have to come back the same twice and double for twice the frames,
-          the HBlank timer has to count 263 lines a frame and timer 2 the
-          same clock over eight.  The rate is `layout.CONSOLE_CLOCK` over the
-          ticks a frame, and the ticks have to be `layout.FRAME_TICKS`, which
-          is where the window reads them;
+          and with the GPU in progressive NTSC they have to be the ticks of
+          that frame (`ntsc_frame_ticks`).  The rate is `layout.CONSOLE_CLOCK`
+          over the ticks a frame, and the ticks have to be
+          `layout.FRAME_TICKS`, which is where the window reads them;
       **the step on a press** -- the pose builds after a press against the
           same builds with nothing pressed: the untouched run twice (equal),
           a run started further on (different pairs), then the cursor moved
