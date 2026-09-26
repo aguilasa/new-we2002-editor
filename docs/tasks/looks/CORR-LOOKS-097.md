@@ -5,10 +5,10 @@ origin: LOOKS-TASK-34
 severity: medium
 files: [tools/looks/confront.py, docs/tasks/looks/34-o-goleiro-andando.md, docs/tasks/looks/35-fechamento-da-v2.md]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-26
+done_commit: 9aeb050d
 ---
 
 # CORR-LOOKS-097 — Versionar a sonda por trás dos números de posição no painel
@@ -102,3 +102,9 @@ arquivos saem de um comando que roda da HEAD (por exemplo
   isso a tabela das tasks 34 e 35 foi trocada pela saída colada, não
   "confirmada". `rite gates --cycle looks` verde; `confront.py --check` 0
   falhas.
+- **Closed** — commit `9aeb050d` (2026-09-26): feat(looks): version the probe behind the panel placement numbers
+  - Files (`git show --name-status 9aeb050d`):
+    - `M docs/tasks/looks/34-o-goleiro-andando.md`
+    - `M docs/tasks/looks/35-fechamento-da-v2.md`
+    - `M docs/tasks/looks/CORR-LOOKS-097.md`
+    - `M tools/looks/confront.py`
