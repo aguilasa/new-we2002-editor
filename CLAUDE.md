@@ -884,6 +884,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/confront.py --silhouette` / `--silhouette-styles` | a nossa silhueta contra a do jogo: no corpo inteiro testemunha a **pose**, em oito passadas do ciclo por slot; no close-up, três estilos de cabelo andados no jogo, cada foto escolhendo o próprio |
 | `python tools/looks/oracle.py --stature [SLOT]` | o que `HEIG` e `BODY` fazem: o vetor de escala, a câmera e as peças contra a regra do `stature.py`, nos mesmos quadros da caminhada, e todos os valores das duas linhas |
 | `python tools/looks/confront.py --silhouette-stature [SLOT]` | a silhueta do jogo andado às pontas de `HEIG` e a dois `BODY`, contra a nossa com a câmera daquela estatura |
+| `python tools/looks/confront.py --placement [SLOT]` | **onde** a figura senta no painel, jogo contra janela, em fração do painel — o que o `--silhouette` deixa de fora de propósito; imprime, não julga |
 | `python tools/looks/oracle.py --kit [SLOT]` | qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer do console |
 | `python tools/looks/confront.py --kit-control [SLOT]` | o uniforme de outro time desenhado na mesma tupla, para medir que o kit decide a figura |
 | `python tools/looks/oracle.py --scenery [SLOT] [--write]` | os pacotes que desenham a mobília da tela, andados da lista que o quadro entrega ao GPU, e os sprites — texto, placa, título, setas — com os texels conferidos do disco contra a VRAM; o `--write` é de onde a janela pinta |
