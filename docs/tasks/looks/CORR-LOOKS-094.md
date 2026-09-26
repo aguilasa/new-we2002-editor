@@ -5,10 +5,10 @@ origin: LOOKS-TASK-33
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-26
+done_commit: 29d2b277
 ---
 
 # CORR-LOOKS-094 — Tirar das docstrings do ritmo o timer de HBlank que o código não lê
@@ -74,3 +74,8 @@ imprime 2 linhas hoje e não pode imprimir nada depois do conserto.
   has to" tools/looks/layout.py tools/looks/oracle.py` não imprime nada (exit
   1). `rite gates --cycle looks`: `looks_selftest: 0 failure(s)`, 108 de 108
   controles vermelhos.
+- **Closed** — commit `29d2b277` (2026-09-26): fix(looks): drop the HBlank timer the rhythm check does not read
+  - Files (`git show --name-status 29d2b277`):
+    - `M docs/tasks/looks/CORR-LOOKS-094.md`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/oracle.py`
