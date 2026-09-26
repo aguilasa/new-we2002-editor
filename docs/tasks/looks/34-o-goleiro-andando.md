@@ -132,20 +132,30 @@ tinta do jogo e a 1–3 passadas da nomeada, dentro do limiar de `WALK_LAG`.
 
 **Critério 4 — o que diferia, e o que não é da figura.** Nada diferiu entre as
 figuras. O que as fotos mostram diferente do jogo é **onde a figura senta no
-painel**, e isso não é da figura 1: a caixa da tinta normalizada pelo painel,
-medida nas capturas acima com um script de rascunho (bbox da tinta contra o
-fundo por linha),
+painel**, e isso não é da figura 1. A caixa da tinta em fração do painel, as
+duas máscaras pelo mesmo `panel_mask`, a janela na passada que melhor casa
+com a foto pela forma (sonda versionada na
+[`CORR-LOOKS-097`](/docs/tasks/looks/CORR-LOOKS-097.md); a tabela que estava
+aqui fora medida por um script descartável, que não foi guardado):
 
 ```
-                        esquerda  topo   direita  base
-jogo slot 1, quadro 60   0.384   0.214   0.690   0.974
-janela slot 1, passada 24 0.215  0.118   0.545   0.908
-jogo slot 2, quadro 60   0.376   0.214   0.690   0.983
-janela slot 2, passada 24 0.253  0.113   0.562   0.908
+python tools/looks/confront.py --placement
+  the panel is 146x120 native pixels, from screen.json; fractions are (left, top, right, bottom) of it
+  -- slot 2 (outfield player) --
+    control: frame 60 captured twice, 2451 pixel(s) of ink, identical
+    game,   frame  60   0.377 0.208 0.719 0.975
+    window, pass 26     0.219 0.125 0.562 0.908  (work\looks-confront\ours-placement-2-26.png)
+    the window's figure sits -0.158 across and -0.083 down of the game's, 0.783 against 0.767 tall
+  -- slot 1 (goalkeeper) --
+    control: frame 60 captured twice, 2458 pixel(s) of ink, identical
+    game,   frame  60   0.377 0.208 0.705 0.975
+    window, pass 24     0.219 0.117 0.548 0.908  (work\looks-confront\ours-placement-1-24.png)
+    the window's figure sits -0.158 across and -0.092 down of the game's, 0.792 against 0.767 tall
+confront --placement: 0 problem(s) over 2 slot(s)
 ```
 
 sai à esquerda e acima **nos dois slots**, do mesmo tanto, com o tamanho
-batendo (altura 0,76 contra 0,79). É o `scene.ROOT_AT`, que o próprio código
+batendo (altura 0,78–0,79 contra 0,77). É o `scene.ROOT_AT`, que o próprio código
 declara escolha de enquadramento — o *draw offset* do GPU não foi medido no
 ciclo —, e o `--silhouette` é livre de translação de propósito
 (`confront.fit_centre`). Não é defeito da figura 1 e não entra aqui: fica

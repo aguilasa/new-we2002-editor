@@ -37,6 +37,7 @@ Usage:
     python tools/looks/confront.py --silhouette [SLOT]          # the pose, by shape
     python tools/looks/confront.py --silhouette-styles [SLOT]   # hair, in the close-up
     python tools/looks/confront.py --silhouette-stature [SLOT]  # HEIG and BODY, by shape
+    python tools/looks/confront.py --placement [SLOT]           # where the figure sits
     python tools/looks/confront.py --kit-control    # another team's uniform scores worse
     python tools/looks/confront.py --outside [SLOT]  # our screen against the game's, outside the figure
 """
@@ -2088,6 +2089,124 @@ def check_silhouette(slots=(2, 1), frames=WALK_SILHOUETTE_FRAMES,
     return 1 if problems else 0
 
 
+PLACEMENT_FRAME = WALK_SILHOUETTE_FRAMES[0]
+"""The counted frame `--placement` photographs: the first of the walk's
+silhouette, so its pass is the one `--silhouette` already judged by shape."""
+
+
+def panel_box(mask, size) -> tuple:
+    """The ink's box as fractions of the panel: (left, top, right, bottom).
+
+    Edges, not pixel indices: the right and bottom fractions are of the pixel
+    AFTER the last one set, so a figure filling the panel reads 0 to 1.
+    """
+    import scene
+
+    found = scene.mask_box(mask, size)
+    if found is None:
+        raise ConfrontError("the mask is empty, so there is no box to place")
+    width, height = size
+    return (found[0] / float(width), found[1] / float(height),
+            (found[2] + 1) / float(width), (found[3] + 1) / float(height))
+
+
+def check_placement(slots=(2, 1), verbose=True) -> int:
+    """`--placement [SLOT]`: where the figure sits in the panel, both sides.
+
+    What `--silhouette` leaves out on purpose (`fit_centre`): that one judges
+    shape and size with the translation fitted per comparison, so a figure
+    drawn in the wrong PLACE passes it.  This prints the place.  The game's
+    panel at `PLACEMENT_FRAME`, and our window at `--scale 1 --frame N` on the
+    pass that best matches that photograph by shape -- the sweep of
+    `_judged_walk` --, both masked by `panel_mask` with the box `screen.json`
+    measured, and the ink's box as fractions of the panel (`panel_box`).
+
+    It asserts only its controls -- the game photographed twice gives the same
+    mask, and our side draws ink --; the offset between the two boxes is
+    printed, not judged, because what the place SHOULD be is the GPU's draw
+    offset, which the cycle has not measured (`scene.ROOT_AT`).  Written for
+    CORR-LOOKS-097, which found the numbers of LOOKS-TASK-34 measured by a
+    script nobody kept.
+    """
+    import iso_source
+    import layout
+    import oracle
+    import scene
+    import screen
+    import ui_check
+
+    ready = oracle.preflight()
+    table = screen.load()
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = {name: disc.read(name)
+                for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
+                             layout.ANIME)}
+    box = table["regions"]["panel"]["native"]
+    size = (box[2] - box[0] + 1, box[3] - box[1] + 1)
+    python, app = _python_and_app()
+    problems, photos = [], {}
+    with oracle.Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            photos[slot] = [walk_photo(game, slot, PLACEMENT_FRAME, oracle,
+                                       table) for _ in range(2)]
+    print("  the panel is %dx%d native pixels, from screen.json; fractions "
+          "are (left, top, right, bottom) of it" % size)
+    for slot in slots:
+        print("  -- slot %d (%s) --" % (slot, oracle.SLOTS[slot]))
+        (number, theirs), (again_number, again) = photos[slot]
+        apart = scene.masks_differ(theirs, again)
+        if apart or number != again_number:
+            problems.append("slot %d: frame %d photographed twice differs in "
+                            "%d pixel(s), frame numbers %d and %d"
+                            % (slot, PLACEMENT_FRAME, apart, number,
+                               again_number))
+            continue
+        print("    control: frame %d captured twice, %d pixel(s) of ink, "
+              "identical" % (PLACEMENT_FRAME, sum(theirs)))
+        cycle = scene.walk_cycle(slot)
+        camera = scene.load_camera(slot)
+        state = scene.screen_state(slot)
+        unposed = scene.build(data, looks.parse_tuple(state.tuple_text()),
+                              state.figure())
+        named, offsets = scene.pass_at_frame(cycle, number), {}
+        problems += _judged_walk(
+            "slot %d frame %d" % (slot, PLACEMENT_FRAME), theirs, named,
+            cycle, data, unposed, camera, size, scene, offsets, slot)
+        best = (named - offsets[slot]) % cycle.passes
+        out = os.path.join(out_dir(), "ours-placement-%d-%d.png"
+                           % (slot, best))
+        code, output = ui_check.run_app(
+            python, app, ["--state", str(slot), "--scale", "1", "--frame",
+                          str(best), "--screenshot", out],
+            ui_check.environment())
+        if code or not os.path.isfile(out):
+            problems.append("slot %d: our window did not draw pass %d -- %s"
+                            % (slot, best, output.strip()[-300:]))
+            continue
+        width, _height, channels, rows = ui_check.picture(out)
+        frame = [[tuple(row[x * channels:x * channels + 3])
+                  for x in range(width)] for row in rows]
+        ours = panel_mask(frame, box)
+        if not any(ours):
+            problems.append("slot %d: our pass %d draws no ink in the panel"
+                            % (slot, best))
+            continue
+        game_box, our_box = panel_box(theirs, size), panel_box(ours, size)
+        print("    game,   frame %3d   %.3f %.3f %.3f %.3f"
+              % ((PLACEMENT_FRAME,) + game_box))
+        print("    window, pass %2d     %.3f %.3f %.3f %.3f  (%s)"
+              % ((best,) + our_box + (os.path.relpath(out, oracle.ROOT),)))
+        print("    the window's figure sits %+.3f across and %+.3f down of "
+              "the game's, %.3f against %.3f tall"
+              % (our_box[0] - game_box[0], our_box[1] - game_box[1],
+                 our_box[3] - our_box[1], game_box[3] - game_box[1]))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("confront --placement: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
 STATURE_SHOWN = (
     ("155 cm", (("HEIG", "155 cm"),)),
     ("210 cm", (("HEIG", "210 cm"),)),
@@ -2575,7 +2694,7 @@ def reach(row: str, slots=(2, 1), verbose=True) -> int:
 
 LIVE = ("--run", "--silhouette", "--silhouette-styles",
         "--silhouette-closeups", "--silhouette-stature", "--outside",
-        "--kit-control", "--reach")
+        "--kit-control", "--reach", "--placement")
 """The commands that start the emulator, and so need Pillow here."""
 
 
@@ -2616,6 +2735,8 @@ def main(argv: list[str]) -> int:
             if argv[1] == "--silhouette-stature":
                 return check_silhouette_stature(chosen)
             return check_silhouette(chosen)
+        if len(argv) >= 2 and argv[1] == "--placement":
+            return check_placement(tuple(int(a) for a in argv[2:]) or (2, 1))
         if len(argv) >= 2 and argv[1] == "--outside":
             return check_outside(tuple(int(a) for a in argv[2:]) or (2, 1))
         if len(argv) >= 2 and argv[1] == "--kit-control":

@@ -3,9 +3,9 @@ id: CORR-LOOKS-097
 title: "Versionar a sonda por trás dos números de posição no painel"
 origin: LOOKS-TASK-34
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/confront.py, docs/tasks/looks/34-o-goleiro-andando.md, docs/tasks/looks/35-fechamento-da-v2.md]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -80,3 +80,25 @@ arquivos saem de um comando que roda da HEAD (por exemplo
 `python tools/looks/confront.py --placement 1`) e os imprime dentro de 0,01.
 
 ## Log de Execução
+
+- 2026-09-26 — Reproduzido: `grep -n "script de rascunho"
+  docs/tasks/looks/34-o-goleiro-andando.md` achou a frase na linha 136, sem
+  comando; o `bbox3.py` da Evidência não existe na HEAD (`can't open file`), o
+  que é o próprio sintoma. Consertado pela opção (a): `confront.py --placement
+  [SLOT]` fotografa o painel no quadro contado 60 (duas vezes, controle de
+  repetição), acha a passada que melhor casa pela forma (a varredura do
+  `_judged_walk`), desenha a janela `--state N --scale 1 --frame <essa>`,
+  mascara os dois lados pelo mesmo `panel_mask` e imprime a caixa da tinta em
+  fração do painel e o deslocamento. Só os controles são asserções — o lugar
+  certo é o *draw offset*, que o ciclo não mediu. Corrida da HEAD
+  (`WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin
+  WE2002_LOOKS_DRIVE_IMAGE=… python tools/looks/confront.py --placement`, `0
+  problem(s) over 2 slot(s)`): jogo 0,377/0,208/0,705/0,975 e janela (passada
+  24) 0,219/0,117/0,548/0,908 no slot 1; jogo 0,377/0,208/0,719/0,975 e janela
+  (passada **26**, não a 24 que a task usou) 0,219/0,125/0,562/0,908 no slot 2;
+  a janela 0,158 à esquerda e 0,08–0,09 acima nos dois. A substância da task
+  34 se mantém; os números **não** batiam dentro de 0,01 (o jogo 0,384 contra
+  0,377, o slot 2 da janela 0,253 contra 0,219 por ser outra passada), e por
+  isso a tabela das tasks 34 e 35 foi trocada pela saída colada, não
+  "confirmada". `rite gates --cycle looks` verde; `confront.py --check` 0
+  falhas.

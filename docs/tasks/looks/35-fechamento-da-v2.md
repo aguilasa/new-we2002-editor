@@ -40,8 +40,10 @@ resources: [emulador, tela]
 - **Da [`LOOKS-TASK-34`](/docs/tasks/looks/34-o-goleiro-andando.md):** a
   figura 1 não tem nada próprio a corrigir, mas as fotos mostraram **onde a
   figura senta no painel** longe do jogo, nos dois slots do mesmo tanto: a
-  caixa da tinta, em fração do painel, começa em (0,215, 0,118) na janela
-  contra (0,384, 0,214) no jogo, com o tamanho batendo. É o `scene.ROOT_AT`,
+  caixa da tinta, em fração do painel, começa em (0,219, 0,117) na janela
+  contra (0,377, 0,208) no jogo no slot 1 — e (0,219, 0,125) contra (0,377,
+  0,208) no slot 2 —, com o tamanho batendo; quem mede é `python
+  tools/looks/confront.py --placement [SLOT]` (CORR-LOOKS-097). É o `scene.ROOT_AT`,
   escolha de enquadramento declarada — o *draw offset* do GPU nunca foi
   medido —, e nenhum gate o julga: o `--silhouette` é livre de translação de
   propósito. Pede veredito na §10.3 — medir o offset, ou registrar a escolha
