@@ -5,10 +5,10 @@ origin: LOOKS-TASK-33
 severity: medium
 files: [tools/looks/ui_check.py, tools/looks/scene.py, tools/looks/ui/app.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-26
+done_commit: af452cad
 ---
 
 # CORR-LOOKS-095 — O ritmo do ui_check tem de ficar vermelho com a taxa errada
@@ -91,3 +91,9 @@ vazio.
   tools/looks/ui_check.py`: `negative: breaking the frame rate reddens the
   walk`, `looks_ui: 21 of 21 negative control(s) red`, a árvore sã com 67
   (want 67) e 68 (want 68). `rite gates --cycle looks` verde.
+- **Closed** — commit `af452cad` (2026-09-26): fix(looks): make the walk's rate check go red at 60 Hz
+  - Files (`git show --name-status af452cad`):
+    - `M docs/tasks/looks/CORR-LOOKS-095.md`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/ui/app.py`
+    - `M tools/looks/ui_check.py`
