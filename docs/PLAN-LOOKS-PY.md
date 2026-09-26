@@ -111,6 +111,28 @@ item a item, com a ferramenta de cada um:
 | 4 | **cumprido.** 1 passed, 3 skipped numa máquina limpa, os quatro alvos listados pelo nome | `ctest -R looks`, no Log da LOOKS-TASK-20 |
 | 5 | **cumprido.** Os dois slots se repetem pixel a pixel a partir do `load_state`; cinco tuplas pontuadas e uma recusa em cada: 3 `win`, 2 `ranked`, 0 sem explicação; e a display list decide a diagonal pela ordem guardada | `confront.py --score` |
 
+A ressalva do item 3 é da v1 e ficou na v1: a prateleira e as 237 primitivas
+cinzas são o que a v2 resolveu (§6 (e) e (f)). O visualizador de uma tupla
+continua existindo, e desenha a prateleira de propósito (`S`).
+
+#### A v2, percorrida em 2026-09-26
+
+A §10 não tem uma lista de pronto à parte: o pedido da §10.1 **é** a lista — a
+janela é a tela `LOOKS SET`, com o boneco montado, vestido e andando. Pela
+[`LOOKS-TASK-35`](/docs/tasks/looks/35-fechamento-da-v2.md), item a item:
+
+| o pedido | resultado | medido por |
+|---|---|---|
+| a tela | **cumprido.** Doze linhas, cursor, setas, ajuda e placa; a mesma sequência de teclas no jogo, no `screen.json` e na janela, 0 diferença nos dois slots | `oracle.py --keys` |
+| montado | **cumprido.** Doze peças na pose do `ANIME.BIN`, com a câmera do jogo; a silhueta a 13–15% da tinta em oito passadas por slot, e a figura no lugar do jogo a um pixel nativo | `confront.py --silhouette`, `--placement` |
+| vestido | **cumprido.** 593 de 593 primitivas texturizadas na figura 0 e 629 de 629 na 1, com o `TEX_A4` medido na VRAM | `app.py --smoke`, `oracle.py --kit` |
+| andando | **cumprido.** 34 passadas por ciclo, 408 de 408 matrizes, a 59,817 quadros por segundo; `Space` pausa, `.` anda uma passada | `anime.py --against-walk`, `oracle.py --rhythm` |
+| o alvo do usuário | **cumprido.** `.\make.ps1 looks` abre a tela, e o `help` diz os controles | `make.ps1` |
+
+O que ficou **aberto**, com razão e destravamento: o giro do close-up e a
+animação de `FOOT` (§10.3 (p)), a fonte da caixa de ajuda (§10.3 (o)), e as
+duas incógnitas da v1 que a v2 não tocou, §6 (g) e (i).
+
 ---
 
 ## 1. Diagnóstico — o que já está medido
@@ -1454,6 +1476,39 @@ máquina — build fora da árvore, `-G Ninja` com o toolchain do vcpkg — est�
 tabela de gates do
 [`perfil-looks.md`](/docs/prompts/perfil-looks.md).
 
+**Os comandos de emulador da v2 ficam de mão, e isso é decisão** (2026-09-26,
+[`LOOKS-TASK-35`](/docs/tasks/looks/35-fechamento-da-v2.md)) — a pergunta que
+a LOOKS-TASK-19 respondeu para o `--check-live`, com a resposta oposta, e pelas
+razões que o próprio `--check-live` tinha a favor e estes não têm:
+
+- **o custo.** O `--check-live` leva 9 s pelo `ctest`; os da v2 levam de 20 s
+  (`--pose`, `--placement`) a 12 min (`--screen`), e a série inteira passa de
+  uma hora. Um alvo que custa isso vira alvo que ninguém roda, que é a forma de
+  gate que a [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) abriu por
+  outro caminho;
+- **vários são geradores do gabarito.** `--screen --write`, `--scenery --write`,
+  `--walk`, `--closeups` e `--camera` escrevem o `screen.json` e os arquivos de
+  `work/` que o `looks_ui` lê como gabarito; rodá-los dentro do `ctest` faria o
+  gate reescrever aquilo contra o que julga;
+- **o que eles medem já tem guarda sem emulador.** O que um gerador escreveu é
+  conferido pelo `looks_ui` (a janela contra os pixels do jogo gravados) e pelo
+  `looks_image`; o `anime.py --against-walk` refaz o ciclo contra a caminhada
+  gravada sem subir processo; e o `looks_live` continua provando, a cada
+  corrida, que o emulador chega à tela e a RAM bate com o disco.
+
+A lista, com o custo medido de cada um, é a tabela de gates do
+[`perfil-looks.md`](/docs/prompts/perfil-looks.md), na coluna *sem alvo
+ainda* — "ainda" ali quer dizer "por decisão", desde esta data. Quem muda um
+módulo de que um deles depende roda o comando dele antes de fechar; é o que as
+tasks da v2 fizeram, cada uma com a saída no Log.
+
+**Os números no fechamento da v2**, de uma corrida que listou os alvos pelo
+nome, num build fora da árvore (`cmake -S . -B <fora> -G Ninja
+-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake`), em
+2026-09-26: **1 passed, 3 skipped** sem nada apontado, e **4 passed** com as
+duas variáveis, o venv, os states e o fork — `looks_selftest` 36 s,
+`looks_image` 3 s, `looks_ui` 371 s, `looks_live` 9 s.
+
 **O `looks_image` roda os oito `--check-image`, e não um.** Até 2026-09-17 ele
 rodava só o `modelfile.py --check-image`, e esta seção dizia que *"um módulo a
 mais só para chamar esse seria cerimônia"* — o que era verdade enquanto ele era
@@ -2168,7 +2223,13 @@ encaminharam à
 escreve aqui. Nenhuma é respondida; cada uma diz **por que** está aberta e o que
 a destravaria.
 
-**(e) A pose — a FONTE está medida desde 2026-09-17, o resto continua aberto.**
+**(e) A pose — FECHADA em 2026-09-25**, pela Fase 9 e pela Fase 11 da v2.
+O boneco sai montado na pose do jogo e anda no ciclo dele: a cadeia está na
+§10.3 (j), (k), (l) e (p), e o que desenha é o `scene.walk_scene`. O que segue
+é o texto de quando ela estava aberta, e continua verdadeiro para o que diz
+dos **arquivos de modelo**.
+
+*Até 2026-09-25: a FONTE medida desde 2026-09-17, o resto aberto.*
 A §10.3 (j) tem a cadeia: `ANIME.BIN` na RAM, a entrada 5 do cabeçalho, a lista
 de quadros que dá a volta, os ângulos empacotados e as duas instruções que
 carregam o GTE. O que esta alínea dizia — e continua valendo para o *arquivo* —
@@ -2227,7 +2288,12 @@ jogo escreve. *O que a silhueta testemunha, e o que não:* com a pose da (e) e d
 [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) e a câmera da
 [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), a silhueta no
 mesmo quadro (`confront.py --silhouette`) **testemunha a pose e o corpo**: seis
-comparações, dois slots, 7% a 18% da tinta, mínimo nítido em todas.
+comparações, dois slots, 7% a 18% da tinta, mínimo nítido em todas — e, desde
+a [`LOOKS-TASK-33`](/docs/tasks/looks/33-a-janela-animada.md), **oito
+passadas** do ciclo por slot, as duas metades incluídas, a 13–15%. Ela é livre
+de translação de propósito, então **não** testemunha onde a figura senta no
+painel; quem testemunha isso, desde a LOOKS-TASK-35, é o
+`confront.py --placement` (§10.3 (m)).
 
 **E NÃO testemunha o estilo de cabelo no corpo inteiro.** Esta seção foi dada
 como fechada em 2026-09-18 com um controle de estilo trocado que pontuava 696 a
@@ -2470,6 +2536,23 @@ continua sendo a (j), e ela abre a Fase 9.
   escrita, leitura de registrador e de VRAM.
 
 ### 10.3 As incógnitas da v2
+
+**Os vereditos, no fechamento da v2** (2026-09-26,
+[`LOOKS-TASK-35`](/docs/tasks/looks/35-fechamento-da-v2.md)). Cada alínea
+abaixo guarda a medição inteira; esta tabela só diz onde cada uma parou.
+
+| alínea | veredito | quem mede |
+|---|---|---|
+| (q) a tela | **respondida** — o `screen.json`, e a janela contra o jogo com 0 diferença nos dois slots | `oracle.py --screen`, `oracle.py --keys` |
+| (r) `DEFAUL` e `NAT` | **respondida** | `oracle.py --default` |
+| (j) de onde vem a pose | **respondida** — o `ANIME.BIN`, entrada 5, nos dois slots | `oracle.py --pose [SLOT]` |
+| (k) a hierarquia | **respondida** — transformação absoluta por peça | `oracle.py --pose <SLOT> <N>`, `--pose-lag` |
+| (l) o formato do `ANIME.BIN` | **fechada** — as seis matrizes que nenhum par explicava são a média da visita que abre cada lado, e o ciclo sai 408 de 408 | `anime.py --against-walk [SLOT]` |
+| (m) a câmera | **fechada**, e desde a LOOKS-TASK-35 também **onde a figura senta no painel** (abaixo) | `oracle.py --camera`, `confront.py --placement` |
+| (s) `HEIG` e `BODY` | **fechada** | `oracle.py --stature` |
+| (n) o `TEX_*.BIN` | **fechada** — `TEX_A4` | `oracle.py --kit` |
+| (o) o painel e o cenário | **fechada**; a caixa de ajuda fica numa fonte de apoio, porque o texto dela vem da ROM do console (LOOKS-TASK-39) | `oracle.py --scenery`, `confront.py --outside` |
+| (p) o ritmo | **fechada** no ritmo; **dois pontos ABERTOS**, com razão e destravamento no fim da (p): o **giro** do close-up e a **animação 147** de `FOOT` | `oracle.py --walk`, `--rhythm` |
 
 **(q) A tela — o que ela escreve e como anda.** O texto de cada valor de cada
 linha, o da caixa de ajuda, o comportamento do cursor nas pontas das doze
@@ -2740,11 +2823,12 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 > da canela errada; e a aritmética fecha, porque a seção que captura nenhuma
 > nomeia é justamente a 10.
 
-**(l) O formato do `ANIME.BIN`.** Os 204 ponteiros, o que cada um nomeia, e se a
+**(l) O formato do `ANIME.BIN` — FECHADA em 2026-09-26.** Os 204 ponteiros, o que cada um nomeia, e se a
 varredura fecha no EOF — o rito da Fase 1 (§1.4).
 [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md).
 
-> **Medida em 2026-09-18, e a incógnita continua ABERTA em um ponto.** O
+> **Medida em 2026-09-18, e a incógnita ficou ABERTA em um ponto até a (p)
+> fechá-lo** — ver o último parágrafo desta alínea. O
 > `tools/looks/anime.py` lê o arquivo inteiro; o que falta é reproduzir a
 > matriz do jogo número a número. O formato:
 >
@@ -2833,6 +2917,11 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 > matrizes de um ciclo — e a varredura de todos os pares sob as **três** regras
 > de desempacotamento continua não explicando aquelas seis, o que as separa das
 > mirroradas, que ela explica.
+>
+> **É o que fecha a alínea** (LOOKS-TASK-35): as seis não são par nenhum
+> porque são a **média**, e com a média o reprodutor acerta o ciclo inteiro —
+> `anime.py --against-walk` dá **408 de 408** entrada por entrada nos dois
+> slots, com a visita seguinte de controle caindo para 34 de 408.
 
 **(m) A câmera do jogo — FECHADA em 2026-09-18.** Projeção, deslocamento de tela
 e a translação da câmera, para que o nosso quadro e o do emulador sejam o mesmo
@@ -2934,6 +3023,33 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > todos, rotação exata no corpo inteiro e em `BOOTS`, e 61 a 80 de 4096
 > (~1°) nas cinco de cabeça — `scene.CHAIN_TURN_SLACK` é 128, e só vale onde a
 > linha tem câmera própria.
+>
+> **E o corpo inteiro passou a sentar onde o jogo o põe** (2026-09-26,
+> [`LOOKS-TASK-35`](/docs/tasks/looks/35-fechamento-da-v2.md)). Até ali o
+> close-up já saía do eixo medido, e o corpo inteiro não: a raiz ia para uma
+> fração escolhida do painel (`ROOT_AT = (0.5, 0.85)`), porque "quem põe o
+> boneco no painel é o deslocamento de desenho da GPU", e esse deslocamento
+> passava por não medido. Estava medido — é o meio do display
+> (`oracle.SCENERY_CENTRE`, da LOOKS-TASK-31), que é o que o `panel_axis` já
+> era. A [`LOOKS-TASK-34`](/docs/tasks/looks/34-o-goleiro-andando.md) viu a
+> figura fora do lugar nas fotos, a
+> [`CORR-LOOKS-097`](/docs/tasks/looks/CORR-LOOKS-097.md) versionou a medição
+> (`confront.py --placement`), e o número, em fração do painel, pela caixa da
+> tinta:
+>
+> | | jogo | janela, `ROOT_AT` | janela, eixo medido |
+> |---|---|---|---|
+> | slot 2, (esquerda, topo) | 0,377, 0,208 | 0,219, 0,125 | 0,384, 0,217 |
+> | slot 1, (esquerda, topo) | 0,377, 0,208 | 0,219, 0,117 | 0,384, 0,217 |
+>
+> Com o eixo medido e a câmera de corpo inteiro reassentada na peça de
+> referência — o mesmo `rebased` do close-up —, a figura fica a **+0,007** na
+> largura e **+0,008** na altura da do jogo, nos dois slots: um pixel nativo.
+> O `ROOT_AT` saiu do código, o `--placement` passou a **afirmar** o lugar
+> (`confront.PLACEMENT_SLACK`, 0,03), e o vermelho foi visto: com o `ROOT_AT`
+> de volta, 2 problemas, 0,158 contra 0,03 nos dois slots. O `--silhouette`
+> continua livre de translação de propósito — ele julga forma e tamanho, e
+> quem julga o lugar agora é este.
 
 **(s) `HEIG` e `BODY` — FECHADA em 2026-09-18.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.
@@ -3378,9 +3494,29 @@ uma passada, se o jogo interpola entre quadros-chave, e se o tronco que balança
 >   do ciclo incluídas, a melhor passada fica a 13–15% da tinta do jogo, dentro
 >   dos 25% da [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), a
 >   1–3 passadas da nomeada (`confront.py --silhouette`).
-> - **Aberto:** o **giro** do modelo nas linhas de cabeça (medido na
->   [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md)) — a
->   janela segura o quadro 12 sem girar — e a animação de `FOOT`.
+> - **Aberto, com veredito dado no fechamento da v2** (LOOKS-TASK-35):
+>   - **o giro do close-up — ABERTA.** Nas cinco linhas de cabeça o jogo gira
+>     o modelo, um ângulo por captura (+18,3°, −16,9°, +16,9°, §6 h), e a
+>     janela segura o quadro 12 **sem girar**. *Por que está aberta:* o que se
+>     mediu é o ângulo em paradas soltas, não o giro em função do quadro
+>     contado — sem a curva, girar seria inventar a velocidade e o sentido.
+>     *Destravaria:* uma corrida que segure uma linha de cabeça e leia a câmera
+>     das peças (`oracle.camera_from_pieces`) a cada passada de um ciclo
+>     contado por `frame_step`, com o mesmo controle do `--walk` (as passadas
+>     tomadas duas vezes a partir do `load_state`); com a curva medida, o
+>     `scene.WalkClock` já tem onde a pôr. O que a janela desenha hoje é
+>     conferido **sem** o giro: a câmera derivada das peças é por parada, e o
+>     `--silhouette-closeups` fica entre 5% e 21% da tinta.
+>   - **a animação de `FOOT` — ABERTA.** Com o cursor em `FOOT` o jogo toca a
+>     **entrada 147** do `ANIME.BIN` nos dois slots (`--rhythm`), e a janela
+>     continua na caminhada da entrada 5, dizendo que não modela a outra
+>     (`layout.WALK_OTHER_ANIMATION`). *Por que está aberta:* o `anime.py` lê a
+>     entrada 147 como lê as 204, mas o que o jogo faz com ela — quantas
+>     passadas, onde o ciclo abre, se espelha — é o que o `--walk` mediu só
+>     para a 5, e as regras de espelho de lá são do dispatch daquela
+>     caminhada. *Destravaria:* o `oracle.py --walk` com o cursor posto em
+>     `FOOT` antes de contar, e o `anime.py --against-walk` contra o que ele
+>     gravar; é o mesmo instrumento, apontado para outra entrada.
 
 ### 10.4 Como se verifica
 

@@ -2094,6 +2094,16 @@ PLACEMENT_FRAME = WALK_SILHOUETTE_FRAMES[0]
 silhouette, so its pass is the one `--silhouette` already judged by shape."""
 
 
+PLACEMENT_SLACK = 0.03
+"""How far, as a fraction of the panel, any edge of our figure's box may sit
+from the game's.  Measured by `--placement` on 2026-09-26, both slots: on the
+measured axis the worst edge is 0.009 (the top, in both slots, where our
+figure is 0.009 shorter than the game's); placed by hand it was 0.158.  0.03
+is 4 native pixels across and 3.6 down, and the hand-placed figure is five
+times over it (the red run, with `ROOT_AT` put back, is in LOOKS-TASK-35).
+"""
+
+
 def panel_box(mask, size) -> tuple:
     """The ink's box as fractions of the panel: (left, top, right, bottom).
 
@@ -2121,12 +2131,13 @@ def check_placement(slots=(2, 1), verbose=True) -> int:
     `_judged_walk` --, both masked by `panel_mask` with the box `screen.json`
     measured, and the ink's box as fractions of the panel (`panel_box`).
 
-    It asserts only its controls -- the game photographed twice gives the same
-    mask, and our side draws ink --; the offset between the two boxes is
-    printed, not judged, because what the place SHOULD be is the GPU's draw
-    offset, which the cycle has not measured (`scene.ROOT_AT`).  Written for
-    CORR-LOOKS-097, which found the numbers of LOOKS-TASK-34 measured by a
-    script nobody kept.
+    Written for CORR-LOOKS-097, which found the numbers of LOOKS-TASK-34
+    measured by a script nobody kept, and it only printed then: the window
+    placed the figure by hand (`ROOT_AT`), a sixth of the panel off.  Since
+    LOOKS-TASK-35 the window frames it on the measured axis and this
+    ASSERTS the place, both corners of the box within `PLACEMENT_SLACK` --
+    after its controls, the game photographed twice giving the same mask and
+    our side drawing ink.
     """
     import iso_source
     import layout
@@ -2196,10 +2207,16 @@ def check_placement(slots=(2, 1), verbose=True) -> int:
               % ((PLACEMENT_FRAME,) + game_box))
         print("    window, pass %2d     %.3f %.3f %.3f %.3f  (%s)"
               % ((best,) + our_box + (os.path.relpath(out, oracle.ROOT),)))
+        across, down = our_box[0] - game_box[0], our_box[1] - game_box[1]
         print("    the window's figure sits %+.3f across and %+.3f down of "
               "the game's, %.3f against %.3f tall"
-              % (our_box[0] - game_box[0], our_box[1] - game_box[1],
-                 our_box[3] - our_box[1], game_box[3] - game_box[1]))
+              % (across, down, our_box[3] - our_box[1],
+                 game_box[3] - game_box[1]))
+        worst = max(abs(our_box[k] - game_box[k]) for k in range(4))
+        if worst > PLACEMENT_SLACK:
+            problems.append("slot %d: the window's figure sits %.3f of the "
+                            "panel off the game's, over the %.3f allowed"
+                            % (slot, worst, PLACEMENT_SLACK))
     for line in problems:
         print("  FAIL  %s" % line)
     print("confront --placement: %d problem(s) over %d slot(s)"

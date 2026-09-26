@@ -814,8 +814,8 @@ geometria, textura e paleta **direto do disco**. Núcleo Python puro em
 `QOpenGLWidget`. **Só lê**: não grava na imagem nem no cartão, por decisão do
 dono do repositório, e isso não muda na v2.
 
-**A v1 fechou em 2026-09-17 e a v2 abriu no mesmo dia** — o ciclo está
-**aberto**, com as fases 8 a 11 (tasks 21 a 40). O alvo da v2 é a própria tela
+**A v1 fechou em 2026-09-17 e a v2 em 2026-09-26** (task 35) — as fases 8 a
+11, tasks 21 a 40; o ciclo continua aberto até o `/rite:close-cycle`. O alvo da v2 é a própria tela
 do jogo: a janela **é** a `LOOKS SET`, com as doze linhas trocáveis, o cursor,
 a caixa de ajuda e o boneco no painel. Entregues a tela (fase 8) e o boneco
 montado, na pose e na câmera do jogo, com altura e corpo (fase 9) e com o
@@ -826,7 +826,9 @@ escrito com a fonte do jogo, no lugar em que o jogo o escreve (tasks 37 e
 isso a janela a mantém numa fonte de apoio (task 39), o close-up por linha
 (task 40), o ciclo da caminhada medido e reproduzido do arquivo (task 32) e
 o painel andando no ritmo medido do jogo — `Space` pausa, `.` anda uma
-passada (task 33); falta o goleiro conferido e o fechamento (tasks 34 e 35).
+passada (task 33), o goleiro conferido (task 34) e a figura sentada no lugar
+do jogo no painel (task 35). Ficam **abertos**, com razão e destravamento na
+§10.3 (p) do plano, o giro do close-up e a animação de `FOOT`.
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
@@ -884,7 +886,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/confront.py --silhouette` / `--silhouette-styles` | a nossa silhueta contra a do jogo: no corpo inteiro testemunha a **pose**, em oito passadas do ciclo por slot; no close-up, três estilos de cabelo andados no jogo, cada foto escolhendo o próprio |
 | `python tools/looks/oracle.py --stature [SLOT]` | o que `HEIG` e `BODY` fazem: o vetor de escala, a câmera e as peças contra a regra do `stature.py`, nos mesmos quadros da caminhada, e todos os valores das duas linhas |
 | `python tools/looks/confront.py --silhouette-stature [SLOT]` | a silhueta do jogo andado às pontas de `HEIG` e a dois `BODY`, contra a nossa com a câmera daquela estatura |
-| `python tools/looks/confront.py --placement [SLOT]` | **onde** a figura senta no painel, jogo contra janela, em fração do painel — o que o `--silhouette` deixa de fora de propósito; imprime, não julga |
+| `python tools/looks/confront.py --placement [SLOT]` | **onde** a figura senta no painel, jogo contra janela, em fração do painel — o que o `--silhouette` deixa de fora de propósito; **afirma** desde a task 35 (`PLACEMENT_SLACK`) |
 | `python tools/looks/oracle.py --kit [SLOT]` | qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer do console |
 | `python tools/looks/confront.py --kit-control [SLOT]` | o uniforme de outro time desenhado na mesma tupla, para medir que o kit decide a figura |
 | `python tools/looks/oracle.py --scenery [SLOT] [--write]` | os pacotes que desenham a mobília da tela, andados da lista que o quadro entrega ao GPU, e os sprites — texto, placa, título, setas — com os texels conferidos do disco contra a VRAM; o `--write` é de onde a janela pinta |

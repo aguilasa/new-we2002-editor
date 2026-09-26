@@ -402,6 +402,16 @@ CONTROLS = (
         "full figure's, and the picture stays a perfectly good picture",
     ),
     Control(
+        "scene-full-figure-by-hand", "scene.py", "panel_camera",
+        "    return camera_matrix(camera, size, panel_axis()), chosen",
+        "    return camera_matrix(camera, size, (73.0, 102.0)), chosen",
+        ("scene",),
+        "until LOOKS-TASK-35 the full figure's root went to a chosen fraction "
+        "of the panel, and the figure sat a sixth of the panel left of the "
+        "game's with every shape check green; framed off the measured axis "
+        "the reference piece no longer lands where the game's camera puts it",
+    ),
+    Control(
         "scene-shelf-stacks", "scene.py", "shelf",
         "        at += (high_x - low_x) + SHELF_GAP",
         "        at += 0.0",

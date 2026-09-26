@@ -862,7 +862,7 @@ def walk_anchor(disc) -> tuple:
     stride, so an anchor taken per pass slides the whole figure by it.  The
     places of `ANIME.BIN` are relative to the FIGURE, which the game's camera
     carries; subtracting one constant from all of them moves the figure once,
-    and `ROOT_AT` and `rebased` take that one constant.
+    and `rebased` takes that one constant.
     """
     import anime
 
@@ -1305,8 +1305,8 @@ def panel_axis(table: dict = None) -> tuple:
     Measured, not chosen: the GTE's offsets are zero on this screen
     (`oracle.py --camera`), so the axis is the display's own middle and the
     panel is a window onto it -- LOOKS-TASK-28 measured the two close-up masks
-    landing 3 pixels apart with nothing fitted.  It is `ROOT_AT` that is a
-    framing choice, and it is only used where the figure is drawn whole.
+    landing 3 pixels apart with nothing fitted, and since LOOKS-TASK-35 the
+    full figure is framed by it too (`panel_camera`).
     """
     import screen
 
@@ -1668,18 +1668,6 @@ def camera_matrix(camera: dict, size: tuple, centre: tuple) -> list:
     return out
 
 
-ROOT_AT = (0.5, 0.85)
-"""Where the figure's ROOT is put inside the panel, as a fraction of it.
-
-**A framing choice, and it is said to be one.**  Where the game puts the figure
-inside the panel is the GPU's draw offset, which this cycle has not measured
-(`oracle.py --camera` measured the GTE's offsets and they are zero), so the
-window places the root itself.  The root and not the ink box: the root is the
-ground the figure stands on and does not move with the pose, where a box
-centred per frame would make the figure bob as the walk swings.
-"""
-
-
 def panel_camera(drawn: Scene, slot: int, size: tuple, scale=None,
                  row: str = None, reference=None) -> list:
     """The game's camera as a 4x4 for the panel, and which camera that is.
@@ -1696,22 +1684,27 @@ def panel_camera(drawn: Scene, slot: int, size: tuple, scale=None,
     has to be: the camera aims itself, which is the whole of why `BOOTS` shows
     the feet and `HAIR` the head.  It needs *reference*, the position of
     `REFERENCE_PIECE` in the frame the figure is posed in (`rebased`).  Every
-    other row draws the figure whole, with the root placed by `ROOT_AT`.
+    other row draws the figure whole with the full figure's camera, framed by
+    the SAME axis and rebased the same way.
+
+    **The full figure used to be placed by hand, and that was the error.**
+    Until LOOKS-TASK-35 its root went to a chosen fraction of the panel
+    (`ROOT_AT = (0.5, 0.85)`), on the reasoning that where the game puts it is
+    the GPU's draw offset and nothing had measured that.  Something had: the
+    offset is the middle of the display (`oracle.SCENERY_CENTRE`), which is
+    what `panel_axis` already is.  `confront.py --placement` measured the
+    difference: with the chosen root the figure sat 0.158 of the panel to the
+    left and 0.083 to 0.092 above the game's, in both slots; on the measured
+    axis it sits +0.007 across and +0.008 down, one native pixel.
     """
+    if reference is None:
+        raise BadScene("the panel's camera needs the reference piece's "
+                       "place, and none was handed in")
     chosen = row if row and row in close_up_rows(slot) else None
-    if chosen:
-        if reference is None:
-            raise BadScene("the close-up camera of %s needs the reference "
-                           "piece's place, and none was handed in" % chosen)
-        camera = rebased(load_camera(slot, scale, chosen), reference)
-        return camera_matrix(camera, size, panel_axis()), chosen
-    camera = load_camera(slot, scale)
-    origin = project((0.0, 0.0, 0.0), camera)
-    if origin is None:
-        raise BadScene("the figure's root is behind the camera")
-    return camera_matrix(camera, size,
-                         (size[0] * ROOT_AT[0] - origin[0],
-                          size[1] * ROOT_AT[1] - origin[1])), None
+    camera = rebased(load_camera(slot, scale, chosen), reference)
+    if project((0.0, 0.0, 0.0), camera) is None:
+        raise BadScene("the figure's reference piece is behind the camera")
+    return camera_matrix(camera, size, panel_axis()), chosen
 
 
 def clip_to_pixel(clip, size: tuple) -> tuple:
@@ -2104,6 +2097,29 @@ def _checks(c) -> None:
                and load_camera(2, "AGE" and None, "AGE")["translation"][2] == 1)
             ok("and so does no row at all",
                camera_file(2, None)[1] is None)
+            # Where the whole figure lands (LOOKS-TASK-35): our origin, which
+            # is the reference piece, goes where the game's own camera puts
+            # that piece about the measured axis -- nothing chosen per panel.
+            size, place = (146, 120), (40, -300, 25)
+            game = camera_matrix(load_camera(2), size, panel_axis())
+            ours = attempt("the full figure's panel camera", lambda:
+                           panel_camera(None, 2, size, None, "AGE", place),
+                           default=([0.0] * 16, None))
+            # The scene stores `y * UP` and the matrix undoes it (`UP`).
+            want = clip_to_pixel(apply_matrix(
+                game, (place[0], place[1] * UP, place[2])), size)
+            got = clip_to_pixel(apply_matrix(ours[0], (0, 0, 0)), size)
+            ok("the full figure puts the reference piece where the game's "
+               "camera does, about the measured axis",
+               ours[1] is None and want and got
+               and abs(want[0] - got[0]) < 1e-6
+               and abs(want[1] - got[1]) < 1e-6, "%s against %s" % (got, want))
+            try:
+                panel_camera(None, 2, size, None, None, None)
+                refused = False
+            except BadScene:
+                refused = True
+            ok("and without the reference piece's place it refuses", refused)
     finally:
         globals()["CAMERA_DIR"] = was
     # The rebase, which is what aims a close-up: our own origin is the

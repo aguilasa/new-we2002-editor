@@ -211,7 +211,8 @@ e os termos que a disparam.
     como o que ele é — uma medição daquela corrida (LOOKS-TASK-32).
 97. **Comparação ajustada não julga close-up.** O `fit_centre` do
     `--silhouette` alinha as duas caixas de tinta, e é o certo no corpo
-    inteiro (a mira é o offset de desenho do GPU, que este ciclo não mediu).
+    inteiro para a FORMA (o lugar, desde a LOOKS-TASK-35, julga o
+    `--placement` — armadilha 104).
     No close-up o que se erra **é a mira**: com ajuste, a nossa figura na
     câmera de `HAIR` marcou 11.995 pixels contra 2.116 da câmera de corpo
     inteiro — o ajuste centra o corpo inteiro no painel e mostra a barriga
@@ -263,3 +264,14 @@ e os termos que a disparam.
     que já tem a regra de estatura não acha, e pode ler isso como "não está no
     disco". Arquivo de código se acha **por conteúdo**: 64 bytes da RAM
     procurados em todos os arquivos dos dois discos (LOOKS-TASK-37).
+
+104. **"Não medido" numa docstring é afirmação, e envelhece.** O corpo
+    inteiro do painel era posto por uma fração escolhida (`scene.ROOT_AT`),
+    porque "o offset de desenho do GPU não foi medido" — e ele estava medido
+    desde a LOOKS-TASK-31 (`oracle.SCENERY_CENTRE`, o meio do display), que é
+    o eixo que o close-up já usava. A figura sentou 0,158 do painel fora do
+    lugar do jogo por oito tasks, com toda silhueta verde, porque a silhueta
+    é livre de translação. Antes de escolher um enquadramento "por falta de
+    medida", procure a medida (`grep` pelo termo no `oracle.py`) e, se a
+    comparação que julga a figura ajusta alguma coisa, ponha outra que julgue
+    o que ela ajusta (`confront.py --placement`, LOOKS-TASK-35).
