@@ -978,6 +978,11 @@ class WalkClock:
         # Pinned by `show_pass`: a still asked for by number stays that pass
         # whatever row the cursor goes to, until a key moves it.
         self.pinned = False
+        # Seconds spent running and the frames they turned into, keys and
+        # holds left out: their ratio is the rate the clock really converts
+        # at, which `self.rate` alone does not say (CORR-LOOKS-095).
+        self.ran = 0.0
+        self.ran_frames = 0.0
 
     # -- time -------------------------------------------------------------
 
@@ -1023,8 +1028,16 @@ class WalkClock:
 
     # -- the two keys ------------------------------------------------------
 
+    def ran_for(self, now: float) -> tuple:
+        """(seconds run, frames they advanced) up to *now*."""
+        if not self.running:
+            return (self.ran, self.ran_frames)
+        return (self.ran + now - self.since,
+                self.ran_frames + self.frames(now) - self.origin)
+
     def pause(self, now: float) -> None:
         if self.running:
+            self.ran, self.ran_frames = self.ran_for(now)
             self.origin = self.frames(now)
             if self.hold_at is not None:
                 self.origin = min(self.origin,
@@ -1104,11 +1117,13 @@ class WalkClock:
 
     def report(self, now: float) -> dict:
         visit, first = self.visit(now)
+        ran, ran_frames = self.ran_for(now)
         return {"pass": self.pass_now(now), "visit": visit,
                 "first_slot": first, "running": self.running,
                 "held": self.held(now), "rate": self.rate,
                 "passes": self.cycle.passes, "frames": self.cycle.frames,
-                "cycle_seconds": self.cycle_seconds()}
+                "cycle_seconds": self.cycle_seconds(),
+                "ran": ran, "ran_frames": ran_frames}
 
 
 CHAINS = (("head", "torso", "thigh a", "shin a", "foot a"),
@@ -2016,6 +2031,8 @@ def _checks(c) -> None:
     paused.pause(0.3)
     ok("paused, the walk stays where it was however long it waits",
        paused.pass_now(0.3) == paused.pass_now(9.0) == clock.pass_now(0.3))
+    ok("the time it ran and the frames that time made are the rate",
+       paused.ran_for(9.0) == (0.3, 0.3 * rate), "%r" % (paused.ran_for(9.0),))
     number = paused.pass_now(9.0)
     paused.step(9.0)
     ok("a step is one pass on, and still paused",

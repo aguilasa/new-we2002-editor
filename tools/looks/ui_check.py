@@ -1793,11 +1793,21 @@ passes, 0 and 1, measured 5,719; a window that drew one pose for every
 WALK_RUN_SECONDS = 2.574
 """How long `--animate-for` lets the walk run: two cycles of 1.287 s."""
 
-WALK_PASS_SLACK = 3
-"""Passes the clock may land from the rate's own count after a run of wall
-clock: the run's start and end are not on a pass boundary, and the event loop
-is sampled every few milliseconds, so a pass or two either way is the clock's
-and not a rate."""
+WALK_PASS_SLACK = 1
+"""Passes the clock may land from the count of the seconds it reports running:
+the seconds are printed to the microsecond, and a run that ends on a pass
+boundary may round across it.  The count is taken at the measured rate over
+THOSE seconds, not over `WALK_RUN_SECONDS` -- the event loop overshoots the
+deadline by a few milliseconds, and a slack wide enough for that let a clock at
+60 or 63 frames a second pass (CORR-LOOKS-095)."""
+
+WALK_RATE_SLACK = 0.01
+"""Frames a second the window's own conversion may sit from the measured rate.
+
+Judged off the frames the clock advanced over the seconds it ran, both from
+its `walk:` line, and not off the rate it reports: that is the attribute the
+clock would convert with, and a conversion that ignored it would still report
+it.  59.817 against 60 is 0.183 apart; the printed digits are good to 1e-4."""
 
 
 def read_walk(output: str) -> dict:
@@ -1812,7 +1822,8 @@ def read_walk(output: str) -> dict:
             r"walk: pass (\d+) \((\d+) of the cycle's (\d+)\), visit (-?\d+), "
             r"first slot (\d+), (running|still)(, held)?; ([\d.]+) frame\(s\) "
             r"a second, a cycle of (\d+) frame\(s\) lasts ([\d.]+) s; (\d+) "
-            r"pass change\(s\) drawn", text)
+            r"pass change\(s\) drawn(?:; ran ([\d.]+) frame\(s\) in "
+            r"([\d.]+) s)?", text)
         if found is None:
             return {"unparsed": text}
         return {"pass": int(found.group(1)), "passes": int(found.group(3)),
@@ -1822,7 +1833,9 @@ def read_walk(output: str) -> dict:
                 "held": bool(found.group(7)),
                 "rate": float(found.group(8)), "frames": int(found.group(9)),
                 "seconds": float(found.group(10)),
-                "drawn": int(found.group(11))}
+                "drawn": int(found.group(11)),
+                "ran_frames": float(found.group(12) or 0),
+                "ran": float(found.group(13) or 0)}
     return {}
 
 
@@ -1886,7 +1899,7 @@ def measure_walk(python: str, app: str, where: str, env: dict) -> tuple:
             cycle = scene.walk_cycle(slot)
         except scene.NoWalk as exc:
             return ([], str(exc), None)
-        want = WALK_RUN_SECONDS * rate / cycle.frames * cycle.passes
+        want = scene.WalkClock(cycle).pass_now(seen["ran"])
         numbers["slot %d run" % slot] = (seen["pass"], round(want, 1),
                                          seen["drawn"])
         if abs(seen["rate"] - round(rate, 3)) > 0.0005 \
@@ -1898,10 +1911,21 @@ def measure_walk(python: str, app: str, where: str, env: dict) -> tuple:
                        "walk is %.3f over %d and %d"
                        % (slot, seen["rate"], seen["frames"], seen["passes"],
                           rate, cycle.frames, cycle.passes))
+        if seen["ran"] < WALK_RUN_SECONDS:
+            bad.append("slot %d: --animate-for %.3f ran the clock %.6f s"
+                       % (slot, WALK_RUN_SECONDS, seen["ran"]))
+        else:
+            ran_rate = seen["ran_frames"] / seen["ran"]
+            numbers["slot %d rate" % slot] = round(ran_rate, 4)
+            if abs(ran_rate - rate) > WALK_RATE_SLACK:
+                bad.append("slot %d: the clock advanced %.3f frame(s) in "
+                           "%.6f s, %.4f a second, and the measured rate is "
+                           "%.4f" % (slot, seen["ran_frames"], seen["ran"],
+                                     ran_rate, rate))
         if abs(seen["pass"] - want) > WALK_PASS_SLACK:
-            bad.append("slot %d: %.3f s of wall clock took the walk %d "
-                       "pass(es), and the game's rhythm is %.1f"
-                       % (slot, WALK_RUN_SECONDS, seen["pass"], want))
+            bad.append("slot %d: %.6f s of wall clock took the walk %d "
+                       "pass(es), and the game's rhythm is %d"
+                       % (slot, seen["ran"], seen["pass"], want))
         if seen["drawn"] < seen["pass"] // 2:
             bad.append("slot %d: the clock went %d pass(es) and the panel "
                        "drew %d of them -- the timer is not driving the "
@@ -1989,10 +2013,14 @@ WALK_BREAKS = (
     ("the step key", os.path.join("ui", "looks_set.py"),
      "            self.clock.step(self.now())\n",
      "            pass\n"),
+    ("the frame rate", "scene.py",
+     "        return self.origin + (now - self.since) * self.rate\n",
+     "        return self.origin + (now - self.since) * 60.0\n"),
 )
 """The window whose `--frame` stops at the argument parser -- every pass the
-same picture, which criterion 5 of LOOKS-TASK-33 exists to catch -- and the
-one whose `.` does nothing."""
+same picture, which criterion 5 of LOOKS-TASK-33 exists to catch --, the one
+whose `.` does nothing, and the clock that converts at the nominal 60 frames a
+second while reporting the measured 59.817 (CORR-LOOKS-095)."""
 
 
 # ---- the gate itself ------------------------------------------------------
@@ -2463,10 +2491,12 @@ def _checks(c) -> None:
     ok("the walk line reads back as numbers",
        read_walk("  walk: pass 67 (33 of the cycle's 34), visit 71, first "
                  "slot 7, still; 59.817 frame(s) a second, a cycle of 77 "
-                 "frame(s) lasts 1.287 s; 67 pass change(s) drawn")
+                 "frame(s) lasts 1.287 s; 67 pass change(s) drawn; ran "
+                 "154.214 frame(s) in 2.578100 s")
        == {"pass": 67, "passes": 34, "visit": 71, "first_slot": 7,
            "running": False, "held": False, "rate": 59.817, "frames": 77,
-           "seconds": 1.287, "drawn": 67})
+           "seconds": 1.287, "drawn": 67, "ran_frames": 154.214,
+           "ran": 2.5781})
 
     for name, where, old, _new in BREAKS + ARROW_BREAKS + WALK_BREAKS:
         path = os.path.join(LOOKS_DIR, where)

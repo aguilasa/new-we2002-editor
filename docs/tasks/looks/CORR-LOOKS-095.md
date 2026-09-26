@@ -3,9 +3,9 @@ id: CORR-LOOKS-095
 title: O ritmo do ui_check tem de ficar vermelho com a taxa errada
 origin: LOOKS-TASK-33
 severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
+files: [tools/looks/ui_check.py, tools/looks/scene.py, tools/looks/ui/app.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -72,3 +72,22 @@ Acrescentar a `WALK_BREAKS` uma terceira entrada que planta 60 Hz no
 vazio.
 
 ## Log de Execução
+
+- 2026-09-26 — Reproduzido: o laço da Evidência deu `60.0 68 … True`, `62.0
+  70 … True`, `63.0 71 … True`, e `WALK_PASS_SLACK = 3` na linha 1796.
+  Consertado com **três arquivos, não um**: a Correção pede julgar a taxa
+  "pelo relato do próprio relógio (quadros decorridos sobre segundos)", e esse
+  relato não existia. `scene.WalkClock` acumula os segundos rodados e os
+  quadros que eles viraram (`ran_for`, fora teclas e retenção) e os põe no
+  `report`; `ui/app.py` os imprime no fim da linha `walk:`; o `ui_check.py`
+  julga `ran_frames / ran` contra a taxa medida com `WALK_RATE_SLACK = 0.01`,
+  conta o `want` por `scene.WalkClock(cycle).pass_now(ran)` com
+  `WALK_PASS_SLACK = 1`, e ganhou a terceira entrada de `WALK_BREAKS`, que
+  planta `* 60.0` no `WalkClock.frames`. Medido no plantio: os dois slots
+  vermelhos — `slot 2: the clock advanced 154.607 frame(s) in 2.576778 s,
+  60.0001 a second, and the measured rate is 59.8173` —, e a contagem de
+  passadas sozinha continuava **verde** (68 contra 68): é a razão que pega.
+  `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python
+  tools/looks/ui_check.py`: `negative: breaking the frame rate reddens the
+  walk`, `looks_ui: 21 of 21 negative control(s) red`, a árvore sã com 67
+  (want 67) e 68 (want 68). `rite gates --cycle looks` verde.

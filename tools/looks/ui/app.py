@@ -226,12 +226,13 @@ def _walk_line(window: LooksSet) -> None:
         return
     print("  walk: pass %d (%d of the cycle's %d), visit %d, first slot %d, "
           "%s%s; %.3f frame(s) a second, a cycle of %d frame(s) lasts %.3f s;"
-          " %d pass change(s) drawn"
+          " %d pass change(s) drawn; ran %.3f frame(s) in %.6f s"
           % (seen["pass"], seen["pass"] % seen["passes"], seen["passes"],
              seen["visit"], seen["first_slot"],
              "running" if seen["running"] else "still",
              ", held" if seen["held"] else "", seen["rate"], seen["frames"],
-             seen["cycle_seconds"], seen["drawn"]))
+             seen["cycle_seconds"], seen["drawn"], seen["ran_frames"],
+             seen["ran"]))
     other = core.walk_other_animation()
     if window.state.row in other:
         print("  walk note: on %s the game plays animation %s instead, and "
