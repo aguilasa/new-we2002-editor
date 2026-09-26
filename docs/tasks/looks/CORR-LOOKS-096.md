@@ -5,10 +5,10 @@ origin: LOOKS-TASK-33
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-26
+done_commit: f18f2363
 ---
 
 # CORR-LOOKS-096 — Recontar o atraso e as margens da silhueta escritos nos docs
@@ -80,3 +80,9 @@ docs/tasks/looks/33-a-janela-animada.md` não imprime nada.
   docs/tasks/looks/33-a-janela-animada.md` não imprime nada; `grep -n
   "43,597,704" tools/looks/layout.py` também não. `rite gates --cycle looks`
   verde.
+- **Closed** — commit `f18f2363` (2026-09-26): docs(looks): recount the silhouette lag, margins and cycle ticks
+  - Files (`git show --name-status f18f2363`):
+    - `M docs/tasks/looks/33-a-janela-animada.md`
+    - `M docs/tasks/looks/CORR-LOOKS-096.md`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/layout.py`

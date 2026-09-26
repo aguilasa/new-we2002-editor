@@ -112,7 +112,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-093](/docs/tasks/looks/CORR-LOOKS-093.md) | Recolar a transcrição dos gates: ela é anterior a 150 linhas do código entregue | LOOKS-TASK-32 | low | done | 2026-09-25 |
 | [CORR-LOOKS-094](/docs/tasks/looks/CORR-LOOKS-094.md) | Tirar das docstrings do ritmo o timer de HBlank que o código não lê | LOOKS-TASK-33 | medium | done | 2026-09-26 |
 | [CORR-LOOKS-095](/docs/tasks/looks/CORR-LOOKS-095.md) | O ritmo do ui_check tem de ficar vermelho com a taxa errada | LOOKS-TASK-33 | medium | pending | — |
-| [CORR-LOOKS-096](/docs/tasks/looks/CORR-LOOKS-096.md) | Recontar o atraso e as margens da silhueta escritos nos docs | LOOKS-TASK-33 | low | pending | — |
+| [CORR-LOOKS-096](/docs/tasks/looks/CORR-LOOKS-096.md) | Recontar o atraso e as margens da silhueta escritos nos docs | LOOKS-TASK-33 | low | done | 2026-09-26 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
