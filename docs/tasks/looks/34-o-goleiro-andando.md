@@ -5,12 +5,12 @@ type: verificação
 category: oráculo
 phase: 11
 depends_on: [LOOKS-TASK-33]
-status: in-progress
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-26
+done_commit: 0d289714
 ---
 
 # LOOKS-TASK-34: O goleiro
@@ -150,4 +150,7 @@ declara escolha de enquadramento — o *draw offset* do GPU não foi medido no
 ciclo —, e o `--silhouette` é livre de translação de propósito
 (`confront.fit_centre`). Não é defeito da figura 1 e não entra aqui: fica
 anotado na LOOKS-TASK-35, que é quem fecha a v2.
-
+- **Closed** — commit `0d289714` (2026-09-26): docs(looks): check the goalkeeper walking in slot 1
+  - Files (`git show --name-status 0d289714`):
+    - `M docs/tasks/looks/34-o-goleiro-andando.md`
+    - `M docs/tasks/looks/35-fechamento-da-v2.md`
