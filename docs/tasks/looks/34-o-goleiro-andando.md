@@ -7,8 +7,8 @@ phase: 11
 depends_on: [LOOKS-TASK-33]
 status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-26
+review_commit: 76b371bc
 done_on: 2026-09-26
 done_commit: 0d289714
 ---
@@ -154,3 +154,4 @@ anotado na LOOKS-TASK-35, que é quem fecha a v2.
   - Files (`git show --name-status 0d289714`):
     - `M docs/tasks/looks/34-o-goleiro-andando.md`
     - `M docs/tasks/looks/35-fechamento-da-v2.md`
+- **Reviewed** (2026-09-26) at `76b371bc`: CORR-LOOKS-097

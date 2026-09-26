@@ -113,6 +113,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-094](/docs/tasks/looks/CORR-LOOKS-094.md) | Tirar das docstrings do ritmo o timer de HBlank que o código não lê | LOOKS-TASK-33 | medium | done | 2026-09-26 |
 | [CORR-LOOKS-095](/docs/tasks/looks/CORR-LOOKS-095.md) | O ritmo do ui_check tem de ficar vermelho com a taxa errada | LOOKS-TASK-33 | medium | done | 2026-09-26 |
 | [CORR-LOOKS-096](/docs/tasks/looks/CORR-LOOKS-096.md) | Recontar o atraso e as margens da silhueta escritos nos docs | LOOKS-TASK-33 | low | done | 2026-09-26 |
+| [CORR-LOOKS-097](/docs/tasks/looks/CORR-LOOKS-097.md) | Versionar a sonda por trás dos números de posição no painel | LOOKS-TASK-34 | medium | pending | — |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
