@@ -5,12 +5,12 @@ type: documentação
 category: fechamento
 phase: 11
 depends_on: [LOOKS-TASK-23, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-34, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40]
-status: in-progress
+status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.5"
-reviewed_on: null
+reviewed_on: pending
 review_commit: null
-done_on: null
-done_commit: null
+done_on: 2026-09-26
+done_commit: 7e462e60
 resources: [emulador, tela]
 ---
 
@@ -196,4 +196,14 @@ Os onze avisos são de prefixo no arquivo `concluidos/` (PAR-TASK), anteriores.
 Links: a varredura de destino da `.claude/rules/links.md` dá a **mesma** saída
 antes e depois (uma linha, `docs/prompts/02-revisar.md`, que já era quebrada),
 e a de forma dá 307 linhas relativas antes e depois, nenhuma nova no diff.
-
+- **Closed** — commit `7e462e60` (2026-09-26): feat(looks): close v2 with the full figure framed on the measured axis
+  - Files (`git show --name-status 7e462e60`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/prompts/perfil-looks.armadilhas.md`
+    - `M docs/prompts/perfil-looks.md`
+    - `M docs/tasks/looks/35-fechamento-da-v2.md`
+    - `M make.ps1`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/scene.py`
