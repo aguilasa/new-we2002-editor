@@ -203,7 +203,7 @@ confront --silhouette: 0 problem(s) over 2 slot(s)
 
 As dezesseis comparações ficam dentro do `MATCH_SHARE` de 25% da
 [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md) (13 a 15%) e com
-mínimo real (`MATCH_MARGIN` 2,5x; o pior da varredura fica a 2,8x a 5,4x do
+mínimo real (`MATCH_MARGIN` 2,5x; o pior da varredura fica a 2,85x a 5,53x do
 melhor). O `PASS_LAG = 3` foi escrito **depois** de medido: com 2, a corrida
 ficou vermelha em quatro de dezesseis, a 3 passadas, e o docstring diz por que
 três é o teto (o nome pode ser a passada seguinte, e a foto é um dos dois

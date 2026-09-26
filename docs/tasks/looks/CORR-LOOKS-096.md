@@ -5,7 +5,7 @@ origin: LOOKS-TASK-33
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -67,3 +67,16 @@ um par que apareça numa corrida colada, ou a faixa vista (43.597.690 a
 docs/tasks/looks/33-a-janela-animada.md` não imprime nada.
 
 ## Log de Execução
+
+- 2026-09-26 — Reproduzido: `confront.py --silhouette | grep -o "[0-9]
+  behind" | sort | uniq -c` deu `7 1 behind`, `5 2 behind`, `4 3 behind`, e
+  as três linhas citadas continuavam lá. Recontado da mesma corrida (16
+  comparações, `0 problem(s)`): a razão pior/melhor da varredura vai de
+  **2,85x a 5,53x** (`grep -oE "…the worst of the sweep [0-9]+" | awk
+  '{print $NF/$1}'`) — o log colava só duas das dezesseis linhas. Consertado:
+  docstring do `PASS_LAG` diz "seven of them at 1, five at 2 and four at 3";
+  log da LOOKS-TASK-33 diz "2,85x a 5,53x"; docstring do `FRAME_TICKS` cita o
+  par colado no log, 43.597.690 e 43.597.700. Verificação: `grep -n "5,4x"
+  docs/tasks/looks/33-a-janela-animada.md` não imprime nada; `grep -n
+  "43,597,704" tools/looks/layout.py` também não. `rite gates --cycle looks`
+  verde.

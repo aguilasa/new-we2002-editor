@@ -1143,9 +1143,10 @@ pass's first matrix load, which is where `--walk` read the number.  The
 picture is one of the two frame buffers (`still_frame` takes the one the
 screen's border rule finds whole), and those hold the two passes finished
 before it.  So the picture is one to three passes behind the name: measured
-on 2026-09-25, 1, 2 and 3 over the sixteen comparisons of both states, eight
-of them at 1.  The sweep either side is eight passes, so a model that matched
-the wrong part of the cycle would still land outside this.
+on 2026-09-25, 1, 2 and 3 over the sixteen comparisons of both states, seven
+of them at 1, five at 2 and four at 3.  The sweep either side is eight passes,
+so a model that matched the wrong part of the cycle would still land outside
+this.
 """
 
 MATCH_SHARE = 0.25

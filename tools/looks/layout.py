@@ -2133,7 +2133,7 @@ FRAME_TICKS = 566204
 Measured on 2026-09-25 (LOOKS-TASK-33) with `oracle.py --rhythm`: `frame_step`
 counted over a whole cycle of the walk (77 frames) and over two, from
 `load_state` in both slots, and the counter read before and after --
-43,597,690 and 43,597,704 ticks for the two single cycles of slot 2, which is
+43,597,690 and 43,597,700 ticks for the two single cycles of slot 2, which is
 566,203.8 a frame.  The witness is the video standard, not a root counter:
 the GPU reports NTSC and progressive (`get_gpu_state`), and the ticks a frame
 have to be `oracle.ntsc_frame_ticks()`, the non-interlaced NTSC frame of 263
