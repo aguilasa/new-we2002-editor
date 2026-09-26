@@ -7,8 +7,8 @@ phase: 11
 depends_on: [LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40]
 status: done
 source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-26
+review_commit: f3bdbcb2
 done_on: 2026-09-25
 done_commit: 7b5a01a3
 resources: [emulador, tela]
@@ -261,3 +261,4 @@ error(s)`.
     - `M tools/looks/ui/looks_set.py`
     - `M tools/looks/ui/viewer.py`
     - `M tools/looks/ui_check.py`
+- **Reviewed** (2026-09-26) at `f3bdbcb2`: CORR-LOOKS-094, CORR-LOOKS-095, CORR-LOOKS-096

@@ -85,7 +85,7 @@ mostra. As tasks 21 a 40 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md) | O texto da ajuda — quem escreve a página (832,256) na VRAM, e de onde | 10 | investigação | LOOKS-TASK-37 | done | 2026-09-22 | 2026-09-23 |
 | [LOOKS-TASK-40](/docs/tasks/looks/40-a-camera-do-close-up.md) | A câmera do close-up — o painel aproxima nas seis linhas em que o jogo aproxima | 10 | implementação | LOOKS-TASK-28 | done | 2026-09-23 | 2026-09-23 |
 | [LOOKS-TASK-32](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) | Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço | 11 | investigação | LOOKS-TASK-26 | done | 2026-09-23 | 2026-09-24 |
-| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | implementação | LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40 | done | 2026-09-25 | pending |
+| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | implementação | LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40 | done | 2026-09-25 | 2026-09-26 |
 | [LOOKS-TASK-34](/docs/tasks/looks/34-o-goleiro-andando.md) | O goleiro — figura 1 montada e andando na tela, conferida no slot 1 | 11 | verificação | LOOKS-TASK-33 | pending | — | — |
 | [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | documentação | LOOKS-TASK-23, LOOKS-TASK-29, LOOKS-TASK-30, LOOKS-TASK-31, LOOKS-TASK-34, LOOKS-TASK-36, LOOKS-TASK-37, LOOKS-TASK-38, LOOKS-TASK-39, LOOKS-TASK-40 | pending | — | — |
 <!-- rite:end -->
