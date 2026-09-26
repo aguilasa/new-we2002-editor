@@ -37,6 +37,18 @@ resources: [emulador, tela]
 
 ---
 
+- **Da [`LOOKS-TASK-34`](/docs/tasks/looks/34-o-goleiro-andando.md):** a
+  figura 1 não tem nada próprio a corrigir, mas as fotos mostraram **onde a
+  figura senta no painel** longe do jogo, nos dois slots do mesmo tanto: a
+  caixa da tinta, em fração do painel, começa em (0,215, 0,118) na janela
+  contra (0,384, 0,214) no jogo, com o tamanho batendo. É o `scene.ROOT_AT`,
+  escolha de enquadramento declarada — o *draw offset* do GPU nunca foi
+  medido —, e nenhum gate o julga: o `--silhouette` é livre de translação de
+  propósito. Pede veredito na §10.3 — medir o offset, ou registrar a escolha
+  como tal.
+
+---
+
 ## Objetivo
 
 Fechar a v2: gates novos alcançáveis pelo `ctest`, o alvo do usuário abrindo a
