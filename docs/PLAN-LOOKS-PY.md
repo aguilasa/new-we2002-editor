@@ -130,8 +130,11 @@ janela é a tela `LOOKS SET`, com o boneco montado, vestido e andando. Pela
 | o alvo do usuário | **cumprido.** `.\make.ps1 looks` abre a tela, e o `help` diz os controles | `make.ps1` |
 
 O que ficou **aberto**, com razão e destravamento: o giro do close-up e a
-animação de `FOOT` (§10.3 (p)), a fonte da caixa de ajuda (§10.3 (o)), e as
-duas incógnitas da v1 que a v2 não tocou, §6 (g) e (i).
+animação de `FOOT` (§10.3 (p)), e as duas incógnitas da v1 que a v2 não tocou,
+§6 (g) e (i). A fonte da caixa de ajuda **não** está entre eles: é decisão sob a
+§10.3 (o), fechada — o texto vem da ROM do console, que não está no disco nem
+neste repositório, e a janela o escreve numa fonte de apoio com o custo medido
+pelo `confront.py --outside`.
 
 ---
 

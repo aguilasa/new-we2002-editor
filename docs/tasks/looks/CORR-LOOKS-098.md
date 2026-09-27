@@ -5,7 +5,7 @@ origin: LOOKS-TASK-35
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -60,3 +60,15 @@ dão o mesmo veredito para a (o); se ela for aberta, `grep -ci destrav` sobre o
 trecho da (o) dá pelo menos 1.
 
 ## Log de Execução
+
+- 2026-09-27 — Reproduzido: `sed -n 132,134p` pôs "a fonte da caixa de ajuda
+  (§10.3 (o))" entre os abertos, `grep -n "^| (o)"` deu a linha 2554
+  **fechada**, e `awk 'NR>=3134 && NR<=3415' … | grep -ci "destrav\|aberta"`
+  deu `0`. Consertado pela primeira opção, que é a que o resto do repositório
+  já diz (a lista de abertos do `CLAUDE.md` só nomeia a (p)): a §0 tira a fonte
+  da ajuda da lista de abertos e a nomeia como decisão sob a (o) fechada, com
+  a razão (texto da ROM do console, fora do disco e do repositório) e o custo
+  medido pelo `confront.py --outside`. Verificação: a §0 (linhas 132-137) e a
+  linha `| (o)` (2557) dão o mesmo veredito, fechada; nenhuma outra linha de
+  plano, perfil ou `CLAUDE.md` a lista como aberta. `rite gates --cycle looks`
+  verde.
