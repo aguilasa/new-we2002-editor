@@ -5,10 +5,10 @@ origin: LOOKS-TASK-35
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-27
+done_commit: 1df1fa74
 ---
 
 # CORR-LOOKS-099 — Corrigir o custo do --pose citado na §4.4 do plano
@@ -68,3 +68,7 @@ Na §4.4 de `docs/PLAN-LOOKS-PY.md`, citar a faixa da tabela do perfil: ~25 s
   min (`--screen`), o `--pose` em ~40 s. Verificação: `grep -n "20 s
   (\`--pose\`" docs/PLAN-LOOKS-PY.md` não imprime nada (exit 1). `rite gates
   --cycle looks` verde.
+- **Closed** — commit `1df1fa74` (2026-09-27): docs(looks): quote the measured cost of --pose and --placement
+  - Files (`git show --name-status 1df1fa74`):
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/tasks/looks/CORR-LOOKS-099.md`
