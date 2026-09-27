@@ -5,10 +5,10 @@ origin: LOOKS-TASK-35
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-27
+done_commit: 3e1f3abc
 ---
 
 # CORR-LOOKS-098 — Reconciliar a lista de abertos da §0 com o veredito da (o) na §10.3
@@ -72,3 +72,7 @@ trecho da (o) dá pelo menos 1.
   linha `| (o)` (2557) dão o mesmo veredito, fechada; nenhuma outra linha de
   plano, perfil ou `CLAUDE.md` a lista como aberta. `rite gates --cycle looks`
   verde.
+- **Closed** — commit `3e1f3abc` (2026-09-27): docs(looks): take the help-box font off the plan's open list
+  - Files (`git show --name-status 3e1f3abc`):
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/tasks/looks/CORR-LOOKS-098.md`

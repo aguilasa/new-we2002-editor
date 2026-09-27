@@ -114,7 +114,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-095](/docs/tasks/looks/CORR-LOOKS-095.md) | O ritmo do ui_check tem de ficar vermelho com a taxa errada | LOOKS-TASK-33 | medium | done | 2026-09-26 |
 | [CORR-LOOKS-096](/docs/tasks/looks/CORR-LOOKS-096.md) | Recontar o atraso e as margens da silhueta escritos nos docs | LOOKS-TASK-33 | low | done | 2026-09-26 |
 | [CORR-LOOKS-097](/docs/tasks/looks/CORR-LOOKS-097.md) | Versionar a sonda por trás dos números de posição no painel | LOOKS-TASK-34 | medium | done | 2026-09-26 |
-| [CORR-LOOKS-098](/docs/tasks/looks/CORR-LOOKS-098.md) | Reconciliar a lista de abertos da §0 com o veredito da (o) na §10.3 | LOOKS-TASK-35 | medium | pending | — |
+| [CORR-LOOKS-098](/docs/tasks/looks/CORR-LOOKS-098.md) | Reconciliar a lista de abertos da §0 com o veredito da (o) na §10.3 | LOOKS-TASK-35 | medium | done | 2026-09-27 |
 | [CORR-LOOKS-099](/docs/tasks/looks/CORR-LOOKS-099.md) | Corrigir o custo do --pose citado na §4.4 do plano | LOOKS-TASK-35 | low | pending | — |
 <!-- rite:end -->
 
