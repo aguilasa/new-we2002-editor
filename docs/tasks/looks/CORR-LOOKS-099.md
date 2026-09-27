@@ -5,7 +5,7 @@ origin: LOOKS-TASK-35
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -58,3 +58,13 @@ Na §4.4 de `docs/PLAN-LOOKS-PY.md`, citar a faixa da tabela do perfil: ~25 s
 `grep -n "20 s (\`--pose\`" docs/PLAN-LOOKS-PY.md` não imprime nada.
 
 ## Log de Execução
+
+- 2026-09-27 — Reproduzido: a §4.4 dizia "de 20 s (`--pose`, `--placement`)";
+  o `rite reproduce` pulou as duas cronometragens (77, sem
+  `WE2002_LOOKS_DRIVE_IMAGE`), e refeitas com as duas variáveis, **36 s**
+  (`oracle.py --pose`, `0 problem(s)`) e **25 s** (`confront.py --placement`,
+  `0 problem(s) over 2 slot(s)`), pelo relógio de `date +%s`. Consertado: a
+  §4.4 cita a faixa da tabela de gates do perfil — ~25 s (`--placement`) a 12
+  min (`--screen`), o `--pose` em ~40 s. Verificação: `grep -n "20 s
+  (\`--pose\`" docs/PLAN-LOOKS-PY.md` não imprime nada (exit 1). `rite gates
+  --cycle looks` verde.

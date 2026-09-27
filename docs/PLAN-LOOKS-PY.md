@@ -1484,8 +1484,9 @@ tabela de gates do
 a LOOKS-TASK-19 respondeu para o `--check-live`, com a resposta oposta, e pelas
 razões que o próprio `--check-live` tinha a favor e estes não têm:
 
-- **o custo.** O `--check-live` leva 9 s pelo `ctest`; os da v2 levam de 20 s
-  (`--pose`, `--placement`) a 12 min (`--screen`), e a série inteira passa de
+- **o custo.** O `--check-live` leva 9 s pelo `ctest`; os da v2 levam de ~25 s
+  (`--placement`) a 12 min (`--screen`), com o `--pose` em ~40 s — os números
+  da tabela de gates do perfil —, e a série inteira passa de
   uma hora. Um alvo que custa isso vira alvo que ninguém roda, que é a forma de
   gate que a [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) abriu por
   outro caminho;
