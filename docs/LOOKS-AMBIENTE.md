@@ -8,10 +8,13 @@ serve a duas coisas:
 2. dizer o que falta fazer para rodá-lo no Linux, em
    `/home/ingmar/desenvolvimento/github/new-we2002-editor`.
 
-Tudo o que se afirma do Linux foi medido em 2026-09-28, a partir do Windows,
-com a partição Linux montada só para leitura pelo WSL (`wsl --mount … --options
-"ro,noload"`). Nada foi gravado lá. O que **não** foi medido está marcado como
-tal.
+O levantamento do Linux foi feito em 2026-09-28, a partir do Windows, com a
+partição Linux montada só para leitura pelo WSL (`wsl --mount … --options
+"ro,noload"`). No mesmo dia o ciclo rodou pela primeira vez **no próprio
+Linux**, seguindo os passos abaixo: os quatro alvos `looks_*` passaram, e três
+defeitos que só o Linux expunha foram corrigidos (seção
+[A primeira corrida no Linux](#a-primeira-corrida-no-linux)). A tabela e os
+passos já refletem essa corrida. O que **não** foi medido está marcado como tal.
 
 Os caminhos saem do código (`tools/looks/`, `tools/pes2/fork.py`, `make.ps1`) e
 dos docs do ciclo ([PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md), o
@@ -40,17 +43,17 @@ abaixo).
 
 | artefato | Windows | Linux, medido em 2026-09-28 |
 |---|---|---|
-| repositório | `C:\github\new-we2002-editor`, em `14e1ecf6`, igual ao `origin/main` | em `08cad58` (2026-09-14): **316 commits atrás**, 124 deles em `tools/looks/`; hoje só tem `layout.py` e `superpack_count.py` |
+| repositório | `C:\github\new-we2002-editor`, em `14e1ecf6`, igual ao `origin/main` | atualizado; em `08cad58` antes da corrida, e as três correções dela entraram depois de `2c0f574` |
 | disco japonês (`WE2002_LOOKS_IMAGE`) | `roms\japanese-shift-jis.bin` | `roms/japanese-shift-jis.bin`, **presente**, 307.187.664 B |
-| disco inglês (`WE2002_LOOKS_DRIVE_IMAGE`) | `C:\games\ps1\work\we2002-english.cue`, cópia de `C:\games\ps1\roms\we2002\we2002-english\` | `roms/we2002-english/we2002-english.{bin,cue}`, **presente**, 306.834.864 B, o mesmo tamanho |
-| fork do DuckStation com MCP | `C:\games\ps1\duckstation-mcp\`, portable, build `a2edf2d` | `~/Applications/duckstation-mcp/` (`bin/`, `lib/`, `plugins/`), build **`c55b8ee`**: outro build |
+| disco inglês (`WE2002_LOOKS_DRIVE_IMAGE`) | `C:\games\ps1\work\we2002-english.cue`, cópia de `C:\games\ps1\roms\we2002\we2002-english\` | `roms/we2002-english/we2002-english.{bin,cue}`, **presente**, 306.834.864 B, SHA-1 `e1676450…` igual ao da cópia do Windows |
+| fork do DuckStation com MCP | `C:\games\ps1\duckstation-mcp\`, portable, build `a2edf2d` | `~/Applications/duckstation-mcp/` (`bin/`, `lib/`, `plugins/`), build **`c55b8ee`**: outro build, e **carrega** os states do `a2edf2d` |
 | dados do emulador | a pasta do próprio fork (`portable.txt`) | `~/.local/share/duckstation/`, com `EnableMCPServer = true`, `MCPServerPort = 2346` |
 | BIOS | `…\duckstation-mcp\bios\`, 4 imagens | `~/.local/share/duckstation/bios/`, as **mesmas 4** (SHA-1 idênticos) |
-| save states (cópia mestra) | `work\looks-states\SLPM-87056_{1,2}.sav` | **ausentes**: não existe `work/looks-states/` |
-| medições do ciclo | `work\looks-{walk,camera,scenery,pose,stature}\` | **ausentes** |
-| venv com PySide6 | `work\venv-looks\` (PySide6 6.11.2, Python 3.13.14) | **ausente** (só existe o `work/venv-mcr/`) |
+| save states (cópia mestra) | `work\looks-states\SLPM-87056_{1,2}.sav` | copiados do Windows (passo 3), SHA-1 conferidos |
+| medições do ciclo | `work\looks-{walk,camera,scenery,pose,stature}\` | copiadas do Windows (passo 3) |
+| venv com PySide6 | `work\venv-looks\` (PySide6 6.11.2, Python 3.13.14) | `work/venv-looks/`, PySide6 6.11.2 sobre o mise 3.13.13 (passo 2) |
 | Python com Pillow | `C:\Users\ingcvs\AppData\Local\Programs\Python\Python313\`, Pillow 12.3.0 | mise 3.13.13 (`~/.local/share/mise/installs/python/3.13/`), **Pillow 12.3.0 já instalado** |
-| build do `ctest` | um diretório fora do worktree, com vcpkg | `build/`, configurado com o Python do mise; **não lista** os alvos `looks_*` |
+| build do `ctest` | um diretório fora do worktree, com vcpkg | `build/`, reconfigurado com `cmake --preset debug`: lista os quatro alvos `looks_*` |
 | display | janela estacionada em -32000 pelo `app.py` | `Xvfb`, `xdotool` e `import` em `/usr/bin` |
 | alvo que abre a tela | `.\make.ps1 looks` | `make looks` / `looks-98` / `looks-venv` (passos 2 e 7) |
 | Superpack v6 (`WE2002_LOOKS_CORPUS`) | `C:\games\we2002\Superpackv6\` | não está no `$HOME`; alcançável em `/media/ingmar/win/games/we2002/Superpackv6/` |
@@ -127,6 +130,20 @@ cp -a ~/.local/share/duckstation/savestates/SLPM-87056_1.sav \
       ~/.local/share/duckstation/savestates/SLPM-87056_1.sav.antes-looks
 ```
 
+O backup continua valendo depois da CORR-LOOKS-100. Antes dela, até o
+`selftest.py` sobrescrevia esse slot no Linux, com um state sintético de 478
+bytes. Isso acabou, mas o `--check-live` e o `ctest -R looks_live` ainda
+restauram a cópia mestra no slot **de propósito**. Ao terminar, devolva o
+original:
+
+```sh
+cp -a ~/.local/share/duckstation/savestates/SLPM-87056_1.sav.antes-looks \
+      ~/.local/share/duckstation/savestates/SLPM-87056_1.sav
+```
+
+A corrida também cria o slot 2 (`SLPM-87056_2.sav`), que antes não existia
+nesta máquina. É rascunho do ciclo.
+
 No Linux a pasta de dados é **uma só** para o fork e para o AppImage oficial,
 porque o fork não roda em modo portable ali. Um save state do ciclo aparece
 também no DuckStation de uso normal.
@@ -147,12 +164,12 @@ export WE2002_LOOKS_IMAGE="$PWD/roms/japanese-shift-jis.bin"
 export WE2002_LOOKS_DRIVE_IMAGE="$PWD/work/looks-disc/we2002-english.cue"
 ```
 
-O `layout.py` confere o digest de todo arquivo que lê. Se o disco inglês do
-Linux fosse outro patch, o `oracle.py` recusaria na hora. **Não medido:** o
-digest do `roms/we2002-english/we2002-english.bin` do Linux contra a cópia do
-Windows. Os tamanhos batem, e a guarda decide na primeira corrida. A outra
-opção é apontar direto para `/media/ingmar/win/games/ps1/work/we2002-english.cue`,
-a mesma cópia que o Windows usou, lida pelo NTFS.
+O `roms/we2002-english/we2002-english.bin` do Linux é **o mesmo arquivo** que
+a cópia do Windows: SHA-1 `e16764507fedbecaedc0f4568e8597a12b871cdf` nos dois,
+medido em 2026-09-28. O state guarda o caminho do disco em que foi gravado, e o
+`oracle.py` compara só o **nome do arquivo** com o `.cue` em uso
+([CORR-LOOKS-101](/docs/tasks/looks/CORR-LOOKS-101.md)). Por isso a cópia tem de
+continuar se chamando `we2002-english.cue`.
 
 ### 6. O emulador, e a pergunta que ficou aberta
 
@@ -162,16 +179,21 @@ estão no binário (`breakpoint`, `continue`, `dump_vram`, `frame_step`,
 `press_button`, `read_memory`, `read_registers`, `read_vram_region`,
 `take_screenshot`, `vram_watch`, `wait_for_pause`, `write_vram_region`).
 
-**Não medido: se o build `c55b8ee` do Linux carrega os save states gravados
-pelo `a2edf2d` do Windows.** Save state do DuckStation carrega a versão do
-formato, e os dois são commits diferentes do fork. A primeira corrida responde
-isso:
+**O build `c55b8ee` do Linux carrega os save states gravados pelo `a2edf2d`
+do Windows.** Medido em 2026-09-28: `load_state slot=1` responde `loaded` e
+mostra a `LOOKS SET` do goleiro, e o `--check-live` passa com as mesmas médias
+de quadro do Windows, 0,182425 e 0,183158.
 
 ```sh
-python3 tools/looks/oracle.py --check-live
+python3 tools/looks/oracle.py --check-live      # ~10 s
 ```
 
-Se o state for recusado, há dois caminhos:
+A captura do fork sai do tamanho da janela do jogo, e os limiares foram
+medidos a 864×655. O `[UI] MainWindowWidth` salvo é 864 no Windows e 800 no
+Linux. No Linux o oracle leva a janela a 864×655 sozinho, e recusa quadro de
+outro tamanho ([CORR-LOOKS-102](/docs/tasks/looks/CORR-LOOKS-102.md)).
+
+Se um build futuro recusar o state, há dois caminhos:
 
 - **Igualar o build.** `python3 tools/pes2/fork.py recipe` diz como obter o
   fork. O zip que roda no Windows é do CI do mesmo fork.
@@ -226,16 +248,39 @@ export WE2002_LOOKS_CORPUS="/media/ingmar/win/games/we2002/Superpackv6/We2002/MC
 ### 9. Conferir, do mais barato ao mais caro
 
 ```sh
-python3 tools/looks/selftest.py                   # sem nada; nunca pula
-python3 tools/looks/cli.py check                  # precisa de WE2002_LOOKS_IMAGE
-python3 tools/looks/ui_check.py                   # + venv, :98, as pastas do passo 3
-python3 tools/looks/oracle.py --check-live        # + fork, states, disco inglês
+python3 tools/looks/selftest.py                   # sem nada; nunca pula; ~14 s
+python3 tools/looks/cli.py check                  # precisa de WE2002_LOOKS_IMAGE; ~2 s
+python3 tools/looks/ui_check.py                   # + venv, :98, as pastas do passo 3; ~3,5 min
+python3 tools/looks/oracle.py --check-live        # + fork, states, disco inglês; ~10 s
 cmake --preset debug && ctest --preset debug -N -R looks   # tem de listar os 4 alvos
+ctest --preset debug -R looks                     # os 4 juntos; ~4,5 min
 ```
 
 O `build/` do Linux foi configurado antes de os alvos `looks_*` existirem, então
 precisa do `cmake` de novo. Confira os **nomes** na saída do `ctest -N`, não o
 código de saída: um `-R` que não casa nada sai 0.
+
+## A primeira corrida no Linux
+
+Em 2026-09-28, seguindo os passos acima, três defeitos apareceram. Os três
+existiam desde a [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md)
+e nunca se manifestaram no Windows. Cada um tem CORR e controle negativo:
+
+- [CORR-LOOKS-100](/docs/tasks/looks/CORR-LOOKS-100.md): o selftest do
+  `oracle.py` gravava um state sintético de 478 B por cima do slot 1 real do
+  DuckStation. O caso isolava o emulador por `PES2_FORK`, que só o Windows
+  respeita. Agora isola por `WE2002_LOOKS_EMULATOR_STATES` e só restaura se o
+  diretório caiu dentro da pasta temporária.
+- [CORR-LOOKS-101](/docs/tasks/looks/CORR-LOOKS-101.md): a guarda de disco
+  comparava o caminho absoluto gravado no state e recusava os states do
+  Windows. Agora compara o nome do arquivo.
+- [CORR-LOOKS-102](/docs/tasks/looks/CORR-LOOKS-102.md): os limiares dependiam
+  da largura de janela salva em cada máquina. Agora a janela é fixada em
+  864×655 no Linux; no Windows, uma largura diferente faz a captura ser
+  recusada.
+
+Com as três corrigidas, `ctest --preset debug -R looks` dá quatro de quatro,
+nenhum *skipped*, e `make looks-98` abre a tela.
 
 ## Os artefatos, um a um
 
