@@ -58,7 +58,7 @@ COPY := $(WORK)/$(notdir $(IMAGE))
         we2002-ptbr-play we2002-ptbr-play-fresh we2002-ptbr-98 \
         we2002-card-snap we2002-card-list \
         we2002-src-check \
-        mcr mcr-98 mcr-venv
+        mcr mcr-98 mcr-venv looks looks-98 looks-venv
 
 # ------------------------------------------------------------------ help ----
 
@@ -104,7 +104,18 @@ help:
 	@echo '                sem cartao, sobe vazio e o proprio editor abre um'
 	@echo '  mcr-98        idem, forcando DISPLAY=$(XVFB)'
 	@echo
-	@echo '  fresh         descarta a copia de trabalho e refaz do original'
+	@echo '  Visualizador 3D da aparencia do jogador -- so le, nao grava:'
+	@echo '  looks-venv    cria $$(LOOKS_VENV) e instala $(LOOKS_PYSIDE) (nunca por apt)'
+	@echo '  looks         abre a TELA `LOOKS SET` do jogo na SUA tela: setas'
+	@echo '                movem o cursor e trocam o valor, ESPACO pausa a'
+	@echo '                caminhada, PONTO anda uma passada'
+	@echo '                STATE=1 comeca do goleiro, STATE=2 (default) do'
+	@echo '                jogador de linha'
+	@echo '                TUPLE=A-I3-A-E-A abre o visualizador de uma tupla'
+	@echo '                so (FIGURE=1 o goleiro; ARGS=--wireframe etc.)'
+	@echo '  looks-98      idem, forcando DISPLAY=$(XVFB)'
+	@echo
+	@echo '  fresh        descarta a copia de trabalho e refaz do original'
 	@echo '  test          testes unitarios (sem imagem)'
 	@echo '  test-release  testes no preset release (pega _FORTIFY_SOURCE)'
 	@echo '  golden        golden test headless (core vs ed.exe sob Wine)'
@@ -124,6 +135,7 @@ help:
 	@echo 'Imagem jogo:  $(GAME_IMAGE)'
 	@echo '              ->  $(GAME_COPY)'
 	@echo 'Cartao .mcr:  $(WE2002_MCR_CARD)  ->  $(MCR_COPY)'
+	@echo 'Imagem looks: $(LOOKS_IMAGE)'
 
 # ----------------------------------------------------------------- build ----
 
@@ -750,6 +762,85 @@ mcr: $(MCR_PY) $(if $(MCR_CARD_THERE),$(MCR_COPY))
 
 mcr-98:
 	@$(MAKE) --no-print-directory mcr DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
+
+# ------------------------------------------ visualizador de aparencia (Python) -
+
+# O visualizador da tela `LOOKS SET` (docs/PLAN-LOOKS-PY.md). Projeto
+# separado, como o de .mcr: Python puro em tools/looks/, UI PySide6 num venv
+# proprio. SO LE -- nada aqui grava na imagem nem no cartao.
+#
+# E o equivalente do `.\make.ps1 looks` do Windows, com os parametros de la
+# virando variaveis:
+#
+#   STATE=1|2          de qual save state a tela comeca: 1 goleiro, 2 jogador
+#                      de linha (-State)
+#   TUPLE=A-I3-A-E-A   abre o visualizador de UMA tupla em vez da tela (-Tuple)
+#   FIGURE=0|1         a figura do visualizador de tupla; so vale com TUPLE
+#                      (-Figure)
+#   LOOKS_IMAGE=<bin>  a trilha de dados JAPONESA (-LooksImage)
+#   ARGS=...           o resto vai direto ao app.py
+#
+# A imagem tem de ser a JAPONESA: o DAT2D.BIN da inglesa difere, e a guarda do
+# layout.py recusa. Default: WE2002_LOOKS_IMAGE, senao a de roms/.
+#
+# O venv e o do mesmo Python do `mcr-venv` -- o `python3` do PATH, que nesta
+# maquina e o mise 3.13 --, e pela mesma razao: `apt` instala para o 3.12 do
+# sistema e o `import` continua falhando. A versao e a que roda no Windows.
+# Ver docs/LOOKS-AMBIENTE.md para o resto do que o ciclo precisa no Linux.
+
+LOOKS_VENV    ?= $(WORK)/venv-looks
+LOOKS_PY      := $(LOOKS_VENV)/bin/python
+LOOKS_PYSIDE  ?= PySide6==6.11.2
+LOOKS_APP     := tools/looks/ui/app.py
+LOOKS_IMAGE   ?= $(or $(WE2002_LOOKS_IMAGE),roms/japanese-shift-jis.bin)
+STATE         ?= 2
+TUPLE         ?=
+FIGURE        ?=
+# Opcoes que so o visualizador de tupla entende. Sem TUPLE o alvo abre a tela,
+# que nao tem camera orbital nem prateleira, e o app.py as ignoraria em
+# silencio -- abrir outra coisa sem dizer. Por isso sao RECUSADAS, como no
+# make.ps1.
+LOOKS_VIEWER_ONLY := --wireframe --no-shelf --piece --yaw --pitch --size
+LOOKS_MISPLACED   := $(filter $(LOOKS_VIEWER_ONLY),$(ARGS))
+
+.PHONY: looks looks-98 looks-venv
+
+looks-venv: $(LOOKS_PY)
+
+$(LOOKS_PY):
+	@echo '>> criando $(LOOKS_VENV) com $$(python3) = '"$$(python3 -VV)"
+	@python3 -m venv '$(LOOKS_VENV)'
+	@'$(LOOKS_VENV)/bin/pip' install --disable-pip-version-check '$(LOOKS_PYSIDE)'
+	@'$(LOOKS_PY)' -c 'import PySide6; print(">> PySide6", PySide6.__version__)'
+
+# O `--visible` e o ponto do alvo: o app.py estaciona a janela fora da tela por
+# default, porque e o que os gates rodam; aqui quem chama e o usuario pedindo
+# para olhar. No `looks-98` ela vai para o Xvfb, onde a regra do :98 manda.
+looks: $(LOOKS_PY)
+	@test -f '$(LOOKS_IMAGE)' || { \
+	  echo 'ERRO: imagem ausente: $(LOOKS_IMAGE)'; \
+	  echo '      aponte a trilha de dados JAPONESA com LOOKS_IMAGE=<bin>'; \
+	  echo '      ou WE2002_LOOKS_IMAGE.'; exit 1; }
+	@test -n '$(TUPLE)' || test -z '$(FIGURE)' || { \
+	  echo 'ERRO: FIGURE e do visualizador de uma tupla, e sem TUPLE o alvo'; \
+	  echo '      abre a TELA. Na tela quem escolhe a figura e o save state:'; \
+	  echo '      STATE=1 e o goleiro (placa GK), STATE=2 o jogador de linha.'; \
+	  echo '      Para o visualizador: make looks TUPLE=A-A1-A-A-A FIGURE=$(FIGURE)'; \
+	  exit 1; }
+	@test -n '$(TUPLE)' || test -z '$(LOOKS_MISPLACED)' || { \
+	  echo 'ERRO: $(LOOKS_MISPLACED) e do visualizador de uma tupla -- a tela'; \
+	  echo '      nao tem camera orbital nem prateleira, e o app.py ignoraria'; \
+	  echo '      a opcao em silencio.'; \
+	  echo "      Para o visualizador: make looks TUPLE=A-A1-A-A-A ARGS='$(ARGS)'"; \
+	  exit 1; }
+	@echo '>> $(LOOKS_PY) $(LOOKS_APP) $(if $(TUPLE),--looks $(TUPLE) --figure $(or $(FIGURE),0),--state $(STATE)) --visible $(ARGS)   (DISPLAY=$(DISPLAY))'
+	@env $(if $(XAUTH),XAUTHORITY='$(XAUTH)') \
+	  '$(LOOKS_PY)' '$(LOOKS_APP)' --image '$(LOOKS_IMAGE)' \
+	  $(if $(TUPLE),--looks '$(TUPLE)' --figure '$(or $(FIGURE),0)',--state '$(STATE)') \
+	  --visible $(ARGS)
+
+looks-98:
+	@$(MAKE) --no-print-directory looks DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
 
 # ----------------------------------------------------------------- testes ---
 

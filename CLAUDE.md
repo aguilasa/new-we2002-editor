@@ -866,7 +866,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 |---|---|
 | `python tools/looks/selftest.py` | o gate **obrigatório**: os self-checks, as três regras de desenho e os controles negativos plantados |
 | `python tools/looks/cli.py sections\|pieces\|texture\|looks [tupla]\|check` | a linha de comando do núcleo; `check` roda os doze `--check-image` e é o alvo `looks_image` |
-| `.\make.ps1 looks` | **abre a tela `LOOKS SET`** — `-State 1\|2` escolhe goleiro ou jogador de linha, `-Tuple A-I3-A-E-A` abre o visualizador de uma tupla só. É o **único** alvo do ciclo que mostra janela ao usuário; opção de visualizador sem `-Tuple` é **recusada**, não ignorada |
+| `.\make.ps1 looks` | **abre a tela `LOOKS SET`** — `-State 1\|2` escolhe goleiro ou jogador de linha, `-Tuple A-I3-A-E-A` abre o visualizador de uma tupla só. É o **único** alvo do ciclo que mostra janela ao usuário; opção de visualizador sem `-Tuple` é **recusada**, não ignorada. No Linux o mesmo é `make looks` (`STATE=`, `TUPLE=`, `FIGURE=`, `ARGS=`), com `looks-98` e `looks-venv`; o ambiente de lá está em [docs/LOOKS-AMBIENTE.md](docs/LOOKS-AMBIENTE.md) |
 | `work/venv-looks/Scripts/python.exe tools/looks/ui/app.py` | o mesmo app: **sem** `--looks` abre a tela (com `--state`, `--keys`, `--screenshot`); **com** `--looks <tupla>` desenha uma tupla fora da tela, e tupla que a tabela recusa sai **2** |
 | `python tools/looks/screen.py --check` / `--report` | a tabela da tela: decodificação, caixas, cursor e os rótulos do `looks.py` contra ela; o `--report` imprime o que a tabela diz |
 | `python tools/looks/ui_check.py` | o alvo `looks_ui`: julga os PNGs de fora, sem o código sob teste, e anda as doze linhas até as duas pontas nos dois slots por tecla sintética |
