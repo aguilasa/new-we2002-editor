@@ -5,10 +5,10 @@ origin: LOOKS-TASK-08
 severity: high
 files: [tools/looks/oracle.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-28
+done_commit: "1843180"
 ---
 
 # CORR-LOOKS-102 — Os limiares do oracle.py dependem da largura de janela salva no DuckStation de cada máquina
@@ -85,3 +85,8 @@ oracle FAILED: the emulator's frame is 800x655 and every threshold here was meas
 - 2026-09-28 — diagnosticado pelo diff dos dois `settings.ini`; medido que
   864×655 devolve a média; corrigido; `--check-live` verde no Linux; controle
   negativo vermelho.
+- **Closed** — commit `1843180` (2026-09-28): fix(looks): pin the game window to the frame the thresholds were measured on
+  - Files (`git show --name-status 1843180`):
+    - `A docs/tasks/looks/CORR-LOOKS-102.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/oracle.py`
