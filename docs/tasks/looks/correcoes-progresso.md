@@ -120,7 +120,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-101](/docs/tasks/looks/CORR-LOOKS-101.md) | A guarda de disco do oracle.py recusa o state em outra máquina por comparar o caminho absoluto | LOOKS-TASK-08 | high | done | 2026-09-28 |
 | [CORR-LOOKS-102](/docs/tasks/looks/CORR-LOOKS-102.md) | Os limiares do oracle.py dependem da largura de janela salva no DuckStation de cada máquina | LOOKS-TASK-08 | high | done | 2026-09-28 |
 | [CORR-LOOKS-103](/docs/tasks/looks/CORR-LOOKS-103.md) | SKIN recolore só a cabeça, e o corpo fica em A | LOOKS-TASK-13 | medium | done | 2026-09-28 |
-| [CORR-LOOKS-104](/docs/tasks/looks/CORR-LOOKS-104.md) | C2, D2, F2 e F3 desenham o cabelo do primeiro estilo da família | LOOKS-TASK-14 | medium | pending | — |
+| [CORR-LOOKS-104](/docs/tasks/looks/CORR-LOOKS-104.md) | C2, D2, F2 e F3 desenham o cabelo do primeiro estilo da família | LOOKS-TASK-14 | medium | done | 2026-09-28 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não

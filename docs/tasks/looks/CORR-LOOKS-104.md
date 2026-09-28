@@ -5,10 +5,10 @@ origin: LOOKS-TASK-14
 severity: medium
 files: [tools/looks/assembly.py, tools/looks/layout.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-28
+done_commit: f5939f3
 ---
 
 # CORR-LOOKS-104 — C2, D2, F2 e F3 desenham o cabelo do primeiro estilo da família
@@ -97,3 +97,9 @@ do plano (§10.3 (p)).
 
 - 2026-09-28 — medido por `--patched HAIR` nos dois slots; corrigido;
   selftest, check-image e a comparação de tela dos nove estilos conferidos.
+- **Closed** — commit `f5939f3` (2026-09-28): fix(looks): give C, D, E1 and F their own hair band
+  - Files (`git show --name-status f5939f3`):
+    - `A docs/tasks/looks/CORR-LOOKS-104.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/assembly.py`
+    - `M tools/looks/layout.py`
