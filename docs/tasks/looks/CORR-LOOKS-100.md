@@ -5,10 +5,10 @@ origin: LOOKS-TASK-08
 severity: high
 files: [tools/looks/oracle.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-28
+done_commit: 44bcba2
 ---
 
 # CORR-LOOKS-100 — O selftest do oracle.py grava no slot real do DuckStation no Linux
@@ -92,3 +92,8 @@ SHA-1 do slot 1 é `43258eeb…` antes e depois.
 
 - 2026-09-28 — reproduzido sob `HOME` descartável, corrigido, selftest verde
   no Linux com o slot real intacto; controle negativo vermelho sem gravar.
+- **Closed** — commit `44bcba2` (2026-09-28): fix(looks): keep the oracle self-check out of the real DuckStation slot
+  - Files (`git show --name-status 44bcba2`):
+    - `A docs/tasks/looks/CORR-LOOKS-100.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/oracle.py`
