@@ -5,10 +5,10 @@ origin: LOOKS-TASK-13
 severity: medium
 files: [tools/looks/assembly.py, tools/looks/layout.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-28
+done_commit: 1f2286a
 ---
 
 # CORR-LOOKS-103 — SKIN recolore só a cabeça, e o corpo fica em A
@@ -97,3 +97,9 @@ mostra pescoço, braços e joelhos na pele D, como o do jogo.
 
 - 2026-09-28 — reproduzido em tela; medido pelas duas pontas nos dois slots;
   corrigido; self-check, check-image e a comparação de tela verdes.
+- **Closed** — commit `1f2286a` (2026-09-28): fix(looks): let SKIN recolour the body, not only the head
+  - Files (`git show --name-status 1f2286a`):
+    - `A docs/tasks/looks/CORR-LOOKS-103.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/assembly.py`
+    - `M tools/looks/layout.py`
