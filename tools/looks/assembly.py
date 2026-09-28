@@ -254,20 +254,20 @@ draws, and this replaces the section.
 
 HAIR_MAP = (
     (24, (0,)), (24, (2,)), (24, (1,)),
-    (26, (0, 1)), (26, (2,)), (26, (1,)), (26, (5,)), (26, (3,)), (26, (4,)),
-    (30, (0, 1)), (30, (2,)),
-    (48, (0, 1)), (48, (2,)),
-    (48, (0,)), (54, (0, 1)),
-    (52, (0, 1, 3)), (52, (1,)), (52, (4,)),
-    (28, (0, 1)),
+    (26, (0,)), (26, (2,)), (26, (1,)), (26, (5,)), (26, (3,)), (26, (4,)),
+    (30, (1,)), (30, (2,)),
+    (48, (1,)), (48, (2,)),
+    (48, (0,)), (54, ()),
+    (52, (3,)), (52, (1,)), (52, (4,)),
+    (28, ()),
     None,
     (34, (0,)), (34, (2,)), (34, (1,)),
-    (36, (0, 1)),
+    (36, ()),
     (32, (0, 1, 3, 4)),
     (46, (5,)), (46, (6,)), (46, (7,)),
     None, None,
-    (44, (0, 1)),
-    (50, (0, 1)),
+    (44, ()),
+    (50, ()),
 )
 """Style index -> (MODEL.BIN section, the bands its rewritten quads landed in).
 
@@ -283,7 +283,7 @@ LOOKS-TASK-14 was missing, and it says what the one-section walk could not:
   other style names.  That is why HAIR_MAP_SECTIONS is thirteen and the letters
   above are twelve (CORR-LOOKS-030);
 * the digit is the **band** of the hair sheet at 3,568 -- B's six variants come
-  back as bands 0/1, 2, 1, 5, 3 and 4 of one section;
+  back as bands 0, 2, 1, 5, 3 and 4 of one section;
 * and section 24, the one every earlier walk watched, is family **A** alone.
   Three values of 32 use it, which is exactly the "three states" that walk saw
   and read as the field's whole reach.
@@ -297,41 +297,51 @@ which is D's, and may be the game putting D's section back rather than naming
 E1's own -- the question is why E1 uses D's, not whether E has one of its own,
 which E2 answers.  Guessing any of
 the four would be the mapping that draws perfectly and is wrong.
+
+**The bands are the hair quads' alone since 2026-09-28** (CORR-LOOKS-104).
+The walk reported the band of every primitive a press wrote, and ten styles
+came out with two or three -- B1 as 0/1, C1 as 0/1, F1 as 0/1/3.  The extra
+bands were the BEARD: the same press rewrites the head's beard quads (column 9,
+`v` 0..16), and their rows read as band 0 or 1.  Split by CLUT column, every
+style writes its hair quads in exactly one band, or in none -- E2, G1, J1, O1
+and P1 rewrite only beard quads, so their hair is the disc's window and the
+tuple of bands is empty.  K1 keeps four, because section 32's rewrite is not a
+band walk at all (its quads land at `v` 58..71) and is not applied.
 """
 
 HAIR_MAP_GOALKEEPER = (
     (24, (0,)),          # A1
     (24, (2,)),          # A2
     (24, (1,)),          # A3
-    (26, (0, 1)),        # B1
+    (26, (0,)),          # B1
     (26, (2,)),          # B2
     (26, (1,)),          # B3
     (26, (5,)),          # B4
     (26, (3,)),          # B5
     (26, (4,)),          # B6
-    (30, (0, 1)),        # C1
+    (30, (1,)),          # C1
     (30, (2,)),          # C2
-    (48, (0, 1)),        # D1
+    (48, (1,)),          # D1
     (48, (2,)),          # D2
     (48, (0,)),          # E1
-    (54, (0, 1)),        # E2
-    (52, (0, 1, 3)),     # F1
+    (54, ()),            # E2
+    (52, (3,)),          # F1
     (52, (1,)),          # F2
     (52, (4,)),          # F3
-    (28, (0, 1)),        # G1
+    (28, ()),            # G1
     None,                # H1
     (34, (0,)),          # I1
     (34, (2,)),          # I2
     (34, (1,)),          # I3
-    (36, (0, 1)),        # J1
+    (36, ()),            # J1
     (32, (0, 1, 3, 4)),  # K1
     (46, (5,)),          # L1
     (46, (6,)),          # L2
     (46, (7,)),          # L3
     None,                # M1
     None,                # N1
-    (44, (0, 1)),        # O1
-    (50, (0, 1)),        # P1
+    (44, ()),            # O1
+    (50, ()),            # P1
 )
 """The same map, measured on the GOALKEEPER: slot 1, figure 1.
 
@@ -342,7 +352,9 @@ equal, value for value -- and that is the finding, not a copy:
 * every style rewrites a section of the **first** run, 24..55, and nothing of
   the second run (74..105) moved at any of the 32 presses.  The second run is
   not the goalkeeper's hair, whatever it is;
-* the bands are the outfield player's, style for style;
+* the bands are the outfield player's, style for style -- and on 2026-09-28
+  `--patched HAIR 1` printed every written primitive identical to slot 2's,
+  press for press, which is what the hair-only bands above rest on;
 * and H1, M1 and N1 wrote nothing here either.
 
 Written out on its own, one row a style, and not as `HAIR_MAP` again: two maps
@@ -384,9 +396,15 @@ Asserted in `_checks` so that a later measurement which fills the holes has to
 come here and change these two numbers.
 """
 
-HAIR_MAP_MULTI_BAND = 10
-HAIR_MAP_BANDS_UNMEASURED = 1
+HAIR_MAP_MULTI_BAND = 1
+HAIR_MAP_BANDS_UNMEASURED = 0
 """How many styles landed in more than one band, and how many of those draw.
+
+**Ten and one until 2026-09-28**, and the ten were the beard's bands counted
+with the hair's (see HAIR_MAP).  Split by column, only K1 keeps more than one,
+and section 32 has no hair quads in layout.HAIR_QUADS, so none of it is drawn
+with a chosen band (CORR-LOOKS-104).  What follows is the reasoning while the
+ten stood.
 
 `--patched` says WHICH bands a style's rewritten quads landed in; it does not
 say **which quad took which**.  For a style with one band there is nothing to
@@ -411,20 +429,24 @@ def multi_band_styles() -> list:
             if entry is not None and len(entry[1]) > 1]
 
 
-def hair_texcoords(texcoords, rows: int) -> tuple:
+def hair_texcoords(texcoords, rows: int,
+                   chosen: int = layout.HEAD_SECTION) -> tuple:
     """The four (u, v) the game draws a hair quad with, at *rows* into the sheet.
 
     `u` is the file's.  `v` is NOT the file's plus the band: the store at
     `layout.HAIR_QUAD_STORE` writes an absolute row into every corner --
     `rows + 15` into corners 0 and 2 and `rows + 1` into 1 and 3 -- and the file
     holds other rows than those, on all four sections whose quads are known
-    (CORR-LOOKS-042).
+    (CORR-LOOKS-042).  Sections 30, 48 and 52 take `rows + 5` for the second
+    pair, layout.HAIR_QUAD_CORNERS (CORR-LOOKS-104), and *chosen* is the
+    section HAIR picked, whose rows these are.
     """
-    if len(texcoords) != len(layout.HAIR_QUAD_ROWS):
+    corners = layout.HAIR_QUAD_CORNERS.get(chosen, layout.HAIR_QUAD_ROWS)
+    if len(texcoords) != len(corners):
         raise BadAssembly("a hair quad has %d corners and this has %d"
-                          % (len(layout.HAIR_QUAD_ROWS), len(texcoords)))
+                          % (len(corners), len(texcoords)))
     return tuple((u, rows + row)
-                 for (u, _v), row in zip(texcoords, layout.HAIR_QUAD_ROWS))
+                 for (u, _v), row in zip(texcoords, corners))
 
 
 def unmeasured_bands(chosen: int, bands) -> tuple:
@@ -693,10 +715,10 @@ def draw_list(disc, values: dict, figure: int, kit: str = None) -> list:
     # measured on the four whose quads are known (layout.HAIR_QUADS).
     quads = layout.HAIR_QUADS.get(chosen)
     if quads:
-        # Four of the thirteen heads have their quads named by index, by
-        # the breakpoint of LOOKS-TASK-14.  The other nine are written by
-        # some other instruction and keep the disc's own window until
-        # something measures them -- a wrong guess here repaints the skull.
+        # Seven of the thirteen heads have their quads named by index: four
+        # by the breakpoint of LOOKS-TASK-14, three by --patched
+        # (CORR-LOOKS-104).  The other six rewrite no hair quad and keep the
+        # disc's own window -- a wrong guess here repaints the skull.
         plan.setdefault((layout.MODEL, drawn), {})[
             (HEAD_BAND.row, quads)] = (HEAD_BAND, bands[0])
         # And their `v` is what the game's store writes, not the file's
@@ -717,7 +739,7 @@ def draw_list(disc, values: dict, figure: int, kit: str = None) -> list:
             clut, band = combine(primitive, plan.get((name, index), {}), at)
             texcoords = None
             if at in stored.get((name, index), ()):
-                texcoords = hair_texcoords(primitive.texcoords, band)
+                texcoords = hair_texcoords(primitive.texcoords, band, chosen)
                 corner = atlas.texel(primitive, *texcoords[0])
             else:
                 corner = atlas.texel(primitive, primitive.texcoords[0][0],
@@ -1045,15 +1067,16 @@ def _checks(c) -> None:
     # primitive, and a2, the band, at the same breakpoint hit -- the numbers
     # have to come through this file (CORR-LOOKS-028).
     multi = multi_band_styles()
-    ok("ten styles landed in more than one band",
-       len(multi) == HAIR_MAP_MULTI_BAND,
+    # Ten until the beard's bands were split from the hair's (CORR-LOOKS-104).
+    ok("one style lands in more than one band, K1",
+       len(multi) == HAIR_MAP_MULTI_BAND
+       and [looks.HAIR_STYLES[i] for i, _s, _b in multi] == ["K1"],
        "%d: %s" % (len(multi), [looks.HAIR_STYLES[i] for i, _s, _b in multi]))
     reach = [i for i, chosen, bands in multi
              if unmeasured_bands(chosen, bands)]
-    ok("and exactly one of them reaches the draw list: the other nine name "
-       "sections whose quads are unknown, so no band is applied at all",
-       len(reach) == HAIR_MAP_BANDS_UNMEASURED
-       and [looks.HAIR_STYLES[i] for i in reach] == ["B1"],
+    ok("and it does not reach the draw list: section 32's quads are unknown, "
+       "so no band is applied at all",
+       len(reach) == HAIR_MAP_BANDS_UNMEASURED,
        "%d: %s" % (len(reach), [looks.HAIR_STYLES[i] for i in reach]))
     # The hair quad's `v`, the way the game's store writes it: an absolute
     # row per corner, not the file's plus the band (CORR-LOOKS-042).  Section
@@ -1110,7 +1133,7 @@ def _checks(c) -> None:
     ok("a style with one band chooses nothing",
        unmeasured_bands(24, (0,)) == ())
     ok("and neither does a multi-band style whose quads are unknown",
-       unmeasured_bands(30, (0, 1)) == ())
+       unmeasured_bands(32, (0, 1, 3, 4)) == ())
     ok("but B1 reports the band the draw list dropped",
        unmeasured_bands(26, (0, 1)) == (1,),
        "%s" % (unmeasured_bands(26, (0, 1)),))
@@ -1303,8 +1326,22 @@ def _checks(c) -> None:
        "%r" % sorted(set(layout.HAIR_QUADS) - named))
     ok("and section 24's entry is the pair the field walk named",
        layout.HAIR_QUADS[layout.HEAD_SECTION] == layout.HAIR_PRIMITIVES)
-    ok("the quads are named for four of the thirteen heads",
-       len(layout.HAIR_QUADS) == 4 and len(named) == HAIR_MAP_SECTIONS)
+    ok("the quads are named for seven of the thirteen heads",
+       len(layout.HAIR_QUADS) == 7 and len(named) == HAIR_MAP_SECTIONS)
+    # Section 30's quads take + 5 for the second pair, and 24's + 1: the same
+    # band lands on different rows by section (CORR-LOOKS-104).
+    quad = ((212, 30), (212, 21), (222, 30), (222, 22))
+    ok("C2's quads land where the game writes them, 47 and 37",
+       [v for _u, v in hair_texcoords(quad, 2 * layout.ATLAS_BAND, 30)]
+       == [47, 37, 47, 37])
+    ok("and the same band on section 24 is 47 and 33",
+       [v for _u, v in hair_texcoords(quad, 2 * layout.ATLAS_BAND)]
+       == [47, 33, 47, 33])
+    ok("every style writes its hair in one band at most, bar K1",
+       [LETTERS for LETTERS in (looks.BY_ROW["HAIR"].label(i)
+                                for i, e in enumerate(HAIR_MAP)
+                                if e is not None and len(e[1]) > 1)]
+       == ["K1"])
 
     # The corpus's arithmetic, which needs neither a disc nor the JPEGs.
     same = {"a": 0.1, "b": 0.2, "c": 0.3, "d": 0.4}

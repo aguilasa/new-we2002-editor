@@ -694,8 +694,11 @@ The first run is therefore **sixteen pairs** rather than 32 independent heads:
 HAIR_QUADS = {
     24: (1, 14),
     26: (1, 3),
+    30: (1, 2),
     34: (0, 1, 12),
     46: (0, 9, 17),
+    48: (1, 2),
+    52: (1, 2),
 }
 """Which primitives of a head take the hair band, per MODEL.BIN section.
 
@@ -706,7 +709,17 @@ visits came out this way; the other nine are written somewhere else, because
 walking every value of the row never stopped that instruction with their
 addresses in `a0`.
 
-**So this is a measured four, not a rule for thirteen.**  The obvious rule --
+**30, 48 and 52 were added on 2026-09-28** (CORR-LOOKS-104), from
+`oracle.py --patched HAIR`, which lists every primitive whose bytes a press
+wrote: on those three sections the styles C, D, E1 and F rewrite primitives 1
+and 2 with the hair colour's CLUT, every time and on both figures, and nothing
+else of the hair column.  The breakpoint never saw them because another store
+writes them -- one with its own corner rows, HAIR_QUAD_CORNERS.  The other six
+sections the row visits rewrite no hair quad at all: their styles draw the
+disc's own window.
+
+**This was a measured four, not a rule for thirteen, and it still is not a
+rule.**  The obvious rule --
 "the primitives that sample the hair sheet in the hair colour's column" -- is
 measured WRONG: section 30 has twelve of those and the game rewrites two.
 
@@ -752,6 +765,20 @@ hold these rows: section 24 keeps 14/1, 26 keeps 14 and 0 or 1, 34 keeps 15/2,
 46 keeps 79/66.  Adding the band to the disc's `v` drew every hair quad a row
 off -- measured in the game's own display list, where section 24's two quads
 carry `v` 15 and the file 14 (CORR-LOOKS-042).
+"""
+
+HAIR_QUAD_CORNERS = {
+    30: (15, 5, 15, 5),
+    48: (15, 5, 15, 5),
+    52: (15, 5, 15, 5),
+}
+"""Sections whose hair quads take other rows than HAIR_QUAD_ROWS.
+
+Read off `oracle.py --patched HAIR` on 2026-09-28 (CORR-LOOKS-104): C1 writes
+section 30's quads with `v` 31/21/31/21 and C2 with 47/37/47/37, E1 section
+48's with 15/5/15/5 and F1 section 52's with 63/53/63/53 -- band * 16 + 15 and
+band * 16 + 5, where the four heads of HAIR_QUAD_ROWS take + 1.  The disc keeps
+30/21/30/22 on all three, which is neither.
 """
 
 HAIR_QUAD_STORE = 0x80011590
