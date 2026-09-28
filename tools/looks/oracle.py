@@ -385,12 +385,36 @@ def drive_image() -> str:
     return value
 
 
+def disc_name(path: str) -> str:
+    """The file name of a disc image, whichever machine wrote the path.
+
+    A state carries the absolute path it was recorded on, and the states of
+    this cycle were recorded on Windows: `os.path.basename` on Linux does not
+    split `C:\\games\\ps1\\work\\we2002-english.cue`, so both separators are
+    split here.  Case is folded because Windows paths are case-blind.
+    """
+    return path.replace("\\", "/").rsplit("/", 1)[-1].lower()
+
+
+def same_disc(recorded: str, cue: str) -> bool:
+    """Whether a state's recorded media is the disc this cycle drives.
+
+    By file name, not by absolute path.  The whole path is a fact about the
+    machine that recorded the state, and comparing it refused the Windows
+    states on Linux although the fork loads them into the right screen
+    (CORR-LOOKS-101).  The name is what tells the two releases apart here --
+    the English cue and the Japanese one are named differently on both
+    machines -- and what the name cannot tell, the disc digests `layout.py`
+    checks and the RAM `--check-live` compares against the disc do.
+    """
+    return disc_name(recorded) == disc_name(cue)
+
+
 def require_media(path: str, cue: str) -> str:
     """Refuse a state recorded on another disc, and say why the name did not
     give it away."""
     got = media_of(path)
-    if os.path.normcase(os.path.abspath(got)) != \
-            os.path.normcase(os.path.abspath(cue)):
+    if not same_disc(got, cue):
         raise WrongDisc(
             "%s was recorded on %r, and this cycle drives %r.  The file name "
             "cannot tell you this: both releases boot the serial %s, so a "
@@ -9955,6 +9979,20 @@ def _checks(c) -> None:
                      "cannot tell you this")
         ok("and the right disc is accepted",
            require_media(state, "/dev/null") == "/dev/null")
+
+        # The path is the recording machine's: a Windows state names the same
+        # cue by another absolute path, and has to pass (CORR-LOOKS-101).
+        windows = "C:\\games\\ps1\\work\\we2002-english.cue"
+        ok("a state recorded on Windows matches the same cue on Linux",
+           same_disc(windows, "/home/x/work/looks-disc/we2002-english.cue"))
+        ok("and the case of a Windows path does not matter",
+           same_disc("C:\\Games\\WE2002-English.CUE", "/x/we2002-english.cue"))
+        ok("but the Japanese cue is still another disc",
+           not same_disc("C:\\games\\ps1\\work\\we2002-japao.cue",
+                         "/x/we2002-english.cue"))
+        ok("and a directory that only ends like the name is not the name",
+           not same_disc("C:\\games\\not-we2002-english.cue",
+                         "/x/we2002-english.cue"))
 
         # The red case the file name cannot catch: same name, other disc.
         japanese = os.path.join(tmp, "%s_1.sav" % SERIAL)

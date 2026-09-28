@@ -117,6 +117,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-098](/docs/tasks/looks/CORR-LOOKS-098.md) | Reconciliar a lista de abertos da §0 com o veredito da (o) na §10.3 | LOOKS-TASK-35 | medium | done | 2026-09-27 |
 | [CORR-LOOKS-099](/docs/tasks/looks/CORR-LOOKS-099.md) | Corrigir o custo do --pose citado na §4.4 do plano | LOOKS-TASK-35 | low | done | 2026-09-27 |
 | [CORR-LOOKS-100](/docs/tasks/looks/CORR-LOOKS-100.md) | O selftest do oracle.py grava no slot real do DuckStation no Linux | LOOKS-TASK-08 | high | done | 2026-09-28 |
+| [CORR-LOOKS-101](/docs/tasks/looks/CORR-LOOKS-101.md) | A guarda de disco do oracle.py recusa o state em outra máquina por comparar o caminho absoluto | LOOKS-TASK-08 | high | pending | — |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
