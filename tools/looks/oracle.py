@@ -566,6 +566,51 @@ def hide_window(handle) -> bool:
                                                   0, 0, flags))
 
 
+SHOT_SIZE = (864, 655)
+"""The size of the frame every threshold in this module was measured on.
+
+The fork's `take_screenshot` comes out at the size of the game window
+(`ScreenshotMode = ScreenResolution`), so the window is a measuring instrument
+and not a preference.  `SCREEN_MEAN` and the region boxes were measured on
+Windows, whose saved `[UI] MainWindowWidth` is 864; the Linux machine's is 800,
+and the same LOOKS SET frame there came out at a mean of 0.1688 against the
+0.1828 +- 0.006 of the screen -- and at 0.1838 once the window was 864 wide
+(CORR-LOOKS-102).  The session sets it rather than trusting each machine's
+settings, and `Session.capture` refuses a frame of any other size.
+"""
+
+
+def size_window(handle) -> bool:
+    """Make the game window SHOT_SIZE, on X, and wait until it is.
+
+    Not on Windows: there SetWindowPos sizes the frame and not the client
+    area, and no run on that machine has measured the difference.  It keeps
+    relying on its saved width, and a wrong one is caught by `capture`.
+    """
+    if WINDOWS or not handle:
+        return False
+    import subprocess
+    import time
+
+    display = os.environ.get("PES2_DISPLAY", ":98")
+    env = dict(os.environ, DISPLAY=display)
+    if display == ":98":
+        env["XAUTHORITY"] = ""
+    width, height = SHOT_SIZE
+    subprocess.run(["xdotool", "windowsize", str(handle), str(width),
+                    str(height)], env=env, capture_output=True, check=True)
+    want = "Geometry: %dx%d" % SHOT_SIZE
+    for _ in range(40):
+        geometry = subprocess.run(["xdotool", "getwindowgeometry",
+                                   str(handle)], env=env, capture_output=True,
+                                  text=True).stdout
+        if want in geometry:
+            return True
+        time.sleep(0.05)
+    raise OracleError("the game window did not become %dx%d: %s"
+                      % (width, height, geometry.strip()))
+
+
 # --- the session ----------------------------------------------------------
 
 SESSION_LOST = "invalid MCP-Session-Id"
@@ -655,6 +700,8 @@ class Oracle:
         try:
             if hide_window(self.window):
                 self.say("window moved off the visible desktop")
+            if size_window(self.window):
+                self.say("window sized %dx%d, the measured frame" % SHOT_SIZE)
             os.makedirs(self.out_dir, exist_ok=True)
             self.pause()
         except BaseException:
@@ -717,6 +764,12 @@ class Oracle:
             raise OracleError("the emulator reported a screenshot at %s and "
                               "there is no file there" % path)
         frame = Frame(path)
+        if frame.size != SHOT_SIZE:
+            raise OracleError(
+                "the emulator's frame is %dx%d and every threshold here was "
+                "measured on %dx%d -- the screenshot takes the game window's "
+                "size, so set the fork's [UI] MainWindowWidth to %d"
+                % (frame.size + SHOT_SIZE + (SHOT_SIZE[0],)))
         if label:
             mean, sd = frame.stats()
             self.say("shot %s  mean=%.6f sd=%.6f  %s"
