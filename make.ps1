@@ -73,7 +73,7 @@ param(
     #
     # A raiz do que o DuckStation usa nesta maquina: `roms\` e `work\` saem
     # dela. E a mesma particao que no Linux e
-    # /media/ingmar/649806ED9806BE14/games/ps1 -- ver docs/PES2-WINDOWS.md.
+    # /media/ingmar/win/games/ps1 -- ver docs/PES2-WINDOWS.md.
     [string]$Games = 'C:\games\ps1',
 
     # Qual release de PES2. O `PES2_TAG` do Makefile.

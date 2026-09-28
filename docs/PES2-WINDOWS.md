@@ -14,7 +14,7 @@ usar o fork com servidor MCP, e a comparação entre os dois binários, está na
 ## 1. O que já está no disco
 
 Tudo em `C:\games\ps1` — que no Linux é
-`/media/ingmar/649806ED9806BE14/games/ps1`, a mesma partição, o volume de
+`/media/ingmar/win/games/ps1`, a mesma partição, o volume de
 sistema do Windows.
 
 ```
