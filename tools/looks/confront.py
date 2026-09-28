@@ -79,8 +79,10 @@ TUPLES = (
 * `I3` hair style -- another head section, 34, and another mesh;
 * `B` beard in colour `E` -- a band and a column on two quads, the smallest
   change here, which is what says how fine the metric can see;
-* `H1` -- a style the assembly table REFUSES.  It is routed and captured like
-  the others, and on our side it must come back as a refusal, not a score.
+* `H1` -- the style the assembly table REFUSED until CORR-LOOKS-105 read the
+  head the game draws for it, section 42.  It is routed and captured like the
+  others, and scored like them since; a refusal on our side is still read and
+  printed, not scored.
 """
 
 SLOT_FIGURE = {2: 0, 1: 1}
@@ -124,8 +126,9 @@ GOALKEEPER_HEAD = ("the goalkeeper's head: HAIR_MAP was measured on the "
                    "(CORR-LOOKS-043)")
 """Kept as the record of the residue it named.  CORR-LOOKS-043 made figure 1
 REFUSE those styles, and CORR-LOOKS-047 measured the goalkeeper's map, so
-figure 1 draws them again -- with the head its own walk names, and refusing
-only H1, the way slot 2 does.  EXPECTED has nothing left to excuse."""
+figure 1 draws them again -- with the head its own walk names, and since
+CORR-LOOKS-105 refusing nothing, the way slot 2 does not.  EXPECTED has nothing
+left to excuse."""
 
 EXPECTED = {}
 """Misses that are a named residue and not a finding.  Anything else that loses

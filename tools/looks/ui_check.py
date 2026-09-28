@@ -137,14 +137,25 @@ the code under test would move with it.
 REFUSED = "A-H1-A-A-A"
 """A tuple the assembly table refuses, and the exit code is the contract.
 
-`HAIR=H1` wrote nothing to either model file when the map was walked, on both
-figures, so which head it draws is not known and the table raises instead of
-drawing somebody else's.  This was `A-A1-A-F-A` until CORR-LOOKS-048 measured
-what beard F draws -- a refusal tuple has to be one the table still refuses,
-or the gate reddens a working viewer.  The gate demands
-exit 2 and NO file: a refusal that still writes a picture would be drawn from
-something, and that something would be invented.
+The gate demands exit 2 and NO file: a refusal that still writes a picture
+would be drawn from something, and that something would be invented.
+
+**Refused in a planted tree, since CORR-LOOKS-105.**  `HAIR=H1` was the
+measured refusal -- it wrote nothing to either model file -- until the game was
+read drawing section 42 for it.  Since then no value on the screen is refused,
+and a refusal the screen cannot reach is still a path that has to work the day
+a remeasure empties a row.  So the two refusal judgements run on a copy of the
+tree where H1 is planted back to `None` (REFUSAL_PLANT): the window has to
+refuse it visibly there, and draw it here.
 """
+
+REFUSAL_PLANT = ("assembly.py",
+                 "    (28, ()),\n    (42, ()),\n",
+                 "    (28, ()),\n    None,\n")
+"""Where, what and with what the refusal is planted: H1's row of HAIR_MAP.
+
+The outfield player's map only, because both refusal judgements run on slot 2
+and figure 0; the goalkeeper's row carries a comment and is not touched."""
 
 REFUSED_TEXT = "H1 TYPE"
 """What the game writes for the hair style the table refuses.
@@ -2121,16 +2132,34 @@ def main(argv: list | None = None) -> int:
                          STANDING, shelf_wide, shelf_tall,
                          shelf_tall / float(shelf_wide), LYING))
 
-        bad += judge_refusal(python, APP, tmp, env)
+        planted, why = _sandbox(tmp, "the refusal", *REFUSAL_PLANT)
+        if planted is None:
+            bad.append("the refusal could not be planted: %s" % why)
+        else:
+            refusing = os.path.join(planted, "ui", "app.py")
+            bad += judge_refusal(python, refusing, tmp, env)
         if bad:
             for line in bad:
                 print("FAIL: %s" % line)
             return 1
-        print("  %s is refused by the table, exits 2 and writes no picture"
+        print("  %s, planted back to a refusal, exits 2 and writes no picture"
               % REFUSED)
 
-    table = screen.load()
-    bad = judge_screen_refusal(python, APP, env, table)
+        table = screen.load()
+        bad = judge_screen_refusal(python, refusing, env, table)
+        if not bad:
+            # And unplanted, the same style draws: the head the game draws for
+            # it, section 42 (CORR-LOOKS-105).
+            out = os.path.join(tmp, "h1.png")
+            code, output = run_app(python, APP,
+                                   ["--looks", REFUSED, "--piece", PIECE,
+                                    "--screenshot", out], env)
+            if code != 0 or not os.path.isfile(out):
+                bad.append("%s draws since CORR-LOOKS-105 and app.py exited "
+                           "%s without a picture: %s"
+                           % (REFUSED, code, output.rstrip()))
+            else:
+                print("  and unplanted, %s draws" % REFUSED)
     walked = 0
     if not bad:
         bad = judge_keys(python, APP, env)

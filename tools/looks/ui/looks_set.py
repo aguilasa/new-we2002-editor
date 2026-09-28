@@ -58,8 +58,10 @@ held rows.
 
 ## Refusal is visible
 
-A tuple the assembly table refuses -- `H1` hair is the measured case -- puts
-the table's own sentence in the help box and leaves the panel EMPTY.  It does
+A tuple the assembly table refuses puts the table's own sentence in the help
+box and leaves the panel EMPTY.  `H1` hair was the measured case until
+CORR-LOOKS-105 read the head the game draws for it; since then no value of the
+screen is refused, and `ui_check` plants one to keep the path honest.  It does
 not fall back to another style: drawing a head nobody asked for is the failure
 the project exists not to commit (plan section 0, item 3).
 """

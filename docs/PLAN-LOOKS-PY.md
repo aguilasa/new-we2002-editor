@@ -1984,7 +1984,12 @@ dedução:
   matriz dele. **Continua ABERTO em 2026-09-17**: `scene.py --corpus` ainda
   recusa `A-H1-A-A-A` e `D-H1-A-A-A`. Destravaria: ler, com o estilo na tela,
   **o que o jogo desenha** — a display list ou a VRAM —, já que nenhum dos dois
-  arquivos de modelo é escrito;
+  arquivos de modelo é escrito. **FECHADO em 2026-09-28**
+  ([`CORR-LOOKS-105`](/docs/tasks/looks/CORR-LOOKS-105.md)): com cada estilo
+  na tela, o ponteiro de modelo da carga de matriz da cabeça nomeia **42** para
+  `H1`, **38** para `M1` e **40** para `N1`, nas duas figuras. Não escreveram
+  nada porque a janela do disco já é a deles; as cores e as gêmeas (39, 41, 43)
+  foram medidas pelo `--colour` e pelo `--patched FACE`;
 - **os quads de nove das treze cabeças**, cujo escritor o breakpoint não
   achou, e — para os dez estilos de faixa múltipla — **qual quad recebe qual
   faixa** ([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)). A
@@ -1992,7 +1997,14 @@ dedução:
   marca `BAND NOT MEASURED`, e o `layout.HAIR_QUADS` continua com as quatro
   cabeças de 2026-09-16. **ABERTO**; destravaria um watchpoint de escrita no `v`
   dos quads de uma das nove — a seção 30 é a candidata, porque é onde a regra
-  óbvia está medida como errada;
+  óbvia está medida como errada. **FECHADO em 2026-09-28**
+  ([`CORR-LOOKS-104`](/docs/tasks/looks/CORR-LOOKS-104.md)), sem watchpoint:
+  a saída do `--patched HAIR` já lista cada primitiva gravada. As seções 30, 48
+  e 52 gravam os quads 1 e 2, em `16·faixa + 15` e `16·faixa + 5`; as outras
+  seis não gravam quad de cabelo. E os "dez estilos de faixa múltipla" eram a
+  barba: o mesmo passo reescreve os quads da coluna 9, e separados pela coluna
+  do CLUT cada estilo grava o cabelo numa faixa só. Resta o `K1` (seção 32),
+  cuja reescrita não é passo de faixa;
 - ~~o mapa foi medido só no jogador de linha~~ — **fechado em 2026-09-16**
   ([`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md)): andado no goleiro
   (`oracle.py --patched HAIR 1`), o mapa volta **igual valor a valor**, nas

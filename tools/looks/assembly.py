@@ -58,11 +58,12 @@ run of heads -- `HAIR_MAP_GOALKEEPER` (CORR-LOOKS-047).
 ## What is still a hole
 
 **Three styles of 32 wrote nothing** -- H1, M1 and N1 -- and three even sections
-of the run, 38, 40 and 42, were never named.  The pair of threes is suggestive
-and is not a measurement, so `head_of` refuses those three instead of handing
-back a head that would draw perfectly and be somebody else's.  **E1 is a fourth
-oddity**: it rewrote D's section, which may be the game putting D's head back
-rather than naming E1's own.
+of the run, 38, 40 and 42, were never named.  `head_of` refused the three until
+2026-09-28, when the game was read DRAWING them: the model pointer of the head's
+matrix load names 42 for H1, 38 for M1 and 40 for N1, on both figures
+(CORR-LOOKS-105).  They wrote nothing because the disc's own window is already
+theirs.  **E1 is the remaining oddity**: it rewrote D's section, which may be
+the game putting D's head back rather than naming E1's own.
 
 **And the quads are named for four heads of thirteen.**  An execute breakpoint
 on the store itself, walked over the whole row (`oracle.py --writes`), reads
@@ -215,10 +216,10 @@ FACE_TWIN_FROM = 5
 
 FACE_TWINS = {
     HEAD_FIGURE_OUTFIELD: {24: 25, 26: 27, 28: 29, 30: 31, 32: 33, 34: 35,
-                           36: 37, 44: 45, 46: 47, 48: 49, 50: 51, 52: 53,
-                           54: 55},
-    1: {24: 25, 26: 27, 28: 29, 30: 31, 32: 33, 34: 35, 36: 37, 44: 45,
-        46: 47, 48: 49, 50: 51, 52: 53, 54: 55},
+                           36: 37, 38: 39, 40: 41, 42: 43, 44: 45, 46: 47,
+                           48: 49, 50: 51, 52: 53, 54: 55},
+    1: {24: 25, 26: 27, 28: 29, 30: 31, 32: 33, 34: 35, 36: 37, 38: 39,
+        40: 41, 42: 43, 44: 45, 46: 47, 48: 49, 50: 51, 52: 53, 54: 55},
 }
 """Figure -> {the head HAIR picked: the section beard F and G draw instead}.
 
@@ -260,12 +261,12 @@ HAIR_MAP = (
     (48, (0,)), (54, ()),
     (52, (3,)), (52, (1,)), (52, (4,)),
     (28, ()),
-    None,
+    (42, ()),
     (34, (0,)), (34, (2,)), (34, (1,)),
     (36, ()),
     (32, (0, 1, 3, 4)),
     (46, (5,)), (46, (6,)), (46, (7,)),
-    None, None,
+    (38, ()), (40, ()),
     (44, ()),
     (50, ()),
 )
@@ -288,10 +289,14 @@ LOOKS-TASK-14 was missing, and it says what the one-section walk could not:
   Three values of 32 use it, which is exactly the "three states" that walk saw
   and read as the field's whole reach.
 
-`None` is a value that rewrote **nothing** in the file: measured, not assumed.
+`None` was a value that rewrote **nothing** in the file: measured, not assumed.
 Three of them -- H1, M1 and N1 -- and three even sections of the run (38, 40
-and 42) never appeared, which is a suggestive pair of threes and no more than
-that.  The pair only closes with 54 counted as named: the run holds sixteen
+and 42) never appeared, which was a suggestive pair of threes and no more than
+that.  **Closed on 2026-09-28** (CORR-LOOKS-105): with each style on the screen,
+the model pointer the head's matrix load carries names 42 for H1, 38 for M1 and
+40 for N1, on both figures -- `oracle._pose_cycle`, the same reading that names
+every piece of the pose.  Nothing was rewritten because the disc already holds
+their window, so their tuple of bands is empty.  The pair only closes with 54 counted as named: the run holds sixteen
 even sections and 16 - 13 = 3.  E1 is a fourth oddity: it rewrote section 48,
 which is D's, and may be the game putting D's section back rather than naming
 E1's own -- the question is why E1 uses D's, not whether E has one of its own,
@@ -329,7 +334,7 @@ HAIR_MAP_GOALKEEPER = (
     (52, (1,)),          # F2
     (52, (4,)),          # F3
     (28, ()),            # G1
-    None,                # H1
+    (42, ()),            # H1
     (34, (0,)),          # I1
     (34, (2,)),          # I2
     (34, (1,)),          # I3
@@ -338,8 +343,8 @@ HAIR_MAP_GOALKEEPER = (
     (46, (5,)),          # L1
     (46, (6,)),          # L2
     (46, (7,)),          # L3
-    None,                # M1
-    None,                # N1
+    (38, ()),            # M1
+    (40, ()),            # N1
     (44, ()),            # O1
     (50, ()),            # P1
 )
@@ -355,7 +360,8 @@ equal, value for value -- and that is the finding, not a copy:
 * the bands are the outfield player's, style for style -- and on 2026-09-28
   `--patched HAIR 1` printed every written primitive identical to slot 2's,
   press for press, which is what the hair-only bands above rest on;
-* and H1, M1 and N1 wrote nothing here either.
+* and H1, M1 and N1 wrote nothing here either -- and draw 42, 38 and 40 here
+  too, read off the drawn head on 2026-09-28 (CORR-LOOKS-105).
 
 Written out on its own, one row a style, and not as `HAIR_MAP` again: two maps
 that agree by measurement and two names for one tuple are different things,
@@ -385,10 +391,10 @@ Not in EFFECTS, and that is the point: `edits()` walks EFFECTS with the field's
 value as the step, and HAIR's value is not a band -- it is a row of HAIR_MAP.
 """
 
-HAIR_MAP_SILENT = 3
-HAIR_MAP_SECTIONS = 13
-HAIR_MAP_GOALKEEPER_SILENT = 3
-HAIR_MAP_GOALKEEPER_SECTIONS = 13
+HAIR_MAP_SILENT = 0
+HAIR_MAP_SECTIONS = 16
+HAIR_MAP_GOALKEEPER_SILENT = 0
+HAIR_MAP_GOALKEEPER_SECTIONS = 16
 """How many values wrote nothing, and how many distinct sections were named --
 on the outfield player, and on the goalkeeper (CORR-LOOKS-047).
 
@@ -1060,7 +1066,7 @@ def _checks(c) -> None:
        all(set(quads) <= set(layout.COLOUR_PRIMITIVES["H.F.COL."][twin])
            for twin, quads in layout.FACE_TWIN_QUADS.items()))
     refuses("a colour row on a head nobody measured is refused, not borrowed",
-            lambda: edits(looks.parse_tuple("B-A1-A-A-A"), 40), "not measured")
+            lambda: edits(looks.parse_tuple("B-A1-A-A-A"), 74), "not measured")
 
     # The band a multi-band style draws with is a CHOICE, not a measurement.
     # Asserted here so the day --writes pairs quad to band -- it reads a0, the
@@ -1107,9 +1113,10 @@ def _checks(c) -> None:
        attempt("I3 on figure 1",
                lambda: head_of(looks.parse_tuple("A-I3-A-A-A"), 1),
                default=None) == (34, (1,)))
-    refuses("and refuses H1, which wrote nothing on the goalkeeper either",
-            lambda: head_of(looks.parse_tuple("A-H1-A-A-A"), 1),
-            "wrote nothing")
+    ok("and H1 is section 42 there too, read off the drawn head",
+       attempt("H1 on figure 1",
+               lambda: head_of(looks.parse_tuple("A-H1-A-A-A"), 1),
+               default=None) == (42, ()))
     refuses("a figure with no measured map is refused, not defaulted",
             lambda: head_of(looks.parse_tuple("A-A1-A-A-A"), 2), "no hair map")
     ok("both of EDT_MOD.BIN's figures have a map", sorted(HAIR_MAPS) == [0, 1])
@@ -1362,9 +1369,21 @@ def _checks(c) -> None:
        head_of(looks.parse_tuple("A-A1-A-A-A")) == (layout.HEAD_SECTION, (0,)))
     ok("and a style of another letter wears another section",
        head_of(looks.parse_tuple("A-I3-A-A-A"))[0] != layout.HEAD_SECTION)
-    refuses("a style the map could not place is refused, not defaulted",
-            lambda: head_of(looks.parse_tuple("A-H1-A-A-A")),
-            "wrote nothing")
+    # H1, M1 and N1 wrote nothing and are drawn all the same: 42, 38 and 40,
+    # the sections the game's own matrix loads named (CORR-LOOKS-105).
+    ok("H1, M1 and N1 wear the sections the game draws for them",
+       [attempt(t, lambda t=t: head_of(looks.parse_tuple(t))[0], default=None)
+        for t in ("A-H1-A-A-A", "A-M1-A-A-A", "A-N1-A-A-A")] == [42, 38, 40])
+    # No row is empty any more, so the refusal is planted: the path has to
+    # hold the day a remeasure empties one.
+    kept = HAIR_MAPS[HEAD_FIGURE]
+    HAIR_MAPS[HEAD_FIGURE] = kept[:19] + (None,) + kept[20:]
+    try:
+        refuses("a style the map could not place is refused, not defaulted",
+                lambda: head_of(looks.parse_tuple("A-H1-A-A-A")),
+                "wrote nothing")
+    finally:
+        HAIR_MAPS[HEAD_FIGURE] = kept
     refuses("and a tuple with no HAIR at all is refused",
             lambda: head_of({}), "says nothing")
 
