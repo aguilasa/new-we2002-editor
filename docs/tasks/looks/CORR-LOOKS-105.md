@@ -5,10 +5,10 @@ origin: LOOKS-TASK-14
 severity: medium
 files: [tools/looks/assembly.py, tools/looks/layout.py, tools/looks/ui_check.py, tools/looks/confront.py, tools/looks/ui/looks_set.py, docs/PLAN-LOOKS-PY.md]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-28
+done_commit: 9696c38
 ---
 
 # CORR-LOOKS-105 — H1, M1 e N1 não desenham cabeça nenhuma
@@ -109,3 +109,13 @@ diferença é o giro do close-up (§10.3 (p) do plano).
 - 2026-09-28 — lida a seção desenhada nos dois slots, com controles; medidas
   cores, gêmeas e quads de barba; corrigido; selftest, check-image, ui_check e
   a comparação de tela verdes.
+- **Closed** — commit `9696c38` (2026-09-28): fix(looks): draw H1, M1 and N1 with the heads the game draws for them
+  - Files (`git show --name-status 9696c38`):
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `A docs/tasks/looks/CORR-LOOKS-105.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/assembly.py`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/ui/looks_set.py`
+    - `M tools/looks/ui_check.py`
