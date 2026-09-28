@@ -165,9 +165,26 @@ comes back empty, and SKIN, H.COL, H.F.COL. and FACE move nothing at all while
 the figure draws perfectly (CORR-LOOKS-034).
 """
 
+BARE_SKIN = "bare skin"
+"""In place of a primitive list: every primitive of the section whose CLUT on
+the disc is the bare-skin window (layout.SKIN_BODY_SECTIONS says why).
+
+A rule and not a list, because the body's skin is whatever the file puts in
+that window -- a list copied out of it would be the same fact stored twice.
+"""
+
+
+def bare_skin(primitive) -> bool:
+    """Does the disc put this primitive in the bare-skin window?"""
+    return skin.grid(primitive.clut) == (layout.CLUT_ROW_FIRST,
+                                         layout.BARE_SKIN_COLUMN)
+
+
 EFFECTS = (
     Effect("SKIN", CLUT_ROW, 1, 4,
-           {HEAD: layout.SKIN_COLOUR_PRIMITIVES},
+           {HEAD: layout.SKIN_COLOUR_PRIMITIVES,
+            **{(layout.EDT_MOD, s): BARE_SKIN
+               for s in layout.SKIN_BODY_SECTIONS}},
            "one whole 256-entry record a step, so one VRAM row: the four "
            "Pieles.  It moves the bare-skin primitives of the figure's own "
            "sections as well, which are pieces.SKIN_SECTIONS"),
@@ -625,7 +642,10 @@ def combine(primitive, byname: dict, at: int) -> tuple:
     """
     clut, band = primitive.clut, 0
     for (_row, primitives), (effect, step) in byname.items():
-        if primitives is not None and at not in primitives:
+        if primitives is BARE_SKIN:
+            if not bare_skin(primitive):
+                continue
+        elif primitives is not None and at not in primitives:
             continue
         clut, band = apply_to(clut, band, effect, step)
     return (clut, band)
@@ -1190,6 +1210,27 @@ def _checks(c) -> None:
     ok("and a field passes over a primitive it does not own",
        combine(one, {("H.F.COL.", BY_ROW["H.F.COL."].where[HEAD]):
                      (BY_ROW["H.F.COL."], 3)}, 0) == (one.clut, 0))
+
+    # The body: SKIN reaches every section the game measured, and inside one
+    # it moves the bare-skin window and nothing else (CORR-LOOKS-103).
+    class Body:
+        def __init__(self, row):
+            self.clut = skin.clut_id(row, layout.BARE_SKIN_COLUMN)
+
+    arm, sleeve = Body(layout.CLUT_ROW_FIRST), Body(layout.CLUT_ROW_FIRST + 6)
+    skin_d = edits(looks.parse_tuple("D-A1-A-A-A"))
+    body = {key for key in skin_d if key[0] == layout.EDT_MOD
+            and any(r == "SKIN" for r, _p in skin_d[key])}
+    ok("SKIN reaches every body section the game measured it in",
+       body == {(layout.EDT_MOD, s) for s in layout.SKIN_BODY_SECTIONS},
+       "%r" % (sorted(body),))
+    on_arm = {("SKIN", BARE_SKIN): (BY_ROW["SKIN"], 3)}
+    ok("and moves a bare-skin primitive of the body by the row",
+       combine(arm, on_arm, 0)
+       == (skin.clut_id(layout.CLUT_ROW_FIRST + 3,
+                        layout.BARE_SKIN_COLUMN), 0))
+    ok("but not one the disc puts in another record, like the shirt's",
+       combine(sleeve, on_arm, 0) == (sleeve.clut, 0))
     # Two ROWS that own the SAME primitives, which is the case the plan's key
     # lost: H.F.COL. moves the beard's column and FACE moves the beard's band,
     # and both name layout.FACE_PRIMITIVES.  Keyed by the primitives alone the
@@ -1241,8 +1282,9 @@ def _checks(c) -> None:
            ("FACE", layout.FACE_TWIN_QUADS[35]), (None, None))[1] == 1,
        "%r" % (g_plan,))
     ok("and a caller with no head in hand is sent to the twin, not to 24",
-       sorted(attempt("plan F with no head", lambda: edits(beard_f),
-                      default={})) == [(layout.MODEL, 25)])
+       sorted(key for key in attempt("plan F with no head",
+                                     lambda: edits(beard_f), default={})
+              if key[0] == layout.MODEL) == [(layout.MODEL, 25)])
     refuses("F on a section with no measured twin is refused",
             lambda: edits(beard_f, 26), "not a twin")
     ok("every head HAIR names has a twin, one section on, and every twin has "
@@ -1517,6 +1559,32 @@ def _check_image(image_path: str) -> int:
     if any(skin.grid(second[k])[0] - skin.grid(first[k])[0] != 3
            for k in moved):
         problems.append("SKIN moved something by other than three rows")
+    # The body, both figures: every bare-skin primitive a figure draws moves,
+    # and the disc puts bare skin in no section outside the measured ones
+    # (CORR-LOOKS-103).
+    import section as section_module
+
+    body = section_module.scan(disc[layout.EDT_MOD],
+                               layout.GEOMETRY_START[layout.EDT_MOD])
+    holding = tuple(i for i, s in enumerate(body.sections)
+                    if any(bare_skin(p) for p in s.primitives))
+    print("  EDT_MOD.BIN puts bare skin in section(s) %s"
+          % ", ".join(str(i) for i in holding))
+    if holding != layout.SKIN_BODY_SECTIONS:
+        problems.append("the disc puts bare skin in sections %s and SKIN "
+                        "recolours %s" % (holding, layout.SKIN_BODY_SECTIONS))
+    for figure in (0, 1):
+        still = [(p["section"], p["primitive"])
+                 for p in draw_list(disc, other, figure)
+                 if p["file"] == layout.EDT_MOD
+                 and skin.grid(p["clut"]) == (layout.CLUT_ROW_FIRST,
+                                              layout.BARE_SKIN_COLUMN)]
+        print("  figure %d at SKIN D: %d body primitive(s) still at A"
+              % (figure, len(still)))
+        if still:
+            problems.append("figure %d at SKIN D keeps %d bare-skin body "
+                            "primitive(s) at A, the first %r"
+                            % (figure, len(still), still[0]))
 
     # The map, against the disc: two tuples that differ only in HAIR have to
     # draw a different head, and the same one twice is the failure a defaulted

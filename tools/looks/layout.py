@@ -631,6 +631,22 @@ settles it: walked end to end by `oracle.py --palettes`, H.F.COL. reaches
 **seven** values, columns 9 to 15, and the grid comes out exactly full.
 """
 
+SKIN_BODY_SECTIONS = (0, 3, 4, 5, 6, 7, 8, 11, 16, 17, 18, 19)
+"""The EDT_MOD.BIN sections whose bare skin the SKIN field recolours.
+
+0 and 3 to 8 are the outfield player's, 11 and 16 to 19 the goalkeeper's --
+`pieces.SKIN_SECTIONS`, per slot.  Inside them the field moves exactly the
+primitives whose CLUT on the disc is the bare-skin window, row CLUT_ROW_FIRST
+and column BARE_SKIN_COLUMN, and no other: measured 2026-09-28 from the two
+settled ends of SKIN on both slots, nothing moved outside that window.  A
+bare-skin primitive that did not move was one the pose did not draw -- the
+game rewrites a CLUT only when it draws it, and the witness is the mirror
+pairs: section 8 kept primitive 27 and section 7, its mirror, kept none.
+
+Until that day the assembly recoloured the head alone, and SKIN left the
+neck, the arms and the legs at A on every tuple (CORR-LOOKS-103).
+"""
+
 BOOT_SECTIONS = (9, 10)
 """The two EDT_MOD.BIN sections the BOOTS field rewrites, in both slots.
 
