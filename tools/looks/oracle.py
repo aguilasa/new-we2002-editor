@@ -107,6 +107,17 @@ can reproduce.  The project copy is the master; the emulator's slot is a
 scratch position restored from it.
 """
 
+ENV_EMULATOR_STATES = "WE2002_LOOKS_EMULATOR_STATES"
+"""Overrides where DuckStation itself keeps save states, on both platforms.
+
+Not for daily use: the default is right on each machine.  It exists so the
+self-check can point `restore_state` at a folder of its own.  `PES2_FORK`
+cannot do that job, because only Windows derives the directory from the fork;
+on Linux it is the user's shared one, and a self-check that relied on
+`PES2_FORK` there copied a 478-byte synthetic state over the real slot 1
+(CORR-LOOKS-100).
+"""
+
 SERIAL = "SLPM-87056"
 """The serial DuckStation names a state after.
 
@@ -324,6 +335,10 @@ def emulator_states_dir() -> str:
     than imported from `mcp_drive`, because that module pulls in PIL at import
     time and asking where a file lives should not need an image library.
     """
+    override = os.environ.get(ENV_EMULATOR_STATES)
+    if override:
+        return os.path.expanduser(override)
+
     import fork
 
     if WINDOWS:
@@ -9952,17 +9967,29 @@ def _checks(c) -> None:
         # rather than create one.  This is not hypothetical: an earlier draft
         # made the folder, and a mistyped fork path put both fixtures in
         # C:\nowhere\savestates while printing that it had restored them.
+        #
+        # The emulator's directory is moved by ENV_EMULATOR_STATES, and
+        # nothing is restored unless it really landed inside `tmp`: on Linux
+        # PES2_FORK moves nothing, and relying on it copied the synthetic
+        # state over the user's real slot 1 (CORR-LOOKS-100).
         saved = {name: os.environ.get(name)
-                 for name in (ENV_STATES, "PES2_FORK")}
+                 for name in (ENV_STATES, ENV_EMULATOR_STATES)}
+        nowhere = os.path.join(tmp, "no-such-fork")
         os.environ[ENV_STATES] = tmp
-        os.environ["PES2_FORK"] = os.path.join(tmp, "no-such-fork")
+        os.environ[ENV_EMULATOR_STATES] = os.path.join(nowhere, "savestates")
         try:
             shutil.copy2(state, project_state(1))
-            c.refuses("restoring into a directory that is not there refuses",
-                      lambda: restore_state(1, verbose=False),
-                      "does not create it", Unavailable)
+            planted = os.path.realpath(emulator_states_dir()).startswith(
+                os.path.realpath(tmp) + os.sep)
+            ok("the emulator's directory is the planted one, not the real one",
+               planted, emulator_states_dir())
+            if planted:
+                c.refuses("restoring into a directory that is not there "
+                          "refuses",
+                          lambda: restore_state(1, verbose=False),
+                          "does not create it", Unavailable)
             ok("and it made no directory doing so",
-               not os.path.exists(os.path.join(tmp, "no-such-fork")))
+               not os.path.exists(nowhere))
         finally:
             for name, was in saved.items():
                 if was is None:
