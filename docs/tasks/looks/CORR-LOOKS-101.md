@@ -5,10 +5,10 @@ origin: LOOKS-TASK-08
 severity: high
 files: [tools/looks/oracle.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-28
+done_commit: fca4bdd
 ---
 
 # CORR-LOOKS-101 — A guarda de disco do oracle.py recusa o state em outra máquina por comparar o caminho absoluto
@@ -82,3 +82,8 @@ outro defeito, e não este.
 
 - 2026-09-28 — medido que o fork `c55b8ee` carrega o state do `a2edf2d`;
   corrigido; selftest verde; controle negativo vermelho.
+- **Closed** — commit `fca4bdd` (2026-09-28): fix(looks): compare a save state's disc by file name, not absolute path
+  - Files (`git show --name-status fca4bdd`):
+    - `A docs/tasks/looks/CORR-LOOKS-101.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/oracle.py`
