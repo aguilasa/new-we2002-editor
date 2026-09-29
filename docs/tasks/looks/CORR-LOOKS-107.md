@@ -5,10 +5,10 @@ origin: LOOKS-TASK-35
 severity: medium
 files: [tools/looks/layout.py, tools/looks/scene.py, tools/looks/oracle.py, tools/looks/ui/looks_set.py, tools/looks/ui/app.py, tools/looks/ui_check.py, docs/PLAN-LOOKS-PY.md, CLAUDE.md]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-29
+done_commit: ac4d250
 ---
 
 # CORR-LOOKS-107 — O close-up não gira o modelo, e no jogo ele gira
@@ -111,3 +111,15 @@ capturado nos mesmos ângulos e no mesmo sentido, mostra a mesma cabeça girada:
 - 2026-09-29 — medida a curva pela câmera das peças; achado o ângulo em RAM;
   medido repouso, passo, pontas e reentrada; implementado; `--turn`, selftest,
   `ui_check` e a comparação de tela verdes.
+- **Closed** — commit `ac4d250` (2026-09-29): feat(looks): turn the model in the close-up as the game does
+  - Files (`git show --name-status ac4d250`):
+    - `M CLAUDE.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `A docs/tasks/looks/CORR-LOOKS-107.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/layout.py`
+    - `M tools/looks/oracle.py`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/ui/app.py`
+    - `M tools/looks/ui/looks_set.py`
+    - `M tools/looks/ui_check.py`
