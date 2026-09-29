@@ -125,7 +125,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-106](/docs/tasks/looks/CORR-LOOKS-106.md) | A janela cai em toda linha de cabeça quando o fontconfig põe um WOFF na reserva | LOOKS-TASK-39 | high | done | 2026-09-29 |
 | [CORR-LOOKS-107](/docs/tasks/looks/CORR-LOOKS-107.md) | O close-up não gira o modelo, e no jogo ele gira | LOOKS-TASK-35 | medium | done | 2026-09-29 |
 | [CORR-LOOKS-108](/docs/tasks/looks/CORR-LOOKS-108.md) | O mapa de cabelo guarda quatro faixas para o K1, e o K1 não grava nenhuma | LOOKS-TASK-14 | low | done | 2026-09-29 |
-| [CORR-LOOKS-109](/docs/tasks/looks/CORR-LOOKS-109.md) | BOOTS desenha a mesma chuteira para todo valor na tela LOOKS SET | LOOKS-TASK-13 | high | pending | — |
+| [CORR-LOOKS-109](/docs/tasks/looks/CORR-LOOKS-109.md) | BOOTS desenha a mesma chuteira para todo valor na tela LOOKS SET | LOOKS-TASK-13 | high | done | 2026-09-29 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não

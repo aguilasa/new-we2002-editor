@@ -5,10 +5,10 @@ origin: LOOKS-TASK-13
 severity: high
 files: [tools/looks/looks.py, tools/looks/screen.py, tools/looks/ui_check.py, tools/looks/controls.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-29
+done_commit: 533d16b
 ---
 
 # CORR-LOOKS-109 — BOOTS desenha a mesma chuteira para todo valor na tela LOOKS SET
@@ -79,3 +79,11 @@ Na captura do `--keys` o jogo e a janela desenham a chuteira E vermelha; com
 ## Log de Execução
 
 - 2026-09-29: consertado e medido contra o jogo no slot 2.
+- **Closed** — commit `533d16b` (2026-09-29): fix(looks): the BOOTS row reaches the figure
+  - Files (`git show --name-status 533d16b`):
+    - `A docs/tasks/looks/CORR-LOOKS-109.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/looks.py`
+    - `M tools/looks/screen.py`
+    - `M tools/looks/ui_check.py`
