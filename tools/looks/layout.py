@@ -2229,6 +2229,42 @@ are the five head rows of the close-up (LOOKS-TASK-40) -- and not `BOOTS`,
 which moves the camera and keeps the walk going.
 """
 
+TURN_ANGLE = 0x80075CD6
+"""Where the game keeps the figure's turn about y: a 16-bit angle, 4096 a turn.
+
+Found on 2026-09-28 by diffing RAM across counted frames with a head row under
+the cursor, and it is the y angle `oracle.py --camera` reads into the chain
+(`stature.camera`): the full figure's and `BOOTS`'s files carry 128, and each
+head row's file carries whatever this held when it was captured.  Measured by
+reading it frame by frame (`oracle.py --turn`), on both states:
+
+* on every row outside WALK_HELD_ROWS it rests at TURN_REST;
+* entering a held row from outside, the first pass is TURN_REST plus one
+  TURN_STEP in the running direction, and then one step a DRAW PASS -- 168
+  changes in 380 frames, the walk's own cadence;
+* at the ends of TURN_BOUNDS it turns back, each end reached once;
+* between two held rows it goes on, and on leaving it goes back to TURN_REST
+  keeping its direction: entered again, it steps the way it was going.
+
+This is the turn the plan left open (section 10.3 (p)): the close-up turns the
+model and the window held it still (CORR-LOOKS-107).
+"""
+
+TURN_REST = 128
+"""The turn on every row that does not turn, and where a turn starts from."""
+
+TURN_STEP = 16
+"""How far the turn moves in one draw pass: 16 of 4096, 1.40625 degrees."""
+
+TURN_BOUNDS = (-640, 448)
+"""The two ends of the turn, signed: -56.25 and +39.375 degrees.
+
+Not symmetric about the rest, and not about zero -- both states, and the same
+entering from above and from below."""
+
+TURN_FIRST_DIRECTION = -1
+"""The direction of the first turn after `load_state`, on both states."""
+
 WALK_HELD_FRAME = 12
 """The frame of the screen's animation the figure is held on, read plain.
 

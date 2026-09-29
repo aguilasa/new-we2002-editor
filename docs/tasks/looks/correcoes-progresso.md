@@ -123,6 +123,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-104](/docs/tasks/looks/CORR-LOOKS-104.md) | C2, D2, F2 e F3 desenham o cabelo do primeiro estilo da família | LOOKS-TASK-14 | medium | done | 2026-09-28 |
 | [CORR-LOOKS-105](/docs/tasks/looks/CORR-LOOKS-105.md) | H1, M1 e N1 não desenham cabeça nenhuma | LOOKS-TASK-14 | medium | done | 2026-09-28 |
 | [CORR-LOOKS-106](/docs/tasks/looks/CORR-LOOKS-106.md) | A janela cai em toda linha de cabeça quando o fontconfig põe um WOFF na reserva | LOOKS-TASK-39 | high | done | 2026-09-29 |
+| [CORR-LOOKS-107](/docs/tasks/looks/CORR-LOOKS-107.md) | O close-up não gira o modelo, e no jogo ele gira | LOOKS-TASK-35 | medium | pending | — |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não

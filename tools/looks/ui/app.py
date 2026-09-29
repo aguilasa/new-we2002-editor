@@ -239,8 +239,9 @@ def _walk_line(window: LooksSet) -> None:
               "this window keeps walking" % (window.state.row,
                                               other[window.state.row]))
     if window.state.row in core.walk_held_rows():
-        print("  walk note: on %s the game also turns the model, and this "
-              "window does not" % window.state.row)
+        print("  walk note: on %s the model turns, as in the game: turn %s"
+              % (window.state.row, "the camera file's own"
+                 if seen.get("turn") is None else seen["turn"]))
 
 
 def _screen_report(window: LooksSet, moved: list) -> dict:
@@ -321,8 +322,9 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
     # orbit -- a projection invented here would look like a measurement.
     # HEIG and BODY live in that camera, as the figure's scale (LOOKS-TASK-29),
     # so the window asks for it again whenever either row moves.
-    window.camera_for = lambda values, row: builder.panel_camera(
-        window.drawn, int(state.slot), window.panel_native(), values, row)
+    window.camera_for = lambda values, row, turn=None: builder.panel_camera(
+        window.drawn, int(state.slot), window.panel_native(), values, row,
+        turn)
     window.aim()
     if window.camera_note is None and window.viewer.game_camera is not None:
         print("  the panel draws with the game's own camera")

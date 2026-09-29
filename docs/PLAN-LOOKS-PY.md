@@ -129,8 +129,9 @@ janela é a tela `LOOKS SET`, com o boneco montado, vestido e andando. Pela
 | andando | **cumprido.** 34 passadas por ciclo, 408 de 408 matrizes, a 59,817 quadros por segundo; `Space` pausa, `.` anda uma passada | `anime.py --against-walk`, `oracle.py --rhythm` |
 | o alvo do usuário | **cumprido.** `.\make.ps1 looks` abre a tela, e o `help` diz os controles | `make.ps1` |
 
-O que ficou **aberto**, com razão e destravamento: o giro do close-up e a
-animação de `FOOT` (§10.3 (p)), e as duas incógnitas da v1 que a v2 não tocou,
+O que ficou **aberto**, com razão e destravamento: a animação de `FOOT`
+(§10.3 (p)) — o giro do close-up, que também estava aqui, **fechou em
+2026-09-29** ([`CORR-LOOKS-107`](/docs/tasks/looks/CORR-LOOKS-107.md)) —, e as duas incógnitas da v1 que a v2 não tocou,
 §6 (g) e (i). A fonte da caixa de ajuda **não** está entre eles: é decisão sob a
 §10.3 (o), fechada — o texto vem da ROM do console, que não está no disco nem
 neste repositório, e a janela o escreve numa fonte de apoio com o custo medido
@@ -2568,7 +2569,7 @@ abaixo guarda a medição inteira; esta tabela só diz onde cada uma parou.
 | (s) `HEIG` e `BODY` | **fechada** | `oracle.py --stature` |
 | (n) o `TEX_*.BIN` | **fechada** — `TEX_A4` | `oracle.py --kit` |
 | (o) o painel e o cenário | **fechada**; a caixa de ajuda fica numa fonte de apoio, porque o texto dela vem da ROM do console (LOOKS-TASK-39) | `oracle.py --scenery`, `confront.py --outside` |
-| (p) o ritmo | **fechada** no ritmo; **dois pontos ABERTOS**, com razão e destravamento no fim da (p): o **giro** do close-up e a **animação 147** de `FOOT` | `oracle.py --walk`, `--rhythm` |
+| (p) o ritmo | **fechada** no ritmo e, desde 2026-09-29, no **giro** do close-up; **um ponto ABERTO**, com razão e destravamento no fim da (p): a **animação 147** de `FOOT` | `oracle.py --walk`, `--rhythm`, `--turn` |
 
 **(q) A tela — o que ela escreve e como anda.** O texto de cada valor de cada
 linha, o da caixa de ajuda, o comportamento do cursor nas pontas das doze
@@ -3511,7 +3512,19 @@ uma passada, se o jogo interpola entre quadros-chave, e se o tronco que balança
 >   dos 25% da [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), a
 >   1–3 passadas da nomeada (`confront.py --silhouette`).
 > - **Aberto, com veredito dado no fechamento da v2** (LOOKS-TASK-35):
->   - **o giro do close-up — ABERTA.** Nas cinco linhas de cabeça o jogo gira
+>   - **o giro do close-up — FECHADA em 2026-09-29**
+>     ([`CORR-LOOKS-107`](/docs/tasks/looks/CORR-LOOKS-107.md)). O giro é um
+>     ângulo de 16 bits em `layout.TURN_ANGLE` (0x80075CD6), o mesmo que o
+>     `--camera` lê como ângulo y da *chain*. Fora das cinco linhas ele fica em
+>     128; ao entrar numa delas anda 16 de 4096 por passada de desenho, rebate
+>     em −640 e +448 (cada ponta uma vez), segue de uma linha de cabeça para
+>     outra, e ao sair volta a 128 guardando o sentido. O `oracle.py --turn`
+>     confere isso contra o jogo nas duas figuras, com controle; o
+>     `scene.turn_after` é a forma fechada, e o `WalkClock` conta as passadas
+>     num relógio próprio que a trava da linha segurada não para. A janela
+>     recompõe a câmera com o ângulo do momento, e parada usa o do arquivo. O
+>     texto abaixo é o registro de quando estava aberta.
+>   - *(registro)* **o giro do close-up — ABERTA.** Nas cinco linhas de cabeça o jogo gira
 >     o modelo, um ângulo por captura (+18,3°, −16,9°, +16,9°, §6 h), e a
 >     janela segura o quadro 12 **sem girar**. *Por que está aberta:* o que se
 >     mediu é o ângulo em paradas soltas, não o giro em função do quadro

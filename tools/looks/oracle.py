@@ -52,6 +52,7 @@ Usage:
     python tools/looks/oracle.py --poses [SLOT [N ...]]  # the same over both slots and the eight spread frames
     python tools/looks/oracle.py --stature [SLOT]
     python tools/looks/oracle.py --rhythm [SLOT]  # the frame rate the walk plays at, off the console's counters, and what a press does to the step
+    python tools/looks/oracle.py --turn [SLOT]  # the close-up's turn off the game's own angle, against scene.turn_after
     python tools/looks/oracle.py --closeups [SLOT]  # which rows zoom the panel onto the head, and the camera of each  # what HEIG and BODY do: the scale, the camera and the pieces, against stature.py
 """
 
@@ -8331,6 +8332,152 @@ def judge_press(still, again, shifted, pressed):
             "untouched run's: %s against %s" % (first[:4], pairs[:4]))
 
 
+TURN_FRAMES = 380
+"""Frames read after entering a held row: past both ends and back once more."""
+
+TURN_REENTER_AFTER = 130
+"""Frames on the held row before leaving it: past the first end, so going up."""
+
+
+def _turn_reads(game, frames):
+    """The turn, read off layout.TURN_ANGLE once a frame for *frames* frames.
+
+    Signed, and folded by hand: the game keeps the angle in 0..4095, so -16
+    is stored as 4080 and a plain signed read does not bring it back.
+    """
+    import anime
+
+    path = os.path.join(game.out_dir, "turn.bin")
+    out = []
+    for _ in range(frames):
+        value = struct.unpack("<H", game.read_ram(layout.TURN_ANGLE, 2,
+                                                  path))[0] % anime.TURN
+        out.append(value - anime.TURN if value >= anime.TURN // 2 else value)
+        game.step(1)
+    return out
+
+
+def _turn_changes(reads):
+    """The values the turn took, each once, in order: one a draw pass."""
+    return [value for at, value in enumerate(reads)
+            if at == 0 or value != reads[at - 1]]
+
+
+def check_turn(slot=None, verbose=True):
+    """`--turn [SLOT]`: the close-up's turn, off the game's own angle.
+
+    The order is the argument, the controls first:
+
+      **the same entry twice** -- from `load_state`, the reads identical frame
+          for frame, or the sequence is the emulator's mood;
+      **rest on a row that does not turn** -- the full figure's row reads
+          layout.TURN_REST before the press and after a while on it;
+      **the model** -- every value the turn takes after entering a held row is
+          `scene.turn_after` of the passes, from rest in the first direction,
+          both ends included; one step off as the negative control;
+      **re-entry** -- left and entered again, it restarts from rest and goes
+          the way it was going when it left, which is the one thing a still
+          picture cannot show.
+    """
+    import scene
+
+    ready = preflight()
+    slots = (slot,) if slot else tuple(sorted(SLOTS))
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in sorted(SLOTS):
+            restore_state(one, verbose=False)
+        for one in slots:
+            print("  -- slot %d (%s) --" % (one, SLOTS[one]))
+            runs = []
+            for _ in range(2):
+                game.load_looks(one)
+                rest = _turn_reads(game, 30)
+                game.client.call("press_button", button="Down",
+                                 duration_frames=CONFIRM_FRAMES)
+                runs.append((rest, _turn_reads(game, TURN_FRAMES)))
+            if runs[0] != runs[1]:
+                problems.append("slot %d: the same entry read twice differs, "
+                                "so nothing below is measured" % one)
+                continue
+            rest, reads = runs[0]
+            print("    control: the entry read twice from load_state, %d "
+                  "frame(s), identical" % len(reads))
+            if set(rest) != {layout.TURN_REST}:
+                problems.append("slot %d: on %s the turn reads %s, not the "
+                                "rest %d" % (one, CURSOR_STARTS_ON,
+                                             sorted(set(rest)),
+                                             layout.TURN_REST))
+                continue
+            print("    control: on %s it rests at %d" % (CURSOR_STARTS_ON,
+                                                          layout.TURN_REST))
+            taken = _turn_changes(reads)
+            model = [scene.turn_after(n, layout.TURN_FIRST_DIRECTION)[0]
+                     for n in range(len(taken))]
+            off = [scene.turn_after(n + 1, layout.TURN_FIRST_DIRECTION)[0]
+                   for n in range(len(taken))]
+            ends = (min(taken), max(taken))
+            print("    %d value(s) in %d frame(s), from %d to %d"
+                  % (len(taken), len(reads), ends[0], ends[1]))
+            if taken != model:
+                first = next(n for n, (a, b) in enumerate(zip(taken, model))
+                             if a != b) if len(taken) == len(model) else 0
+                problems.append("slot %d: the turn is not scene.turn_after's "
+                                "from pass %d: the game %r, the model %r"
+                                % (one, first, taken[first:first + 4],
+                                   model[first:first + 4]))
+                continue
+            if off == taken:
+                problems.append("slot %d: one pass along matches as well, so "
+                                "the comparison sees nothing" % one)
+                continue
+            if ends != tuple(layout.TURN_BOUNDS):
+                problems.append("slot %d: the run reached %r and the bounds "
+                                "are %r" % (one, ends, layout.TURN_BOUNDS))
+                continue
+            print("    every value is scene.turn_after's, both ends reached "
+                  "once each; one pass along it is not")
+            # Leave, and come back: rest again, and the direction kept.  Left
+            # past the first end, so it is going UP -- leaving while it went
+            # down would pass a turn that always restarts downwards.
+            game.load_looks(one)
+            game.client.call("press_button", button="Down",
+                             duration_frames=CONFIRM_FRAMES)
+            stay = _turn_changes(_turn_reads(game, TURN_REENTER_AFTER))
+            going = scene.turn_after(len(stay) - 1,
+                                     layout.TURN_FIRST_DIRECTION)[1]
+            if going == layout.TURN_FIRST_DIRECTION:
+                problems.append("slot %d: after %d frame(s) the turn still "
+                                "goes the first way, so re-entry cannot tell "
+                                "a kept direction from a reset one"
+                                % (one, TURN_REENTER_AFTER))
+                continue
+            game.client.call("press_button", button="Up",
+                             duration_frames=CONFIRM_FRAMES)
+            back = _turn_reads(game, 60)
+            game.client.call("press_button", button="Down",
+                             duration_frames=CONFIRM_FRAMES)
+            again = _turn_changes(_turn_reads(game, 30))
+            if back[-1] != layout.TURN_REST:
+                problems.append("slot %d: back on %s the turn reads %d, not "
+                                "the rest" % (one, CURSOR_STARTS_ON, back[-1]))
+                continue
+            want = [scene.turn_after(n, going)[0] for n in range(len(again))]
+            if again != want:
+                problems.append("slot %d: entered again it went %r, and "
+                                "leaving it was going %+d: %r"
+                                % (one, again[:5], going, want[:5]))
+                continue
+            print("    left and entered again: rest %d, then %r -- the way it "
+                  "was going when it left (%+d)"
+                  % (layout.TURN_REST, again[:4], going))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --turn: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
 def check_rhythm(slot=None, verbose=True):
     """`--rhythm [SLOT]`: the rate the walk plays at, and what a press does.
 
@@ -10550,6 +10697,8 @@ def main(argv):
                                 row=argv[3] if len(argv) > 3 else None)
         if len(argv) in (2, 3) and argv[1] == "--walk":
             return check_walk(int(argv[2]) if len(argv) == 3 else None)
+        if len(argv) in (2, 3) and argv[1] == "--turn":
+            return check_turn(int(argv[2]) if len(argv) == 3 else None)
         if len(argv) in (2, 3) and argv[1] == "--rhythm":
             return check_rhythm(int(argv[2]) if len(argv) == 3 else None)
         if len(argv) in (2, 3) and argv[1] == "--walk-watch":

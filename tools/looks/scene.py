@@ -556,10 +556,10 @@ class Builder:
         return tuple(carried[REFERENCE_PIECE]["position"])
 
     def panel_camera(self, drawn: Scene, slot: int, size: tuple,
-                     values: dict, row: str = None):
+                     values: dict, row: str = None, turn: int = None):
         """(the 4x4, the row it came from) for the panel as it stands now."""
         return panel_camera(drawn, slot, size, self.scale(values), row,
-                            self.reference_place())
+                            self.reference_place(), turn)
 
     def art(self):
         """The screen's 2D art laid out in VRAM, once (`sprites.Art`)."""
@@ -945,6 +945,31 @@ def pass_at_frame(cycle: WalkCycle, frame_number: int) -> int:
     return bisect.bisect_right(cycle.starts, inside) - 1
 
 
+def turn_after(passes: int, direction: int,
+               start: int = layout.TURN_REST) -> tuple:
+    """(angle, direction) of the close-up's turn *passes* draw passes on.
+
+    Closed form of what `oracle.py --turn` read off `layout.TURN_ANGLE`: one
+    TURN_STEP a pass in *direction*, turning back at each end of TURN_BOUNDS,
+    each end reached once.  *direction* is the one the turn is going in at
+    *start*; the one returned is where it goes after the last pass, which is
+    what a held row hands on to the next time it is entered.
+    """
+    step = layout.TURN_STEP
+    low, high = (bound // step for bound in layout.TURN_BOUNDS)
+    at = start // step
+    span = high - low
+    # A position along one going-down-then-up sweep that starts at `high`.
+    if direction < 0:
+        phase = high - at
+    else:
+        phase = span + at - low
+    phase = (phase + passes) % (2 * span)
+    if phase < span:
+        return ((high - phase) * step, -1)
+    return ((low + phase - span) * step, 1)
+
+
 class WalkClock:
     """Which pass of the walk the panel shows, as a function of time.
 
@@ -983,6 +1008,13 @@ class WalkClock:
         # at, which `self.rate` alone does not say (CORR-LOOKS-095).
         self.ran = 0.0
         self.ran_frames = 0.0
+        # The close-up's turn (layout.TURN_ANGLE): where the held rows were
+        # entered, and the direction a new entry goes in.  Counted on a clock
+        # of its own, `free_frames`, which no hold caps: the pose stops on a
+        # held row and the turn does not (CORR-LOOKS-107).
+        self.free = 0.0
+        self.turn_from = None
+        self.turn_direction = layout.TURN_FIRST_DIRECTION
 
     # -- time -------------------------------------------------------------
 
@@ -991,6 +1023,13 @@ class WalkClock:
         if not self.running:
             return self.origin
         return self.origin + (now - self.since) * self.rate
+
+    def free_frames(self, now: float) -> float:
+        """Video frames run since the clock was made, no hold and no restart
+        taken off: the turn's clock."""
+        if not self.running:
+            return self.free
+        return self.free + (now - self.since) * self.rate
 
     def _pass_at_frames(self, frames: float) -> int:
         import bisect
@@ -1022,6 +1061,22 @@ class WalkClock:
             return (self.visit0 + self.hold_at, 0)
         return (self.visit0 + number, self.first_slot)
 
+    def turn(self, now: float):
+        """The turn the panel shows at *now*, or None for the camera's own.
+
+        None off a held row, and before one whole pass has been drawn on it:
+        a still picture stands for the moment its camera file was captured,
+        and that file already carries the turn of that moment.  From the
+        first pass on it is the game's, pass for pass (CORR-LOOKS-107).
+        """
+        if self.turn_from is None:
+            return None
+        passes = (self._pass_at_frames(self.free_frames(now))
+                  - self._pass_at_frames(self.turn_from))
+        if passes <= 0:
+            return None
+        return turn_after(passes, self.turn_direction)[0]
+
     def cycle_seconds(self) -> float:
         """How long one cycle of the walk lasts: its frames at the rate."""
         return self.cycle.frames / self.rate
@@ -1037,6 +1092,7 @@ class WalkClock:
 
     def pause(self, now: float) -> None:
         if self.running:
+            self.free = self.free_frames(now)
             self.ran, self.ran_frames = self.ran_for(now)
             self.origin = self.frames(now)
             if self.hold_at is not None:
@@ -1062,7 +1118,11 @@ class WalkClock:
         self.pause(now)
         self.pinned = False
         if self.hold_at is not None and number >= self.hold_at:
+            # Held, the pose stays and the turn takes its one pass.
+            self.free = self._frames_of_pass(
+                self._pass_at_frames(self.free) + 1)
             return
+        self.free += self._frames_of_pass(number + 1) - self.origin
         self.origin = self._frames_of_pass(number + 1)
 
     def show_pass(self, number: int) -> None:
@@ -1094,11 +1154,24 @@ class WalkClock:
                                   - (self.visit0 + number)) % visits)
         if settle and not self.running:
             self.origin = self._frames_of_pass(self.hold_at)
+        # After the settle, so a still picture has turned no pass.
+        self.turn_from = self.free_frames(now)
 
     def release(self, now: float) -> None:
         """The cursor left a held row: on from the frame after the held one."""
         if self.hold_at is None or self.pinned:
             return
+        # The turn goes back to rest and keeps its direction for the next
+        # entry, as the game does (layout.TURN_ANGLE).
+        if self.turn_from is not None:
+            passes = (self._pass_at_frames(self.free_frames(now))
+                      - self._pass_at_frames(self.turn_from))
+            if passes > 0:
+                self.turn_direction = turn_after(passes,
+                                                 self.turn_direction)[1]
+            self.turn_from = None
+        # `since` moves below, so the free clock is folded first.
+        self.free = self.free_frames(now)
         if self.pass_now(now) < self.hold_at:
             self.hold_at = None
             return
@@ -1123,7 +1196,8 @@ class WalkClock:
                 "held": self.held(now), "rate": self.rate,
                 "passes": self.cycle.passes, "frames": self.cycle.frames,
                 "cycle_seconds": self.cycle_seconds(),
-                "ran": ran, "ran_frames": ran_frames}
+                "ran": ran, "ran_frames": ran_frames,
+                "turn": self.turn(now)}
 
 
 CHAINS = (("head", "torso", "thigh a", "shin a", "foot a"),
@@ -1317,7 +1391,8 @@ def panel_axis(table: dict = None) -> tuple:
             table["display"][1] / 2.0 - box[1])
 
 
-def load_camera(slot: int = 2, scale=None, row: str = None) -> dict:
+def load_camera(slot: int = 2, scale=None, row: str = None,
+                turn: int = None) -> dict:
     """What `oracle.py --camera` measured, or `NoCamera`.
 
     *row* is the row the cursor is on: with a camera of its own measured for
@@ -1335,6 +1410,12 @@ def load_camera(slot: int = 2, scale=None, row: str = None) -> dict:
     the camera for another scale is composed from the chain `--camera` read
     beside the load, and the chain has to reproduce the load at the state's own
     scale, integer for integer, before it is trusted with any other.
+
+    **With *turn*, the close-up at another moment of its turn.**  The chain's y
+    angle IS the turn (`layout.TURN_ANGLE`): the file carries the one of the
+    moment it was captured, and the camera for any other is the same chain
+    with that angle replaced (CORR-LOOKS-107).  Only a row with a camera of
+    its own takes it -- the full figure's angle is TURN_REST and stays there.
     """
     import json
 
@@ -1352,7 +1433,7 @@ def load_camera(slot: int = 2, scale=None, row: str = None) -> dict:
     camera = {"rotation": record["camera"]["rotation"],
               "translation": record["camera"]["translation"],
               "projection": record["projection"][0]}
-    if scale is None:
+    if scale is None and (turn is None or chosen is None):
         return camera
     import stature
 
@@ -1371,14 +1452,22 @@ def load_camera(slot: int = 2, scale=None, row: str = None) -> dict:
     # on all fourteen files, and the rotation exact on the full figure and on
     # `BOOTS` while the five rows that turn the figure drift 61 to 80 -- one
     # frame of that turn between the build and the load.
-    turn = CHAIN_TURN_SLACK if chosen else 0
+    slack = CHAIN_TURN_SLACK if chosen else 0
     apart = max(abs(a - b) for a, b in zip(own["rotation"],
                                            camera["rotation"]))
-    if apart > turn or own["translation"] != camera["translation"]:
+    if apart > slack or own["translation"] != camera["translation"]:
         raise NoCamera("%s: the chain composes %r at the state's own scale, "
                        "and the game loaded %r -- %d apart in the rotation, "
                        "over the %d a turning figure takes"
-                       % (path, own, record["camera"], apart, turn))
+                       % (path, own, record["camera"], apart, slack))
+    if scale is None:
+        scale = chain["scale"]
+    if turn is not None and chosen is not None:
+        import anime
+
+        angles = list(chain["angles"])
+        angles[1] = turn % anime.TURN
+        chain = dict(chain, angles=angles)
     try:
         composed = stature.camera(chain, scale)
     except stature.BadStature as exc:
@@ -1669,7 +1758,7 @@ def camera_matrix(camera: dict, size: tuple, centre: tuple) -> list:
 
 
 def panel_camera(drawn: Scene, slot: int, size: tuple, scale=None,
-                 row: str = None, reference=None) -> list:
+                 row: str = None, reference=None, turn: int = None) -> list:
     """The game's camera as a 4x4 for the panel, and which camera that is.
 
     *size* is the panel in NATIVE pixels, never the widget's: `H` is in the
@@ -1701,7 +1790,7 @@ def panel_camera(drawn: Scene, slot: int, size: tuple, scale=None,
         raise BadScene("the panel's camera needs the reference piece's "
                        "place, and none was handed in")
     chosen = row if row and row in close_up_rows(slot) else None
-    camera = rebased(load_camera(slot, scale, chosen), reference)
+    camera = rebased(load_camera(slot, scale, chosen, turn), reference)
     if project((0.0, 0.0, 0.0), camera) is None:
         raise BadScene("the figure's reference piece is behind the camera")
     return camera_matrix(camera, size, panel_axis()), chosen
@@ -2058,6 +2147,43 @@ def _checks(c) -> None:
     settled.hold(0.0, settle=True)
     ok("a still picture on a held row is the settled one",
        settled.visit(0.0) == (layout.WALK_HELD_FRAME, 0))
+
+    # The close-up's turn (CORR-LOOKS-107), against what `oracle.py --turn`
+    # read off layout.TURN_ANGLE: from rest, one step a pass the first way;
+    # each end once; and the direction kept for the next entry.
+    ok("the turn walks down from rest, one step a pass",
+       [turn_after(n, -1)[0] for n in range(6)] == [128, 112, 96, 80, 64, 48])
+    ok("and turns back at each end, reaching it once",
+       [turn_after(n, -1)[0] for n in (47, 48, 49)] == [-624, -640, -624]
+       and [turn_after(n, -1)[0] for n in (115, 116, 117)] == [432, 448, 432])
+    ok("going up, it climbs from rest",
+       [turn_after(n, 1)[0] for n in range(3)] == [128, 144, 160])
+    ok("and a sweep is 136 passes, one end to the other and back",
+       turn_after(136, -1) == turn_after(0, -1))
+    ok("a still picture on a held row keeps the camera file's own turn",
+       settled.turn(0.0) is None)
+    turning = WalkClock(cycle, running=True, now=0.0)
+    turning.hold(0.0)
+    one = cycle.frames / float(cycle.passes) / rate
+    ok("on a held row the turn is the game's from the first pass on",
+       turning.turn(0.0) is None
+       and turning.turn(60 * one) == turn_after(
+           turning._pass_at_frames(turning.frames(60 * one))
+           - turning._pass_at_frames(0.0), -1)[0])
+    kept = turning.turn(60 * one)
+    turning.pause(60 * one)
+    ok("paused on a held row, the turn stays where it was",
+       kept is not None and turning.turn(90 * one) == kept, "%r" % kept)
+    turning.step(90 * one)
+    ok("and a step turns it one pass on",
+       turning.turn(90 * one) == turn_after(
+           turning._pass_at_frames(turning.free) - turning._pass_at_frames(
+               turning.turn_from), -1)[0] != kept)
+    turning.resume(90 * one)
+    turning.release(60 * one + 30 * one)
+    ok("leaving it, the turn goes back to rest and keeps its direction",
+       turning.turn(60 * one) is None and turning.turn_direction == 1,
+       "direction %d" % turning.turn_direction)
     before = clock.visit(0.7)
     clock.value_changed(0.7)
     ok("a changed value leaves the walk where it was, as the game does",

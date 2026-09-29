@@ -1101,8 +1101,8 @@ def plant_camera(python: str, env: dict, name: str, where: str, old: str,
 CAMERA_BREAKS = (
     ("the row reaching the camera", os.path.join("ui", "looks_set.py"),
      "            matrix, row = self.camera_for(self.state.values(), "
-     "self.state.row)",
-     "            matrix, row = self.camera_for(self.state.values(), None)"),
+     "self.state.row,",
+     "            matrix, row = self.camera_for(self.state.values(), None,"),
     ("the cursor moving re-aiming the panel",
      os.path.join("ui", "looks_set.py"),
      "              or self.state.row != row):",

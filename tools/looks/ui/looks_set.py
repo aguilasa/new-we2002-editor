@@ -102,7 +102,6 @@ CURSOR = QtGui.QColor(181, 181, 57)
 REFUSED = QtGui.QColor(232, 120, 120)
 PANEL = QtGui.QColor(12, 40, 96)
 
-
 FONT_FAMILIES = ("Consolas",)
 """The window's own font, where the disc has none to give."""
 
@@ -127,6 +126,9 @@ class LooksSet(QtWidgets.QWidget):
         self.elapsed = QtCore.QElapsedTimer()
         self.elapsed.start()
         self.shown = None
+        # The close-up's turn the camera was last aimed with, so a pass that
+        # only turns the model re-aims without rebuilding (CORR-LOOKS-107).
+        self.shown_turn = None
         self.passes_drawn = 0
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(TICK_MS)
@@ -352,10 +354,23 @@ class LooksSet(QtWidgets.QWidget):
             self.clock.pause(self.now())
             self.timer.stop()
 
+    def turn(self):
+        """The close-up's turn now, or None where the camera's own holds."""
+        if self.clock is None or self.state.row not in core.walk_held_rows():
+            return None
+        return self.clock.turn(self.now())
+
     def tick(self) -> None:
-        """Draw the pass the clock says is on, if it is not the one shown."""
+        """Draw the pass the clock says is on, if it is not the one shown.
+
+        On a held row the pose stands still and the MODEL TURNS, one step a
+        pass (layout.TURN_ANGLE), so a pass that changes only the turn re-aims
+        the camera and rebuilds nothing.
+        """
         if self.clock is None or self.drawn is None or self.refusal:
             return
+        if self.turn() != self.shown_turn:
+            self.aim()
         visit = self.clock.visit(self.now())
         if visit == self.shown:
             return
@@ -403,8 +418,11 @@ class LooksSet(QtWidgets.QWidget):
         """
         if self.camera_for is None or self.drawn is None:
             return
+        turn = self.turn()
         try:
-            matrix, row = self.camera_for(self.state.values(), self.state.row)
+            matrix, row = self.camera_for(self.state.values(), self.state.row,
+                                          turn)
+            self.shown_turn = turn
             self.viewer.game_camera = matrix
             self.camera_row = row
             self.camera_note = None
