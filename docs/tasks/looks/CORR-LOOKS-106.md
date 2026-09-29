@@ -5,10 +5,10 @@ origin: LOOKS-TASK-39
 severity: high
 files: [tools/looks/ui/looks_set.py]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-29
+done_commit: 1101cb5
 ---
 
 # CORR-LOOKS-106 — A janela cai em toda linha de cabeça quando o fontconfig põe um WOFF na reserva
@@ -93,3 +93,8 @@ looks_selftest: 0 failure(s)
 
 - 2026-09-29 — reproduzido na janela e num script mínimo; causa isolada no
   fontconfig e no WOFF; corrigido; janela de pé em toda linha.
+- **Closed** — commit `1101cb5` (2026-09-29): fix(looks): keep the help box off Qt's system font fallback
+  - Files (`git show --name-status 1101cb5`):
+    - `A docs/tasks/looks/CORR-LOOKS-106.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/ui/looks_set.py`
