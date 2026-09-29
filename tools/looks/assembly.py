@@ -264,7 +264,7 @@ HAIR_MAP = (
     (42, ()),
     (34, (0,)), (34, (2,)), (34, (1,)),
     (36, ()),
-    (32, (0, 1, 3, 4)),
+    (32, ()),
     (46, (5,)), (46, (6,)), (46, (7,)),
     (38, ()), (40, ()),
     (44, ()),
@@ -310,8 +310,11 @@ bands were the BEARD: the same press rewrites the head's beard quads (column 9,
 `v` 0..16), and their rows read as band 0 or 1.  Split by CLUT column, every
 style writes its hair quads in exactly one band, or in none -- E2, G1, J1, O1
 and P1 rewrite only beard quads, so their hair is the disc's window and the
-tuple of bands is empty.  K1 keeps four, because section 32's rewrite is not a
-band walk at all (its quads land at `v` 58..71) and is not applied.
+tuple of bands is empty.  K1 is empty too, since 2026-09-29 (CORR-LOOKS-108):
+the four bands the walk gave it were the game PUTTING BACK section 32, which
+the save states carry edited, and read settled on K1 -- both figures, two
+colour tuples -- section 32 differs from the disc in one beard quad and no
+hair quad.  Seen at the same turn as the game, it draws the same head.
 """
 
 HAIR_MAP_GOALKEEPER = (
@@ -339,7 +342,7 @@ HAIR_MAP_GOALKEEPER = (
     (34, (2,)),          # I2
     (34, (1,)),          # I3
     (36, ()),            # J1
-    (32, (0, 1, 3, 4)),  # K1
+    (32, ()),            # K1
     (46, (5,)),          # L1
     (46, (6,)),          # L2
     (46, (7,)),          # L3
@@ -402,14 +405,14 @@ Asserted in `_checks` so that a later measurement which fills the holes has to
 come here and change these two numbers.
 """
 
-HAIR_MAP_MULTI_BAND = 1
+HAIR_MAP_MULTI_BAND = 0
 HAIR_MAP_BANDS_UNMEASURED = 0
 """How many styles landed in more than one band, and how many of those draw.
 
 **Ten and one until 2026-09-28**, and the ten were the beard's bands counted
-with the hair's (see HAIR_MAP).  Split by column, only K1 keeps more than one,
-and section 32 has no hair quads in layout.HAIR_QUADS, so none of it is drawn
-with a chosen band (CORR-LOOKS-104).  What follows is the reasoning while the
+with the hair's (see HAIR_MAP).  Split by column, only K1 kept more than one
+(CORR-LOOKS-104), and those were the game restoring section 32, not writing
+hair (CORR-LOOKS-108): no style writes its hair in two bands.  What follows is the reasoning while the
 ten stood.
 
 `--patched` says WHICH bands a style's rewritten quads landed in; it does not
@@ -1073,15 +1076,14 @@ def _checks(c) -> None:
     # primitive, and a2, the band, at the same breakpoint hit -- the numbers
     # have to come through this file (CORR-LOOKS-028).
     multi = multi_band_styles()
-    # Ten until the beard's bands were split from the hair's (CORR-LOOKS-104).
-    ok("one style lands in more than one band, K1",
-       len(multi) == HAIR_MAP_MULTI_BAND
-       and [looks.HAIR_STYLES[i] for i, _s, _b in multi] == ["K1"],
+    # Ten until the beard's bands were split from the hair's (CORR-LOOKS-104),
+    # and none once K1's were read as the game restoring (CORR-LOOKS-108).
+    ok("no style lands in more than one band",
+       len(multi) == HAIR_MAP_MULTI_BAND,
        "%d: %s" % (len(multi), [looks.HAIR_STYLES[i] for i, _s, _b in multi]))
     reach = [i for i, chosen, bands in multi
              if unmeasured_bands(chosen, bands)]
-    ok("and it does not reach the draw list: section 32's quads are unknown, "
-       "so no band is applied at all",
+    ok("and so no dropped band reaches the draw list",
        len(reach) == HAIR_MAP_BANDS_UNMEASURED,
        "%d: %s" % (len(reach), [looks.HAIR_STYLES[i] for i in reach]))
     # The hair quad's `v`, the way the game's store writes it: an absolute
@@ -1344,11 +1346,11 @@ def _checks(c) -> None:
     ok("and the same band on section 24 is 47 and 33",
        [v for _u, v in hair_texcoords(quad, 2 * layout.ATLAS_BAND)]
        == [47, 33, 47, 33])
-    ok("every style writes its hair in one band at most, bar K1",
+    ok("every style writes its hair in one band at most",
        [LETTERS for LETTERS in (looks.BY_ROW["HAIR"].label(i)
                                 for i, e in enumerate(HAIR_MAP)
                                 if e is not None and len(e[1]) > 1)]
-       == ["K1"])
+       == [])
 
     # The corpus's arithmetic, which needs neither a disc nor the JPEGs.
     same = {"a": 0.1, "b": 0.2, "c": 0.3, "d": 0.4}

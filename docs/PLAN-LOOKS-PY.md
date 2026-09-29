@@ -2004,8 +2004,10 @@ dedução:
   e 52 gravam os quads 1 e 2, em `16·faixa + 15` e `16·faixa + 5`; as outras
   seis não gravam quad de cabelo. E os "dez estilos de faixa múltipla" eram a
   barba: o mesmo passo reescreve os quads da coluna 9, e separados pela coluna
-  do CLUT cada estilo grava o cabelo numa faixa só. Resta o `K1` (seção 32),
-  cuja reescrita não é passo de faixa;
+  do CLUT cada estilo grava o cabelo numa faixa só. O `K1` (seção 32), que
+  parecia exceção, não grava cabelo nenhum: as quatro faixas eram o jogo
+  devolvendo a seção 32 que os save states trazem alterada
+  ([`CORR-LOOKS-108`](/docs/tasks/looks/CORR-LOOKS-108.md));
 - ~~o mapa foi medido só no jogador de linha~~ — **fechado em 2026-09-16**
   ([`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md)): andado no goleiro
   (`oracle.py --patched HAIR 1`), o mapa volta **igual valor a valor**, nas
