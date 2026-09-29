@@ -248,6 +248,16 @@ the same five, in the same order, are columns 3 to 7 of `defaultlook.txt`.
 
 TUPLE_SEPARATOR = "-"
 
+TUPLE_EXTRA = ("boots",)
+"""The fields the figure draws that the corpus tuple does not spell.
+
+A sixth part, after the five, and only when the values carry it: the corpus
+names five and keeps parsing as five.  BOOTS recolours both feet
+(`assembly.EFFECTS`), and until CORR-LOOKS-109 the screen built the figure
+from the five-part text -- the row moved, the text did not, and every value
+drew boots A.
+"""
+
 
 # ---- the codec -----------------------------------------------------------
 
@@ -289,20 +299,23 @@ def labels(values: dict) -> dict:
 # ---- the corpus tuple ----------------------------------------------------
 
 def parse_tuple(text: str) -> dict:
-    """`A-I3-A-F-A` to the five fields it names."""
+    """`A-I3-A-F-A` to the five fields it names, and `A-I3-A-F-A-C` to six."""
     parts = text.strip().split(TUPLE_SEPARATOR)
-    if len(parts) != len(TUPLE_ORDER):
-        raise BadLooks("%r has %d part(s) and a tuple has %d: %s"
+    names = TUPLE_ORDER + TUPLE_EXTRA
+    if not len(TUPLE_ORDER) <= len(parts) <= len(names):
+        raise BadLooks("%r has %d part(s) and a tuple has %d: %s, and "
+                       "optionally %s"
                        % (text, len(parts), len(TUPLE_ORDER),
-                          ", ".join(TUPLE_ORDER)))
+                          ", ".join(TUPLE_ORDER), ", ".join(TUPLE_EXTRA)))
     return {name: BY_NAME[name].index_of(part)
-            for name, part in zip(TUPLE_ORDER, parts)}
+            for name, part in zip(names, parts)}
 
 
 def format_tuple(values: dict) -> str:
-    """The inverse, for the five fields of `TUPLE_ORDER`."""
+    """The inverse: the five of `TUPLE_ORDER`, and `TUPLE_EXTRA` if present."""
+    names = TUPLE_ORDER + tuple(n for n in TUPLE_EXTRA if n in values)
     return TUPLE_SEPARATOR.join(BY_NAME[name].label(values[name])
-                                for name in TUPLE_ORDER)
+                                for name in names)
 
 
 CORPUS_SUFFIX = ".jpg"

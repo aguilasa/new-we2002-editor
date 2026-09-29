@@ -658,7 +658,7 @@ CONTROLS = (
     ),
     Control(
         "looks-tuple-any-length", "looks.py", "parse_tuple",
-        "    if len(parts) != len(TUPLE_ORDER):",
+        "    if not len(TUPLE_ORDER) <= len(parts) <= len(names):",
         "    if False:",
         ("looks",),
         "a parser that takes any number of parts: the corpus survey then "

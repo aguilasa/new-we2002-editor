@@ -708,12 +708,15 @@ def measure(python: str, app: str, where: str, env: dict) -> tuple:
 
 # ---- the screen, judged by key --------------------------------------------
 
-TUPLE_ROWS = ("SKIN", "HAIR", "H.COL", "FACE", "H.F.COL.")
-"""The five rows a press of which has to reach the figure.
+TUPLE_ROWS = ("SKIN", "HAIR", "H.COL", "FACE", "H.F.COL.", "BOOTS")
+"""The six rows a press of which has to reach the figure.
 
-They are the five of `looks.TUPLE_ORDER`, and the gate spells them here rather
-than importing that list so that a row silently dropped from the tuple shows up
-as a disagreement instead of as two files agreeing with each other.
+They are the five of `looks.TUPLE_ORDER` and the one of `looks.TUPLE_EXTRA`,
+and the gate spells them here rather than importing those lists so that a row
+silently dropped from the tuple shows up as a disagreement instead of as two
+files agreeing with each other.  BOOTS was that row until CORR-LOOKS-109: the
+five were spelled from the corpus tuple, which never names the boots, and the
+row drew boots A for every value with this gate green.
 """
 
 

@@ -1056,7 +1056,8 @@ class State:
         return out
 
     def tuple_text(self) -> str:
-        """The five fields the scene is built from, as `A-A1-A-A-A`."""
+        """The fields the scene is built from, as `A-A1-A-A-A-A` (the sixth is
+        BOOTS, looks.TUPLE_EXTRA)."""
         return looks.format_tuple(self.values())
 
     def press(self, button: str) -> bool:
