@@ -5,10 +5,10 @@ origin: LOOKS-TASK-14
 severity: low
 files: [tools/looks/assembly.py, docs/PLAN-LOOKS-PY.md]  # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-29
+done_commit: 14442eb
 ---
 
 # CORR-LOOKS-108 — O mapa de cabelo guarda quatro faixas para o K1, e o K1 não grava nenhuma
@@ -81,3 +81,9 @@ cli check: 12 module(s), 12 ok, 0 skipped, 0 failed -- ok
 
 - 2026-09-29 — K1 lido assentado nos dois slots; comparado com o jogo no mesmo
   giro; mapa corrigido.
+- **Closed** — commit `14442eb` (2026-09-29): fix(looks): K1 writes no hair band, so the map keeps none
+  - Files (`git show --name-status 14442eb`):
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `A docs/tasks/looks/CORR-LOOKS-108.md`
+    - `M docs/tasks/looks/correcoes-progresso.md`
+    - `M tools/looks/assembly.py`
