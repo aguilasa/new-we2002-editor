@@ -103,6 +103,16 @@ REFUSED = QtGui.QColor(232, 120, 120)
 PANEL = QtGui.QColor(12, 40, 96)
 
 
+FONT_FAMILIES = ("Consolas",)
+"""The window's own font, where the disc has none to give."""
+
+FONT_FOR_SYMBOLS = ("DejaVu Sans Mono",)
+"""Named first for a text Consolas cannot draw whole (`LooksSet._font`)."""
+
+FONT_LATIN_END = 0x0250  # not-an-address: a Unicode code point
+"""The end of the Latin blocks, which Consolas draws; past it, FONT_FOR_SYMBOLS."""
+
+
 class LooksSet(QtWidgets.QWidget):
     """The screen, driven by the four buttons and redrawn on every change."""
 
@@ -269,8 +279,26 @@ class LooksSet(QtWidgets.QWidget):
             out += self.builder.placed_sprites(self.state.style(role))
         return out
 
-    def _font(self, size: int) -> QtGui.QFont:
-        font = QtGui.QFont("Consolas")
+    def _font(self, size: int, text: str = "") -> QtGui.QFont:
+        """Consolas, or a family that holds every character of *text*.
+
+        Never Qt's own fallback: a character Consolas lacks -- the help's
+        button glyph, U+25A0 -- sends Qt to fontconfig for another family, and
+        on a Linux machine whose cache put a WOFF file first
+        (fonts-opendyslexic, after the cache was rebuilt on 2026-09-29) the
+        PySide6 6.11 wheel crashed loading it, killing the window on every
+        head row (CORR-LOOKS-106).  A text Consolas cannot draw whole takes a
+        named family first, and Consolas stays in the list for the machines
+        without it.
+
+        Decided by the characters and not by asking Qt: `inFontUcs4` walks the
+        same fallback and crashed the same way.
+        """
+        font = QtGui.QFont()
+        families = list(FONT_FAMILIES)
+        if any(ord(one) >= FONT_LATIN_END for one in text):
+            families = list(FONT_FOR_SYMBOLS) + families
+        font.setFamilies(families)
         font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
         font.setPixelSize(size)
         return font
@@ -562,9 +590,8 @@ class LooksSet(QtWidgets.QWidget):
         painter.setPen(BOX)
         painter.drawRect(help_box.adjusted(0, 0, -1, -1))
         painter.setPen(REFUSED if self.refusal else INK)
-        painter.setFont(small)
+        said = self.refusal if self.refusal else self.state.help_text()
+        painter.setFont(self._font(small.pixelSize(), said))
         painter.drawText(help_box.adjusted(4 * s, 2 * s, -4 * s, -2 * s),
-                         int(QtCore.Qt.TextFlag.TextWordWrap),
-                         self.refusal if self.refusal
-                         else self.state.help_text())
+                         int(QtCore.Qt.TextFlag.TextWordWrap), said)
         painter.end()
