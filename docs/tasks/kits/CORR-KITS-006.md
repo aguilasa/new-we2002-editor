@@ -1,0 +1,57 @@
+---
+id: CORR-KITS-006
+title: "Paste prims transcripts in the Log whole, not trimmed"
+origin: KITS-TASK-03
+severity: low
+files: []            # predicted paths/globs; batches build their conflict matrix from them
+resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
+status: pending
+depends_on: []
+done_on: null
+done_commit: null
+---
+
+# CORR-KITS-006 — Paste prims transcripts in the Log whole, not trimmed
+
+Origin: [KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md)
+
+## Problem
+
+O primeiro critério da KITS-TASK-03 é a saída "colada no Log", mas o que está lá não é o que a ferramenta imprime. Na transcrição do `prims` faltam o cabeçalho `Primitives per kit record: ...` e duas linhas por figura (`a corner in a DAT2D image record` 356/200 e `a corner in no record of either file` 0). Na do `--negative` aparecem 4 das 14 linhas, e o texto "(exit 0; sai 1 se alguma falhar)" entrou dentro do bloco de código como se fosse saída da ferramenta.
+
+## Evidência
+
+```text
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin | grep -nE 'Primitives per|a corner in'
+1:Primitives per kit record: roms/japanese-shift-jis.bin
+6:  a corner in a DAT2D image record         356
+7:  a corner in no record of either file     0
+15:  a corner in a DAT2D image record         200
+16:  a corner in no record of either file     0
+$ grep -c 'a corner in' docs/tasks/kits/03-primitivas-por-retangulo.md
+0
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --negative | wc -l
+15
+```
+
+## Root cause
+
+Hipótese: a saída foi aparada à mão quando o Log foi escrito.
+
+## Fix
+
+Colar as duas saídas inteiras na seção de evidência da task e pôr a nota de código de saída fora do bloco de código.
+
+## Arquivos a criar ou modificar
+
+- `docs/tasks/kits/03-primitivas-por-retangulo.md`
+
+## Verificação
+
+```text
+$ grep -c 'a corner in' docs/tasks/kits/03-primitivas-por-retangulo.md
+```
+
+Hoje dá 0; depois, 4.
+
+## Log de Execução

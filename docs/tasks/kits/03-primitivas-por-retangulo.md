@@ -10,8 +10,8 @@ resources: []        # serialized resources this item needs (rite.toml [resource
 status: done
 done_on: 2026-09-30
 done_commit: f71b47d6
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-30
+review_commit: 1969acad
 ---
 
 # KITS-TASK-03 — Contar primitivas de cada figura por retângulo do TEX
@@ -103,3 +103,4 @@ O das mangas em (560, 256) prova que a contagem por quatro cantos enxerga regist
     - `M docs/tasks/kits/03-primitivas-por-retangulo.md`
     - `M tools/kits/cli.py`
     - `M tools/kits/core/survey.py`
+- **Reviewed** (2026-09-30) at `1969acad`: CORR-KITS-005, CORR-KITS-006, CORR-KITS-007
