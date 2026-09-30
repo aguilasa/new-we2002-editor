@@ -16,8 +16,9 @@ repositório**; o rito em si está na documentação do plugin
 | `/corrigir-tudo [ciclo]` | `/rite:fix-all [ciclo]` |
 | — | `/rite:status`, `/rite:new-cycle`, `/rite:plan-to-tasks`, `/rite:close-cycle`, `/rite:retro` |
 
-Os ciclos continuam onde estavam e têm nome: `pes2` (`docs/tasks/`), `looks` (`docs/tasks/looks/`),
-`port-mcr` (`docs/tasks/port-mcr/`) e `wte`, arquivado em `docs/tasks/concluidos/`.
+Os ciclos continuam onde estavam e têm nome: `pes2` (`docs/tasks/`) e `port-mcr`
+(`docs/tasks/port-mcr/`); arquivados, `wte` em `docs/tasks/concluidos/` e `looks` em
+`docs/tasks/concluidos/looks/`.
 
 ## O que mudou, e o que não mudou
 
@@ -32,7 +33,7 @@ Os ciclos continuam onde estavam e têm nome: `pes2` (`docs/tasks/`), `looks` (`
   e `severity` no frontmatter. O ID de uma CORR nova sai sempre do `rite new-fix` — nunca "o maior
   + 1" contado à mão.
 - **A ordem de execução** de um ciclo é a numérica, a menos que o `progresso.md` liste `order:` no
-  frontmatter — é o caso do `looks`, que roda 36–40 antes de 32.
+  frontmatter — foi o caso do `looks`, que rodou 36–40 antes de 32.
 - **Um ciclo é uma pasta com `progresso.md`**, `depends_on` não atravessa pasta, e projeto
   encerrado desce para `docs/tasks/concluidos/`. Isso não mudou.
 - **Os perfis** (`docs/prompts/perfil-<ciclo>.md`) continuam sendo a camada do ciclo, lidos por todo
