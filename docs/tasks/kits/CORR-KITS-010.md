@@ -5,10 +5,10 @@ origin: KITS-TASK-05
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: "22555288"
 ---
 
 # CORR-KITS-010 — Re-run the plan's secondary subcommands in the closing Log
@@ -76,3 +76,7 @@ Cinco corridas acrescentadas ao bloco de evidência da KITS-TASK-05, geradas por
 $ grep -cE 'all-kits|--tuple|rects --all|--kit 98' docs/tasks/kits/05-fechamento-fase-0.md
 5
 ```
+- **Closed** — commit `22555288` (2026-09-30): docs(kits): re-run in the phase 0 closing Log the subcommand variants the plan cites
+  - Files (`git show --name-status 22555288`):
+    - `M docs/tasks/kits/05-fechamento-fase-0.md`
+    - `M docs/tasks/kits/CORR-KITS-010.md`
