@@ -48,11 +48,14 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#4.3). Nada de remapear
 
 ```
 $ python tools/kits/cli.py prims roms/japanese-shift-jis.bin     # exit 0
+Primitives per kit record: roms/japanese-shift-jis.bin
   kit TEX_A4, tuple A-A1-A-A-A, geometry and resolution by tools/looks draw_list
 figure 0 (outfield): 593 primitive(s) over 12 section(s)
   container (draw list, first corner)      DAT2D 356, kit 237
   kit role (draw list, first corner)       uniform 237
   kit role (any of four corners)           uniform 237
+  a corner in a DAT2D image record         356
+  a corner in no record of either file     0
   corners touch a kit role first missed    0
   VRAM box of the corners in kit records   (576,256)..(607,359)
   sleeves (576,384): 0 primitive(s)
@@ -60,6 +63,8 @@ figure 1 (goalkeeper): 629 primitive(s) over 12 section(s)
   container (draw list, first corner)      DAT2D 200, kit 429
   kit role (draw list, first corner)       uniform 429
   kit role (any of four corners)           uniform 429
+  a corner in a DAT2D image record         200
+  a corner in no record of either file     0
   corners touch a kit role first missed    0
   VRAM box of the corners in kit records   (600,256)..(639,383)
   sleeves (576,384): 0 primitive(s)
@@ -110,15 +115,25 @@ assembly --check-image: ok
 Controles negativos:
 
 ```
-$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --negative
-    uniform moved to (0,0)       moved 2  figure 0  uniform first            237 ->   0  drops to zero     held
-    uniform moved to (0,0)       moved 2  figure 1  uniform first            429 ->   0  drops to zero     held
-    sleeves moved to (560,256)   moved 2  figure 0  disagree                   0 -> 238  rises above zero  held
-    sleeves moved to (560,256)   moved 2  figure 1  disagree                   0 -> 194  rises above zero  held
-  14 of 14 expectations held                          (exit 0; sai 1 se alguma falhar)
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --negative     # exit 0
+  sleeves moved to (0,0)       moved 2  figure 0  sleeves first              0 ->   0  stays zero        held
+  sleeves moved to (0,0)       moved 2  figure 0  sleeves touch              0 ->   0  stays zero        held
+  sleeves moved to (0,0)       moved 2  figure 1  sleeves first              0 ->   0  stays zero        held
+  sleeves moved to (0,0)       moved 2  figure 1  sleeves touch              0 ->   0  stays zero        held
+  uniform moved to (0,0)       moved 2  figure 0  uniform first            237 ->   0  drops to zero     held
+  uniform moved to (0,0)       moved 2  figure 0  uniform touch            237 ->   0  drops to zero     held
+  uniform moved to (0,0)       moved 2  figure 1  uniform first            429 ->   0  drops to zero     held
+  uniform moved to (0,0)       moved 2  figure 1  uniform touch            429 ->   0  drops to zero     held
+  sleeves moved to (560,256)   moved 2  figure 0  other (560,256) touch      0 -> 238  rises above zero  held
+  sleeves moved to (560,256)   moved 2  figure 0  other (560,256) first      0 ->   0  stays zero        held
+  sleeves moved to (560,256)   moved 2  figure 0  disagree                   0 -> 238  rises above zero  held
+  sleeves moved to (560,256)   moved 2  figure 1  other (560,256) touch      0 -> 194  rises above zero  held
+  sleeves moved to (560,256)   moved 2  figure 1  other (560,256) first      0 ->   0  stays zero        held
+  sleeves moved to (560,256)   moved 2  figure 1  disagree                   0 -> 194  rises above zero  held
+14 of 14 expectations held
 ```
 
-O das mangas em (560, 256) prova que a contagem por quatro cantos enxerga registro que o primeiro-encontrado esconde (238 no lugar de 237: uma primitiva do `DAT2D` tem canto na faixa plantada).
+O comando sai 1 se alguma expectativa falhar. O das mangas em (560, 256) prova que a contagem por quatro cantos enxerga registro que o primeiro-encontrado esconde (238 no lugar de 237: uma primitiva do `DAT2D` tem canto na faixa plantada).
 
 `grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py` → sem saída; `cli.py survey` → mesmas linhas da KITS-TASK-01 (md5 da saída igual antes e depois).
 
