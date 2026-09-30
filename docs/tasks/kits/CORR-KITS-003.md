@@ -5,10 +5,10 @@ origin: KITS-TASK-02
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: 921ed149
 ---
 
 # CORR-KITS-003 — Version the rects probes: full owner list and negative control
@@ -101,3 +101,10 @@ exit 1
 $ grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py
 (sem saída, exit 1)
 ```
+- **Closed** — commit `921ed149` (2026-09-30): fix(kits): version the rects owner list and negative control
+  - Files (`git show --name-status 921ed149`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/02-retangulos-608-e-704.md`
+    - `M docs/tasks/kits/CORR-KITS-003.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/survey.py`
