@@ -10,8 +10,8 @@ resources: []        # serialized resources this item needs (rite.toml [resource
 status: done
 done_on: 2026-09-30
 done_commit: fc5717ae
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-30
+review_commit: da75b135
 ---
 
 # KITS-TASK-01 — Promover o levantamento do §1.1 a ferramenta versionada
@@ -90,3 +90,4 @@ Erro: `python tools/kits/cli.py survey roms/nope.bin` → `survey: Could not ope
     - `A tools/kits/cli.py`
     - `A tools/kits/core/__init__.py`
     - `A tools/kits/core/survey.py`
+- **Reviewed** (2026-09-30) at `da75b135`: CORR-KITS-001, CORR-KITS-002
