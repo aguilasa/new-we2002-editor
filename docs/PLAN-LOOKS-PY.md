@@ -2440,7 +2440,7 @@ leitura nas duas, com a tela trocando de time.
 - Os controles negativos, contados pela ferramenta e nunca escritos em prosa.
 - [NOTICE.md](../NOTICE.md) com a linhagem do `we3d` (MIT, com crédito) e a
   ressalva do Superpack.
-- O ciclo `docs/tasks/looks/` com `progresso.md` e
+- O ciclo `docs/tasks/concluidos/looks/` (arquivado em 2026-09-30) com `progresso.md` e
   `/docs/prompts/perfil-looks.md`.
 - Este plano, mantido: **o que a execução mudar, muda aqui, na seção que
   mudou.**

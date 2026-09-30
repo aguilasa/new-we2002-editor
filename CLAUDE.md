@@ -834,7 +834,7 @@ ciclo novo; o giro do close-up fechou em
 2026-09-29 ([CORR-LOOKS-107](docs/tasks/concluidos/looks/CORR-LOOKS-107.md)).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
-[docs/tasks/looks/](docs/tasks/concluidos/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
+[docs/tasks/concluidos/looks/](docs/tasks/concluidos/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
 `CORR-LOOKS-`, perfil [docs/prompts/perfil-looks.md](docs/prompts/perfil-looks.md)
 (as armadilhas da 70 em diante em
 [perfil-looks.armadilhas.md](docs/prompts/perfil-looks.armadilhas.md)), e rodava por `/rite:execute looks`. Não estende o `we2002_core` e não compartilha

@@ -671,7 +671,7 @@ de execução.
 tools/looks/        núcleo Python puro — ZERO Qt, ZERO endereço fora de layout.py
 tools/looks/ui/     PySide6 — ZERO endereço, ZERO leitura de disco
 work/venv-looks/    fora do git
-docs/tasks/looks/   este ciclo
+docs/tasks/concluidos/looks/   este ciclo, arquivado
 ```
 
 **O único arquivo gerado do ciclo é `tools/looks/screen.json`**, desde a
