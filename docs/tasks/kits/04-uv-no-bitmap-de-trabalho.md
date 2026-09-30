@@ -10,8 +10,8 @@ resources: []        # serialized resources this item needs (rite.toml [resource
 status: done
 done_on: 2026-09-30
 done_commit: 63dde69c
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-30
+review_commit: 2a63d8ac
 ---
 
 # KITS-TASK-04 — Levantar as UV que o boneco amostra no bitmap de 256×128
@@ -87,3 +87,4 @@ $ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative
     - `M docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md`
     - `M tools/kits/cli.py`
     - `M tools/kits/core/survey.py`
+- **Reviewed** (2026-09-30) at `2a63d8ac`: CORR-KITS-008, CORR-KITS-009
