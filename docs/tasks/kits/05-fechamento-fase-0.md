@@ -162,7 +162,7 @@ $ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative      # exit
   uniform moved to (0,0)     moved 2  figure 1  mapped count drops to 0  429 -> 0  held
 11 of 11 expectations held
 
-$ grep -rnE 'print(|sys.exit|PySide' tools/kits/core/      # exit 1, sem saída (corrida no Git Bash)
+$ grep -rnE 'print\(|sys\.exit|PySide' tools/kits/core/      # exit 1, sem saída (corrida no Git Bash)
 ```
 
 (As nove linhas `skipped` do `rects` — 1 Form 2 e 8 fora da trilha — ficam na saída acima.)
