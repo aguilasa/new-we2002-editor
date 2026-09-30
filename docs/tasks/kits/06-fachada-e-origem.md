@@ -7,10 +7,10 @@ depends_on: [KITS-TASK-05]
 source_of_truth: "/docs/PLAN-KITS-PY.md#3.1"
 files: ["tools/kits/core/api.py", "tools/kits/core/source.py", "tools/kits/core/errors.py", "NOTICE.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
-done_on: null
-done_commit: null
-reviewed_on: null
+status: done
+done_on: 2026-09-30
+done_commit: 51c8a6a0
+reviewed_on: pending
 review_commit: null
 ---
 
@@ -100,3 +100,12 @@ $ grep -rnE '^[A-Za-z_]+ *= *(\[|\{|dict\(|list\(|set\()' tools/kits/core/api.py
 - O `source.py` usa `survey._shape_of` e `survey.EXPECTED_SHAPE` (privado e fora do módulo de endereço). Nota na KITS-TASK-07, que é quem move os retângulos.
 - `survey.SurveyError` deriva de `Exception`, não de `KitsError`: `except KitsError` não pega falha do `survey`. Nota na KITS-TASK-07.
 - `RomSource.image_path` sai com barra invertida no Windows (`os.path.normpath`), como mostra a linha do `.cue`.
+- **Closed** — commit `51c8a6a0` (2026-09-30): feat(kits): add the core facade that opens a disc or a lone TEX by its content
+  - Files (`git show --name-status 51c8a6a0`):
+    - `M NOTICE.md`
+    - `M docs/tasks/kits/06-fachada-e-origem.md`
+    - `M docs/tasks/kits/07-tex-e-guarda-de-forma.md`
+    - `M tools/kits/cli.py`
+    - `A tools/kits/core/api.py`
+    - `A tools/kits/core/errors.py`
+    - `A tools/kits/core/source.py`
