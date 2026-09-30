@@ -1302,9 +1302,11 @@ Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há duas:
   alvo; no resto de `docs/`, alvo fora de `docs/` (`../NOTICE.md`) continua
   relativo.
 
-Duas regras que custaram correção em mais de um ciclo, e por isso valem para
-todos (retro do `looks`,
-[docs/tasks/concluidos/looks/retro.md](docs/tasks/concluidos/looks/retro.md)):
+Quatro regras que custaram correção em mais de um ciclo, e por isso valem para
+todos (retros do `looks`,
+[docs/tasks/concluidos/looks/retro.md](docs/tasks/concluidos/looks/retro.md), e
+do `port-mcr`,
+[docs/tasks/concluidos/port-mcr/retro.md](docs/tasks/concluidos/port-mcr/retro.md)):
 
 - **Número em Log ou documento é colado da ferramenta, na HEAD entregue.** Não
   se reescreve de memória, não sai de sonda descartável — sonda que produziu um
@@ -1317,6 +1319,18 @@ todos (retro do `looks`,
   não afirmado, pulo silencioso ou função sem chamador contam como ausência de
   gate. Foram 16 correções no `looks`, 5 delas altas, e o mesmo no
   `port-mcr`.
+- **Fechar um veredito é varrer quem dizia o anterior.** Critério, total ou
+  decisão que muda numa task muda na mesma task em todo lugar que o repete —
+  regra, perfil, plano, docstring, cabeçalho de seção, a entrada da fase em
+  "Verificações específicas por fase" —, e um total vive em **um** documento só,
+  os outros remetendo ao comando que o imprime. Foram 20 correções no `looks` e
+  8 no `port-mcr`, 5 delas altas (entre elas a contagem de controles e a de
+  alvos de `ctest`).
+- **Um caso medido não é a regra.** Um slot, um cartão, uma imagem medidos dizem
+  aquele caso; a frase diz "o menor", não "todos", e amostra se conta **por
+  conteúdo** (digest), não por arquivo nem pelos que a task usou — três dos
+  "sete cartões independentes" do `port-mcr` eram o mesmo cartão. Foram 22
+  correções no `looks` e 8 no `port-mcr`.
 
 <!-- rite:begin -->
 Este repositório usa o plugin **Rite** (<https://github.com/aguilasa/rite>); a configuração está em
