@@ -360,6 +360,10 @@ agrupamento se parte em 104 e 1
 ([CORR-KITS-005](/docs/tasks/kits/CORR-KITS-005.md)). Fica aberta a outra metade: se a
 manga longa e a braçadeira são outra geometria, fora do `EDT_MOD.BIN` — a
 imagem existe e o jogo a envia à VRAM, mas quem a desenha não está nesta tela.
+E fica aberta a pergunta do mapa de zonas: em que retângulo do mapa de zonas cai
+cada primitiva não foi medido aqui — é o cruzamento do §4.6, feito pela
+[KITS-TASK-16](/docs/tasks/kits/16-zonas.md) sobre a lista de retângulos UV
+([CORR-KITS-007](/docs/tasks/kits/CORR-KITS-007.md)).
 
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 
