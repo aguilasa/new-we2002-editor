@@ -3,8 +3,8 @@
 As armadilhas 1 a 69 estão no
 [`perfil-looks.md`](/docs/prompts/perfil-looks.md), na seção "Armadilhas
 medidas neste ciclo". Este arquivo guarda da 70 em diante — da 80 desde a
-[`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) e da 70 desde a
-[`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md), cada vez que o
+[`LOOKS-TASK-36`](/docs/tasks/concluidos/looks/36-os-sprites-estaticos.md) e da 70 desde a
+[`LOOKS-TASK-40`](/docs/tasks/concluidos/looks/40-a-camera-do-close-up.md), cada vez que o
 perfil chegou ao limite de tamanho do rito (`[profile].max_kb`). O rito lê este
 arquivo **por busca**, não por inteiro, então cada entrada nomeia os caminhos
 e os termos que a disparam.
@@ -239,17 +239,17 @@ e os termos que a disparam.
     leva o cursor ao rótulo (`Undo`). O x do ◀ é fixo por linha e não
     acompanha o texto (302, 384, 416, 424): derivá-lo da largura do valor erra
     em toda linha. Medido no walk do `--screen` (LOOKS-TASK-36,
-    [`CORR-LOOKS-067`](/docs/tasks/looks/CORR-LOOKS-067.md)).
+    [`CORR-LOOKS-067`](/docs/tasks/concluidos/looks/CORR-LOOKS-067.md)).
 93. **O texto provisório da janela cobre pixel de sprite.** A fonte do Qt é
     mais larga que a do jogo, e o "CB" e o "SHIRT N" caem sobre texels da placa
     e das caixas que o jogo deixa à mostra: 16 e 18 de 359 amostras erravam
     por isso, com o decode igual ao jogo. O `looks_ui` julga os sprites com
     `--no-stand-in-text`; quando a fonte do jogo chegar
-    ([`LOOKS-TASK-37`](/docs/tasks/looks/37-a-tabela-de-glifos.md)), a opção
+    ([`LOOKS-TASK-37`](/docs/tasks/concluidos/looks/37-a-tabela-de-glifos.md)), a opção
     perde o motivo. **Chegou, e o motivo mudou de nome:** a placa e a camisa
     agora saem nos glifos do jogo, mas do x do objeto, e não de onde o jogo as
     centra. A opção virou `--no-unplaced-text` e vale até a
-    [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md).
+    [`LOOKS-TASK-38`](/docs/tasks/concluidos/looks/38-o-alinhamento-dos-valores.md).
 95. **A caixa de um texto muda com o texto, e a cor vem de dentro da
     string.** O objeto do `NAT` fica em x −80 com `Unknown` e em −104 com uma
     nação: uma caixa medida na carga alinha errado todo valor depois da

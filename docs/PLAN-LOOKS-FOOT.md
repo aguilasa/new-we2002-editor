@@ -64,12 +64,12 @@ cabelo, cor do cabelo, barba e cor da barba), então nada da geometria muda com
 ele — o que muda, se mudar, é a animação.
 
 A câmera da linha é a de **corpo inteiro**, idêntica número a número à da
-linha de carga ([`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md),
+linha de carga ([`LOOKS-TASK-40`](/docs/tasks/concluidos/looks/40-a-camera-do-close-up.md),
 `oracle.py --closeups`). Isso tira a câmera do risco deste plano.
 
 ### 1.2 O que o jogo faz ali, medido
 
-A [`LOOKS-TASK-33`](/docs/tasks/looks/33-a-janela-animada.md) classificou cada
+A [`LOOKS-TASK-33`](/docs/tasks/concluidos/looks/33-a-janela-animada.md) classificou cada
 linha pela origem dos pares que a montagem de pose lê (`oracle.row_walk`,
 `oracle.pair_owner`, `oracle.classify_walk`), dentro do `oracle.py --rhythm`:
 
@@ -121,7 +121,7 @@ não valer para a 147:
 ### 1.5 O precedente mais próximo
 
 O giro do close-up, que a v2 também deixou aberto, fechou em 2026-09-29 pela
-[`CORR-LOOKS-107`](/docs/tasks/looks/CORR-LOOKS-107.md): o ângulo lido do
+[`CORR-LOOKS-107`](/docs/tasks/concluidos/looks/CORR-LOOKS-107.md): o ângulo lido do
 próprio jogo (`layout.TURN_ANGLE`, `oracle.py --turn`) contra um modelo puro
 (`scene.turn_after`) — repouso, passo por passada, pontas e o sentido guardado
 na reentrada. É a forma que este plano copia: medir o estado do jogo por

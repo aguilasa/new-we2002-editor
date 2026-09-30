@@ -1,7 +1,7 @@
 # Plano — visualizador 3D da aparência do jogador, em Python + Qt
 
 > **Estado: as oito fases executadas, e o ciclo fechado em 2026-09-17** pela
-> [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md). Este
+> [`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md). Este
 > banner dizia *"plano escrito em 2026-09-14, nenhuma fase executada"*. O que a
 > execução mudou está **na seção que mudou**, com a data e o que ela dizia
 > antes; o índice dessas mudanças são as tasks e as `CORR-LOOKS-*` que cada
@@ -25,7 +25,7 @@
 > não conferida, está dito na própria linha.
 >
 > Ciclo de tasks: **aberto em 2026-09-14**, em
-> [`/docs/tasks/looks/progresso.md`](/docs/tasks/looks/progresso.md) — 20 tasks,
+> [`/docs/tasks/looks/progresso.md`](/docs/tasks/concluidos/looks/progresso.md) — 20 tasks,
 > prefixo `LOOKS-TASK-`, pool `CORR-LOOKS-`, perfil
 > [`/docs/prompts/perfil-looks.md`](/docs/prompts/perfil-looks.md). Roda por
 > `/executar looks`. A §7 ganhou uma **Fase 0** que a primeira versão não tinha:
@@ -73,17 +73,17 @@ mudança; é esse comportamento que se reproduz.
    `--looks A-H1-A-A-A` **recusa**, com a mensagem da tabela e saída **2**. As
    duas metades são o critério. A **tela** do `FACE` oferece **sete** valores,
    `A` a `G`, andada letra a letra nos dois slots pela
-   [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md), e a
+   [`LOOKS-TASK-17`](/docs/tasks/concluidos/looks/17-confronto-com-o-emulador.md), e a
    **tabela** sabe aplicar os sete: `A` a `E` são as faixas 0 a 4 dos dois
-   quads de barba que a [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)
+   quads de barba que a [`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md)
    mediu, e `F` e `G` desenham o **gêmeo** da cabeça — a seção ímpar seguinte
    —, com os quads de barba dele na faixa do disco e uma adiante
-   ([`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md)). A metade que
+   ([`CORR-LOOKS-048`](/docs/tasks/concluidos/looks/CORR-LOOKS-048.md)). A metade que
    recusa é o `H1`, que não escreveu nada nas duas figuras.
 
    **Este item pedia a recusa de `A-I3-A-F-A` até 2026-09-16.** Ela era honesta
    enquanto ninguém tinha lido `F` e `G` — a recusa dizia "não medido" desde a
-   [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md), e antes disso
+   [`CORR-LOOKS-044`](/docs/tasks/concluidos/looks/CORR-LOOKS-044.md), e antes disso
    "fora de alcance" —, e dezesseis das cinquenta tuplas do corpus caíam nela.
    Medido, `A-I3-A-F-A` **desenha**; a recusa que continua sendo critério é a
    de um estilo que não escreveu nada, e desenhar um `A1` calado no lugar de um
@@ -92,7 +92,7 @@ mudança; é esse comportamento que se reproduz.
    **47 e 3**: as duas de `H1` e o `0.jpg`.
 4. `ctest -R looks` numa máquina limpa: **1 passed, 3 skipped**. Dizia *2
    skipped* até 2026-09-17, quando a
-   [`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) registrou o
+   [`LOOKS-TASK-19`](/docs/tasks/concluidos/looks/19-alvos-de-ctest-e-cli.md) registrou o
    quarto alvo, `looks_live` (§4.4).
 5. O confronto da §5.3 roda: nosso quadro contra o quadro do emulador na mesma
    tupla, com a diferença medida e registrada — não necessariamente zero, mas
@@ -100,7 +100,7 @@ mudança; é esse comportamento que se reproduz.
 
 #### A definição de pronto, percorrida em 2026-09-17
 
-Pela [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md),
+Pela [`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md),
 item a item, com a ferramenta de cada um:
 
 | item | resultado | medido por |
@@ -119,7 +119,7 @@ continua existindo, e desenha a prateleira de propósito (`S`).
 
 A §10 não tem uma lista de pronto à parte: o pedido da §10.1 **é** a lista — a
 janela é a tela `LOOKS SET`, com o boneco montado, vestido e andando. Pela
-[`LOOKS-TASK-35`](/docs/tasks/looks/35-fechamento-da-v2.md), item a item:
+[`LOOKS-TASK-35`](/docs/tasks/concluidos/looks/35-fechamento-da-v2.md), item a item:
 
 | o pedido | resultado | medido por |
 |---|---|---|
@@ -131,7 +131,7 @@ janela é a tela `LOOKS SET`, com o boneco montado, vestido e andando. Pela
 
 O que ficou **aberto**, com razão e destravamento: a animação de `FOOT`
 (§10.3 (p)) — o giro do close-up, que também estava aqui, **fechou em
-2026-09-29** ([`CORR-LOOKS-107`](/docs/tasks/looks/CORR-LOOKS-107.md)) —, e as duas incógnitas da v1 que a v2 não tocou,
+2026-09-29** ([`CORR-LOOKS-107`](/docs/tasks/concluidos/looks/CORR-LOOKS-107.md)) —, e as duas incógnitas da v1 que a v2 não tocou,
 §6 (g) e (i). A fonte da caixa de ajuda **não** está entre eles: é decisão sob a
 §10.3 (o), fechada — o texto vem da ROM do console, que não está no disco nem
 neste repositório, e a janela o escreve numa fonte de apoio com o custo medido
@@ -210,7 +210,7 @@ cabeçalho) - 4 × (número de palavras do cabeçalho)` — e o
 discos**, a cada corrida. Sem isso as duas constantes ficariam cravadas na
 prática: o `derive_base()` só era exercitado sobre vetores sintéticos
 construídos para casar com o algoritmo, e uma regressão nele deixaria o
-`--check` verde até a Fase 2 ([`CORR-LOOKS-008`](/docs/tasks/looks/CORR-LOOKS-008.md)).
+`--check` verde até a Fase 2 ([`CORR-LOOKS-008`](/docs/tasks/concluidos/looks/CORR-LOOKS-008.md)).
 
 ```text
   base     /BIN/EDT_MOD.BIN      2 words -> 0x8011c000 (constant 0x8011c000) ok
@@ -252,7 +252,7 @@ foi feita em 2026-09-14 comparando os arquivos inteiros, não os primeiros bytes
 | `/BIN/MODEL.BIN` | 8100 / 64.800 | **idêntico** (`0b3814bb0d3b`) |
 | `/BIN/DAT2D.BIN` | 5300 / 81.124 | **difere** |
 | `/SELECT.BIN` | 850 / 300.648 | **difere** |
-| `/SLPM_870.56` | 24 / 337.920 | **difere** — menos as janelas de código da ajuda, idênticas ([`LOOKS-TASK-39`](/docs/tasks/looks/39-o-texto-da-ajuda.md)) |
+| `/SLPM_870.56` | 24 / 337.920 | **difere** — menos as janelas de código da ajuda, idênticas ([`LOOKS-TASK-39`](/docs/tasks/concluidos/looks/39-o-texto-da-ajuda.md)) |
 
 **Esta é a linha mais operacional do plano**, e decide como se trabalha:
 
@@ -272,7 +272,7 @@ disco de dirigir.** As duas imagens japonesas desta máquina são o **mesmo
 dump** — `roms/japanese-shift-jis.bin` e
 `C:\games\ps1\roms\we2002\we-2002-original-japao.bin` têm o mesmo
 `sha256 e853eb14f5bddd50…`, 307.187.664 bytes, **reconferido em 2026-09-14**
-pela [`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md):
+pela [`LOOKS-TASK-02`](/docs/tasks/concluidos/looks/02-ambiente-e-os-dois-discos.md):
 
 ```sh
 python tools/looks/iso_source.py --check-discs <japonês.bin> <inglês.bin>
@@ -280,7 +280,7 @@ python tools/looks/iso_source.py --check-discs <japonês.bin> <inglês.bin>
 
 O `--check-discs` confere os quatro arquivos **por dentro do disco**, que é o
 que decide, e não a imagem inteira. **Ele mora no `iso_source.py` desde a
-[`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md)**
+[`LOOKS-TASK-03`](/docs/tasks/concluidos/looks/03-fonte-de-disco-e-layout.md)**
 (2026-09-14), e não mais no `layout.py`: ler disco é trabalho da fachada, e o
 `layout.py` não faz I/O. Para a imagem inteira, que só responde "é
 este dump mesmo?":
@@ -317,7 +317,7 @@ depois da última seção de um grupo vêm 8 bytes de zero
 ```
 
 **e o "8" estava errado** — corrigido em 2026-09-14 pela
-[`LOOKS-TASK-04`](/docs/tasks/looks/04-formato-de-secao.md), que implementou a
+[`LOOKS-TASK-04`](/docs/tasks/concluidos/looks/04-formato-de-secao.md), que implementou a
 regra e a mediu nos dois arquivos:
 
 ```
@@ -346,7 +346,7 @@ O `EDT_MOD.BIN` dá `[1] × 20`: cada peça é seu próprio grupo.
 
 **A segunda linha da tabela está ali de propósito.** Começar em 15.704 também
 fecha no EOF exato, e por isso passou por leitura completa do arquivo até a
-[`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md): **terminar no fim não
+[`CORR-LOOKS-010`](/docs/tasks/concluidos/looks/CORR-LOOKS-010.md): **terminar no fim não
 diz nada sobre o começo**. É a razão de a coluna "a partir de" existir nesta
 tabela, e de nenhuma contagem de seção ser escrita sem ela.
 
@@ -372,7 +372,7 @@ delas **revista uma segunda vez** em 2026-09-14:
   outras três é o que o pacote da GPU manda zerar. A leitura inteira, com as
   três medições que a sustentam, está na §1.6, que era a contradição que ela
   resolve; quem a reescreveu foi a
-  [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md).
+  [`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md).
 
   Vale o registro de **por que a primeira leitura resistiu**: ela vinha do
   `we3d`, batia com uma estatística real, e nada no parser dependia de estar
@@ -385,7 +385,7 @@ delas **revista uma segunda vez** em 2026-09-14:
 ### 1.5 O `EDT_MOD.BIN` tem 20 seções e **duas** listas de onze
 
 > **Corrigido em 2026-09-14** pela
-> [`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md). Esta seção dizia
+> [`CORR-LOOKS-010`](/docs/tasks/concluidos/looks/CORR-LOOKS-010.md). Esta seção dizia
 > *"é um jogador só, de onze peças"*, que *"há dados não-geometria entre as
 > seções"*, e que a região entre 216 e 15.704 era *"material de textura"* com
 > *"um cabeçalho TIM em 3.228"*. As três coisas estavam erradas, e pela mesma
@@ -403,7 +403,7 @@ scan(edt,   216) ->  20 sec  1218 vert  1074 prim  end=36072
 
 Os dois fecham no EOF, e **é por isso que o primeiro engana**: começar perto do
 fim e terminar no fim não diz nada sobre o começo. Daí a regra que a
-[`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md) passou a exigir:
+[`LOOKS-TASK-05`](/docs/tasks/concluidos/looks/05-arquivos-de-modelo.md) passou a exigir:
 **toda contagem de seção vem acompanhada do offset de onde a varredura
 começou.**
 
@@ -460,7 +460,7 @@ Quatro leituras, todas de peso:
   **Mesma forma não é mesma malha, e a diferença é de dois pares e só deles.**
   Comparadas posição a posição pelo `pieces.py --check-image`, que imprime a
   conta desde 2026-09-15
-  ([`CORR-LOOKS-021`](/docs/tasks/looks/CORR-LOOKS-021.md)):
+  ([`CORR-LOOKS-021`](/docs/tasks/concluidos/looks/CORR-LOOKS-021.md)):
 
   ```text
   pos  0:  0 vs 11  same size, 505 of 2384 byte(s) differ, 2 of them vertex
@@ -485,7 +485,7 @@ Quatro leituras, todas de peso:
 - **A pergunta que isso abre**, e que **não** se responde aqui: dois bonecos
   (jogador de linha e goleiro?), duas qualidades do mesmo boneco, ou um modelo
   mais um conjunto de variações? Quem decide é a
-  [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md), pelo
+  [`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md), pelo
   emulador — e o estímulo já existe: os **dois save states** do usuário são
   exatamente goleiro e jogador de linha. A incógnita (a) da §6 passou a ter
   **três** respostas possíveis, não duas.
@@ -515,7 +515,7 @@ mora é no `DAT2D.BIN` (§1.7).
 #### O cabeçalho do `MODEL.BIN`: 18 listas, o slot vazio, e **duas** corridas
 
 Medido em 2026-09-14 pela
-[`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md), ao fechar a
+[`LOOKS-TASK-05`](/docs/tasks/concluidos/looks/05-arquivos-de-modelo.md), ao fechar a
 pergunta que a §1.2 tinha deixado aberta — por que o início do `MODEL.BIN` é
 constante enquanto o do `EDT_MOD.BIN` é derivado.
 
@@ -537,7 +537,7 @@ recebesse isso entraria na tabela de ponteiros.
 procedimental.** Dezesseis das dezoito listas abrem com uma entrada de tag
 `0x80`, e essas entradas miram **duas** corridas diferentes — remedido em
 2026-09-14 pela
-[`CORR-LOOKS-013`](/docs/tasks/looks/CORR-LOOKS-013.md), que achou esta seção
+[`CORR-LOOKS-013`](/docs/tasks/concluidos/looks/CORR-LOOKS-013.md), que achou esta seção
 dizendo *"mirando o offset 104"* no singular:
 
 ```
@@ -580,10 +580,10 @@ com dado na mão.
 corridas agrupam, nem por que são duas, de 64 e de 32 ponteiros. Se a incógnita (a) concluir que o boneco vem do `MODEL.BIN`, é ela que
 diz **qual** dos modelos de lá — e é onde a hipótese do `we3d`, de 14 jogadores
 de 11 peças, se confere. A linha está escrita na
-[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md).
+[`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md).
 
 **Veredito de 2026-09-17, na reconciliação
-([`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md)):
+([`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md)):
 continua aberto, e deixou de ser pergunta do visualizador.** A incógnita (a)
 concluiu que o boneco vem dos **dois** arquivos: do `MODEL.BIN` só a cabeça, e
 qual cabeça é escolhida pelo `HAIR` entre as seções do bloco 24..55 (§6 (c)).
@@ -597,7 +597,7 @@ tela mudando de time.
 Esta seção se chamava *"A tela desenha com textura, e o formato de seção não tem
 textura"* e descrevia a contradição de maior risco do plano. Ela foi **resolvida
 em 2026-09-14** pela
-[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md), e não havia
+[`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md), e não havia
 contradição nenhuma: o que estava errado era a leitura da primitiva, herdada da
 análise do `we3d`.
 
@@ -637,7 +637,7 @@ Três medições independentes concordam, e cada uma sozinha seria fraca:
 
 **A palavra de página traz mais do que a posição: os bits 7-8 são a
 profundidade da CLUT**, e as três páginas **não concordam**. Contado sobre os
-dois arquivos em 2026-09-15 ([`CORR-LOOKS-018`](/docs/tasks/looks/CORR-LOOKS-018.md)),
+dois arquivos em 2026-09-15 ([`CORR-LOOKS-018`](/docs/tasks/concluidos/looks/CORR-LOOKS-018.md)),
 pelo `section.py` commitado:
 
 | `tpage` | VRAM | profundidade | `EDT_MOD.BIN` | `MODEL.BIN` | total |
@@ -664,7 +664,7 @@ dessa tela são **29**, entre `0x800C1678` e `0x800C4948`, de 4 a 54 vértices, 
 **nenhum campo de LOOKS toca um deles**.
 
 **Essa última frase é medição, e é o mesmo comando que a faz.** Desde
-2026-09-15 ([`CORR-LOOKS-019`](/docs/tasks/looks/CORR-LOOKS-019.md)) o `--tmds`
+2026-09-15 ([`CORR-LOOKS-019`](/docs/tasks/concluidos/looks/CORR-LOOKS-019.md)) o `--tmds`
 percorre cada TMD **até o fim** — cabeçalho, tabela de objetos, vértices e os
 pacotes de primitiva, que são de tamanho variável — e depois mexe em campo,
 cruzando o resíduo do `field_diff()` com esse mapa:
@@ -709,7 +709,7 @@ bytes: **qual delas vale depende da profundidade da página que a amostra**, que
 a §1.6 mede primitiva a primitiva. Esta seção dizia "128×128 a 4 bpp cada" até
 2026-09-15, e isso decidia por conta própria uma coisa que a geometria já
 respondia de outro jeito
-([`CORR-LOOKS-018`](/docs/tasks/looks/CORR-LOOKS-018.md)).
+([`CORR-LOOKS-018`](/docs/tasks/concluidos/looks/CORR-LOOKS-018.md)).
 
 **E duas das três páginas que a geometria nomeia não têm entrada aqui.** Em
 y=256 o `DAT2D.BIN` ocupa (512, 256), (544, 256), (896, 256) e (928, 256) —
@@ -717,7 +717,7 @@ nada em (576, 256) nem em (640, 256).
 
 **São 1.039 primitivas amostrando de fora deste arquivo, e não 1.175** — medido
 em 2026-09-15 pelo `atlas.py --check-image`
-([`CORR-LOOKS-024`](/docs/tasks/looks/CORR-LOOKS-024.md)). A diferença são as
+([`CORR-LOOKS-024`](/docs/tasks/concluidos/looks/CORR-LOOKS-024.md)). A diferença são as
 **136** primitivas da página `0x1A`, e ela ensina a regra que a Fase 4 vai
 precisar: **o que resolve um registro é o texel, não a base da página**. Uma
 página de 4 bits cobre 256 texels e as imagens do arquivo têm 128, então um `u`
@@ -739,13 +739,13 @@ As três primeiras são as que interessam, segundo a tabela do CARP
 A coluna do meio é **transcrição** do rótulo de terceiro, que é o objeto do
 confronto, e nada mais: a tradução *"cabelos, corpos e chuteiras"* que esta
 tabela trazia ao lado do 8 é exatamente a leitura que a §1.8 derrubou em
-2026-09-15 ([`CORR-LOOKS-024`](/docs/tasks/looks/CORR-LOOKS-024.md)). Quem lia
+2026-09-15 ([`CORR-LOOKS-024`](/docs/tasks/concluidos/looks/CORR-LOOKS-024.md)). Quem lia
 esta seção e parava aqui saía com a resposta errada da contradição que a seção
 seguinte resolve.
 
 **O `0 clut(s)` era verdade sobre o varredor e mentira sobre o arquivo — medido
 em 2026-09-15** pela
-[`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md). Esta seção
+[`LOOKS-TASK-10`](/docs/tasks/concluidos/looks/10-lista-de-cluts-do-dat2d.md). Esta seção
 dizia que o `entries()` do `bin_archive.py` "não acha a lista de paletas deste
 arquivo", e a lista está lá: **267 registros**, do offset 76.836 até o fim do
 arquivo. O que a esconde é uma palavra do registro, que o
@@ -778,7 +778,7 @@ retângulo que o próprio registro declara; sem ele, não:
 
 A constante `0x800f` funciona em todo contêiner cujo payload cabe nos primeiros
 64 KiB. **Nos discos de PES2 isso não é todo contêiner** — medido em 2026-09-17
-pela [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md),
+pela [`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md),
 numa cópia da `(EsIt)`. Esta frase dizia *"que é todo contêiner dos quatro
 discos da família PES2 que o outro projeto mediu. Ela nunca esteve errada lá"*,
 e a própria seção, parágrafos abaixo, dizia o contrário:
@@ -840,7 +840,7 @@ nenhum. E as colunas 2..8 e 10..15 **não têm primitiva nenhuma no disco**: ela
 existem como destino de tecla, não como estado gravado. Quem escrever a tabela
 de montagem (§4) a partir de *"colunas 1..8 são as oito cores de cabelo"* dá a
 932 primitivas uma cor de cabelo que elas não têm, e o boneco **desenha
-perfeitamente** ([`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)).
+perfeitamente** ([`CORR-LOOKS-026`](/docs/tasks/concluidos/looks/CORR-LOOKS-026.md)).
 
 **A regra do "mais estreito ganha" é a da própria GPU, e isso foi medido.** O
 `oracle.py --palettes` compara as **21 linhas de CLUT** deste contêiner contra a
@@ -857,7 +857,7 @@ que as duas páginas de textura ausentes já apontavam, agora com as paletas
 juntas.
 
 **E ela fechou em 2026-09-15**, pela
-[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md), com
+[`LOOKS-TASK-11`](/docs/tasks/concluidos/looks/11-qual-imagem-e-o-cabelo.md), com
 `python tools/looks/atlas.py --elsewhere` varrendo os 235 contêineres do disco:
 
 | o que falta aqui | quem tem |
@@ -873,13 +873,13 @@ arquivo comum — mora nos 105 contêineres de textura de time.
 duas em (0, 488) e uma em **(256, 480), que a geometria não nomeia** —, o mesmo
 nos 105. Esta seção dizia "as duas paletas de 256 por arquivo", lendo o `x2` do
 `--elsewhere` como o total do arquivo; medido em 2026-09-15
-([`CORR-LOOKS-025`](/docs/tasks/looks/CORR-LOOKS-025.md)), o `x2` é quantas
+([`CORR-LOOKS-025`](/docs/tasks/concluidos/looks/CORR-LOOKS-025.md)), o `x2` é quantas
 respondem àquela id. O comando imprime as duas contagens uma linha abaixo da
 outra desde então.
 
 **E "casa e fora" é hipótese, não medição.** Ninguém trocou o uniforme do time
 na tela para ver qual das duas de uma id se move, que é o método da
-LOOKS-TASK-09 — e é o que a [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)
+LOOKS-TASK-09 — e é o que a [`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md)
 vai precisar, porque o uniforme é o único campo com **duas candidatas por id**.
 A quinta paleta fica como pergunta aberta ao lado.
 
@@ -893,19 +893,19 @@ justamente a das 136 primitivas das seções 0 e 1 do `MODEL.BIN`.
   oito campos do quarto registro certos e **erra a própria aritmética**:
   escreve 67.248 onde os campos dizem 67.428. Dois dígitos trocados, achado ao
   ler a transcrição em vez de resumi-la, 2026-09-15.) O que confirma não é o passo de
-  512 bytes: é que a [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md)
+  512 bytes: é que a [`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md)
   mediu o `SKIN` somando `0x40` ao CLUT id, que é **exatamente uma linha de
   VRAM**, e que quem ele move são as peças de pele nua.
 - **"Botines" em 67.940** é o quinto registro largo, em VRAM (0, 484). A
   confirmação é independente do rótulo: as seções 9 e 10 — as que a
-  [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md) nomeou pé, por
+  [`LOOKS-TASK-09`](/docs/tasks/concluidos/looks/09-nomear-as-onze-pecas.md) nomeou pé, por
   espelho e por serem as duas únicas que os dois bonecos compartilham — amostram
   **(0, 484) e mais nada**, e nenhuma outra **peça nomeada** a toca. A
   exclusividade vale dentro do `EDT_MOD.BIN`, que é onde moram as peças
   nomeadas: **seis seções do `MODEL.BIN` — 11, 12, 22, 23, 63 e 64, cinco
   primitivas cada — também amostram (0, 484)**, e `112 + 30 = 142` fecha o total
   que o `--check-image` imprime para esse id
-  ([`CORR-LOOKS-023`](/docs/tasks/looks/CORR-LOOKS-023.md)). Quem são essas
+  ([`CORR-LOOKS-023`](/docs/tasks/concluidos/looks/CORR-LOOKS-023.md)). Quem são essas
   seis é pergunta da Fase 3, e a cabeça não está entre elas.
 
 **O conserto não foi para o `bin_archive.py`, e a razão é de escopo.** Quem lê
@@ -916,7 +916,7 @@ palavra de banco custa **80 registros a mais em cinco contêineres deste disco**
 `EDTR_2D.BIN` 2 —, **nenhum deles estádio**, medido pelo `texture.py --survey`.
 Esta seção dizia *"2.151 em 40, os `GDC_*` incluídos"* até 2026-09-15, e esse
 número não reproduzia por leitura nenhuma
-([`CORR-LOOKS-022`](/docs/tasks/looks/CORR-LOOKS-022.md)). O que decide é o
+([`CORR-LOOKS-022`](/docs/tasks/concluidos/looks/CORR-LOOKS-022.md)). O que decide é o
 escopo: o `bin_archive.py` é o varredor de outro projeto, cujo gate não é
 medido aqui, e mexer nele para servir a um arquivo de um quinto disco moveria o
 chão de um gate alheio sem entregar nada que o `texture.py` já não entregue.
@@ -924,7 +924,7 @@ chão de um gate alheio sem entregar nada que o `texture.py` já não entregue.
 ciclo de PES2**, onde ela vale para `DAT_CG.BIN`, `DATSEL2I.BIN`, `DATSEL_I.BIN`
 e `EDTR_2D.BIN` também — e para o `ENDCSR.BIN`, em parte, que esta lista não
 tinha até a medição de 2026-09-17 acima. A
-[`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) a
+[`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md) a
 registrou no [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md).
 
 ### 1.8 A contradição da cena — RESPONDIDA: o cabelo é o 3.568
@@ -936,7 +936,7 @@ CARP rotula o 3.568 como *"Caras"* e o **8** como *"Pelos"*. Os dois não podiam
 estar certos.
 
 **Medido em 2026-09-15** pela
-[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md), por
+[`LOOKS-TASK-11`](/docs/tasks/concluidos/looks/11-qual-imagem-e-o-cabelo.md), por
 `python tools/looks/atlas.py --check-image`: **o cabelo é o 3.568. O tutorial do
 `zeta` está certo; o *"Pelos"* que o CARP põe no offset 8 está errado.**
 
@@ -952,7 +952,7 @@ página (512, 256)   u   0..127  ->  VRAM x 512..543  ->  o registro em 8
 ```
 
 As dezoito primitivas da seção 24 do `MODEL.BIN` — a cabeça, nomeada pela
-[`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md) — declaram todas
+[`LOOKS-TASK-09`](/docs/tasks/concluidos/looks/09-nomear-as-onze-pecas.md) — declaram todas
 a página `0x0018`, que é essa, a 4 bits. Então a pergunta vira uma subtração:
 
 | campo | primitivas | passo | `u` | registro |
@@ -961,7 +961,7 @@ a página `0x0018`, que é essa, a 4 bits. Então a pergunta vira uma subtraçã
 | `FACE` | 8 e 13 | `v` `+0x10` | 152..174 | **3.568** |
 | — | as outras catorze | — | 16..62 | 8 |
 
-As primitivas de `HAIR` vêm da [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md);
+As primitivas de `HAIR` vêm da [`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md);
 as de `FACE` foram medidas aqui, nos dois save states. **Nenhum dos dois campos
 toca o registro em 8.**
 
@@ -1003,7 +1003,7 @@ rótulo nenhum, que com as três medidas fecham as 23. A tabela
 registros já medidos, e opinião sobre o que foi medido deixa de ser o que a
 imagem carrega. Esta frase dizia "seis e dezessete" — 6 + 17 = 23 sobre um
 conjunto de 20 —, e foi corrigida em 2026-09-15
-([`CORR-LOOKS-024`](/docs/tasks/looks/CORR-LOOKS-024.md)). Inclusive
+([`CORR-LOOKS-024`](/docs/tasks/concluidos/looks/CORR-LOOKS-024.md)). Inclusive
 a 10.248, que **136 primitivas** amostram: elas são todas das seções 0 e 1 do
 `MODEL.BIN`, nenhuma das doze peças, e "bandeirinha de escanteio e bolas" é o
 que o CARP diz, não o que se mediu.
@@ -1043,7 +1043,7 @@ está encerrado e não é fase deste plano.
 `foot` guarda dois e tem três. **O disco concorda**: nos 1.449 registros, a
 barba chega a 6, a cor de barba a 3 e o pé a 2, e nenhum passa do último
 rótulo. E a tela concorda por um terceiro caminho — a
-[`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) andou
+[`LOOKS-TASK-12`](/docs/tasks/concluidos/looks/12-pele-paleta-ou-vertice.md) andou
 `H.F.COL.` de ponta a ponta e ele oferece **sete**. Índice sem rótulo é lacuna
 de nomenclatura de terceiro, não defeito.
 
@@ -1059,7 +1059,7 @@ campos guardados, não doze.
 
 No disco, os registros ficam em `/SELECT.BIN`, offset **157.164** — e desde
 2026-09-15 as duas metades dessa frase têm medição, pela
-[`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md):
+[`LOOKS-TASK-13`](/docs/tasks/concluidos/looks/13-campos-e-dominios-de-looks.md):
 
 - **o offset está certo, e não por confiança**: o `OFS_PLAYER_ATTR` do
   `src/core/include/we2002/Offsets.hpp` resolve para **exatamente esse byte
@@ -1172,7 +1172,7 @@ nomeadas de `tools/pes2/mcp_drive.py`.
 
 **Desde 2026-09-14 isto é código**, no
 [`tools/looks/oracle.py`](../tools/looks/oracle.py), e o que a
-[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) mediu ao
+[`LOOKS-TASK-07`](/docs/tasks/concluidos/looks/07-oraculo-e-rota-ate-a-tela.md) mediu ao
 escrevê-lo muda três coisas desta receita:
 
 - **A chegada se confere pelo quadro, e o quadro diz qual slot é.** A média da
@@ -1207,7 +1207,7 @@ A ajuda de cada linha da tela traz o glifo de botão `■`, e com ele o
 `screen.py --report` morria na terceira das doze linhas — e a mensagem de falha
 que o `oracle._walk_row` levanta morreria no mesmo lugar, no `print` da própria
 falha. Desde 2026-09-17
-([`CORR-LOOKS-055`](/docs/tasks/looks/CORR-LOOKS-055.md)) o `main()` dos dois
+([`CORR-LOOKS-055`](/docs/tasks/concluidos/looks/CORR-LOOKS-055.md)) o `main()` dos dois
 passa as saídas por `screen.printable_output()` — UTF-8 com `replace` —, então
 **a ferramenta não precisa mais de `PYTHONIOENCODING`**. Script de sondagem
 escrito à mão continua precisando, ou da mesma chamada.
@@ -1223,7 +1223,7 @@ escrito à mão continua precisando, ou da mesma chamada.
   mantém a pasta.
 
   **Os números, e a subpasta que eles descrevem** — remedidos em 2026-09-14 pela
-  [`LOOKS-TASK-01`](/docs/tasks/looks/01-base-legal-e-linhagem.md). Esta seção
+  [`LOOKS-TASK-01`](/docs/tasks/concluidos/looks/01-base-legal-e-linhagem.md). Esta seção
   dizia *"4,2 GB, 28.720 arquivos"* da **raiz**, e eles são da subpasta
   `We2002\` — 4.452.185.957 B em 28.720 arquivos. A raiz tem **31.790 arquivos
   e 4.830.420.054 B**, repartidos em treze pastas (`Iss1`, `Iss2`,
@@ -1244,7 +1244,7 @@ escrito à mão continua precisando, ou da mesma chamada.
   `legacy/`. Serve como **testemunha**, para confirmar o que já sabemos. Não se
   copia código de lá.
 - Obrigação **cumprida em 2026-09-14** pela
-  [`LOOKS-TASK-01`](/docs/tasks/looks/01-base-legal-e-linhagem.md): o
+  [`LOOKS-TASK-01`](/docs/tasks/concluidos/looks/01-base-legal-e-linhagem.md): o
   [NOTICE.md](../NOTICE.md) tem a seção *"Lineage of the appearance viewer"*,
   com os três materiais em linhas separadas, como o repositório já faz com o
   `WECompressor` e com o `Easy-Mcr`. Duas coisas que a execução acrescentou ao
@@ -1349,7 +1349,7 @@ No Windows, `python` resolve para 3.13.14; `python3` **não existe** e cai no
 atalho da Microsoft Store.
 
 **Criado em 2026-09-14** pela
-[`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md), no
+[`LOOKS-TASK-02`](/docs/tasks/concluidos/looks/02-ambiente-e-os-dois-discos.md), no
 Windows desta máquina:
 
 ```powershell
@@ -1391,7 +1391,7 @@ O erro parece dizer que o arquivo não é form1, e o que houve foi outra coisa.
 dentro do ISO. No PowerShell o problema não existe.
 
 **Reproduzido de novo em 2026-09-14**, palavra por palavra, ao fechar a
-[`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md):
+[`LOOKS-TASK-02`](/docs/tasks/concluidos/looks/02-ambiente-e-os-dois-discos.md):
 
 ```sh
 $ python tools/pes2/lzss.py roms/japanese-shift-jis.bin --file /BIN/EDT_MOD.BIN
@@ -1428,11 +1428,11 @@ Mesma divisão por custo que o repositório já usa:
 | `looks_live` | as duas variáveis, os dois states e o fork | 77 | `oracle.py --check-live` | **2026-09-17** |
 
 **Eram três até 2026-09-17**, e esta seção se chamava *"Os três alvos"*. A
-[`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) tinha de
+[`LOOKS-TASK-19`](/docs/tasks/concluidos/looks/19-alvos-de-ctest-e-cli.md) tinha de
 decidir o que fazer com o `oracle.py --check-live`, que existia desde a
-[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) e não era
+[`LOOKS-TASK-07`](/docs/tasks/concluidos/looks/07-oraculo-e-rota-ate-a-tela.md) e não era
 alvo nenhum — um gate que só roda quem se lembra dele, a forma que a
-[`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) abriu. Ele virou o
+[`CORR-LOOKS-012`](/docs/tasks/concluidos/looks/CORR-LOOKS-012.md) abriu. Ele virou o
 quarto alvo, e o que decidiu foi medido: ele confere os quatro pré-requisitos
 **antes** de subir processo nenhum, e pula com 77 nomeando o que falta; com
 tudo no lugar, custa **8,77 s** pelo `ctest`, com a janela fora da tela e o
@@ -1457,7 +1457,7 @@ plantada por controle negativo).
 **O `looks_live` perdeu a sessão MCP uma vez em catorze corridas**, no primeiro
 `pause` depois de o emulador subir, e as outras treze passaram. A causa não foi
 separada; está aberta na
-[`CORR-LOOKS-051`](/docs/tasks/looks/CORR-LOOKS-051.md). O que aquela corrida
+[`CORR-LOOKS-051`](/docs/tasks/concluidos/looks/CORR-LOOKS-051.md). O que aquela corrida
 também mostrou — o emulador ficando de pé quando a exceção sai do
 `Oracle.__enter__`, onde o `__exit__` não roda — foi consertado na própria
 LOOKS-TASK-19.
@@ -1466,22 +1466,22 @@ LOOKS-TASK-19.
 tabela acima dizia "venv + display" enquanto a 16 não existia; quando ela
 passou a medir, o que faltava era o disco: um visualizador sem disco não tem o
 que desenhar, e o alvo **pula** em vez de subir a janela vazia e passar. É a
-distinção que a [`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md)
+distinção que a [`LOOKS-TASK-16`](/docs/tasks/concluidos/looks/16-contratos-da-ui.md)
 existe para não errar — o `mcr_ui` passava com a janela sozinha e imprimia um
 `note:` que ninguém lia.
 
 **E o número tem de sair de uma corrida que listou os alvos pelo nome.**
 `ctest -R <padrão>` que não casa nada imprime `No tests were found!!!` e **sai
 0** — indistinguível de verde, e já passou por verde duas vezes neste ciclo
-([`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md),
-[`CORR-LOOKS-015`](/docs/tasks/looks/CORR-LOOKS-015.md)). Nenhum diretório de
+([`CORR-LOOKS-012`](/docs/tasks/concluidos/looks/CORR-LOOKS-012.md),
+[`CORR-LOOKS-015`](/docs/tasks/concluidos/looks/CORR-LOOKS-015.md)). Nenhum diretório de
 build do worktree lista os alvos de `looks`; a receita que funciona nesta
 máquina — build fora da árvore, `-G Ninja` com o toolchain do vcpkg — está na
 tabela de gates do
 [`perfil-looks.md`](/docs/prompts/perfil-looks.md).
 
 **Os comandos de emulador da v2 ficam de mão, e isso é decisão** (2026-09-26,
-[`LOOKS-TASK-35`](/docs/tasks/looks/35-fechamento-da-v2.md)) — a pergunta que
+[`LOOKS-TASK-35`](/docs/tasks/concluidos/looks/35-fechamento-da-v2.md)) — a pergunta que
 a LOOKS-TASK-19 respondeu para o `--check-live`, com a resposta oposta, e pelas
 razões que o próprio `--check-live` tinha a favor e estes não têm:
 
@@ -1489,7 +1489,7 @@ razões que o próprio `--check-live` tinha a favor e estes não têm:
   (`--placement`) a 12 min (`--screen`), com o `--pose` em ~40 s — os números
   da tabela de gates do perfil —, e a série inteira passa de
   uma hora. Um alvo que custa isso vira alvo que ninguém roda, que é a forma de
-  gate que a [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) abriu por
+  gate que a [`CORR-LOOKS-012`](/docs/tasks/concluidos/looks/CORR-LOOKS-012.md) abriu por
   outro caminho;
 - **vários são geradores do gabarito.** `--screen --write`, `--scenery --write`,
   `--walk`, `--closeups` e `--camera` escrevem o `screen.json` e os arquivos de
@@ -1528,13 +1528,13 @@ agregador, cada uma com controle negativo:
 - **o `modelfile` está na corrida**, porque a primeira leitura dele é um
   arquivo **só-japonês** pela guarda. Geometria é idêntica nos dois discos, e
   sem essa leitura o disco inglês dependeria dos outros para ser notado
-  ([`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md)). Medido: contra o
+  ([`CORR-LOOKS-012`](/docs/tasks/concluidos/looks/CORR-LOOKS-012.md)). Medido: contra o
   `.bin` inglês, **sete dos oito falham e o `pieces` passa** — ele só lê
   geometria, e a resposta dele está certa nos dois discos. **A posição não
   importa:** o `check` roda os oito até o fim, e com o `modelfile` por último o
   veredito é o mesmo, `1 ok, 7 failed -- FAILED`. Esta regra dizia "o
   `modelfile` roda **primeiro**" até 2026-09-17, com um controle da posição
-  ([`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); o controle agora
+  ([`CORR-LOOKS-052`](/docs/tasks/concluidos/looks/CORR-LOOKS-052.md)); o controle agora
   tira o `modelfile` da lista;
 - **pulo parcial é falha**: com a imagem dada, um módulo que ainda responde 77
   está sem algo que os outros têm, e oito resultados com um pulo no meio não
@@ -1588,10 +1588,10 @@ da regra 1 tem de achar.
 Dois deles são varredura e não caso de propriedade, e pelo mesmo motivo: a
 falha que fecham é por **omissão**. O `/SELECT.BIN` não pertencia a família
 nenhuma e recusava com o "digest mismatch" pelado que o próprio módulo chama de
-erro ([`CORR-LOOKS-006`](/docs/tasks/looks/CORR-LOOKS-006.md)); e o
+erro ([`CORR-LOOKS-006`](/docs/tasks/concluidos/looks/CORR-LOOKS-006.md)); e o
 `sweep_addresses()` só era rodado contra a árvore real, que está limpa, então
 só era observado **verde**
-([`CORR-LOOKS-009`](/docs/tasks/looks/CORR-LOOKS-009.md)).
+([`CORR-LOOKS-009`](/docs/tasks/concluidos/looks/CORR-LOOKS-009.md)).
 
 O **`--sweep`** é a regra 1 conferida em vez de prometida: ele varre
 `tools/looks/` por literal hexadecimal e por decimal de quatro dígitos ou mais
@@ -1654,7 +1654,7 @@ tradução pode manter o tamanho do disco e trocar exatamente este arquivo — q
 
 **E a guarda só vale porque não há outro caminho de leitura.** Função que recusa
 não impede nada se o chamador puder não chamá-la. O `iso_source.py` (§3.2,
-[`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md)) é a
+[`LOOKS-TASK-03`](/docs/tasks/concluidos/looks/03-fonte-de-disco-e-layout.md)) é a
 **única** porta de leitura de disco do projeto, e passa **todo** arquivo pelo
 `require()` antes de devolver bytes — não por disciplina de quem escreve o
 chamador. Quem precisar dos bytes sem conferência (comparar dois discos é o caso
@@ -1680,9 +1680,9 @@ não bate.
 
 **Esta seção dizia "`EDT_MOD.BIN` 11 terminando em 36.072", sem offset de
 partida**, e ficou assim até 2026-09-14, quando a
-[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) a releu.
+[`LOOKS-TASK-07`](/docs/tasks/concluidos/looks/07-oraculo-e-rota-ate-a-tela.md) a releu.
 A §1.5 já tinha sido corrigida pela
-[`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md) e esta não: 11 é o que
+[`CORR-LOOKS-010`](/docs/tasks/concluidos/looks/CORR-LOOKS-010.md) e esta não: 11 é o que
 uma varredura começando em 15.704 acha, e ela **também** fecha em 36.072
 exato. Contagem sem o offset de onde a varredura partiu não é medição — é
 justamente por isso que os dois números andam juntos aqui agora.
@@ -1695,7 +1695,7 @@ que amarra "o que eu li do arquivo" a "o que o jogo está desenhando".
 
 **Mas não é byte a byte, e a diferença é o achado.** Esta seção prometia
 igualdade total até 2026-09-14, quando a
-[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) mediu pela
+[`LOOKS-TASK-07`](/docs/tasks/concluidos/looks/07-oraculo-e-rota-ate-a-tela.md) mediu pela
 primeira vez, com o jogo parado na tela `LOOKS SET`:
 
 ```text
@@ -1720,7 +1720,7 @@ Três coisas decorrem, e as três importam mais do que a igualdade prometida:
    Goleiro e jogador de linha divergem em 162 corridas dentro do `EDT_MOD.BIN`;
    os 20 bytes do `MODEL.BIN` são os mesmos nos dois. A incógnita (a) da §6
    começa daí, e a
-   [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) tem a linha.
+   [`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md) tem a linha.
 
 E a diferença **reproduz**: dois `load_state` do mesmo slot devolvem RAM
 idêntica, o que é o baseline que a §1.11 promete, agora medido.
@@ -1734,7 +1734,7 @@ filtro e câmera diferem —, mas precisa ser **medida, registrada e explicada**
 Um número que ninguém olhou não é verificação.
 
 **Medido em 2026-09-16 pela
-[`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md)**, e o
+[`LOOKS-TASK-17`](/docs/tasks/concluidos/looks/17-confronto-com-o-emulador.md)**, e o
 comando é `python tools/looks/confront.py --run` (capturas e veredito) ou
 `--score` (só o veredito, sobre as capturas guardadas).
 
@@ -1758,10 +1758,10 @@ certa vence a própria linha.
 As vitórias "abaixo da margem" são o limite da métrica e não do render:
 `I(g, a) − I(g, b) ≤ 1 − I(a, b)`, e os nossos renders da referência e da barba
 `B`/`E` distam só **0,039** — a barba move 2,39% da cabeça
-([`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md)). O `A-H1-A-A-A` é
+([`CORR-LOOKS-038`](/docs/tasks/concluidos/looks/CORR-LOOKS-038.md)). O `A-H1-A-A-A` é
 **recusa**, não pontuação, nos dois slots. A linha do goleiro dizia
 `A-I3-A-A-A` recusado e vitórias de 0,536 e 0,265 até 2026-09-16: a
-[`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md) mediu o mapa de cabelo
+[`CORR-LOOKS-047`](/docs/tasks/concluidos/looks/CORR-LOOKS-047.md) mediu o mapa de cabelo
 dele, o `I3` voltou a desenhar, e o slot 1 foi re-julgado com o nosso lado
 re-renderizado (a paleta da matriz cresceu com as cores do `I3`, daí os números
 novos). A captura se repete **pixel a pixel** a
@@ -1779,7 +1779,7 @@ sete não aparecem nas duas faixas lidas.
 pela tupla exata**: `A-I3-A-F-A` é pele A, cabelo I3, cor A, barba F, cor de
 barba A. O quinquagésimo se chama `0.jpg` e não tem tupla no nome — conferido
 em 2026-09-14, e a decisão sobre ele é da
-[`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md), que
+[`LOOKS-TASK-18`](/docs/tasks/concluidos/looks/18-corpus-dos-cinquenta-renders.md), que
 ganhou a linha. **O caminho é relativo a `Superpackv6\We2002\`** e não à raiz
 da coletânea, como toda citação `MCR\…` deste plano (§2). É
 corpus independente, produzido por outra pessoa, com rótulo. Serve para pegar
@@ -1791,11 +1791,11 @@ mesmo caminho de código dos dois lados.
 no git (§2). Ele conta quantos parseiam, quantos recusam e quantos formatam de
 volta para o próprio nome, imprime a cobertura por campo, e **falha se nada for
 recusado**: um parser permissivo devolveria 50 de 50 e a linha leria melhor que
-a verdadeira ([`CORR-LOOKS-027`](/docs/tasks/looks/CORR-LOOKS-027.md)).
+a verdadeira ([`CORR-LOOKS-027`](/docs/tasks/concluidos/looks/CORR-LOOKS-027.md)).
 
 **Quem compara os desenhos é `corpus.py --run`** (e `--score`, sobre os renders
 guardados), medido em 2026-09-16 pela
-[`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md). O
+[`LOOKS-TASK-18`](/docs/tasks/concluidos/looks/18-corpus-dos-cinquenta-renders.md). O
 `0.jpg` é **um quadro branco**, uma cor só e nenhuma figura: fica fora da conta,
 dito pela ferramenta. Das 49 tuplas, **47** desenham e 2 recusam (`H1`).
 
@@ -1813,7 +1813,7 @@ reportados. **E o que a linha mede é a letra do vencedor**, não a cor do
 render: "pele 47/47" quer dizer que o render de **maior nota** para cada JPEG
 tem a letra de pele do nome — um render que pinta a pele só na testa perde para
 o de outra cabeça com a pele inteira, e a letra bate assim mesmo
-([`CORR-LOOKS-050`](/docs/tasks/looks/CORR-LOOKS-050.md)):
+([`CORR-LOOKS-050`](/docs/tasks/concluidos/looks/CORR-LOOKS-050.md)):
 
 | | pele | cor de cabelo | cor de barba | estilo (reportado) | barba (reportado) |
 |---|---|---|---|---|---|
@@ -1822,7 +1822,7 @@ o de outra cabeça com a pele inteira, e a letra bate assim mesmo
 
 A cor de barba só é julgada onde o nome tem barba: sem ela, os quads da barba
 não amostram nenhuma entrada que a cor mexe
-([`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md)).
+([`CORR-LOOKS-038`](/docs/tasks/concluidos/looks/CORR-LOOKS-038.md)).
 
 **O corpus achou um erro sistemático, e é o que ele existe para achar.** A nota
 de cada JPEG contra o próprio render, agrupada: cabeça `A1` com pele `A` 0,721;
@@ -1830,13 +1830,13 @@ cabeça `A1` com outra pele 0,641; outra cabeça com pele `A` 0,697; **outra
 cabeça com outra pele, 0,411**. Olhadas as seis piores, a pele nova pinta só a
 testa e o rosto fica na pele `A` — os índices de cor medidos na seção 24 e
 aplicados às outras cabeças por empréstimo erram
-([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)). **Consertado em
+([`CORR-LOOKS-049`](/docs/tasks/concluidos/looks/CORR-LOOKS-049.md)). **Consertado em
 2026-09-16:** medidos cabeça a cabeça, os índices de cada uma entram no
 `layout.COLOUR_PRIMITIVES`, e o grupo sobe de 0,411 para **0,659** (os outros:
 0,721, 0,641, 0,713); a tira dos piores mostra o rosto inteiro na pele do nome.
 
 **E desde 2026-09-16 isso é asserção, não tabela impressa**
-([`CORR-LOOKS-050`](/docs/tasks/looks/CORR-LOOKS-050.md)). Um grupo falha quando
+([`CORR-LOOKS-050`](/docs/tasks/concluidos/looks/CORR-LOOKS-050.md)). Um grupo falha quando
 a **média** dele fica abaixo da **pior nota** de todos os outros grupos — a pior
 imagem de qualquer outro lugar, que já paga pose, câmera e JPEG; nenhum número
 escolhido à mão. Com o empréstimo presente, 0,411 contra 0,540, vermelho, e o
@@ -1865,19 +1865,19 @@ critério da própria task trazia escrito.
 ### 5.6 O que não tem oráculo — dito antes de começar
 
 1. **A pose — e é pior do que "pose neutra", medido em 2026-09-16 pela
-   [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md).** Não é só a
+   [`LOOKS-TASK-15`](/docs/tasks/concluidos/looks/15-visualizador-opengl.md).** Não é só a
    animação que falta: **nenhum dos dois arquivos de modelo diz onde uma peça
    fica.** Cada seção é modelada em torno da **própria origem** — nas
    coordenadas do arquivo, a cabeça vai de y **-48 a 15** e a chuteira de
    **-18 a 15**; no render elas aparecem viradas, porque o `scene.UP` é `-1`
-   ([`CORR-LOOKS-037`](/docs/tasks/looks/CORR-LOOKS-037.md)) —, então desenhar
+   ([`CORR-LOOKS-037`](/docs/tasks/concluidos/looks/CORR-LOOKS-037.md)) —, então desenhar
    as doze peças nas coordenadas do arquivo empilha o boneco inteiro num ponto
    só. Quem posiciona
    é o jogo, na display list da §6(a), em tempo de desenho.
 
    **O confronto da §5.3 não precisou dela.** A métrica escolhida é de cor, e
    cor não depende de onde a peça fica; a pose continua **não medida**, e
-   passa à [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md)
+   passa à [`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md)
    como incógnita aberta com a razão.
 
    A v1 desenha então uma **prateleira**, não uma pose: as peças em fila, cada
@@ -1886,7 +1886,7 @@ critério da própria task trazia escrito.
    certo e é de ninguém, que é exatamente o que o `head_of` recusa fazer com os
    três estilos de cabelo não medidos. A pose de verdade, se for querida, sai da
    display list e é medição da
-   [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md). E a
+   [`LOOKS-TASK-17`](/docs/tasks/concluidos/looks/17-confronto-com-o-emulador.md). E a
    comparação da §5.3 continua não batendo pixel a pixel, agora por dois
    motivos em vez de um.
 2. **A câmera.** O jogo escolhe enquadramento por campo — fecha no rosto em
@@ -1905,7 +1905,7 @@ critério da própria task trazia escrito.
 
 **(a) O que são os quatro TMDs texturizados de `0x00168xxx` — RESPONDIDA em
 2026-09-14**, pela
-[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md). **O boneco vem
+[`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md). **O boneco vem
 dos dois arquivos de modelo, e não de TMD nenhum.** Trocar um campo na tela
 reescreve bytes *dentro* de `EDT_MOD.BIN` e de `MODEL.BIN` nos endereços de
 carga, de forma reprodutível, e **zero** bytes em qualquer TMD — que, nos dois
@@ -1930,10 +1930,10 @@ O que sobra em aberto, e agora com nome: o `MODEL.BIN` seção 24 é a peça que
 `HAIR`, `FACE` e `SKIN` compartilham — a cabeça —, e as ~130 a 320 bytes por
 campo que caem **fora** dos dois arquivos são buffers de trabalho, com duas
 faixas constantes (`0x80153000+` e `0x80162000+`, a 0xF000 uma da outra). Quem
-as nomeia é a [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md).
+as nomeia é a [`LOOKS-TASK-09`](/docs/tasks/concluidos/looks/09-nomear-as-onze-pecas.md).
 
 **(b) Qual peça é qual — RESPONDIDA em 2026-09-15**, pela
-[`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md), por
+[`LOOKS-TASK-09`](/docs/tasks/concluidos/looks/09-nomear-as-onze-pecas.md), por
 `python tools/looks/pieces.py --check-image`. Onze seções por boneco, e nenhuma
 nomeada pelo tamanho:
 
@@ -1970,7 +1970,7 @@ confere os dois últimos:
    lado.
 
 **(c) A tabela de montagem — MEDIDA, 2026-09-16, com resíduo nomeado**, pela
-[`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), em quatro
+[`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md), em quatro
 passagens: a primeira mediu os cinco campos que reescrevem CLUT e `v`
 (2026-09-15) e a quarta fechou a âncora do cabelo, os quads e o cross-check
 contra o corpus. O que liga `HAIR = B3` à peça e à paleta certas é o coração do
@@ -1980,26 +1980,26 @@ dedução:
 - **três estilos** — `H1`, `M1`, `N1` — não escreveram nada, e **três seções
   pares** — 38, 40, 42 — nunca foram nomeadas; o `head_of` **recusa** os três
   em vez de devolver a cabeça de outro. Esta linha apontava para a
-  [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md); o
+  [`LOOKS-TASK-17`](/docs/tasks/concluidos/looks/17-confronto-com-o-emulador.md); o
   confronto **não** os resolveu — o `A-H1-A-A-A` é a recusa das duas linhas da
   matriz dele. **Continua ABERTO em 2026-09-17**: `scene.py --corpus` ainda
   recusa `A-H1-A-A-A` e `D-H1-A-A-A`. Destravaria: ler, com o estilo na tela,
   **o que o jogo desenha** — a display list ou a VRAM —, já que nenhum dos dois
   arquivos de modelo é escrito. **FECHADO em 2026-09-28**
-  ([`CORR-LOOKS-105`](/docs/tasks/looks/CORR-LOOKS-105.md)): com cada estilo
+  ([`CORR-LOOKS-105`](/docs/tasks/concluidos/looks/CORR-LOOKS-105.md)): com cada estilo
   na tela, o ponteiro de modelo da carga de matriz da cabeça nomeia **42** para
   `H1`, **38** para `M1` e **40** para `N1`, nas duas figuras. Não escreveram
   nada porque a janela do disco já é a deles; as cores e as gêmeas (39, 41, 43)
   foram medidas pelo `--colour` e pelo `--patched FACE`;
 - **os quads de nove das treze cabeças**, cujo escritor o breakpoint não
   achou, e — para os dez estilos de faixa múltipla — **qual quad recebe qual
-  faixa** ([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)). A
-  [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md) desenha com a
+  faixa** ([`CORR-LOOKS-028`](/docs/tasks/concluidos/looks/CORR-LOOKS-028.md)). A
+  [`LOOKS-TASK-15`](/docs/tasks/concluidos/looks/15-visualizador-opengl.md) desenha com a
   marca `BAND NOT MEASURED`, e o `layout.HAIR_QUADS` continua com as quatro
   cabeças de 2026-09-16. **ABERTO**; destravaria um watchpoint de escrita no `v`
   dos quads de uma das nove — a seção 30 é a candidata, porque é onde a regra
   óbvia está medida como errada. **FECHADO em 2026-09-28**
-  ([`CORR-LOOKS-104`](/docs/tasks/looks/CORR-LOOKS-104.md)), sem watchpoint:
+  ([`CORR-LOOKS-104`](/docs/tasks/concluidos/looks/CORR-LOOKS-104.md)), sem watchpoint:
   a saída do `--patched HAIR` já lista cada primitiva gravada. As seções 30, 48
   e 52 gravam os quads 1 e 2, em `16·faixa + 15` e `16·faixa + 5`; as outras
   seis não gravam quad de cabelo. E os "dez estilos de faixa múltipla" eram a
@@ -2007,9 +2007,9 @@ dedução:
   do CLUT cada estilo grava o cabelo numa faixa só. O `K1` (seção 32), que
   parecia exceção, não grava cabelo nenhum: as quatro faixas eram o jogo
   devolvendo a seção 32 que os save states trazem alterada
-  ([`CORR-LOOKS-108`](/docs/tasks/looks/CORR-LOOKS-108.md));
+  ([`CORR-LOOKS-108`](/docs/tasks/concluidos/looks/CORR-LOOKS-108.md));
 - ~~o mapa foi medido só no jogador de linha~~ — **fechado em 2026-09-16**
-  ([`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md)): andado no goleiro
+  ([`CORR-LOOKS-047`](/docs/tasks/concluidos/looks/CORR-LOOKS-047.md)): andado no goleiro
   (`oracle.py --patched HAIR 1`), o mapa volta **igual valor a valor**, nas
   **mesmas** seções do primeiro bloco (24..55) — nada do segundo bloco
   (74..105) se mexe — e com as mesmas faixas; `H1`, `M1` e `N1` também não
@@ -2018,9 +2018,9 @@ dedução:
   disco recusados por estilo de cabelo caíram de **136 para 4** dos 179;
 - **a comparação desenho contra desenho** do corpus, que aqui foi feita por
   altura de malha e não por pixel — **feita em 2026-09-16**, pela
-  [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md) contra o
+  [`LOOKS-TASK-17`](/docs/tasks/concluidos/looks/17-confronto-com-o-emulador.md) contra o
   emulador (§5.3) e pela
-  [`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) contra
+  [`LOOKS-TASK-18`](/docs/tasks/concluidos/looks/18-corpus-dos-cinquenta-renders.md) contra
   os 50 JPGs (§5.4), por histograma de cor. O que ela não alcança é a (h)
   abaixo.
 
@@ -2039,7 +2039,7 @@ não uma escolha entre malhas.
 | `H.COL` | coluna do CLUT | `+1` | 8 de 8 | 7 primitivas da cabeça |
 | `H.F.COL.` | coluna do CLUT | `+1` | 7 de 7 nomeadas | as 2 da barba |
 | `BOOTS` | coluna do CLUT | `+1` | 8 de 8 | 42 das 56 primitivas de cada pé |
-| `FACE` | `v` e, em `F`/`G`, **a seção** | 16 linhas | **7** de 7 na tela, **7** aplicados | `A`–`E`: as 2 da barba, nas faixas 0 a 4. `F` e `G`: **o gêmeo** da cabeça (seção + 1), com os quads de barba dele (`layout.FACE_TWIN_QUADS`) na faixa 5 do disco e na 6 — medido nas treze cabeças e nas duas figuras ([`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md)); até ela, "`F` e `G` escrevem outra coisa, não lida" |
+| `FACE` | `v` e, em `F`/`G`, **a seção** | 16 linhas | **7** de 7 na tela, **7** aplicados | `A`–`E`: as 2 da barba, nas faixas 0 a 4. `F` e `G`: **o gêmeo** da cabeça (seção + 1), com os quads de barba dele (`layout.FACE_TWIN_QUADS`) na faixa 5 do disco e na 6 — medido nas treze cabeças e nas duas figuras ([`CORR-LOOKS-048`](/docs/tasks/concluidos/looks/CORR-LOOKS-048.md)); até ela, "`F` e `G` escrevem outra coisa, não lida" |
 | `HAIR` | **escolhe a seção** | — | 32 de 32 | a cabeça inteira — ver abaixo |
 
 **E o fundo de cada campo é o estado que o disco guarda** — descer a linha até
@@ -2109,10 +2109,10 @@ treses é sugestivo e não é medição, então o `assembly.head_of` **recusa** 
 três em vez de devolver uma cabeça que desenharia perfeitamente e seria de
 outro. O `E1` é uma quarta esquisitice, e a pergunta é **por que ele usa a
 seção do `D`** — não se o `E` tem seção: tem, a 54, nomeada pelo `E2`
-([`CORR-LOOKS-030`](/docs/tasks/looks/CORR-LOOKS-030.md)). E o mapa foi medido no **jogador de
+([`CORR-LOOKS-030`](/docs/tasks/concluidos/looks/CORR-LOOKS-030.md)). E o mapa foi medido no **jogador de
 linha** e, desde 2026-09-16, também no **goleiro**, onde volta igual e nas
 mesmas seções do primeiro bloco
-([`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md)); esta frase dizia
+([`CORR-LOOKS-047`](/docs/tasks/concluidos/looks/CORR-LOOKS-047.md)); esta frase dizia
 que o segundo bloco de cabeças, o do goleiro, ninguém tinha andado.
 
 **As quatro linhas de cor pintam a cabeça que a tupla veste, e não a 24.** O
@@ -2121,12 +2121,12 @@ que o segundo bloco de cabeças, o do goleiro, ninguém tinha andado.
 29 estilos restantes o plano voltava vazio e **nenhum campo de cor movia um
 pixel**, com o boneco desenhando perfeitamente. O `edits()` recebe a seção
 escolhida e re-endereça a chave
-([`CORR-LOOKS-034`](/docs/tasks/looks/CORR-LOOKS-034.md)); medido depois do
+([`CORR-LOOKS-034`](/docs/tasks/concluidos/looks/CORR-LOOKS-034.md)); medido depois do
 conserto, `SKIN` move 14,54% da cabeça `I3` e `H.COL` 2,90%, onde antes os dois
 moviam zero.
 
 **E os índices de primitiva das quatro linhas são os de cada cabeça**, desde
-2026-09-16 ([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)). Até ali
+2026-09-16 ([`CORR-LOOKS-049`](/docs/tasks/concluidos/looks/CORR-LOOKS-049.md)). Até ali
 eles tinham sido medidos só na seção 24 e aplicados às outras doze por
 empréstimo, marcados **`COLOUR BY BORROWED INDEX`** — e o corpus mostrou o que
 isso desenhava: pele nova só na testa. O `oracle.py --colour` anda cada linha
@@ -2142,7 +2142,7 @@ dezesseis entradas da janela (`[2, 5, 12, 13, 14, 15]`), e a faixa 0 **não
 amostra nenhuma delas**; as faixas 1 a 4 amostram cinco ou seis. Na tela:
 `A-A1-A-A-E` contra `A-A1-A-A-A` move 0,00% dos pixels e `A-A1-A-B-E` contra
 `A-A1-A-B-A` move **2,39%**
-([`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md)). O
+([`CORR-LOOKS-038`](/docs/tasks/concluidos/looks/CORR-LOOKS-038.md)). O
 `scene --check-image` afirma as duas metades, de modo que uma cor de barba que
 parasse de funcionar apareceria como as faixas 1..4 esvaziando.
 
@@ -2159,19 +2159,19 @@ isso alcança **um** estilo — o `B1`, seção 26, o único de faixa múltipla 
 quads o `layout.HAIR_QUADS` conhece —, e o `draw_list` aplica a primeira: o
 `--tuple` marca essa linha com **`BAND NOT MEASURED`** em vez de imprimir um
 `band +0` igual aos outros
-([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)). A medição é de uma
+([`CORR-LOOKS-028`](/docs/tasks/concluidos/looks/CORR-LOOKS-028.md)). A medição é de uma
 corrida: o `oracle.py --writes` lê `a0` — a primitiva — e `a2` — a faixa — no
 **mesmo** acerto do breakpoint, então o par sai junto.
 
 **(d) Pele: paleta ou cor de vértice? — PALETA**, medido em 2026-09-14 pela
-[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) como
+[`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md) como
 subproduto da (a): cada passo de `SKIN` soma `0x40` ao byte baixo do CLUT id
 das primitivas da pele, em quatro valores — que são as quatro peles do
 `kSkin[4]`. Não há cor de vértice nenhuma em jogo; a pergunta nasceu da leitura
 errada da primitiva, corrigida na §1.6.
 
 **E fechada em 2026-09-15** pela
-[`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md), que mediu os
+[`LOOKS-TASK-12`](/docs/tasks/concluidos/looks/12-pele-paleta-ou-vertice.md), que mediu os
 outros dois campos de cor e o lado da GPU. As quatro paletas estão no disco
 (§1.7) — os quatro registros de **256 entradas** em VRAM (0, 480) a (0, 483),
 offsets 65.892, 66.404, 66.916 e 67.428 —, e um registro de 256 entradas não é
@@ -2191,7 +2191,7 @@ cabelos + 7 barbas = 16. **Isso é sobre os campos, não sobre as colunas** — 
 coluna 1 é também a janela de repouso de 948 primitivas em 50 seções do
 `MODEL.BIN`, das quais 16 são a cabeça, e as colunas 2..8 e 10..15 não têm
 primitiva nenhuma no disco (§1.7,
-[`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)). O
+[`CORR-LOOKS-026`](/docs/tasks/concluidos/looks/CORR-LOOKS-026.md)). O
 alcance de cada campo foi **andado até as duas pontas**, não deduzido — e aí
 apareceu uma propriedade da tela que não estava escrita em lugar nenhum: **os
 campos de LOOKS travam nas pontas, não dão a volta.** O quarto `Right` no `SKIN`
@@ -2206,11 +2206,11 @@ nenhum: 3, 6, 10 e 11.** A união dos três é
 **Este parágrafo dizia nove, e uma exceção, até 2026-09-16:** a união
 `{0, 1, 4, 8, 9, 13, 14, 16, 17}`, `SKIN` com 8 e `H.COL` com 7, e a
 primitiva 4 andando com `H.COL` e não com `SKIN`
-([`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)). As listas tinham
+([`CORR-LOOKS-026`](/docs/tasks/concluidos/looks/CORR-LOOKS-026.md)). As listas tinham
 sido lidas **antes de o jogo terminar de reescrever a cabeça** (armadilha 18 do
 perfil); das duas pontas assentadas, `SKIN` move 14, `H.COL` 12, todas as de
 `H.COL` andam também com a linha, e a exceção some
-([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)).
+([`CORR-LOOKS-049`](/docs/tasks/concluidos/looks/CORR-LOOKS-049.md)).
 
 **Nenhum byte de vértice se mexe em nenhum dos seis pares campo × slot.** Todo
 acerto cai no **byte 2 da primitiva**, que é o byte baixo do CLUT id. Uma
@@ -2235,10 +2235,10 @@ dezesseis entradas** que o CLUT id da primitiva nomeia dentro do registro de
 
 Esta seção tinha quatro incógnitas, e as quatro estão respondidas acima. A
 execução abriu outras cinco, que **não** estavam aqui até 2026-09-17: a
-[`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md) e a
-[`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) as
+[`LOOKS-TASK-17`](/docs/tasks/concluidos/looks/17-confronto-com-o-emulador.md) e a
+[`LOOKS-TASK-18`](/docs/tasks/concluidos/looks/18-corpus-dos-cinquenta-renders.md) as
 encaminharam à
-[`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md), que as
+[`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md), que as
 escreve aqui. Nenhuma é respondida; cada uma diz **por que** está aberta e o que
 a destravaria.
 
@@ -2267,7 +2267,7 @@ põe fora do escopo.
 medido pelo `assembly.py --check-image`; são as dos 105 `TEX_*.BIN`, e saíam
 sem textura.
 
-> **Fechada pela [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).** Os
+> **Fechada pela [`LOOKS-TASK-30`](/docs/tasks/concluidos/looks/30-o-uniforme.md).** Os
 > 105 contêineres entraram na guarda com digest medido — todos **form 1** e
 > **idênticos nos dois discos**, o que é por que o `--check-discs` os aceita
 > dos dois lados —, e qual deles a tela veste passou a ser **medido na VRAM**
@@ -2302,13 +2302,13 @@ nem contra os quadros do emulador, onde a verdade é conhecida
 (`corpus.py --score`, o controle; §5.4). Nenhum dos dois confrontos verifica,
 então, que a **malha** desenhada é a do estilo certo; quem verifica isso hoje é
 só o `oracle.py --patched` da
-[`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), pela seção que o
+[`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md), pela seção que o
 jogo escreve. *O que a silhueta testemunha, e o que não:* com a pose da (e) e da
-[`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) e a câmera da
-[`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), a silhueta no
+[`LOOKS-TASK-27`](/docs/tasks/concluidos/looks/27-o-boneco-montado.md) e a câmera da
+[`LOOKS-TASK-28`](/docs/tasks/concluidos/looks/28-a-camera-do-jogo.md), a silhueta no
 mesmo quadro (`confront.py --silhouette`) **testemunha a pose e o corpo**: seis
 comparações, dois slots, 7% a 18% da tinta, mínimo nítido em todas — e, desde
-a [`LOOKS-TASK-33`](/docs/tasks/looks/33-a-janela-animada.md), **oito
+a [`LOOKS-TASK-33`](/docs/tasks/concluidos/looks/33-a-janela-animada.md), **oito
 passadas** do ciclo por slot, as duas metades incluídas, a 13–15%. Ela é livre
 de translação de propósito, então **não** testemunha onde a figura senta no
 painel; quem testemunha isso, desde a LOOKS-TASK-35, é o
@@ -2337,7 +2337,7 @@ slots: **6 de 6**, por 1,36x a 4,10x contra o estilo errado mais próximo
 gate fecha um **controle antes** — o mesmo close-up duas vezes, 0 pixel e a
 mesma câmera derivada — e confere margem contra o estilo errado mais próximo
 (`CLOSEUP_MARGIN`) e teto para o certo (`CLOSEUP_SHARE`), desde a
-[`CORR-LOOKS-063`](/docs/tasks/looks/CORR-LOOKS-063.md): antes ele perguntava
+[`CORR-LOOKS-063`](/docs/tasks/concluidos/looks/CORR-LOOKS-063.md): antes ele perguntava
 só qual dos três escores era o menor.
 
 **(i) As duas corridas de ponteiros do `MODEL.BIN` — ABERTA.** A de 64 e a de 32
@@ -2390,7 +2390,7 @@ leitura nas duas, com a tela trocando de time.
    dentro do cabeçalho seguinte do `EDT_MOD.BIN`.
 2. **O `EDT_MOD.BIN` é contíguo do 216 ao EOF**, e são **20** seções em duas
    listas de onze (§1.5). Esta armadilha dizia o contrário até 2026-09-14
-   ([`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md)). O que quebra é
+   ([`CORR-LOOKS-010`](/docs/tasks/concluidos/looks/CORR-LOOKS-010.md)). O que quebra é
    começar em 0 ou em 8 — cabeçalho e listas —, e o que engana é começar em
    15.704: também fecha no EOF exato, lendo metade do arquivo.
 3. **A ordem da lista não é a ordem do arquivo** (§1.5). Assumir a do arquivo
@@ -2434,9 +2434,9 @@ leitura nas duas, com a tela trocando de time.
   disco, o de UI e o do emulador —, todos sob `if(Python3_FOUND)` (§4.4). Este
   item dizia *"três alvos"* e *"um de UI sob `if(UNIX AND Python3_FOUND)`"* até
   2026-09-17: o `UNIX` estava medido como errado desde a
-  [`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md) — a janela sobe
+  [`LOOKS-TASK-16`](/docs/tasks/concluidos/looks/16-contratos-da-ui.md) — a janela sobe
   nativa no Windows —, e o quarto alvo é da
-  [`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md).
+  [`LOOKS-TASK-19`](/docs/tasks/concluidos/looks/19-alvos-de-ctest-e-cli.md).
 - Os controles negativos, contados pela ferramenta e nunca escritos em prosa.
 - [NOTICE.md](../NOTICE.md) com a linhagem do `we3d` (MIT, com crédito) e a
   ressalva do Superpack.
@@ -2446,7 +2446,7 @@ leitura nas duas, com a tela trocando de time.
   mudou.**
 
 **Conferidos contra o disco em 2026-09-17** pela
-[`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md):
+[`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md):
 
 | entregável | estado |
 |---|---|
@@ -2481,7 +2481,7 @@ mesma conversa:
 
 - uma barra de título, que desenha `S SET` — o objeto de texto guarda
   `LOOKS SET`, e a fonte do título não tem glifo para `L`, `O` nem `K`
-  (§10.3 (q), [`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md)). Esta
+  (§10.3 (q), [`CORR-LOOKS-054`](/docs/tasks/concluidos/looks/CORR-LOOKS-054.md)). Esta
   linha dizia "uma barra de título com `LOOKS SET`" até 2026-09-17, e era o
   texto do objeto, não o da tela;
 - em cima, à esquerda, a **placa de posição** — `GK` no slot 1, `CB` no slot 2
@@ -2497,7 +2497,7 @@ mesma conversa:
 
 **O que a gravação mostra**, olhado quadro a quadro (e **nenhum número dela
 entra aqui**: quem mede ritmo, quadros e ângulo é o emulador, na
-[`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md)):
+[`LOOKS-TASK-32`](/docs/tasks/concluidos/looks/32-o-ciclo-da-caminhada.md)):
 
 - o jogador **caminha parado no lugar**, de frente para a câmera, balançando o
   tronco e os braços — um ciclo de passada que se repete;
@@ -2517,7 +2517,7 @@ continua sendo a (j), e ela abre a Fase 9.
 ### 10.2 O que já se sabe, e de onde
 
 - **As doze linhas, os domínios e os rótulos** estão no `looks.py` desde a
-  [`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md), conferidos mecanicamente contra
+  [`LOOKS-TASK-13`](/docs/tasks/concluidos/looks/13-campos-e-dominios-de-looks.md), conferidos mecanicamente contra
   o `src/core/Player.cpp`; `DEFAUL` e `NAT` não guardam nada e são o default por
   nacionalidade do `data/defaultlook.txt` (armadilha 17 do perfil). O que
   **não** está medido é o **texto** que a tela escreve para cada valor —
@@ -2539,13 +2539,13 @@ continua sendo a (j), e ela abre a Fase 9.
   arquivos de modelo (§1.2), com a largura que a §6.13 do
   [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) já contava. **Que o `ANIME.BIN`
   é o que a tela usa é hipótese, pelo nome**: a
-  [`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md) mede antes de qualquer leitor ser
-  escrito, como a [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) mediu os modelos antes
+  [`LOOKS-TASK-24`](/docs/tasks/concluidos/looks/24-de-onde-vem-a-pose.md) mede antes de qualquer leitor ser
+  escrito, como a [`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md) mediu os modelos antes
   da Fase 3.
 - **`BODY` não escreve em nenhum dos dois arquivos de modelo** (§6 (a)), e
   `HEIG` também não foi visto escrevendo; se os dois mudam o desenho, é na
   transformação, e é por isso que a (s) mora na Fase 9.
-  > **Medido em 2026-09-18** ([`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md)):
+  > **Medido em 2026-09-18** ([`LOOKS-TASK-29`](/docs/tasks/concluidos/looks/29-altura-e-corpo.md)):
   > é na transformação, e é na **câmera** — ver a (s).
 - **O uniforme mora nos `TEX_*.BIN`**, que não têm digest na guarda (§6 (f)).
 - **A forma não tem testemunha** (§6 (h)). Um boneco montado na pose do jogo é
@@ -2557,7 +2557,7 @@ continua sendo a (j), e ela abre a Fase 9.
 ### 10.3 As incógnitas da v2
 
 **Os vereditos, no fechamento da v2** (2026-09-26,
-[`LOOKS-TASK-35`](/docs/tasks/looks/35-fechamento-da-v2.md)). Cada alínea
+[`LOOKS-TASK-35`](/docs/tasks/concluidos/looks/35-fechamento-da-v2.md)). Cada alínea
 abaixo guarda a medição inteira; esta tabela só diz onde cada uma parou.
 
 | alínea | veredito | quem mede |
@@ -2577,7 +2577,7 @@ abaixo guarda a medição inteira; esta tabela só diz onde cada uma parou.
 linha, o da caixa de ajuda, o comportamento do cursor nas pontas das doze
 linhas, e os valores iniciais que cada save state carrega. Texto de tela
 inventado a partir do rótulo é o erro que a armadilha 17 descreve.
-[`LOOKS-TASK-21`](/docs/tasks/looks/21-a-tela-medida.md).
+[`LOOKS-TASK-21`](/docs/tasks/concluidos/looks/21-a-tela-medida.md).
 
 > **Respondida em 2026-09-17**, por `oracle.py --screen --write`, e a resposta
 > é o [`tools/looks/screen.json`](../tools/looks/screen.json) — escrito pela
@@ -2591,11 +2591,11 @@ inventado a partir do rótulo é o erro que a armadilha 17 descreve.
 >   `screen.decode` faz delas é conferido, a cada corrida, contra os glifos que
 >   a rotina `layout.SCREEN_GLYPH` desenha: 34 strings, nos dois states e na
 >   ponta de cada uma das doze linhas. **A placa e o nome da camisa entram
->   nessa conferência** desde a [`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md);
+>   nessa conferência** desde a [`CORR-LOOKS-054`](/docs/tasks/concluidos/looks/CORR-LOOKS-054.md);
 >   o título não pode entrar, e é o item seguinte.
 > - **O título não é o que o objeto diz: o objeto guarda `LOOKS SET` e a tela
 >   mostra `S SET`.** Medido em 2026-09-17
->   ([`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md)), escrevendo
+>   ([`CORR-LOOKS-054`](/docs/tasks/concluidos/looks/CORR-LOOKS-054.md)), escrevendo
 >   marcador de onze bytes sobre a string na RAM do jogo em execução e lendo a
 >   faixa de volta da VRAM: o título é impresso pela **segunda** fonte ASCII
 >   (`kind` 33), que não passa pela rotina de glifos, e ela tem glifo para
@@ -2633,13 +2633,13 @@ inventado a partir do rótulo é o erro que a armadilha 17 descreve.
 >   **A caixa do cursor é por linha**, e o passo só a desce: ela começa em
 >   x 314 em `NAT`, 436 em `AGE`, 428 em `FOOT` e 396 nas outras nove, igual
 >   nos dois slots e em todo valor da linha — medido em 2026-09-22
->   ([CORR-LOOKS-070](/docs/tasks/looks/CORR-LOOKS-070.md)). Até essa data
+>   ([CORR-LOOKS-070](/docs/tasks/concluidos/looks/CORR-LOOKS-070.md)). Até essa data
 >   este item dava só a de `NAT` e o passo, e a tabela carregava aquela caixa
 >   para as outras onze linhas.
 
 **(r) `DEFAUL` e `NAT`.** Qual nação é qual valor da linha `NAT`, e se `DEFAUL`
 aplica exatamente a linha do `data/defaultlook.txt` — medido no jogo, nunca
-suposto pelo nome da coluna. [`LOOKS-TASK-23`](/docs/tasks/looks/23-default-por-nacionalidade.md).
+suposto pelo nome da coluna. [`LOOKS-TASK-23`](/docs/tasks/concluidos/looks/23-default-por-nacionalidade.md).
 
 > **Respondida em 2026-09-17**, por `oracle.py --default`, e a resposta desmente
 > a pergunta em três pontos. O que se mediu:
@@ -2691,8 +2691,8 @@ suposto pelo nome da coluna. [`LOOKS-TASK-23`](/docs/tasks/looks/23-default-por-
 o `ANIME.BIN` lido a cada quadro; matrizes calculadas em código a partir de
 poucos parâmetros; ou uma tabela noutro arquivo. Escrever um leitor de
 `ANIME.BIN` antes de saber é o erro que a
-[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) existiu para não cometer.
-[`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md).
+[`LOOKS-TASK-08`](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md) existiu para não cometer.
+[`LOOKS-TASK-24`](/docs/tasks/concluidos/looks/24-de-onde-vem-a-pose.md).
 
 > **Respondida em 2026-09-17**, por `oracle.py --pose`, e a resposta é o
 > primeiro candidato — **com o terceiro dentro dele**: a pose vem do
@@ -2719,7 +2719,7 @@ poucos parâmetros; ou uma tabela noutro arquivo. Escrever um leitor de
 >      **279.034 de 396.804 bytes diferem** e nenhuma das 204 entradas é lida.
 >
 >    Esta frase dizia que a função *"responde `0x8017EE60`"* até 2026-09-18
->    ([`CORR-LOOKS-059`](/docs/tasks/looks/CORR-LOOKS-059.md)), e ninguém obtém
+>    ([`CORR-LOOKS-059`](/docs/tasks/concluidos/looks/CORR-LOOKS-059.md)), e ninguém obtém
 >    essa resposta: quem chamar recebe a exceção.
 > 2. **O cabeçalho é de 204 entradas, uma por animação, e a tela toca a de
 >    índice 5.** Medido com um watchpoint de leitura nas 204 de uma vez:
@@ -2749,13 +2749,13 @@ poucos parâmetros; ou uma tabela noutro arquivo. Escrever um leitor de
 > **quatro** endereços do arquivo, não viu nada e quase virou "o `ANIME.BIN`
 > não é lido"; a entrada que o jogo lê é a sexta palavra do cabeçalho.
 >
-> **O que fica para a [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md):** qual carga de matriz é de qual peça. A 24
+> **O que fica para a [`LOOKS-TASK-25`](/docs/tasks/concluidos/looks/25-a-pose-de-referencia.md):** qual carga de matriz é de qual peça. A 24
 > conta paradas, e o número antes de a sequência se repetir varia entre
 > corridas (207 e 408), então ele não é contagem de quadro.
 
 **(k) A hierarquia e a convenção.** Rotação em ponto fixo 4.12, `y` para
 baixo — a v1 já desenha com `UP = -1` —, e se a matriz de cada peça é absoluta
-ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md).
+ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/concluidos/looks/25-a-pose-de-referencia.md).
 
 > **Respondida em 2026-09-18**, por `oracle.py --pose <SLOT> <N> [N ...]`, e a
 > resposta é **absoluta**: o que chega ao GTE por peça já é a câmera composta
@@ -2785,7 +2785,7 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 >   seguinte e a primeira parada de uma passada vem com os três registradores
 >   zerados; quem a nomeia é a junta. Esta linha dizia *"a raiz"*, com matriz
 >   *"igual à da câmera a menos de uma volta pequena"*, até 2026-09-18
->   ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)): a rotação dessa
+>   ([`CORR-LOOKS-062`](/docs/tasks/concluidos/looks/CORR-LOOKS-062.md)): a rotação dessa
 >   parada balança **4362** ao longo de oito quadros, acompanhando os 4074 da
 >   canela `b`, enquanto a da câmera é constante — quem quase não se mexe é o
 >   tronco, com 185.
@@ -2809,9 +2809,9 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 >   braço a↔tronco, braço b↔antebraço a* —, e cada um estava um elo fora: são os
 >   mesmos números lidos com a nomeação de antes do atraso de desenho, que só
 >   foi corrigida no fim de 2026-09-18
->   ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)). O teto de fora
+>   ([`CORR-LOOKS-062`](/docs/tasks/concluidos/looks/CORR-LOOKS-062.md)). O teto de fora
 >   também mudou com a nomeação: foi *"2,3x"* até
->   [`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md), depois 2,5x, e a
+>   [`CORR-LOOKS-060`](/docs/tasks/concluidos/looks/CORR-LOOKS-060.md), depois 2,5x, e a
 >   corrida com os nomes certos imprime 3,3x. **O esqueleto do jogo não é rígido**: os pés, os antebraços
 >   restantes, as coxas e o tronco não ficam a distância fixa de candidato
 >   nenhum. Isso é resultado, e é justamente por isso que o leitor não compõe.
@@ -2824,7 +2824,7 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 >   sem osso nenhum esticar. Quem desfaz a câmera é o `M_mãe⁻¹` acima.
 >
 > **O que ficou aberto aqui, e fechou em 2026-09-18**
-> ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)): esta seção dizia
+> ([`CORR-LOOKS-062`](/docs/tasks/concluidos/looks/CORR-LOOKS-062.md)): esta seção dizia
 > que a tela desenha **duas** chuteiras e só **uma** seção de chuteira carrega
 > matriz, e que a segunda seria desenhada *"sem carga de matriz própria,
 > reaproveitando a rotação que já está no GTE"*. As seções 9 e 10 são lidas as
@@ -2844,7 +2844,7 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 
 **(l) O formato do `ANIME.BIN` — FECHADA em 2026-09-26.** Os 204 ponteiros, o que cada um nomeia, e se a
 varredura fecha no EOF — o rito da Fase 1 (§1.4).
-[`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md).
+[`LOOKS-TASK-26`](/docs/tasks/concluidos/looks/26-o-formato-do-anime-bin.md).
 
 > **Medida em 2026-09-18, e a incógnita ficou ABERTA em um ponto até a (p)
 > fechá-lo** — ver o último parágrafo desta alínea. O
@@ -2906,7 +2906,7 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 >   o scratchpad anterior, não o que aquele quadro desenhou. O
 >   `--against-pose` imprime as duas contas e **reprova** se menos de um
 >   terço das capturas carregar par
->   ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md));
+>   ([`CORR-LOOKS-061`](/docs/tasks/concluidos/looks/CORR-LOOKS-061.md));
 > - e **dez variantes de desempacotamento** dividem o mesmo dispatch
 >   (`0x80011DA0`): a peça que toma outra não para na instrução vigiada, e
 >   herdar o par da peça anterior nomeia bytes errados com cara de certo.
@@ -2931,7 +2931,7 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 > dois trios a 32 de distância também é múltipla de 16.
 >
 > **Quando o jogo faz essa média está medido desde 2026-09-23** pela
-> [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md), item (p): é
+> [`LOOKS-TASK-32`](/docs/tasks/concluidos/looks/32-o-ciclo-da-caminhada.md), item (p): é
 > a visita que **abre um lado** da caminhada, uma vez por peça, 24 das 408
 > matrizes de um ciclo — e a varredura de todos os pares sob as **três** regras
 > de desempacotamento continua não explicando aquelas seis, o que as separa das
@@ -2944,7 +2944,7 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 
 **(m) A câmera do jogo — FECHADA em 2026-09-18.** Projeção, deslocamento de tela
 e a translação da câmera, para que o nosso quadro e o do emulador sejam o mesmo
-desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
+desenho. [`LOOKS-TASK-28`](/docs/tasks/concluidos/looks/28-a-camera-do-jogo.md).
 
 > **Medido:** `H = 1376 px`, a matriz `[3195, 0, 635, -27, 2488, 133, -635,
 > -268, 3195]` e a translação `[-480, 192, 4125]`, iguais nos dois slots, lidos
@@ -2956,10 +2956,10 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > a projeção sai com a origem no eixo da câmera e **quem põe o boneco dentro do
 > painel é o deslocamento de desenho da GPU**, não o GTE. Isso e a nossa
 > escolha de medir lugares a partir de uma peça (a segunda chuteira,
-> [`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)) somam **uma**
+> [`CORR-LOOKS-062`](/docs/tasks/concluidos/looks/CORR-LOOKS-062.md)) somam **uma**
 > translação, e ela é **ajustada a cada comparação**, não fixada — ver
 > abaixo. Esta frase dizia que a translação era medida uma vez e fixada, até a
-> [`CORR-LOOKS-064`](/docs/tasks/looks/CORR-LOOKS-064.md), que é o que a
+> [`CORR-LOOKS-064`](/docs/tasks/concluidos/looks/CORR-LOOKS-064.md), que é o que a
 > primeira sessão fez e o que a segunda mediu ser pior.
 >
 > **A projeção confere na largura:** a nossa figura projeta **50,5 px** de
@@ -2995,7 +2995,7 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > não se separam; no close-up, sim (§6 h).
 >
 > **Quais linhas aproximam, e a janela trocando de câmera** (2026-09-23,
-> [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md)). São
+> [`LOOKS-TASK-40`](/docs/tasks/concluidos/looks/40-a-camera-do-close-up.md)). São
 > **seis das doze**, medidas andando todas as doze no jogo nos dois slots
 > (`oracle.py --closeups`), e não são as cinco que o nome sugere:
 >
@@ -3044,15 +3044,15 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > linha tem câmera própria.
 >
 > **E o corpo inteiro passou a sentar onde o jogo o põe** (2026-09-26,
-> [`LOOKS-TASK-35`](/docs/tasks/looks/35-fechamento-da-v2.md)). Até ali o
+> [`LOOKS-TASK-35`](/docs/tasks/concluidos/looks/35-fechamento-da-v2.md)). Até ali o
 > close-up já saía do eixo medido, e o corpo inteiro não: a raiz ia para uma
 > fração escolhida do painel (`ROOT_AT = (0.5, 0.85)`), porque "quem põe o
 > boneco no painel é o deslocamento de desenho da GPU", e esse deslocamento
 > passava por não medido. Estava medido — é o meio do display
 > (`oracle.SCENERY_CENTRE`, da LOOKS-TASK-31), que é o que o `panel_axis` já
-> era. A [`LOOKS-TASK-34`](/docs/tasks/looks/34-o-goleiro-andando.md) viu a
+> era. A [`LOOKS-TASK-34`](/docs/tasks/concluidos/looks/34-o-goleiro-andando.md) viu a
 > figura fora do lugar nas fotos, a
-> [`CORR-LOOKS-097`](/docs/tasks/looks/CORR-LOOKS-097.md) versionou a medição
+> [`CORR-LOOKS-097`](/docs/tasks/concluidos/looks/CORR-LOOKS-097.md) versionou a medição
 > (`confront.py --placement`), e o número, em fração do painel, pela caixa da
 > tinta:
 >
@@ -3072,7 +3072,7 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 
 **(s) `HEIG` e `BODY` — FECHADA em 2026-09-18.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.
-[`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md).
+[`LOOKS-TASK-29`](/docs/tasks/concluidos/looks/29-altura-e-corpo.md).
 
 > **Veredito: uma escala por eixo, dentro da câmera.** Nenhuma peça muda e a
 > pose não muda: o jogo guarda um vetor de escala da figura e o aplica às
@@ -3129,7 +3129,7 @@ peça, ou nada — medido pela pose de dois valores de cada.
 
 **(n) Qual `TEX_*.BIN` a tela veste — FECHADA em 2026-09-20.** A §6 (f):
 digest na guarda, o arquivo que o time dos save states usa, e as primitivas
-resolvidas. [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).
+resolvidas. [`LOOKS-TASK-30`](/docs/tasks/concluidos/looks/30-o-uniforme.md).
 
 > **É o `TEX_A4`, nos dois states, medido na VRAM** (§6 f). O desenho o lê
 > pelo `layout.KIT_ON_SCREEN`, e o que isso vale está medido dos dois lados:
@@ -3153,9 +3153,9 @@ resolvidas. [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).
 **(o) O painel e o cenário — FECHADA em 2026-09-21.** Se o degradê, a borda, a
 barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou do
 `EDT_2D.BIN`, ou polígonos da GPU.
-[`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md), que fecha a medição e a mobília; o
-resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) a
-[`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md).
+[`LOOKS-TASK-31`](/docs/tasks/concluidos/looks/31-o-painel-e-o-cenario.md), que fecha a medição e a mobília; o
+resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/concluidos/looks/36-os-sprites-estaticos.md) a
+[`LOOKS-TASK-40`](/docs/tasks/concluidos/looks/40-a-camera-do-close-up.md).
 
 > **Três elementos respondidos, e são polígonos.** O `oracle.py --scenery` lê a
 > display list na RAM e fica só com os pacotes cujas cores são as que o
@@ -3173,7 +3173,7 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > **Nenhum deles é imagem**: não há registro de `DAT2D.BIN` envolvido, e o
 > desenho é do próprio GPU. Os pacotes texturizados que a varredura acha são
 > **o boneco**, e as páginas que eles amostram confirmam a
-> [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md) de graça: a cabeça sai
+> [`LOOKS-TASK-30`](/docs/tasks/concluidos/looks/30-o-uniforme.md) de graça: a cabeça sai
 > da página (512,256) do `DAT2D.BIN` e o corpo da (576,256), que é do kit e
 > que o `DAT2D.BIN` não tem.
 >
@@ -3197,7 +3197,7 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > tela perde, com duas corridas sem dano de controle: as páginas do boneco
 > (512,256) e do kit (576,256) derrubam 17 ladrilhos cada no slot 2, e 12 e 18
 > no slot 1, todos sobre a ajuda e o painel
-> ([`CORR-LOOKS-066`](/docs/tasks/looks/CORR-LOOKS-066.md)), três
+> ([`CORR-LOOKS-066`](/docs/tasks/concluidos/looks/CORR-LOOKS-066.md)), três
 > páginas vizinhas não derrubam nada — e a da fonte derruba **um** ladrilho
 > só, o que diz que ela é reenviada a cada quadro. Medir o que o caminho de
 > impressão manda ao GPU, comando a comando, é a continuação desta task.
@@ -3279,7 +3279,7 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > de glifos do jogo (código → `u`, `v` e largura), não da foto de um quadro.
 >
 > **A fonte, lida da rotina** (2026-09-22,
-> [`LOOKS-TASK-37`](/docs/tasks/looks/37-a-tabela-de-glifos.md)). A rotina de
+> [`LOOKS-TASK-37`](/docs/tasks/concluidos/looks/37-a-tabela-de-glifos.md)). A rotina de
 > glifo não está no `/SELECT8.BIN`: está no **`/SELECTC.BIN`**, carregado em
 > 0x800FC000, achado por conteúdo nos dois discos. O arquivo difere entre eles
 > em 5.201 bytes, que são o texto traduzido. A rotina (0x8010BB04-0x8010C0D8)
@@ -3307,7 +3307,7 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > `SCREEN_PRINT` e `SCREEN_GLYPH`, e os 86 avanços de cada slot, dispostos
 > pelo `Font.run` a partir do primeiro glifo de cada trecho, dão 0 fora; com
 > o espaçamento forçado a 0 ficam 24 trechos fora, e a 2, quatro
-> ([`CORR-LOOKS-071`](/docs/tasks/looks/CORR-LOOKS-071.md)). O `\t` começa
+> ([`CORR-LOOKS-071`](/docs/tasks/concluidos/looks/CORR-LOOKS-071.md)). O `\t` começa
 > trecho novo: `A1` é `\t\x12A\t\x1e1`, e o pixel entre `A` e `1` é coluna
 > (LOOKS-TASK-38), não espaçamento. A janela escreve com
 > esses glifos, e os rótulos, alinhados à esquerda no x do objeto, batem
@@ -3315,10 +3315,10 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > jogo (0 de 16.416 nos dois slots, com o quadro deslocado um pixel
 > divergindo em 2.875). Sem a folga, 11.839 dos 16.416 divergem, porque o
 > fundo da faixa nosso fica a ~6 do do jogo; com folga 8 já são 0
-> ([`CORR-LOOKS-072`](/docs/tasks/looks/CORR-LOOKS-072.md)).
+> ([`CORR-LOOKS-072`](/docs/tasks/concluidos/looks/CORR-LOOKS-072.md)).
 >
 > **O alinhamento, e a cor no meio da string** (2026-09-22,
-> [`LOOKS-TASK-38`](/docs/tasks/looks/38-o-alinhamento-dos-valores.md)). O
+> [`LOOKS-TASK-38`](/docs/tasks/concluidos/looks/38-o-alinhamento-dos-valores.md)). O
 > byte 13 do objeto é o **modo de alinhamento**, medido contra as chamadas de
 > desenho: **0** começa a linha na esquerda da caixa, **2** a encosta na
 > borda direita (`x + largura − largura da linha`, o espaçamento de cada
@@ -3345,7 +3345,7 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > primeiro valor.
 >
 > **Os estáticos e as setas, desenhados** (2026-09-21,
-> [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md)). O
+> [`LOOKS-TASK-36`](/docs/tasks/concluidos/looks/36-os-sprites-estaticos.md)). O
 > `sprites.py` monta cada sprite do disco como o GPU o corta — quatro texels
 > por halfword, a entrada `0x0000` da CLUT transparente, a cor do sprite
 > modulando cada canal (128 é um) —, e a janela pinta título, ícone, caixas da
@@ -3371,11 +3371,11 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > A cor delas pulsa de quadro a quadro; a janela as desenha a 128, sem pulso. E o
 > `DEFAUL` mostra o ◀ com um valor só, porque `Left` **não** trava ali: leva o
 > cursor ao rótulo, com a ajuda `Undo` e o ▶ em x 276 —
-> [`CORR-LOOKS-067`](/docs/tasks/looks/CORR-LOOKS-067.md). **Esta frase parava
+> [`CORR-LOOKS-067`](/docs/tasks/concluidos/looks/CORR-LOOKS-067.md). **Esta frase parava
 > em "384 nas outras oito" até 2026-09-22**, e quem contasse as linhas em 384
 > no `screen.json` acharia nove: o `DEFAUL` é a nona desde a CORR-LOOKS-067, e
 > a conta das onze linhas de valores o deixava de fora
-> ([`CORR-LOOKS-079`](/docs/tasks/looks/CORR-LOOKS-079.md)).
+> ([`CORR-LOOKS-079`](/docs/tasks/concluidos/looks/CORR-LOOKS-079.md)).
 >
 > **Veredito (2026-09-21): a tela é polígono e imagem, e o que é imagem é do
 > disco — menos a ajuda.** O painel, a caixa de ajuda, o fundo, a barra de título, as
@@ -3383,12 +3383,12 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 > GPU os desenha. Texto, título, ícone, caixas, barra, placa e seta são 142
 > sprites cortados do `EDT_2D.BIN` e do `DAT2D.BIN`, com as paletas do
 > `DAT2D.BIN`. O texto da ajuda é escrito na VRAM pelo jogo em tempo de
-> execução. A [`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md) fecha com a medição e a mobília; desenhar
+> execução. A [`LOOKS-TASK-31`](/docs/tasks/concluidos/looks/31-o-painel-e-o-cenario.md) fecha com a medição e a mobília; desenhar
 > os sprites, o texto, o alinhamento, a ajuda e a câmera do close-up são as
-> [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos.md) a [`LOOKS-TASK-40`](/docs/tasks/looks/40-a-camera-do-close-up.md).
+> [`LOOKS-TASK-36`](/docs/tasks/concluidos/looks/36-os-sprites-estaticos.md) a [`LOOKS-TASK-40`](/docs/tasks/concluidos/looks/40-a-camera-do-close-up.md).
 >
 > **A ajuda não vem do disco, e não pode vir: vem da ROM do console**
-> (2026-09-22, [`LOOKS-TASK-39`](/docs/tasks/looks/39-o-texto-da-ajuda.md)).
+> (2026-09-22, [`LOOKS-TASK-39`](/docs/tasks/concluidos/looks/39-o-texto-da-ajuda.md)).
 > Quem remede é o `oracle.py --help-box`, e a cadeia é esta, ponta a ponta:
 >
 > - **quem escreve a página (832,256):** o próprio jogo, por **cópia de
@@ -3432,7 +3432,7 @@ resto da tela é das [`LOOKS-TASK-36`](/docs/tasks/looks/36-os-sprites-estaticos
 **(p) O ritmo do ciclo — FECHADA em 2026-09-23.** Quantos quadros do jogo dura
 uma passada, se o jogo interpola entre quadros-chave, e se o tronco que balança
 é da animação ou da câmera.
-[`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
+[`LOOKS-TASK-32`](/docs/tasks/concluidos/looks/32-o-ciclo-da-caminhada.md).
 
 > **Medida por `oracle.py --walk`, e o reprodutor é `anime.py --frame N`**, que
 > acerta **408 de 408** matrizes de um ciclo **entrada por entrada** nos dois
@@ -3468,7 +3468,7 @@ uma passada, se o jogo interpola entre quadros-chave, e se o tronco que balança
 >   oito e não reinicia com a figura: a passada lê as vagas da vaga inicial até
 >   a 11 de um quadro e as anteriores do **seguinte**. A vaga inicial é **7** no
 >   slot 2 e **0** no slot 1, constante em toda passada de uma corrida — é a
->   medição que a [`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md)
+>   medição que a [`LOOKS-TASK-29`](/docs/tasks/concluidos/looks/29-altura-e-corpo.md)
 >   encontrou como "uma passada atravessa dois quadros", agora com o corte
 >   nomeado.
 > - **O balanço é da ANIMAÇÃO, não da câmera — e não é do tronco.** A câmera
@@ -3486,11 +3486,11 @@ uma passada, se o jogo interpola entre quadros-chave, e se o tronco que balança
 >   passadas diferindo entre si (uma captura que lê constante passa o primeiro
 >   controle perfeitamente); a pose voltando em 34 e em nenhuma passada antes;
 >   cada carga nomeada **duas vezes** — pela vaga do par e pelo ponteiro de
->   modelo com o atraso da [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) —, batendo nas 516;
+>   modelo com o atraso da [`LOOKS-TASK-27`](/docs/tasks/concluidos/looks/27-o-boneco-montado.md) —, batendo nas 516;
 >   e o modelo com **uma visita de diferença**, que cai para 34 de 408.
 >
 > **E a janela anda nesse ritmo desde 2026-09-25**, pela
-> [`LOOKS-TASK-33`](/docs/tasks/looks/33-a-janela-animada.md), com o que
+> [`LOOKS-TASK-33`](/docs/tasks/concluidos/looks/33-a-janela-animada.md), com o que
 > faltava medir medido por `oracle.py --rhythm`:
 >
 > - **A taxa é a do NTSC progressivo, 59,817 quadros por segundo.** O
@@ -3511,11 +3511,11 @@ uma passada, se o jogo interpola entre quadros-chave, e se o tronco que balança
 >   de cabeça estava errada: lá o boneco não anda, gira.
 > - **A silhueta fecha no ciclo.** Em oito passadas por slot, as duas metades
 >   do ciclo incluídas, a melhor passada fica a 13–15% da tinta do jogo, dentro
->   dos 25% da [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), a
+>   dos 25% da [`LOOKS-TASK-28`](/docs/tasks/concluidos/looks/28-a-camera-do-jogo.md), a
 >   1–3 passadas da nomeada (`confront.py --silhouette`).
 > - **Aberto, com veredito dado no fechamento da v2** (LOOKS-TASK-35):
 >   - **o giro do close-up — FECHADA em 2026-09-29**
->     ([`CORR-LOOKS-107`](/docs/tasks/looks/CORR-LOOKS-107.md)). O giro é um
+>     ([`CORR-LOOKS-107`](/docs/tasks/concluidos/looks/CORR-LOOKS-107.md)). O giro é um
 >     ângulo de 16 bits em `layout.TURN_ANGLE` (0x80075CD6), o mesmo que o
 >     `--camera` lê como ângulo y da *chain*. Fora das cinco linhas ele fica em
 >     128; ao entrar numa delas anda 16 de 4096 por passada de desenho, rebate
@@ -3562,7 +3562,7 @@ antes do teste:
    mesma sequência duas vezes no jogo, que tem de dar o mesmo texto.
 
    > **Fechada em 2026-09-17** pela
-   > [`LOOKS-TASK-22`](/docs/tasks/looks/22-a-tela-na-janela.md), e o comando é
+   > [`LOOKS-TASK-22`](/docs/tasks/concluidos/looks/22-a-tela-na-janela.md), e o comando é
    > `oracle.py --keys [SEQUÊNCIA [SLOT]]` — repetição na SEQUÊNCIA se escreve
    > `Right x41`, a única forma aceita —, ~30 s por corrida. Ele compara
    > **três** lados depois de uma sequência de 19 teclas: o jogo, o
@@ -3582,10 +3582,10 @@ antes do teste:
    contra o que o GTE carregou para P no quadro N, lido por breakpoint. Ponto
    fixo é inteiro: a comparação é **exata**, e qualquer diferença é achado.
    > **Fechada em 2026-09-18** pela
-   > [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md), e o que ela
+   > [`LOOKS-TASK-27`](/docs/tasks/concluidos/looks/27-o-boneco-montado.md), e o que ela
    > acrescentou não estava previsto aqui: a comparação exata de matriz já
    > estava verde na
-   > [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md) — 90 de
+   > [`LOOKS-TASK-26`](/docs/tasks/concluidos/looks/26-o-formato-do-anime-bin.md) — 90 de
    > 96 exatas — **e a figura montada com elas não ficava em pé**. Faltava
    > dizer de *qual peça* é cada matriz, e essa pergunta não é sobre números:
    > o ponteiro de modelo que o jogo carrega na parada da carga nomeia a peça
@@ -3602,7 +3602,7 @@ antes do teste:
    > simétricos — quadris a −224 e −217, ombros a −341 e −342 — e os lugares
    > do próprio arquivo empilham a figura da cabeça em −420 à chuteira em 0,
    > que é a chuteira contra a qual todos os outros lugares são medidos
-   > ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md); esta linha dizia
+   > ([`CORR-LOOKS-062`](/docs/tasks/concluidos/looks/CORR-LOOKS-062.md); esta linha dizia
    > "o chão em que a raiz se apoia", e a raiz é a segunda chuteira).
 3. **Silhueta contra silhueta.** A máscara do boneco no nosso quadro contra a
    do emulador, no mesmo N, com a câmera da (m). O controle é o emulador contra

@@ -1,7 +1,7 @@
 # Perfil de ciclo — visualizador 3D da aparência do jogador
 
 **Este arquivo é o perfil do ciclo `looks`**, nomeado pelo campo `perfil:` do
-[`docs/tasks/looks/progresso.md`](/docs/tasks/looks/progresso.md) e carregado
+[`docs/tasks/looks/progresso.md`](/docs/tasks/concluidos/looks/progresso.md) e carregado
 pelos prompts de `docs/prompts/`. Os prompts têm o **rito**; o que é deste ciclo
 mora aqui.
 
@@ -66,11 +66,11 @@ Não se revertem sem o usuário pedir.
    primeiras folgas do `EDT_MOD.BIN`. Um varredor que consome sempre 8 cai 4
    bytes dentro do cabeçalho seguinte e lê `nPrim` na casa dos bilhões — o mesmo
    sintoma da seção 55, pela regra oposta
-   ([`LOOKS-TASK-04`](/docs/tasks/looks/04-formato-de-secao.md)).
+   ([`LOOKS-TASK-04`](/docs/tasks/concluidos/looks/04-formato-de-secao.md)).
 3. **O `EDT_MOD.BIN` é contíguo do offset 216 ao EOF**, e a lista serve para
    outra coisa. Esta armadilha dizia *"não é contíguo — varrer do começo sem a
    lista pega uma seção e para"*, e foi remedida em 2026-09-14
-   ([`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md)): varrer **do 216**
+   ([`CORR-LOOKS-010`](/docs/tasks/concluidos/looks/CORR-LOOKS-010.md)): varrer **do 216**
    acha as **20** seções e fecha no EOF. O que quebra é começar no offset 0 ou
    no 8, que são o cabeçalho e as listas — `BadSection`, com contagens na casa
    dos bilhões. A lista é necessária pela **ordem** e por dizer **qual peça
@@ -84,7 +84,7 @@ Não se revertem sem o usuário pedir.
    tem paleta" continua sendo erro — mas o motivo não era o que esta linha
    dizia. Ela dizia *"a lista existe e o varredor não a acha"*, como se fosse
    falha de varredura. **Remedido em 2026-09-15**
-   ([`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md)): a lista
+   ([`LOOKS-TASK-10`](/docs/tasks/concluidos/looks/10-lista-de-cluts-do-dat2d.md)): a lista
    existe — 267 registros a partir de 76.836 — e o que a esconde é o **campo 7**
    do registro, que o `bin_archive.py` documenta como a tag constante `0x800f` e
    que é, medido, o **banco de 64 KiB do offset de 16 bits do campo 6**. O
@@ -95,7 +95,7 @@ Não se revertem sem o usuário pedir.
    Esta linha dizia que generalizar o `entries()` faz aparecerem *"2.151
    registros a mais em 40 outros contêineres, os estádios incluídos"*, e esse
    número não reproduz por leitura nenhuma
-   ([`CORR-LOOKS-022`](/docs/tasks/looks/CORR-LOOKS-022.md)): medido pelo
+   ([`CORR-LOOKS-022`](/docs/tasks/concluidos/looks/CORR-LOOKS-022.md)): medido pelo
    `texture.py --survey`, o custo é de **80 registros em cinco contêineres, e
    nenhum deles é estádio**. §1.8 do plano.
 6. **`MSYS_NO_PATHCONV=1`** em toda chamada do Git Bash que passe caminho de
@@ -123,9 +123,9 @@ Não se revertem sem o usuário pedir.
 12. **`ctest -R <padrao>` que não casa nada SAI 0.** Ele imprime
     `No tests were found!!!` e devolve sucesso, e isso vale para os cinco
     projetos do repositório. Já enganou **duas vezes** neste ciclo: a
-    [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) sobre um alvo que
+    [`CORR-LOOKS-012`](/docs/tasks/concluidos/looks/CORR-LOOKS-012.md) sobre um alvo que
     não existia, e a
-    [`CORR-LOOKS-015`](/docs/tasks/looks/CORR-LOOKS-015.md) sobre um alvo que
+    [`CORR-LOOKS-015`](/docs/tasks/concluidos/looks/CORR-LOOKS-015.md) sobre um alvo que
     existe no fonte e em build nenhum. **Confira `N tests passed`, nunca só o
     código de saída** — e, num alvo que deveria rodar, confira que o nome dele
     aparece na listagem.
@@ -133,7 +133,7 @@ Não se revertem sem o usuário pedir.
     O CARP rotula o offset 8 do `DAT2D.BIN` como "Pelos" e o 3.568 como
     "Caras"; o tutorial do `zeta` manda abrir o 3.568 para achar cabelo.
     **Medido em 2026-09-15**
-    ([`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md)): o
+    ([`LOOKS-TASK-11`](/docs/tasks/concluidos/looks/11-qual-imagem-e-o-cabelo.md)): o
     cabelo é o **3.568** — as primitivas que `HAIR` e `FACE` movem têm `u`
     152..199, e numa página de 4 bits isso é a segunda metade. O `zeta` acertou;
     o *"Pelos"* do CARP está errado. O que fica de armadilha é outra coisa, e
@@ -141,7 +141,7 @@ Não se revertem sem o usuário pedir.
     O `cabellowe2002.bmp` que vem ao lado do tutorial — "cabelo" no nome — é
     byte a byte o registro em **8**, e não o cabelo.
 14. **Os campos da tela travam nas pontas; não dão a volta.** Medido em
-    2026-09-15 ([`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md)):
+    2026-09-15 ([`LOOKS-TASK-12`](/docs/tasks/concluidos/looks/12-pele-paleta-ou-vertice.md)):
     o quarto `Right` no `SKIN` deixa o CLUT id exatamente onde o terceiro o
     pôs. Quem anda um campo esperando o ciclo voltar ao início lê esse valor
     repetido como **pressão que o jogo ignorou** e acusa falha — foi o que a
@@ -156,7 +156,7 @@ Não se revertem sem o usuário pedir.
 16. **Número de terceiro vem em par, e só uma metade costuma estar certa.**
     O `Offsets We2002.txt` do Superpack dá *"157.164, 1.242 jogadores"* para os
     registros do `/SELECT.BIN`. Medido em 2026-09-15
-    ([`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md)): o
+    ([`LOOKS-TASK-13`](/docs/tasks/concluidos/looks/13-campos-e-dominios-de-looks.md)): o
     **offset está certo** — o `OFS_PLAYER_ATTR` do próprio repositório cai no
     mesmo byte — e a **contagem está 207 curta**, são 1.449. Conferir a metade
     fácil e herdar a outra é o jeito de escrever um número errado com ar de
@@ -169,7 +169,7 @@ Não se revertem sem o usuário pedir.
     campos porque a tela tem doze linhas erra por dois.
 18. **O jogo reescreve o bloco de primitivas ao longo de MAIS DE UM QUADRO.**
     Medido em 2026-09-15
-    ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)): uma
+    ([`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md)): uma
     leitura logo depois da tecla trouxe 34 das 42 primitivas do `BOOTS` no CLUT
     novo e 8 ainda no velho — um estado que nunca existiu. E uma amostra tirada
     **antes** de a escrita começar é igual à anterior, o que uma varredura lê
@@ -179,17 +179,17 @@ Não se revertem sem o usuário pedir.
     quadros separadas não bastam para uma cabeça inteira:** as listas de
     primitivas de `SKIN` (8) e `H.COL` (7) da seção 24 saíram assim, e das duas
     pontas assentadas, 300 quadros entre as leituras, são 14 e 12
-    ([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)). Quem mede **o que
+    ([`CORR-LOOKS-049`](/docs/tasks/concluidos/looks/CORR-LOOKS-049.md)). Quem mede **o que
     um campo move** compara as pontas (`oracle.py --colour`), não passo a passo.
 19. **Alcance de tela não é domínio de campo — e "a tela alcança três" pode
     ser a JANELA, não a tela.** `beard_style` guarda oito, os rótulos nomeiam
     sete e a tela anda **sete** — esta linha dizia **cinco**, e era a mesma
     armadilha: cinco é a faixa dos dois quads da seção 24, e `F` e `G` desenham
     **outra seção**, o gêmeo da cabeça
-    ([`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md),
-    [`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md)). Já o `HAIR` guarda 32
+    ([`CORR-LOOKS-044`](/docs/tasks/concluidos/looks/CORR-LOOKS-044.md),
+    [`CORR-LOOKS-048`](/docs/tasks/concluidos/looks/CORR-LOOKS-048.md)). Já o `HAIR` guarda 32
     e a varredura leu **três**, e isso estava **errado** — corrigido em
-    2026-09-16 ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)):
+    2026-09-16 ([`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md)):
     a célula de valor da linha se mexe em **32 de 32** teclas; o que assenta em
     três estados é a **seção 24**, que é uma família de cabelo só. Quem anda um
     campo observando **uma** seção mede aquela seção, e uma linha que escolhe
@@ -210,7 +210,7 @@ Não se revertem sem o usuário pedir.
     `a2` a cada escrita. **E um store não serve o arquivo inteiro:** aquela
     instrução escreve os quads de quatro das treze cabeças, e as outras nove
     têm outro dono, que ninguém achou ainda. Medido em 2026-09-16
-    ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)).
+    ([`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md)).
 22. **Tecla dada com a CPU parada num breakpoint pode não registrar.** Na
     varredura do `--writes`, **5 de 31** teclas não moveram a célula de valor —
     e sem a captura ao lado, cada uma delas poria as escritas seguintes sob o
@@ -220,7 +220,7 @@ Não se revertem sem o usuário pedir.
     buffer da §6(a) se reescrevem a **cada quadro**, porque o boneco anima:
     andar um campo lendo-as morre no `steady()` com *"never settled"*, e está
     certo que morra. Medido em 2026-09-16
-    ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)). Quem
+    ([`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md)). Quem
     precisar do que o campo escreve lá usa o filtro de churn do `field_diff`,
     ou breakpoint de escrita — que o fork oferece e este ciclo ainda não usou.
 24. **Nenhum dos dois arquivos de modelo diz ONDE uma peça fica.** Cada seção
@@ -228,7 +228,7 @@ Não se revertem sem o usuário pedir.
     coordenadas do arquivo empilha o boneco num ponto só — e cada peça, isolada,
     parece perfeita. Quem posiciona é o jogo, na display list. Medido em
     2026-09-16
-    ([`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md)); o
+    ([`LOOKS-TASK-15`](/docs/tasks/concluidos/looks/15-visualizador-opengl.md)); o
     visualizador desenha uma **prateleira** (`scene.shelf`) e diz que é uma.
 25. **Uniforme int do PySide6 se escreve com `setUniformValue1i`.** Passar um
     `int` para o `setUniformValue` geral chega no shader como zero, sem erro
@@ -245,7 +245,7 @@ Não se revertem sem o usuário pedir.
     `atlas.py --compare` imprime o nulo em cada linha por isso.
 27. **Árvore plantada que nem importa fica vermelha, e vermelho pela causa
     errada não prova nada.** Medido em 2026-09-16
-    ([`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md)): a primeira
+    ([`LOOKS-TASK-16`](/docs/tasks/concluidos/looks/16-contratos-da-ui.md)): a primeira
     corrida do `ui_check.py` anunciou **3 de 3** controles vermelhos, e os três
     tinham morrido em `ModuleNotFoundError: No module named 'lzss'` — o
     `atlas.py` alcança `tools/pes2/` de lado, e a cópia levava só
@@ -260,7 +260,7 @@ Não se revertem sem o usuário pedir.
     célula, o `FACE` deu **8** valores num slot e 7 no outro, numa linha que
     mostra sete rótulos nos dois. A letra não pisca: o `confront.glyph_mask`
     lê só os pixels lavanda do rótulo, com controle ocioso antes. Medido em
-    2026-09-16 ([`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md)).
+    2026-09-16 ([`LOOKS-TASK-17`](/docs/tasks/concluidos/looks/17-confronto-com-o-emulador.md)).
 29. **Um quadro do jogo e um render nosso não se comparam por pixel.** A pose e
     a câmera mudam quase todo pixel sem que a tupla mude; o que a tupla muda é
     o **histograma de cor**, e as cores dos quads saem exatas, sem modulação.
@@ -269,14 +269,14 @@ Não se revertem sem o usuário pedir.
     imprime esse teto ao lado. **Mas só onde o teto explica:** liderança abaixo
     da margem passa como `ranked` quando o teto é menor que `2 × MARGIN`, e
     falha sob teto largo — até a
-    [`CORR-LOOKS-045`](/docs/tasks/looks/CORR-LOOKS-045.md) passava sempre.
+    [`CORR-LOOKS-045`](/docs/tasks/concluidos/looks/CORR-LOOKS-045.md) passava sempre.
 30. **Histograma de cor resolve cor e não resolve forma — e quem prova é o
     controle, não o corpus.** Contra os 47 renders do corpus, 35 JPEGs não ficam
     em primeiro; lido sozinho, isso parece render errado. Os quadros do
     **emulador**, com a verdade conhecida, ficam em 3º e 4º na mesma matriz.
     Pele, cor de cabelo e cor de barba o argmax acerta sempre; estilo e barba,
     metade. Medido em 2026-09-16
-    ([`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md)).
+    ([`LOOKS-TASK-18`](/docs/tasks/concluidos/looks/18-corpus-dos-cinquenta-renders.md)).
     **Métrica sobre dado de terceiro sem controle de verdade conhecida ao lado
     não diz de quem é a falha.**
 31. **Exceção dentro do `__enter__` não passa pelo `__exit__`.** O `Oracle`
@@ -286,20 +286,20 @@ Não se revertem sem o usuário pedir.
     um diretório de dados só, então a sobra derruba a próxima corrida de
     qualquer projeto. Todo recurso adquirido no `__enter__` se solta ali mesmo
     se o resto dele falhar. Medido em 2026-09-17
-    ([`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md)).
+    ([`LOOKS-TASK-19`](/docs/tasks/concluidos/looks/19-alvos-de-ctest-e-cli.md)).
 32. **O servidor MCP do fork guarda UMA sessão, e o editor é um segundo
     cliente.** O `.mcp.json` registra o fork na porta 2346 no escopo do projeto;
     um `initialize` de qualquer outro cliente invalida a sessão de quem a tinha,
     e a próxima chamada volta `HTTP 400 ... missing or invalid MCP-Session-Id`.
     Medido em 2026-09-17, **3 de 3** com um segundo cliente de propósito
-    ([`CORR-LOOKS-051`](/docs/tasks/looks/CORR-LOOKS-051.md)) — é o vermelho
+    ([`CORR-LOOKS-051`](/docs/tasks/concluidos/looks/CORR-LOOKS-051.md)) — é o vermelho
     sem causa que o `looks_live` deu uma vez em catorze. O `oracle.OneSession`
     refaz o `initialize` **uma vez** e imprime `MCP session taken by another
     client`; ver essa linha num Log é sinal de dois clientes na porta, e perder
     de novo logo depois do novo handshake falha — não é caso de rodar até passar.
 33. **`get_gpu_state` antes do `load_state` responde o modo da tela de boot.**
     Medido em 2026-09-17
-    ([`LOOKS-TASK-21`](/docs/tasks/looks/21-a-tela-medida.md)): num emulador
+    ([`LOOKS-TASK-21`](/docs/tasks/concluidos/looks/21-a-tela-medida.md)): num emulador
     recém-subido ele diz 256×239, e a tela `LOOKS SET` é 512×240. Recortar a
     VRAM com o tamanho errado deixa o painel e perde a caixa das linhas — e
     oito corridas seguidas leram isso como quadro pela metade, arquivo PNG
@@ -324,7 +324,7 @@ Não se revertem sem o usuário pedir.
     mesmo lugar.
 37. **A fonte do título pula o que não tem glifo, e o objeto de texto não sabe
     disso.** O objeto guarda `LOOKS SET` e a tela mostra `S SET`. Medido em
-    2026-09-17 ([`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md)) por
+    2026-09-17 ([`CORR-LOOKS-054`](/docs/tasks/concluidos/looks/CORR-LOOKS-054.md)) por
     marcador escrito na RAM do jogo em execução: a segunda fonte ASCII
     (`kind` 33) tem glifo para nove dos 71 caracteres varridos — `AEJSTW12-` —,
     e caractere sem glifo não desenha **nem anda com a caneta** (espaço anda
@@ -341,11 +341,11 @@ Não se revertem sem o usuário pedir.
     quando o cursor erra a linha carrega a mesma ajuda, então uma corrida de
     doze minutos terminaria no erro do `print` **em vez** do diagnóstico.
     Desde 2026-09-17
-    ([`CORR-LOOKS-055`](/docs/tasks/looks/CORR-LOOKS-055.md)) o `main()` das
+    ([`CORR-LOOKS-055`](/docs/tasks/concluidos/looks/CORR-LOOKS-055.md)) o `main()` das
     ferramentas que imprimem esse texto chama `screen.printable_output()`. A
     regra que fica: **o `■` não sai da medição — quem se ajusta é a saída.**
 39. **Janela e tabela concordam de graça; quem desempata é o jogo.** A janela
-    da [`LOOKS-TASK-22`](/docs/tasks/looks/22-a-tela-na-janela.md) não decide
+    da [`LOOKS-TASK-22`](/docs/tasks/concluidos/looks/22-a-tela-na-janela.md) não decide
     nada sobre a tela — o `screen.State` carrega as travas, a volta do cursor,
     o texto de cada valor e a ajuda —, e é justamente por isso que o
     `ui_check.py` comparar a janela contra o `screen.py` **não** prova que a
@@ -363,7 +363,7 @@ Não se revertem sem o usuário pedir.
     parada. O jeito que funciona é **duas corridas com o MESMO número de
     teclas** terminando em valores diferentes: o que conta tempo anda igual nas
     duas e cai fora sozinho. Medido em 2026-09-17
-    ([`LOOKS-TASK-23`](/docs/tasks/looks/23-default-por-nacionalidade.md)).
+    ([`LOOKS-TASK-23`](/docs/tasks/concluidos/looks/23-default-por-nacionalidade.md)).
 41. **`data/defaultlook.txt` é a tabela do EDITOR, e o cabeçalho dela diz
     `TEAM`.** São 95 **times** — nações e clubes juntos (`Inter`, `Bayern`,
     `Clas. Brazil`) —, e a linha `NAT` da tela é a lista de **nacionalidades**
@@ -386,7 +386,7 @@ Não se revertem sem o usuário pedir.
     regras: **arme a faixa inteira**, e **tenha um controle do instrumento** —
     um watchpoint sobre um objeto de texto que a rotina de impressão recebe
     dispara, e é ele que dá direito de ler silêncio como resposta. Medido em
-    2026-09-17 ([`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md)).
+    2026-09-17 ([`LOOKS-TASK-24`](/docs/tasks/concluidos/looks/24-de-onde-vem-a-pose.md)).
 43. **Um `continue` só nomeia a PRIMEIRA que dispara.** O emulador para no
     primeiro acerto e fica lá, então armar trinta breakpoints, soltar uma vez e
     listar responde "qual disparou primeiro" — e a resposta muda de corrida
@@ -403,17 +403,17 @@ Não se revertem sem o usuário pedir.
     ponteiro mais baixo mira o offset 912, não o 816 que a regra supõe, e daí
     sairiam os 96 bytes altos (`0x8017EE60`) que são a base do controle
     vermelho. Esta linha dizia que a regra "erra por 96 bytes" até 2026-09-18
-    ([`CORR-LOOKS-059`](/docs/tasks/looks/CORR-LOOKS-059.md)) — errar por 96 é
+    ([`CORR-LOOKS-059`](/docs/tasks/concluidos/looks/CORR-LOOKS-059.md)) — errar por 96 é
     o que ela faria se chegasse lá; o que ela faz é recusar.
     Base de arquivo novo se mede **por conteúdo** — uma corrida de
     64 bytes que apareça uma vez só na RAM —, e a regra do cabeçalho só depois,
     se quiser, como confirmação.
 
 45. **Duas cargas de matriz não são duas do mesmo tipo.** A
-    [`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md) contou
+    [`LOOKS-TASK-24`](/docs/tasks/concluidos/looks/24-de-onde-vem-a-pose.md) contou
     `POSE_MATRIX` e `POSE_MATRIX_SECOND` como "as duas instruções que carregam
     a matriz", 18 e 18 de 40 paradas. Medido em 2026-09-18
-    ([`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md)): a
+    ([`LOOKS-TASK-25`](/docs/tasks/concluidos/looks/25-a-pose-de-referencia.md)): a
     primeira repete a **mesma** rotação nas doze paradas de uma passada
     enquanto a translação anda pelas peças — é a **câmera** —, e só a segunda
     muda por peça. Ler a pose da primeira dá doze peças com a mesma orientação,
@@ -436,7 +436,7 @@ Não se revertem sem o usuário pedir.
     **E a conclusão que parecia sobrar era falsa.** Ela dizia *"uma peça pode
     ser desenhada sem carga de matriz própria, reaproveitando a rotação que já
     está no GTE"*, e a passada tem **doze cargas para doze seções desenhadas**
-    ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md), 2026-09-18): a
+    ([`CORR-LOOKS-062`](/docs/tasks/concluidos/looks/CORR-LOOKS-062.md), 2026-09-18): a
     carga da seção 10 existe, o que não existe é **quem a nomeie**, porque cada
     carga é nomeada pelo ponteiro da parada seguinte e a primeira parada de uma
     passada não carrega ponteiro. Ponteiro que não nomeia não é peça que não
@@ -448,9 +448,9 @@ Não se revertem sem o usuário pedir.
     nada. Com oito quadros espalhados por 140, as juntas verdadeiras vão a
     4,6x-14,6x e nenhuma linha fora dos cinco pares passa de **3,3x** — dizia
     2,3x até 2026-09-18
-    ([`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md)), que é o teto do
+    ([`CORR-LOOKS-060`](/docs/tasks/concluidos/looks/CORR-LOOKS-060.md)), que é o teto do
     slot 1 sozinho, e 2,5x até a
-    [`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md), do mesmo dia: com
+    [`CORR-LOOKS-062`](/docs/tasks/concluidos/looks/CORR-LOOKS-062.md), do mesmo dia: com
     os nomes certos das peças, o teto de fora é o **tronco** no slot 1, a 3,3x,
     e o slot 2 imprime 2,5x. As cinco juntas verdadeiras também trocaram de
     nome ali, e cada uma estava um elo fora — o que era "raiz↔cabeça" é
@@ -471,7 +471,7 @@ Não se revertem sem o usuário pedir.
     na altura dos pés, e o comando disse **0 problemas**. Os dois controles
     comparam capturas **entre si** e nenhum olhava dentro de uma. Medido em
     2026-09-18
-    ([`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md)): a
+    ([`LOOKS-TASK-25`](/docs/tasks/concluidos/looks/25-a-pose-de-referencia.md)): a
     pergunta que faltava era *o que esta captura afirma, olhada sozinha?*. E
     ela só apareceu porque o plantio foi **rodado**; imaginado, teria ficado
     verde para sempre.
@@ -500,23 +500,23 @@ Não se revertem sem o usuário pedir.
     **falha inteiro no slot 1**: metade das peças passa a ter ângulos que não
     existem em 3.952 quadros. O sintoma é tentador — lê-se como *"o jogo
     interpola metade dos quadros"* —, e chegou a ser escrito no plano e
-    encaminhado para a [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md)
+    encaminhado para a [`LOOKS-TASK-32`](/docs/tasks/concluidos/looks/32-o-ciclo-da-caminhada.md)
     antes de ser remedido no mesmo dia. A ponte que vale é o registrador que a
     instrução de leitura usa (`layout.ANIME_UNPACK`): com ele, **96 de 96** —
     das **192** capturadas, porque oito das dezesseis capturas não param no
     desempacotamento e são postas de lado, com os ângulos do scratchpad
     anterior. **E desde a
-    [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) a ponte
+    [`LOOKS-TASK-32`](/docs/tasks/concluidos/looks/32-o-ciclo-da-caminhada.md) a ponte
     melhor é `layout.ANIME_BUILD`**, o `jal` da `RotMatrix`, por onde passam
     as dez variantes: as oito capturas postas de lado eram as que tomaram
     outra variante, e ali são 520 de 520 cargas com par contra 316 de 520,
     faltando uma metade espelhada inteira — 204 cargas seguidas, 17 das 34
     passadas (armadilha 99; `oracle.py --walk-watch`). O `--against-pose` imprime as duas contas desde a
-    [`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md), e reprova se
+    [`CORR-LOOKS-061`](/docs/tasks/concluidos/looks/CORR-LOOKS-061.md), e reprova se
     menos de um terço das capturas carregar par: **gate que escolhe sozinho
     o que não vai medir tem de dizer quanto deixou de fora.**
     Medido em 2026-09-18
-    ([`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)).
+    ([`LOOKS-TASK-26`](/docs/tasks/concluidos/looks/26-o-formato-do-anime-bin.md)).
 55. **Dez variantes dividem um dispatch, e vigiar uma delas é vigiar um
     décimo.** A rotina que desempacota os ângulos tem dez caminhos
     (`0x80011DA0`), cada um com o seu próprio `lw`. Um breakpoint na variante
@@ -532,7 +532,7 @@ Não se revertem sem o usuário pedir.
     invisível em desenho, total em comparação exata. **Desmontar a rotina
     resolveu; tentar variantes de arredondamento não chegava lá.** Medido em
     2026-09-18
-    ([`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)).
+    ([`LOOKS-TASK-26`](/docs/tasks/concluidos/looks/26-o-formato-do-anime-bin.md)).
 57. **Testemunha barata que pode ser enganada por aritmética não é
     testemunha.** Para separar *"o jogo misturou esta matriz"* de *"o leitor
     errou"*, a primeira regra foi ler a volta de volta e exigir ângulos
@@ -542,7 +542,7 @@ Não se revertem sem o usuário pedir.
     algum reproduz a matriz (`anime.no_pair_explains`). **E essa também só
     diz metade**: pose do lado espelhado da caminhada não é a volta de par
     nenhum tampouco, e chamá-la de mistura foi o que o ciclo fez até a
-    [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md). Quem
+    [`LOOKS-TASK-32`](/docs/tasks/concluidos/looks/32-o-ciclo-da-caminhada.md). Quem
     separa é o `anime.walk_pose`, que reproduz as duas: as seis da task 26 são
     médias, e a varredura sob as **três** regras continua não as explicando.
 
@@ -560,7 +560,7 @@ Não se revertem sem o usuário pedir.
     a matriz da seguinte: a chuteira herda a do quadril e o boneco montado sai
     com o pé na altura da coxa, **com todo número dentro da faixa e cada peça
     isolada perfeita**. Custou uma passada inteira da
-    [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md), e o que
+    [`LOOKS-TASK-27`](/docs/tasks/concluidos/looks/27-o-boneco-montado.md), e o que
     desempata não é olhar o desenho — é o **tornozelo**: a origem da chuteira
     no referencial da própria canela tem dispersão **5,0** unidades no atraso
     certo e **158,8** no outro, nos dois slots, com a canela errada de
@@ -570,7 +570,7 @@ Não se revertem sem o usuário pedir.
     parada: o que ele vê pode ser o resto do passo anterior.**
 60. **Número de gate se transcreve da corrida feita NA ÁRVORE QUE SE
     COMMITA.** O Log da
-    [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) foi commitado
+    [`LOOKS-TASK-27`](/docs/tasks/concluidos/looks/27-o-boneco-montado.md) foi commitado
     dizendo `86 of 86` controles porque a corrida de onde o número saiu foi
     feita antes de o último controle entrar na árvore; o commit mede **87**.
     Ninguém percebe olhando — os dois são plausíveis e a corrida foi de
@@ -582,7 +582,7 @@ Não se revertem sem o usuário pedir.
     comparações e em direções opostas — o que não localiza mínimo nenhum.
     Alargada para o ciclo inteiro, com a volta, os mínimos caem no interior.
     Medido em 2026-09-18
-    ([`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md)).
+    ([`LOOKS-TASK-28`](/docs/tasks/concluidos/looks/28-a-camera-do-jogo.md)).
 62. **O `OFX`/`OFY` do GTE é ZERO nesta tela, e o painel é posicionado pela
     GPU.** Quem procurar "o deslocamento de tela" nos registradores de controle
     acha zero e pode ler isso como leitura falhada. Não é: a projeção sai com a
@@ -600,7 +600,7 @@ Não se revertem sem o usuário pedir.
     como figura, a tinta sobe de 2.376 para 2.618 e **nenhum** quadro da
     caminhada casa. O sintoma não é uma imagem visivelmente torta: é uma
     comparação que não fecha. Medido em 2026-09-18
-    ([`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md)).
+    ([`LOOKS-TASK-28`](/docs/tasks/concluidos/looks/28-a-camera-do-jogo.md)).
 64. **Translação única mantida fixa é pior que alinhamento por comparação.**
     Soa mais rigoroso e mede outra coisa: ajustada numa pose e aplicada à foto
     de outra, desloca a figura inteira e **todo** candidato pontua mal — o
@@ -641,7 +641,7 @@ Não se revertem sem o usuário pedir.
     desenhava a tupla de referência. E o defeito **fabricou uma evidência**: o
     controle de estilo trocado pontuava 696–834 contra 179–426 pela cabeça
     flutuando, e a §6 (h) foi dada como fechada por ele. Medido e corrigido em
-    2026-09-18 ([`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md));
+    2026-09-18 ([`LOOKS-TASK-28`](/docs/tasks/concluidos/looks/28-a-camera-do-jogo.md));
     o `--check-image` agora desenha três estilos e exige zero primitiva sem
     pose. **Gate que só desenha a referência mede a referência.**
 Da 70 em diante, as armadilhas moram em
@@ -695,7 +695,7 @@ só esta lista; a tabela abaixo é o catálogo de alvos e ferramentas, não gate
 | alvo | precisa | **como se roda AQUI** | por `ctest`, onde o build configura | existe desde |
 | --- | --- | --- | --- | --- |
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
-| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os doze `--check-image` (desde a LOOKS-TASK-37, com o `glyphs`; desde a LOOKS-TASK-36, com o `sprites`; desde a LOOKS-TASK-29, com o `stature`), todos até o fim (a ordem é de leitura, não guarda — [`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
+| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os doze `--check-image` (desde a LOOKS-TASK-37, com o `glyphs`; desde a LOOKS-TASK-36, com o `sprites`; desde a LOOKS-TASK-29, com o `stature`), todos até o fim (a ordem é de leitura, não guarda — [`CORR-LOOKS-052`](/docs/tasks/concluidos/looks/CORR-LOOKS-052.md)); até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
 | `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` — desde a LOOKS-TASK-36 fotografa a janela **nos dois slots** e confere os sprites estáticos contra os pixels que o **jogo** mostrou, gravados pelo `--scenery --write` (nenhuma cor sai do `sprites.py`), com dois controles plantados — os sprites que não chegam à janela e a placa na CLUT do jogador de linha; desde a CORR-LOOKS-068 também os **pixels das setas** `▶` (na carga) e `◀` (após `Up`), contra os do jogo gravados pelo mesmo `--write` e modulados pela cor do pulso, com dois controles (CLUT e `uv` trocados); desde a LOOKS-TASK-31 confere a mobília que a janela pinta contra a tabela medida em `work/looks-scenery/` (cada pacote amostrado dentro do canto, com um controle plantado), desde a LOOKS-TASK-30 exige `textured == primitives` na figura inteira (o corpo vestido), e desde a LOOKS-TASK-29 também fotografa a tela em 155, 175 e 210 cm e em `H TYPE` e exige que a tinta do painel siga as razões da regra (`STATURE_SLACK`), com dois controles plantados; sem câmera medida em `work/looks-camera/` diz que não julgou; desde a LOOKS-TASK-40 anda o cursor até **cada** linha que tem câmera medida e exige que o relatório da janela nomeie a câmera daquela linha — e a de corpo inteiro na linha de carga —, com dois controles plantados (a linha que não chega ao núcleo, o cursor que não reaponta); desde a LOOKS-TASK-33 a caminhada: dois `--frame` dão duas fotos, um duas vezes a mesma, `--animate-for` no ritmo medido, `.` e `Space`; dois controles plantados | `ctest -R looks_ui` | LOOKS-TASK-16 |
 | `looks_live` | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo) | `python tools/looks/oracle.py --check-live` | `ctest -R looks_live` | LOOKS-TASK-19 (o comando, da LOOKS-TASK-07) |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
@@ -709,7 +709,7 @@ só esta lista; a tabela abaixo é o catálogo de alvos e ferramentas, não gate
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min (medido 2026-09-20, os dois slots) | `python tools/looks/oracle.py --kit [SLOT]` — qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer: cada retângulo que cada contêiner declara contra a VRAM, halfword a halfword, com o controle (a mesma VRAM lida duas vezes, idêntica) fechando antes. Exige **uma página e uma paleta** exatas e que nenhum outro contêiner as reproduza (armadilha 77) | — | LOOKS-TASK-30 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~6 min por slot (a RAM inteira é lida) | `python tools/looks/oracle.py --scenery [SLOT] [--write]` — os pacotes que desenham a mobília da tela, **andados da lista que o quadro entrega ao GPU** (armadilha 86) e **partidos em comandos** (armadilha 89), em ordem de desenho, com blend e polilinhas, e o controle (a tela carregada duas vezes) fechando antes; os sprites por página, com os texels amostrados decodificados do `EDT_2D.BIN` e do `DAT2D.BIN` contra a VRAM e o controle (a VRAM três linhas abaixo) tendo de divergir; o `--write` deixa `work/looks-scenery/slotN.json`, que é de onde a janela pinta — e, desde a LOOKS-TASK-36, as amostras de pixel de cada sprite estático, lidas do frame buffer com a CPU parada, que são o gabarito do `looks_ui`; desde a CORR-LOOKS-068, também as das duas setas (`ARROW_WALKS`: a carga e `Up`), com a CLUT de cada uma conferida contra `sprites.ARROW_CLUT` | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | idem; ~3 min por slot | `python tools/looks/oracle.py --repaint [SLOT]` — sobrescreve os dois buffers e deixa o jogo correr: o mapa diz que parte da tela é redesenhada a cada quadro e que parte foi pintada uma vez, com o controle do mesmo mapa duas vezes | — | LOOKS-TASK-31 |
-| *(sem alvo ainda)* | as duas variáveis, os dois states, o fork, o `python` principal — é quem tem Pillow; o do venv é lançado só para a janela, e sob ele o comando **recusa** ([`CORR-LOOKS-087`](/docs/tasks/looks/CORR-LOOKS-087.md)) — e `work/looks-scenery/`; ~2 min | `python tools/looks/confront.py --outside [SLOT]` — a nossa tela contra a do jogo **fora do boneco**: o chão de cada região pela mediana de cada canal (armadilha 85), com o jogo fotografado duas vezes de controle. Afirma as regiões cuja cor foi medida (`OUTSIDE_REGIONS`) dentro de `OUTSIDE_SLACK`, e imprime o resto sem afirmar; desde a LOOKS-TASK-36, com as caixas dos sprites estáticos — título, ícone, caixas da camisa e placa —, tiradas da tabela medida; desde a LOOKS-TASK-37, com as colunas de rótulos e valores, e **as duas pixel a pixel dentro de `OUTSIDE_SLACK` (16) por canal** — sem folga divergem, o fundo fica a ~6 — contra o quadro do jogo, com o quadro deslocado um pixel de controle e a borda da caixa do cursor de fora, que pulsa (LOOKS-TASK-38); desde a LOOKS-TASK-39 mede também a **caixa de ajuda** pixel a pixel, com o mesmo piso e controle, e **não a afirma**: aquele texto é escrito com a fonte da ROM do console | — | LOOKS-TASK-31 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states, o fork, o `python` principal — é quem tem Pillow; o do venv é lançado só para a janela, e sob ele o comando **recusa** ([`CORR-LOOKS-087`](/docs/tasks/concluidos/looks/CORR-LOOKS-087.md)) — e `work/looks-scenery/`; ~2 min | `python tools/looks/confront.py --outside [SLOT]` — a nossa tela contra a do jogo **fora do boneco**: o chão de cada região pela mediana de cada canal (armadilha 85), com o jogo fotografado duas vezes de controle. Afirma as regiões cuja cor foi medida (`OUTSIDE_REGIONS`) dentro de `OUTSIDE_SLACK`, e imprime o resto sem afirmar; desde a LOOKS-TASK-36, com as caixas dos sprites estáticos — título, ícone, caixas da camisa e placa —, tiradas da tabela medida; desde a LOOKS-TASK-37, com as colunas de rótulos e valores, e **as duas pixel a pixel dentro de `OUTSIDE_SLACK` (16) por canal** — sem folga divergem, o fundo fica a ~6 — contra o quadro do jogo, com o quadro deslocado um pixel de controle e a borda da caixa do cursor de fora, que pulsa (LOOKS-TASK-38); desde a LOOKS-TASK-39 mede também a **caixa de ajuda** pixel a pixel, com o mesmo piso e controle, e **não a afirma**: aquele texto é escrito com a fonte da ROM do console | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min por slot | `python tools/looks/oracle.py --pages [SLOT]` — o que na tela vem de cada página da VRAM, estragando uma por vez, com duas corridas sem dano de controle (armadilha 83) | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | venv + `WE2002_LOOKS_IMAGE` e as capturas de um `--run`; **sem emulador**, ~1 min | `python tools/looks/confront.py --kit-control [SLOT]` — a mesma tupla desenhada no uniforme de outros dois times, contra a foto do jogo: o kit medido tem de ficar `KIT_CONTROL_MARGIN` mais perto. É o controle negativo do uniforme, porque o `--score` não o alcança (armadilha 78) | — | LOOKS-TASK-30 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
@@ -750,14 +750,14 @@ só esta lista; a tabela abaixo é o catálogo de alvos e ferramentas, não gate
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~9 min nos dois slots | `python tools/looks/oracle.py --rhythm [SLOT]` — a taxa de quadros (ticks por quadro contra o quadro NTSC, `layout.FRAME_TICKS`), onde a caminhada anda, para ou toca outra animação linha a linha (`layout.WALK_HELD_ROWS`, `WALK_OTHER_ANIMATION`), a volta de uma linha parada e o que um valor trocado faz (`WALK_ON_VALUE`), com controles (armadilhas 101, 102) | — | LOOKS-TASK-33 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e `work/looks-walk/` (77 sem ele); **sem emulador**, ~2 s | `python tools/looks/anime.py --against-walk [SLOT]` — o modelo contra o ciclo medido: 408 de 408 entrada por entrada, mais **oito** passadas espalhadas pelas que nenhum quadro do arquivo guarda (o lado espelhado e as médias), com uma visita de diferença de controle | — | LOOKS-TASK-32 |
 | *(sem alvo ainda)* | idem | `python tools/looks/anime.py --frame N [SLOT]` — a pose de **uma** passada desenhada, do arquivo: quadro, lado, regra por peça e o lugar. É o reprodutor que a janela animada usa, e ele **recusa** rodar sem o ciclo medido em vez de inventar um | — | LOOKS-TASK-32 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/concluidos/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes; desde a LOOKS-TASK-38 compara o **conjunto inteiro de glifos** do quadro — ponto e `uv` —, uma linha de falha por linha da tela; desde a LOOKS-TASK-36 compara também as **setas** ao lado do valor, lidas da lista que o quadro entrega ao GPU, e desde a CORR-LOOKS-068 recusa seta cuja CLUT não seja `sprites.ARROW_CLUT`; repetição na SEQUÊNCIA se escreve `Right x41`, a única forma aceita | — | LOOKS-TASK-22 |
 | *(dentro do `looks_ui`)* | venv + display + a imagem | o `ui_check.py` anda as **doze linhas até as duas pontas nos dois slots** por tecla sintética do Qt, mais o cursor além das duas pontas e a recusa alcançada por tecla; ~1 min 40 s ao todo | `ctest -R looks_ui` | LOOKS-TASK-22 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14
-([`CORR-LOOKS-015`](/docs/tasks/looks/CORR-LOOKS-015.md)): `build`,
+([`CORR-LOOKS-015`](/docs/tasks/concluidos/looks/CORR-LOOKS-015.md)): `build`,
 `build-mingw` e `build-windows-release` respondem `No tests were found!!!` e
 **saem 0**, e nenhum `CTestTestfile.cmake` deles cita `looks`. O `build/` foi
 gerado noutra máquina (`CMAKE_HOME_DIRECTORY:INTERNAL=/home/ingmar/...`).
@@ -794,7 +794,7 @@ curto: ela não depende de build nenhum.
 Hoje são **1 passed, 3 skipped** numa máquina limpa — medido em 2026-09-17,
 com os quatro alvos listados pelo nome —, e **4 passed** com as duas variáveis
 apontadas, o venv e o fork no lugar. Eram *1 passed, 2 skipped* e *3 passed*
-até a [`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md), que
+até a [`LOOKS-TASK-19`](/docs/tasks/concluidos/looks/19-alvos-de-ctest-e-cli.md), que
 registrou o `looks_live`.
 
 **Antes da LOOKS-TASK-06 não há gate**, e isso é esperado: as tasks 01 a 05 se
@@ -809,12 +809,12 @@ contrato é: mediu e passou, ou pulou com 77.
 commit.** Não é zelo: a árvore anda a cada edição da própria task, e o número
 copiado no meio da execução descreve uma árvore que não existe mais. Três vezes
 neste ciclo, em três tasks seguidas — 8.916 contra 10.182 na
-[`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)
-([`CORR-LOOKS-032`](/docs/tasks/looks/CORR-LOOKS-032.md)), 11.789 contra 11.831
-na [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md)
-([`CORR-LOOKS-036`](/docs/tasks/looks/CORR-LOOKS-036.md)) e 12.609 contra
-12.613 na [`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md)
-([`CORR-LOOKS-041`](/docs/tasks/looks/CORR-LOOKS-041.md)). A forma que
+[`LOOKS-TASK-14`](/docs/tasks/concluidos/looks/14-tabela-de-montagem.md)
+([`CORR-LOOKS-032`](/docs/tasks/concluidos/looks/CORR-LOOKS-032.md)), 11.789 contra 11.831
+na [`LOOKS-TASK-15`](/docs/tasks/concluidos/looks/15-visualizador-opengl.md)
+([`CORR-LOOKS-036`](/docs/tasks/concluidos/looks/CORR-LOOKS-036.md)) e 12.609 contra
+12.613 na [`LOOKS-TASK-16`](/docs/tasks/concluidos/looks/16-contratos-da-ui.md)
+([`CORR-LOOKS-041`](/docs/tasks/concluidos/looks/CORR-LOOKS-041.md)). A forma que
 sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
 `git worktree add --detach <tmp> <sha>` e rodar o gate lá.
 
@@ -838,7 +838,7 @@ sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
   ele.** Ela é a porta de entrada de quem ainda não sabe que existe plano, e
   por isso não é coberta por nenhuma varredura do rito: o plano, o perfil e as
   tasks se reconciliam entre si e ela fica para trás sozinha. Aconteceu em
-  2026-09-17 ([`CORR-LOOKS-056`](/docs/tasks/looks/CORR-LOOKS-056.md)): a v2
+  2026-09-17 ([`CORR-LOOKS-056`](/docs/tasks/concluidos/looks/CORR-LOOKS-056.md)): a v2
   abriu e a primeira entrega chegou com a seção ainda dizendo "ciclo fechado" e
   descrevendo um visualizador de tupla. **Task que muda o que o ciclo entrega
   ou como se roda olha para lá antes de fechar.**
@@ -890,7 +890,7 @@ sobre dado que pode não ser o que a tela desenha.
   36.072. **Toda contagem vem com o offset de onde a varredura começou**, e
   isso não é zelo: começar em 15.704 dá 11/690/611 fechando no mesmo EOF
   exato, o que passou por leitura completa do arquivo e era metade dele
-  ([`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md)). **Uma varredura que não chega
+  ([`CORR-LOOKS-010`](/docs/tasks/concluidos/looks/CORR-LOOKS-010.md)). **Uma varredura que não chega
   ao EOF não é "quase certa", é errada** — foi exatamente assim que o formato
   revelou o separador de zeros. E o controle negativo do tamanho de primitiva
   (24 → 20) tem de ficar vermelho; se ficar verde, a varredura não está

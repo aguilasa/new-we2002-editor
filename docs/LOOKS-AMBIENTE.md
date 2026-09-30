@@ -19,7 +19,7 @@ passos já refletem essa corrida. O que **não** foi medido está marcado como t
 Os caminhos saem do código (`tools/looks/`, `tools/pes2/fork.py`, `make.ps1`) e
 dos docs do ciclo ([PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md), o
 [perfil](/docs/prompts/perfil-looks.md) e as tasks de
-[docs/tasks/looks/](/docs/tasks/looks/progresso.md)).
+[docs/tasks/looks/](/docs/tasks/concluidos/looks/progresso.md)).
 
 ## O `C:\` do Windows, visto do Linux
 
@@ -168,7 +168,7 @@ O `roms/we2002-english/we2002-english.bin` do Linux é **o mesmo arquivo** que
 a cópia do Windows: SHA-1 `e16764507fedbecaedc0f4568e8597a12b871cdf` nos dois,
 medido em 2026-09-28. O state guarda o caminho do disco em que foi gravado, e o
 `oracle.py` compara só o **nome do arquivo** com o `.cue` em uso
-([CORR-LOOKS-101](/docs/tasks/looks/CORR-LOOKS-101.md)). Por isso a cópia tem de
+([CORR-LOOKS-101](/docs/tasks/concluidos/looks/CORR-LOOKS-101.md)). Por isso a cópia tem de
 continuar se chamando `we2002-english.cue`.
 
 ### 6. O emulador, e a pergunta que ficou aberta
@@ -191,7 +191,7 @@ python3 tools/looks/oracle.py --check-live      # ~10 s
 A captura do fork sai do tamanho da janela do jogo, e os limiares foram
 medidos a 864×655. O `[UI] MainWindowWidth` salvo é 864 no Windows e 800 no
 Linux. No Linux o oracle leva a janela a 864×655 sozinho, e recusa quadro de
-outro tamanho ([CORR-LOOKS-102](/docs/tasks/looks/CORR-LOOKS-102.md)).
+outro tamanho ([CORR-LOOKS-102](/docs/tasks/concluidos/looks/CORR-LOOKS-102.md)).
 
 Se um build futuro recusar o state, há dois caminhos:
 
@@ -263,18 +263,18 @@ código de saída: um `-R` que não casa nada sai 0.
 ## A primeira corrida no Linux
 
 Em 2026-09-28, seguindo os passos acima, três defeitos apareceram. Os três
-existiam desde a [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md)
+existiam desde a [LOOKS-TASK-08](/docs/tasks/concluidos/looks/08-de-onde-vem-o-boneco.md)
 e nunca se manifestaram no Windows. Cada um tem CORR e controle negativo:
 
-- [CORR-LOOKS-100](/docs/tasks/looks/CORR-LOOKS-100.md): o selftest do
+- [CORR-LOOKS-100](/docs/tasks/concluidos/looks/CORR-LOOKS-100.md): o selftest do
   `oracle.py` gravava um state sintético de 478 B por cima do slot 1 real do
   DuckStation. O caso isolava o emulador por `PES2_FORK`, que só o Windows
   respeita. Agora isola por `WE2002_LOOKS_EMULATOR_STATES` e só restaura se o
   diretório caiu dentro da pasta temporária.
-- [CORR-LOOKS-101](/docs/tasks/looks/CORR-LOOKS-101.md): a guarda de disco
+- [CORR-LOOKS-101](/docs/tasks/concluidos/looks/CORR-LOOKS-101.md): a guarda de disco
   comparava o caminho absoluto gravado no state e recusava os states do
   Windows. Agora compara o nome do arquivo.
-- [CORR-LOOKS-102](/docs/tasks/looks/CORR-LOOKS-102.md): os limiares dependiam
+- [CORR-LOOKS-102](/docs/tasks/concluidos/looks/CORR-LOOKS-102.md): os limiares dependiam
   da largura de janela salva em cada máquina. Agora a janela é fixada em
   864×655 no Linux; no Windows, uma largura diferente faz a captura ser
   recusada.
@@ -336,7 +336,7 @@ As duas máquinas têm as mesmas quatro imagens: `scph1001`, `scph5500`,
 = bios` e `Region = Auto`.
 
 A BIOS não serve só para ligar o console. A
-[LOOKS-TASK-39](/docs/tasks/looks/39-o-texto-da-ajuda.md) mediu que o texto da
+[LOOKS-TASK-39](/docs/tasks/concluidos/looks/39-o-texto-da-ajuda.md) mediu que o texto da
 caixa de ajuda **vem da ROM do console**: uma chamada de BIOS por caractere
 (vetor `0xB0`, função `0x51`) devolve um bitmap 16×15. Por isso a janela
 escreve a ajuda numa fonte de apoio (§10.3 (o) do plano).

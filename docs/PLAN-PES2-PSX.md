@@ -766,7 +766,7 @@ byte alto é 0 em toda imagem e varia nos CLUT. Listas terminam na halfword
 > contêineres).
 >
 > **E alcança este projeto.** Numa cópia da `(EsIt)`, em 2026-09-17
-> ([`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md)):
+> ([`LOOKS-TASK-20`](/docs/tasks/concluidos/looks/20-reconciliacao-e-entregaveis.md)):
 >
 > ```text
 > $ python tools/looks/texture.py --survey "<copia>/…(Es,It) (Track 1).bin"

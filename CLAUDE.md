@@ -815,7 +815,8 @@ geometria, textura e paleta **direto do disco**. Núcleo Python puro em
 dono do repositório, e isso não muda na v2.
 
 **A v1 fechou em 2026-09-17 e a v2 em 2026-09-26** (task 35) — as fases 8 a
-11, tasks 21 a 40; o ciclo continua aberto até o `/rite:close-cycle`. O alvo da v2 é a própria tela
+11, tasks 21 a 40 —, e o ciclo foi **encerrado e arquivado** em
+`docs/tasks/concluidos/looks/` pelo `/rite:close-cycle`. O alvo da v2 é a própria tela
 do jogo: a janela **é** a `LOOKS SET`, com as doze linhas trocáveis, o cursor,
 a caixa de ajuda e o boneco no painel. Entregues a tela (fase 8) e o boneco
 montado, na pose e na câmera do jogo, com altura e corpo (fase 9) e com o
@@ -827,15 +828,16 @@ isso a janela a mantém numa fonte de apoio (task 39), o close-up por linha
 (task 40), o ciclo da caminhada medido e reproduzido do arquivo (task 32) e
 o painel andando no ritmo medido do jogo — `Space` pausa, `.` anda uma
 passada (task 33), o goleiro conferido (task 34) e a figura sentada no lugar
-do jogo no painel (task 35). Fica **aberta**, com razão e destravamento na
-§10.3 (p) do plano, a animação de `FOOT`; o giro do close-up fechou em
-2026-09-29 ([CORR-LOOKS-107](docs/tasks/looks/CORR-LOOKS-107.md)).
+do jogo no painel (task 35). Ficou **aberta, sem task**, a animação de
+`FOOT`, com razão e destravamento na §10.3 (p) do plano — mexer nela é abrir
+ciclo novo; o giro do close-up fechou em
+2026-09-29 ([CORR-LOOKS-107](docs/tasks/concluidos/looks/CORR-LOOKS-107.md)).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
-[docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
+[docs/tasks/looks/](docs/tasks/concluidos/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
 `CORR-LOOKS-`, perfil [docs/prompts/perfil-looks.md](docs/prompts/perfil-looks.md)
 (as armadilhas da 70 em diante em
-[perfil-looks.armadilhas.md](docs/prompts/perfil-looks.armadilhas.md)), e roda por `/rite:execute looks`. Não estende o `we2002_core` e não compartilha
+[perfil-looks.armadilhas.md](docs/prompts/perfil-looks.armadilhas.md)), e rodava por `/rite:execute looks`. Não estende o `we2002_core` e não compartilha
 build; o que empresta é leitura de disco de `tools/pes2/` (`iso.py`, `lzss.py`,
 `mcp.py`, `fork.py`) e conhecimento de formato.
 
@@ -969,7 +971,7 @@ Cinco coisas que custam tempo se descobertas tarde:
   linha dizia o contrário até 2026-09-18 — *"uma peça pode ser desenhada sem
   carga de matriz própria: a tela mostra duas chuteiras e só uma seção de
   chuteira carrega matriz"* —, e o erro é do **instrumento**, não do jogo
-  ([`CORR-LOOKS-062`](docs/tasks/looks/CORR-LOOKS-062.md)). Cada carga é
+  ([`CORR-LOOKS-062`](docs/tasks/concluidos/looks/CORR-LOOKS-062.md)). Cada carga é
   nomeada pelo ponteiro de modelo da parada **seguinte** (o atraso acima), e a
   primeira parada de uma passada não carrega ponteiro nenhum: a carga da
   segunda chuteira é a única que fica sem quem a nomeie. Ela foi lida como
@@ -1307,8 +1309,8 @@ nunca à mão. Comandos: `/rite:status`, `/rite:execute`, `/rite:review`, `/rite
 
 **Um ciclo vivo também pode morar numa subpasta**, desde 2026-09-07. O ciclo é
 o **argumento do comando**, pelo nome — `/rite:execute port-mcr`,
-`/rite:review looks` — e os nomes são `pes2` (`docs/tasks/`), `looks`,
-`port-mcr` e `wte` (arquivado). `depends_on` não atravessa pasta, e uma pasta é
+`/rite:review port-mcr` — e os nomes são `pes2` (`docs/tasks/`) e
+`port-mcr`; `wte` e `looks` estão arquivados. `depends_on` não atravessa pasta, e uma pasta é
 ciclo se, e só se, tem `progresso.md` próprio.
 
 **Projeto encerrado é arquivado em `docs/tasks/concluidos/`.** Em 2026-09-01 as
