@@ -65,7 +65,36 @@ figure 1 (goalkeeper): 629 primitive(s) over 12 section(s)
   sleeves (576,384): 0 primitive(s)
 ```
 
-Com `--kit 00` a saída só difere na linha do cabeçalho (`diff`); num laço descartável sobre os 105 TEX o resultado por papel foi um só.
+Com `--kit 00` a saída só difere na linha do cabeçalho (`diff`). Os 105 TEX e a independência da tupla, versionados desde a [CORR-KITS-005](/docs/tasks/kits/CORR-KITS-005.md) (antes um laço descartável):
+
+```
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --all-kits     # exit 0
+Primitives per kit record, every kit: roms/japanese-shift-jis.bin
+  tuple A-A1-A-A-A: 105 kits, 1 distinct result(s)
+  105 kit(s)
+    figure 0: 593 primitive(s); kit role uniform 237
+    figure 1: 629 primitive(s); kit role uniform 429
+
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --tuple A-A1-A-A-A --tuple D-A1-A-A-A --tuple A-P1-A-A-A --tuple A-I3-A-A-A --tuple A-A1-H-A-A --tuple A-A1-A-G-A --tuple A-A1-A-A-G --tuple A-I3-A-G-A     # exit 0
+Primitives per kit record, per tuple: roms/japanese-shift-jis.bin
+  kit TEX_A4
+  A-A1-A-A-A     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  D-A1-A-A-A     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  A-P1-A-A-A     figure 0: 603 total, kit role uniform 237; figure 1: 639 total, kit role uniform 429
+  A-I3-A-A-A     figure 0: 598 total, kit role uniform 237; figure 1: 634 total, kit role uniform 429
+  A-A1-H-A-A     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  A-A1-A-G-A     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  A-A1-A-A-G     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  A-I3-A-G-A     figure 0: 598 total, kit role uniform 237; figure 1: 634 total, kit role uniform 429
+  kit roles identical in all 8 tuples: yes (1 distinct)
+
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --all-kits --negative     # exit 0
+Planted: 2 image record(s) of TEX_A4 moved from (576,256) to (0,0)
+  clean    105 kits, 1 distinct result(s): 105
+  planted  105 kits, 2 distinct result(s): 104, 1  [TEX_A4]
+  kit roles of TEX_A4, clean vs planted: 2 distinct
+red
+```
 
 Controle de totais — o `looks` já imprime o mesmo número por figura:
 
@@ -96,7 +125,7 @@ O das mangas em (560, 256) prova que a contagem por quatro cantos enxerga regist
 ### Problemas encontrados
 
 - O primeiro desenho do controle positivo pôs as mangas em (576, 256) e deu `FAILED 0 -> 0`: o papel é lido pela origem, e um registro ali se chama "uniforme". Refeito em (560, 256).
-- Só a tupla `A-A1-A-A-A` foi medida por figura; a tupla só troca a cabeça, que amostra o `DAT2D`.
+- Só a tupla `A-A1-A-A-A` foi medida por figura; a tupla só troca a cabeça, que amostra o `DAT2D`. Medido depois, com oito tuplas, pela [CORR-KITS-005](/docs/tasks/kits/CORR-KITS-005.md).
 - **Closed** — commit `f71b47d6` (2026-09-30): feat(kits): count each figure's primitives per kit record (prims)
   - Files (`git show --name-status f71b47d6`):
     - `M docs/PLAN-KITS-PY.md`

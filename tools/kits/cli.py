@@ -8,6 +8,8 @@ Usage:
     python tools/kits/cli.py rects --negative <image.bin> X,Y [X,Y ...]
     python tools/kits/cli.py rects <image.bin> X,Y [X,Y ...]
     python tools/kits/cli.py prims [--kit TAG] [--negative] <image.bin>
+    python tools/kits/cli.py prims --all-kits [--tuple T] [--negative] <image.bin>
+    python tools/kits/cli.py prims [--kit TAG] --tuple T [--tuple T ...] <image.bin>
     python tools/kits/cli.py uv [--kit TAG] [--json | --negative] <image.bin>
 """
 
@@ -188,11 +190,63 @@ def print_prims_controls(controls) -> int:
     return 1 if bad else 0
 
 
+def print_prims_all_kits(sweep) -> None:
+    print("Primitives per kit record, every kit: %s" % sweep.source)
+    print("  tuple %s: %d kits, %d distinct result(s)"
+          % (sweep.tuple_text, sweep.kits, len(sweep.groups)))
+    for figures, tags in sweep.groups:
+        print("  %3d kit(s)%s" % (len(tags), _tags(tags)))
+        for f in figures:
+            print("    figure %d: %d primitive(s); kit role %s"
+                  % (f.figure, f.total, _pairs(f.first)))
+
+
+def print_prims_tuples(reports) -> None:
+    print("Primitives per kit record, per tuple: %s" % reports[0].source)
+    print("  kit TEX_%s" % reports[0].kit)
+    for r in reports:
+        print("  %-14s %s" % (r.tuple_text, "; ".join(
+            "figure %d: %d total, kit role %s" % (f.figure, f.total, _pairs(f.first))
+            for f in r.figures)))
+    distinct = len({survey_mod.kit_roles_of(r) for r in reports})
+    print("  kit roles identical in all %d tuples: %s (%d distinct)"
+          % (len(reports), _yes(distinct == 1), distinct))
+
+
+def print_sweep_control(c) -> int:
+    """Print the planted kit against both sweeps; exit 1 unless both split."""
+    print("Planted: %d image record(s) of TEX_%s moved from (576,256) to (%d,%d)"
+          % ((c.moved, c.kit) + survey_mod.PRIMS_AWAY))
+    for label, sweep in (("clean", c.clean), ("planted", c.planted)):
+        print("  %-8s %d kits, %d distinct result(s): %s"
+              % (label, sweep.kits, len(sweep.groups),
+                 ", ".join("%d%s" % (len(t), _tags(t)) for _, t in sweep.groups)))
+    print("  kit roles of TEX_%s, clean vs planted: %d distinct" % (c.kit, c.roles_distinct))
+    print("red" if c.red else "GREEN (control failed)")
+    return 0 if c.red else 1
+
+
 def cmd_prims(args) -> int:
+    tuples = args.tuple or [survey_mod.PRIMS_TUPLE]
     try:
+        if args.negative and args.all_kits:
+            if len(tuples) > 1:
+                print("prims: --all-kits takes one --tuple", file=sys.stderr)
+                return 2
+            return print_sweep_control(
+                survey_mod.prims_all_kits_negative_image(args.image, args.kit, tuples[0]))
         if args.negative:
             return print_prims_controls(survey_mod.prims_negative_image(args.image, args.kit))
-        result = survey_mod.prims_image(args.image, args.kit)
+        if args.all_kits:
+            if len(tuples) > 1:
+                print("prims: --all-kits takes one --tuple", file=sys.stderr)
+                return 2
+            print_prims_all_kits(survey_mod.prims_all_kits_image(args.image, tuples[0]))
+            return 0
+        if len(tuples) > 1:
+            print_prims_tuples(survey_mod.prims_tuples_image(args.image, args.kit, tuples))
+            return 0
+        result = survey_mod.prims_image(args.image, args.kit, tuples[0])
     except survey_mod.SurveyError as exc:
         print("prims: %s" % exc, file=sys.stderr)
         return 1
@@ -283,6 +337,11 @@ def main(argv=None) -> int:
                    help="kit tag (default %s)" % survey_mod.layout.KIT_ON_SCREEN)
     p.add_argument("--negative", action="store_true",
                    help="move the kit's sleeves and uniform records and show the counts")
+    p.add_argument("--all-kits", action="store_true",
+                   help="count with every kit and group identical results")
+    p.add_argument("--tuple", action="append", metavar="T",
+                   help="looks tuple (default %s); repeat it to compare tuples"
+                   % survey_mod.PRIMS_TUPLE)
     p.set_defaults(fn=cmd_prims)
     p = sub.add_parser("uv", help="each kit primitive's UV rect in the 256x128 work bitmap")
     p.add_argument("image", help="the Japanese data track (.bin)")

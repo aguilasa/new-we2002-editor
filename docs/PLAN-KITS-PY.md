@@ -350,7 +350,14 @@ cantos de cada primitiva conferidos contra todo registro do TEX):
 da `LOOKS SET`.** Tudo o que o boneco tira do TEX sai da imagem de uniforme: o
 jogador de linha da metade esquerda, o goleiro da direita, que vai até a última
 linha (383) e nenhuma além. A contagem é a mesma nos 105 TEX e independe da
-tupla fora a cabeça, que amostra o `DAT2D`. Fica aberta a outra metade: se a
+tupla fora a cabeça, que amostra o `DAT2D`: `python tools/kits/cli.py prims
+roms/japanese-shift-jis.bin --all-kits` dá 105 kits e um resultado distinto, e
+`--tuple` repetido com oito tuplas, uma por campo mexido, dá os papéis do kit
+iguais nas oito (237/429) com o total mudando só com o cabelo (603/639 em
+`A-P1-A-A-A`, 598/634 em `A-I3-A-G-A`). O controle das duas conferências é
+`--all-kits --negative`: com o uniforme do `TEX_A4` tirado do lugar o
+agrupamento se parte em 104 e 1
+([CORR-KITS-005](/docs/tasks/kits/CORR-KITS-005.md)). Fica aberta a outra metade: se a
 manga longa e a braçadeira são outra geometria, fora do `EDT_MOD.BIN` — a
 imagem existe e o jogo a envia à VRAM, mas quem a desenha não está nesta tela.
 

@@ -750,12 +750,22 @@ def prims_files(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
 
 def read_prims_files(image_path: str, kit: str) -> dict:
     """The four files the draw list reads, through the looks disc guard."""
-    import iso_source
-
     if kit not in layout.KIT_TAGS:
         raise SurveyError("TEX_%s is not one of the %d kit containers."
                           % (kit, len(layout.KIT_TAGS)))
-    paths = (layout.EDT_MOD, layout.MODEL, layout.DAT2D, layout.kit_path(kit))
+    return _read_disc_files(image_path, (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
+                                         layout.kit_path(kit)))
+
+
+def read_prims_all_kits(image_path: str) -> dict:
+    """The three model files and every kit container, in one disc open."""
+    return _read_disc_files(image_path, (layout.EDT_MOD, layout.MODEL, layout.DAT2D)
+                            + tuple(layout.kit_path(k) for k in layout.KIT_TAGS))
+
+
+def _read_disc_files(image_path: str, paths) -> dict:
+    import iso_source
+
     try:
         with iso_source.open_disc(image_path) as disc:
             return {p: disc.read(p) for p in paths}
@@ -767,9 +777,67 @@ def read_prims_files(image_path: str, kit: str) -> dict:
         raise SurveyError("%s is not a readable data track: %s" % (image_path, exc)) from exc
 
 
-def prims_image(image_path: str, kit: str = layout.KIT_ON_SCREEN) -> PrimsReport:
+def prims_image(image_path: str, kit: str = layout.KIT_ON_SCREEN,
+                tuple_text: str = PRIMS_TUPLE) -> PrimsReport:
     """prims_files() over the disc at *image_path*."""
-    return prims_files(read_prims_files(image_path, kit), kit, source=image_path)
+    return prims_files(read_prims_files(image_path, kit), kit, tuple_text, source=image_path)
+
+
+# -- the same count over every kit, and over several tuples ---------------
+#
+# PLAN-KITS-PY.md section 4.3 says the count is the same in the 105 kits and
+# does not depend on the tuple beyond the head.  These two sweeps are what
+# that sentence rests on.
+
+@dataclass(frozen=True)
+class KitsSweep:
+    """prims_files() over every kit, grouped by identical result."""
+
+    source: str
+    tuple_text: str
+    groups: tuple   # ((figures, (kit tags sorted)), ...), most kits first
+
+    @property
+    def kits(self) -> int:
+        return sum(len(tags) for _, tags in self.groups)
+
+
+def prims_all_kits(files: Mapping[str, bytes], tuple_text: str = PRIMS_TUPLE,
+                   source: str = "") -> KitsSweep:
+    """Count the primitives with every kit container of *files* and group
+    the kits whose two figures come out the same.  Pure: no I/O."""
+    tags = [k for k in layout.KIT_TAGS if layout.kit_path(k) in files]
+    if not tags:
+        raise NoKitsFound("No kit container was found in %s." % (source or "the input"))
+    groups = {}
+    for tag in tags:
+        figures = prims_files(files, tag, tuple_text, source).figures
+        groups.setdefault(figures, []).append(tag)
+    return KitsSweep(source=source, tuple_text=tuple_text,
+                     groups=tuple(sorted(((f, tuple(t)) for f, t in groups.items()),
+                                         key=lambda g: (-len(g[1]), g[1]))))
+
+
+def prims_all_kits_image(image_path: str, tuple_text: str = PRIMS_TUPLE) -> KitsSweep:
+    """prims_all_kits() over the disc at *image_path*."""
+    return prims_all_kits(read_prims_all_kits(image_path), tuple_text, source=image_path)
+
+
+def kit_roles_of(report: PrimsReport) -> tuple:
+    """What a tuple sweep compares: per figure, the kit roles by both counts --
+    the part of the result the body decides and the head does not."""
+    return tuple((f.figure, f.first, f.touch) for f in report.figures)
+
+
+def prims_tuples(files: Mapping[str, bytes], kit: str, tuple_texts,
+                 source: str = "") -> tuple:
+    """prims_files() once per tuple.  Pure: no I/O."""
+    return tuple(prims_files(files, kit, t, source) for t in tuple_texts)
+
+
+def prims_tuples_image(image_path: str, kit: str, tuple_texts) -> tuple:
+    """prims_tuples() over the disc at *image_path*."""
+    return prims_tuples(read_prims_files(image_path, kit), kit, tuple_texts, source=image_path)
 
 
 # -- negative controls of the primitive count ----------------------------
@@ -871,6 +939,48 @@ def prims_negative(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
 def prims_negative_image(image_path: str, kit: str = layout.KIT_ON_SCREEN) -> tuple:
     """prims_negative() over the disc at *image_path*."""
     return prims_negative(read_prims_files(image_path, kit), kit, source=image_path)
+
+
+@dataclass(frozen=True)
+class SweepControl:
+    """The every-kit sweep and the tuple comparison, clean and with one kit's
+    uniform moved away: the two checks behind section 4.3, seen failing."""
+
+    kit: str
+    moved: int
+    clean: KitsSweep
+    planted: KitsSweep
+    roles_distinct: int   # kit_roles_of() of the kit, clean vs planted
+
+    @property
+    def red(self) -> bool:
+        alone = any(tags == (self.kit,) for _, tags in self.planted.groups)
+        return (len(self.clean.groups) == 1 and len(self.planted.groups) == 2
+                and alone and self.roles_distinct == 2)
+
+
+def prims_all_kits_negative(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
+                            tuple_text: str = PRIMS_TUPLE, source: str = "") -> SweepControl:
+    """Move *kit*'s uniform records to PRIMS_AWAY and run both sweeps' checks
+    again.  Pure: *files* is not modified."""
+    path = layout.kit_path(kit)
+    if path not in files:
+        raise SurveyError("The sweep control needs %s, which %s does not hold."
+                          % (path, source or "the input"))
+    planted = dict(files)
+    planted[path], moved = _move_images(files[path], (576, 256), PRIMS_AWAY)
+    roles = {kit_roles_of(prims_files(f, kit, tuple_text, source)) for f in (files, planted)}
+    return SweepControl(kit=kit, moved=moved,
+                        clean=prims_all_kits(files, tuple_text, source),
+                        planted=prims_all_kits(planted, tuple_text, source),
+                        roles_distinct=len(roles))
+
+
+def prims_all_kits_negative_image(image_path: str, kit: str = layout.KIT_ON_SCREEN,
+                                  tuple_text: str = PRIMS_TUPLE) -> SweepControl:
+    """prims_all_kits_negative() over the disc at *image_path*."""
+    return prims_all_kits_negative(read_prims_all_kits(image_path), kit, tuple_text,
+                                   source=image_path)
 
 
 # -- the UV rects in the work bitmap -------------------------------------
