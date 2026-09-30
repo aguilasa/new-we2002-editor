@@ -47,16 +47,29 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#4.4).
 ### Evidência
 
 ```
-$ python tools/kits/cli.py rects roms/japanese-shift-jis.bin 608,256 704,256 576,256 576,384
-  236 files read, 131 hold records; 9 skipped        (1 Form 2, 8 fora da trilha)
+$ python tools/kits/cli.py rects roms/japanese-shift-jis.bin 608,256 704,256 576,256 576,384     # exit 0
+VRAM point owners: roms/japanese-shift-jis.bin
+  236 files read, 131 hold records; 9 skipped
+    skipped /MOVIE/WE2002.STR (Form 2)
+    skipped /SD/DA/01GOALDM.DA (outside the track)
+    skipped /SD/DA/02GMOVER.DA (outside the track)
+    skipped /SD/DA/03SELE01.DA (outside the track)
+    skipped /SD/DA/04SELE02.DA (outside the track)
+    skipped /SD/DA/05RSLT01.DA (outside the track)
+    skipped /SD/DA/06TITLEV.DA (outside the track)
+    skipped /SD/DA/07STAFF1.DA (outside the track)
+    skipped /SD/DA/08STAFF2.DA (outside the track)
 (608,256): 211 record(s) in 106 file(s) cover it, 0 start there
-  image origin ( 576, 256)  64x128 hw  covers only  105 file(s): /BIN/TEX_00.BIN, ...
+  image origin ( 576, 256)  64x128 hw  covers only  105 file(s): /BIN/TEX_00.BIN, /BIN/TEX_01.BIN, /BIN/TEX_02.BIN ...
   image origin ( 592, 256)  32x128 hw  covers only    1 file(s): /SELECT2.BIN
 (704,256): 116 record(s) in 116 file(s) cover it, 116 start there
-  image origin ( 704, 256)  64x 64 hw  STARTS here  105 file(s): /BIN/TEX_00.BIN, ...
+  image origin ( 704, 256)  64x 64 hw  STARTS here  105 file(s): /BIN/TEX_00.BIN, /BIN/TEX_01.BIN, /BIN/TEX_02.BIN ...
   image origin ( 704, 256)  32x128 hw  STARTS here   11 file(s): /BIN/DATSEL3.BIN, /BIN/EDT_2D.BIN, /BIN/LC_AF.BIN ...
 (576,256): 211 record(s) in 106 file(s) cover it, 211 start there
+  image origin ( 576, 256)  64x128 hw  STARTS here  105 file(s): /BIN/TEX_00.BIN, /BIN/TEX_01.BIN, /BIN/TEX_02.BIN ...
+  image origin ( 576, 256)  32x128 hw  STARTS here    1 file(s): /SELECT2.BIN
 (576,384): 210 record(s) in 105 file(s) cover it, 210 start there
+  image origin ( 576, 384)  64x128 hw  STARTS here  105 file(s): /BIN/TEX_00.BIN, /BIN/TEX_01.BIN, /BIN/TEX_02.BIN ...
 
 $ python tools/looks/atlas.py --elsewhere roms/japanese-shift-jis.bin
       ( 576, 256)   1520 corner(s)  in 107 container(s): DATSEL2.BIN, SELECT2.BIN, TEX_00.BIN ...

@@ -5,7 +5,7 @@ origin: KITS-TASK-02
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -55,3 +55,27 @@ $ grep -c 'VRAM point owners' docs/tasks/kits/02-retangulos-608-e-704.md
 Hoje dá 0; depois, pelo menos 1, e `grep -n 'fora da trilha'` não acha nada dentro do bloco `$`.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `10bd0e3a`)
+
+```text
+$ grep -c 'VRAM point owners' docs/tasks/kits/02-retangulos-608-e-704.md
+0
+$ grep -n 'fora da trilha' docs/tasks/kits/02-retangulos-608-e-704.md
+51:  236 files read, 131 hold records; 9 skipped        (1 Form 2, 8 fora da trilha)
+```
+
+REPRODUCED. Causa raiz confirmada: a saída do comando (cabeçalho, nove `skipped`, três nomes por grupo, as linhas de (576,256) e (576,384)) não bate com o bloco.
+
+### O que foi feito
+
+Bloco `$ python tools/kits/cli.py rects ...` da KITS-TASK-02 trocado pela saída literal do mesmo comando na HEAD `498109fa` (exit 0). Nada fora dele mudou; o `atlas.py --elsewhere` logo abaixo segue como trecho de duas linhas, fora do escopo desta CORR.
+
+### Verificação
+
+```text
+$ grep -c 'VRAM point owners' docs/tasks/kits/02-retangulos-608-e-704.md
+1
+$ grep -n 'fora da trilha' docs/tasks/kits/02-retangulos-608-e-704.md
+(sem saída, exit 1)
+```
