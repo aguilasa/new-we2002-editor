@@ -46,6 +46,9 @@ serialized = [
   { name = "tela", why = "nada abre janela visível: :98 no Linux, janela em -32000 no Windows" },
 ]
 
+[commit]
+co_author_footer = false
+
 [vocab]
 task_types = ["decisão", "ferramenta", "verificação", "engenharia-reversa", "closing", "projeto", "implementação", "infra", "extração", "documentação", "infraestrutura", "investigação"]
 
