@@ -5,10 +5,10 @@ origin: KITS-TASK-03
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: d197ec19
 ---
 
 # CORR-KITS-007 — State in §4.3 where the zone-map half of the question is answered
@@ -75,3 +75,7 @@ $ sed -n '/^### 4.3/,/^### 4.4/p' docs/PLAN-KITS-PY.md | grep -c 'mapa de zonas'
 $ sed -n 329,360p docs/PLAN-KITS-PY.md | grep -c 'mapa de zonas'
 1
 ```
+- **Closed** — commit `d197ec19` (2026-09-30): docs(kits): say in plan 4.3 that the zone-map half is answered by 4.6
+  - Files (`git show --name-status d197ec19`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-007.md`
