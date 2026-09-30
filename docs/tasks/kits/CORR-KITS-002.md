@@ -5,10 +5,10 @@ origin: KITS-TASK-01
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: b9bce55b
 ---
 
 # CORR-KITS-002 — Version the survey's negative controls instead of an ad hoc probe
@@ -102,3 +102,9 @@ $ grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py
 ```
 
 Ligar o comando ao `ctest` (`kits_image`) é da KITS-TASK-08.
+- **Closed** — commit `b9bce55b` (2026-09-30): fix(kits): version the survey negative controls as cli.py survey --negative
+  - Files (`git show --name-status b9bce55b`):
+    - `M docs/tasks/kits/01-levantamento-do-tex.md`
+    - `M docs/tasks/kits/CORR-KITS-002.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/survey.py`
