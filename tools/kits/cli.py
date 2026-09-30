@@ -7,6 +7,7 @@ Usage:
     python tools/kits/cli.py rects [--all] <image.bin> X,Y [X,Y ...]
     python tools/kits/cli.py rects --negative <image.bin> X,Y [X,Y ...]
     python tools/kits/cli.py rects <image.bin> X,Y [X,Y ...]
+    python tools/kits/cli.py prims [--kit TAG] [--negative] <image.bin>
 """
 
 from __future__ import annotations
@@ -150,6 +151,53 @@ def cmd_rects(args) -> int:
     return 0
 
 
+def _pairs(pairs) -> str:
+    return ", ".join("%s %d" % kv for kv in pairs) if pairs else "none"
+
+
+def print_prims(r) -> None:
+    print("Primitives per kit record: %s" % r.source)
+    print("  kit TEX_%s, tuple %s, geometry and resolution by tools/looks draw_list"
+          % (r.kit, r.tuple_text))
+    for f in r.figures:
+        print("figure %d (%s): %d primitive(s) over %d section(s)"
+              % (f.figure, "outfield" if f.figure == 0 else "goalkeeper",
+                 f.total, f.sections))
+        print("  %-40s %s" % ("container (draw list, first corner)", _pairs(f.containers)))
+        print("  %-40s %s" % ("kit role (draw list, first corner)", _pairs(f.first)))
+        print("  %-40s %s" % ("kit role (any of four corners)", _pairs(f.touch)))
+        print("  %-40s %d" % ("a corner in a DAT2D image record", f.touch_dat2d))
+        print("  %-40s %d" % ("a corner in no record of either file", f.touch_none))
+        print("  %-40s %d" % ("corners touch a kit role first missed", f.disagree))
+        print("  %-40s %s" % ("VRAM box of the corners in kit records",
+                               "(%d,%d)..(%d,%d)" % f.kit_box if f.kit_box else "none"))
+        print("  sleeves (576,384): %d primitive(s)" % f.sleeves)
+
+
+def print_prims_controls(controls) -> int:
+    """Print each planted move; exit 1 unless every expectation held."""
+    bad = 0
+    for c in controls:
+        bad += not c.ok
+        print("  %-28s moved %d  figure %d  %-24s %3d -> %3d  %-17s %s"
+              % (c.name, c.moved, c.figure, c.count, c.clean, c.after, c.expect,
+                 "held" if c.ok else "FAILED"))
+    print("%d of %d expectations held" % (len(controls) - bad, len(controls)))
+    return 1 if bad else 0
+
+
+def cmd_prims(args) -> int:
+    try:
+        if args.negative:
+            return print_prims_controls(survey_mod.prims_negative_image(args.image, args.kit))
+        result = survey_mod.prims_image(args.image, args.kit)
+    except survey_mod.SurveyError as exc:
+        print("prims: %s" % exc, file=sys.stderr)
+        return 1
+    print_prims(result)
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -166,6 +214,13 @@ def main(argv=None) -> int:
     p.add_argument("--negative", action="store_true",
                    help="plant the TEX_A4 origin shift and show the counts it moves")
     p.set_defaults(fn=cmd_rects)
+    p = sub.add_parser("prims", help="how many primitives of each figure sample each kit record")
+    p.add_argument("image", help="the Japanese data track (.bin)")
+    p.add_argument("--kit", default=survey_mod.layout.KIT_ON_SCREEN,
+                   help="kit tag (default %s)" % survey_mod.layout.KIT_ON_SCREEN)
+    p.add_argument("--negative", action="store_true",
+                   help="move the kit's sleeves and uniform records and show the counts")
+    p.set_defaults(fn=cmd_prims)
     args = parser.parse_args(argv)
     return args.fn(args)
 

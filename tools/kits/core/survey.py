@@ -23,6 +23,7 @@ import hashlib
 import os
 import sys
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Mapping, Optional
 
 _TOOLS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -556,3 +557,301 @@ def rects_negative_image(image_path: str, points) -> tuple:
     """rects_negative() over every readable file of the disc at *image_path*."""
     files, _ = read_all_files(image_path)
     return rects_negative(files, points, source=image_path)
+
+
+# -- which primitive samples which kit record ----------------------------
+#
+# PLAN-KITS-PY.md section 4.3: for each figure of the LOOKS SET, how many
+# primitives sample each rectangle of the kit container, read through the
+# draw list of `tools/looks` and never remapped here.  Two counts per role,
+# because the draw list resolves only the FIRST record covering the FIRST
+# corner (section 1.2): "first" is that resolution, "touch" is every kit
+# record any of the four corners falls in.
+
+KIT_ROLES = MappingProxyType({
+    (576, 256): "uniform",
+    (576, 384): "sleeves",
+    (704, 256): "flag",
+    (768, 384): "referee",
+})
+"""Role of a kit image record by its VRAM origin, as section 1.1 measured."""
+
+ROLE_ORDER = ("uniform", "sleeves", "flag", "referee")
+SLEEVES = (576, 384)
+PRIMS_FIGURES = (0, 1)
+PRIMS_TUPLE = "A-A1-A-A-A"
+"""The tuple the figures are drawn in: the reference `assembly --check-image`
+walks.  The tuple picks the head and its colours; the body's pieces, which
+sample the kit, are the figure's own."""
+
+CONTAINER_DAT2D = "DAT2D"
+CONTAINER_KIT = "kit"
+CONTAINER_NONE = "nothing"
+CONTAINER_ORDER = (CONTAINER_DAT2D, CONTAINER_KIT, CONTAINER_NONE)
+
+
+def role_of(x: int, y: int) -> str:
+    """The role of a kit image record at origin (x, y); an unknown origin is
+    named by it, so a container of another shape shows up instead of hiding."""
+    return KIT_ROLES.get((x, y), "other (%d,%d)" % (x, y))
+
+
+@dataclass(frozen=True)
+class FigurePrims:
+    """What one figure's primitives sample, for one kit."""
+
+    figure: int
+    total: int
+    sections: int
+    containers: tuple      # ((container label, primitives), ...)
+    first: tuple           # ((role, primitives), ...) by the draw list's resolution
+    touch: tuple           # ((role, primitives), ...) by any of the four corners
+    touch_dat2d: int       # primitives with a corner in a DAT2D image record
+    touch_none: int        # primitives with a corner in no record of either file
+    disagree: int          # primitives whose corners touch a kit role the first missed
+    kit_box: Optional[tuple]  # (x0, y0, x1, y1) of the corners in kit records, inclusive
+
+    def first_of(self, role: str) -> int:
+        return dict(self.first).get(role, 0)
+
+    def touch_of(self, role: str) -> int:
+        return dict(self.touch).get(role, 0)
+
+    @property
+    def sleeves(self) -> int:
+        """Primitives sampling the sleeves image, by either count."""
+        return max(self.first_of("sleeves"), self.touch_of("sleeves"))
+
+
+@dataclass(frozen=True)
+class PrimsReport:
+    source: str
+    kit: str
+    tuple_text: str
+    figures: tuple
+
+
+def _ordered(counts: dict, order) -> tuple:
+    keys = [k for k in order if k in counts] + sorted(k for k in counts if k not in order)
+    return tuple((k, counts[k]) for k in keys)
+
+
+def _corners_of(entry, primitive) -> list:
+    """The four VRAM texels of one draw-list entry, with the tuple's band --
+    the same texcoords the draw list and scene.py sample."""
+    import atlas
+
+    if entry["texcoords"] is not None:
+        coords = entry["texcoords"]
+    else:
+        coords = [(u, v + entry["band"]) for u, v in primitive.texcoords]
+    return [atlas.texel(primitive, u, v) for u, v in coords]
+
+
+def _covering(records, point) -> list:
+    return [r for r in records if covers(r, point)]
+
+
+def figure_prims(files: Mapping[str, bytes], values, figure: int, kit: str) -> FigurePrims:
+    """Count one figure's primitives per container and per kit role.
+    Pure: *files* is {disc path: bytes} and is not modified."""
+    import assembly
+    import section
+    import texture
+
+    kit_path = layout.kit_path(kit)
+    kit_images = texture.images(files[kit_path])
+    dat_images = texture.images(files[layout.DAT2D])
+    by_offset = {r.offset: r for r in kit_images}
+    try:
+        parts = assembly.draw_list(files, values, figure, kit)
+    except assembly.BadAssembly as exc:
+        raise SurveyError("The draw list of figure %d refused: %s" % (figure, exc)) from exc
+
+    scans = {}
+    containers, first, touch = {}, {}, {}
+    touch_dat2d = touch_none = disagree = 0
+    kit_points = []
+    for entry in parts:
+        name = entry["file"]
+        if name not in scans:
+            scans[name] = section.scan(files[name], layout.GEOMETRY_START[name])
+        primitive = scans[name].sections[entry["section"]].primitives[entry["primitive"]]
+
+        if entry["container"] is None:
+            label, first_role = CONTAINER_NONE, None
+        elif entry["container"] == kit_path:
+            rec = by_offset[entry["image"]]
+            label, first_role = CONTAINER_KIT, role_of(rec.x, rec.y)
+        elif entry["container"] == layout.DAT2D:
+            label, first_role = CONTAINER_DAT2D, None
+        else:
+            label, first_role = entry["container"], None
+        containers[label] = containers.get(label, 0) + 1
+        if first_role is not None:
+            first[first_role] = first.get(first_role, 0) + 1
+
+        roles, in_dat2d, nowhere = set(), False, False
+        for point in _corners_of(entry, primitive):
+            kit_hit = _covering(kit_images, point)
+            dat_hit = _covering(dat_images, point)
+            roles.update(role_of(r.x, r.y) for r in kit_hit)
+            if kit_hit:
+                kit_points.append(point)
+            in_dat2d = in_dat2d or bool(dat_hit)
+            nowhere = nowhere or not (kit_hit or dat_hit)
+        for role in roles:
+            touch[role] = touch.get(role, 0) + 1
+        touch_dat2d += in_dat2d
+        touch_none += nowhere
+        disagree += bool(roles - {first_role})
+
+    return FigurePrims(
+        figure=figure, total=len(parts),
+        sections=len({(p["file"], p["section"]) for p in parts}),
+        containers=_ordered(containers, CONTAINER_ORDER),
+        first=_ordered(first, ROLE_ORDER),
+        touch=_ordered(touch, ROLE_ORDER),
+        touch_dat2d=touch_dat2d, touch_none=touch_none, disagree=disagree,
+        kit_box=(min(x for x, _ in kit_points), min(y for _, y in kit_points),
+                 max(x for x, _ in kit_points), max(y for _, y in kit_points))
+        if kit_points else None)
+
+
+def prims_files(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
+                tuple_text: str = PRIMS_TUPLE, source: str = "") -> PrimsReport:
+    """figure_prims() for both figures.  Pure: no I/O."""
+    import looks
+
+    try:
+        values = looks.parse_tuple(tuple_text)
+    except looks.BadLooks as exc:
+        raise SurveyError("The tuple %s is refused: %s" % (tuple_text, exc)) from exc
+    return PrimsReport(source=source, kit=kit, tuple_text=tuple_text,
+                       figures=tuple(figure_prims(files, values, f, kit)
+                                     for f in PRIMS_FIGURES))
+
+
+def read_prims_files(image_path: str, kit: str) -> dict:
+    """The four files the draw list reads, through the looks disc guard."""
+    import iso_source
+
+    if kit not in layout.KIT_TAGS:
+        raise SurveyError("TEX_%s is not one of the %d kit containers."
+                          % (kit, len(layout.KIT_TAGS)))
+    paths = (layout.EDT_MOD, layout.MODEL, layout.DAT2D, layout.kit_path(kit))
+    try:
+        with iso_source.open_disc(image_path) as disc:
+            return {p: disc.read(p) for p in paths}
+    except OSError as exc:
+        raise SurveyError("Could not open %s: %s" % (image_path, exc.strerror or exc)) from exc
+    except layout.WrongDisc as exc:
+        raise SurveyError(str(exc)) from exc
+    except ValueError as exc:
+        raise SurveyError("%s is not a readable data track: %s" % (image_path, exc)) from exc
+
+
+def prims_image(image_path: str, kit: str = layout.KIT_ON_SCREEN) -> PrimsReport:
+    """prims_files() over the disc at *image_path*."""
+    return prims_files(read_prims_files(image_path, kit), kit, source=image_path)
+
+
+# -- negative controls of the primitive count ----------------------------
+
+PRIMS_AWAY = (0, 0)
+"""Where a planted record is moved so no primitive can sample it: the display
+area at the top-left of VRAM, which no texture page of the figures names."""
+
+
+def _move_images(data: bytes, origin, to) -> tuple:
+    """(new bytes, how many records moved): every image record at *origin*
+    gets origin *to*."""
+    out = bytearray(data)
+    moved = 0
+    for e in bin_archive.entries(data):
+        if e.is_image and (e.x, e.y) == tuple(origin):
+            out[e.pos + 2:e.pos + 4] = to[0].to_bytes(2, "little")
+            out[e.pos + 4:e.pos + 6] = to[1].to_bytes(2, "little")
+            moved += 1
+    return bytes(out), moved
+
+
+@dataclass(frozen=True)
+class PrimsControl:
+    """One planted move, the count it had to move, and whether it did."""
+
+    name: str
+    moved: int
+    figure: int
+    count: str
+    clean: int
+    after: int
+    expect: str
+
+    @property
+    def ok(self) -> bool:
+        if self.expect == EXPECT_ZERO:
+            return self.after == 0
+        if self.expect == EXPECT_DROP:
+            return self.clean > 0 and self.after == 0
+        return self.after > 0
+
+
+PRIMS_OVERLAP = (560, 256)
+"""Where the positive control puts the sleeves: 16 halfwords left of the
+uniform, so its rect covers the uniform's columns 576..623 from behind."""
+
+EXPECT_ZERO = "stays zero"
+EXPECT_DROP = "drops to zero"
+EXPECT_RISE = "rises above zero"
+
+PRIMS_CONTROLS = (
+    ("sleeves moved to (0,0)", SLEEVES, PRIMS_AWAY,
+     (("sleeves", "first", EXPECT_ZERO), ("sleeves", "touch", EXPECT_ZERO))),
+    ("uniform moved to (0,0)", (576, 256), PRIMS_AWAY,
+     (("uniform", "first", EXPECT_DROP), ("uniform", "touch", EXPECT_DROP))),
+    ("sleeves moved to (560,256)", SLEEVES, PRIMS_OVERLAP,
+     ((role_of(*PRIMS_OVERLAP), "touch", EXPECT_RISE),
+      (role_of(*PRIMS_OVERLAP), "first", EXPECT_ZERO),
+      ("", "disagree", EXPECT_RISE))),
+)
+"""(name, origin, to, ((role, count, expectation), ...)).  The third is the
+positive control of the any-corner count: the sleeves records, moved to
+overlap the uniform rect from behind it in file order, are never the draw
+list's first match -- and have to be counted all the same.  It is moved to
+(560,256) and not onto (576,256) because the role is read off the origin: a
+record lying exactly on the uniform's origin is named "uniform"."""
+
+
+def _count_of(fig: FigurePrims, role: str, count: str) -> int:
+    if count == "first":
+        return fig.first_of(role)
+    if count == "touch":
+        return fig.touch_of(role)
+    return fig.disagree
+
+
+def prims_negative(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
+                   source: str = "") -> tuple:
+    """Plant each move of PRIMS_CONTROLS in the kit and measure again.
+    Pure: *files* is not modified."""
+    path = layout.kit_path(kit)
+    clean = prims_files(files, kit, source=source)
+    out = []
+    for name, origin, to, checks in PRIMS_CONTROLS:
+        planted = dict(files)
+        planted[path], moved = _move_images(files[path], origin, to)
+        after = prims_files(planted, kit, source=source)
+        for a, b in zip(clean.figures, after.figures):
+            for role, count, expect in checks:
+                out.append(PrimsControl(name=name, moved=moved, figure=a.figure,
+                                        count=" ".join(t for t in (role, count) if t),
+                                        clean=_count_of(a, role, count),
+                                        after=_count_of(b, role, count),
+                                        expect=expect))
+    return tuple(out)
+
+
+def prims_negative_image(image_path: str, kit: str = layout.KIT_ON_SCREEN) -> tuple:
+    """prims_negative() over the disc at *image_path*."""
+    return prims_negative(read_prims_files(image_path, kit), kit, source=image_path)

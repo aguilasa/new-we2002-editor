@@ -336,6 +336,24 @@ retângulo do mapa de zonas. Se a manga longa e a braçadeira forem outra
 geometria (outro arquivo, outra lista de seções), elas entram só quando essa
 geometria for lida — **nunca** por remapeamento de UV feito à mão.
 
+**Primeira metade medida em 2026-09-30 ([KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md)),**
+com `python tools/kits/cli.py prims roms/japanese-shift-jis.bin` (tupla
+`A-A1-A-A-A`, geometria e resolução pelo `draw_list` do `looks`, e os quatro
+cantos de cada primitiva conferidos contra todo registro do TEX):
+
+| figura | primitivas | `DAT2D` | TEX, uniforme (576, 256) | mangas (576, 384) | bandeira, árbitro | caixa dos cantos no TEX |
+|---|---|---|---|---|---|---|
+| 0, linha | 593 | 356 | 237 | **0** | 0 | (576,256)..(607,359) |
+| 1, goleiro | 629 | 200 | 429 | **0** | 0 | (600,256)..(639,383) |
+
+**A imagem de mangas não é amostrada por primitiva nenhuma das duas figuras
+da `LOOKS SET`.** Tudo o que o boneco tira do TEX sai da imagem de uniforme: o
+jogador de linha da metade esquerda, o goleiro da direita, que vai até a última
+linha (383) e nenhuma além. A contagem é a mesma nos 105 TEX e independe da
+tupla fora a cabeça, que amostra o `DAT2D`. Fica aberta a outra metade: se a
+manga longa e a braçadeira são outra geometria, fora do `EDT_MOD.BIN` — a
+imagem existe e o jogo a envia à VRAM, mas quem a desenha não está nesta tela.
+
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 
 O [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)
