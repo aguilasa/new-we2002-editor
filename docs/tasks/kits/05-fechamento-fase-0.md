@@ -10,8 +10,8 @@ resources: []        # serialized resources this item needs (rite.toml [resource
 status: done
 done_on: 2026-09-30
 done_commit: b040bd96
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-30
+review_commit: 38e3c386
 ---
 
 # KITS-TASK-05 — Fechamento da fase 0 — medições no disco
@@ -178,4 +178,4 @@ check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ### Problemas encontrados
 
 - A primeira versão deste Log dizia `# exit 2, sem saída` no `grep` do núcleo. O `exit 2` era erro do próprio `grep` chamado pelo `subprocess` do Python (`grep: Unmatched ( or \(` — o padrão chegou sem o escape que o shell daria), não um veredito. Refeito no Git Bash: `exit 1`, sem saída — o núcleo continua sem `print`, `sys.exit` e `PySide`.
-
+- **Reviewed** (2026-09-30) at `38e3c386`: CORR-KITS-010
