@@ -489,3 +489,70 @@ def rects_image(image_path: str, points) -> RectsReport:
     """owners_of() over every readable file of the disc at *image_path*."""
     files, skipped = read_all_files(image_path)
     return owners_of(files, points, source=image_path, skipped=skipped)
+
+
+# -- negative control of the owner search --------------------------------
+#
+# Shift the uniform origins of one kit container out of (576,256) and the
+# owner counts of a point inside that rectangle have to drop by that file.
+
+RECTS_CONTROL_TAG = "A4"
+RECTS_CONTROL_FROM = (576, 256)
+RECTS_CONTROL_TO_X = 640
+
+
+def rects_control_path() -> str:
+    return layout.KIT_DIR + layout.KIT_PREFIX + RECTS_CONTROL_TAG + layout.KIT_SUFFIX
+
+
+def _shift_origins(data: bytes, origin, to_x: int) -> tuple:
+    """(new bytes, how many records moved): every image record at *origin*
+    gets x = *to_x*."""
+    out = bytearray(data)
+    moved = 0
+    for e in bin_archive.entries(data):
+        if e.is_image and (e.x, e.y) == tuple(origin):
+            out[e.pos + 2:e.pos + 4] = to_x.to_bytes(2, "little")
+            moved += 1
+    return bytes(out), moved
+
+
+@dataclass(frozen=True)
+class RectsControl:
+    """One point measured on the clean files and on the planted ones."""
+
+    point: tuple
+    planted: str
+    moved: int
+    files: tuple      # (clean, planted) number of owner files
+    records: tuple    # (clean, planted) number of owner records
+    planted_owns: tuple  # (clean, planted): does the planted file own the point
+
+    @property
+    def red(self) -> bool:
+        return self.files[0] != self.files[1] or self.records[0] != self.records[1]
+
+
+def rects_negative(files: Mapping[str, bytes], points, source: str = "") -> tuple:
+    """Plant the origin shift of RECTS_CONTROL_TAG and compare owners_of()
+    before and after, point by point.  Pure: *files* is not modified."""
+    path = rects_control_path()
+    if path not in files:
+        raise SurveyError("The rects control needs %s, which %s does not hold."
+                          % (path, source or "the input"))
+    planted = dict(files)
+    planted[path], moved = _shift_origins(files[path], RECTS_CONTROL_FROM, RECTS_CONTROL_TO_X)
+    clean = owners_of(files, points, source)
+    after = owners_of(planted, points, source)
+    return tuple(
+        RectsControl(point=a.point, planted=path, moved=moved,
+                     files=(len(a.files), len(b.files)),
+                     records=(len(a.owners), len(b.owners)),
+                     planted_owns=(path in a.files, path in b.files))
+        for a, b in zip(clean.points, after.points))
+
+
+def rects_negative_image(image_path: str, points) -> tuple:
+    """rects_negative() over every readable file of the disc at *image_path*."""
+    files, _ = read_all_files(image_path)
+    return rects_negative(files, points, source=image_path)

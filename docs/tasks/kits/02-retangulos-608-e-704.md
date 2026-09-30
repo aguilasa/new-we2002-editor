@@ -66,9 +66,21 @@ $ grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py
 (sem saída, exit 1)
 ```
 
-As onze de 32×128 em (704, 256): `DATSEL3`, `EDT_2D`, `LC_AF`, `LC_AM`, `LC_AS`, `LC_EU`, `LC_IC`, `LC_KO`, `LC_LG`, `LC_MS`, `LC_OL`.
+As onze de 32×128 em (704, 256), versionadas desde a [CORR-KITS-003](/docs/tasks/kits/CORR-KITS-003.md) (a linha de 105 TEX omitida aqui):
 
-Controle negativo (em memória): as duas origens de uniforme do `TEX_A4` deslocadas de 576 para 640 → donos de (608,256) de 106 para 105, registros de 211 para 209, `TEX_A4` fora da lista.
+```
+$ python tools/kits/cli.py rects --all roms/japanese-shift-jis.bin 704,256
+  image origin ( 704, 256)  32x128 hw  STARTS here   11 file(s): /BIN/DATSEL3.BIN, /BIN/EDT_2D.BIN, /BIN/LC_AF.BIN, /BIN/LC_AM.BIN, /BIN/LC_AS.BIN, /BIN/LC_EU.BIN, /BIN/LC_IC.BIN, /BIN/LC_KO.BIN, /BIN/LC_LG.BIN, /BIN/LC_MS.BIN, /BIN/LC_OL.BIN
+```
+
+Controle negativo, versionado desde a mesma CORR (antes uma sonda em memória):
+
+```
+$ python tools/kits/cli.py rects --negative roms/japanese-shift-jis.bin 608,256     # exit 0
+Planted: 2 image record(s) of /BIN/TEX_A4.BIN moved from (576,256) to x=640
+  (608,256): files 106 -> 105, records 211 -> 209, /BIN/TEX_A4.BIN owns it: yes -> NO  red
+1 of 1 points red
+```
 
 O `survey` segue com as mesmas 12 linhas da KITS-TASK-01.
 

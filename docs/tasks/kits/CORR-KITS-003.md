@@ -5,7 +5,7 @@ origin: KITS-TASK-02
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -58,3 +58,46 @@ $ python tools/kits/cli.py rects --all roms/japanese-shift-jis.bin 704,256
 Hoje o primeiro sai 2 (argumento não reconhecido). Depois, ele imprime 106→105 arquivos, 211→209 registros e o `TEX_A4` fora; o segundo lista os onze donos 32×128.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `10bd0e3a`)
+
+```text
+$ grep -n 'NAMES_SHOWN = ' tools/kits/cli.py
+94:NAMES_SHOWN = 3
+$ python tools/kits/cli.py rects --negative roms/japanese-shift-jis.bin 608,256
+usage: cli.py [-h] {survey,rects} ...
+cli.py: error: unrecognized arguments: --negative
+```
+
+REPRODUCED (exit 2); e `rects ... 704,256` corta os onze em `/BIN/LC_AF.BIN ...`. Causa raiz confirmada: nenhum código versionado planta o deslocamento nem imprime a lista inteira.
+
+### O que foi feito
+
+- `tools/kits/core/survey.py`: `rects_negative(files, points)` puro — desloca para x=640 toda imagem do `TEX_A4` com origem em (576,256) e devolve, por ponto, arquivos, registros e se o `TEX_A4` é dono, antes e depois (`RectsControl`); `rects_negative_image(path, points)` lê o disco.
+- `tools/kits/cli.py rects --all` (todos os nomes) e `rects --negative` (sai 1 se algum ponto não se mover).
+- §4.4 do plano cita os dois comandos; o Log da KITS-TASK-02 troca a lista escrita à mão e a sonda pelas saídas.
+
+### Verificação
+
+```text
+$ python tools/kits/cli.py rects --negative roms/japanese-shift-jis.bin 608,256; echo "exit $?"
+Planted: 2 image record(s) of /BIN/TEX_A4.BIN moved from (576,256) to x=640
+  (608,256): files 106 -> 105, records 211 -> 209, /BIN/TEX_A4.BIN owns it: yes -> NO  red
+1 of 1 points red
+exit 0
+$ python tools/kits/cli.py rects --all roms/japanese-shift-jis.bin 704,256 | tail -1
+  image origin ( 704, 256)  32x128 hw  STARTS here   11 file(s): /BIN/DATSEL3.BIN, /BIN/EDT_2D.BIN, /BIN/LC_AF.BIN, /BIN/LC_AM.BIN, /BIN/LC_AS.BIN, /BIN/LC_EU.BIN, /BIN/LC_IC.BIN, /BIN/LC_KO.BIN, /BIN/LC_LG.BIN, /BIN/LC_MS.BIN, /BIN/LC_OL.BIN
+```
+
+O verificador visto falhando — um ponto que o deslocamento não alcança:
+
+```text
+$ python tools/kits/cli.py rects --negative roms/japanese-shift-jis.bin 608,256 704,256; echo "exit $?"
+Planted: 2 image record(s) of /BIN/TEX_A4.BIN moved from (576,256) to x=640
+  (608,256): files 106 -> 105, records 211 -> 209, /BIN/TEX_A4.BIN owns it: yes -> NO  red
+  (704,256): files 116 -> 116, records 116 -> 116, /BIN/TEX_A4.BIN owns it: yes -> yes  GREEN (control failed)
+1 of 2 points red
+exit 1
+$ grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py
+(sem saída, exit 1)
+```

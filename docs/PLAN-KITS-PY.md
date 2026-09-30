@@ -362,6 +362,13 @@ com `python tools/kits/cli.py rects roms/japanese-shift-jis.bin 608,256 704,256`
   (704, 256) é a fonte, não a bandeira** — o 3D não pode pedir a bandeira à
   VRAM daquela tela.
 
+A lista dos onze sai de `python tools/kits/cli.py rects --all
+roms/japanese-shift-jis.bin 704,256`, e o controle negativo da busca de
+`python tools/kits/cli.py rects --negative roms/japanese-shift-jis.bin 608,256`:
+com as duas origens de uniforme do `TEX_A4` deslocadas de 576 para 640, os donos
+de (608, 256) caem de 106 para 105 arquivos e de 211 para 209 registros
+([CORR-KITS-003](/docs/tasks/kits/CORR-KITS-003.md)).
+
 ### 4.5 (e) A paleta do árbitro
 
 Não está no TEX. As duas tabelas do Superpack

@@ -4,6 +4,8 @@
 Usage:
     python tools/kits/cli.py survey <image.bin>
     python tools/kits/cli.py survey --negative <image.bin>
+    python tools/kits/cli.py rects [--all] <image.bin> X,Y [X,Y ...]
+    python tools/kits/cli.py rects --negative <image.bin> X,Y [X,Y ...]
     python tools/kits/cli.py rects <image.bin> X,Y [X,Y ...]
 """
 
@@ -99,7 +101,7 @@ def _point(p) -> str:
     return "(%d,%d)" % p
 
 
-def print_rects(r) -> None:
+def print_rects(r, shown=NAMES_SHOWN) -> None:
     print("VRAM point owners: %s" % r.source)
     print("  %d files read, %d hold records; %d skipped"
           % (r.scanned, r.with_records, len(r.skipped)))
@@ -111,20 +113,40 @@ def print_rects(r) -> None:
         for shape, paths in po.grouped():
             kind, x, y, w, h = shape
             starts = "STARTS here" if (x, y) == po.point else "covers only"
-            names = ", ".join(paths[:NAMES_SHOWN])
-            more = " ..." if len(paths) > NAMES_SHOWN else ""
+            names = ", ".join(paths if shown is None else paths[:shown])
+            more = " ..." if shown is not None and len(paths) > shown else ""
             print("  %-5s origin (%4d,%4d) %3dx%3d hw  %-11s  %3d file(s): %s%s"
                   % (kind, x, y, w, h, starts, len(paths), names, more))
+
+
+def print_rects_controls(controls) -> int:
+    """Print the planted origin shift per point; exit 1 unless every point is red."""
+    if controls:
+        c = controls[0]
+        print("Planted: %d image record(s) of %s moved from (%d,%d) to x=%d"
+              % (c.moved, c.planted, survey_mod.RECTS_CONTROL_FROM[0],
+                 survey_mod.RECTS_CONTROL_FROM[1], survey_mod.RECTS_CONTROL_TO_X))
+    green = 0
+    for c in controls:
+        verdict = "red" if c.red else "GREEN (control failed)"
+        green += not c.red
+        print("  %s: files %d -> %d, records %d -> %d, %s owns it: %s -> %s  %s"
+              % (_point(c.point), c.files[0], c.files[1], c.records[0], c.records[1],
+                 c.planted, _yes(c.planted_owns[0]), _yes(c.planted_owns[1]), verdict))
+    print("%d of %d points red" % (len(controls) - green, len(controls)))
+    return 1 if green else 0
 
 
 def cmd_rects(args) -> int:
     try:
         points = [survey_mod.parse_point(t) for t in args.points]
+        if args.negative:
+            return print_rects_controls(survey_mod.rects_negative_image(args.image, points))
         result = survey_mod.rects_image(args.image, points)
     except survey_mod.SurveyError as exc:
         print("rects: %s" % exc, file=sys.stderr)
         return 1
-    print_rects(result)
+    print_rects(result, shown=None if args.all else NAMES_SHOWN)
     return 0
 
 
@@ -139,6 +161,10 @@ def main(argv=None) -> int:
     p = sub.add_parser("rects", help="every record on the disc covering a VRAM point")
     p.add_argument("image", help="the Japanese data track (.bin)")
     p.add_argument("points", nargs="+", metavar="X,Y", help="VRAM point, in halfwords")
+    p.add_argument("--all", action="store_true", help="name every owner file, not only %d"
+                   % NAMES_SHOWN)
+    p.add_argument("--negative", action="store_true",
+                   help="plant the TEX_A4 origin shift and show the counts it moves")
     p.set_defaults(fn=cmd_rects)
     args = parser.parse_args(argv)
     return args.fn(args)
