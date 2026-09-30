@@ -87,7 +87,7 @@ graph TD
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [KITS-TASK-01](/docs/tasks/kits/01-levantamento-do-tex.md) | Promover o levantamento do §1.1 a ferramenta versionada | 0 | ferramenta | — | done | 2026-09-30 | 2026-09-30 |
-| [KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md) | Medir o que são os retângulos (608,256) e (704,256) | 0 | investigação | — | pending | — | — |
+| [KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md) | Medir o que são os retângulos (608,256) e (704,256) | 0 | investigação | — | done | 2026-09-30 | pending |
 | [KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md) | Contar primitivas de cada figura por retângulo do TEX | 0 | investigação | — | pending | — | — |
 | [KITS-TASK-04](/docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md) | Levantar as UV que o boneco amostra no bitmap de 256×128 | 0 | investigação | KITS-TASK-03 | pending | — | — |
 | [KITS-TASK-05](/docs/tasks/kits/05-fechamento-fase-0.md) | Fechamento da fase 0 — medições no disco | 0 | closing | KITS-TASK-01, KITS-TASK-02, KITS-TASK-03, KITS-TASK-04 | pending | — | — |

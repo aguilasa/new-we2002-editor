@@ -7,10 +7,10 @@ depends_on: []
 source_of_truth: "/docs/PLAN-KITS-PY.md#4.4"
 files: ["tools/kits/cli.py", "tools/kits/core/survey.py", "docs/PLAN-KITS-PY.md", "docs/PLAN-LOOKS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
-done_on: null
-done_commit: null
-reviewed_on: null
+status: done
+done_on: 2026-09-30
+done_commit: 18e7ec61
+reviewed_on: pending
 review_commit: null
 ---
 
@@ -75,3 +75,11 @@ O `survey` segue com as mesmas 12 linhas da KITS-TASK-01.
 ### Problemas encontrados
 
 - **Os dois leitores de contêiner discordam num arquivo.** O `atlas.py --elsewhere` (leitor `texture.tables` do `looks`) põe `DATSEL2.BIN` como dono de (576,256)/(608,256); o `rects` (leitor `bin_archive.entries`) não acha registro dele cobrindo nenhum dos quatro pontos. Nota deixada na KITS-TASK-09, que confronta decodificadores.
+- **Closed** — commit `18e7ec61` (2026-09-30): feat(kits): add cli.py rects and close §4.4 — (608,256) is a bucket, not a record
+  - Files (`git show --name-status 18e7ec61`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/tasks/kits/02-retangulos-608-e-704.md`
+    - `M docs/tasks/kits/09-cli-e-confronto-1.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/survey.py`
