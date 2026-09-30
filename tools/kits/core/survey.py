@@ -279,3 +279,80 @@ def read_kits(image_path: str) -> dict:
 def survey_image(image_path: str) -> Survey:
     """Survey every kit container of the disc at *image_path*."""
     return survey_files(read_kits(image_path), source=image_path)
+
+
+# -- negative controls ---------------------------------------------------
+#
+# Each control plants one defect in a copy of the containers and names the
+# survey figure that has to move.  They live here, next to what they break,
+# so the red is reproducible from HEAD instead of from a throwaway probe.
+
+@dataclass(frozen=True)
+class ControlResult:
+    """One planted defect and the figure it had to move."""
+
+    name: str
+    planted: str
+    figure: str
+    clean: object
+    after: object
+
+    @property
+    def red(self) -> bool:
+        return self.clean != self.after
+
+
+def _flip_clut_bit(data: bytes, record: int) -> bytes:
+    entry = bin_archive.entries(data)[record]
+    out = bytearray(data)
+    out[entry.offset] ^= 0x01
+    return bytes(out)
+
+
+def _flip_stream_bit(data: bytes, record: int, at: int = 3) -> bytes:
+    entry = bin_archive.entries(data)[record]
+    out = bytearray(data)
+    out[entry.offset + at] ^= 0x01
+    return bytes(out)
+
+
+def _shift_rect_x(data: bytes, record: int) -> bytes:
+    entry = bin_archive.entries(data)[record]
+    out = bytearray(data)
+    out[entry.pos + 2:entry.pos + 4] = (entry.x + 1).to_bytes(2, "little")
+    return bytes(out)
+
+
+NEGATIVE_CONTROLS = (
+    ("A4 player CLUT, second set", "A4", lambda d: _flip_clut_bit(d, SECOND_PALETTES[0]),
+     "first set == second set", lambda s: s.sets_equal),
+    ("A4 goalkeeper CLUT, first set", "A4", lambda d: _flip_clut_bit(d, FIRST_PALETTES[1]),
+     "player palette == keeper palette", lambda s: s.player_equals_keeper),
+    ("00 referee LZSS stream, +3", "00", lambda d: _flip_stream_bit(d, REFEREE),
+     "referee variants / problems", lambda s: (s.referee_variants, s.problems)),
+    ("00 referee rect x + 1", "00", lambda d: _shift_rect_x(d, REFEREE),
+     "shape ok", lambda s: len(s.shape_ok)),
+)
+"""(name, tag, plant, figure, measure): the defects of KITS-TASK-01's Log."""
+
+
+def negative_controls(files: Mapping[str, bytes], source: str = "") -> tuple:
+    """Plant each defect of NEGATIVE_CONTROLS on its own and measure again.
+    Pure: *files* is not modified."""
+    clean = survey_files(files, source)
+    out = []
+    for name, tag, plant, figure, measure in NEGATIVE_CONTROLS:
+        if tag not in files:
+            raise SurveyError("The control '%s' needs TEX_%s, which %s does not hold."
+                              % (name, tag, source or "the input"))
+        planted = dict(files)
+        planted[tag] = plant(files[tag])
+        out.append(ControlResult(name=name, planted="TEX_" + tag, figure=figure,
+                                 clean=measure(clean),
+                                 after=measure(survey_files(planted, source))))
+    return tuple(out)
+
+
+def negative_controls_image(image_path: str) -> tuple:
+    """negative_controls() over every kit container of a disc."""
+    return negative_controls(read_kits(image_path), source=image_path)

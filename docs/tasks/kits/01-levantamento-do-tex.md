@@ -66,14 +66,18 @@ $ grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py tools/kits/core/
 (sem saída, exit 1)
 ```
 
-Controles negativos (em memória, sobre os 105 reais):
+Controles negativos, versionados desde a [CORR-KITS-002](/docs/tasks/kits/CORR-KITS-002.md) (`core/survey.py` `NEGATIVE_CONTROLS`; cada defeito plantado sozinho numa cópia dos 105 reais):
 
 ```
-clean   {'shape_ok': 105, 'sets_equal': ('A4',), 'images_differ': 103, 'only_pal': ('98',), 'player_eq_gk': ('A4',), 'referee_variants': 1, ...}
-planted {'shape_ok': 104, 'sets_equal': (), 'images_differ': 102, 'only_pal': ('98', 'A4'), 'player_eq_gk': (), 'referee_variants': 1, ...}
+$ python tools/kits/cli.py survey --negative roms/japanese-shift-jis.bin     # exit 0
+  A4 player CLUT, second set       TEX_A4   first set == second set: ('A4',) -> ()  red
+  A4 goalkeeper CLUT, first set    TEX_A4   player palette == keeper palette: ('A4',) -> ()  red
+  00 referee LZSS stream, +3       TEX_00   referee variants / problems: (1, ()) -> (2, ())  red
+  00 referee rect x + 1            TEX_00   shape ok: 105 -> 104  red
+4 of 4 controls red
 ```
 
-(bit de cor na CLUT de jogador do 2º conjunto do `TEX_A4`, bit na CLUT de goleiro do 1º, e `x` do árbitro do `TEX_00` 768→769). O árbitro à parte: um bit trocado no fluxo LZSS do árbitro do `TEX_00` (offset +3) leva `referee variants` de 1 a 2.
+(Esta seção trazia antes dicionários `clean`/`planted` de uma sonda em memória, com os quatro defeitos plantados juntos; a sonda não foi versionada e foi substituída pelo comando acima.)
 
 Erro: `python tools/kits/cli.py survey roms/nope.bin` → `survey: Could not open roms/nope.bin: No such file or directory`, exit 1.
 

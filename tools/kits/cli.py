@@ -3,6 +3,7 @@
 
 Usage:
     python tools/kits/cli.py survey <image.bin>
+    python tools/kits/cli.py survey --negative <image.bin>
 """
 
 from __future__ import annotations
@@ -65,8 +66,22 @@ def print_survey(s) -> None:
     print("  %-46s %s .. %s bytes" % ("file size", "{:,}".format(lo), "{:,}".format(hi)))
 
 
+def print_controls(controls) -> int:
+    """Print each planted defect; the exit code is 1 unless every one is red."""
+    green = 0
+    for c in controls:
+        verdict = "red" if c.red else "GREEN (control failed)"
+        green += not c.red
+        print("  %-32s %-8s %s: %s -> %s  %s"
+              % (c.name, c.planted, c.figure, c.clean, c.after, verdict))
+    print("%d of %d controls red" % (len(controls) - green, len(controls)))
+    return 1 if green else 0
+
+
 def cmd_survey(args) -> int:
     try:
+        if args.negative:
+            return print_controls(survey_mod.negative_controls_image(args.image))
         result = survey_mod.survey_image(args.image)
     except survey_mod.SurveyError as exc:
         print("survey: %s" % exc, file=sys.stderr)
@@ -80,6 +95,8 @@ def main(argv=None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("survey", help="measure the 105 kit containers of a disc")
     p.add_argument("image", help="the Japanese data track (.bin)")
+    p.add_argument("--negative", action="store_true",
+                   help="plant each known defect and show the figure it moves")
     p.set_defaults(fn=cmd_survey)
     args = parser.parse_args(argv)
     return args.fn(args)
