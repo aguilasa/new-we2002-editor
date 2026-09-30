@@ -5,10 +5,10 @@ origin: KITS-TASK-03
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: 0f48d058
 ---
 
 # CORR-KITS-006 — Paste prims transcripts in the Log whole, not trimmed
@@ -83,3 +83,7 @@ $ grep -c 'a corner in' docs/tasks/kits/03-primitivas-por-retangulo.md
 $ grep -n 'sai 1 se alguma falhar' docs/tasks/kits/03-primitivas-por-retangulo.md
 (sem saída, exit 1)
 ```
+- **Closed** — commit `0f48d058` (2026-09-30): docs(kits): paste the prims transcripts of KITS-TASK-03 whole
+  - Files (`git show --name-status 0f48d058`):
+    - `M docs/tasks/kits/03-primitivas-por-retangulo.md`
+    - `M docs/tasks/kits/CORR-KITS-006.md`
