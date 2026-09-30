@@ -694,8 +694,9 @@ Um **quinto projeto**, aberto em 2026-09-07: o port em Python do
 puro em `tools/mcr/`, UI **PySide6** em `tools/mcr/ui/`, separados por regra.
 
 O plano é [docs/PLAN-MCR-PY.md](docs/PLAN-MCR-PY.md); o ciclo de tasks é
-[docs/tasks/port-mcr/](docs/tasks/concluidos/port-mcr/progresso.md), com prefixo
-`MCR-TASK-` e pool `CORR-MCR-`, e roda por `/rite:execute port-mcr`.
+[docs/tasks/concluidos/port-mcr/](docs/tasks/concluidos/port-mcr/progresso.md), com prefixo
+`MCR-TASK-` e pool `CORR-MCR-`. Rodava por `/rite:execute port-mcr`, e foi
+**encerrado e arquivado** em 2026-09-30 pelo `/rite:close-cycle`.
 
 **O mapa do option file** é o [docs/MCR-OPTION-FILE.md](docs/MCR-OPTION-FILE.md):
 estrutura do save, o que cada byte conhecido significa, e o que continua
@@ -1324,9 +1325,9 @@ nunca à mão. Comandos: `/rite:status`, `/rite:execute`, `/rite:review`, `/rite
 <!-- rite:end -->
 
 **Um ciclo vivo também pode morar numa subpasta**, desde 2026-09-07. O ciclo é
-o **argumento do comando**, pelo nome — `/rite:execute port-mcr`,
-`/rite:review port-mcr` — e os nomes são `pes2` (`docs/tasks/pes2/`) e
-`port-mcr`; `wte` e `looks` estão arquivados. `depends_on` não atravessa pasta, e uma pasta é
+o **argumento do comando**, pelo nome — `/rite:execute pes2`,
+`/rite:review pes2` — e o único vivo hoje é `pes2` (`docs/tasks/pes2/`);
+`wte`, `looks` e `port-mcr` estão arquivados. `depends_on` não atravessa pasta, e uma pasta é
 ciclo se, e só se, tem `progresso.md` próprio.
 
 **Projeto encerrado é arquivado em `docs/tasks/concluidos/`.** Em 2026-09-01 as
