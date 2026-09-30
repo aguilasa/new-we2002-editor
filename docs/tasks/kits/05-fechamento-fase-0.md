@@ -7,10 +7,10 @@ depends_on: [KITS-TASK-01, KITS-TASK-02, KITS-TASK-03, KITS-TASK-04]
 source_of_truth: "/docs/PLAN-KITS-PY.md#7"
 files: ["docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
-done_on: null
-done_commit: null
-reviewed_on: null
+status: done
+done_on: 2026-09-30
+done_commit: b040bd96
+reviewed_on: pending
 review_commit: null
 ---
 
@@ -171,3 +171,6 @@ $ grep -rnE 'print\(|sys\.exit|PySide' tools/kits/core/      # exit 2, sem saíd
 $ rite check --cycle kits
 check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ```
+- **Closed** — commit `b040bd96` (2026-09-30): docs(kits): close phase 0 — the four measurements re-run at HEAD match the plan
+  - Files (`git show --name-status b040bd96`):
+    - `M docs/tasks/kits/05-fechamento-fase-0.md`
