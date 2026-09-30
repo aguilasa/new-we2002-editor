@@ -7,10 +7,10 @@ depends_on: [KITS-TASK-03]
 source_of_truth: "/docs/PLAN-KITS-PY.md#4.6"
 files: ["tools/kits/core/survey.py", "tools/kits/cli.py", "docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
-done_on: null
-done_commit: null
-reviewed_on: null
+status: done
+done_on: 2026-09-30
+done_commit: 63dde69c
+reviewed_on: pending
 review_commit: null
 ---
 
@@ -81,3 +81,9 @@ $ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative
 
 - A primeira corrida do `--negative` falhou 4 de 7: o papel sai da origem do registro, e o uniforme deslocado para (577,256) deixava de se chamar "uniforme". O controle passa agora um `roles=` que nomeia a origem deslocada; o comportamento padrão não mudou.
 - Com o deslocamento, 22 primitivas da figura 0 saem do registro (a coluna de halfword 576) em vez de mover; o controle exige que as que continuam mapeadas movam (215 de 215).
+- **Closed** — commit `63dde69c` (2026-09-30): feat(kits): map each kit primitive's UV rect into the 256x128 work bitmap (uv)
+  - Files (`git show --name-status 63dde69c`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/survey.py`
