@@ -5,10 +5,10 @@ origin: KITS-TASK-03
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: f0a54db5
 ---
 
 # CORR-KITS-005 — Add versioned probes for the 105-TEX and tuple-independence claims
@@ -107,3 +107,10 @@ $ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --negative | tail -
 $ grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py
 (sem saída, exit 1)
 ```
+- **Closed** — commit `f0a54db5` (2026-09-30): fix(kits): version the 105-kit and tuple sweeps behind section 4.3
+  - Files (`git show --name-status f0a54db5`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/03-primitivas-por-retangulo.md`
+    - `M docs/tasks/kits/CORR-KITS-005.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/survey.py`
