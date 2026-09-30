@@ -23,7 +23,7 @@ imagem do jogo, ou um TEX avulso feito com WETex — e os mostra de duas formas:
   mesmo motivo: o que falta medir é leitura. Um editor de TEX é outro projeto e
   herdaria as armadilhas do §3.8 e do §4.3 do [SUPERPACK-UNIFORMES.md](/docs/SUPERPACK-UNIFORMES.md).
 - **Não inventa geometria.** Manga longa e braçadeira só aparecem no 3D se a
-  geometria que as desenha for achada e medida (§4 (c)). Até lá o 2D as mostra,
+  geometria que as desenha for achada e medida (§4.3). Até lá o 2D as mostra,
   e o 3D diz que não as tem.
 - Não é a tela `LOOKS SET`. Aquela janela é a tela do jogo e decide nada; esta
   é uma ferramenta de inspeção, com controles que o jogo não tem.
@@ -98,7 +98,7 @@ O mapa de zonas em pixels, a ordem das faces, as medidas de cada peça, a regra 
 que o índice 0 preto é transparente e a grade de 16 rampas dos TEX originais
 estão no [SUPERPACK-UNIFORMES.md](/docs/SUPERPACK-UNIFORMES.md) §1.3 e §2. É a
 fonte do mapa de zonas deste projeto, com a proveniência dita: **comunidade,
-medido no PNG do polipoli**, até a fase 2 conferi-lo contra a geometria.
+medido no PNG do polipoli**, até a fase 3 conferi-lo contra a geometria.
 
 ## 2. A decisão: projeto novo, núcleo do `looks` por import
 
@@ -114,7 +114,12 @@ Por que não copiar: a geometria, a pose, a câmera, a guarda de disco e a
 decodificação de textura custaram 40 tasks e estão confrontadas com o emulador.
 Uma cópia envelhece no primeiro conserto.
 
-As duas mudanças no `looks` (tasks do ciclo `looks`, não deste):
+As duas mudanças no `looks` são **tasks deste ciclo** (fase 5 da §7), que tocam
+`tools/looks/`. O ciclo `looks` está arquivado em `docs/tasks/concluidos/looks/`,
+e o Rite não liga `depends_on` entre pastas — reabri-lo para duas mudanças
+pequenas custaria mais do que fazê-las aqui. Elas são **aditivas**: default
+igual ao de hoje, e os gates do `looks` (`looks_selftest`, `looks_image`,
+`looks_ui`, `looks_live`) continuam verdes depois delas.
 
 1. **`scene.Builder(kit=...)`**, com o `TEX_A4` de default — hoje só o caminho
    de tupla avulsa aceita outra tag.
@@ -202,7 +207,7 @@ api.figure(kit, kit_set, figure, geometry_path, frame=None)   # a cena 3D, via l
 ```
 
 `TeamEntry.name_origin` diz de onde o nome veio (`"rom"` ou `"table"`, ver
-§3.3), e `tag` é `None` enquanto a incógnita (b) não souber o TEX daquele time.
+§3.3), e `tag` é `None` enquanto a incógnita da §4.2 não souber o TEX daquele time.
 
 Os módulos atrás da fachada:
 
@@ -229,9 +234,9 @@ A janela abre com **uma escolha só**, "Abrir…", que aceita os dois; o núcleo
 decide o que é.
 
 - **ROM**: aparece o **combobox de times**. Escolher um time carrega o TEX dele.
-  Enquanto a incógnita (b) não fechar, o combobox lista as 105 tags (`TEX_00`…
+  Enquanto a §4.2 não fechar, o combobox lista as 105 tags (`TEX_00`…
   `TEX_A4`), com o nome do time ao lado só onde o mapeamento já for conhecido;
-  fechada a (b), ele lista times, na ordem do jogo.
+  fechada a §4.2, ele lista times, na ordem do jogo.
 - **TEX avulso**: sem combobox; o arquivo é o uniforme.
 
 **O 3D precisa da geometria**, que não está no TEX e só foi medida nos discos
@@ -263,7 +268,7 @@ inglês por índice, hardcoded; senão, o nome que está na ROM.**
 - O índice que liga nome e tabela é o mesmo que o combobox de times do `ed.exe`
   usa para indexar `TEAM_NAMES` (a tabela tem 120 linhas para 63 seleções e 32
   clubes da ML; quais linhas valem para qual time se confere no `edDlg.cpp`
-  antes de gerar). **Não é a tag do TEX** — essa ligação é a incógnita (b).
+  antes de gerar). **Não é a tag do TEX** — essa ligação é a §4.2.
 
 ### 3.4 A interface (`tools/kits/ui/`)
 
@@ -303,13 +308,17 @@ ganha `kits_selftest` (sem nada, nunca pula), `kits_image` (com uma ROM),
 
 ## 4. As incógnitas, em ordem de risco
 
-**(a) Titular e suplente são os pares 1 e 2?** A comunidade inteira diz que sim
+### 4.1 (a) Titular e suplente são os pares 1 e 2?
+
+A comunidade inteira diz que sim
 e a ordem do arquivo concorda; o jogo nunca foi olhado. Com o §1.1, agora dá:
 escolher um time com os dois pares diferentes, entrar numa partida com ele de
 suplente e ler a VRAM (`oracle.py --kit` já compara retângulo por retângulo).
 **Risco alto**: errar aqui troca todos os uniformes do 3D, e o 2D não percebe.
 
-**(b) Que time usa qual tag.** Nada no repositório sabe. O Wetigre dá a ordem de
+### 4.2 (b) Que time usa qual tag
+
+Nada no repositório sabe. O Wetigre dá a ordem de
 cabeça do WE2000 (`TEX_00` Irlanda, `01` Irlanda do Norte, `02` Escócia…); o
 editor do Obocaman em `we-team-editor/` insere TEX por time e portanto contém a
 tabela; o emulador responde time a time pelo `--kit`. **É ela que decide o
@@ -317,7 +326,9 @@ combobox do §3.2**: sem ela o combobox lista tags, com nome só onde já se sab
 Os nomes (§3.3) e o mapeamento são coisas separadas — o nome sai da ROM por
 índice de time, e o índice de time não diz qual TEX o time veste.
 
-**(c) Manga longa e braçadeira no 3D.** A imagem de mangas (576, 384) é
+### 4.3 (c) Manga longa e braçadeira no 3D
+
+A imagem de mangas (576, 384) é
 enviada à VRAM na `LOOKS SET`, mas não se sabe quais primitivas a amostram nem se
 o modelo de partida é o mesmo do `EDT_MOD.BIN`. Medir primeiro, no disco:
 quantas primitivas de cada figura caem em cada retângulo do TEX e em que
@@ -325,19 +336,25 @@ retângulo do mapa de zonas. Se a manga longa e a braçadeira forem outra
 geometria (outro arquivo, outra lista de seções), elas entram só quando essa
 geometria for lida — **nunca** por remapeamento de UV feito à mão.
 
-**(d) O que é (608, 256) e o que é (704, 256).** O [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)
+### 4.4 (d) O que é (608, 256) e o que é (704, 256)
+
+O [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)
 §1.7 escreve (608, 256) entre os retângulos que só os TEX têm; o `layout.py` e a
 leitura do §1.1 dizem (704, 256), que é a bandeira. E na `LOOKS SET` o (704, 256)
 é a página da fonte (`EDT_2D.BIN`). Suspeita: a linha do plano do `looks` está
 velha. Conferir antes de o 3D pedir qualquer coisa à bandeira.
 
-**(e) A paleta do árbitro.** Não está no TEX. As duas tabelas do Superpack
+### 4.5 (e) A paleta do árbitro
+
+Não está no TEX. As duas tabelas do Superpack
 divergem em 32 bytes (SUPERPACK-UNIFORMES §5). Se o `SELECT.BIN` for um
 contêiner, o `bin_archive.py` acha os registros de CLUT e decide sozinho; se não
 for, vale o emulador numa partida. Até lá o árbitro sai com a paleta que o
 usuário escolher, e a janela diz que não é a do jogo.
 
-**(f) A zona do mapa bate com a geometria?** O mapa é da comunidade. A conferência
+### 4.6 (f) A zona do mapa bate com a geometria?
+
+O mapa é da comunidade. A conferência
 é mecânica: toda primitiva do boneco com UV no TEX cai numa zona do mapa, e zona
 que nenhuma primitiva amostra ou é da manga longa, da braçadeira e dos figurantes
 com bandeira — ou está errada.
@@ -351,7 +368,7 @@ com bandeira — ou está errada.
    do `.tim`, então a nossa descompressão do `.bin` tem de devolver os pixels do
    `.tim` byte a byte. É um oráculo que não passou pelo nosso código — o papel
    que os 50 JPGs tiveram no `looks`.
-3. **O emulador julga o 3D.** Com o time do §4 (a) em campo: o retângulo que o
+3. **O emulador julga o 3D.** Com o time da §4.1 em campo: o retângulo que o
    jogo enviou é o conjunto que a ferramenta disse, e o confronto por histograma
    de cor do `looks` (`confront.py --score`) é refeito com outro uniforme que não
    o `A4`.
@@ -359,15 +376,17 @@ com bandeira — ou está errada.
    - trocar as paletas 486 e 488 tem de trocar jogador e goleiro no 3D;
    - um byte trocado no fluxo LZSS de um TEX tem de ser **recusado** pela guarda
      de forma;
-   - o mapa de zonas deslocado 1 px tem de reprovar o §4 (f);
+   - o mapa de zonas deslocado 1 px tem de reprovar a §4.6;
    - pedir o suplente do `TEX_A4` tem de dar o mesmo quadro que o titular, e
      de qualquer tag do §1.1 que difere, um quadro diferente.
 
 ## 6. Riscos de projeto
 
-- **O `looks` está com o ciclo aberto.** As duas mudanças do §2 entram como tasks
-  dele, na fila dele; este projeto espera por elas ou começa pelo 2D, que não
-  depende delas.
+- **Mexer num projeto arquivado.** O ciclo `looks` fechou, e as duas mudanças do
+  §2 são feitas por este ciclo dentro de `tools/looks/`. O risco é quebrar o que
+  lá foi confrontado com o emulador sem ninguém do `looks` olhando; a defesa é a
+  task da fase 5 exigir os quatro gates do `looks` verdes antes e depois, e as
+  mudanças serem aditivas, com o comportamento de hoje como default.
 - **Acoplamento.** Importar o núcleo do `looks` amarra este projeto às mudanças
   de lá. É o preço de não copiar; o `kits_selftest` roda os self-checks do
   `looks` que usa, para a quebra aparecer aqui e não na janela.
@@ -380,17 +399,17 @@ com bandeira — ou está errada.
 
 | fase | entrega | depende de |
 |---|---|---|
-| 0 | as medições do §4 (c), (d) e (f) feitas no disco, e o script do §1.1 promovido a `tex.py --survey` | — |
+| 0 | as medições das §4.3, §4.4 e §4.6 feitas no disco, e o script do §1.1 promovido a `tex.py --survey` | — |
 | 1 | **núcleo, lado TEX**: `api.py` (a fachada), `source.py`, `tex.py`, guarda de forma, `cli.py info/export`; confrontos 1 e 2 do §5 | 0 |
 | 2 | **núcleo, lado ROM**: o gerador do §3.3 com `--check` no `ctest`, `teams.py`, `cli.py teams`; a regra japonês → tabela conferida nas duas imagens de `roms/` | 1 |
-| 3 | `flat.py` + `zones.py`; §4 (f) fechado — ainda sem janela | 1 |
+| 3 | `flat.py` + `zones.py`; §4.6 fechada — ainda sem janela | 1 |
 | 4 | **a janela mínima**: Abrir… (ROM ou TEX), combobox, aba "Plano", estilo Fusion fixo; captura igual no Windows e no Linux | 2, 3 |
-| 5 | as duas mudanças do §2 no `looks` (tasks do ciclo `looks`) | — |
+| 5 | as duas mudanças do §2 em `tools/looks/`, feitas por este ciclo; gates do `looks` verdes antes e depois | — |
 | 6 | `figure.py` e a aba "3D": titular/suplente, jogador/goleiro | 4, 5 |
-| 7 | §4 (a) no emulador e o confronto 3 do §5 | 6 |
-| 8 | §4 (b): o combobox passa a listar times em vez de tags | 2 |
+| 7 | §4.1 no emulador e o confronto 3 do §5 | 6 |
+| 8 | §4.2: o combobox passa a listar times em vez de tags | 2 |
 | 9 | aba "Diagnóstico" | 1 |
-| — | manga longa, braçadeira e árbitro com a paleta do jogo: só depois de (c) e (e) | 0 |
+| — | manga longa, braçadeira e árbitro com a paleta do jogo: só depois das §4.3 e §4.5 | 0 |
 
 As fases 1 a 3 não têm janela nenhuma, de propósito: o núcleo fica pronto e
 testado pela CLI antes de existir interface, e é assim que ele chega inteiro à
