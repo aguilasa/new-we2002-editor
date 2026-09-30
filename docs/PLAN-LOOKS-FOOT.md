@@ -221,6 +221,30 @@ A mesma régua da §10.4 do plano de origem, sem desconto:
   `docs/prompts/perfil-looks.md` e `perfil-looks.armadilhas.md`; o ciclo novo
   precisa de perfil próprio que as cite, e não de cópia delas.
 
+### 5.1 O que o ciclo `looks` ensinou
+
+Da [retro do `looks`](/docs/tasks/concluidos/looks/retro.md), para o perfil
+do ciclo novo — cada uma com as correções de lá que a provam:
+
+- **K1 — Uma medição de uma entrada, um valor e um slot não é a regra.** Antes
+  de escrever "a 147 faz X", ela foi andada nos dois slots e nos três valores
+  de `FOOT`? Foi o grupo maior de engenharia do `looks`, 22 correções
+  (CORR-LOOKS-010, 043, 044, 047, 048, 104, 105, 108, 109 entre elas).
+- **K2 — O verificador nasce com o controle vermelho visto.** Toda asserção
+  nova tem um defeito plantado em `controls.py` na mesma entrega, e o Log
+  mostra o vermelho (CORR-LOOKS-009, 040, 046, 063, 068, 095).
+- **K3 — Número em Log ou documento sai de comando versionado.** A contagem de
+  quadros da 147 na §1.3 é o primeiro caso deste plano: sai de um trecho de
+  Python solto, e a Fase 1 a põe numa ferramenta (CORR-LOOKS-022, 027, 092,
+  097).
+- **K4 — O Log cola a saída da HEAD entregue.** Os gates rodam depois da
+  última edição, e a transcrição é colada daí, sem resumo dentro da cerca
+  (CORR-LOOKS-032, 036, 041, 091, 093).
+- **K5 — Fechar um veredito é varrer quem dizia o anterior.** Os termos do
+  `rite sweep` incluem o número velho e o nome da incógnita, e a varredura olha
+  docstrings e cabeçalhos de seção (CORR-LOOKS-024, 033, 057, 058, 085, 094,
+  098).
+
 ## 6. Fases
 
 | Fase | O que entrega | Depende de |

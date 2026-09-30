@@ -1301,6 +1301,22 @@ Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há duas:
   alvo; no resto de `docs/`, alvo fora de `docs/` (`../NOTICE.md`) continua
   relativo.
 
+Duas regras que custaram correção em mais de um ciclo, e por isso valem para
+todos (retro do `looks`,
+[docs/tasks/concluidos/looks/retro.md](docs/tasks/concluidos/looks/retro.md)):
+
+- **Número em Log ou documento é colado da ferramenta, na HEAD entregue.** Não
+  se reescreve de memória, não sai de sonda descartável — sonda que produziu um
+  número vira opção de uma ferramenta versionada antes de o número entrar em
+  texto —, e a transcrição de gate é refeita depois da última edição. Foram 17
+  correções no `looks` e uma série no `wte` ("o Log diz 41 regras, e o gerador
+  tem 47").
+- **Verificador sem vermelho visto não é gate.** Toda asserção nova entra com um
+  defeito plantado que a derruba, e o Log mostra o vermelho; veredito impresso e
+  não afirmado, pulo silencioso ou função sem chamador contam como ausência de
+  gate. Foram 16 correções no `looks`, 5 delas altas, e o mesmo no
+  `port-mcr`.
+
 <!-- rite:begin -->
 Este repositório usa o plugin **Rite** (<https://github.com/aguilasa/rite>); a configuração está em
 `rite.toml`. Estado de task e CORR só muda pelo CLI (`rite close`, `rite mark*`, `rite new-fix`),
