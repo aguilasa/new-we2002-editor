@@ -5,10 +5,10 @@ origin: KITS-TASK-01
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: a9cafeb4
 ---
 
 # CORR-KITS-001 — Route cli.py survey through core/api.py, or record the exception
@@ -84,3 +84,8 @@ docs/tasks/kits/09-cli-e-confronto-1.md:40:Da [CORR-KITS-001](/docs/tasks/kits/C
 ```
 
 Vazio antes, duas linhas depois.
+- **Closed** — commit `a9cafeb4` (2026-09-30): docs(kits): record the cli.py survey facade exception, hand it to KITS-TASK-09
+  - Files (`git show --name-status a9cafeb4`):
+    - `M docs/tasks/kits/01-levantamento-do-tex.md`
+    - `M docs/tasks/kits/09-cli-e-confronto-1.md`
+    - `M docs/tasks/kits/CORR-KITS-001.md`
