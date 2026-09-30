@@ -4,6 +4,7 @@
 Usage:
     python tools/kits/cli.py survey <image.bin>
     python tools/kits/cli.py survey --negative <image.bin>
+    python tools/kits/cli.py rects <image.bin> X,Y [X,Y ...]
 """
 
 from __future__ import annotations
@@ -90,6 +91,43 @@ def cmd_survey(args) -> int:
     return 0
 
 
+NAMES_SHOWN = 3
+"""How many file names a grouped owner line shows."""
+
+
+def _point(p) -> str:
+    return "(%d,%d)" % p
+
+
+def print_rects(r) -> None:
+    print("VRAM point owners: %s" % r.source)
+    print("  %d files read, %d hold records; %d skipped"
+          % (r.scanned, r.with_records, len(r.skipped)))
+    for path, reason in r.skipped:
+        print("    skipped %s (%s)" % (path, reason))
+    for po in r.points:
+        print("%s: %d record(s) in %d file(s) cover it, %d start there"
+              % (_point(po.point), len(po.owners), len(po.files), len(po.starters)))
+        for shape, paths in po.grouped():
+            kind, x, y, w, h = shape
+            starts = "STARTS here" if (x, y) == po.point else "covers only"
+            names = ", ".join(paths[:NAMES_SHOWN])
+            more = " ..." if len(paths) > NAMES_SHOWN else ""
+            print("  %-5s origin (%4d,%4d) %3dx%3d hw  %-11s  %3d file(s): %s%s"
+                  % (kind, x, y, w, h, starts, len(paths), names, more))
+
+
+def cmd_rects(args) -> int:
+    try:
+        points = [survey_mod.parse_point(t) for t in args.points]
+        result = survey_mod.rects_image(args.image, points)
+    except survey_mod.SurveyError as exc:
+        print("rects: %s" % exc, file=sys.stderr)
+        return 1
+    print_rects(result)
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -98,6 +136,10 @@ def main(argv=None) -> int:
     p.add_argument("--negative", action="store_true",
                    help="plant each known defect and show the figure it moves")
     p.set_defaults(fn=cmd_survey)
+    p = sub.add_parser("rects", help="every record on the disc covering a VRAM point")
+    p.add_argument("image", help="the Japanese data track (.bin)")
+    p.add_argument("points", nargs="+", metavar="X,Y", help="VRAM point, in halfwords")
+    p.set_defaults(fn=cmd_rects)
     args = parser.parse_args(argv)
     return args.fn(args)
 

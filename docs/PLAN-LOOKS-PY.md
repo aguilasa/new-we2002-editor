@@ -864,9 +864,17 @@ juntas.
 
 | o que falta aqui | quem tem |
 |---|---|
-| VRAM (576, 256), (576, 384) e (608, 256) | **105 `TEX_*.BIN`** (mais `DATSEL2.BIN` e `SELECT2.BIN` em duas delas) |
+| VRAM (576, 256), (576, 384) e (608, 256)¹ | **105 `TEX_*.BIN`** (mais `DATSEL2.BIN` e `SELECT2.BIN` em duas delas) |
 | CLUT (0, 486) e (0, 488), 256 entradas | **105 `TEX_*.BIN`, duas de cada id por arquivo** |
 | CLUT (0, 485) e (336, 510) | **contêiner nenhum deste disco** |
+
+¹ **(608, 256) não é um retângulo**, é o segundo balde de 32 colunas que o
+`--elsewhere` usa para agrupar cantos (`x // 32 * 32`), dentro do registro de
+(576, 256), 64×128 halfwords, dos 105 TEX. Registro que *começa* ali não existe
+no disco — medido em 2026-09-30 por `python tools/kits/cli.py rects
+roms/japanese-shift-jis.bin 608,256`
+([KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md)). A tabela fica como o
+comando a imprimiu; esta nota diz como lê-la.
 
 A resposta é uma frase: **o uniforme é por time**, e por isso não mora no
 arquivo comum — mora nos 105 contêineres de textura de time.

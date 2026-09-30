@@ -344,6 +344,24 @@ leitura do §1.1 dizem (704, 256), que é a bandeira. E na `LOOKS SET` o (704, 2
 é a página da fonte (`EDT_2D.BIN`). Suspeita: a linha do plano do `looks` está
 velha. Conferir antes de o 3D pedir qualquer coisa à bandeira.
 
+**Fechada em 2026-09-30 ([KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md))**,
+com `python tools/kits/cli.py rects roms/japanese-shift-jis.bin 608,256 704,256`:
+
+- **(608, 256) não é origem de registro nenhum do disco** — "0 start there". É
+  a metade direita do uniforme: o registro de (576, 256), 64×128 halfwords, dos
+  105 TEX o cobre (duas vezes por arquivo, titular e suplente), e o
+  `SELECT2.BIN` o cobre com uma imagem de 32×128 em (592, 256). A linha do
+  PLAN-LOOKS §1.7 vinha do `atlas.py --elsewhere`, que agrupa os cantos
+  amostrados em baldes de 32 colunas (`x // 32 * 32`): (576, 256) e (608, 256)
+  são dois baldes do mesmo retângulo. A suspeita estava certa.
+- **(704, 256) é origem de verdade, de 116 arquivos e dois formatos.** Nos 105
+  TEX é a bandeira, 64×64 halfwords; em onze outros contêineres — `EDT_2D.BIN`
+  (a fonte da `LOOKS SET`), `DATSEL3.BIN` e nove `LC_*.BIN` — é uma imagem de
+  32×128 no mesmo canto. São telas diferentes carregando a própria página no
+  mesmo lugar da VRAM, e as duas leituras são verdade: **na `LOOKS SET`, o
+  (704, 256) é a fonte, não a bandeira** — o 3D não pode pedir a bandeira à
+  VRAM daquela tela.
+
 ### 4.5 (e) A paleta do árbitro
 
 Não está no TEX. As duas tabelas do Superpack

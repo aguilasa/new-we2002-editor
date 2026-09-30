@@ -356,3 +356,136 @@ def negative_controls(files: Mapping[str, bytes], source: str = "") -> tuple:
 def negative_controls_image(image_path: str) -> tuple:
     """negative_controls() over every kit container of a disc."""
     return negative_controls(read_kits(image_path), source=image_path)
+
+
+# -- who owns a VRAM point -------------------------------------------------
+#
+# PLAN-KITS-PY.md section 4.4: which record of which file on the disc covers
+# a VRAM point, and whether it starts there.  A point named in a note may be
+# the origin of a record or only a sample inside one; this tells the two apart.
+
+@dataclass(frozen=True)
+class Owner:
+    """One record of one file that covers a VRAM point."""
+
+    path: str
+    kind: str
+    x: int
+    y: int
+    w: int
+    h: int
+
+    def starts_at(self, point) -> bool:
+        return (self.x, self.y) == tuple(point)
+
+    @property
+    def shape(self) -> tuple:
+        return (self.kind, self.x, self.y, self.w, self.h)
+
+
+@dataclass(frozen=True)
+class PointOwners:
+    """Every record on the disc that covers one VRAM point."""
+
+    point: tuple
+    owners: tuple
+
+    @property
+    def files(self) -> tuple:
+        return tuple(sorted({o.path for o in self.owners}))
+
+    @property
+    def starters(self) -> tuple:
+        return tuple(o for o in self.owners if o.starts_at(self.point))
+
+    def grouped(self) -> tuple:
+        """((shape, (paths sorted)), ...) -- one line per record shape,
+        sorted by how many files own it (most first), then by shape."""
+        groups = {}
+        for o in self.owners:
+            groups.setdefault(o.shape, set()).add(o.path)
+        return tuple(sorted(((s, tuple(sorted(p))) for s, p in groups.items()),
+                            key=lambda g: (-len(g[1]), g[0])))
+
+
+@dataclass(frozen=True)
+class RectsReport:
+    """The answer for every point asked, over every readable file."""
+
+    source: str
+    points: tuple
+    scanned: int
+    with_records: int
+    skipped: tuple
+
+
+def _kind_name(e) -> str:
+    return KIND_IMAGE if e.is_image else KIND_CLUT if e.is_clut else "kind %d" % e.kind
+
+
+def covers(entry, point) -> bool:
+    """x in [rx, rx+w) and y in [ry, ry+h), in the halfword units the record stores."""
+    px, py = point
+    return entry.x <= px < entry.x + entry.w and entry.y <= py < entry.y + entry.h
+
+
+def owners_of(files: Mapping[str, bytes], points, source: str = "",
+              skipped=()) -> RectsReport:
+    """For each VRAM point, every record in *files* ({path: bytes}) covering it.
+    Pure: no I/O.  *skipped* is carried through for the caller to report."""
+    points = tuple(tuple(p) for p in points)
+    found = {p: [] for p in points}
+    with_records = 0
+    for path in sorted(files):
+        records = bin_archive.entries(files[path])
+        with_records += bool(records)
+        for e in records:
+            for p in points:
+                if covers(e, p):
+                    found[p].append(Owner(path=path, kind=_kind_name(e),
+                                          x=e.x, y=e.y, w=e.w, h=e.h))
+    return RectsReport(
+        source=source,
+        points=tuple(PointOwners(point=p, owners=tuple(found[p])) for p in points),
+        scanned=len(files),
+        with_records=with_records,
+        skipped=tuple(skipped),
+    )
+
+
+def read_all_files(image_path: str) -> tuple:
+    """({path: bytes} of every readable file on the disc, ((path, reason), ...)
+    of the ones that could not be read as Form 1 inside the track)."""
+    try:
+        image = iso.Image(image_path)
+    except OSError as exc:
+        raise SurveyError("Could not open %s: %s" % (image_path, exc.strerror or exc)) from exc
+    except ValueError as exc:
+        raise SurveyError("%s is not a readable data track: %s" % (image_path, exc)) from exc
+    try:
+        out, skipped = {}, []
+        for path in sorted(image.files):
+            try:
+                out[path] = image.read_file(path)
+            except iso.Form2Sector:
+                skipped.append((path, "Form 2"))
+            except iso.OutsideTrack:
+                skipped.append((path, "outside the track"))
+        return out, tuple(skipped)
+    finally:
+        image.close()
+
+
+def parse_point(text: str) -> tuple:
+    """'608,256' -> (608, 256); a malformed point raises SurveyError."""
+    try:
+        x, y = (int(v, 0) for v in text.split(","))
+    except ValueError as exc:
+        raise SurveyError("'%s' is not a VRAM point X,Y" % text) from exc
+    return (x, y)
+
+
+def rects_image(image_path: str, points) -> RectsReport:
+    """owners_of() over every readable file of the disc at *image_path*."""
+    files, skipped = read_all_files(image_path)
+    return owners_of(files, points, source=image_path, skipped=skipped)
