@@ -50,7 +50,7 @@ da ROM que o gate usa**: as imagens de `roms/` declaram
 `cdrom:SLPM_870.56` e escrevem `BISLPM-87056WEW-OPT`. O sufixo
 `WEW-OPT` e o mesmo nos dois, e e por isso que o layout deste documento
 vale para os dois; o que difere e o codigo, e a consequencia esta em
-[MCR-TASK-13](../../docs/tasks/port-mcr/13-oraculo-e-veredito.md): um
+[MCR-TASK-13](../../docs/tasks/concluidos/port-mcr/13-oraculo-e-veredito.md): um
 console com este cartao e aquela ROM nao acha este save.
 
 ## O conteúdo do bloco do WE2002

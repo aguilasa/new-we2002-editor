@@ -8,7 +8,7 @@ Correções abertas pelo `/revisar` sobre as tasks deste ciclo. O andamento das
 pasta — o ciclo de PES2 tem o seu em
 [`/docs/tasks/pes2/correcoes-progresso.md`](/docs/tasks/pes2/correcoes-progresso.md), o
 do port do `.mcr` em
-[`/docs/tasks/port-mcr/correcoes-progresso.md`](/docs/tasks/port-mcr/correcoes-progresso.md),
+[`/docs/tasks/port-mcr/correcoes-progresso.md`](/docs/tasks/concluidos/port-mcr/correcoes-progresso.md),
 e o ciclo arquivado, o dele em
 [`/docs/tasks/concluidos/correcoes-progresso.md`](/docs/tasks/concluidos/correcoes-progresso.md).
 

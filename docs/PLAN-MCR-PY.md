@@ -2,10 +2,10 @@
 
 > **Estado:** as quatro fases executadas, e a definição de pronto conferida
 > item a item na
-> [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) em 2026-09-08 —
+> [MCR-TASK-14](/docs/tasks/concluidos/port-mcr/14-verificacao-final.md) em 2026-09-08 —
 > os seis fecharam. Este arquivo é a **fonte de verdade** do ciclo `port-mcr`;
 > o andamento fica em
-> [/docs/tasks/port-mcr/progresso.md](/docs/tasks/port-mcr/progresso.md).
+> [/docs/tasks/port-mcr/progresso.md](/docs/tasks/concluidos/port-mcr/progresso.md).
 >
 > O que a execução mudou no plano está escrito onde muda, e não aqui: o
 > `0x6500` virou o capitão (§1.8), o `io.py` virou `mcrio.py` (§3.2), o
@@ -359,14 +359,14 @@ no meio da lista, perto do que se parecem. O
 nenhuma delas tinha o **guard externo** — cinco vezes neste ciclo uma exceção
 fora do `attempt()` matou a corrida e escondeu os checks seguintes. O
 `controls.py` porque o estímulo de cada controle negativo morava em prosa, e a
-[CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) mediu que prosa não
+[CORR-MCR-009](/docs/tasks/concluidos/port-mcr/CORR-MCR-009.md) mediu que prosa não
 reproduz; agora é substituição literal versionada, como os roteiros de
 `tools/par/` são para o golden. São **dois tipos**: a substituição literal, e
 um punhado menor que **cria** um arquivo uma pasta abaixo, porque o defeito que
 ele mede é uma varredura que não desce
-([CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md)). Quantos são de cada
+([CORR-MCR-014](/docs/tasks/concluidos/port-mcr/CORR-MCR-014.md)). Quantos são de cada
 tipo é o que a última linha do `controls.py` imprime
-([CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md)). O `ui_check.py`
+([CORR-MCR-017](/docs/tasks/concluidos/port-mcr/CORR-MCR-017.md)). O `ui_check.py`
 porque o alvo `mcr_ui` precisa de um executável que decida sozinho entre
 pular e falhar.
 
@@ -470,7 +470,7 @@ seguem o idioma do arquivo em que moram, que é o que a regra sempre quis dizer.
 consistência dele.** A MCR-TASK-12 reescreveu o bloco do `mcr_ui` em português
 para acrescentar uma ressalva — 6 das 74 linhas, e nenhuma varredura reclamou,
 porque a `glossary.sweep()` cobre `tools/mcr/**.py` e não alcança o CMake, por
-desenho. A [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) repôs.
+desenho. A [CORR-MCR-019](/docs/tasks/concluidos/port-mcr/CORR-MCR-019.md) repôs.
 
 O fonte de origem é espanhol, então `glossary.py` carrega o mapa
 (`jugador→player`, `cancha→pitch`, `formacion→formation`, `grabar→write`,
@@ -482,7 +482,7 @@ mecânica de [tools/glossary.py](../tools/glossary.py) com o italiano do
 falso-positivo, e sem ela a regra é prosa.
 
 O `card.py` da MCR-TASK-04 foi escrito **antes** desta decisão e ficou em
-português; a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) o retraduziu
+português; a [CORR-MCR-007](/docs/tasks/concluidos/port-mcr/CORR-MCR-007.md) o retraduziu
 em 2026-09-07, replantando os cinco controles negativos da task para provar que
 os trechos que o `recusa()` casa por substring foram traduzidos junto com as
 mensagens. **Não há exceção aberta** — a varredura acima vale para todo módulo.
@@ -682,14 +682,14 @@ fica registrada com a medição que a justifica. O precedente escrito está no
 | 5 | pedidos posteriores ao fechamento — abrir cartão pela tela, e o contêiner `.gme` |
 
 O quadro com as tasks, dependências e datas está em
-[/docs/tasks/port-mcr/progresso.md](/docs/tasks/port-mcr/progresso.md) — as 14
+[/docs/tasks/port-mcr/progresso.md](/docs/tasks/concluidos/port-mcr/progresso.md) — as 14
 das fases 0 a 4, mais o que a Fase 5 receber.
 
 **A Fase 5 não é reabertura.** Ela existe porque escopo pedido depois do
 fechamento não cabe numa fase já revisada: a definição de pronto acima
 continua conferida e fechada, e o que entra aqui se mede contra o critério da
 própria task. A primeira é a
-[MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md), de
+[MCR-TASK-15](/docs/tasks/concluidos/port-mcr/15-abrir-cartao-pela-tela.md), de
 2026-09-09: a janela tem de subir com ou sem cartão, e escolher um `.mcr` do
 computador tem de ser ação visível dela — botão e item de menu —, nunca um
 diálogo que aparece antes da janela.

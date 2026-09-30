@@ -1,7 +1,7 @@
 # Perfil de ciclo — port em Python do editor de `.mcr` do WE2002
 
 **Este arquivo é o perfil do ciclo `port-mcr`**, nomeado pelo campo `perfil:` do
-[`docs/tasks/port-mcr/progresso.md`](/docs/tasks/port-mcr/progresso.md) e
+[`docs/tasks/port-mcr/progresso.md`](/docs/tasks/concluidos/port-mcr/progresso.md) e
 carregado pelos prompts de `docs/prompts/`. Os prompts têm o **rito**; o que é
 deste ciclo mora aqui.
 
@@ -34,22 +34,22 @@ recebem por argumento: `/rite:execute port-mcr`, `/rite:review port-mcr`,
   docstrings, comentários, mensagens de erro, `--help` e rótulo de UI em inglês;
   `docs/**` em português. A fronteira é o arquivo. Decisão do dono do
   repositório, 2026-09-07. O `card.py` era anterior a ela e foi retraduzido pela
-  [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) no mesmo dia; **não há
+  [CORR-MCR-007](/docs/tasks/concluidos/port-mcr/CORR-MCR-007.md) no mesmo dia; **não há
   exceção aberta**. (§3.5 do plano)
 - **Cartão de jogo não se versiona.** A fixture é `work/entrada.mcr`, apontada
   por `WE2002_MCR_CARD`. Mesma regra de `roms/`.
 - **Controle negativo se registra pela substituição literal**, nunca pela
   descrição do efeito: a linha de origem, a de destino e a função onde ela mora.
   Duas contagens da MCR-TASK-06 e uma da MCR-TASK-07 não reproduziram da prosa
-  ([CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md),
-  [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md)) — "trocar dois campos no
+  ([CORR-MCR-009](/docs/tasks/concluidos/port-mcr/CORR-MCR-009.md),
+  [CORR-MCR-011](/docs/tasks/concluidos/port-mcr/CORR-MCR-011.md)) — "trocar dois campos no
   encoder" tem mais de uma leitura, e uma linha que aparece duas vezes no
   arquivo precisa da função para ser identificada. A cópia plantada roda com
   `PYTHONPATH=tools/mcr`, senão morre em `ModuleNotFoundError` antes de medir, e
   **confira que a substituição casou**: literal que não bate deixa a cópia
   intacta e a corrida sai verde.
   **E há um controle que não é substituição: ele cria um arquivo.** O defeito
-  que a [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md) mediu é uma pasta
+  que a [CORR-MCR-014](/docs/tasks/concluidos/port-mcr/CORR-MCR-014.md) mediu é uma pasta
   que a varredura não desce — as duas varreduras de desenho enumeravam com
   `os.listdir` —, e nenhuma troca de linha exprime isso. Ali "casou uma vez"
   quer dizer caminho livre e escrito. E o espanhol que ele planta sai do
@@ -143,7 +143,7 @@ docs/tasks/port-mcr/  este ciclo
 | `mcr_selftest` | MCR-TASK-10 | os 13 `self_check()`, as três regras, a varredura de idioma **e os controles negativos, todos exigidos vermelhos** — quantos são, e de que tipo, é o que a última linha do `controls.py` imprime — sem fixture e sem Qt, ~13 s. **Obrigatório** |
 | `mcr_card` | MCR-TASK-10 | `cli.py check`: round-trip nas duas formas e os cross-checks contra `WE2002_MCR_CARD` (skip 77) |
 | `mcr_container` | MCR-TASK-16 | `gme.py --check`: desmonta e remonta os oito `.gme` de `mcr/` e exige o mesmo arquivo. **É o único gate deste ciclo que não precisa de fixture** — a entrada é versionada, então ele roda em qualquer clone. Pula com 77 só se `mcr/` não existir |
-| `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. **Passa desde a MCR-TASK-11**; pula com 77 se faltar venv, `app.py` ou display. Com `WE2002_MCR_CARD` ele também dirige os widgets, grava dois cartões, confere o round-trip deles **e planta os controles negativos que o motor do `controls.py` não alcança** — a conversão de volta do arraste, a exibição de um valor fora do onze, as duas portas de abrir cartão e o filtro dos diálogos, todos precisando de Qt para serem exercitados. **Quantos são é a última linha que ele imprime** (`ui negative controls: N of N red`), pela razão da CORR-MCR-017; e ela não pode ser copiada para cá, porque o `count_sweep` do `controls.py` varre este arquivo atrás de `N of N red` e o compararia com o total dos *outros* controles. Desde a [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) ele também abre uma cópia com capitão e cobrador **fora** do domínio medido e exige que a tela os **mostre ou os nomeie num rótulo visível** — tooltip não conta. Desde a MCR-TASK-15 ele também sobe a janela **sem cartão** — esse passo roda com ou sem fixture — e exige que ela seja a porta de entrada: página vazia com botão, botão e item de menu disparando a **mesma** ação, diálogo cancelado sem efeito, e edição não gravada que só se perde depois de uma pergunta |
+| `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. **Passa desde a MCR-TASK-11**; pula com 77 se faltar venv, `app.py` ou display. Com `WE2002_MCR_CARD` ele também dirige os widgets, grava dois cartões, confere o round-trip deles **e planta os controles negativos que o motor do `controls.py` não alcança** — a conversão de volta do arraste, a exibição de um valor fora do onze, as duas portas de abrir cartão e o filtro dos diálogos, todos precisando de Qt para serem exercitados. **Quantos são é a última linha que ele imprime** (`ui negative controls: N of N red`), pela razão da CORR-MCR-017; e ela não pode ser copiada para cá, porque o `count_sweep` do `controls.py` varre este arquivo atrás de `N of N red` e o compararia com o total dos *outros* controles. Desde a [CORR-MCR-020](/docs/tasks/concluidos/port-mcr/CORR-MCR-020.md) ele também abre uma cópia com capitão e cobrador **fora** do domínio medido e exige que a tela os **mostre ou os nomeie num rótulo visível** — tooltip não conta. Desde a MCR-TASK-15 ele também sobe a janela **sem cartão** — esse passo roda com ou sem fixture — e exige que ela seja a porta de entrada: página vazia com botão, botão e item de menu disparando a **mesma** ação, diálogo cancelado sem efeito, e edição não gravada que só se perde depois de uma pergunta |
 
 Antes da MCR-TASK-10 **não havia gate deste ciclo**, e é por isso que a ordem
 mandou: 05 antes de 06/07/08, 09 antes de 11, 10 antes de 12. **Desde
@@ -164,12 +164,12 @@ estar ocupado.
 o total viveu como número neste arquivo, a MCR-TASK-11 acrescentou o décimo
 sexto, e a linha do gate que os comandos leem antes de rodar qualquer coisa
 continuou dizendo quinze, enquanto o `progresso.md` — editado pela **mesma
-task** — já dizia dezesseis ([CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md)).
+task** — já dizia dezesseis ([CORR-MCR-017](/docs/tasks/concluidos/port-mcr/CORR-MCR-017.md)).
 Copiar aqui a linha inteira que o comando imprime é de propósito: quem rodar
 compara duas frases iguais, não um número solto contra outro. E deixou de ser
 convenção — o `controls.py --self-check` **varre** este arquivo e o
 `progresso.md` do ciclo e recusa total que não bate com `len(CONTROLS)`, que é
-o que a [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) mediu faltar: o
+o que a [CORR-MCR-021](/docs/tasks/concluidos/port-mcr/CORR-MCR-021.md) mediu faltar: o
 número saiu daqui e ficou lá, quatro tasks para trás.
 
 ---
@@ -213,7 +213,7 @@ quando o usuário pede — tarefa de fase adiante de que uma tarefa da fase corr
   recusa e identificador local em en-US (§3.5). **Ao traduzir um módulo que já
   tem `self_check`, traduza o trecho esperado junto com a mensagem** — o
   `recusa()` casa substring, e traduzir um lado só deixa o gate verde por
-  acidente; foi o que a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md)
+  acidente; foi o que a [CORR-MCR-007](/docs/tasks/concluidos/port-mcr/CORR-MCR-007.md)
   mediu, replantando os cinco controles negativos.
   **E toda checagem de round-trip precisa de uma companheira que prove que o
   escritor rodou.** Na MCR-TASK-09 o laço de `Save.write` trocado por
@@ -266,7 +266,7 @@ quando o usuário pede — tarefa de fase adiante de que uma tarefa da fase corr
   MCR-TASK-12); e **os passos das fases 3 e 4 continuam no gate**, e a corrida
   os mostra.
   A MCR-TASK-16 acrescentou uma quarta, pela
-  [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md): **rótulo que a Regra 3
+  [CORR-MCR-025](/docs/tasks/concluidos/port-mcr/CORR-MCR-025.md): **rótulo que a Regra 3
   impede o núcleo de conferir — o filtro dos diálogos é o caso — precisa de
   asserção com caso plantado, e ela julga o que a pessoa vê**. A primeira
   versão varria a string inteira do filtro, e os grupos estreitos do fim

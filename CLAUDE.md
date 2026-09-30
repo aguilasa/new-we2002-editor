@@ -694,7 +694,7 @@ Um **quinto projeto**, aberto em 2026-09-07: o port em Python do
 puro em `tools/mcr/`, UI **PySide6** em `tools/mcr/ui/`, separados por regra.
 
 O plano é [docs/PLAN-MCR-PY.md](docs/PLAN-MCR-PY.md); o ciclo de tasks é
-[docs/tasks/port-mcr/](docs/tasks/port-mcr/progresso.md), com prefixo
+[docs/tasks/port-mcr/](docs/tasks/concluidos/port-mcr/progresso.md), com prefixo
 `MCR-TASK-` e pool `CORR-MCR-`, e roda por `/rite:execute port-mcr`.
 
 **O mapa do option file** é o [docs/MCR-OPTION-FILE.md](docs/MCR-OPTION-FILE.md):

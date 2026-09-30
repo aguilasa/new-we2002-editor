@@ -85,7 +85,7 @@ Uma consequência mecânica: o `gme.py --check` varre `mcr/*.gme` e portanto
 **não enxerga os `.mcr`** — o gate `mcr_container` continua dizendo `8/8`, e é
 o certo, já que não há contêiner nenhum para desmontar ali.
 
-**Desde a [MCR-TASK-16](../docs/tasks/port-mcr/16-conteiner-gme.md) o
+**Desde a [MCR-TASK-16](../docs/tasks/concluidos/port-mcr/16-conteiner-gme.md) o
 `tools/mcr/` lê `.gme` direto** — a decisão é por conteúdo (o tamanho, e o `MC`
 em 3904), então a extensão nem precisa estar certa:
 
@@ -192,7 +192,7 @@ jogo criou o cartão e gravou nele. 2026-09-10.
 
 Um save só, e `cli.py info` reporta `bad checksums none`.
 
-**Por que ele estava faltando.** A [MCR-TASK-13](../docs/tasks/port-mcr/13-oraculo-e-veredito.md)
+**Por que ele estava faltando.** A [MCR-TASK-13](../docs/tasks/concluidos/port-mcr/13-oraculo-e-veredito.md)
 fechou com o veredito do console **não obtido**, e a razão era de código de
 produto: a fixture do ciclo é `BISLPM-86600WEW-OPT`, e os discos desta máquina
 são `SLPM-87056`. Um jogo de PSX acha o save dele pelo nome, então aquele

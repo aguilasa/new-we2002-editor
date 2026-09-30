@@ -12,7 +12,7 @@ modo exibição**, e como reescrever isso sem que o jogo recuse o cartão.
 
 É o papel que [`../wte/re/mcr.md`](../wte/re/mcr.md) faz para os 17 destinos do
 editor do Obocaman: **fonte de endereços**, para a ferramenta citar. A medição
-é da [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md), cujo
+é da [MCR-TASK-17](/docs/tasks/concluidos/port-mcr/17-mapa-dos-desbloqueios.md), cujo
 escopo é descoberta e mapeamento — **marcar e desmarcar na ferramenta é task
 seguinte**, e ela cita este arquivo.
 
@@ -301,7 +301,7 @@ EOF
 - **Os 15 bytes de `0x02035`**: não identificados; zero é aceito.
 - **Se a mesma verificação cobre a área de jogador**, que é onde o
   `tools/mcr/` e o editor do Obocaman escrevem. É a pergunta que a
-  [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) deixou como
+  [MCR-TASK-13](/docs/tasks/concluidos/port-mcr/13-oraculo-e-veredito.md) deixou como
   veredito do console, e agora é testável do mesmo jeito: gravar pela
   ferramenta e abrir no jogo. **Há evidência a favor**, medida em 2026-09-12:
   os três destinos que caem dentro do save ficam **depois** do fim do registro

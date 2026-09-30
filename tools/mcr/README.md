@@ -19,7 +19,7 @@ se usa quando algo dá errado e se quer ver a ferramenta sozinha.
 - **O plano** — [`docs/PLAN-MCR-PY.md`](../../docs/PLAN-MCR-PY.md), fonte de
   verdade do que este projeto é e do que ele decidiu não ser.
 - **O ciclo de tasks** —
-  [`docs/tasks/port-mcr/`](../../docs/tasks/port-mcr/progresso.md).
+  [`docs/tasks/port-mcr/`](../../docs/tasks/concluidos/port-mcr/progresso.md).
 - **O mapa do option file** —
   [`docs/MCR-OPTION-FILE.md`](../../docs/MCR-OPTION-FILE.md), a consolidação:
   estrutura, cada byte conhecido, e o que continua obscuro. A medição de cada
@@ -43,7 +43,7 @@ se usa quando algo dá errado e se quer ver a ferramenta sozinha.
 > (`wte/tools/`, `wte/tests/roteiros/`). A varredura de idioma
 > (`glossary.py`) cobre os `.py` e não alcança este arquivo, então a fronteira
 > aqui é convenção e não guarda — foi exatamente assim que a
-> [CORR-MCR-019](../../docs/tasks/port-mcr/CORR-MCR-019.md) aconteceu, num
+> [CORR-MCR-019](../../docs/tasks/concluidos/port-mcr/CORR-MCR-019.md) aconteceu, num
 > arquivo vizinho.
 
 ---
