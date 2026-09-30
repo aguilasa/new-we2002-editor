@@ -48,6 +48,7 @@ serialized = [
 
 [commit]
 co_author_footer = false
+push = "after-each-item"
 
 [vocab]
 task_types = ["decisão", "ferramenta", "verificação", "engenharia-reversa", "closing", "projeto", "implementação", "infra", "extração", "documentação", "infraestrutura", "investigação"]
