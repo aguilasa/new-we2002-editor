@@ -57,3 +57,60 @@ este perfil e o plano divergirem, o plano ganha.
 ## Verificações específicas por fase
 
 <!-- One entry per phase used by tasks ("### Phase 1 — ..."). The reviewer runs these; a phase without an entry is a finding. -->
+
+### Fase 0 — medições no disco
+
+- Todo número novo no plano sai de subcomando versionado de `tools/kits/cli.py`; rodar e comparar (§1.1, §4.3, §4.4, §4.6).
+- `grep -rnE 'print\(|sys\.exit|PySide' tools/kits/core/` vazio.
+- As §4.3, §4.4 e §4.6 têm veredito ou o aberto dito, com o comando.
+
+### Fase 1 — núcleo, lado TEX
+
+- `ctest -R kits` lista `kits_selftest` e `kits_image` pelo nome; `No tests were found` é vermelho.
+- `python tools/kits/controls.py`: todo controle vermelho, incluindo o byte trocado no LZSS (§5.4).
+- `cli.py` só importa `core.api` e stdlib (§3.1).
+- European Deluxe: 16 dos 18 com cauda Form 2 abrem, `TEX_13` e `TEX_48` recusados com o motivo (§2.1).
+
+### Fase 2 — núcleo, lado ROM
+
+- `python tools/kits/gen_tables.py --check` sai 0 e tem vermelho plantado visto (§3.3).
+- `cli.py teams` nas duas imagens de `roms/`: `table` na japonesa, `rom` na European Deluxe, nenhum nome vazio.
+
+### Fase 3 — plano e zonas
+
+- `git ls-files tools/kits/ui` vazio: sem janela até aqui (§7).
+- Mapa deslocado 1 px reprova a §4.6; o mapa medido passa (§5.4).
+- `TEX_A4`: bitmap de titular = suplente; tag que difere, diferente.
+
+### Fase 4 — janela mínima
+
+- `tools/kits/ui/` só importa PySide6, stdlib e `core.api` (§3.1).
+- `ctest -R kits_ui` verde, e sem Fusion/`QPalette` fixa ele reprova (§3.4).
+- Nenhuma janela visível: `:98` no Linux, `-32000` no Windows.
+
+### Fase 5 — mudanças no `looks`
+
+- `ctest -R looks`: os quatro pelo nome, verdes antes e depois (§2, §6).
+- Suplente do `TEX_A4` = titular; tag que difere, quadro diferente (§5.4).
+- Sem argumento novo, `Builder` desenha como antes (default `TEX_A4`, `kit_set=1`).
+
+### Fase 6 — 3D
+
+- Só `core/figure.py` importa o `looks` (§3.1).
+- Trocar as paletas 486 e 488 troca jogador e goleiro (§5.4).
+- Sem `WE2002_LOOKS_IMAGE`, aba 3D desligada com a frase e o 2D igual (§3.2).
+
+### Fase 7 — emulador
+
+- A leitura da VRAM começa de save state, e o controle com o time de titular mostra o 1º par (§4.1).
+- Escore do confronto 3 colado, com o controle cruzado reprovando (§5.3).
+
+### Fase 8 — times em vez de tags
+
+- Cada linha da tabela time → tag tem proveniência; três conferidas no emulador (§4.2).
+- Nada do `we-team-editor.exe` no git.
+
+### Fase 9 — diagnóstico e pronto
+
+- `TEX_13` e `TEX_48` aparecem na aba com o motivo (§0, item 3).
+- Os cinco itens da Definição de pronto conferidos com comando (§0).
