@@ -11,6 +11,7 @@ Usage:
     python tools/kits/cli.py prims --all-kits [--tuple T] [--negative] <image.bin>
     python tools/kits/cli.py prims [--kit TAG] --tuple T [--tuple T ...] <image.bin>
     python tools/kits/cli.py uv [--kit TAG] [--json | --negative] <image.bin>
+    python tools/kits/cli.py open <path> [<path> ...]
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from core import api  # noqa: E402
 from core import survey as survey_mod  # noqa: E402
 
 SHORT_LIST = 5
@@ -315,6 +317,29 @@ def cmd_uv(args) -> int:
     return 0
 
 
+def cmd_open(args) -> int:
+    """What `api.open_source` makes of each path: its kind, or the refusal.
+
+    Only the facade is used here.  Exit 1 when any path is refused, so a
+    list that should all open fails loudly on the first one that does not.
+    """
+    refused = 0
+    for path in args.paths:
+        name = os.path.basename(path)
+        try:
+            source = api.open_source(path)
+        except api.KitsError as exc:
+            refused += 1
+            print("REFUSE %s -> %s: %s" % (name, type(exc).__name__, exc))
+            continue
+        if source.kind == api.KIND_ROM:
+            extra = "kit tags %d, data track %s" % (len(source.kit_tags()), source.image_path)
+        else:
+            extra = "%d bytes" % source.size
+        print("OPEN   %s -> %s (%s)" % (name, source.kind, extra))
+    return 1 if refused else 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -353,6 +378,9 @@ def main(argv=None) -> int:
     mode.add_argument("--negative", action="store_true",
                       help="shift and move the uniform record and check the rects follow")
     p.set_defaults(fn=cmd_uv)
+    p = sub.add_parser("open", help="what the core makes of a file: a disc, a lone TEX, or a refusal")
+    p.add_argument("paths", nargs="+", metavar="path")
+    p.set_defaults(fn=cmd_open)
     args = parser.parse_args(argv)
     return args.fn(args)
 

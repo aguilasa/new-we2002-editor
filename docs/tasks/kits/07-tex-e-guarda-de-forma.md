@@ -38,4 +38,6 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#2.1).
 
 Da KITS-TASK-01: os 11 retângulos do TEX (`EXPECTED_SHAPE`) estão em `tools/kits/core/survey.py`; pelo §3.1 endereço mora no `layout.py` do `looks` — mover para lá (ou justificar) quando o `tex.py` os usar, e o `survey.py` passar a importar de um lugar só.
 
+Da KITS-TASK-06: o `core/source.py` reconhece TEX por `survey._shape_of` e `survey.EXPECTED_SHAPE` — quando os retângulos saírem do `survey.py`, o `source.py` passa a usar a função pública do módulo novo. E `survey.SurveyError` deriva de `Exception`; trazê-la para baixo de `errors.KitsError` junto, para `except KitsError` pegar tudo o que o núcleo levanta.
+
 ## Log de Execução
