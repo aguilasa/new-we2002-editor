@@ -5,7 +5,7 @@ origin: KITS-TASK-01
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -55,3 +55,32 @@ $ grep -n "survey" docs/tasks/kits/09-cli-e-confronto-1.md docs/tasks/kits/06-fa
 Vazio antes; depois lista a passagem. Depois da task 09, `grep -nP "^from core import (?!api)" tools/kits/cli.py` sai vazio.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `a384fe67`)
+
+```text
+$ grep -n "^from core\|survey_mod\.\(EXPECTED\|KIND\)" tools/kits/cli.py
+16:from core import survey as survey_mod  # noqa: E402
+41:    images = sum(1 for r in survey_mod.EXPECTED_SHAPE if r[0] == survey_mod.KIND_IMAGE)
+42:    cluts = len(survey_mod.EXPECTED_SHAPE) - images
+$ grep -n "survey" docs/tasks/kits/06-fachada-e-origem.md docs/tasks/kits/09-cli-e-confronto-1.md | grep -i api
+(vazio, exit 1)
+```
+
+REPRODUCED. Causa raiz confirmada: `core/api.py` não existe (`git ls-files tools/kits` lista só `cli.py`, `core/__init__.py`, `core/survey.py`), e a KITS-TASK-06 que a cria depende da 05.
+
+### O que foi feito
+
+- KITS-TASK-01, "Problemas encontrados": a exceção temporária ao §3.1, com o motivo e quem a encerra.
+- KITS-TASK-09: critério novo (`cli.py survey` pela fachada, `grep -nP "^from core import (?!api)" tools/kits/cli.py` vazio) e a nota de origem. A 09 já lista `cli.py` e `core/api.py` em `files`.
+- `tools/kits/cli.py` **não** foi tocado: sem `api.py` não há para onde apontar; a troca é trabalho da 09.
+
+### Verificação
+
+```text
+$ grep -n "survey" docs/tasks/kits/09-cli-e-confronto-1.md docs/tasks/kits/06-fachada-e-origem.md | grep -i "api"
+docs/tasks/kits/09-cli-e-confronto-1.md:32:- [ ] `cli.py survey` passa pela fachada: `api.py` expõe o levantamento (`survey_image`) e a forma esperada (quantas imagens e quantas CLUTs), e `grep -nP "^from core import (?!api)" tools/kits/cli.py` sai vazio
+docs/tasks/kits/09-cli-e-confronto-1.md:40:Da [CORR-KITS-001](/docs/tasks/kits/CORR-KITS-001.md): o subcomando `survey`, entregue na KITS-TASK-01 antes de a fachada existir, importa `core.survey` direto e lê `survey_mod.EXPECTED_SHAPE`/`KIND_IMAGE`. Esta task o passa para trás de `core/api.py`, com as constantes de forma vindo de lá.
+```
+
+Vazio antes, duas linhas depois.

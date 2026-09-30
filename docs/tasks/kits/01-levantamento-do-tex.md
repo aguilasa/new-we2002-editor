@@ -80,6 +80,7 @@ Erro: `python tools/kits/cli.py survey roms/nope.bin` → `survey: Could not ope
 ### Problemas encontrados
 
 - Os 11 retângulos (`EXPECTED_SHAPE`) moram em `core/survey.py`; o §3.1 quer endereço no `layout.py` do `looks`, que esta task não podia tocar. Nota deixada na KITS-TASK-07.
+- Exceção temporária ao §3.1 ([CORR-KITS-001](/docs/tasks/kits/CORR-KITS-001.md)): `cli.py survey` importa `core.survey` direto e lê `EXPECTED_SHAPE`/`KIND_IMAGE`, porque a fachada `core/api.py` só nasce na KITS-TASK-06. A passagem para trás da fachada fica com a [KITS-TASK-09](/docs/tasks/kits/09-cli-e-confronto-1.md), que já exige `cli.py` importando só `core.api`.
 - **Closed** — commit `fc5717ae` (2026-09-30): feat(kits): survey the TEX containers in core, print it from cli.py survey
   - Files (`git show --name-status fc5717ae`):
     - `M NOTICE.md`
