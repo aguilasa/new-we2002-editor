@@ -11,5 +11,5 @@
 | [CORR-KITS-006](/docs/tasks/kits/CORR-KITS-006.md) | Paste prims transcripts in the Log whole, not trimmed | KITS-TASK-03 | low | done | 2026-09-30 |
 | [CORR-KITS-007](/docs/tasks/kits/CORR-KITS-007.md) | State in §4.3 where the zone-map half of the question is answered | KITS-TASK-03 | low | done | 2026-09-30 |
 | [CORR-KITS-008](/docs/tasks/kits/CORR-KITS-008.md) | Plant a red for the outside-256x128 count in uv --negative | KITS-TASK-04 | medium | done | 2026-09-30 |
-| [CORR-KITS-009](/docs/tasks/kits/CORR-KITS-009.md) | Paste the uv --negative transcript whole and give the survey md5 | KITS-TASK-04 | medium | pending | — |
+| [CORR-KITS-009](/docs/tasks/kits/CORR-KITS-009.md) | Paste the uv --negative transcript whole and give the survey md5 | KITS-TASK-04 | medium | done | 2026-09-30 |
 <!-- rite:end -->

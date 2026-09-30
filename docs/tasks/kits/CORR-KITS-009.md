@@ -5,10 +5,10 @@ origin: KITS-TASK-04
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: 4c0c7808
 ---
 
 # CORR-KITS-009 — Paste the uv --negative transcript whole and give the survey md5
@@ -89,3 +89,7 @@ $ grep -c "rects move -2 px in x" docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md
 $ grep -c c2ec025a docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md
 2
 ```
+- **Closed** — commit `4c0c7808` (2026-09-30): docs(kits): give the survey md5 in the KITS-TASK-04 Log, measured per commit
+  - Files (`git show --name-status 4c0c7808`):
+    - `M docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md`
+    - `M docs/tasks/kits/CORR-KITS-009.md`
