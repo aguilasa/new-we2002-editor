@@ -5,10 +5,10 @@ origin: KITS-TASK-02
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: fc984d0a
 ---
 
 # CORR-KITS-004 — Paste the rects transcript as the tool prints it
@@ -79,3 +79,7 @@ $ grep -c 'VRAM point owners' docs/tasks/kits/02-retangulos-608-e-704.md
 $ grep -n 'fora da trilha' docs/tasks/kits/02-retangulos-608-e-704.md
 (sem saída, exit 1)
 ```
+- **Closed** — commit `fc984d0a` (2026-09-30): docs(kits): paste the rects transcript of KITS-TASK-02 as the tool prints it
+  - Files (`git show --name-status fc984d0a`):
+    - `M docs/tasks/kits/02-retangulos-608-e-704.md`
+    - `M docs/tasks/kits/CORR-KITS-004.md`
