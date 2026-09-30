@@ -162,7 +162,7 @@ $ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative      # exit
   uniform moved to (0,0)     moved 2  figure 1  mapped count drops to 0  429 -> 0  held
 11 of 11 expectations held
 
-$ grep -rnE 'print\(|sys\.exit|PySide' tools/kits/core/      # exit 2, sem saída
+$ grep -rnE 'print(|sys.exit|PySide' tools/kits/core/      # exit 1, sem saída (corrida no Git Bash)
 ```
 
 (As nove linhas `skipped` do `rects` — 1 Form 2 e 8 fora da trilha — ficam na saída acima.)
@@ -174,3 +174,8 @@ check: 0 error(s), 0 warning(s) in 1 cycle(s)
 - **Closed** — commit `b040bd96` (2026-09-30): docs(kits): close phase 0 — the four measurements re-run at HEAD match the plan
   - Files (`git show --name-status b040bd96`):
     - `M docs/tasks/kits/05-fechamento-fase-0.md`
+
+### Problemas encontrados
+
+- A primeira versão deste Log dizia `# exit 2, sem saída` no `grep` do núcleo. O `exit 2` era erro do próprio `grep` chamado pelo `subprocess` do Python (`grep: Unmatched ( or \(` — o padrão chegou sem o escape que o shell daria), não um veredito. Refeito no Git Bash: `exit 1`, sem saída — o núcleo continua sem `print`, `sys.exit` e `PySide`.
+
