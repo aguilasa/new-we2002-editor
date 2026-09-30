@@ -5,10 +5,10 @@ origin: KITS-TASK-04
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-09-30
+done_commit: 8f635307
 ---
 
 # CORR-KITS-008 — Plant a red for the outside-256x128 count in uv --negative
@@ -102,3 +102,8 @@ $ grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py
 ```
 
 O digest do `uv` sem controle é o mesmo do Log da KITS-TASK-04: a saída publicada não mudou.
+- **Closed** — commit `8f635307` (2026-09-30): fix(kits): make uv --negative see each outside-256x128 verdict go red
+  - Files (`git show --name-status 8f635307`):
+    - `M docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md`
+    - `M docs/tasks/kits/CORR-KITS-008.md`
+    - `M tools/kits/core/survey.py`
