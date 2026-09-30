@@ -5,7 +5,7 @@ origin: KITS-TASK-04
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -55,3 +55,37 @@ $ grep -c c2ec025a docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md
 Hoje os dois dão 0; depois, 2 e pelo menos 1.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `e4f60cd9`)
+
+```text
+$ grep -c "rects move -2 px in x" docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md
+0
+$ python tools/kits/cli.py survey roms/japanese-shift-jis.bin | md5sum
+c2ec025a808afd4ffbe4c39fca0d991a *-
+$ grep -c c2ec025a docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md
+0
+```
+
+REPRODUCED. Causa raiz confirmada: transcrição aparada e md5 não registrado.
+
+### O que foi feito
+
+- A transcrição inteira do `uv --negative` entrou no Log da KITS-TASK-04 pela [CORR-KITS-008](/docs/tasks/kits/CORR-KITS-008.md), que rodou antes nesta leva e mexia no mesmo bloco (a saída passou de 7 para 11 expectativas); aqui só se confere que as duas linhas `rects move -2 px in x` estão lá.
+- O md5 do `survey` escrito no Log, com o comando. A afirmação "o mesmo das tasks anteriores" foi medida, não copiada: o `cli.py` de `fc5717ae`, `18e7ec61` e `f71b47d6`, extraído por `git archive` para uma pasta temporária, dá o mesmo valor:
+
+```text
+$ for c in fc5717ae 18e7ec61 f71b47d6; do git archive $c tools/kits tools/pes2 tools/looks | tar -x -C old; python old/tools/kits/cli.py survey roms/japanese-shift-jis.bin | md5sum; done
+fc5717ae c2ec025a808afd4ffbe4c39fca0d991a *-
+18e7ec61 c2ec025a808afd4ffbe4c39fca0d991a *-
+f71b47d6 c2ec025a808afd4ffbe4c39fca0d991a *-
+```
+
+### Verificação
+
+```text
+$ grep -c "rects move -2 px in x" docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md
+2
+$ grep -c c2ec025a docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md
+2
+```

@@ -83,7 +83,14 @@ $ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative     # exit 
 
 O comando sai 1 se alguma expectativa falhar. As quatro linhas `outside:` entraram pela [CORR-KITS-008](/docs/tasks/kits/CORR-KITS-008.md): cada veredito de fora do 256×128 (duas imagens, papel sem lugar, borda) visto saindo do zero.
 
-`grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py` → sem saída; `prims --negative` → `14 of 14 expectations held`; `survey` → saída com o mesmo md5 das tasks anteriores.
+`grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py` → sem saída; `prims --negative` → `14 of 14 expectations held`; `survey` → saída com o mesmo md5 das tasks anteriores, medido pela [CORR-KITS-009](/docs/tasks/kits/CORR-KITS-009.md) rodando o `cli.py` de cada commit (`git archive <commit> tools/kits tools/pes2 tools/looks` numa pasta temporária):
+
+```
+$ python tools/kits/cli.py survey roms/japanese-shift-jis.bin | md5sum
+c2ec025a808afd4ffbe4c39fca0d991a *-
+```
+
+O mesmo `c2ec025a808afd4ffbe4c39fca0d991a` em `fc5717ae` (KITS-TASK-01), `18e7ec61` (02), `f71b47d6` (03) e na HEAD desta correção.
 
 ### Problemas encontrados
 
