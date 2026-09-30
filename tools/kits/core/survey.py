@@ -1166,6 +1166,35 @@ on the uniform's first halfword column fall out of the moved record, so the
 primitives that touch it leave the mapped set; the others must move."""
 
 
+UV_WIDE = (560, 256, 96)
+"""(x, y, width in halfwords) of the third control: the uniform record moved
+16 halfwords left and widened to 96, so it still holds every corner the
+figures sample but a pixel column can now reach 2 * 96 - 1 -- past the 128
+the uniform has in the work bitmap.  The only way to see the edge verdict
+move: a 64-halfword record at 8 bits is exactly 128 pixels and cannot leave."""
+
+UV_RENAMED = "banner"
+"""The role the second control gives the uniform record: one the work bitmap
+has no place for."""
+
+
+def _widen_images(data: bytes, origin, to) -> tuple:
+    """(new bytes, how many records changed): every image record at *origin*
+    gets origin to[0], to[1] and width to[2]."""
+    out = bytearray(data)
+    moved = 0
+    for e in bin_archive.entries(data):
+        if e.is_image and (e.x, e.y) == tuple(origin):
+            for i, v in enumerate(to):
+                out[e.pos + 2 + 2 * i:e.pos + 4 + 2 * i] = v.to_bytes(2, "little")
+            moved += 1
+    return bytes(out), moved
+
+
+def _outside_of(fig, why: str) -> int:
+    return sum(1 for r in fig.outside if r.outside == why)
+
+
 @dataclass(frozen=True)
 class UvControl:
     """One planted move, one figure (-1: both), and what it did to the rects."""
@@ -1210,6 +1239,34 @@ def uv_negative(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
         out.append(UvControl(name, moved, a.figure, "union x1 moves -2 px",
                              "%r" % (ua,), "%r" % (ub,),
                              ua is not None and ub is not None and ub[2] == ua[2] - 2))
+    a, b = clean.figures[0], after.figures[0]
+    out.append(UvControl(name, moved, a.figure, "outside: split rises",
+                         "%d outside" % len(a.outside),
+                         "%d %s" % (_outside_of(b, UV_OUTSIDE_SPLIT), UV_OUTSIDE_SPLIT),
+                         not a.outside and _outside_of(b, UV_OUTSIDE_SPLIT) > 0))
+
+    after = uv_files(files, kit, source=source,
+                     roles=MappingProxyType({**KIT_ROLES, UNIFORM: UV_RENAMED}))
+    name = "uniform named %s" % UV_RENAMED
+    for a, b in zip(clean.figures, after.figures):
+        n = _outside_of(b, UV_OUTSIDE_ROLE)
+        out.append(UvControl(name, 0, a.figure, "outside: role = mapped",
+                             "%d outside" % len(a.outside),
+                             "%d %s" % (n, UV_OUTSIDE_ROLE),
+                             not a.outside and n == len(a.mapped) > 0))
+
+    planted = dict(files)
+    planted[path], moved = _widen_images(files[path], UNIFORM, UV_WIDE)
+    wide = UV_WIDE[:2]
+    after = uv_files(planted, kit, source=source,
+                     roles=MappingProxyType({**KIT_ROLES, wide: "uniform"}))
+    name = "uniform at (%d,%d) w %d" % UV_WIDE
+    a, b = clean.figures[1], after.figures[1]
+    n = _outside_of(b, UV_OUTSIDE_EDGE)
+    out.append(UvControl(name, moved, a.figure, "outside: edge rises",
+                         "%d outside" % len(a.outside),
+                         "%d %s" % (n, UV_OUTSIDE_EDGE),
+                         not a.outside and n > 0))
 
     planted = dict(files)
     planted[path], moved = _move_images(files[path], UNIFORM, PRIMS_AWAY)

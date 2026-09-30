@@ -66,14 +66,22 @@ sha256 of the canonical JSON: 2360a921f7cee6f69dcbc1bb3ad2633c306a720c86399a04b9
 Contra a KITS-TASK-03 (caixas em halfword de VRAM): figura 0, (576,256)..(607,359) → x 2·0 .. 2·31+1 = 0..63, y 0..103; figura 1, (600,256)..(639,383) → x 48..127, y 0..127. As mesmas caixas, e 237/429 primitivas nos dois comandos.
 
 ```
-$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative     # exit 0
   uniform moved to (577,256) moved 2  both      digest changes           2360a921f7cee6f6 -> 39883f850ca73f5d  held
+  uniform moved to (577,256) moved 2  figure 0  rects move -2 px in x    237 mapped -> 215 of 215 still mapped moved  held
   uniform moved to (577,256) moved 2  figure 0  union x1 moves -2 px     (0, 0, 63, 103) -> (0, 0, 61, 103)  held
+  uniform moved to (577,256) moved 2  figure 1  rects move -2 px in x    429 mapped -> 429 of 429 still mapped moved  held
   uniform moved to (577,256) moved 2  figure 1  union x1 moves -2 px     (48, 0, 127, 127) -> (46, 0, 125, 127)  held
+  uniform moved to (577,256) moved 2  figure 0  outside: split rises     0 outside -> 18 corners in two images  held
+  uniform named banner       moved 0  figure 0  outside: role = mapped   0 outside -> 237 not uniform or sleeves  held
+  uniform named banner       moved 0  figure 1  outside: role = mapped   0 outside -> 429 not uniform or sleeves  held
+  uniform at (560,256) w 96  moved 2  figure 1  outside: edge rises      0 outside -> 236 rect leaves 256x128  held
   uniform moved to (0,0)     moved 2  figure 0  mapped count drops to 0  237 -> 0  held
   uniform moved to (0,0)     moved 2  figure 1  mapped count drops to 0  429 -> 0  held
-7 of 7 expectations held                                  (exit 0)
+11 of 11 expectations held
 ```
+
+O comando sai 1 se alguma expectativa falhar. As quatro linhas `outside:` entraram pela [CORR-KITS-008](/docs/tasks/kits/CORR-KITS-008.md): cada veredito de fora do 256×128 (duas imagens, papel sem lugar, borda) visto saindo do zero.
 
 `grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py` → sem saída; `prims --negative` → `14 of 14 expectations held`; `survey` → saída com o mesmo md5 das tasks anteriores.
 

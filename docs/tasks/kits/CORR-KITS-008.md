@@ -5,7 +5,7 @@ origin: KITS-TASK-04
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -56,3 +56,49 @@ $ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative | grep -c "
 Hoje dá 0; depois, pelo menos 1, com a linha dizendo "held".
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `e4f60cd9`)
+
+```text
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative | grep -c "outside"
+0
+```
+
+REPRODUCED. Causa raiz confirmada: as sete expectativas de `uv_negative` olhavam digest, deslocamento, união e contagem mapeada; nenhuma lia `FigureUv.outside`.
+
+### O que foi feito
+
+`tools/kits/core/survey.py`, `uv_negative`, quatro expectativas novas, uma para cada veredito de fora:
+
+- `UV_OUTSIDE_SPLIT`: sob o `UV_SHIFT` já existente, a figura 0 vai de 0 a 18 "corners in two images".
+- `UV_OUTSIDE_ROLE`: o registro do uniforme, sem mover, chamado de `banner` (`UV_RENAMED`) — as duas figuras vão de 0 ao número mapeado (237 e 429).
+- `UV_OUTSIDE_EDGE`: o uniforme movido para (560,256) e alargado para 96 halfwords (`UV_WIDE`, `_widen_images`) — a figura 1 vai de 0 a 236 "rect leaves 256x128". Era o ramo nunca exercitado: um registro de 64 halfwords a 8 bits tem exatamente 128 pixels e não sai; só alargando o registro a coluna passa de 127.
+
+O `cli.py` não precisou mudar: o `print_uv_controls` já imprime o que o núcleo devolve. O Log da KITS-TASK-04 recebeu a transcrição nova inteira.
+
+### Verificação
+
+```text
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative; echo "exit $?"
+  uniform moved to (577,256) moved 2  both      digest changes           2360a921f7cee6f6 -> 39883f850ca73f5d  held
+  uniform moved to (577,256) moved 2  figure 0  rects move -2 px in x    237 mapped -> 215 of 215 still mapped moved  held
+  uniform moved to (577,256) moved 2  figure 0  union x1 moves -2 px     (0, 0, 63, 103) -> (0, 0, 61, 103)  held
+  uniform moved to (577,256) moved 2  figure 1  rects move -2 px in x    429 mapped -> 429 of 429 still mapped moved  held
+  uniform moved to (577,256) moved 2  figure 1  union x1 moves -2 px     (48, 0, 127, 127) -> (46, 0, 125, 127)  held
+  uniform moved to (577,256) moved 2  figure 0  outside: split rises     0 outside -> 18 corners in two images  held
+  uniform named banner       moved 0  figure 0  outside: role = mapped   0 outside -> 237 not uniform or sleeves  held
+  uniform named banner       moved 0  figure 1  outside: role = mapped   0 outside -> 429 not uniform or sleeves  held
+  uniform at (560,256) w 96  moved 2  figure 1  outside: edge rises      0 outside -> 236 rect leaves 256x128  held
+  uniform moved to (0,0)     moved 2  figure 0  mapped count drops to 0  237 -> 0  held
+  uniform moved to (0,0)     moved 2  figure 1  mapped count drops to 0  429 -> 0  held
+11 of 11 expectations held
+exit 0
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative | grep -c "outside"
+4
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin | tail -1
+sha256 of the canonical JSON: 2360a921f7cee6f69dcbc1bb3ad2633c306a720c86399a04b918fbdf9448fb84
+$ grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py
+(sem saída, exit 1)
+```
+
+O digest do `uv` sem controle é o mesmo do Log da KITS-TASK-04: a saída publicada não mudou.
