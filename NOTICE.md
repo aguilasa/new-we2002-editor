@@ -206,6 +206,19 @@ If you are Darkensses, or Haplo, or polipoli, or hold rights to anything in the
 Superpack, and want this use licensed, relicensed, or taken down, please open an
 issue.
 
+## Lineage of the kit viewer (the `tools/kits/` tree)
+
+`tools/kits/` is a seventh product in this repository: a viewer of the team kits
+(`TEX_<tag>.BIN`) in 2D and 3D, planned in
+[`docs/PLAN-KITS-PY.md`](docs/PLAN-KITS-PY.md). It reads; it never writes. This
+section grows with the tree: every piece of third-party code the kit viewer
+reaches — directly or through the modules it imports — gets its row in the same
+commit that brings it in.
+
+| Author | Work | What reaches `tools/kits/` |
+|---|---|---|
+| **Maximiliano Ducoli (CARP)** | [WECompressor](https://github.com/maxiducoli/WECompressor) — the `.BIN` container format and the LZSS codec of `WECompress.cpp` | Through `tools/pes2/lzss.py` and `tools/pes2/bin_archive.py`, which `tools/kits/core/survey.py` imports to read every kit container. Same terms and same caveat on `WECompress.cpp`'s authorship as in the `BIN/*.BIN` section above: non-commercial use, with credit. |
+
 ## Copyright and license status
 
 **This project has no license.**

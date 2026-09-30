@@ -37,4 +37,6 @@ review_commit: null
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#3.1).
 
+Da KITS-TASK-01: a seção do `tools/kits/` no `NOTICE.md` já existe, com a linha do CARP (o `survey.py` importa `lzss.py`/`bin_archive.py`). Esta task a completa com o `we3d` quando a geometria do `looks` for alcançada.
+
 ## Log de Execução

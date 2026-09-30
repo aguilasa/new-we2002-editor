@@ -36,4 +36,6 @@ review_commit: null
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#2.1).
 
+Da KITS-TASK-01: os 11 retângulos do TEX (`EXPECTED_SHAPE`) estão em `tools/kits/core/survey.py`; pelo §3.1 endereço mora no `layout.py` do `looks` — mover para lá (ou justificar) quando o `tex.py` os usar, e o `survey.py` passar a importar de um lugar só.
+
 ## Log de Execução

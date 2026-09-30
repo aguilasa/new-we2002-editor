@@ -52,16 +52,16 @@ imagem do jogo, ou um TEX avulso feito com WETex — e os mostra de duas formas:
 ### 1.1 O contêiner, medido nos 105
 
 `tools/pes2/bin_archive.py` lê o TEX, e a leitura dos 105 do disco japonês
-(script em §7, fase 0) deu:
+(`python tools/kits/cli.py survey roms/japanese-shift-jis.bin`) deu:
 
 | medida | resultado |
 |---|---|
 | forma | **uma só nos 105**: 6 imagens + 5 CLUTs, sempre nos mesmos retângulos de VRAM e na mesma ordem |
 | titular = suplente (imagens e paletas) | **só no `TEX_A4`** |
 | imagens diferem entre titular e suplente | 103 |
-| só as paletas diferem | 1 |
-| paleta do jogador = paleta do goleiro (titular) | 1 |
-| bandeira | o fluxo descomprime em 16.384 bytes, mas a 2ª metade tem **um só valor de byte** nos 105: a imagem é 128×64, como o registro declara, e o resto é enchimento |
+| só as paletas diferem | 1 (`TEX_98`) |
+| paleta do jogador = paleta do goleiro (titular) | 1 (`TEX_A4`) |
+| bandeira | o fluxo descomprime em 16.384 bytes, mas a 2ª metade tem **um só valor de byte** em cada um dos 105 (`0xFF` em 93, `0x00` em 12): a imagem é 128×64, como o registro declara, e o resto é enchimento |
 | árbitro | **idêntico nos 105** |
 | tamanho do arquivo | 25.948 a 34.200 bytes |
 
@@ -399,7 +399,7 @@ com bandeira — ou está errada.
 
 | fase | entrega | depende de |
 |---|---|---|
-| 0 | as medições das §4.3, §4.4 e §4.6 feitas no disco, e o script do §1.1 promovido a `tex.py --survey` | — |
+| 0 | as medições das §4.3, §4.4 e §4.6 feitas no disco, e o levantamento do §1.1 promovido a `cli.py survey` (medição em `core/survey.py`) | — |
 | 1 | **núcleo, lado TEX**: `api.py` (a fachada), `source.py`, `tex.py`, guarda de forma, `cli.py info/export`; confrontos 1 e 2 do §5 | 0 |
 | 2 | **núcleo, lado ROM**: o gerador do §3.3 com `--check` no `ctest`, `teams.py`, `cli.py teams`; a regra japonês → tabela conferida nas duas imagens de `roms/` | 1 |
 | 3 | `flat.py` + `zones.py`; §4.6 fechada — ainda sem janela | 1 |
