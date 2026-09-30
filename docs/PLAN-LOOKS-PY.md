@@ -160,8 +160,10 @@ MSYS_NO_PATHCONV=1 python tools/pes2/iso.py ls roms/japanese-shift-jis.bin
 | `/BIN/MODEL.BIN` | 8100 | 64.800 | form1 | **não** |
 
 Os dois são **form1 nesta imagem**, o que importa: na
-`golden-european-deluxe.bin` 18 dos 105 `TEX_*.BIN` são **form 2** e o
-`iso.py` se recusa a lê-los (§1.14 do [PLAN-PES2-PSX.md](/docs/PLAN-PES2-PSX.md)).
+`golden-european-deluxe.bin` 18 dos 105 `TEX_*.BIN` têm os **últimos 1–3
+setores marcados form 2** e o `iso.py` se recusa a lê-los (§1.14 do
+[PLAN-PES2-PSX.md](/docs/PLAN-PES2-PSX.md)). O dado nesses setores está no
+leiaute form 1 — medido em 2026-09-30, §2.1 do [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md).
 Essa armadilha não alcança estes dois arquivos, mas alcança as texturas de
 uniforme se o projeto crescer para elas.
 
@@ -2397,7 +2399,9 @@ leitura nas duas, com a tela trocando de time.
    embaralha peça sem sintoma.
 4. **`MSYS_NO_PATHCONV=1`** ou o caminho de dentro do ISO vira caminho Windows,
    com mensagem de erro que culpa a coisa errada (§4.2).
-5. **18 dos 105 `TEX_*.BIN` são form 2** na `golden-european-deluxe.bin`, e o
+5. **18 dos 105 `TEX_*.BIN` têm a cauda marcada form 2** na
+   `golden-european-deluxe.bin` (só os últimos 1–3 setores, com o dado no
+   leiaute form 1 — §2.1 do [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md)), e o
    `iso.py` os recusa. Não alcança os dois arquivos de modelo, alcança uniforme.
    **No disco japonês e na tradução inglesa, não**: medido em 2026-09-20
    (`iso_source.py --check-discs`), os 105 são form 1 nos dois e idênticos

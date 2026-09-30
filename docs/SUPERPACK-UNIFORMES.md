@@ -481,9 +481,11 @@ modelo, posição de número); servem só para achar a cor do número.
   documento sobre as duas paletas por imagem e a paleta da bandeira respondem,
   do lado da comunidade, as perguntas que o [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)
   deixou abertas.
-- **18 dos 105 `TEX_*.BIN` são form 2** na `golden-european-deluxe.bin`, e o
-  `iso.py` os recusa; no disco japonês e na tradução inglesa os 105 são form 1.
-  Uma ferramenta que grave TEX precisa tratar os dois.
+- **18 dos 105 `TEX_*.BIN` têm os últimos 1–3 setores marcados Form 2** na
+  `golden-european-deluxe.bin`, e o `iso.py` os recusa; no disco japonês e na
+  tradução inglesa os 105 são Form 1. O dado nesses setores está no leiaute
+  Form 1 — detalhe no §2.1 do [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md). Uma
+  ferramenta que grave TEX precisa saber disso.
 - Nenhuma ferramenta de escrita de TEX existe aqui. Se um dia existir, a regra do
   §3.8 (caber no espaço do original) e a do §4.3 (o que funciona no emulador
   pode quebrar no console) são as duas que um golden test não pega sozinho.

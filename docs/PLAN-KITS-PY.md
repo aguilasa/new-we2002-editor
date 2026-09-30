@@ -141,9 +141,35 @@ de sair do WETex. Então:
 Isso vira diagnóstico de graça: o TEX corrompido do WECompressor (§4.3 do
 SUPERPACK-UNIFORMES) passa a ter um nome.
 
-**Form 2.** Na `golden-european-deluxe.bin`, 18 dos 105 TEX são form 2 e o
-`iso.py` os recusa. A ferramenta herda a recusa e a mensagem; ler form 2 é
-trabalho do `iso.py`, não deste projeto.
+**Os "18 TEX Form 2" da European Deluxe não são Form 2 — têm a cauda marcada
+como Form 2.** Medido em 2026-09-30 na `golden-european-deluxe.bin`:
+
+- nos 18, só os **últimos 1 a 3 setores** do arquivo têm o bit Form 2 no
+  subcabeçalho (submode `0x20`); o resto é Form 1. O `iso.py` recusa o arquivo
+  inteiro por causa desses poucos;
+- nesses setores o dado está **no leiaute Form 1**: 2.048 bytes a partir do
+  byte 24, e os bytes 2.072–2.347, que num Form 2 de verdade seriam dado, são
+  zero; da cauda de 280 bytes só os 4 do EDC de Form 2 estão preenchidos;
+- lendo os 18 com 2.048 bytes por setor, ignorando o bit, **16 saem perfeitos**
+  (11 registros, toda imagem descomprime em 16.384). Lendo com 2.324, nenhum.
+
+Leitura provável: a European Deluxe é um patch, os TEX dela são maiores que os
+originais, e quem os gravou ocupou setores que antes eram Form 2 sem trocar o
+subcabeçalho. O console lê 2.048 bytes por setor e não olha o bit, e é por isso
+que o jogo roda. **Não verificado na tela.**
+
+Então a ferramenta **não** herda a recusa. O `source.py` lê a cauda marcada Form
+2 no leiaute Form 1 quando os bytes provam que é isso (dado depois dos 2.048
+zerado), e o diagnóstico diz que leu assim. Não é trabalho de ler Form 2 de
+verdade; é não confiar num bit que o patch deixou errado.
+
+Os dois que sobram são outra coisa, e são exatamente o que a aba
+"Diagnóstico" existe para mostrar:
+
+- `TEX_13` tem **10 registros**: falta o árbitro;
+- `TEX_48` tem o fluxo LZSS da **primeira imagem quebrado** ("distance 0" no
+  byte 4.810, num setor Form 1) — o sintoma de TEX corrompido que o
+  SUPERPACK-UNIFORMES §4.3 atribui ao compressor do Walxer.
 
 ## 3. Arquitetura
 

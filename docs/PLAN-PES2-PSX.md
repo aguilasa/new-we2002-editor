@@ -953,8 +953,11 @@ começa em **28**; a varredura de (a) dizia **48**. É **48**, nos quatro
 discos: 24, 28, 32 e 44 falham, e falham na primeira distância que aponta para
 antes do começo da saída. A linha da §5c foi corrigida no arquivo dela. O
 provável motivo de a medição antiga não se reproduzir também ficou medido:
-na imagem golden European Deluxe **18 dos 105 `TEX_*.BIN` são Form 2**, e o
-`iso.py` recusa lê-los — não há área de 2.048 bytes num setor Form 2. O
+na imagem golden European Deluxe **18 dos 105 `TEX_*.BIN` têm setores marcados
+Form 2**, e o `iso.py` recusa lê-los. (Corrigido em 2026-09-30: só os últimos
+1–3 setores de cada arquivo têm o bit, e o dado neles está no leiaute Form 1 —
+2.048 bytes, o resto zerado; lidos assim, 16 dos 18 saem inteiros. Detalhe no
+§2.1 do [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md).) O
 `TEX_00.BIN`, que é justamente o arquivo da divergência, é um deles; quem o
 leu em 2026-08-02 leu com outro fatiamento de setor, o que casa com o
 `16.400 = 16.384 + 16` que ela registrava. As outras cinco linhas daquela
