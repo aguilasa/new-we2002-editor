@@ -5,7 +5,7 @@ type: "investigação"
 phase: 8
 depends_on: [KITS-TASK-14]
 source_of_truth: "/docs/PLAN-KITS-PY.md#4.2"
-files: ["tools/kits/core/generated/", "tools/kits/gen_tables.py", "docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
+files: ["tools/kits/core/generated/", "tools/kits/gen_tables.py", "docs/PLAN-KITS-PY.md", "NOTICE.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: ["emulador"]        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 done_on: null
@@ -31,6 +31,7 @@ A tabela índice de time → tag, medida (editor do Obocaman em `we-team-editor/
 - [ ] A tabela cobre N times, número da ferramenta, e cada linha diz de onde veio
 - [ ] Pelo menos três linhas conferidas no emulador, comando e saída no Log
 - [ ] A §4.2 do plano tem veredito
+- [ ] A seção do `kits` no `NOTICE.md` credita, no mesmo commit, de onde a tabela veio: Obocaman (`we-team-editor.exe`, sem licença; dado medido, não código) e Wetigre, se a ordem de cabeça do WE2000 for usada
 
 ## Notes
 

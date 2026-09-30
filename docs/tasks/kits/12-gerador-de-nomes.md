@@ -5,7 +5,7 @@ type: ferramenta
 phase: 2
 depends_on: [KITS-TASK-11]
 source_of_truth: "/docs/PLAN-KITS-PY.md#3.3"
-files: ["tools/kits/gen_tables.py", "tools/kits/core/generated/", "tests/CMakeLists.txt"]            # predicted paths/globs; batches build their conflict matrix from them
+files: ["tools/kits/gen_tables.py", "tools/kits/core/generated/", "tests/CMakeLists.txt", "NOTICE.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 done_on: null
@@ -32,6 +32,7 @@ Os offsets de nome de time (`OFS_TEAM_NAME_*`), os comprimentos e o `TEAM_NAMES[
 - [ ] Controle: um nome de `TEAM_NAMES` alterado numa cópia do `Tables.cpp` faz o `--check` sair diferente de 0 (vermelho no Log)
 - [ ] `ctest -R kits` lista o alvo do gerador pelo nome
 - [ ] As linhas de `TEAM_NAMES` que valem para cada time foram conferidas no `legacy/mfc/edDlg.cpp` e a referência (arquivo:linha) está no Log
+- [ ] A seção do `kits` no `NOTICE.md` ganha, no mesmo commit, a linha da tabela `TEAM_NAMES` (Francesco Moriero, `legacy/mfc/`, sem licença)
 
 ## Notes
 

@@ -5,7 +5,7 @@ type: "implementação"
 phase: 1
 depends_on: [KITS-TASK-05]
 source_of_truth: "/docs/PLAN-KITS-PY.md#3.1"
-files: ["tools/kits/core/api.py", "tools/kits/core/source.py", "tools/kits/core/errors.py"]            # predicted paths/globs; batches build their conflict matrix from them
+files: ["tools/kits/core/api.py", "tools/kits/core/source.py", "tools/kits/core/errors.py", "NOTICE.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
 status: pending
 done_on: null
@@ -31,6 +31,7 @@ review_commit: null
 - [ ] Um `.bin` do disco japonês renomeado para `.tex` abre como `rom`, e um TEX extraído renomeado para `.bin` abre como `tex` — comando e saída no Log
 - [ ] Arquivo que não é nenhum dos dois é recusado com exceção tipada e frase — comando e saída no Log
 - [ ] `grep -rnE 'print\(|sys\.exit|PySide|^[A-Z_]+ *= *\[\]' tools/kits/core/` vazio (sem saída, sem Qt, sem estado global mutável)
+- [ ] `NOTICE.md` ganha a seção "Lineage of the kit viewer (`tools/kits/`)" no mesmo commit, citando **todo código de terceiro que o `kits` alcança**, inclusive por import indireto: o LZSS e o formato `.BIN` da suíte CARP (Maximiliano Ducoli, via `tools/pes2/lzss.py` e `bin_archive.py`) e o `we3d` (Darkensses, MIT, via a geometria do `tools/looks/`). O Superpack não é citado como fonte (regra de 2026-09-30)
 
 ## Notes
 
