@@ -23,7 +23,7 @@ sem core dump e sem entrada no journal. O controle — 75 s de execução livre
 
 Nada disso está registrado: as trinta e quatro armadilhas da §6.11 não têm
 entrada para isso, o perfil não menciona, e a
-[PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md), que certificou o
+[PES2-TASK-33](/docs/tasks/pes2/33-compilar-e-validar-o-mcp.md), que certificou o
 binário, não viu.
 
 **Por que isso importa mais do que "um emulador instável".** O fluxo A — a

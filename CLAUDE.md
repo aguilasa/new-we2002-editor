@@ -677,7 +677,7 @@ Quatro coisas que custam tempo se descobertas tarde:
   §1.5 do plano.
 
 **PES2 entrou no pool em 2026-09-01**, e o backlog dele é
-[docs/tasks/progresso.md](docs/tasks/progresso.md) — hoje 34 tasks, cobrindo
+[docs/tasks/pes2/progresso.md](docs/tasks/pes2/progresso.md) — hoje 34 tasks, cobrindo
 sete das oito fases do plano (a Fase 1 não tem task), cada uma com
 `fonte_de_verdade` apontando para a seção que a mede. Até
 essa data o projeto estava fora do pool *por escolha*, e o backlog era a §7 do
@@ -1325,7 +1325,7 @@ nunca à mão. Comandos: `/rite:status`, `/rite:execute`, `/rite:review`, `/rite
 
 **Um ciclo vivo também pode morar numa subpasta**, desde 2026-09-07. O ciclo é
 o **argumento do comando**, pelo nome — `/rite:execute port-mcr`,
-`/rite:review port-mcr` — e os nomes são `pes2` (`docs/tasks/`) e
+`/rite:review port-mcr` — e os nomes são `pes2` (`docs/tasks/pes2/`) e
 `port-mcr`; `wte` e `looks` estão arquivados. `depends_on` não atravessa pasta, e uma pasta é
 ciclo se, e só se, tem `progresso.md` próprio.
 

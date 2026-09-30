@@ -296,7 +296,7 @@ deixando linha de log. É a mesma armadilha 35 da §6.11 do plano, medida no
 Linux em 2026-09-03 com quatro mortes em seis corridas.
 
 O diagnóstico do `mcp.py` — que a
-[CORR-PES2-032](/docs/tasks/CORR-PES2-032.md) construiu para separar "nunca
+[CORR-PES2-032](/docs/tasks/pes2/CORR-PES2-032.md) construiu para separar "nunca
 subiu" de "caiu agora" — estava **degradado aqui até 2026-09-11**: ele
 pergunta a `fork.running_pids()`, que estourava no `pgrep` ausente e caía no
 ramo genérico. Com o `fork.py` portado, a mensagem certa aparece:

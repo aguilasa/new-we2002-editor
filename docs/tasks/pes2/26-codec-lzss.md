@@ -127,7 +127,7 @@ arquivo dela, e com o provável motivo de a medição antiga não se reproduzir:
 `TEX_00.BIN` entre eles, e o `iso.py` recusa lê-los, então quem mediu em
 2026-08-02 leu com outro fatiamento de setor — o que casa com o
 `16.400 = 16.384 + 16` da linha velha. (Este Log dizia "os 105" até a
-[CORR-PES2-014](/docs/tasks/CORR-PES2-014.md); os outros 87 são Form 1.)
+[CORR-PES2-014](/docs/tasks/pes2/CORR-PES2-014.md); os outros 87 são Form 1.)
 As outras cinco linhas daquela tabela **se reproduzem exatamente** pelo
 `lzss.py`: `DAT2D` 8/7.447/16.345, `LOGO` 8/3.186/8.192, `TITLE`
 8/3.015/8.192, `T_NAME` 4/1.890/8.192 e `DATSEL3` 8/2.973/8.192. Essa

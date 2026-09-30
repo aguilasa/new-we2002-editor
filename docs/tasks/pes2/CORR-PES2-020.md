@@ -31,7 +31,7 @@ orçamento (o `TITLE.BIN` entrada 0, 22 bytes acima) e em verde as outras
 quatro; a conferência de round-trip só é atravessada em verde, e um verde que
 nunca pôde ser vermelho não é evidência — é decoração.
 
-É a mesma lição que a [CORR-PES2-009](/docs/tasks/CORR-PES2-009.md) já cobrou
+É a mesma lição que a [CORR-PES2-009](/docs/tasks/pes2/CORR-PES2-009.md) já cobrou
 neste ciclo, quando o `--check` do `lzss.py` passou verde com o bug do `k3`
 assinado reintroduzido.
 

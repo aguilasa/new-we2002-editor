@@ -19,7 +19,7 @@ done_commit: d9d090e
 
 - **Referência:** [`/docs/PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) §6.14, que
   registra a avaliação de 2026-09-02 e a decisão de **não adotar então**.
-- Fase 0 pelo mesmo motivo da [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md):
+- Fase 0 pelo mesmo motivo da [PES2-TASK-01](/docs/tasks/pes2/01-ferramental-das-fases-3-e-4.md):
   é decisão sobre ferramental da máquina, não sobre o disco.
 
 A §6.14 avaliou o
@@ -83,7 +83,7 @@ um punhado de endereços. Depois `read_memory` neles e conferir contra a tela.
       `stenzek/duckstation`, que é justamente o build sem o servidor.
 
       *Corrigido em 2026-09-03 pela
-      [CORR-PES2-028](/docs/tasks/CORR-PES2-028.md):* três dos quatro números
+      [CORR-PES2-028](/docs/tasks/pes2/CORR-PES2-028.md):* três dos quatro números
       continuam certos, e **"nenhuma release própria" é falso**. O fork
       publica quatorze ativos na release `latest`, de 2026-08-29, e o
       `DuckStation-x64.AppImage` dela **traz o servidor MCP**. A frase sobre
@@ -168,13 +168,13 @@ justificar só os fluxos A e E.
 **Corrigido em:** 2026-09-03 — os dois endereços publicados aqui estavam
 deslocados 45 bytes, porque o `savestate.py` derivava o início da RAM
 contando para trás a partir da tag `DMA`. A
-[PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) achou o erro ao
+[PES2-TASK-33](/docs/tasks/pes2/33-compilar-e-validar-o-mcp.md) achou o erro ao
 confrontar o leitor com o servidor MCP, e os números acima já são os certos.
 As leituras desta task continuam válidas — o que estava errado era o
 endereço, nunca o valor.
 
 O **deslocamento** ficou para trás naquela reconciliação e só foi corrigido em
-2026-09-03 pela [CORR-PES2-026](/docs/tasks/CORR-PES2-026.md): o Resumo abaixo
+2026-09-03 pela [CORR-PES2-026](/docs/tasks/pes2/CORR-PES2-026.md): o Resumo abaixo
 dizia 6799, e o leitor mede **6754**. Os dois números se movem em sentidos
 opostos — a base desce 45, os endereços sobem 45 —, então procurar pelo
 endereço publicado não encontra o deslocamento que o produziu.
@@ -231,7 +231,7 @@ Três coisas medidas que valem para a PES2-TASK-05 e adiante:
    parte com as duas, e passou.
 
    *Corrigido em 2026-09-03 pela
-   [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md):* este item concluía "não é
+   [CORR-PES2-027](/docs/tasks/pes2/CORR-PES2-027.md):* este item concluía "não é
    defeito, é uma variável a mais que a linha do perfil não mostra", e **era
    defeito**. A linha do perfil era a única instrução que existia, então o
    gate nunca corria pela receita escrita — e pulava com o mesmo `Skipped`

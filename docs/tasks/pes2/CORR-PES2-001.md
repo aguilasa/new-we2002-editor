@@ -16,7 +16,7 @@ done_commit: ae79230
 ## Problema identificado
 
 A §3.2 do [plano](/docs/PLAN-PES2-PSX.md) e o Log da
-[PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) afirmam, como
+[PES2-TASK-01](/docs/tasks/pes2/01-ferramental-das-fases-3-e-4.md) afirmam, como
 coisa **medida em 2026-09-01**:
 
 > `objdump` precisa de `-b binary -m mips:3000 -EL`: sem o `-EL` a saída é MIPS

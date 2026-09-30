@@ -15,7 +15,7 @@ done_commit: 1a2c6b1
 
 ## Problema identificado
 
-A [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) atualizou a
+A [PES2-TASK-02](/docs/tasks/pes2/02-poke-por-conjunto-de-copias.md) atualizou a
 §1.5, a §1.6, a §1.13 e a §6.1 do plano, o `CLAUDE.md` e o `progresso.md`.
 Sobraram **três** trechos que não são registro datado — são instrução viva — e
 um deles descreve um teste que mudou nesta mesma task:

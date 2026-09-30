@@ -21,8 +21,8 @@ done_commit: 648e60d
   **fluxo F** — o único dos sete que a seção descartou dizendo *"as
   ferramentas dele seriam melhores … mas é a parte que já está de pé e
   medida"*.
-- Fase 0 pelo mesmo motivo das [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md)
-  e [33](/docs/tasks/33-compilar-e-validar-o-mcp.md): é decisão sobre o
+- Fase 0 pelo mesmo motivo das [PES2-TASK-32](/docs/tasks/pes2/32-poc-do-mcp-do-duckstation.md)
+  e [33](/docs/tasks/pes2/33-compilar-e-validar-o-mcp.md): é decisão sobre o
   ferramental da máquina, não sobre o disco.
 
 A frase do plano continua verdadeira quanto ao *estar de pé*, e falsa quanto

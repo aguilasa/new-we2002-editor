@@ -18,7 +18,7 @@ done_commit: "6665565"
 ## Contexto
 
 - **Referência:** [`/docs/PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) §6.14.
-- **Existe porque a [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md)
+- **Existe porque a [PES2-TASK-32](/docs/tasks/pes2/32-poc-do-mcp-do-duckstation.md)
   não fez isto.** Ela se chamava "prova de conceito do MCP" e fechou **sem
   jamais baixar o fork, compilar ou falar com o servidor**. O que ela mediu foi
   o caminho alternativo — o save state —, concluiu que ele cobria os fluxos C e
@@ -101,7 +101,7 @@ motivo — que é resultado legítimo.
 1. **O `ninja` não está instalado** nesta máquina (`cmake` 3.28.3 e `g++`
    13.3.0 estão). O DuckStation pede `ninja`; instalar é decisão do dono da
    máquina, como foi a do `numpy` na
-   [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md). **Pergunte.**
+   [PES2-TASK-01](/docs/tasks/pes2/01-ferramental-das-fases-3-e-4.md). **Pergunte.**
 2. **As dependências do DuckStation** — Qt 6, SDL2, shaderc, SPIRV-Cross,
    libbacktrace. O projeto tem um script de dependências; ver o que ele quer
    antes de assumir que `apt` resolve.
@@ -139,7 +139,7 @@ como ferramenta de diagnóstico, não como emulador de trabalho"*, foi
 trabalho, pelo fluxo F — dirigir o jogo por MCP em vez de `xdotool`. O que
 está escrito abaixo é o que esta task mediu e continua valendo como
 evidência; o que a troca de binário arrasta está na §6.14 do plano e é a
-[PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
+[PES2-TASK-34](/docs/tasks/pes2/34-rotas-mcp-no-lugar-do-drive.md).
 
 **Resumo.** O fork compila em **107 segundos**, o servidor MCP responde, e o
 fluxo A entregou o que nenhum save state entrega. Mas o achado que mais vale

@@ -97,7 +97,7 @@ BSS na entrada:
   errado.
 - `objdump` precisa de `-b binary -m mips:3000`. O `-EL` deste Log foi anotado
   pelo que se esperava dele: remedido na revisão desta task
-  ([CORR-PES2-001](/docs/tasks/CORR-PES2-001.md)), **omiti-lo não muda uma
+  ([CORR-PES2-001](/docs/tasks/pes2/CORR-PES2-001.md)), **omiti-lo não muda uma
   instrução sequer** — o `mipsel-linux-gnu-objdump` 2.42 já tem alvo
   `elf32-tradlittlemips`, e 1.017 linhas com e sem ele dão mnemônicos
   idênticos. Quem **não** falha e só mente é o **`-EB`**: sobre o mesmo laço de

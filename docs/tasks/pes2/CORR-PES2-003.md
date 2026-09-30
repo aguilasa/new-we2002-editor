@@ -15,7 +15,7 @@ done_commit: ef5f7fb
 
 ## Problema identificado
 
-A [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) tirou o prefixo de **correção**
+A [CORR-PES2-002](/docs/tasks/pes2/CORR-PES2-002.md) tirou o prefixo de **correção**
 dos prompts e dos wrappers, e deixou intacto o irmão dele: o prefixo de
 **task**. Os cinco prompts e os cinco wrappers mandam executar `WTE-TASK-XX` na
 letra — 39 e 11 ocorrências —, enquanto o `progresso.md` vivo lista
@@ -80,7 +80,7 @@ precisou dele naquela invocação.
 
 Mesma forma que a CORR-PES2-002 aplicou ao outro prefixo: `<PREFIXO>-TASK-XX`,
 com uma linha por prompt dizendo que `<PREFIXO>` sai do
-[`progresso.md`](/docs/tasks/progresso.md) — que é a fonte análoga do
+[`progresso.md`](/docs/tasks/pes2/progresso.md) — que é a fonte análoga do
 `correcoes-progresso.md`, e o arquivo que o prompt já lê no primeiro passo.
 
 Duas distinções a manter, e são o trabalho:
@@ -134,7 +134,7 @@ a metade que falta: o de **task** também é, e quem o declara é o `progresso.m
 **Resumo do que foi feito.** Evidência reproduzida verbatim antes de editar:
 **39 + 11 = 50** ocorrências, distribuídas exatamente como a CORR previa, e o
 `progresso.md` vivo com **25** `PES2-TASK-*`. A classificação é o trabalho, e
-repetiu o método da [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md): **20
+repetiu o método da [CORR-PES2-002](/docs/tasks/pes2/CORR-PES2-002.md): **20
 prescritivas** viraram `<PREFIXO>-TASK-XX` — as três exclusões "nunca execute …
 por aqui", os quatro modelos de link de tabela, os dois `git commit -m` de
 modelo, os exemplos de argumento dos wrappers, e as menções genéricas a
@@ -152,7 +152,7 @@ ganhou a metade que faltava.
    09` afirmaria que esse checklist vale para as fases de PES2, que não têm nada
    disso. Ficaram como estão: o texto está certo sobre o ciclo que descreve.
 2. **Isso revelou uma discrepância maior que esta CORR**, e ela virou
-   [CORR-PES2-004](/docs/tasks/CORR-PES2-004.md): os prompts ficaram agnósticos
+   [CORR-PES2-004](/docs/tasks/pes2/CORR-PES2-004.md): os prompts ficaram agnósticos
    de plano e de prefixo e continuam com um corpo inteiro de conteúdo
    operacional do `wte/` — 64 caminhos `wte/` cravados, os gates datados por
    task de outro ciclo, a tabela de geradores, e o `04-corrigir-tudo.md`

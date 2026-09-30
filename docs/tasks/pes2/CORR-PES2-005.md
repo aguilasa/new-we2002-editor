@@ -21,7 +21,7 @@ slot, registro em que a regra de fim de alguma tabela para, registro que é o
 **último** da tabela, e registro que se sobrepõe a um marcador.
 
 O `self_check()` afirma exercitar cinco delas, e o Log da
-[PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) repete:
+[PES2-TASK-02](/docs/tasks/pes2/02-poke-por-conjunto-de-copias.md) repete:
 *"Cinco recusas, todas exercitadas pelo `--self-check`"*.
 
 Medido: são **quatro** guardas distintas. O caso escrito para a regra de fim —

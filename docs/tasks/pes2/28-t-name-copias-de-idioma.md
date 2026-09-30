@@ -190,7 +190,7 @@ sobra do conteúdo antigo, e a imagem de volta **byte a byte** ao original.
 renderizado … visto na tela, nos dois idiomas"* e *"o nome antigo ausente de
 todas as telas"*. Eles precisam chegar à tela de apresentação e trocar de
 idioma no emulador, que é exatamente o roteiro da
-[PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md), ainda pendente. O
+[PES2-TASK-03](/docs/tasks/pes2/03-direcao-do-emulador.md), ainda pendente. O
 `depends_on` desta task só declara a 27, e isso é um defeito do quadro: quem
 o refizer deve acrescentar a 03. A linha do que a 03 precisa entregar para
 desbloquear esta está escrita **no arquivo dela**.

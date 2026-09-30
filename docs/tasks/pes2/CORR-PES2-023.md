@@ -40,7 +40,7 @@ São três afirmações, e as três estão desatualizadas:
    Etapa 3: *"Se o perfil não tiver entrada para essa fase, **diga isso na
    saída** em vez de improvisar — fase sem verificação escrita é achado, e
    vira CORR."* Esta é essa CORR. É o mesmo achado que a
-   [CORR-PES2-017](/docs/tasks/CORR-PES2-017.md) cobrou para a Fase 7, e a
+   [CORR-PES2-017](/docs/tasks/pes2/CORR-PES2-017.md) cobrou para a Fase 7, e a
    Fase 0 já teve **três** tasks executadas — uma a mais do que a Fase 7 tinha
    quando aquela foi aberta.
 3. **"As seis fases"** — a §5 do plano tem **oito**: Fase 0 a Fase 7. A
@@ -125,7 +125,7 @@ foi reaberta duas vezes depois de "fechada", e é por isso que tem lista.
   versionado que a leva ao estado em que ela pode ser exercitada?
 ```
 
-O último item é o que a [CORR-PES2-024](/docs/tasks/CORR-PES2-024.md) cobra
+O último item é o que a [CORR-PES2-024](/docs/tasks/pes2/CORR-PES2-024.md) cobra
 no `--measure-menu`.
 
 ## Arquivos a criar ou modificar

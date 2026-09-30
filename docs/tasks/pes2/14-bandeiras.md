@@ -44,7 +44,7 @@ lê outros valores nos mesmos offsets; a japonesa é a que reproduz o literal.)
 Os cinco `OFS_FLAG_SHAPE_COPY_*` são **outra coisa** — forma de bandeira, não
 cor — e moram noutros arquivos: `/OPENNING.BIN` +20820, `/SELECT.BIN` +5580 e
 +286580, `/SELFORM.BIN` +72400 e `/REPLAYS.BIN` +58304. O **72400** que esta
-frase citava até a [CORR-PES2-015](/docs/tasks/CORR-PES2-015.md) é o do
+frase citava até a [CORR-PES2-015](/docs/tasks/pes2/CORR-PES2-015.md) é o do
 `/SELFORM.BIN`, e em `DAT2D.BIN` +72400 lê-se `0x0d4d 0x118f 0x11d2 0x1613`,
 com o bit alto **apagado** — o contrário do que a frase descreve. Quem localiza
 os nove é `python3 tools/pes2/ofs_map.py <img>`.

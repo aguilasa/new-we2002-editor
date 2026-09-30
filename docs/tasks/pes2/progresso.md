@@ -49,41 +49,41 @@ PES2-TASK-22.
 <!-- rite:begin tasks -->
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | Ferramental das fases 3 e 4 — numpy e desmontador MIPS | 0 | decisão | — | done | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | `tools/pes2/poke.py` — gravação pelo conjunto de cópias | 2 | ferramenta | — | done | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md) | Direção do DuckStation — navegar até a tela e capturar | 2 | ferramenta | — | in-progress | — | — |
-| [PES2-TASK-04](/docs/tasks/04-poke-de-validacao.md) | O `poke` de validação — PIEMONTE em todas as telas | 2 | verificação | PES2-TASK-02, PES2-TASK-03 | pending | — | — |
-| [PES2-TASK-05](/docs/tasks/05-diferencial-de-cartao.md) | Harness de diferencial de memory card | 3 | ferramenta | PES2-TASK-03 | pending | — | — |
-| [PES2-TASK-06](/docs/tasks/06-registro-de-jogador-no-cartao.md) | Estrutura do registro de jogador, pelo cartão | 3 | engenharia-reversa | PES2-TASK-05 | pending | — | — |
-| [PES2-TASK-07](/docs/tasks/07-dump-de-ram-e-casamento.md) | Dump de RAM e casamento com o bloco do disco | 3 | engenharia-reversa | PES2-TASK-06 | pending | — | — |
-| [PES2-TASK-08](/docs/tasks/08-indice-do-bloco-de-nomes.md) | Os 624 candidatos de 16 bits — existe índice para o bloco de nomes? | 3 | engenharia-reversa | — | pending | — | — |
-| [PES2-TASK-09](/docs/tasks/09-os-blocos-extras-de-selectc.md) | Os 25 blocos de nome depois do pool, em `SELECTC.BIN` | 3 | engenharia-reversa | — | pending | — | — |
-| [PES2-TASK-10](/docs/tasks/10-fechamento-fase-3.md) | Fechamento da Fase 3 — o registro de jogador | 3 | closing | PES2-TASK-06, PES2-TASK-07, PES2-TASK-08, PES2-TASK-09 | pending | — | — |
-| [PES2-TASK-11](/docs/tasks/11-elenco-de-time.md) | Elenco por time — que jogador pertence a que clube | 4 | engenharia-reversa | PES2-TASK-10 | pending | — | — |
-| [PES2-TASK-12](/docs/tasks/12-formacoes.md) | Formações — a tabela tática por time | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
-| [PES2-TASK-13](/docs/tasks/13-uniforme-e-cores.md) | Uniforme e cores de time | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
-| [PES2-TASK-14](/docs/tasks/14-bandeiras.md) | Bandeiras — forma e cores | 4 | engenharia-reversa | PES2-TASK-13 | pending | — | — |
-| [PES2-TASK-15](/docs/tasks/15-master-league.md) | Master League — custos, slots e elencos | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
-| [PES2-TASK-16](/docs/tasks/16-fechamento-fase-4.md) | Fechamento da Fase 4 — o resto do banco | 4 | closing | PES2-TASK-11, PES2-TASK-12, PES2-TASK-13, PES2-TASK-14, PES2-TASK-15 | pending | — | — |
-| [PES2-TASK-17](/docs/tasks/17-formato-do-mapa.md) | O formato do `pes2_map.json` | 5 | projeto | PES2-TASK-10 | pending | — | — |
-| [PES2-TASK-18](/docs/tasks/18-mapa-consolidado.md) | `pes2_map.json` — o mapa consolidado | 5 | implementação | PES2-TASK-16, PES2-TASK-17 | pending | — | — |
-| [PES2-TASK-19](/docs/tasks/19-gerador-e-guarda.md) | O gerador — do mapa ao código, com `--check` | 5 | ferramenta | PES2-TASK-18 | pending | — | — |
-| [PES2-TASK-20](/docs/tasks/20-round-trip-pelo-mapa.md) | Round-trip headless pelo mapa | 5 | verificação | PES2-TASK-19 | pending | — | — |
-| [PES2-TASK-21](/docs/tasks/21-fechamento-fase-5.md) | Fechamento da Fase 5 — o portão da Fase 6 | 5 | closing | PES2-TASK-04, PES2-TASK-18, PES2-TASK-20 | pending | — | — |
-| [PES2-TASK-22](/docs/tasks/22-decisao-de-linguagem-e-ui.md) | Decisão de linguagem e UI do editor | 6 | decisão | PES2-TASK-21, PES2-TASK-30 | pending | — | — |
-| [PES2-TASK-23](/docs/tasks/23-editor-leitura.md) | O editor — leitura e exibição | 6 | implementação | PES2-TASK-22 | pending | — | — |
-| [PES2-TASK-24](/docs/tasks/24-editor-gravacao.md) | O editor — gravação | 6 | implementação | PES2-TASK-23 | pending | — | — |
-| [PES2-TASK-25](/docs/tasks/25-verificacao-final.md) | Verificação final — o projeto contra a definição de pronto | 6 | closing | PES2-TASK-24 | pending | — | — |
-| [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | engenharia-reversa | — | done | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM — 4 e 8 bpp com CLUT | 7 | engenharia-reversa | PES2-TASK-26 | done | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md) | `T_NAME_I` e `T_NAME_S` — o conjunto de cópias por idioma | 7 | engenharia-reversa | PES2-TASK-27 | pending | — | — |
-| [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail, recompressão só do editado | 7 | ferramenta | PES2-TASK-27 | done | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — o que o editor precisa mostrar | 7 | verificação | PES2-TASK-27, PES2-TASK-28, PES2-TASK-29 | pending | — | — |
-| [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | engenharia-reversa | — | pending | — | — |
-| [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | decisão | — | done | 2026-09-02 | 2026-09-03 |
-| [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | Compilar o fork e validar o MCP de fato | 0 | decisão | PES2-TASK-32 | done | 2026-09-03 | 2026-09-03 |
-| [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | Rotas MCP no lugar do `drive.py` | 0 | ferramenta | PES2-TASK-33 | done | 2026-09-03 | 2026-09-03 |
-| [PES2-TASK-35](/docs/tasks/35-desbloqueio-de-times.md) | Desbloqueio de times secretos e da lista de Master League, pelo disco | 4 | engenharia-reversa | — | pending | — | — |
+| [PES2-TASK-01](/docs/tasks/pes2/01-ferramental-das-fases-3-e-4.md) | Ferramental das fases 3 e 4 — numpy e desmontador MIPS | 0 | decisão | — | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-02](/docs/tasks/pes2/02-poke-por-conjunto-de-copias.md) | `tools/pes2/poke.py` — gravação pelo conjunto de cópias | 2 | ferramenta | — | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-03](/docs/tasks/pes2/03-direcao-do-emulador.md) | Direção do DuckStation — navegar até a tela e capturar | 2 | ferramenta | — | in-progress | — | — |
+| [PES2-TASK-04](/docs/tasks/pes2/04-poke-de-validacao.md) | O `poke` de validação — PIEMONTE em todas as telas | 2 | verificação | PES2-TASK-02, PES2-TASK-03 | pending | — | — |
+| [PES2-TASK-05](/docs/tasks/pes2/05-diferencial-de-cartao.md) | Harness de diferencial de memory card | 3 | ferramenta | PES2-TASK-03 | pending | — | — |
+| [PES2-TASK-06](/docs/tasks/pes2/06-registro-de-jogador-no-cartao.md) | Estrutura do registro de jogador, pelo cartão | 3 | engenharia-reversa | PES2-TASK-05 | pending | — | — |
+| [PES2-TASK-07](/docs/tasks/pes2/07-dump-de-ram-e-casamento.md) | Dump de RAM e casamento com o bloco do disco | 3 | engenharia-reversa | PES2-TASK-06 | pending | — | — |
+| [PES2-TASK-08](/docs/tasks/pes2/08-indice-do-bloco-de-nomes.md) | Os 624 candidatos de 16 bits — existe índice para o bloco de nomes? | 3 | engenharia-reversa | — | pending | — | — |
+| [PES2-TASK-09](/docs/tasks/pes2/09-os-blocos-extras-de-selectc.md) | Os 25 blocos de nome depois do pool, em `SELECTC.BIN` | 3 | engenharia-reversa | — | pending | — | — |
+| [PES2-TASK-10](/docs/tasks/pes2/10-fechamento-fase-3.md) | Fechamento da Fase 3 — o registro de jogador | 3 | closing | PES2-TASK-06, PES2-TASK-07, PES2-TASK-08, PES2-TASK-09 | pending | — | — |
+| [PES2-TASK-11](/docs/tasks/pes2/11-elenco-de-time.md) | Elenco por time — que jogador pertence a que clube | 4 | engenharia-reversa | PES2-TASK-10 | pending | — | — |
+| [PES2-TASK-12](/docs/tasks/pes2/12-formacoes.md) | Formações — a tabela tática por time | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
+| [PES2-TASK-13](/docs/tasks/pes2/13-uniforme-e-cores.md) | Uniforme e cores de time | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
+| [PES2-TASK-14](/docs/tasks/pes2/14-bandeiras.md) | Bandeiras — forma e cores | 4 | engenharia-reversa | PES2-TASK-13 | pending | — | — |
+| [PES2-TASK-15](/docs/tasks/pes2/15-master-league.md) | Master League — custos, slots e elencos | 4 | engenharia-reversa | PES2-TASK-11 | pending | — | — |
+| [PES2-TASK-16](/docs/tasks/pes2/16-fechamento-fase-4.md) | Fechamento da Fase 4 — o resto do banco | 4 | closing | PES2-TASK-11, PES2-TASK-12, PES2-TASK-13, PES2-TASK-14, PES2-TASK-15 | pending | — | — |
+| [PES2-TASK-17](/docs/tasks/pes2/17-formato-do-mapa.md) | O formato do `pes2_map.json` | 5 | projeto | PES2-TASK-10 | pending | — | — |
+| [PES2-TASK-18](/docs/tasks/pes2/18-mapa-consolidado.md) | `pes2_map.json` — o mapa consolidado | 5 | implementação | PES2-TASK-16, PES2-TASK-17 | pending | — | — |
+| [PES2-TASK-19](/docs/tasks/pes2/19-gerador-e-guarda.md) | O gerador — do mapa ao código, com `--check` | 5 | ferramenta | PES2-TASK-18 | pending | — | — |
+| [PES2-TASK-20](/docs/tasks/pes2/20-round-trip-pelo-mapa.md) | Round-trip headless pelo mapa | 5 | verificação | PES2-TASK-19 | pending | — | — |
+| [PES2-TASK-21](/docs/tasks/pes2/21-fechamento-fase-5.md) | Fechamento da Fase 5 — o portão da Fase 6 | 5 | closing | PES2-TASK-04, PES2-TASK-18, PES2-TASK-20 | pending | — | — |
+| [PES2-TASK-22](/docs/tasks/pes2/22-decisao-de-linguagem-e-ui.md) | Decisão de linguagem e UI do editor | 6 | decisão | PES2-TASK-21, PES2-TASK-30 | pending | — | — |
+| [PES2-TASK-23](/docs/tasks/pes2/23-editor-leitura.md) | O editor — leitura e exibição | 6 | implementação | PES2-TASK-22 | pending | — | — |
+| [PES2-TASK-24](/docs/tasks/pes2/24-editor-gravacao.md) | O editor — gravação | 6 | implementação | PES2-TASK-23 | pending | — | — |
+| [PES2-TASK-25](/docs/tasks/pes2/25-verificacao-final.md) | Verificação final — o projeto contra a definição de pronto | 6 | closing | PES2-TASK-24 | pending | — | — |
+| [PES2-TASK-26](/docs/tasks/pes2/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | engenharia-reversa | — | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-27](/docs/tasks/pes2/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM — 4 e 8 bpp com CLUT | 7 | engenharia-reversa | PES2-TASK-26 | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-28](/docs/tasks/pes2/28-t-name-copias-de-idioma.md) | `T_NAME_I` e `T_NAME_S` — o conjunto de cópias por idioma | 7 | engenharia-reversa | PES2-TASK-27 | pending | — | — |
+| [PES2-TASK-29](/docs/tasks/pes2/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail, recompressão só do editado | 7 | ferramenta | PES2-TASK-27 | done | 2026-09-01 | 2026-09-01 |
+| [PES2-TASK-30](/docs/tasks/pes2/30-fechamento-fase-7.md) | Fechamento da Fase 7 — o que o editor precisa mostrar | 7 | verificação | PES2-TASK-27, PES2-TASK-28, PES2-TASK-29 | pending | — | — |
+| [PES2-TASK-31](/docs/tasks/pes2/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | engenharia-reversa | — | pending | — | — |
+| [PES2-TASK-32](/docs/tasks/pes2/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | decisão | — | done | 2026-09-02 | 2026-09-03 |
+| [PES2-TASK-33](/docs/tasks/pes2/33-compilar-e-validar-o-mcp.md) | Compilar o fork e validar o MCP de fato | 0 | decisão | PES2-TASK-32 | done | 2026-09-03 | 2026-09-03 |
+| [PES2-TASK-34](/docs/tasks/pes2/34-rotas-mcp-no-lugar-do-drive.md) | Rotas MCP no lugar do `drive.py` | 0 | ferramenta | PES2-TASK-33 | done | 2026-09-03 | 2026-09-03 |
+| [PES2-TASK-35](/docs/tasks/pes2/35-desbloqueio-de-times.md) | Desbloqueio de times secretos e da lista de Master League, pelo disco | 4 | engenharia-reversa | — | pending | — | — |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada task — não edite
@@ -127,7 +127,7 @@ pergunta diferente:
    por causa dos fluxos de engenharia reversa, e sim do fluxo F — dirigir o
    jogo. Com `pause` + `frame_step`, cinco teclas são cinco linhas; por
    `xdotool` num display sem window manager, são uma aposta. O que isso
-   arrasta está na §6.14 e foi a [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
+   arrasta está na §6.14 e foi a [PES2-TASK-34](/docs/tasks/pes2/34-rotas-mcp-no-lugar-do-drive.md).
 
 **A Fase 0 voltou a estar fechada** com a 34, em 2026-09-03. E ela mediu uma
 coisa que nenhuma das três decisões previa: **as assinaturas de quadro não se
@@ -471,7 +471,7 @@ alcançam qualquer task.
 ## Pendências externas
 
 - ~~**`numpy` e um desmontador MIPS**~~ — **resolvido em 2026-09-01** pela
-  [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md), a pedido do
+  [PES2-TASK-01](/docs/tasks/pes2/01-ferramental-das-fases-3-e-4.md), a pedido do
   dono da máquina: `numpy` 2.5.2, `radare2` 5.5.0 e
   `mipsel-linux-gnu-objdump` 2.42. **Ghidra ficou de fora**, com razão escrita
   na §3.2 do plano — se a Fase 4 pedir decompilação de verdade, a decisão se

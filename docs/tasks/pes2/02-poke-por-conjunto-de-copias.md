@@ -97,7 +97,7 @@ e nome com byte fora de 0x20..0x7E. Escrever em `roms/` é recusado sem
 override.
 
 > Esta frase dizia "cinco recusas, todas exercitadas" até a
-> [CORR-PES2-005](/docs/tasks/CORR-PES2-005.md). Eram quatro guardas
+> [CORR-PES2-005](/docs/tasks/pes2/CORR-PES2-005.md). Eram quatro guardas
 > distintas: o caso da regra de fim escolhia o time 96 (`IRELAND`), que
 > está fora de `team-names-select2`, e a guarda de time ausente respondia
 > por ele; a de último registro não tinha caso nenhum. `_expect_refusal`

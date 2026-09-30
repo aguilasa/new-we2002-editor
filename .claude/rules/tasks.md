@@ -16,8 +16,8 @@ repositório**; o rito em si está na documentação do plugin
 | `/corrigir-tudo [ciclo]` | `/rite:fix-all [ciclo]` |
 | — | `/rite:status`, `/rite:new-cycle`, `/rite:plan-to-tasks`, `/rite:close-cycle`, `/rite:retro` |
 
-Os ciclos continuam onde estavam e têm nome: `pes2` (`docs/tasks/`) e `port-mcr`
-(`docs/tasks/port-mcr/`); arquivados, `wte` em `docs/tasks/concluidos/` e `looks` em
+Os ciclos têm nome e cada um mora na sua subpasta: `pes2` (`docs/tasks/pes2/`, desde
+2026-09-30 — antes ficava solto em `docs/tasks/`) e `port-mcr` (`docs/tasks/port-mcr/`); arquivados, `wte` em `docs/tasks/concluidos/` e `looks` em
 `docs/tasks/concluidos/looks/`.
 
 ## O que mudou, e o que não mudou

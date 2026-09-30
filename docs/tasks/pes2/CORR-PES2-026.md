@@ -23,12 +23,12 @@ state, diz:
 > subtração; nos estados medidos ela cai no offset **6799** do fluxo inflado,
 > mas esse número é resultado, não constante.
 
-O Log da [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) repete o
+O Log da [PES2-TASK-32](/docs/tasks/pes2/32-poc-do-mcp-do-duckstation.md) repete o
 mesmo 6799.
 
 O `savestate.py` mede **6754** em todos os estados desta máquina — incluindo
 um salvo hoje. A diferença é exatamente os **45 bytes** que a
-[PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) corrigiu: a RAM não
+[PES2-TASK-33](/docs/tasks/pes2/33-compilar-e-validar-o-mcp.md) corrigiu: a RAM não
 é a última coisa que `Bus` escreve, `MEMCTRL.regs` e `RAM_SIZE.bits` vêm
 depois dela. Aquela correção reescreveu os dois endereços do fluxo C
 (`0x000714EE` → `0x0007151B`, `0x00137BE5` → `0x00137C12`, +45 cada) e

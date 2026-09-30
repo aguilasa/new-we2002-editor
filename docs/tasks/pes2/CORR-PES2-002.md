@@ -16,7 +16,7 @@ done_commit: 5e2b8bd
 ## Problema identificado
 
 O pool de correções vivo é `CORR-PES2-XXX`, decidido e escrito em
-[`docs/tasks/correcoes-progresso.md`](/docs/tasks/correcoes-progresso.md):
+[`docs/tasks/pes2/correcoes-progresso.md`](/docs/tasks/pes2/correcoes-progresso.md):
 
 > **A numeração deste pool começa em `CORR-PES2-001`.** […] O prefixo muda
 > porque o projeto muda; a convenção de que **o pool é único dentro do ciclo**

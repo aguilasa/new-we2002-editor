@@ -46,7 +46,7 @@ no `.bin`, como o `ed.exe` faz no WE2002.
   continua verdadeira — dado de jogo não mora ali —, mas ela mede o objetivo
   errado depois que a Fase 7 entrou: `.RA` não é streaming, é **banco de som
   VAB**, e editar som é feature de editor. Medição na §1.14, task na
-  [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md). O `MOVIE/` e os `.DA`
+  [PES2-TASK-31](/docs/tasks/pes2/31-audio-ra-e-vag.md). O `MOVIE/` e os `.DA`
   continuam fora.
 - **Não** recalcular EDC/ECC. O `ed.exe` não recalcula e o jogo não confere;
   gravação in-place preservando os 280 bytes de cauda é a política herdada.
@@ -678,7 +678,7 @@ lado de cá. O que sobra é a Fase 7 deste plano — verificar, e adaptar onde a
 localização europeia multiplicou os arquivos.
 
 **(e) O codec lê os quatro discos — medido em 2026-09-01, pela
-[PES2-TASK-26](/docs/tasks/26-codec-lzss.md).** O `tools/pes2/lzss.py` porta o
+[PES2-TASK-26](/docs/tasks/pes2/26-codec-lzss.md).** O `tools/pes2/lzss.py` porta o
 LZSS do `WECompress.cpp` (crédito e condição no [NOTICE.md](../NOTICE.md)) e
 foi apontado para todo `BIN/*.BIN` `form1` das duas releases de PES2 e das
 duas imagens de WE2002:
@@ -712,7 +712,7 @@ Os três verdictos, como a ferramenta os define:
   `MODEL.BIN` (estádios e malha, fora por (d)), `ANIME`, `DEMODATA`,
   `EDT_MOD`, `ENDANIME`, e **onze
   `CG*.BIN`** — estes últimos são o achado que a
-  [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) tem de explicar, porque a
+  [PES2-TASK-27](/docs/tasks/pes2/27-conteiner-e-tim.md) tem de explicar, porque a
   §5 Fase 10 do `PLAN-FEATURES` contava com eles como contêiner gráfico.
 
 **Round-trip: 8.217 de 8.217 blocos**, `decompress(compress(x)) == x` nos
@@ -739,11 +739,11 @@ diferença são os 36 bytes de cabeçalho de contêiner, que também ficam fora 
 qualquer fluxo: são duas medidas diferentes, as duas certas.
 
 > Esta frase citava `0f 80 0a 00 20 02 80 01` como o início dos registros até
-> a [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md). É o **quarto** deles, em
+> a [CORR-PES2-011](/docs/tasks/pes2/CORR-PES2-011.md). É o **quarto** deles, em
 > 53066 — três registros depois do começo da cauda, em 53018.
 
 **(f) O índice do contêiner: 16 bytes por entrada, dois tipos — medido em
-2026-09-01, pela [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md).** A §5
+2026-09-01, pela [PES2-TASK-27](/docs/tasks/pes2/27-conteiner-e-tim.md).** A §5
 Fase 10 do `PLAN-FEATURES` previa um `DATA_HEADER` de 32 bytes. São **16**, e
 há duas espécies:
 
@@ -887,17 +887,17 @@ valores ali —, fechando em `0x8000 0x8000 0x8000 0x0000`.
 Os cinco `OFS_FLAG_SHAPE_COPY_*` são **outra coisa** — forma de bandeira, não
 cor — e moram noutros arquivos: `/OPENNING.BIN` +20820, `/SELECT.BIN` +5580 e
 +286580, `/SELFORM.BIN` +72400 e `/REPLAYS.BIN` +58304. O **72400** que esta
-frase citava até a [CORR-PES2-015](/docs/tasks/CORR-PES2-015.md) é o do
+frase citava até a [CORR-PES2-015](/docs/tasks/pes2/CORR-PES2-015.md) é o do
 `/SELFORM.BIN`, e em `DAT2D.BIN` +72400 lê-se `0x0d4d 0x118f 0x11d2 0x1613`,
 com o bit alto **apagado** — o contrário do que a frase descreve. Quem localiza
 os nove é `python3 tools/pes2/ofs_map.py <img>`. Só que o `DAT2D.BIN` do WE2002 tem **23
 registros de imagem e zero de CLUT** nas duas imagens: a região de paleta
 começa em 65876 e o contêiner não a indexa. No PES2 o mesmo arquivo indexa —
 266 CLUTs, cargas em 53372..64284. É a via de entrada da
-[PES2-TASK-14](/docs/tasks/14-bandeiras.md), e a linha está escrita lá.
+[PES2-TASK-14](/docs/tasks/pes2/14-bandeiras.md), e a linha está escrita lá.
 
 **(g) Gravar de volta: fit-or-fail, medido — 2026-09-01, pela
-[PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md).** O
+[PES2-TASK-29](/docs/tasks/pes2/29-gravacao-de-asset.md).** O
 `tools/pes2/asset_write.py` importa PNG indexado, recomprime **só** a entrada
 tocada, confere antes de escrever e recusa o que não couber.
 
@@ -1083,7 +1083,7 @@ em diante:
 
 > **Estes números foram medidos à mão nesta sessão, num script de
 > scratchpad.** Pela disciplina do projeto eles valem como *ponto de partida*,
-> não como fato versionado: a [PES2-TASK-35](/docs/tasks/35-desbloqueio-de-times.md)
+> não como fato versionado: a [PES2-TASK-35](/docs/tasks/pes2/35-desbloqueio-de-times.md)
 > entrega a ferramenta que os reproduz, e é ela que os promove — ou os
 > corrige.
 
@@ -1487,7 +1487,7 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    > Medido com um campeonato jogado à mão pelo usuário (Brasil campeão,
    > 7×0 na final contra a Itália) e um save state parkado na prorrogação
    > da final — ver a rota `ending` do `mcp_drive.py` e o Log da
-   > [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md).
+   > [PES2-TASK-03](/docs/tasks/pes2/03-direcao-do-emulador.md).
 3b. **Os nomes dos atributos, lidos da tela.** O Modo Editar mostra os
    **dezesseis** campos por jogador, em ordem, e a ordem de tela costuma ser
    a ordem do registro: `Ataque`, `Defensa`, `Equilib.`, `Resisten`,
@@ -1722,25 +1722,25 @@ O que a §1.14 já entrega, e que esta fase gasta em vez de redescobrir: o
 formato é o do WE2002, o `PLAN-FEATURES` já o descreve fase a fase, e a
 camada ISO9660 (Fase 8 de lá) já está pronta e verde no `iso.py`.
 
-- **Codec LZSS** ([PES2-TASK-26](/docs/tasks/26-codec-lzss.md)). Descomprimir
+- **Codec LZSS** ([PES2-TASK-26](/docs/tasks/pes2/26-codec-lzss.md)). Descomprimir
   os contêineres das duas releases — 208 e 210, §1.14(e); round-trip
   `decompress(compress(x)) == x`. Decide a divergência do `TEX_00` da §1.14.
-- **Contêiner e TIM** ([PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md)).
+- **Contêiner e TIM** ([PES2-TASK-27](/docs/tasks/pes2/27-conteiner-e-tim.md)).
   Lista de entradas, `DATA_HEADER`, 4 e 8 bpp com CLUT, export PNG. É a de
   risco mais alto — o único ponto onde o formato ainda é hipótese. Também é a
   via provável para as bandeiras da Fase 4: os quatro `OFS_FLAG_COLOURS_*`
   caem em `BIN/DAT2D.BIN` (§1.4).
 - **Cópias de idioma**
-  ([PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md)). `T_NAME_I` e
+  ([PES2-TASK-28](/docs/tasks/pes2/28-t-name-copias-de-idioma.md)). `T_NAME_I` e
   `T_NAME_S` são byte a byte idênticos; gravar um só repete a §6.1 uma camada
   acima. Varrer o conjunto, nunca declará-lo.
-- **Gravação** ([PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md)).
+- **Gravação** ([PES2-TASK-29](/docs/tasks/pes2/29-gravacao-de-asset.md)).
   Fit-or-fail, recompressão só do editado, e a decisão de EDC/ECC entre a §6.7
   daqui e a §5(b) de lá.
-- **Fechamento** ([PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md)). Os
+- **Fechamento** ([PES2-TASK-30](/docs/tasks/pes2/30-fechamento-fase-7.md)). Os
   três números por eixo, e a lista do que a UI tem de cobrir. **É portão da
   PES2-TASK-22.**
-- **Áudio** ([PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md)). VAB, VAG,
+- **Áudio** ([PES2-TASK-31](/docs/tasks/pes2/31-audio-ra-e-vag.md)). VAB, VAG,
   ADPCM. **Independente e fora do portão** — dá para parar antes dela sem
   perder o salto de valor.
 
@@ -1823,7 +1823,7 @@ Preservar os 280 B de cauda. O jogo não confere; corrigir muda bytes que
 nenhum teste espera e destrói a comparação de round-trip.
 
 **Decidido por medição em 2026-09-01, pela
-[PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md), e havia divergência a
+[PES2-TASK-29](/docs/tasks/pes2/29-gravacao-de-asset.md), e havia divergência a
 resolver.** A §5(b) do [PLAN-FEATURES](/docs/PLAN-FEATURES.md) decidiu
 **recalcular** EDC/ECC no caminho de assets; esta seção decide **preservar**.
 As duas não podem valer no mesmo comando, e a medida decide:
@@ -1881,7 +1881,7 @@ aponta para o lugar errado.
 > E as que existem por dirigir a tela com `xdotool` — a calibragem de tecla,
 > o foco `PointerRoot`, o auto-repeat — deixam de ter objeto na medida em que
 > a direção passa a ser por MCP, que é a
-> [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md). **Nenhuma
+> [PES2-TASK-34](/docs/tasks/pes2/34-rotas-mcp-no-lugar-do-drive.md). **Nenhuma
 > foi removida daqui**: armadilha medida é registro, e some quando a
 > ferramenta que a contorna morrer, não antes.
 
@@ -2280,7 +2280,7 @@ de ser **invisível na verificação** se o roteiro do emulador não trocar de
 idioma.
 
 **Varrido em 2026-09-01, pela
-[PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md), e o resultado
+[PES2-TASK-28](/docs/tasks/pes2/28-t-name-copias-de-idioma.md), e o resultado
 corrige a frase que estava aqui.** O `tools/pes2/lang_map.py` agrupa por
 digest de conteúdo sobre **todo** arquivo `form1` do disco, e acha **três**
 conjuntos de cópia por release, não os pares que esta seção listava:
@@ -2350,7 +2350,7 @@ copiar a banda 3 sobre a 2 dá 1.904 bytes contra **1.868** de folga até o
 próximo registro: **recusado, 36 bytes acima**. A mesma entrada com a banda 2
 sobre a 3 dá 1.817 e passa. Isto é a política *fit-or-fail* da §5(a) do
 `PLAN-FEATURES` acontecendo em dado real, e é da
-[PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md).
+[PES2-TASK-29](/docs/tasks/pes2/29-gravacao-de-asset.md).
 
 **Um número da §5c a refinar.** Ela mede que recomprimir dá sempre 0,2% a 2,0%
 *menor*. Sobre as 28 entradas do `T_NAME_I`, o compressor daqui dá 61.212
@@ -2563,7 +2563,7 @@ MCP?"* e concluiu que não; nunca mediu *"o MCP funciona?"*, porque o fork não
 foi baixado nem compilado e o servidor nunca respondeu nada. A distinção ficou
 enterrada num critério marcado até o usuário apontá-la em 2026-09-03. Quem
 quiser a segunda resposta a tem como
-[PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md), com escopo já
+[PES2-TASK-33](/docs/tasks/pes2/33-compilar-e-validar-o-mcp.md), com escopo já
 reduzido aos fluxos **A** e **E** — os únicos que o save state não cobre,
 porque uma foto de RAM diz o que ela contém e nunca quem escreveu.
 
@@ -2574,7 +2574,7 @@ casos vermelhos no `pes2_selftest`, sem trocar o binário do emulador e sem
 invalidar nenhuma assinatura de quadro da §6.11. O fork volta à mesa **se e
 quando** o laço disco↔RAM precisar do fluxo A.
 
-**Revista em 2026-09-03 pela [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md),
+**Revista em 2026-09-03 pela [PES2-TASK-33](/docs/tasks/pes2/33-compilar-e-validar-o-mcp.md),
 e a premissa de custo estava errada.** A frase acima dava como motivo
 "compilar 12.330 commits de C++", e isso foi medido:
 
@@ -2721,7 +2721,7 @@ porque não dá para confiar que cinco teclas movam cinco.
 > A corrida acima usou cliente descartável no scratchpad, e por isso
 > **nenhum número dela é resultado versionado**. Quem os quiser em documento
 > tira de script versionado, que é entregável da
-> [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
+> [PES2-TASK-34](/docs/tasks/pes2/34-rotas-mcp-no-lugar-do-drive.md).
 
 **O que a decisão arrasta.** Nada disto é opinião — é consequência mecânica
 de trocar o binário, e cada item era da PES2-TASK-34.

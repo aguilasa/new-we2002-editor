@@ -26,7 +26,7 @@ Na §6.14 do [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md):
 > em 2026-09-02, 12.330 commits na branch `mcp`.
 
 E no critério de conclusão da
-[PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md):
+[PES2-TASK-32](/docs/tasks/pes2/32-poc-do-mcp-do-duckstation.md):
 
 > `sadnescity/duckstation` tem 3 estrelas, 0 forks, 12.330 commits na branch
 > `mcp`, e **nenhuma release própria** — a página que o README aponta é a do

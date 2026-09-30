@@ -1,7 +1,7 @@
 # Perfil de ciclo — Pro Evolution Soccer 2 (PSX)
 
 **Este arquivo é o perfil do ciclo PES2**, nomeado pelo campo `perfil:` do
-[`docs/tasks/progresso.md`](/docs/tasks/progresso.md) e carregado pelos prompts
+[`docs/tasks/pes2/progresso.md`](/docs/tasks/pes2/progresso.md) e carregado pelos prompts
 de `docs/prompts/`. Os prompts têm o **rito**; o que é deste ciclo mora aqui.
 
 Fonte: [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md). Onde este perfil e o plano
@@ -284,7 +284,7 @@ da fase corrente precisa.
 ## Verificações específicas por fase
 
 As oito fases são as do [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) §5, e o
-quadro de tasks está no [`progresso.md`](/docs/tasks/progresso.md).
+quadro de tasks está no [`progresso.md`](/docs/tasks/pes2/progresso.md).
 
 **Fase 1 — diferencial barato — está fechada.** Não há task de trabalho nela; o
 que entregou (as âncoras `OFS_*` e o diff entre releases) é premissa das

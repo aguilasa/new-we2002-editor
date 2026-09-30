@@ -17,8 +17,8 @@ done_commit: 5e2b8bd
 
 Três correções seguidas tiraram dos prompts o que a regra proíbe **por nome**:
 o plano ([`fonte_de_verdade` na task](/.claude/rules/tasks.md)), o prefixo
-de correção ([CORR-PES2-002](/docs/tasks/CORR-PES2-002.md)) e o prefixo de task
-([CORR-PES2-003](/docs/tasks/CORR-PES2-003.md)). O que sobrou é maior que os
+de correção ([CORR-PES2-002](/docs/tasks/pes2/CORR-PES2-002.md)) e o prefixo de task
+([CORR-PES2-003](/docs/tasks/pes2/CORR-PES2-003.md)). O que sobrou é maior que os
 três, e a varredura da 003 é que o mostrou: **os prompts continuam carregando
 um corpo inteiro de conteúdo operacional do ciclo `wte/` Lazarus**, e para uma
 task de PES2 ele não é só inaplicável — é instrução ativa apontando para
@@ -114,7 +114,7 @@ então esta CORR **não a toma sozinha**.
   fase.** É o erro que esta CORR existe para nomear: passaria a afirmar que um
   checklist de `.dfm` vale para PES2
 - **Não apagar as 28 citações** de task real do ciclo fechado. A
-  [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) já mediu o custo disso no pool
+  [CORR-PES2-002](/docs/tasks/pes2/CORR-PES2-002.md) já mediu o custo disso no pool
   de correções: a varredura ingênua apaga a armadilha junto com o prefixo
 - **Não tocar `docs/tasks/concluidos/`**
 

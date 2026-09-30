@@ -15,7 +15,7 @@ done_commit: e6e7190
 
 ## Problema identificado
 
-A [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) reduziu o escopo
+A [PES2-TASK-33](/docs/tasks/pes2/33-compilar-e-validar-o-mcp.md) reduziu o escopo
 do fork a dois fluxos, e disse por quê:
 
 > Como a TASK-32 entregou C e D em Python puro (`tools/pes2/savestate.py`), o
@@ -40,7 +40,7 @@ breakpoint. Refazê-lo hoje significa escrever à mão a sequência de
 `mcp.py --call breakpoint action=add type=write address=…`, esperar,
 `read_registers`, `disassemble` — que é exatamente o que esta revisão teve de
 fazer, e foi nesse caminho que a queda da
-[CORR-PES2-032](/docs/tasks/CORR-PES2-032.md) apareceu.
+[CORR-PES2-032](/docs/tasks/pes2/CORR-PES2-032.md) apareceu.
 
 A lista de Fase 0 do [`perfil-pes2.md`](/docs/prompts/perfil-pes2.md) pergunta
 isto em uma linha:

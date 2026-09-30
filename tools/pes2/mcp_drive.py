@@ -234,7 +234,7 @@ def on_pitch(mean):
 # and parked the final's injury time in slot 3. A state is derived from a
 # commercial game and stays out of git like `roms/` does, so on any other
 # machine this route reports *skipped*, the same way `pes2_image` does
-# without an image. The decision is in docs/tasks/03-direcao-do-emulador.md.
+# without an image. The decision is in docs/tasks/pes2/03-direcao-do-emulador.md.
 #
 # What it buys is the answer to the question that bounded PES2-TASK-04:
 # **the ending names the team in text.** `CHAMPION BRAZIL`, in letters, where
@@ -965,7 +965,7 @@ def route_ending(s):
             f"no save state at {state_path(ENDING_SLOT)} -- this route needs "
             f"a championship final parked there, and a state is not "
             f"versioned (it is derived from a commercial game, same rule as "
-            f"roms/). See docs/tasks/03-direcao-do-emulador.md")
+            f"roms/). See docs/tasks/pes2/03-direcao-do-emulador.md")
 
     s.say(f"loading the final from slot {ENDING_SLOT}")
     s.load_state(ENDING_SLOT)

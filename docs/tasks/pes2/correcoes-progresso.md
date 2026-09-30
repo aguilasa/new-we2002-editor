@@ -2,7 +2,7 @@
 
 Correções abertas pelo `/rite:review` (até a migração para o Rite, pelo `/revisar` — [prompt da época](https://github.com/aguilasa/new-we2002-editor/blob/bcb5aee473527ace5d5bc24ef29c9a36d26a2874/docs/prompts/02-revisar.md))
 e fechadas pelo `/rite:fix`. O andamento das **tarefas** fica em
-[`progresso.md`](/docs/tasks/progresso.md); este arquivo só rastreia correção.
+[`progresso.md`](/docs/tasks/pes2/progresso.md); este arquivo só rastreia correção.
 
 **"Done on" nasce `—`** e é escrita pelo `rite close` com a data do commit que
 corrigiu — a revisão abre a correção, não a fecha.
@@ -23,38 +23,38 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 <!-- rite:begin fixes -->
 | ID | Title | Origin | Severity | Status | Done on |
 | --- | --- | --- | --- | --- | --- |
-| [CORR-PES2-001](/docs/tasks/CORR-PES2-001.md) | Correção: o -EL do objdump não é o que a §3.2 diz que é — quem mente é o -EB | PES2-TASK-01 | high | done | 2026-09-01 |
-| [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | Correção: as regras e os prompts dizem CORR-WTE, o pool vivo é CORR-PES2 | PES2-TASK-01 | medium | done | 2026-09-01 |
-| [CORR-PES2-003](/docs/tasks/CORR-PES2-003.md) | Correção: os prompts e os wrappers cravam WTE-TASK-XX; o ciclo vivo é PES2-TASK-XX | CORR-PES2-002 | medium | done | 2026-09-01 |
-| [CORR-PES2-004](/docs/tasks/CORR-PES2-004.md) | Correção: os prompts ficaram agnósticos de plano e de prefixo, e continuam cheios de corpo WTE-específico | CORR-PES2-003 | medium | done | 2026-09-01 |
-| [CORR-PES2-005](/docs/tasks/CORR-PES2-005.md) | Correção: duas das cinco recusas do `--self-check` do `poke.py` medem a mesma coisa; a regra de fim e o último registro nunca são exercitados | PES2-TASK-02 | high | done | 2026-09-01 |
-| [CORR-PES2-006](/docs/tasks/CORR-PES2-006.md) | Correção: o `poke.py` mede oito listas e continua dizendo cinco — inclusive no que imprime | PES2-TASK-02 | high | done | 2026-09-01 |
-| [CORR-PES2-007](/docs/tasks/CORR-PES2-007.md) | Correção: três textos vivos ainda dizem cinco listas, e a tabela de testes do plano não conhece o `poke` | PES2-TASK-02 | medium | done | 2026-09-01 |
-| [CORR-PES2-008](/docs/tasks/CORR-PES2-008.md) | Correção: a varredura do `poke.py` só enxerga registro delimitado por NUL, e o disco tem tabela de largura fixa | PES2-TASK-02 | low | done | 2026-09-01 |
-| [CORR-PES2-009](/docs/tasks/CORR-PES2-009.md) | Correção: o `--check` do `lzss.py` não sabe ficar vermelho — o bug de porte que a própria task nomeia passa verde | PES2-TASK-26 | high | done | 2026-09-01 |
-| [CORR-PES2-010](/docs/tasks/CORR-PES2-010.md) | Correção: as duas constantes do `scan` do `lzss.py` — uma decide todo verdicto com 128 B de margem, a outra é justificada por um número errado | PES2-TASK-26 | medium | done | 2026-09-01 |
-| [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md) | Correção: o prefixo de registro citado na §1.14(e) é o do quarto registro, não a forma deles | PES2-TASK-26 | low | done | 2026-09-01 |
-| [CORR-PES2-012](/docs/tasks/CORR-PES2-012.md) | Correção: o estado medido diz 208 contêineres no PES2 e 195 no WE2002; os quatro discos medem 208, 210, 177 e 195 | PES2-TASK-26 | low | done | 2026-09-01 |
-| [CORR-PES2-013](/docs/tasks/CORR-PES2-013.md) | Correção: o `check` do `bin_archive.py` sai vermelho na imagem golden, e nenhum documento diz isso | PES2-TASK-27 | high | done | 2026-09-01 |
-| [CORR-PES2-014](/docs/tasks/CORR-PES2-014.md) | Correção: não são os 105 `TEX_*.BIN` da European Deluxe que são Form 2 — são 18 | PES2-TASK-27 | high | done | 2026-09-01 |
-| [CORR-PES2-015](/docs/tasks/CORR-PES2-015.md) | Correção: um dos quatro offsets de bandeira citados é de forma, e mora noutro arquivo; o quarto de cor é 75776 | PES2-TASK-27 | high | done | 2026-09-01 |
-| [CORR-PES2-016](/docs/tasks/CORR-PES2-016.md) | Correção: a profundidade é decidida por contêiner, e o `DAT2D.BIN` do PES2 tem 261 paletas de 16 contra 5 de 256 | PES2-TASK-27 | high | done | 2026-09-01 |
-| [CORR-PES2-017](/docs/tasks/CORR-PES2-017.md) | Correção: o perfil do ciclo não tem seção de Fase 7, e a Fase 7 já teve quatro tasks executadas | PES2-TASK-29 | medium | done | 2026-09-01 |
-| [CORR-PES2-018](/docs/tasks/CORR-PES2-018.md) | Correção: são 9 de 13 entradas que recomprimem no orçamento, não 10 de 3, e a folga vai a 3 bytes, não 4 | PES2-TASK-29 | high | done | 2026-09-01 |
-| [CORR-PES2-019](/docs/tasks/CORR-PES2-019.md) | Correção: o import não valida profundidade nem paleta, e grava um PNG de 4 bpp num slot de 8 bpp em silêncio | PES2-TASK-29 | high | done | 2026-09-01 |
-| [CORR-PES2-020](/docs/tasks/CORR-PES2-020.md) | Correção: a conferência antes da gravação nunca foi vista ficando vermelha | PES2-TASK-29 | low | done | 2026-09-01 |
-| [CORR-PES2-021](/docs/tasks/CORR-PES2-021.md) | Correção: o `boot_check.sh` justifica nomear o binário com um 0,019 que a própria task mediu e desmentiu | PES2-TASK-34 | high | done | 2026-09-03 |
-| [CORR-PES2-022](/docs/tasks/CORR-PES2-022.md) | Correção: a coluna "Revisado em" das PES2-TASK-32 e 33 diz `✅ Concluído`, e nenhuma das duas foi revisada | PES2-TASK-34 | high | done | 2026-09-03 |
-| [CORR-PES2-023](/docs/tasks/CORR-PES2-023.md) | Correção: o perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde há oito | PES2-TASK-34 | medium | done | 2026-09-03 |
-| [CORR-PES2-024](/docs/tasks/CORR-PES2-024.md) | Correção: o `--measure-menu` é gate, não confere se está no menu, e nenhum comando versionado o coloca lá | PES2-TASK-34 | medium | done | 2026-09-03 |
-| [CORR-PES2-025](/docs/tasks/CORR-PES2-025.md) | Correção: a §3.2 do plano ainda chama a morada do fork de "item aberto da PES2-TASK-34" | PES2-TASK-34 | low | done | 2026-09-03 |
-| [CORR-PES2-026](/docs/tasks/CORR-PES2-026.md) | Correção: o offset da RAM no fluxo inflado ficou em 6799; o leitor corrigido mede 6754 | PES2-TASK-32 | high | done | 2026-09-03 |
-| [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md) | Correção: o `pes2_boot` nunca roda pela receita documentada — ele quer `PES2_IMAGE`, e os docs só dão `WE2002_PES2_*` | PES2-TASK-32 | high | done | 2026-09-03 |
-| [CORR-PES2-028](/docs/tasks/CORR-PES2-028.md) | Correção: o fork publica binário próprio, e o AppImage dele traz o servidor MCP | PES2-TASK-32 | high | done | 2026-09-03 |
-| [CORR-PES2-029](/docs/tasks/CORR-PES2-029.md) | Correção: estado ausente despeja traceback no `savestate.py`, e o `except` do `selftest.py` vira NameError | PES2-TASK-32 | low | done | 2026-09-03 |
-| [CORR-PES2-030](/docs/tasks/CORR-PES2-030.md) | Correção: o `pes2_boot` prova vida exigindo que dois quadros difiram, e falha na tela de intro que não anima | CORR-PES2-027 | high | done | 2026-09-03 |
-| [CORR-PES2-031](/docs/tasks/CORR-PES2-031.md) | Correção: o fluxo A, que é a razão de o fork existir, não tem ferramenta versionada | PES2-TASK-33 | medium | done | 2026-09-04 |
-| [CORR-PES2-032](/docs/tasks/CORR-PES2-032.md) | Correção: o fork morre calado durante execução livre, e toda ferramenta relata isso como "não está rodando" | PES2-TASK-33 | high | done | 2026-09-03 |
+| [CORR-PES2-001](/docs/tasks/pes2/CORR-PES2-001.md) | Correção: o -EL do objdump não é o que a §3.2 diz que é — quem mente é o -EB | PES2-TASK-01 | high | done | 2026-09-01 |
+| [CORR-PES2-002](/docs/tasks/pes2/CORR-PES2-002.md) | Correção: as regras e os prompts dizem CORR-WTE, o pool vivo é CORR-PES2 | PES2-TASK-01 | medium | done | 2026-09-01 |
+| [CORR-PES2-003](/docs/tasks/pes2/CORR-PES2-003.md) | Correção: os prompts e os wrappers cravam WTE-TASK-XX; o ciclo vivo é PES2-TASK-XX | CORR-PES2-002 | medium | done | 2026-09-01 |
+| [CORR-PES2-004](/docs/tasks/pes2/CORR-PES2-004.md) | Correção: os prompts ficaram agnósticos de plano e de prefixo, e continuam cheios de corpo WTE-específico | CORR-PES2-003 | medium | done | 2026-09-01 |
+| [CORR-PES2-005](/docs/tasks/pes2/CORR-PES2-005.md) | Correção: duas das cinco recusas do `--self-check` do `poke.py` medem a mesma coisa; a regra de fim e o último registro nunca são exercitados | PES2-TASK-02 | high | done | 2026-09-01 |
+| [CORR-PES2-006](/docs/tasks/pes2/CORR-PES2-006.md) | Correção: o `poke.py` mede oito listas e continua dizendo cinco — inclusive no que imprime | PES2-TASK-02 | high | done | 2026-09-01 |
+| [CORR-PES2-007](/docs/tasks/pes2/CORR-PES2-007.md) | Correção: três textos vivos ainda dizem cinco listas, e a tabela de testes do plano não conhece o `poke` | PES2-TASK-02 | medium | done | 2026-09-01 |
+| [CORR-PES2-008](/docs/tasks/pes2/CORR-PES2-008.md) | Correção: a varredura do `poke.py` só enxerga registro delimitado por NUL, e o disco tem tabela de largura fixa | PES2-TASK-02 | low | done | 2026-09-01 |
+| [CORR-PES2-009](/docs/tasks/pes2/CORR-PES2-009.md) | Correção: o `--check` do `lzss.py` não sabe ficar vermelho — o bug de porte que a própria task nomeia passa verde | PES2-TASK-26 | high | done | 2026-09-01 |
+| [CORR-PES2-010](/docs/tasks/pes2/CORR-PES2-010.md) | Correção: as duas constantes do `scan` do `lzss.py` — uma decide todo verdicto com 128 B de margem, a outra é justificada por um número errado | PES2-TASK-26 | medium | done | 2026-09-01 |
+| [CORR-PES2-011](/docs/tasks/pes2/CORR-PES2-011.md) | Correção: o prefixo de registro citado na §1.14(e) é o do quarto registro, não a forma deles | PES2-TASK-26 | low | done | 2026-09-01 |
+| [CORR-PES2-012](/docs/tasks/pes2/CORR-PES2-012.md) | Correção: o estado medido diz 208 contêineres no PES2 e 195 no WE2002; os quatro discos medem 208, 210, 177 e 195 | PES2-TASK-26 | low | done | 2026-09-01 |
+| [CORR-PES2-013](/docs/tasks/pes2/CORR-PES2-013.md) | Correção: o `check` do `bin_archive.py` sai vermelho na imagem golden, e nenhum documento diz isso | PES2-TASK-27 | high | done | 2026-09-01 |
+| [CORR-PES2-014](/docs/tasks/pes2/CORR-PES2-014.md) | Correção: não são os 105 `TEX_*.BIN` da European Deluxe que são Form 2 — são 18 | PES2-TASK-27 | high | done | 2026-09-01 |
+| [CORR-PES2-015](/docs/tasks/pes2/CORR-PES2-015.md) | Correção: um dos quatro offsets de bandeira citados é de forma, e mora noutro arquivo; o quarto de cor é 75776 | PES2-TASK-27 | high | done | 2026-09-01 |
+| [CORR-PES2-016](/docs/tasks/pes2/CORR-PES2-016.md) | Correção: a profundidade é decidida por contêiner, e o `DAT2D.BIN` do PES2 tem 261 paletas de 16 contra 5 de 256 | PES2-TASK-27 | high | done | 2026-09-01 |
+| [CORR-PES2-017](/docs/tasks/pes2/CORR-PES2-017.md) | Correção: o perfil do ciclo não tem seção de Fase 7, e a Fase 7 já teve quatro tasks executadas | PES2-TASK-29 | medium | done | 2026-09-01 |
+| [CORR-PES2-018](/docs/tasks/pes2/CORR-PES2-018.md) | Correção: são 9 de 13 entradas que recomprimem no orçamento, não 10 de 3, e a folga vai a 3 bytes, não 4 | PES2-TASK-29 | high | done | 2026-09-01 |
+| [CORR-PES2-019](/docs/tasks/pes2/CORR-PES2-019.md) | Correção: o import não valida profundidade nem paleta, e grava um PNG de 4 bpp num slot de 8 bpp em silêncio | PES2-TASK-29 | high | done | 2026-09-01 |
+| [CORR-PES2-020](/docs/tasks/pes2/CORR-PES2-020.md) | Correção: a conferência antes da gravação nunca foi vista ficando vermelha | PES2-TASK-29 | low | done | 2026-09-01 |
+| [CORR-PES2-021](/docs/tasks/pes2/CORR-PES2-021.md) | Correção: o `boot_check.sh` justifica nomear o binário com um 0,019 que a própria task mediu e desmentiu | PES2-TASK-34 | high | done | 2026-09-03 |
+| [CORR-PES2-022](/docs/tasks/pes2/CORR-PES2-022.md) | Correção: a coluna "Revisado em" das PES2-TASK-32 e 33 diz `✅ Concluído`, e nenhuma das duas foi revisada | PES2-TASK-34 | high | done | 2026-09-03 |
+| [CORR-PES2-023](/docs/tasks/pes2/CORR-PES2-023.md) | Correção: o perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde há oito | PES2-TASK-34 | medium | done | 2026-09-03 |
+| [CORR-PES2-024](/docs/tasks/pes2/CORR-PES2-024.md) | Correção: o `--measure-menu` é gate, não confere se está no menu, e nenhum comando versionado o coloca lá | PES2-TASK-34 | medium | done | 2026-09-03 |
+| [CORR-PES2-025](/docs/tasks/pes2/CORR-PES2-025.md) | Correção: a §3.2 do plano ainda chama a morada do fork de "item aberto da PES2-TASK-34" | PES2-TASK-34 | low | done | 2026-09-03 |
+| [CORR-PES2-026](/docs/tasks/pes2/CORR-PES2-026.md) | Correção: o offset da RAM no fluxo inflado ficou em 6799; o leitor corrigido mede 6754 | PES2-TASK-32 | high | done | 2026-09-03 |
+| [CORR-PES2-027](/docs/tasks/pes2/CORR-PES2-027.md) | Correção: o `pes2_boot` nunca roda pela receita documentada — ele quer `PES2_IMAGE`, e os docs só dão `WE2002_PES2_*` | PES2-TASK-32 | high | done | 2026-09-03 |
+| [CORR-PES2-028](/docs/tasks/pes2/CORR-PES2-028.md) | Correção: o fork publica binário próprio, e o AppImage dele traz o servidor MCP | PES2-TASK-32 | high | done | 2026-09-03 |
+| [CORR-PES2-029](/docs/tasks/pes2/CORR-PES2-029.md) | Correção: estado ausente despeja traceback no `savestate.py`, e o `except` do `selftest.py` vira NameError | PES2-TASK-32 | low | done | 2026-09-03 |
+| [CORR-PES2-030](/docs/tasks/pes2/CORR-PES2-030.md) | Correção: o `pes2_boot` prova vida exigindo que dois quadros difiram, e falha na tela de intro que não anima | CORR-PES2-027 | high | done | 2026-09-03 |
+| [CORR-PES2-031](/docs/tasks/pes2/CORR-PES2-031.md) | Correção: o fluxo A, que é a razão de o fork existir, não tem ferramenta versionada | PES2-TASK-33 | medium | done | 2026-09-04 |
+| [CORR-PES2-032](/docs/tasks/pes2/CORR-PES2-032.md) | Correção: o fork morre calado durante execução livre, e toda ferramenta relata isso como "não está rodando" | PES2-TASK-33 | high | done | 2026-09-03 |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada correção — não
@@ -396,7 +396,7 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
   running` sobre um emulador vivo: `sd=0,13657` é conteúdo desenhado, a janela
   existia e o MCP respondeu. Medido em três corridas seguidas do mesmo
   comando: 0 de 524.000 pixels na primeira, 260.000 nas duas seguintes
-- **Como foi detectado:** a verificação final da [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md),
+- **Como foi detectado:** a verificação final da [CORR-PES2-027](/docs/tasks/pes2/CORR-PES2-027.md),
   que é o que fez o `pes2_boot` correr pela receita pela primeira vez — o gate
   passou a ser exercitado, e a intermitência apareceu na segunda corrida
 - **Fix:** a prova de vida não pode depender de o jogo animar naquele

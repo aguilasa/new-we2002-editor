@@ -24,13 +24,13 @@ done_commit: null
 - Fase 4 **por proximidade**, não por pertencimento: é dado de disco fora do
   texto, como o resto da Fase 4, mas não é banco — é o que decide o que a
   grade percorre. Não trava a
-  [PES2-TASK-16](/docs/tasks/16-fechamento-fase-4.md) e não é travado por ela.
+  [PES2-TASK-16](/docs/tasks/pes2/16-fechamento-fase-4.md) e não é travado por ela.
 - `depends_on` vazio **de propósito**: as quatro ferramentas de que ela
   precisa já estão de pé — `tools/pes2/mcp_drive.py` e `fork.py` (rotas e
-  breakpoint por MCP, [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md)),
+  breakpoint por MCP, [PES2-TASK-34](/docs/tasks/pes2/34-rotas-mcp-no-lugar-do-drive.md)),
   `savestate.py` (busca de valor e diff de RAM), `memcard.py` (o `PES-OPT`) e
   `iso.py` (extrair, reinjetar, round-trip). Se a
-  [PES2-TASK-05](/docs/tasks/05-diferencial-de-cartao.md) fechar antes, o
+  [PES2-TASK-05](/docs/tasks/pes2/05-diferencial-de-cartao.md) fechar antes, o
   harness de diferencial de cartão dela **substitui** o passo 1 abaixo; não
   espere por ele.
 

@@ -15,7 +15,7 @@ done_commit: 12b631c
 
 ## Problema identificado
 
-O achado que dominou a [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md)
+O achado que dominou a [PES2-TASK-02](/docs/tasks/pes2/02-poke-por-conjunto-de-copias.md)
 foi que o conjunto de cópias de nome de time era **cinco no papel e é oito no
 disco**. `tables.py`, `team_map.py`, `iso.py`, `check_image.py` e os documentos
 principais foram atualizados; o **próprio `poke.py`** ficou para trás em nove

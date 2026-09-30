@@ -15,7 +15,7 @@ done_commit: 77ca8d3
 
 ## Problema identificado
 
-A tabela de resumo do [`progresso.md`](/docs/tasks/progresso.md) tem a coluna
+A tabela de resumo do [`progresso.md`](/docs/tasks/pes2/progresso.md) tem a coluna
 **"Revisado em"**, e o próprio arquivo declara o que ela aceita:
 
 > - **"Revisado em"** — o commit da revisão. Tarefa concluída e ainda não

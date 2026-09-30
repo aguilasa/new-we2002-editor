@@ -41,7 +41,7 @@ mesmo estrago do `LOGO.BIN` que o Log da task descreve ter custado uma corrida,
 só que sem o sintoma que denunciou aquele (estourar o fim do arquivo).
 
 `DAT2D.BIN` é o arquivo para o qual a §1.14(f) manda a
-[PES2-TASK-14](/docs/tasks/14-bandeiras.md) olhar.
+[PES2-TASK-14](/docs/tasks/pes2/14-bandeiras.md) olhar.
 
 ## Evidência
 

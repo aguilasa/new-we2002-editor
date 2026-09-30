@@ -213,7 +213,7 @@ e hoje **só o `roundtrip` a cumpre**.
       ficar fora do pool enquanto exploratório. **Adiado em 2026-08-30** para
       não misturar criação de tarefa com aquela rodada, e **decidido em
       2026-09-01**: o projeto entra no pool, com 25 tasks em
-      [/docs/tasks/progresso.md](/docs/tasks/progresso.md). Enquanto esteve
+      [/docs/tasks/pes2/progresso.md](/docs/tasks/pes2/progresso.md). Enquanto esteve
       adiado, o backlog foi a §7 deste arquivo; agora não é mais.
 - [→] **Preparo para as Fases 3 e 4:** `numpy` não está instalado
       (confirmado), e não há desmontador MIPS — `ghidra`, `radare2` e
@@ -312,7 +312,7 @@ varredura da §7.4 e é onde a Fase 3 começa.
 
 Esta seção fez as vezes do `progresso.md` enquanto o projeto estava fora do
 pool. **Deixou de estar em 2026-09-01**, e desde então o backlog é
-[/docs/tasks/progresso.md](/docs/tasks/progresso.md) — 25 tasks nas seis
+[/docs/tasks/pes2/progresso.md](/docs/tasks/pes2/progresso.md) — 25 tasks nas seis
 fases, cada uma com `fonte_de_verdade` apontando para a seção do plano que a
 mede. O que aparecer para fazer entra **lá**, não aqui.
 
@@ -323,7 +323,7 @@ trabalho de código: a instalação de pacote da §7.1.
 ### 7.1 Decisões do usuário, não de código
 
 - [x] **Criar as tasks das seis fases** — feito em 2026-09-01, em
-      [/docs/tasks/progresso.md](/docs/tasks/progresso.md), com
+      [/docs/tasks/pes2/progresso.md](/docs/tasks/pes2/progresso.md), com
       `fonte_de_verdade` apontando para as seções do plano como manda a
       [.claude/rules/tasks.md](../.claude/rules/tasks.md). São **25 tasks**:
       uma de decisão de ferramental, três que fecham a Fase 2 pelo `poke` de

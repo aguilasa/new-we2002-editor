@@ -16,7 +16,7 @@ done_commit: 87bf4da
 ## Problema identificado
 
 A tabela **"Estado medido, herdado das Fases 0 e 1"** do
-[`progresso.md`](/docs/tasks/progresso.md) diz:
+[`progresso.md`](/docs/tasks/pes2/progresso.md) diz:
 
 > | Contêineres `form1` em `/BIN/` | **208** no PES2, 195 no WE2002 — os 13 de
 >   diferença são cópia de idioma |

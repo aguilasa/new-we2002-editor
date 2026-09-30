@@ -9,10 +9,11 @@ Fonte: [`PLAN-MCR-PY.md`](/docs/PLAN-MCR-PY.md). Onde este perfil e o plano
 divergirem, **o plano ganha** — aqui só mora o resumo operacional, e o
 `source_of_truth` de cada task aponta para a seção que a mede.
 
-**Este ciclo mora numa subpasta**, e é o primeiro que mora. Os comandos o
+**Este ciclo mora numa subpasta**, e foi o primeiro que morou. Os comandos o
 recebem por argumento: `/rite:execute port-mcr`, `/rite:review port-mcr`,
-`/rite:fix port-mcr`. Sem argumento, os comandos continuam no `docs/tasks/`
-raso, que é o ciclo de PES2 — a regra é o `rite resolve-cycle`.
+`/rite:fix port-mcr`. Sem argumento, quem decide é o `rite resolve-cycle`. (Até
+2026-09-30 o ciclo de PES2 ficava solto em `docs/tasks/`; hoje mora em
+`docs/tasks/pes2/`.)
 
 ---
 

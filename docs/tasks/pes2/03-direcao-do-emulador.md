@@ -83,7 +83,7 @@ O que entra é o script que o cria e o caminho de onde ele mora.
 
 ### Quem está esperando: a PES2-TASK-28 parou aqui
 
-Em 2026-09-01 a [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md)
+Em 2026-09-01 a [PES2-TASK-28](/docs/tasks/pes2/28-t-name-copias-de-idioma.md)
 fechou tudo o que não precisa de emulador — o conjunto de cópias varrido, a
 recusa, a fonte localizada, o round-trip byte a byte — e **ficou parada nos
 dois itens de tela**. Ela precisa de duas coisas deste roteiro, e vale

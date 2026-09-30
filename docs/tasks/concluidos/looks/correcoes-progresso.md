@@ -6,7 +6,7 @@ Correções abertas pelo `/revisar` sobre as tasks deste ciclo. O andamento das
 **O prefixo deste pool é `CORR-LOOKS-`**, com numeração contínua a partir de
 `001`. O pool é único dentro do ciclo, e não se cruza com o de nenhuma outra
 pasta — o ciclo de PES2 tem o seu em
-[`/docs/tasks/correcoes-progresso.md`](/docs/tasks/correcoes-progresso.md), o
+[`/docs/tasks/pes2/correcoes-progresso.md`](/docs/tasks/pes2/correcoes-progresso.md), o
 do port do `.mcr` em
 [`/docs/tasks/port-mcr/correcoes-progresso.md`](/docs/tasks/port-mcr/correcoes-progresso.md),
 e o ciclo arquivado, o dele em

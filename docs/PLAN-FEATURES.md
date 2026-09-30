@@ -256,7 +256,7 @@ algoritmo do CARP e comparei com os bytes da Konami.
 | `TEX_00` | **48** | 5.145 | 16.384 | — | — | não | ok |
 
 **A linha do `TEX_00` foi corrigida em 2026-09-01, pela
-[PES2-TASK-26](/docs/tasks/26-codec-lzss.md).** Ela dizia início **28**,
+[PES2-TASK-26](/docs/tasks/pes2/26-codec-lzss.md).** Ela dizia início **28**,
 comprimido 6.453, descomprimido 16.400, e nenhum dos três se reproduz. Nas
 quatro imagens que o `tools/pes2/lzss.py` lê, o fluxo de `TEX_00.BIN` começa
 em **48** — as 12 palavras de cabeçalho da §1.14 do `PLAN-PES2-PSX`, com a
@@ -514,7 +514,7 @@ Três consequências para **este** plano:
   formato público; o `fsize` de 251 kB num arquivo de 20 MB indica cadeia de
   bancos, não índice proprietário.
 - ~~**A §5c tem uma divergência aberta.**~~ **Fechada em 2026-09-01** pela
-  [PES2-TASK-26](/docs/tasks/26-codec-lzss.md): o fluxo de `TEX_00.BIN`
+  [PES2-TASK-26](/docs/tasks/pes2/26-codec-lzss.md): o fluxo de `TEX_00.BIN`
   começa em **48**, e 24, 28, 32 e 44 falham cedo nas quatro imagens. A linha
   da tabela da §5c foi corrigida, com o registro do que a medição antiga
   provavelmente leu — os `TEX_*` da imagem golden são **Form 2**, e o

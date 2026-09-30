@@ -8,7 +8,7 @@ tasks deste ciclo. O andamento das
 **O prefixo deste pool é `CORR-MCR-`**, com numeração contínua a partir de
 `001`. O pool é único dentro do ciclo, e não se cruza com o de nenhuma outra
 pasta — o ciclo de PES2 tem o seu em
-[`/docs/tasks/correcoes-progresso.md`](/docs/tasks/correcoes-progresso.md), e o
+[`/docs/tasks/pes2/correcoes-progresso.md`](/docs/tasks/pes2/correcoes-progresso.md), e o
 ciclo arquivado, o dele em
 [`/docs/tasks/concluidos/correcoes-progresso.md`](/docs/tasks/concluidos/correcoes-progresso.md).
 

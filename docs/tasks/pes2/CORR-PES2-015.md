@@ -16,7 +16,7 @@ done_commit: a5476f7
 ## Problema identificado
 
 A §1.14(f) do plano e o repasse escrito na
-[PES2-TASK-14](/docs/tasks/14-bandeiras.md) dizem:
+[PES2-TASK-14](/docs/tasks/pes2/14-bandeiras.md) dizem:
 
 > Os quatro `OFS_FLAG_*` da §1.4 caem em `/BIN/DAT2D.BIN` nos offsets
 > relativos **69798, 72400, 73254 e 73728** …

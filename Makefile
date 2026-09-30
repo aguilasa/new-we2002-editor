@@ -394,7 +394,7 @@ pes2: $(PES2_STAMP)
 
 # A excecao da secao 6.10, e ela existe porque o usuario a pede: jogar. E o
 # caso de `ending`, que so se alcanca vencendo uma final -- decidido em
-# 2026-09-04, ver docs/tasks/03-direcao-do-emulador.md.
+# 2026-09-04, ver docs/tasks/pes2/03-direcao-do-emulador.md.
 pes2-play:
 	@echo '>> abrindo na SUA tela (DISPLAY=$(DISPLAY)) -- excecao da 6.10,'
 	@echo '   que existe para as sessoes em que voce joga ou assiste.'
