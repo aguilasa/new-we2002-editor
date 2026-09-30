@@ -652,32 +652,53 @@ def _covering(records, point) -> list:
     return [r for r in records if covers(r, point)]
 
 
+def _drawn(files: Mapping[str, bytes], values, figure: int, kit: str) -> list:
+    """[(draw-list entry, primitive), ...] of one figure: the draw list of
+    `tools/looks/assembly.py`, each entry paired with the primitive its
+    section scan holds.  Shared by the primitive count and the UV rects, so
+    both read the same geometry the same way."""
+    import assembly
+    import section
+
+    try:
+        parts = assembly.draw_list(files, values, figure, kit)
+    except assembly.BadAssembly as exc:
+        raise SurveyError("The draw list of figure %d refused: %s" % (figure, exc)) from exc
+    scans = {}
+    out = []
+    for entry in parts:
+        name = entry["file"]
+        if name not in scans:
+            scans[name] = section.scan(files[name], layout.GEOMETRY_START[name])
+        out.append((entry, scans[name].sections[entry["section"]].primitives[entry["primitive"]]))
+    return out
+
+
+def _tuple_values(tuple_text: str):
+    import looks
+
+    try:
+        return looks.parse_tuple(tuple_text)
+    except looks.BadLooks as exc:
+        raise SurveyError("The tuple %s is refused: %s" % (tuple_text, exc)) from exc
+
+
 def figure_prims(files: Mapping[str, bytes], values, figure: int, kit: str) -> FigurePrims:
     """Count one figure's primitives per container and per kit role.
     Pure: *files* is {disc path: bytes} and is not modified."""
-    import assembly
-    import section
     import texture
 
     kit_path = layout.kit_path(kit)
     kit_images = texture.images(files[kit_path])
     dat_images = texture.images(files[layout.DAT2D])
     by_offset = {r.offset: r for r in kit_images}
-    try:
-        parts = assembly.draw_list(files, values, figure, kit)
-    except assembly.BadAssembly as exc:
-        raise SurveyError("The draw list of figure %d refused: %s" % (figure, exc)) from exc
+    drawn = _drawn(files, values, figure, kit)
+    parts = [entry for entry, _ in drawn]
 
-    scans = {}
     containers, first, touch = {}, {}, {}
     touch_dat2d = touch_none = disagree = 0
     kit_points = []
-    for entry in parts:
-        name = entry["file"]
-        if name not in scans:
-            scans[name] = section.scan(files[name], layout.GEOMETRY_START[name])
-        primitive = scans[name].sections[entry["section"]].primitives[entry["primitive"]]
-
+    for entry, primitive in drawn:
         if entry["container"] is None:
             label, first_role = CONTAINER_NONE, None
         elif entry["container"] == kit_path:
@@ -721,12 +742,7 @@ def figure_prims(files: Mapping[str, bytes], values, figure: int, kit: str) -> F
 def prims_files(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
                 tuple_text: str = PRIMS_TUPLE, source: str = "") -> PrimsReport:
     """figure_prims() for both figures.  Pure: no I/O."""
-    import looks
-
-    try:
-        values = looks.parse_tuple(tuple_text)
-    except looks.BadLooks as exc:
-        raise SurveyError("The tuple %s is refused: %s" % (tuple_text, exc)) from exc
+    values = _tuple_values(tuple_text)
     return PrimsReport(source=source, kit=kit, tuple_text=tuple_text,
                        figures=tuple(figure_prims(files, values, f, kit)
                                      for f in PRIMS_FIGURES))
@@ -855,3 +871,247 @@ def prims_negative(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
 def prims_negative_image(image_path: str, kit: str = layout.KIT_ON_SCREEN) -> tuple:
     """prims_negative() over the disc at *image_path*."""
     return prims_negative(read_prims_files(image_path, kit), kit, source=image_path)
+
+
+# -- the UV rects in the work bitmap -------------------------------------
+#
+# PLAN-KITS-PY.md section 4.6 crosses the community's zone map against the
+# geometry, and the zone map is drawn on the 256x128 WORK BITMAP
+# (SUPERPACK-UNIFORMES.md section 2): the uniform image (128x128 pixels) on
+# the left, the long-sleeves image (128x128) on the right.  This turns each
+# kit primitive of the figures into the rect of bitmap pixels it samples.
+#
+# A corner's pixel is computed in PIXELS from the primitive's page and its
+# u,v -- column = (page_x - record_x) * texels_per_halfword + u -- and never
+# through the halfword VRAM x that atlas.texel returns: at 8 bits one
+# halfword is two pixels, and rounding through it loses the odd column.
+
+BITMAP_W = 256
+BITMAP_H = 128
+BITMAP_X = MappingProxyType({"uniform": 0, "sleeves": 128})
+"""Left edge, in the work bitmap, of each kit role that lives in it."""
+
+UV_OUTSIDE_ROLE = "not uniform or sleeves"
+UV_OUTSIDE_SPLIT = "corners in two images"
+UV_OUTSIDE_EDGE = "rect leaves 256x128"
+
+
+@dataclass(frozen=True)
+class UvRect:
+    """One kit primitive and the bitmap pixels its corners bound, inclusive."""
+
+    file: str
+    section: int
+    primitive: int
+    role: str
+    rect: Optional[tuple]    # (x0, y0, x1, y1) in bitmap pixels, or None if outside
+    outside: str             # "" when mapped, else why it is not
+
+
+@dataclass(frozen=True)
+class FigureUv:
+    figure: int
+    rects: tuple             # UvRect, in draw-list order
+
+    @property
+    def mapped(self) -> tuple:
+        return tuple(r for r in self.rects if not r.outside)
+
+    @property
+    def outside(self) -> tuple:
+        return tuple(r for r in self.rects if r.outside)
+
+    @property
+    def union(self) -> Optional[tuple]:
+        rs = [r.rect for r in self.mapped]
+        if not rs:
+            return None
+        return (min(r[0] for r in rs), min(r[1] for r in rs),
+                max(r[2] for r in rs), max(r[3] for r in rs))
+
+    @property
+    def pixels(self) -> int:
+        """Distinct bitmap pixels inside the axis-aligned rects: bounding-rect
+        coverage, not a rasterisation of the triangles."""
+        seen = set()
+        for r in self.mapped:
+            x0, y0, x1, y1 = r.rect
+            for y in range(y0, y1 + 1):
+                seen.update((x, y) for x in range(x0, x1 + 1))
+        return len(seen)
+
+
+@dataclass(frozen=True)
+class UvReport:
+    source: str
+    kit: str
+    tuple_text: str
+    figures: tuple
+
+    def canonical(self) -> dict:
+        """The geometry only -- no source path, no kit tag -- so the digest
+        names the rects and nothing else."""
+        return {"bitmap": [BITMAP_W, BITMAP_H], "tuple": self.tuple_text,
+                "figures": [{"figure": f.figure,
+                             "rects": [{"file": r.file, "section": r.section,
+                                        "primitive": r.primitive, "role": r.role,
+                                        "rect": list(r.rect) if r.rect else None,
+                                        "outside": r.outside}
+                                       for r in f.rects]}
+                            for f in self.figures]}
+
+    def canonical_json(self) -> str:
+        import json
+
+        return json.dumps(self.canonical(), sort_keys=True, separators=(",", ":"))
+
+    @property
+    def digest(self) -> str:
+        return hashlib.sha256(self.canonical_json().encode("ascii")).hexdigest()
+
+
+def bitmap_pixel(primitive, u: int, v: int, record) -> tuple:
+    """(column, row) of texel (u, v) of *primitive* inside the image *record*,
+    in pixels: the page's halfword offset from the record times the texels a
+    halfword holds at the primitive's depth, plus u."""
+    import atlas
+
+    page_x, page_y = primitive.tpage_vram
+    per = atlas.texels_per_unit(primitive.tpage_depth)
+    return ((page_x - record.x) * per + u, page_y + v - record.y)
+
+
+def _texcoords_of(entry, primitive) -> list:
+    """The (u, v) of the four corners, with the tuple's band -- the same
+    coordinates _corners_of() turns into VRAM texels."""
+    if entry["texcoords"] is not None:
+        return list(entry["texcoords"])
+    return [(u, v + entry["band"]) for u, v in primitive.texcoords]
+
+
+def figure_uv(files: Mapping[str, bytes], values, figure: int, kit: str,
+              roles: Mapping = KIT_ROLES) -> FigureUv:
+    """The bitmap rect of every primitive of one figure with a corner in a kit
+    image record (the any-corner rule of figure_prims).  *roles* names a
+    record by its origin; a planted control passes its own.  Pure."""
+    import atlas
+    import texture
+
+    kit_images = texture.images(files[layout.kit_path(kit)])
+    out = []
+    for entry, primitive in _drawn(files, values, figure, kit):
+        corners = []
+        for u, v in _texcoords_of(entry, primitive):
+            hits = _covering(kit_images, atlas.texel(primitive, u, v))
+            corners.append((u, v, hits[0] if hits else None))
+        if not any(rec is not None for _, _, rec in corners):
+            continue
+        named = {roles.get((rec.x, rec.y), role_of(rec.x, rec.y))
+                 if rec is not None else None for _, _, rec in corners}
+        key = dict(file=entry["file"], section=entry["section"],
+                   primitive=entry["primitive"])
+        if len(named) != 1:
+            out.append(UvRect(role="+".join(sorted(r or "no kit record" for r in named)),
+                              rect=None, outside=UV_OUTSIDE_SPLIT, **key))
+            continue
+        role = named.pop()
+        if role not in BITMAP_X:
+            out.append(UvRect(role=role, rect=None, outside=UV_OUTSIDE_ROLE, **key))
+            continue
+        pts = [bitmap_pixel(primitive, u, v, rec) for u, v, rec in corners]
+        left = BITMAP_X[role]
+        rect = (left + min(x for x, _ in pts), min(y for _, y in pts),
+                left + max(x for x, _ in pts), max(y for _, y in pts))
+        inside = (left <= rect[0] and rect[2] < left + BITMAP_W // 2
+                  and 0 <= rect[1] and rect[3] < BITMAP_H)
+        out.append(UvRect(role=role, rect=rect,
+                          outside="" if inside else UV_OUTSIDE_EDGE, **key))
+    return FigureUv(figure=figure, rects=tuple(out))
+
+
+def uv_files(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
+             tuple_text: str = PRIMS_TUPLE, source: str = "",
+             roles: Mapping = KIT_ROLES) -> UvReport:
+    """figure_uv() for both figures.  Pure: no I/O."""
+    values = _tuple_values(tuple_text)
+    return UvReport(source=source, kit=kit, tuple_text=tuple_text,
+                    figures=tuple(figure_uv(files, values, f, kit, roles)
+                                  for f in PRIMS_FIGURES))
+
+
+def uv_image(image_path: str, kit: str = layout.KIT_ON_SCREEN) -> UvReport:
+    """uv_files() over the disc at *image_path*."""
+    return uv_files(read_prims_files(image_path, kit), kit, source=image_path)
+
+
+# -- negative controls of the UV rects -----------------------------------
+
+UNIFORM = (576, 256)
+UV_SHIFT = (577, 256)
+"""The uniform record moved one halfword right: at 8 bits every pixel the
+figures sample is then two columns further left in the image.  The control
+still names the moved record "uniform" -- the role is keyed by origin, and
+without that every rect would just fall outside instead of moving.  Corners
+on the uniform's first halfword column fall out of the moved record, so the
+primitives that touch it leave the mapped set; the others must move."""
+
+
+@dataclass(frozen=True)
+class UvControl:
+    """One planted move, one figure (-1: both), and what it did to the rects."""
+
+    name: str
+    moved: int
+    figure: int
+    measure: str
+    clean: str
+    after: str
+    ok: bool
+
+
+def _key(r: UvRect) -> tuple:
+    return (r.file, r.section, r.primitive)
+
+
+def uv_negative(files: Mapping[str, bytes], kit: str = layout.KIT_ON_SCREEN,
+                source: str = "") -> tuple:
+    """Plant (a) the uniform shifted by +1 halfword and (b) the uniform moved
+    to PRIMS_AWAY, and check what each has to do.  Pure."""
+    path = layout.kit_path(kit)
+    clean = uv_files(files, kit, source=source)
+    out = []
+
+    planted = dict(files)
+    planted[path], moved = _move_images(files[path], UNIFORM, UV_SHIFT)
+    after = uv_files(planted, kit, source=source,
+                     roles=MappingProxyType({**KIT_ROLES, UV_SHIFT: "uniform"}))
+    name = "uniform moved to (%d,%d)" % UV_SHIFT
+    out.append(UvControl(name, moved, -1, "digest changes", clean.digest[:16],
+                         after.digest[:16], clean.digest != after.digest))
+    for a, b in zip(clean.figures, after.figures):
+        before = {_key(r): r.rect for r in a.mapped}
+        common = [(before[_key(r)], r.rect) for r in b.mapped if _key(r) in before]
+        shifted = sum(1 for c, d in common if d == (c[0] - 2, c[1], c[2] - 2, c[3]))
+        out.append(UvControl(name, moved, a.figure, "rects move -2 px in x",
+                             "%d mapped" % len(a.mapped),
+                             "%d of %d still mapped moved" % (shifted, len(common)),
+                             bool(common) and shifted == len(common)))
+        ua, ub = a.union, b.union
+        out.append(UvControl(name, moved, a.figure, "union x1 moves -2 px",
+                             "%r" % (ua,), "%r" % (ub,),
+                             ua is not None and ub is not None and ub[2] == ua[2] - 2))
+
+    planted = dict(files)
+    planted[path], moved = _move_images(files[path], UNIFORM, PRIMS_AWAY)
+    after = uv_files(planted, kit, source=source)
+    name = "uniform moved to (%d,%d)" % PRIMS_AWAY
+    for a, b in zip(clean.figures, after.figures):
+        out.append(UvControl(name, moved, a.figure, "mapped count drops to 0",
+                             str(len(a.mapped)), str(len(b.mapped)),
+                             len(a.mapped) > 0 and len(b.mapped) == 0))
+    return tuple(out)
+
+
+def uv_negative_image(image_path: str, kit: str = layout.KIT_ON_SCREEN) -> tuple:
+    """uv_negative() over the disc at *image_path*."""
+    return uv_negative(read_prims_files(image_path, kit), kit, source=image_path)

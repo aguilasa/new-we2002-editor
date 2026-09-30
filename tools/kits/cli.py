@@ -8,11 +8,13 @@ Usage:
     python tools/kits/cli.py rects --negative <image.bin> X,Y [X,Y ...]
     python tools/kits/cli.py rects <image.bin> X,Y [X,Y ...]
     python tools/kits/cli.py prims [--kit TAG] [--negative] <image.bin>
+    python tools/kits/cli.py uv [--kit TAG] [--json | --negative] <image.bin>
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 
@@ -198,6 +200,67 @@ def cmd_prims(args) -> int:
     return 0
 
 
+def _rect(r) -> str:
+    return "(%d,%d)..(%d,%d)" % r if r else "none"
+
+
+def print_uv(r) -> None:
+    print("UV rects in the %dx%d work bitmap: %s"
+          % (survey_mod.BITMAP_W, survey_mod.BITMAP_H, r.source))
+    print("  kit TEX_%s, tuple %s; uniform at x 0..127, sleeves at x 128..255; "
+          "pixels from page and u,v" % (r.kit, r.tuple_text))
+    for f in r.figures:
+        print("figure %d (%s): %d kit primitive(s), %d mapped"
+              % (f.figure, "outfield" if f.figure == 0 else "goalkeeper",
+                 len(f.rects), len(f.mapped)))
+        roles = {}
+        for u in f.mapped:
+            roles[u.role] = roles.get(u.role, 0) + 1
+        print("  %-44s %s" % ("mapped per image", _pairs(sorted(roles.items()))))
+        print("  %-44s %s" % ("union box, bitmap px (inclusive)", _rect(f.union)))
+        print("  %-44s %d" % ("distinct px in the rects (bounding-rect)", f.pixels))
+        why = {}
+        for u in f.outside:
+            why[u.outside] = why.get(u.outside, 0) + 1
+        print("  outside %dx%d: %d%s" % (survey_mod.BITMAP_W, survey_mod.BITMAP_H,
+                                          len(f.outside),
+                                          "  (" + _pairs(sorted(why.items())) + ")"
+                                          if why else ""))
+    print("sha256 of the canonical JSON: %s" % r.digest)
+
+
+def print_uv_controls(controls) -> int:
+    """Print each planted move; exit 1 unless every expectation held."""
+    bad = 0
+    for c in controls:
+        bad += not c.ok
+        fig = "both" if c.figure < 0 else "figure %d" % c.figure
+        print("  %-26s moved %d  %-8s  %-24s %s -> %s  %s"
+              % (c.name, c.moved, fig, c.measure, c.clean, c.after,
+                 "held" if c.ok else "FAILED"))
+    print("%d of %d expectations held" % (len(controls) - bad, len(controls)))
+    return 1 if bad else 0
+
+
+def cmd_uv(args) -> int:
+    try:
+        if args.negative:
+            return print_uv_controls(survey_mod.uv_negative_image(args.image, args.kit))
+        result = survey_mod.uv_image(args.image, args.kit)
+    except survey_mod.SurveyError as exc:
+        print("uv: %s" % exc, file=sys.stderr)
+        return 1
+    if args.json:
+        doc = result.canonical()
+        doc["kit"] = result.kit
+        doc["source"] = result.source
+        doc["sha256"] = result.digest
+        print(json.dumps(doc, indent=1, sort_keys=True))
+    else:
+        print_uv(result)
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -221,6 +284,16 @@ def main(argv=None) -> int:
     p.add_argument("--negative", action="store_true",
                    help="move the kit's sleeves and uniform records and show the counts")
     p.set_defaults(fn=cmd_prims)
+    p = sub.add_parser("uv", help="each kit primitive's UV rect in the 256x128 work bitmap")
+    p.add_argument("image", help="the Japanese data track (.bin)")
+    p.add_argument("--kit", default=survey_mod.layout.KIT_ON_SCREEN,
+                   help="kit tag (default %s)" % survey_mod.layout.KIT_ON_SCREEN)
+    mode = p.add_mutually_exclusive_group()
+    mode.add_argument("--json", action="store_true",
+                      help="print every rect, machine-readable (digest over the geometry)")
+    mode.add_argument("--negative", action="store_true",
+                      help="shift and move the uniform record and check the rects follow")
+    p.set_defaults(fn=cmd_uv)
     args = parser.parse_args(argv)
     return args.fn(args)
 

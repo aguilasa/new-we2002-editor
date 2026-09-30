@@ -7,7 +7,7 @@ depends_on: [KITS-TASK-03]
 source_of_truth: "/docs/PLAN-KITS-PY.md#4.6"
 files: ["tools/kits/core/survey.py", "tools/kits/cli.py", "docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 done_on: null
 done_commit: null
 reviewed_on: null
@@ -28,11 +28,56 @@ A entrada da §4.6: o conjunto de retângulos do bitmap de trabalho 256×128 que
 
 ## Done criteria
 
-- [ ] Subcomando versionado imprime, por figura, os retângulos UV amostrados no espaço 256×128; a saída (ou o digest dela, se longa) está no Log
-- [ ] A §4.6 do plano diz onde a saída mora e quantas primitivas caem fora do 256×128 (número da ferramenta)
+- [x] Subcomando versionado imprime, por figura, os retângulos UV amostrados no espaço 256×128; a saída (ou o digest dela, se longa) está no Log
+- [x] A §4.6 do plano diz onde a saída mora e quantas primitivas caem fora do 256×128 (número da ferramenta)
 
 ## Notes
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#4.6).
 
 ## Log de Execução
+
+### O que foi feito
+
+- `core/survey.py`: `figure_uv`/`uv_files`/`uv_image`, `bitmap_pixel()` (coluna = `(page_x - record.x) * texels_per_unit + u`, linha = `page_y + v - record.y`, em pixel e não em halfword, para não perder a coluna ímpar). O laço do `draw_list` saiu de `figure_prims` para `_drawn()` e passou a servir aos dois; a saída do `prims` não mudou.
+- `cli.py uv <imagem> [--kit TAG] [--json] [--negative]`.
+- §4.6 do plano: onde a saída mora (o comando, com o digest) e a tabela.
+
+### Evidência
+
+```
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin      # exit 0
+figure 0 (outfield): 237 kit primitive(s), 237 mapped
+  mapped per image                             uniform 237
+  union box, bitmap px (inclusive)             (0,0)..(63,103)
+  distinct px in the rects (bounding-rect)     4117
+  outside 256x128: 0
+figure 1 (goalkeeper): 429 kit primitive(s), 429 mapped
+  mapped per image                             uniform 429
+  union box, bitmap px (inclusive)             (48,0)..(127,127)
+  distinct px in the rects (bounding-rect)     3825
+  outside 256x128: 0
+sha256 of the canonical JSON: 2360a921f7cee6f69dcbc1bb3ad2633c306a720c86399a04b918fbdf9448fb84
+
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --kit 00 | tail -1
+sha256 of the canonical JSON: 2360a921f7cee6f69dcbc1bb3ad2633c306a720c86399a04b918fbdf9448fb84
+```
+
+Contra a KITS-TASK-03 (caixas em halfword de VRAM): figura 0, (576,256)..(607,359) → x 2·0 .. 2·31+1 = 0..63, y 0..103; figura 1, (600,256)..(639,383) → x 48..127, y 0..127. As mesmas caixas, e 237/429 primitivas nos dois comandos.
+
+```
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative
+  uniform moved to (577,256) moved 2  both      digest changes           2360a921f7cee6f6 -> 39883f850ca73f5d  held
+  uniform moved to (577,256) moved 2  figure 0  union x1 moves -2 px     (0, 0, 63, 103) -> (0, 0, 61, 103)  held
+  uniform moved to (577,256) moved 2  figure 1  union x1 moves -2 px     (48, 0, 127, 127) -> (46, 0, 125, 127)  held
+  uniform moved to (0,0)     moved 2  figure 0  mapped count drops to 0  237 -> 0  held
+  uniform moved to (0,0)     moved 2  figure 1  mapped count drops to 0  429 -> 0  held
+7 of 7 expectations held                                  (exit 0)
+```
+
+`grep -nE 'print\(|sys\.exit|PySide' tools/kits/core/survey.py` → sem saída; `prims --negative` → `14 of 14 expectations held`; `survey` → saída com o mesmo md5 das tasks anteriores.
+
+### Problemas encontrados
+
+- A primeira corrida do `--negative` falhou 4 de 7: o papel sai da origem do registro, e o uniforme deslocado para (577,256) deixava de se chamar "uniforme". O controle passa agora um `roles=` que nomeia a origem deslocada; o comportamento padrão não mudou.
+- Com o deslocamento, 22 primitivas da figura 0 saem do registro (a coluna de halfword 576) em vez de mover; o controle exige que as que continuam mapeadas movam (215 de 215).

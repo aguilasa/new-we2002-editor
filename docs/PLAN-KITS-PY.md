@@ -402,6 +402,25 @@ O mapa é da comunidade. A conferência
 que nenhuma primitiva amostra ou é da manga longa, da braçadeira e dos figurantes
 com bandeira — ou está errada.
 
+**A entrada da conferência foi medida em 2026-09-30 ([KITS-TASK-04](/docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md)).**
+Ela não é um arquivo versionado: mora no comando, que a refaz do disco —
+`python tools/kits/cli.py uv <imagem> --json` dá o retângulo de UV de cada
+primitiva no bitmap de trabalho de 256×128 (uniforme em x 0–127, mangas em
+128–255), e o texto sem `--json` fecha com o sha256 da lista, que no disco
+japonês é `2360a921…48fb84` e não muda com o TEX (é geometria).
+
+| figura | primitivas do TEX | caixa no bitmap (px, inclusiva) | px nos retângulos¹ | fora do 256×128 |
+|---|---|---|---|---|
+| 0, linha | 237 | (0,0)..(63,103) | 4.117 | **0** |
+| 1, goleiro | 429 | (48,0)..(127,127) | 3.825 | **0** |
+
+¹ Cobertura pelos retângulos envolventes dos cantos, não rasterização dos
+triângulos.
+
+Toda primitiva cai dentro do bitmap, e toda na metade do uniforme — nenhuma na
+das mangas (§4.3). As duas figuras dividem a imagem de uniforme e se sobrepõem
+em x 48–63. A fase 3 cruza essa lista com o mapa de zonas.
+
 ## 5. Como se verifica
 
 1. **Dois decodificadores concordam.** `tex.py` e `bin_archive.py export` sobre
