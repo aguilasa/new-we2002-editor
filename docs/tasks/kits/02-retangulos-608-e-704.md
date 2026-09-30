@@ -10,8 +10,8 @@ resources: []        # serialized resources this item needs (rite.toml [resource
 status: done
 done_on: 2026-09-30
 done_commit: 18e7ec61
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-09-30
+review_commit: b529ac6b
 ---
 
 # KITS-TASK-02 — Medir o que são os retângulos (608,256) e (704,256)
@@ -83,3 +83,4 @@ O `survey` segue com as mesmas 12 linhas da KITS-TASK-01.
     - `M docs/tasks/kits/09-cli-e-confronto-1.md`
     - `M tools/kits/cli.py`
     - `M tools/kits/core/survey.py`
+- **Reviewed** (2026-09-30) at `b529ac6b`: CORR-KITS-003, CORR-KITS-004
