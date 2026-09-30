@@ -1,0 +1,375 @@
+# Plano — visualizador de uniformes (TEX), 2D e 3D, em Python + Qt
+
+Proposta de 2026-09-29. **Nenhuma fase foi executada**; o que está marcado como
+medido foi medido ao escrever este plano, com o comando ao lado.
+
+## 0. Escopo
+
+### Objetivo
+
+Uma ferramenta que abre os uniformes dos times — os 105 `TEX_<tag>.BIN` da
+imagem do jogo, ou um TEX avulso feito com WETex — e os mostra de duas formas:
+
+- **2D plano**: as imagens do contêiner como a comunidade as edita (o BMP de
+  trabalho de 256×128), com a paleta de verdade, a grade de 16×16 cores e o mapa
+  de zonas por cima;
+- **3D**: o jogador inteiro vestindo aquele uniforme — titular ou suplente,
+  jogador de linha ou goleiro —, montado, na pose e sob a câmera do jogo, com a
+  geometria que o `tools/looks/` já lê e já confrontou com o emulador.
+
+### Não-objetivos
+
+- **Não grava.** Nem na imagem nem no TEX. É a mesma decisão do `looks`, pelo
+  mesmo motivo: o que falta medir é leitura. Um editor de TEX é outro projeto e
+  herdaria as armadilhas do §3.8 e do §4.3 do [SUPERPACK-UNIFORMES.md](/docs/SUPERPACK-UNIFORMES.md).
+- **Não inventa geometria.** Manga longa e braçadeira só aparecem no 3D se a
+  geometria que as desenha for achada e medida (§4 (c)). Até lá o 2D as mostra,
+  e o 3D diz que não as tem.
+- Não é a tela `LOOKS SET`. Aquela janela é a tela do jogo e decide nada; esta
+  é uma ferramenta de inspeção, com controles que o jogo não tem.
+- **Não é uma interface elaborada.** Ela vai ser absorvida por uma aplicação
+  única no futuro; o que precisa durar é o núcleo, e a janela é o mínimo que o
+  exercita (§3).
+
+### Definição de pronto
+
+1. A janela abre uma ROM, o combobox lista os times (em inglês se o disco é o
+   japonês, com o nome da ROM nos outros), e qualquer dos 105 TEX mostra as 6
+   imagens com as 5 paletas, sem uma imagem cinza e sem um índice fora da paleta.
+2. O 3D veste o jogador e o goleiro com o titular e o suplente de um time em que
+   os dois **diferem** — e o confronto com o emulador (§5) diz que é o mesmo
+   uniforme que o jogo desenha.
+3. A mesma janela abre um TEX feito com WETex, e um TEX quebrado é **recusado
+   com o motivo**, não desenhado torto.
+4. O mapa de zonas sobreposto ao 2D foi conferido contra a geometria: toda zona
+   que o boneco amostra cai dentro de uma zona do mapa, e o que sobra está
+   listado.
+5. A CLI faz tudo o que a janela faz sem importar nada além da fachada do
+   núcleo, e a janela sai igual no Windows e no Linux.
+
+## 1. O que já se sabe
+
+### 1.1 O contêiner, medido nos 105
+
+`tools/pes2/bin_archive.py` lê o TEX, e a leitura dos 105 do disco japonês
+(script em §7, fase 0) deu:
+
+| medida | resultado |
+|---|---|
+| forma | **uma só nos 105**: 6 imagens + 5 CLUTs, sempre nos mesmos retângulos de VRAM e na mesma ordem |
+| titular = suplente (imagens e paletas) | **só no `TEX_A4`** |
+| imagens diferem entre titular e suplente | 103 |
+| só as paletas diferem | 1 |
+| paleta do jogador = paleta do goleiro (titular) | 1 |
+| bandeira | o fluxo descomprime em 16.384 bytes, mas a 2ª metade tem **um só valor de byte** nos 105: a imagem é 128×64, como o registro declara, e o resto é enchimento |
+| árbitro | **idêntico nos 105** |
+| tamanho do arquivo | 25.948 a 34.200 bytes |
+
+A ordem, que o [SUPERPACK-UNIFORMES.md](/docs/SUPERPACK-UNIFORMES.md) §1.1
+detalha: imagem uniforme (576, 256), imagem mangas (576, 384), CLUT jogador
+(0, 486), CLUT goleiro (0, 488) — duas vezes, titular e suplente —, bandeira
+(704, 256) com a CLUT (256, 480), e árbitro (768, 384).
+
+**A consequência que muda o `looks`:** o uniforme que as duas save states vestem
+é justamente o **único** em que titular e suplente são iguais. Tudo o que o
+`looks` mediu sobre o uniforme é verdade, e nada disso distingue um conjunto do
+outro. A pergunta "casa e fora" do [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)
+§1.7 não pode ser respondida com o `TEX_A4`.
+
+### 1.2 Como o uniforme chega ao boneco hoje, no `looks`
+
+- `scene.from_image(..., kit=<tag>)` já aceita **qualquer** das 105 tags, e o
+  `ui/app.py --looks <tupla> --kit <tag>` desenha com ela. O `scene.Builder`,
+  que alimenta a tela, tem o `TEX_A4` fixo.
+- Não existe uma VRAM simulada. `assembly.draw_list` monta bancos na ordem
+  `[DAT2D, TEX]`, e cada primitiva pede ao `atlas.image_at` o **primeiro**
+  registro que cobre o texel; a paleta vem do `texture.covering`, que também
+  fica com o primeiro. **Resultado: o titular sempre ganha**, e não há parâmetro
+  para o suplente.
+- A paleta de jogador ou de goleiro **não é escolhida em código**: é o CLUT id
+  que a própria primitiva carrega. A figura 0 é o jogador de linha, a 1 o
+  goleiro.
+- Não há manga longa nem braçadeira em lugar nenhum do `looks`. A manga do
+  goleiro é outra geometria, não outra textura.
+
+### 1.3 O que a comunidade sabe e o disco não diz
+
+O mapa de zonas em pixels, a ordem das faces, as medidas de cada peça, a regra de
+que o índice 0 preto é transparente e a grade de 16 rampas dos TEX originais
+estão no [SUPERPACK-UNIFORMES.md](/docs/SUPERPACK-UNIFORMES.md) §1.3 e §2. É a
+fonte do mapa de zonas deste projeto, com a proveniência dita: **comunidade,
+medido no PNG do polipoli**, até a fase 2 conferi-lo contra a geometria.
+
+## 2. A decisão: projeto novo, núcleo do `looks` por import
+
+**Recomendação: `tools/kits/`, projeto próprio, que importa o núcleo do
+`tools/looks/` sem copiá-lo, mais duas mudanças pequenas e aditivas no `looks`.**
+
+Por que não uma v3 do `looks`: a janela do `looks` **é** a tela do jogo e a regra
+dela é não decidir nada. Uma aba de paletas, uma grade de zonas e um seletor de
+titular e suplente são decisões que o jogo não mostra; dentro daquela janela, ou
+viram exceção à regra ou viram outra janela — e outra janela é outro projeto.
+
+Por que não copiar: a geometria, a pose, a câmera, a guarda de disco e a
+decodificação de textura custaram 40 tasks e estão confrontadas com o emulador.
+Uma cópia envelhece no primeiro conserto.
+
+As duas mudanças no `looks` (tasks do ciclo `looks`, não deste):
+
+1. **`scene.Builder(kit=...)`**, com o `TEX_A4` de default — hoje só o caminho
+   de tupla avulsa aceita outra tag.
+2. **Escolha do conjunto.** Um parâmetro `kit_set` (1 = titular, 2 = suplente)
+   que faça o banco do TEX entregar o 2º par de registros em vez do 1º. A
+   pergunta é de ordem de busca, e a resposta cabe no banco — o resto do
+   `looks` não muda.
+
+### 2.1 Dois discos, e o TEX de fora
+
+O `looks` recusa todo arquivo cujo digest não mediu, e os 105 digests são do
+disco japonês. **Para uma ferramenta de uniformes isso é o contrário do que se
+quer**: o motivo de ver um TEX é ver o de um patch, o de um BR2002, o que acabou
+de sair do WETex. Então:
+
+- **a geometria** (`MODEL.BIN`, `EDT_MOD.BIN`, `ANIME.BIN`, `DAT2D.BIN`) vem do
+  disco confiável, pela guarda do `looks`, como hoje (`WE2002_LOOKS_IMAGE`);
+- **o TEX** vem de onde o usuário mandar — outra imagem, uma tag, um arquivo
+  solto —, e a guarda dele é **de forma**, não de digest: 11 registros, os
+  retângulos e as larguras do §1.1, cada fluxo LZSS terminando dentro do arquivo
+  e descomprimindo no tamanho que o retângulo pede. O que não bate é recusado
+  com a frase de qual registro e por quê.
+
+Isso vira diagnóstico de graça: o TEX corrompido do WECompressor (§4.3 do
+SUPERPACK-UNIFORMES) passa a ter um nome.
+
+**Form 2.** Na `golden-european-deluxe.bin`, 18 dos 105 TEX são form 2 e o
+`iso.py` os recusa. A ferramenta herda a recusa e a mensagem; ler form 2 é
+trabalho do `iso.py`, não deste projeto.
+
+## 3. Arquitetura
+
+**A regra que manda em todo o resto: núcleo e interface separados por um
+contrato só.** A ideia é, no futuro, juntar esta ferramenta, o `looks`, o editor
+de `.mcr` e o que vier numa aplicação só. O que tem de sobreviver a essa junção é
+o núcleo; a janela deste projeto é descartável e pode ser trocada inteira sem
+mexer em uma linha do núcleo.
+
+### 3.1 O núcleo (`tools/kits/core/`)
+
+Python puro, **sem Qt**, sem `print`, sem `sys.exit`, sem estado global. Recebe
+caminhos e bytes, devolve dados simples — `dataclass`, `bytes` RGBA, listas — e
+erra com exceções tipadas cuja mensagem já é a frase que a interface mostra. Tudo
+o que ele faz roda num teste sem tela.
+
+O contrato é **uma fachada**, `core/api.py`, e a interface só importa ela:
+
+```python
+source = api.open_source(path)        # ROM (.bin/.iso/.cue) ou TEX avulso, pelo conteúdo
+source.kind                           # "rom" ou "tex"
+source.teams()                        # [TeamEntry(index, name, name_origin, tag)]  -- só ROM
+kit = source.kit(team_or_tag)         # ROM: pelo time; TEX avulso: o próprio arquivo
+kit.problems                          # a guarda de forma, registro a registro (§2.1)
+kit.flat(image, palette)              # FlatImage(width, height, rgba, indices)
+kit.work_bitmap(kit_set, figure)      # o 256×128 da comunidade, uniforme + mangas
+kit.palette_grid(palette)             # 256 cores, BGR555 e RGB
+api.zone_at(x, y)                     # zona do mapa (§1.3) num ponto do 256×128
+api.figure(kit, kit_set, figure, geometry_path, frame=None)   # a cena 3D, via looks
+```
+
+`TeamEntry.name_origin` diz de onde o nome veio (`"rom"` ou `"table"`, ver
+§3.3), e `tag` é `None` enquanto a incógnita (b) não souber o TEX daquele time.
+
+Os módulos atrás da fachada:
+
+| módulo | faz |
+|---|---|
+| `source.py` | reconhece o que foi aberto **pelo conteúdo**, não pela extensão: imagem de CD (pelo `iso.py`) ou TEX (pela forma do §1.1); diz qual disco é (§3.3) |
+| `tex.py` | lê um TEX, aplica a guarda de forma, nomeia as 6 imagens e as 5 paletas |
+| `teams.py` | lê os nomes de time da ROM e aplica a regra do §3.3 |
+| `zones.py` | o mapa de zonas como dados, com proveniência por linha |
+| `flat.py` | imagem + paleta → RGBA; o BMP de trabalho; a grade de 16×16 |
+| `figure.py` | a única ponte com o `looks`: pede a cena ao `scene` |
+| `generated/` | as tabelas copiadas do C++ por gerador (§3.3), nunca editadas à mão |
+
+A **CLI** (`tools/kits/cli.py`: `info`, `teams`, `export`, `check`) é o segundo
+cliente da fachada e a prova de que ela basta: se a CLI precisar importar algo
+além de `api`, a fachada está incompleta.
+
+Endereço só em um módulo, como no `looks` (regra 1 dele): os offsets de nome de
+time moram no `generated/`, o resto de endereço no `layout.py` do `looks`.
+
+### 3.2 A origem: ROM ou TEX
+
+A janela abre com **uma escolha só**, "Abrir…", que aceita os dois; o núcleo
+decide o que é.
+
+- **ROM**: aparece o **combobox de times**. Escolher um time carrega o TEX dele.
+  Enquanto a incógnita (b) não fechar, o combobox lista as 105 tags (`TEX_00`…
+  `TEX_A4`), com o nome do time ao lado só onde o mapeamento já for conhecido;
+  fechada a (b), ele lista times, na ordem do jogo.
+- **TEX avulso**: sem combobox; o arquivo é o uniforme.
+
+**O 3D precisa da geometria**, que não está no TEX e só foi medida nos discos
+japonês e inglês (§2.1). Com um TEX avulso, ou com uma ROM cuja geometria não é a
+medida, o 3D usa o disco de `WE2002_LOOKS_IMAGE`; sem ele, a aba 3D fica
+desligada **com a frase do motivo**, e o 2D funciona igual.
+
+### 3.3 Os nomes dos times
+
+A regra pedida: **se o nome na ROM está em japonês, mostrar o equivalente em
+inglês por índice, hardcoded; senão, o nome que está na ROM.**
+
+- **O nome da ROM** é o que o `we2002_core` já lê (`Team::names`,
+  `mixed_case_name`, `kanji_name`, com o `KanjiToAscii` portado verbatim) — o
+  mesmo que o `ed.exe` mostra. O núcleo em Python não reescreve esse leitor à mão:
+  os offsets (`OFS_TEAM_NAME_*`) e o comprimento de cada nome saem do
+  `Offsets.hpp`/`Tables.cpp` por um **gerador com `--check`** registrado no
+  `ctest`, como o `rc2ui.py`. Se o C++ mudar, o gerador acusa.
+- **A tabela em inglês já existe**: `TEAM_NAMES[120][20]` em
+  `src/core/Tables.cpp`, os nomes que o editor original exibe ("Ireland",
+  "Scotland", "Wales"…), indexados pelo mesmo índice de time. Ela vai para o
+  `generated/` pelo mesmo gerador. Não se escreve uma lista nova.
+- **"Está em japonês" é decidido pelo disco, não pelo texto.** O `source.py`
+  reconhece o disco pelo executável de boot (`SLPM_870.56` é o japonês) e pelos
+  digests que o `looks` já guarda. Adivinhar pelo conteúdo do nome falha em
+  silêncio: o `KanjiToAscii` devolve espaço para o que não for par `0x82`, e um
+  nome japonês vira uma linha em branco com cara de nome vazio. Disco
+  desconhecido cai no nome da ROM, e o `name_origin` diz isso.
+- O índice que liga nome e tabela é o mesmo que o combobox de times do `ed.exe`
+  usa para indexar `TEAM_NAMES` (a tabela tem 120 linhas para 63 seleções e 32
+  clubes da ML; quais linhas valem para qual time se confere no `edDlg.cpp`
+  antes de gerar). **Não é a tag do TEX** — essa ligação é a incógnita (b).
+
+### 3.4 A interface (`tools/kits/ui/`)
+
+Pouca coisa, e só apresentação: widgets que chamam a fachada e desenham o que ela
+devolve.
+
+- Barra de cima: **Abrir…**, o caminho aberto, e o **combobox de times** quando
+  for ROM.
+- **Aba "Plano"**: seletor de imagem e de paleta (só as combinações que o jogo
+  usa), zoom de vizinho mais próximo, xadrez no transparente, grade 16×16,
+  mapa de zonas ligável, e o mouse dizendo zona, índice e cor. Botão "Exportar
+  PNG".
+- **Aba "3D"**: titular/suplente, jogador/goleiro, giro livre.
+- **Aba "Diagnóstico"**: a lista do `kit.problems`.
+
+**Estilo visual próprio, idêntico no Windows e no Linux, e não o do `looks`.**
+O `looks` imita a tela do jogo; esta é uma ferramenta comum. Para sair igual nas
+duas plataformas:
+
+- `QApplication.setStyle("Fusion")` — o único estilo que o Qt desenha ele mesmo
+  nas duas; os nativos mudam de plataforma para plataforma;
+- uma `QPalette` fixa, definida no código, sem herdar tema do sistema (claro ou
+  escuro do Windows, GTK do Linux);
+- fonte com família e tamanho **em pixels** fixados, para o DPI escalado do
+  Windows (150 % nesta máquina) não mudar o layout;
+- layouts do Qt, não geometria absoluta: esta janela não reproduz tela nenhuma.
+
+A conferência é visual e barata: a mesma captura nos dois sistemas, lado a lado.
+
+### 3.5 Idioma e ambiente
+
+Como o `looks`: código e docstrings em inglês, documentos em português. O venv é
+o `work/venv-looks/`, que já tem PySide6; o núcleo não precisa dele. `ctest`
+ganha `kits_selftest` (sem nada, nunca pula), `kits_image` (com uma ROM),
+`kits_ui` (venv e tela) e o `--check` do gerador do §3.3, com a convenção de
+*skip* 77.
+
+## 4. As incógnitas, em ordem de risco
+
+**(a) Titular e suplente são os pares 1 e 2?** A comunidade inteira diz que sim
+e a ordem do arquivo concorda; o jogo nunca foi olhado. Com o §1.1, agora dá:
+escolher um time com os dois pares diferentes, entrar numa partida com ele de
+suplente e ler a VRAM (`oracle.py --kit` já compara retângulo por retângulo).
+**Risco alto**: errar aqui troca todos os uniformes do 3D, e o 2D não percebe.
+
+**(b) Que time usa qual tag.** Nada no repositório sabe. O Wetigre dá a ordem de
+cabeça do WE2000 (`TEX_00` Irlanda, `01` Irlanda do Norte, `02` Escócia…); o
+editor do Obocaman em `we-team-editor/` insere TEX por time e portanto contém a
+tabela; o emulador responde time a time pelo `--kit`. **É ela que decide o
+combobox do §3.2**: sem ela o combobox lista tags, com nome só onde já se sabe.
+Os nomes (§3.3) e o mapeamento são coisas separadas — o nome sai da ROM por
+índice de time, e o índice de time não diz qual TEX o time veste.
+
+**(c) Manga longa e braçadeira no 3D.** A imagem de mangas (576, 384) é
+enviada à VRAM na `LOOKS SET`, mas não se sabe quais primitivas a amostram nem se
+o modelo de partida é o mesmo do `EDT_MOD.BIN`. Medir primeiro, no disco:
+quantas primitivas de cada figura caem em cada retângulo do TEX e em que
+retângulo do mapa de zonas. Se a manga longa e a braçadeira forem outra
+geometria (outro arquivo, outra lista de seções), elas entram só quando essa
+geometria for lida — **nunca** por remapeamento de UV feito à mão.
+
+**(d) O que é (608, 256) e o que é (704, 256).** O [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)
+§1.7 escreve (608, 256) entre os retângulos que só os TEX têm; o `layout.py` e a
+leitura do §1.1 dizem (704, 256), que é a bandeira. E na `LOOKS SET` o (704, 256)
+é a página da fonte (`EDT_2D.BIN`). Suspeita: a linha do plano do `looks` está
+velha. Conferir antes de o 3D pedir qualquer coisa à bandeira.
+
+**(e) A paleta do árbitro.** Não está no TEX. As duas tabelas do Superpack
+divergem em 32 bytes (SUPERPACK-UNIFORMES §5). Se o `SELECT.BIN` for um
+contêiner, o `bin_archive.py` acha os registros de CLUT e decide sozinho; se não
+for, vale o emulador numa partida. Até lá o árbitro sai com a paleta que o
+usuário escolher, e a janela diz que não é a do jogo.
+
+**(f) A zona do mapa bate com a geometria?** O mapa é da comunidade. A conferência
+é mecânica: toda primitiva do boneco com UV no TEX cai numa zona do mapa, e zona
+que nenhuma primitiva amostra ou é da manga longa, da braçadeira e dos figurantes
+com bandeira — ou está errada.
+
+## 5. Como se verifica
+
+1. **Dois decodificadores concordam.** `tex.py` e `bin_archive.py export` sobre
+   as mesmas 105 tags, imagem por imagem e paleta por paleta.
+2. **A comunidade como oráculo externo.** O Superpack tem ~150 pares
+   `*_BND.bin` + `*_BND.tim` em `Banderas 3D/`: o `.bin` saiu do WEZip a partir
+   do `.tim`, então a nossa descompressão do `.bin` tem de devolver os pixels do
+   `.tim` byte a byte. É um oráculo que não passou pelo nosso código — o papel
+   que os 50 JPGs tiveram no `looks`.
+3. **O emulador julga o 3D.** Com o time do §4 (a) em campo: o retângulo que o
+   jogo enviou é o conjunto que a ferramenta disse, e o confronto por histograma
+   de cor do `looks` (`confront.py --score`) é refeito com outro uniforme que não
+   o `A4`.
+4. **Controles negativos**, plantados por comando como no `looks`:
+   - trocar as paletas 486 e 488 tem de trocar jogador e goleiro no 3D;
+   - um byte trocado no fluxo LZSS de um TEX tem de ser **recusado** pela guarda
+     de forma;
+   - o mapa de zonas deslocado 1 px tem de reprovar o §4 (f);
+   - pedir o suplente do `TEX_A4` tem de dar o mesmo quadro que o titular, e
+     de qualquer tag do §1.1 que difere, um quadro diferente.
+
+## 6. Riscos de projeto
+
+- **O `looks` está com o ciclo aberto.** As duas mudanças do §2 entram como tasks
+  dele, na fila dele; este projeto espera por elas ou começa pelo 2D, que não
+  depende delas.
+- **Acoplamento.** Importar o núcleo do `looks` amarra este projeto às mudanças
+  de lá. É o preço de não copiar; o `kits_selftest` roda os self-checks do
+  `looks` que usa, para a quebra aparecer aqui e não na janela.
+- **Licença.** Nada do Superpack entra no repositório — nem os mapas, nem os
+  `.tim`. O mapa de zonas é reescrito como dados medidos, com a fonte citada; os
+  pares de bandeira são lidos de `WE2002_KITS_CORPUS`, uma pasta do usuário, como
+  o `WE2002_LOOKS_CORPUS`.
+
+## 7. Fases
+
+| fase | entrega | depende de |
+|---|---|---|
+| 0 | as medições do §4 (c), (d) e (f) feitas no disco, e o script do §1.1 promovido a `tex.py --survey` | — |
+| 1 | **núcleo, lado TEX**: `api.py` (a fachada), `source.py`, `tex.py`, guarda de forma, `cli.py info/export`; confrontos 1 e 2 do §5 | 0 |
+| 2 | **núcleo, lado ROM**: o gerador do §3.3 com `--check` no `ctest`, `teams.py`, `cli.py teams`; a regra japonês → tabela conferida nas duas imagens de `roms/` | 1 |
+| 3 | `flat.py` + `zones.py`; §4 (f) fechado — ainda sem janela | 1 |
+| 4 | **a janela mínima**: Abrir… (ROM ou TEX), combobox, aba "Plano", estilo Fusion fixo; captura igual no Windows e no Linux | 2, 3 |
+| 5 | as duas mudanças do §2 no `looks` (tasks do ciclo `looks`) | — |
+| 6 | `figure.py` e a aba "3D": titular/suplente, jogador/goleiro | 4, 5 |
+| 7 | §4 (a) no emulador e o confronto 3 do §5 | 6 |
+| 8 | §4 (b): o combobox passa a listar times em vez de tags | 2 |
+| 9 | aba "Diagnóstico" | 1 |
+| — | manga longa, braçadeira e árbitro com a paleta do jogo: só depois de (c) e (e) | 0 |
+
+As fases 1 a 3 não têm janela nenhuma, de propósito: o núcleo fica pronto e
+testado pela CLI antes de existir interface, e é assim que ele chega inteiro à
+aplicação única.
+
+**O que não pode ser pulado:** a fase 7. Sem ela o 3D pode trocar titular e
+suplente em todos os times, com todo gate verde — é exatamente o que o `TEX_A4`
+esconderia.
