@@ -7,10 +7,10 @@ depends_on: []
 source_of_truth: "/docs/PLAN-KITS-PY.md#4.3"
 files: ["tools/kits/core/survey.py", "tools/kits/cli.py", "docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
-done_on: null
-done_commit: null
-reviewed_on: null
+status: done
+done_on: 2026-09-30
+done_commit: f71b47d6
+reviewed_on: pending
 review_commit: null
 ---
 
@@ -97,3 +97,9 @@ O das mangas em (560, 256) prova que a contagem por quatro cantos enxerga regist
 
 - O primeiro desenho do controle positivo pôs as mangas em (576, 256) e deu `FAILED 0 -> 0`: o papel é lido pela origem, e um registro ali se chama "uniforme". Refeito em (560, 256).
 - Só a tupla `A-A1-A-A-A` foi medida por figura; a tupla só troca a cabeça, que amostra o `DAT2D`.
+- **Closed** — commit `f71b47d6` (2026-09-30): feat(kits): count each figure's primitives per kit record (prims)
+  - Files (`git show --name-status f71b47d6`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/03-primitivas-por-retangulo.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/survey.py`
