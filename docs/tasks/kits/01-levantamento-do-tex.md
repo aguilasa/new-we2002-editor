@@ -7,10 +7,10 @@ depends_on: []
 source_of_truth: "/docs/PLAN-KITS-PY.md#1.1"
 files: ["tools/kits/core/__init__.py", "tools/kits/core/survey.py", "tools/kits/cli.py"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
-done_on: null
-done_commit: null
-reviewed_on: null
+status: done
+done_on: 2026-09-30
+done_commit: fc5717ae
+reviewed_on: pending
 review_commit: null
 ---
 
@@ -80,3 +80,13 @@ Erro: `python tools/kits/cli.py survey roms/nope.bin` → `survey: Could not ope
 ### Problemas encontrados
 
 - Os 11 retângulos (`EXPECTED_SHAPE`) moram em `core/survey.py`; o §3.1 quer endereço no `layout.py` do `looks`, que esta task não podia tocar. Nota deixada na KITS-TASK-07.
+- **Closed** — commit `fc5717ae` (2026-09-30): feat(kits): survey the TEX containers in core, print it from cli.py survey
+  - Files (`git show --name-status fc5717ae`):
+    - `M NOTICE.md`
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/01-levantamento-do-tex.md`
+    - `M docs/tasks/kits/06-fachada-e-origem.md`
+    - `M docs/tasks/kits/07-tex-e-guarda-de-forma.md`
+    - `A tools/kits/cli.py`
+    - `A tools/kits/core/__init__.py`
+    - `A tools/kits/core/survey.py`
