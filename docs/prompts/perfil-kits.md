@@ -10,9 +10,29 @@ which commands search instead of reading whole.
 
 <!-- Decisions the user confirmed. One line each, with the date and where it was decided. -->
 
+Todas do [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md), proposta de 2026-09-29. Onde
+este perfil e o plano divergirem, o plano ganha.
+
+- **Só lê.** Não grava na imagem nem no TEX — §0 (Não-objetivos).
+- **Não inventa geometria.** Manga longa e braçadeira só no 3D depois de achadas e medidas; até lá o 3D diz que não as tem — §0, §4.3.
+- **Projeto próprio em `tools/kits/`, que importa o núcleo do `tools/looks/` sem copiar** — §2.
+- **As duas mudanças no `looks` (`scene.Builder(kit=...)`, `kit_set`) são tasks deste ciclo**, aditivas, default igual ao de hoje, com os quatro gates do `looks` verdes antes e depois — §2, §6, fase 5 da §7.
+- **Geometria do disco confiável pela guarda do `looks` (`WE2002_LOOKS_IMAGE`); o TEX vem de qualquer lugar, com guarda de forma, não de digest** — §2.1.
+- **Cauda marcada Form 2 com dado no leiaute Form 1 é lida como Form 1**, e o diagnóstico diz que leu assim — §2.1.
+- **Núcleo × interface:** `tools/kits/core/` sem Qt, sem `print`, sem `sys.exit`, sem estado global; UI e CLI só importam `core/api.py` — §3, §3.1.
+- **Endereço só em um módulo:** nomes de time em `generated/`, o resto no `layout.py` do `looks` — §3.1.
+- **Origem reconhecida pelo conteúdo, não pela extensão** — §3.1, §3.2.
+- **Nomes de time:** japonês decidido pelo disco (boot `SLPM_870.56`, digests), não pelo texto; tabela inglesa é o `TEAM_NAMES` de `src/core/Tables.cpp` via gerador com `--check` — §3.3.
+- **Estilo Fusion, `QPalette` fixa, fonte em pixels, layouts Qt; igual no Windows e no Linux, não o do `looks`** — §3.4.
+- **Código e docstrings em inglês, documentos em português; venv `work/venv-looks/`** — §3.5.
+- **Nada do Superpack entra no git**; pares de bandeira por `WE2002_KITS_CORPUS` — §6.
+- **Fases 1 a 3 sem janela; a fase 7 (emulador) não pode ser pulada; manga longa/braçadeira/árbitro esperam §4.3 e §4.5** — §7.
+
 ## Sources of truth
 
 <!-- Plan sections, specs, reference outputs. Items point here through `source_of_truth`. -->
+
+- [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md) — o plano; âncoras por `rite anchors docs/PLAN-KITS-PY.md` (incógnitas em `#4.1`…`#4.6`).
 
 ## Generated artifacts
 
