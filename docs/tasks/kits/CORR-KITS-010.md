@@ -5,7 +5,7 @@ origin: KITS-TASK-05
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -56,3 +56,23 @@ $ grep -cE 'all-kits|--tuple|rects --all|--kit 98' docs/tasks/kits/05-fechamento
 Hoje dá 0; depois, pelo menos 4.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `226b1582`)
+
+```text
+$ grep -cE 'all-kits|--tuple|rects --all|--kit 98' docs/tasks/kits/05-fechamento-fase-0.md
+0
+```
+
+REPRODUCED. As quatro corridas da Evidência dão hoje os mesmos números que a revisão viu (603/639, 598/634, 104 e 1, os onze arquivos, o digest `2360a921…48fb84` com `--kit 98`). Causa raiz confirmada: o Log do fechamento reexecutou só a forma padrão e a `--negative` de cada subcomando.
+
+### O que foi feito
+
+Cinco corridas acrescentadas ao bloco de evidência da KITS-TASK-05, geradas por script a partir da ferramenta na HEAD e não digitadas: `prims --all-kits`, `prims --all-kits --negative`, `prims` com as oito tuplas da CORR-KITS-005, `rects --all … 704,256 | tail -1` e `uv --kit 98 | tail -1`, todas com saída 0. Uma frase fora do bloco diz de onde vieram. Código e plano não mudaram.
+
+### Verificação
+
+```text
+$ grep -cE 'all-kits|--tuple|rects --all|--kit 98' docs/tasks/kits/05-fechamento-fase-0.md
+5
+```

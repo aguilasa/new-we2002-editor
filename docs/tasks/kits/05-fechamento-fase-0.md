@@ -162,8 +162,43 @@ $ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --negative      # exit
   uniform moved to (0,0)     moved 2  figure 1  mapped count drops to 0  429 -> 0  held
 11 of 11 expectations held
 
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --all-kits      # exit 0
+Primitives per kit record, every kit: roms/japanese-shift-jis.bin
+  tuple A-A1-A-A-A: 105 kits, 1 distinct result(s)
+  105 kit(s)
+    figure 0: 593 primitive(s); kit role uniform 237
+    figure 1: 629 primitive(s); kit role uniform 429
+
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --all-kits --negative      # exit 0
+Planted: 2 image record(s) of TEX_A4 moved from (576,256) to (0,0)
+  clean    105 kits, 1 distinct result(s): 105
+  planted  105 kits, 2 distinct result(s): 104, 1  [TEX_A4]
+  kit roles of TEX_A4, clean vs planted: 2 distinct
+red
+
+$ python tools/kits/cli.py prims roms/japanese-shift-jis.bin --tuple A-A1-A-A-A --tuple D-A1-A-A-A --tuple A-P1-A-A-A --tuple A-I3-A-A-A --tuple A-A1-H-A-A --tuple A-A1-A-G-A --tuple A-A1-A-A-G --tuple A-I3-A-G-A      # exit 0
+Primitives per kit record, per tuple: roms/japanese-shift-jis.bin
+  kit TEX_A4
+  A-A1-A-A-A     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  D-A1-A-A-A     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  A-P1-A-A-A     figure 0: 603 total, kit role uniform 237; figure 1: 639 total, kit role uniform 429
+  A-I3-A-A-A     figure 0: 598 total, kit role uniform 237; figure 1: 634 total, kit role uniform 429
+  A-A1-H-A-A     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  A-A1-A-G-A     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  A-A1-A-A-G     figure 0: 593 total, kit role uniform 237; figure 1: 629 total, kit role uniform 429
+  A-I3-A-G-A     figure 0: 598 total, kit role uniform 237; figure 1: 634 total, kit role uniform 429
+  kit roles identical in all 8 tuples: yes (1 distinct)
+
+$ python tools/kits/cli.py rects --all roms/japanese-shift-jis.bin 704,256 | tail -1      # exit 0
+  image origin ( 704, 256)  32x128 hw  STARTS here   11 file(s): /BIN/DATSEL3.BIN, /BIN/EDT_2D.BIN, /BIN/LC_AF.BIN, /BIN/LC_AM.BIN, /BIN/LC_AS.BIN, /BIN/LC_EU.BIN, /BIN/LC_IC.BIN, /BIN/LC_KO.BIN, /BIN/LC_LG.BIN, /BIN/LC_MS.BIN, /BIN/LC_OL.BIN
+
+$ python tools/kits/cli.py uv roms/japanese-shift-jis.bin --kit 98 | tail -1      # exit 0
+sha256 of the canonical JSON: 2360a921f7cee6f69dcbc1bb3ad2633c306a720c86399a04b918fbdf9448fb84
+
 $ grep -rnE 'print\(|sys\.exit|PySide' tools/kits/core/      # exit 1, sem saída (corrida no Git Bash)
 ```
+
+As cinco corridas entre o `uv --negative` e o `grep` são as variantes que o plano cita (§4.3, §4.4 e o digest do §4.6 com outro TEX), acrescentadas pela [CORR-KITS-010](/docs/tasks/kits/CORR-KITS-010.md); os números batem com o plano.
 
 (As nove linhas `skipped` do `rects` — 1 Form 2 e 8 fora da trilha — ficam na saída acima.)
 
