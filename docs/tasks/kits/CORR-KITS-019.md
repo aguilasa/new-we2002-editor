@@ -76,3 +76,8 @@ $ python tools/kits/cli.py open --negative roms/japanese-shift-jis.bin | tail -1
 $ WE2002_LOOKS_IMAGE=roms/golden-european-deluxe.bin python tools/kits/selftest.py --image | grep -c FAIL
 1
 ```
+- **Closed** — commit `41698e48` (2026-10-01): fix(kits): read the recognition fixtures' TEX through read_disc_file
+  - Files (`git show --name-status 41698e48`):
+    - `M docs/tasks/kits/08-selftest-e-ctest.md`
+    - `M docs/tasks/kits/CORR-KITS-019.md`
+    - `M tools/kits/core/source.py`
