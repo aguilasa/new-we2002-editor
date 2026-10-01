@@ -122,3 +122,8 @@ $ rite check --cycle kits --json      # exit 0
 ```
 
 A discordância sobre `/BIN/DATSEL2.BIN` (nota acima) continua aberta e sem dono: não é TEX, nada da fase 1 depende dela.
+- **Closed** — commit `f07540e9` (2026-10-01): docs(kits): close phase 1, checked at HEAD
+  - Files (`git show --name-status f07540e9`):
+    - `M docs/tasks/kits/11-fechamento-fase-1.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
