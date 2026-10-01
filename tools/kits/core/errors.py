@@ -46,3 +46,7 @@ class KitUnreadable(KitError):
 
 class KitRefused(KitError):
     """The kit container was read and fails the guard of form (section 2.1)."""
+
+
+class StreamError(KitsError):
+    """A lone LZSS stream (a WEZip `.bin`) does not decode."""

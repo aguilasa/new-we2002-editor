@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from .errors import (KitError, KitMissing, KitRefused, KitsError,  # noqa: F401
                      KitUnreadable, NotASource, SourceEmpty, SourceError,
-                     SourceMissing, SourceUnreadable)
+                     SourceMissing, SourceUnreadable, StreamError)
 from .source import KIND_ROM, KIND_TEX, OpenControl, RomSource, TexSource  # noqa: F401
 from .source import open_controls as _open_controls
 from .source import open_source as _open_source
@@ -27,6 +27,7 @@ from .tex import (EXPECTED_SHAPE, IMAGE_RECORDS, NOTE_FORM2_TAIL,  # noqa: F401
                   NOTE_PAST_ISO_SIZE, PALETTE_RECORDS, RECORD_NAMES, Image, Kit,
                   Note, Palette, StreamControl)
 from .tex import stream_control as _stream_control
+from .tex import decompress_stream as _decompress_stream
 from .source import DiscControl  # noqa: F401
 from .source import disc_controls as _disc_controls
 from . import survey as measure  # noqa: F401  (the phase-0 probes, below)
@@ -42,6 +43,7 @@ __all__ = (
     "KitError", "KitMissing", "KitUnreadable", "KitRefused",
     "measure", "survey_image", "Survey", "SurveyError",
     "IMAGE_RECORDS", "PALETTE_RECORDS", "IMAGE_COUNT", "PALETTE_COUNT",
+    "decompress_stream", "StreamError",
 )
 
 IMAGE_COUNT = len(IMAGE_RECORDS)
@@ -94,3 +96,9 @@ def disc_controls(source):
     """The two read rules of a disc (Form 2 tail, next-file limit), each
     planted on the kit it applies to: a tuple of `DiscControl`."""
     return _disc_controls(source.image_path, source.kit_tags())
+
+
+def decompress_stream(data, label="the stream"):
+    """The plain bytes of a lone LZSS stream (a WEZip `.bin`), decoded by the
+    same decoder as the kit records; `StreamError` with the sentence to show."""
+    return _decompress_stream(data, label)

@@ -37,7 +37,7 @@ for _sub in ("pes2", "looks"):
 import bin_archive  # noqa: E402  (tools/pes2, after the path insert)
 import lzss  # noqa: E402
 
-from .errors import KitRefused  # noqa: E402
+from .errors import KitRefused, StreamError  # noqa: E402
 
 KIND_IMAGE = "image"
 KIND_CLUT = "clut"
@@ -202,6 +202,17 @@ class Kit:
         if self.problems:
             raise KitRefused("%s is refused: %s." % (self.label, "; ".join(self.problems)))
         return self
+
+
+def decompress_stream(data: bytes, label: str = "the stream") -> bytes:
+    """The plain bytes of one LZSS stream starting at byte 0 of *data* -- a
+    lone compressed image, as WEZip writes it -- by the same decoder the
+    kit records go through.  `StreamError` names where it stopped."""
+    try:
+        plain, _used = lzss.decompress(bytes(data), 0)
+    except lzss.LzssError as exc:
+        raise StreamError("%s does not decode as an LZSS stream: %s" % (label, exc)) from exc
+    return plain
 
 
 def _record_problem(record: int, why: str) -> str:

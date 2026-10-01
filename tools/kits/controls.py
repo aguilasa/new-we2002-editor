@@ -134,10 +134,18 @@ CONTROLS = (
         "cli-imports-survey", "kits/cli.py", "the imports",
         "from core import api  # noqa: E402\n",
         "from core import api  # noqa: E402\nfrom core import survey  # noqa: E402\n",
-        "FAIL  cli.py imports only core.api",
+        "FAIL  cli.py and confront.py import only core.api",
         "section 3.1: the CLI is the second client of the facade and the proof it "
         "is enough; before CORR-KITS-018 it imported core.survey and the gate "
         "stayed green",
+    ),
+    Control(
+        "confront2-blind", "kits/confront.py", "compare_pair",
+        "    if plain == pixels:",
+        "    if True:",
+        "FAIL  confront 2: one pixel changed in the .tim is a mismatch",
+        "section 5, confront 2: an oracle whose comparison cannot fail says "
+        "nothing about the decoder",
     ),
 )
 BY_ID = {c.id: c for c in CONTROLS}

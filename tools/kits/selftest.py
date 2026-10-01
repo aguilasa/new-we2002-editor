@@ -299,7 +299,7 @@ def core_rule_breaks() -> list:
     return out
 
 
-FACADE_CLIENTS = ("cli.py",)
+FACADE_CLIENTS = ("cli.py", "confront.py")
 """Files of tools/kits that may import nothing of the core but `core.api`
 (section 3.1); the window's `ui/` joins them when it exists."""
 
@@ -340,21 +340,58 @@ def _rule_checks(c) -> None:
     c.ok("core/ has no print, exit, input or Qt (section 3.1)", breaks == [],
          "%s" % breaks)
     breaks = c.attempt("sweep the facade clients", facade_breaks, default=None)
-    c.ok("cli.py imports only core.api and the standard library (section 3.1)",
+    c.ok("cli.py and confront.py import only core.api and the standard library "
+         "(section 3.1)",
          breaks == [], "%s" % breaks)
 
 
 # -- 4. the negative controls ----------------------------------------------
 
-def _kits_controls():
-    """tools/kits/controls.py, by path: `import controls` finds the looks one,
-    which `tex` put first on sys.path."""
-    spec = importlib.util.spec_from_file_location("kits_controls",
-                                                  os.path.join(KITS_DIR, "controls.py"))
+def _kits_module(name: str):
+    """tools/kits/<name>.py, by path: `import controls` or `import confront`
+    finds the looks one, which `tex` put first on sys.path."""
+    spec = importlib.util.spec_from_file_location("kits_" + name,
+                                                  os.path.join(KITS_DIR, name + ".py"))
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module           # dataclasses look the module up
     spec.loader.exec_module(module)
     return module
+
+
+def _kits_controls():
+    return _kits_module("controls")
+
+
+# -- confront 2's reader, on a pair built here -----------------------------
+
+def build_tim(pixels: bytes, w: int, h: int, x: int = 960, y: int = 0) -> bytes:
+    """An 8-bit TIM with a 256-colour CLUT block, written out here."""
+    clut = struct.pack("<IHHHH", 12 + 512, 0, 480, 256, 1) + bytes(512)
+    image = struct.pack("<IHHHH", 12 + len(pixels), x, y, w, h) + pixels
+    return struct.pack("<II", 0x10, 0x09) + clut + image
+
+
+def _confront2_checks(c) -> None:
+    confront = c.attempt("import tools/kits/confront.py", lambda: _kits_module("confront"))
+    if confront is None:
+        return
+    pixels = _plain(0, 64 * 128 * 2)
+    tim = build_tim(pixels, 64, 128)
+    stream = lzss.compress(pixels)
+    r = confront.compare_pair(stream, tim, "fixture")
+    c.ok("confront 2: a .bin compressed from the .tim's pixels matches", r.ok,
+         "%s %s" % (r.status, r.detail))
+    flipped = bytearray(tim)
+    flipped[len(tim) - len(pixels) + 1000] ^= 1
+    r = confront.compare_pair(stream, bytes(flipped), "fixture")
+    c.ok("confront 2: one pixel changed in the .tim is a mismatch at that pixel",
+         r.status == "differ" and "first at 1000" in r.detail, "%s %s" % (r.status, r.detail))
+    r = confront.compare_pair(stream, tim[:len(tim) - 1], "fixture")
+    c.ok("confront 2: a cut .tim is refused as a TIM, not compared", r.status == "tim",
+         "%s %s" % (r.status, r.detail))
+    r = confront.compare_pair(b"\x01\x00", tim, "fixture")
+    c.ok("confront 2: a .bin that does not decode is said so", r.status == "bin",
+         "%s %s" % (r.status, r.detail))
 
 
 def _negative(c) -> None:
@@ -377,6 +414,7 @@ def run(verbose: bool = True, plant: bool = True) -> int:
         total = harness.run("looks modules", _looks_checks, verbose)
         total += harness.run("core", _core_checks, verbose)
         total += harness.run("rules", _rule_checks, verbose)
+        total += harness.run("confront 2", _confront2_checks, verbose)
         if plant:
             total += harness.run("controls", _negative, verbose)
         else:

@@ -484,7 +484,9 @@ em x 48–63. A fase 3 cruza essa lista com o mapa de zonas.
    `*_BND.bin` + `*_BND.tim` em `Banderas 3D/`: o `.bin` saiu do WEZip a partir
    do `.tim`, então a nossa descompressão do `.bin` tem de devolver os pixels do
    `.tim` byte a byte. É um oráculo que não passou pelo nosso código — o papel
-   que os 50 JPGs tiveram no `looks`.
+   que os 50 JPGs tiveram no `looks`. Medido na KITS-TASK-10: são **160** pares,
+   e os 160 batem (`WE2002_KITS_CORPUS=<…/Banderas 3D> python tools/kits/confront.py`;
+   `--negative` troca um pixel de uma cópia do `.tim`, que tem de reprovar).
 3. **O emulador julga o 3D.** Com o time da §4.1 em campo: o retângulo que o
    jogo enviou é o conjunto que a ferramenta disse, e o confronto por histograma
    de cor do `looks` (`confront.py --score`) é refeito com outro uniforme que não
