@@ -73,3 +73,8 @@ $ grep -n -iE "neo2k3" NOTICE.md | cut -c1-80
 $ grep -c -iE "neo2k3|kosmo|fabio" NOTICE.md
 1
 ```
+- **Closed** — commit `d30a4d78` (2026-10-01): docs(notice): credit Neo2k3, Kosmo and Fabio FJA, named inside Banderas 3D
+  - Files (`git show --name-status d30a4d78`):
+    - `M NOTICE.md`
+    - `M docs/tasks/kits/10-confronto-2-superpack.md`
+    - `M docs/tasks/kits/CORR-KITS-023.md`
