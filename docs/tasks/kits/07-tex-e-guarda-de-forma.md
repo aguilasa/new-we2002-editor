@@ -10,8 +10,8 @@ resources: []        # serialized resources this item needs (rite.toml [resource
 status: done
 done_on: 2026-10-01
 done_commit: c1d3fc48
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-10-01
+review_commit: 9938704a
 ---
 
 # KITS-TASK-07 — Ler o TEX com guarda de forma e a cauda marcada Form 2 no leiaute Form 1
@@ -123,3 +123,4 @@ $ python tools/kits/cli.py survey --negative roms/japanese-shift-jis.bin | tail 
     - `M tools/kits/core/source.py`
     - `M tools/kits/core/survey.py`
     - `A tools/kits/core/tex.py`
+- **Reviewed** (2026-10-01) at `9938704a`: CORR-KITS-013, CORR-KITS-014, CORR-KITS-015, CORR-KITS-016
