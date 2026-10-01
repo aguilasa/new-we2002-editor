@@ -44,3 +44,32 @@ $ grep -n -iE "neo2k3" NOTICE.md
 Hoje não imprime nada; depois tem de imprimir a linha do kits.
 
 ## Log de Execução
+
+### Reprodução (HEAD `f66559ad`, com `WE2002_KITS_CORPUS` apontado — o shell do `rite reproduce` não o tinha)
+
+```text
+$ cd "$WE2002_KITS_CORPUS"; find . -type f ! -iname '*.bin' ! -iname '*.tim' | grep -v "_BND\.\|BAND\.bmp"
+./Banderas 3D - Mixto/01 BASE_BAND_3D.bmp
+./Base bandera 3D - Neo2k3/Base bandera 3D - NEO2k3.psd
+./Hinchas por banderas 3D - Kosmo.psd
+./Remover as bandeiras 3D grandes e pequenas dos estádios - Fabio FJA/Remover as bandeiras 3D grandes e pequenas dos estádios - Fabio FJA.docx
+./Remover as bandeiras 3D grandes e pequenas dos estádios - Fabio FJA/Remover as bandeiras 3D grandes e pequenas dos estádios - Fabio FJA.ppf
+$ grep -c -iE "neo2k3|kosmo|fabio" NOTICE.md
+0
+```
+
+REPRODUCED.
+
+### O que foi feito
+
+- `NOTICE.md`, linha do WEZip/confronto 2: "não identificados" fica para os autores das bandeiras (nenhum nome de arquivo de bandeira nomeia quem a desenhou), e os três nomes da pasta entram creditados pelo que fizeram, dizendo que o confronto 2 não lê nada deles. A ligação Neo2k3 → bandeiras fica como **possível, não provada**: o `.psd` dele (2005) e o `01 BASE_BAND_3D.bmp` do `Mixto` (2006) têm os dois 128×128 (lido do cabeçalho de cada um), e nada na pasta diz que um saiu do outro ou que as bandeiras foram desenhadas sobre eles.
+- KITS-TASK-10, parágrafo "Créditos" das Notas: o mesmo.
+
+### Verificação
+
+```text
+$ grep -n -iE "neo2k3" NOTICE.md | cut -c1-80
+222:| **LaGaRTo**, with **WarlockDC** and **Jordinator** | WEZip 1.0 — compresse
+$ grep -c -iE "neo2k3|kosmo|fabio" NOTICE.md
+1
+```
