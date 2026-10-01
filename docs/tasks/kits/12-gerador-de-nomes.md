@@ -103,3 +103,4 @@ $ python -c "import sys;sys.path.insert(0,'tools/kits');from core.generated impo
     - `A tools/kits/core/generated/__init__.py`
     - `A tools/kits/core/generated/team_names.py`
     - `A tools/kits/gen_tables.py`
+- **Reviewed** (2026-10-01) at `7db6d0bc`: no finding
