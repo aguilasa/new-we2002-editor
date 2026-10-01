@@ -413,16 +413,18 @@ def _image_checks(c, image_path) -> None:
 
 
 def run_image(verbose: bool = True) -> int:
-    """`kits_image`: 77 without the disc, else the failure count (as 0 or 1)."""
+    """`kits_image`: 77 when the variable is not set, else the failure count
+    (as 0 or 1).  Set and pointing at no file is a failure, not a skip: the
+    run asked for the disc gate, and a typo must not turn it grey."""
     image_path = os.environ.get(IMAGE_VARIABLE)
     if not image_path:
         print("kits_image: skipped -- %s is not set (the Japanese data track .bin)"
               % IMAGE_VARIABLE)
         return SKIP
     if not os.path.isfile(image_path):
-        print("kits_image: skipped -- %s points at %s, which is not a file"
-              % (IMAGE_VARIABLE, image_path))
-        return SKIP
+        print("  FAIL  %s points at a file  %s is not one" % (IMAGE_VARIABLE, image_path))
+        print("kits_image: 1 failure(s)")
+        return 1
     total = harness.run("kits_image", _image_checks, verbose, image_path=image_path)
     return 1 if total else 0
 

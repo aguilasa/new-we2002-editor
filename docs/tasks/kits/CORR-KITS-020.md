@@ -42,3 +42,32 @@ $ WE2002_LOOKS_IMAGE=C:/nope/typo.bin python tools/kits/selftest.py --image; ech
 Hoje imprime 77; depois tem de imprimir 1.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `201c7915`)
+
+```text
+$ WE2002_LOOKS_IMAGE=C:/nope/typo.bin python tools/kits/selftest.py --image; echo $?
+kits_image: skipped -- WE2002_LOOKS_IMAGE points at C:/nope/typo.bin, which is not a file
+77
+```
+
+REPRODUCED (o `ctest` da Evidência não achou teste porque o `--scratch` rodou fora de um build).
+
+### O que foi feito
+
+`tools/kits/selftest.py`, `run_image`: variável definida e caminho que não é arquivo agora imprime uma linha `FAIL` e sai 1. O 77 ficou só para a variável não definida; o `tests/CMakeLists.txt` (`SKIP_RETURN_CODE 77`) não muda.
+
+### Verificação
+
+```text
+$ WE2002_LOOKS_IMAGE=C:/nope/typo.bin python tools/kits/selftest.py --image; echo $?
+  FAIL  WE2002_LOOKS_IMAGE points at a file  C:/nope/typo.bin is not one
+kits_image: 1 failure(s)
+1
+$ env -u WE2002_LOOKS_IMAGE python tools/kits/selftest.py --image; echo $?
+kits_image: skipped -- WE2002_LOOKS_IMAGE is not set (the Japanese data track .bin)
+77
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python tools/kits/selftest.py --image | tail -1; echo $?
+kits_image: 0 failure(s)
+0
+```
