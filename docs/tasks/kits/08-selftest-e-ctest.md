@@ -7,10 +7,10 @@ depends_on: [KITS-TASK-07]
 source_of_truth: "/docs/PLAN-KITS-PY.md#3.5"
 files: ["tools/kits/selftest.py", "tools/kits/controls.py", "tests/CMakeLists.txt"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
-done_on: null
-done_commit: null
-reviewed_on: null
+status: done
+done_on: 2026-10-01
+done_commit: e243594d
+reviewed_on: pending
 review_commit: null
 ---
 
@@ -102,3 +102,10 @@ $ python tools/kits/controls.py      # exit 0
   RED    looks-layout-empty-slot      looks/layout.py :: the pointer-list walk
 controls: 9 of 9 red
 ```
+- **Closed** — commit `e243594d` (2026-10-01): test(kits): add kits_selftest, kits_image and the planted controls
+  - Files (`git show --name-status e243594d`):
+    - `M docs/tasks/kits/08-selftest-e-ctest.md`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tests/CMakeLists.txt`
+    - `A tools/kits/controls.py`
+    - `A tools/kits/selftest.py`
