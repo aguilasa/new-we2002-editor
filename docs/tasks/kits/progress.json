@@ -224,10 +224,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#7",
       "files": [],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-01",
+      "done_commit": "992f0b07",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

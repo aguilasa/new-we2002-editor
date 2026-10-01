@@ -71,3 +71,8 @@ against we2002_core: 95 of 95 ROM names equal (95 lines in core_names_eu.tsv)
 $ rite check --cycle kits --json
 {'errors': 0, 'warnings': 0}
 ```
+- **Closed** — commit `992f0b07` (2026-10-01): docs(kits): close phase 2, checked at HEAD
+  - Files (`git show --name-status 992f0b07`):
+    - `M docs/tasks/kits/14-fechamento-fase-2.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
