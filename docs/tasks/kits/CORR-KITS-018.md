@@ -90,3 +90,10 @@ controls: 11 of 11 red
 ```
 
 Saídas do CLI iguais: `survey | md5sum` → `c2ec025a808afd4ffbe4c39fca0d991a`; `uv` → `2360a921…48fb84`; `prims --negative` 14 de 14, `rects --negative` 1 de 1, `survey --negative` 4 de 4, `uv --negative` 11 de 11.
+- **Closed** — commit `8217b130` (2026-10-01): fix(kits): keep cli.py behind the facade and gate the rule
+  - Files (`git show --name-status 8217b130`):
+    - `M docs/tasks/kits/CORR-KITS-018.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/selftest.py`
