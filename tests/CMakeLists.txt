@@ -288,3 +288,27 @@ if(Python3_FOUND)
         RESOURCE_LOCK duckstation
         TIMEOUT 600)
 endif()
+
+# The kit viewer (docs/PLAN-KITS-PY.md) is the seventh project: Python 3 in
+# tools/kits/, importing the looks core instead of copying it.
+if(Python3_FOUND)
+    # The mandatory gate, needing nothing and never skipping: the self-check of
+    # every looks module the kits code imports (the coupling of section 6,
+    # derived from the imports), the core on a container built in memory, the
+    # no-print/no-exit/no-Qt rule on core/, and every control of
+    # tools/kits/controls.py planted in a copy and required to go red.
+    add_test(NAME kits_selftest
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/kits/selftest.py --quiet)
+    set_tests_properties(kits_selftest PROPERTIES TIMEOUT 300)
+
+    # The disc gate: WE2002_LOOKS_IMAGE (the Japanese data track) through the
+    # facade -- every kit passes the guard of form, control 4 holds on a real
+    # kit, the recognition fixtures give what they have to.  77 without it.
+    add_test(NAME kits_image
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/kits/selftest.py --image --quiet)
+    set_tests_properties(kits_image PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 300)
+endif()
