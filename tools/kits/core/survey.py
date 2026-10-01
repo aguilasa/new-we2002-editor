@@ -20,41 +20,20 @@ see the counts move.  `survey_image()` opens a disc and feeds it.
 from __future__ import annotations
 
 import hashlib
-import os
-import sys
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Mapping, Optional
 
-_TOOLS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-for _sub in ("pes2", "looks"):
-    _path = os.path.normpath(os.path.join(_TOOLS, _sub))
-    if _path not in sys.path:
-        sys.path.insert(0, _path)
+from .errors import KitsError
+from .tex import EXPECTED_SHAPE, KIND_CLUT, KIND_IMAGE  # noqa: F401  (one home: tex.py)
+from .tex import shape_of as _shape_of
 
-import bin_archive  # noqa: E402  (tools/pes2, after the path insert)
+# `tex` has put tools/pes2 and tools/looks on sys.path.
+import bin_archive  # noqa: E402
 import iso  # noqa: E402
 import lzss  # noqa: E402
 import layout  # noqa: E402  (tools/looks: where the kit files are named)
 
-
-KIND_IMAGE = "image"
-KIND_CLUT = "clut"
-
-EXPECTED_SHAPE = (
-    (KIND_IMAGE, 576, 256, 64, 128),   # 0 uniform, first set
-    (KIND_IMAGE, 576, 384, 64, 128),   # 1 sleeves, first set
-    (KIND_CLUT, 0, 486, 256, 1),       # 2 player palette, first set
-    (KIND_CLUT, 0, 488, 256, 1),       # 3 goalkeeper palette, first set
-    (KIND_IMAGE, 576, 256, 64, 128),   # 4 uniform, second set
-    (KIND_IMAGE, 576, 384, 64, 128),   # 5 sleeves, second set
-    (KIND_CLUT, 0, 486, 256, 1),       # 6 player palette, second set
-    (KIND_CLUT, 0, 488, 256, 1),       # 7 goalkeeper palette, second set
-    (KIND_IMAGE, 704, 256, 64, 64),    # 8 flag
-    (KIND_CLUT, 256, 480, 256, 1),     # 9 flag palette
-    (KIND_IMAGE, 768, 384, 64, 128),   # 10 referee
-)
-"""(kind, x, y, w, h) of every record, in file order, as section 1.1 measured."""
 
 FIRST_IMAGES = (0, 1)
 SECOND_IMAGES = (4, 5)
@@ -64,7 +43,7 @@ FLAG = 8
 REFEREE = 10
 
 
-class SurveyError(Exception):
+class SurveyError(KitsError):
     """The survey could not run; the message is what a UI would show."""
 
 
@@ -188,14 +167,6 @@ class Survey:
     def size_range(self) -> tuple:
         sizes = [k.size for k in self.kits]
         return (min(sizes), max(sizes)) if sizes else (0, 0)
-
-
-def _shape_of(records) -> tuple:
-    out = []
-    for e in records:
-        kind = KIND_IMAGE if e.is_image else KIND_CLUT if e.is_clut else "kind %d" % e.kind
-        out.append((kind, e.x, e.y, e.w, e.h))
-    return tuple(out)
 
 
 def _clut_bytes(data: bytes, entry) -> bytes:

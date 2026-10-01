@@ -71,7 +71,7 @@ este perfil e o plano divergirem, o plano ganha.
 - `python tools/kits/controls.py`: todo controle vermelho, incluindo o byte trocado no LZSS (§5.4).
 - `cli.py` só importa `core.api` e stdlib (§3.1).
 - `NOTICE.md` tem a seção do `tools/kits/`, com CARP e `we3d`; nenhuma linha cita o Superpack como fonte.
-- European Deluxe: 16 dos 18 com cauda Form 2 abrem, `TEX_13` e `TEX_48` recusados com o motivo (§2.1).
+- European Deluxe: `cli.py tex` dá 97 que abrem e 8 recusados com o motivo, `TEX_48` entre eles; `TEX_13` abre lido além do tamanho ISO; `--iso-size` reproduz os 16 dos 18 com cauda Form 2 (§2.1).
 
 ### Fase 2 — núcleo, lado ROM
 
@@ -114,5 +114,5 @@ este perfil e o plano divergirem, o plano ganha.
 
 ### Fase 9 — diagnóstico e pronto
 
-- `TEX_13` e `TEX_48` aparecem na aba com o motivo (§0, item 3).
+- `TEX_48` e `TEX_70` aparecem na aba com o motivo, e o `TEX_13` com a nota de leitura além do tamanho ISO (§0, item 3; §2.1).
 - Os cinco itens da Definição de pronto conferidos com comando (§0).

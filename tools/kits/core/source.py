@@ -12,9 +12,14 @@ Three things are recognised, tried in this order:
   data track it names is resolved against the cue's own folder and opened
   as the disc above;
 * a kit container (`TEX_<tag>.BIN`) -- bytes whose record list has the
-  11-record shape of section 1.1 (`survey.EXPECTED_SHAPE`).
+  11-record shape of section 1.1 (`tex.EXPECTED_SHAPE`).
 
 Anything else is refused with a typed error from `errors`.
+
+Either source then gives its kit containers through `kit()`, read by
+`tex.read_kit` behind the guard of form.  On a disc, a sector marked
+Form 2 whose bytes are in the Form 1 layout is read as Form 1, and the
+kit's `notes` say so (section 2.1).
 """
 
 from __future__ import annotations
@@ -25,8 +30,9 @@ import struct
 from dataclasses import dataclass
 from typing import Optional
 
-from . import survey
-from .errors import NotASource, SourceEmpty, SourceMissing, SourceUnreadable
+from . import survey, tex
+from .errors import (KitMissing, KitUnreadable, NotASource, SourceEmpty,
+                     SourceMissing, SourceUnreadable)
 
 # `survey` has already put tools/pes2 on sys.path; these are the same modules.
 import bin_archive  # noqa: E402
@@ -67,6 +73,39 @@ class RomSource:
         """The tags of every kit container on the disc, sorted."""
         return self.tags
 
+    def kit(self, tag: str, trust_iso_size: bool = False) -> tex.Kit:
+        """The kit container *tag*, read behind the guard of form.
+
+        Its `problems` say whether it passed; `KitMissing` if the disc has
+        no such tag, `KitUnreadable` if a sector of it is Form 2 for real.
+        *trust_iso_size* reads only the ISO size, the way `iso.py` would:
+        the diagnostic that shows what the header extent recovers."""
+        return self.kits((tag,), trust_iso_size)[0]
+
+    def kits(self, tags=None, trust_iso_size: bool = False) -> tuple:
+        """`kit()` of each of *tags* (default: every tag), opening the disc once."""
+        tags = self.tags if tags is None else tuple(tags)
+        for tag in tags:
+            if tag not in self.tags:
+                raise KitMissing("%s has no kit container %s."
+                                 % (self.path, survey.layout.KIT_PREFIX + tag
+                                    + survey.layout.KIT_SUFFIX))
+        try:
+            image = iso.Image(self.image_path)
+        except OSError as exc:
+            raise SourceUnreadable("Could not read %s: %s"
+                                   % (self.image_path, exc.strerror or exc)) from exc
+        try:
+            out = []
+            for tag in tags:
+                path = survey.layout.KIT_DIR + survey.layout.KIT_PREFIX + tag                     + survey.layout.KIT_SUFFIX
+                data, notes = read_disc_file(image, path, trust_iso_size)
+                out.append(tex.read_kit(data, label="%s on %s" % (path, self.path),
+                                        notes=notes))
+            return tuple(out)
+        finally:
+            image.close()
+
 
 @dataclass(frozen=True)
 class TexSource:
@@ -80,6 +119,99 @@ class TexSource:
     @property
     def size(self) -> int:
         return len(self.data)
+
+    def kit(self, tag: Optional[str] = None) -> tex.Kit:
+        """The file itself, read behind the guard of form; *tag* is ignored."""
+        return tex.read_kit(self.data, label=self.path)
+
+
+# -- the Form 2 tail ------------------------------------------------------
+
+FORM2_TAIL = slice(iso.HEADER + iso.FORM1_DATA, iso.HEADER + 2324)
+"""Bytes 2072..2347 of a raw sector: data in a real Form 2 sector, the
+EDC/ECC area in Form 1.  Zero in every sector of the European Deluxe
+whose subheader says Form 2 over a Form 1 layout (section 2.1)."""
+
+
+def _slot_end(image, entry) -> int:
+    """The first sector after *entry* that holds another file, or the end
+    of the track: how far the file can reach without overlapping one."""
+    later = [e.lba for e in image.files.values() if e.lba > entry.lba]
+    return min(later + [image.sector_count])
+
+
+def _sector_data(image, path: str, lba: int, index: int, count: int) -> tuple:
+    """(2,048 data bytes, marked Form 2?) of one sector of *path*."""
+    if image.form(lba) == 1:
+        return image.read_sector(lba), False
+    image.f.seek(lba * iso.RAW_SECTOR)
+    raw = image.f.read(iso.RAW_SECTOR)
+    if any(raw[FORM2_TAIL]):
+        raise KitUnreadable(
+            "%s on %s: sector %d (%d of %d) is Form 2 with data past byte 2048, "
+            "so it is not a Form 1 sector with a wrong bit." % (
+                path, image.path, lba, index + 1, count))
+    return raw[iso.HEADER:iso.HEADER + iso.FORM1_DATA], True
+
+
+def read_disc_file(image, path: str, trust_iso_size: bool = False) -> tuple:
+    """(bytes, notes) of the kit container *path* on an opened `iso.Image`.
+
+    Two things a patched disc gets wrong are not trusted, and the notes say
+    when either was overruled:
+
+    * **the size.**  The European Deluxe kept the Japanese ISO size for
+      most of its TEX, and their own header lists records past it.  The
+      file is read to where its header says it ends (`tex.declared_extent`)
+      when that is past the ISO size and before the next file starts;
+    * **the Form 2 bit.**  A sector marked Form 2 whose bytes 2072..2347
+      are zero is in the Form 1 layout with a wrong bit, and gives the
+      2,048 at byte 24 (section 2.1).  A Form 2 sector with data there is
+      refused.
+
+    *trust_iso_size* skips the first: the file is read to its ISO size.
+    """
+    entry = image.entry(path)
+    if entry.lba + entry.sectors > image.sector_count:
+        raise KitUnreadable("%s on %s runs past the end of the data track."
+                            % (path, image.path))
+    slot = _slot_end(image, entry) - entry.lba
+    chunks, marked = [], []
+    for i in range(entry.sectors):
+        data, form2 = _sector_data(image, path, entry.lba + i, i, entry.sectors)
+        chunks.append(data)
+        if form2:
+            marked.append(entry.lba + i)
+    data = b"".join(chunks)
+    notes = []
+    extent = None if trust_iso_size else tex.declared_extent(data)
+    if extent is None and not trust_iso_size and slot > entry.sectors:
+        # The header's last list may itself be past the ISO size: look in the slot.
+        for i in range(entry.sectors, slot):
+            more, form2 = _sector_data(image, path, entry.lba + i, i, slot)
+            chunks.append(more)
+            if form2:
+                marked.append(entry.lba + i)
+            extent = tex.declared_extent(b"".join(chunks))
+            if extent is not None:
+                break
+        data = b"".join(chunks)
+    size = entry.size
+    if extent is not None and entry.size < extent <= len(data):
+        notes.append(tex.Note(tex.NOTE_PAST_ISO_SIZE,
+                              "its ISO size is %d bytes and its own header ends at byte %d, "
+                              "before the next file; read to %d."
+                              % (entry.size, extent, extent)))
+        size = extent
+    if marked:
+        reached = [m for m in marked if (m - entry.lba) * iso.FORM1_DATA < size]
+        if reached:
+            notes.append(tex.Note(tex.NOTE_FORM2_TAIL,
+                                  "%d of the %d sectors read (%s) are marked Form 2 with "
+                                  "the data in the Form 1 layout (bytes 2072-2347 zero); "
+                                  "read as Form 1." % (len(reached), -(-size // iso.FORM1_DATA),
+                                                      ", ".join(str(m) for m in reached))))
+    return data[:size], tuple(notes)
 
 
 def _check_readable(path: str) -> int:
@@ -171,20 +303,7 @@ def _open_cue(path: str, text: str) -> Optional[RomSource]:
 
 def _tex_problem(data: bytes) -> Optional[str]:
     """None if *data* has the kit container shape, else the first thing that differs."""
-    shape = survey._shape_of(bin_archive.entries(data))
-    expected = survey.EXPECTED_SHAPE
-    if shape == expected:
-        return None
-    if not shape:
-        return "it holds no image or palette record list"
-    if len(shape) != len(expected):
-        return ("it has %d image/palette records where a kit container has %d"
-                % (len(shape), len(expected)))
-    for i, (got, want) in enumerate(zip(shape, expected)):
-        if got != want:
-            return ("record %d is %s at (%d,%d) %dx%d where a kit container has "
-                    "%s at (%d,%d) %dx%d" % ((i,) + got + want))
-    return "its records differ from a kit container's"  # unreachable: shapes differ
+    return tex.shape_problem(bin_archive.entries(data))
 
 
 def open_source(path: str):
@@ -259,21 +378,21 @@ def build_open_fixtures(image_path: str, folder: str) -> tuple:
     kit_path = survey.layout.kit_path(CONTROL_KIT_TAG)
     image = iso.Image(image_path)
     try:
-        tex = image.read_file(kit_path)
+        kit_bytes = image.read_file(kit_path)
     finally:
         image.close()
-    first = bin_archive.entries(tex)[0]
+    first = bin_archive.entries(kit_bytes)[0]
     tag_at = first.pos + TEX_TAG_FIELD
     j = lambda name: os.path.join(folder, name)  # noqa: E731
 
-    _write(j("kit.bin"), tex)
+    _write(j("kit.bin"), kit_bytes)
     os.link(image_path, j("disc.tex"))
     with open(j("disc.cue"), "w", encoding="ascii") as fh:
         fh.write('FILE "disc.tex" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n')
-    broken = bytearray(tex)
+    broken = bytearray(kit_bytes)
     broken[tag_at] ^= 0xFF
     _write(j("broken-tag.tex"), bytes(broken))
-    kind = bytearray(tex)
+    kind = bytearray(kit_bytes)
     kind[first.pos] ^= 0xFF
     _write(j("broken-kind.tex"), bytes(kind))
     _write(j("note.txt"), b"this is not a CD image")
@@ -283,11 +402,11 @@ def build_open_fixtures(image_path: str, folder: str) -> tuple:
         fh.write('FILE "nothere.bin" BINARY\n  TRACK 01 MODE2/2352\n')
     os.mkdir(j("folder"))
 
-    n = len(survey.EXPECTED_SHAPE)
+    n = len(tex.EXPECTED_SHAPE)
     return (
         ("disc.tex", "hard link to the disc", KIND_ROM, ""),
         ("disc.cue", "cue sheet naming disc.tex", KIND_ROM, ""),
-        ("kit.bin", "%s extracted (%d bytes)" % (kit_path, len(tex)), KIND_TEX, ""),
+        ("kit.bin", "%s extracted (%d bytes)" % (kit_path, len(kit_bytes)), KIND_TEX, ""),
         ("broken-tag.tex", "kit.bin, byte %d (record 0 at %d, +%d: the tag) XOR 0xFF"
          % (tag_at, first.pos, TEX_TAG_FIELD), "NotASource",
          "it has %d image/palette records where a kit container has %d" % (n - 1, n)),

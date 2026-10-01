@@ -168,13 +168,45 @@ Então a ferramenta **não** herda a recusa. O `source.py` lê a cauda marcada F
 zerado), e o diagnóstico diz que leu assim. Não é trabalho de ler Form 2 de
 verdade; é não confiar num bit que o patch deixou errado.
 
-Os dois que sobram são outra coisa, e são exatamente o que a aba
-"Diagnóstico" existe para mostrar:
+**E o tamanho ISO também mente.** Medido em 2026-10-01 na KITS-TASK-07: na
+European Deluxe, **64 dos 105** TEX têm, na tabela de ponteiros do próprio
+cabeçalho, uma lista de registros **depois** do tamanho que o diretório ISO
+declara — o patch aumentou os arquivos e deixou o tamanho do diretório como
+estava. Cada TEX ocupa um espaço de 20 setores até o arquivo seguinte, e o
+que o cabeçalho aponta está dentro dele. Lido pelo tamanho ISO, 65 TEX
+saem com 8 a 10 registros; lido até onde o cabeçalho diz que o contêiner
+acaba, eles têm os 11. Então o `source.py` também **não** confia no tamanho:
+lê até o fim que o cabeçalho declara (`tex.declared_extent`) quando ele passa
+do tamanho ISO e cabe antes do arquivo seguinte, e o diagnóstico diz que leu
+assim. Os setores que essa leitura alcança têm o mesmo bit Form 2 errado; os
+"18" acima são os que caem **dentro** do tamanho ISO.
 
-- `TEX_13` tem **10 registros**: falta o árbitro;
-- `TEX_48` tem o fluxo LZSS da **primeira imagem quebrado** ("distance 0" no
-  byte 4.810, num setor Form 1) — o sintoma de TEX corrompido que o
-  SUPERPACK-UNIFORMES §4.3 atribui ao compressor do Walxer.
+```
+$ python tools/kits/cli.py tex --iso-size roms/golden-european-deluxe.bin   # a leitura antiga
+105 kits: 40 pass, 65 refused; 0 read past the ISO size, 18 with sectors marked Form 2 read as Form 1
+$ python tools/kits/cli.py tex roms/golden-european-deluxe.bin
+105 kits: 97 pass, 8 refused; 64 read past the ISO size, 67 with sectors marked Form 2 read as Form 1
+```
+
+**O `TEX_13` não tem 10 registros.** A versão anterior desta seção dizia que
+faltava o árbitro; é o tamanho: o tamanho ISO dele é 31.792 bytes, o cabeçalho
+acaba no 32.146, e o árbitro está entre os dois e descomprime em 16.384.
+
+Os 8 que sobram são outra coisa, e são exatamente o que a aba "Diagnóstico"
+existe para mostrar — fluxo LZSS que não decodifica ou que não dá o tamanho do
+retângulo:
+
+- `TEX_48`: a **primeira imagem** dá "distance 0" no byte 4.810, num setor
+  Form 1 — o sintoma de TEX corrompido que o SUPERPACK-UNIFORMES §4.3 atribui
+  ao compressor do Walxer;
+- `TEX_70`: o 2º uniforme dá "distance 0" no 16.938; `TEX_A2`: o árbitro
+  aponta antes do começo da saída;
+- `TEX_06`, `TEX_84` (2º uniforme) e `TEX_28` (bandeira) passam de 16.384;
+- `TEX_03` (2ª manga, 15.481) e `TEX_92` (árbitro, 16.357) ficam abaixo.
+
+O `tools/pes2/bin_archive.py` tolera seis registros quebrados nessa imagem
+(`HACKED`) e nomeia o `TEX_70` no byte 18.052; a guarda acusa o 16.938. **Não
+conferido** se os seis dele são seis destes oito.
 
 ## 3. Arquitetura
 
@@ -226,7 +258,9 @@ cliente da fachada e a prova de que ela basta: se a CLI precisar importar algo
 além de `api`, a fachada está incompleta. Ao lado desses quatro ela tem `open`,
 o que a fachada faz de cada arquivo (§3.2; `open --negative` monta as fixtures e
 confere cada recusa), entrado na KITS-TASK-06 para a evidência sair de comando
-versionado, e as sondas de medição da fase 0 (`survey`, `rects`, `prims`, `uv`)
+versionado, `tex`, a guarda de forma sobre cada TEX de uma origem (§2.1;
+`--iso-size` refaz a leitura pelo tamanho ISO, `--negative` o controle 4 do
+§5), entrado na KITS-TASK-07 pelo mesmo motivo, e as sondas de medição da fase 0 (`survey`, `rects`, `prims`, `uv`)
 ([CORR-KITS-012](/docs/tasks/kits/CORR-KITS-012.md)).
 
 Endereço só em um módulo, como no `looks` (regra 1 dele): os offsets de nome de

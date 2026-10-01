@@ -12,6 +12,7 @@ Usage:
     python tools/kits/cli.py prims [--kit TAG] --tuple T [--tuple T ...] <image.bin>
     python tools/kits/cli.py uv [--kit TAG] [--json | --negative] <image.bin>
     python tools/kits/cli.py open <path> [<path> ...]
+    python tools/kits/cli.py tex [--tag TAG ...] [--iso-size] [--negative] <path>
 """
 
 from __future__ import annotations
@@ -366,6 +367,74 @@ def cmd_open(args) -> int:
     return 1 if refused else 0
 
 
+def _kits_of(source, tags, trust_iso_size=False):
+    """(label, Kit or the KitError raised) for each kit of *source*."""
+    if source.kind != api.KIND_ROM:
+        return [(os.path.basename(source.path), source.kit())]
+    out = []
+    for tag in tags or source.kit_tags():
+        try:
+            out.append(("TEX_" + tag, source.kit(tag, trust_iso_size)))
+        except api.KitError as exc:
+            out.append(("TEX_" + tag, exc))
+    return out
+
+
+def _tex_negative(kits) -> int:
+    """Section 5, control 4, on the first kit that passed."""
+    sound = [(name, k) for name, k in kits if not isinstance(k, Exception) and k.ok]
+    if not sound:
+        print("tex: --negative needs a kit that passes the guard, and none did",
+              file=sys.stderr)
+        return 1
+    name, kit = sound[0]
+    c = api.stream_control(kit)
+    print("control: %s, byte %d (record 0 stream +%d) 0x%02x -> 0x%02x"
+          % (name, c.at, c.at - c.offset, c.before, c.after))
+    print("  clean:   %s" % ("passes" if c.clean.ok else "; ".join(c.clean.problems)))
+    print("  planted: %s" % ("passes" if c.planted.ok else "; ".join(c.planted.problems)))
+    print("control %s" % ("held: the planted kit is refused on record 0" if c.ok
+                          else "FAILED"))
+    return 0 if c.ok else 1
+
+
+def cmd_tex(args) -> int:
+    """Each kit container of a source through the guard of form (section 2.1).
+
+    Exit 1 when any kit is refused; with --negative, the exit is the
+    control's alone.
+    """
+    try:
+        source = api.open_source(args.path)
+    except api.KitsError as exc:
+        print("tex: %s" % exc, file=sys.stderr)
+        return 1
+    kits = _kits_of(source, args.tag, args.iso_size)
+    if args.negative:
+        return _tex_negative(kits)
+    refused = 0
+    noted = {api.NOTE_PAST_ISO_SIZE: 0, api.NOTE_FORM2_TAIL: 0}
+    for name, kit in kits:
+        if isinstance(kit, Exception):
+            refused += 1
+            print("REFUSE %s -> %s: %s" % (name, type(kit).__name__, kit))
+            continue
+        if kit.problems:
+            refused += 1
+            print("REFUSE %s (%d bytes): %s" % (name, kit.size, "; ".join(kit.problems)))
+        else:
+            print("PASS   %s (%d bytes): %d images, %d palettes"
+                  % (name, kit.size, len(kit.images), len(kit.palettes)))
+        for note in kit.notes:
+            noted[note.kind] += 1
+            print("  note: %s" % note)
+    print("%d kits: %d pass, %d refused; %d read past the ISO size, "
+          "%d with sectors marked Form 2 read as Form 1"
+          % (len(kits), len(kits) - refused, refused, noted[api.NOTE_PAST_ISO_SIZE],
+             noted[api.NOTE_FORM2_TAIL]))
+    return 1 if refused else 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -409,6 +478,15 @@ def main(argv=None) -> int:
     p.add_argument("--negative", action="store_true",
                    help="build the recognition fixtures from one disc and check each outcome")
     p.set_defaults(fn=cmd_open)
+    p = sub.add_parser("tex", help="every kit container of a source through the guard of form")
+    p.add_argument("path", help="a disc image, a cue sheet or a lone TEX")
+    p.add_argument("--tag", action="append", help="only this tag (repeatable; disc only)")
+    p.add_argument("--iso-size", action="store_true",
+                   help="read each TEX to its ISO size only, not to where its header ends")
+    p.add_argument("--negative", action="store_true",
+                   help="change one byte of record 0's LZSS stream in the first sound kit "
+                        "and check it is refused")
+    p.set_defaults(fn=cmd_tex)
     args = parser.parse_args(argv)
     return args.fn(args)
 

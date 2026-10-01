@@ -30,3 +30,19 @@ class SourceEmpty(SourceError):
 
 class NotASource(SourceError):
     """The file was read, and it is neither a CD image nor a kit container."""
+
+
+class KitError(KitsError):
+    """A kit container of a source cannot be given whole."""
+
+
+class KitMissing(KitError):
+    """The source has no kit container by that tag."""
+
+
+class KitUnreadable(KitError):
+    """The kit container's sectors cannot be read as data (a real Form 2 sector)."""
+
+
+class KitRefused(KitError):
+    """The kit container was read and fails the guard of form (section 2.1)."""
