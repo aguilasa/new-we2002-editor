@@ -477,7 +477,9 @@ em x 48–63. A fase 3 cruza essa lista com o mapa de zonas.
 ## 5. Como se verifica
 
 1. **Dois decodificadores concordam.** `tex.py` e `bin_archive.py export` sobre
-   as mesmas 105 tags, imagem por imagem e paleta por paleta.
+   as mesmas 105 tags, imagem por imagem e paleta por paleta
+   (`cli.py export --confront <imagem>`; `--negative` muda um pixel do nosso
+   lado, que tem de divergir).
 2. **A comunidade como oráculo externo.** O Superpack tem ~150 pares
    `*_BND.bin` + `*_BND.tim` em `Banderas 3D/`: o `.bin` saiu do WEZip a partir
    do `.tim`, então a nossa descompressão do `.bin` tem de devolver os pixels do

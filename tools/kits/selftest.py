@@ -33,6 +33,7 @@ import importlib.util
 import io
 import os
 import re
+import subprocess
 import struct
 import sys
 import tempfile
@@ -410,6 +411,33 @@ def _image_checks(c, image_path) -> None:
         c.ok("every recognition fixture gives what it has to",
              opened and all(o.ok for o in opened),
              "%s" % [o.name for o in opened if not o.ok])
+    _confront_checks(c, image_path, len(kits))
+
+
+CONFRONT_LINE = re.compile(r"^confront 1: (\d+) of (\d+) tags equal", re.MULTILINE)
+
+
+def _confront_checks(c, image_path, n_kits) -> None:
+    """Confront 1 of section 5 through `cli.py export --confront`, and its
+    control: one pixel changed on our side has to make exactly that tag differ."""
+    cli = os.path.join(KITS_DIR, "cli.py")
+    for negative in (False, True):
+        argv = [sys.executable, cli, "export", "--confront", image_path]
+        if negative:
+            argv.insert(4, "--negative")
+        proc = subprocess.run(argv, capture_output=True, text=True)
+        m = CONFRONT_LINE.search(proc.stdout)
+        got = (int(m.group(1)), int(m.group(2))) if m else None
+        if not negative:
+            c.ok("confront 1: every kit equal to bin_archive.py export",
+                 proc.returncode == 0 and got == (n_kits, n_kits),
+                 "exit %d, %s" % (proc.returncode, got))
+            print("  ..... confront 1: %s of %s tags equal" % (got or ("?", "?")))
+        else:
+            c.ok("confront 1 control: one pixel changed on our side makes one tag differ",
+                 proc.returncode == 0 and got == (n_kits - 1, n_kits)
+                 and "red, held" in proc.stdout,
+                 "exit %d, %s" % (proc.returncode, got))
 
 
 def run_image(verbose: bool = True) -> int:

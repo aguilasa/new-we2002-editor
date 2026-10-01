@@ -144,7 +144,7 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#5",
       "files": ["tools/kits/cli.py", "tools/kits/selftest.py", "tools/kits/core/api.py"],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,

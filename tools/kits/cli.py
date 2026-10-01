@@ -13,6 +13,9 @@ Usage:
     python tools/kits/cli.py uv [--kit TAG] [--json | --negative] <image.bin>
     python tools/kits/cli.py open <path> [<path> ...]
     python tools/kits/cli.py tex [--tag TAG ...] [--iso-size] [--negative] <path>
+    python tools/kits/cli.py info [--tag TAG ...] <path>
+    python tools/kits/cli.py export --out DIR [--tag TAG ...] [--palette K] <path>
+    python tools/kits/cli.py export --confront [--negative] [--tag TAG ...] <image.bin>
 """
 
 from __future__ import annotations
@@ -20,7 +23,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import struct
+import subprocess
 import sys
+import tempfile
+import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -51,9 +58,8 @@ def print_survey(s) -> None:
     n = s.total
     print("Kit container survey: %s" % s.source)
     print("  %-46s %3d" % ("TEX_<tag>.BIN containers", n))
-    images = sum(1 for r in survey_mod.EXPECTED_SHAPE if r[0] == survey_mod.KIND_IMAGE)
-    cluts = len(survey_mod.EXPECTED_SHAPE) - images
-    _count("shape %d images + %d CLUTs, same rects/order" % (images, cluts), s.shape_ok, n)
+    _count("shape %d images + %d CLUTs, same rects/order"
+           % (api.IMAGE_COUNT, api.PALETTE_COUNT), s.shape_ok, n)
     print("  %-46s %3d" % ("distinct shapes", s.distinct_shapes))
     if s.shape_off:
         print("  off-shape: %s" % ", ".join("TEX_" + t for t in s.shape_off))
@@ -94,8 +100,8 @@ def cmd_survey(args) -> int:
     try:
         if args.negative:
             return print_controls(survey_mod.negative_controls_image(args.image))
-        result = survey_mod.survey_image(args.image)
-    except survey_mod.SurveyError as exc:
+        result = api.survey_image(args.image)
+    except api.SurveyError as exc:
         print("survey: %s" % exc, file=sys.stderr)
         return 1
     print_survey(result)
@@ -456,6 +462,222 @@ def cmd_tex(args) -> int:
     return 1 if refused else 0
 
 
+def cmd_info(args) -> int:
+    """What a source is, and with --tag (or a lone TEX) what one kit holds."""
+    try:
+        source = api.open_source(args.path)
+    except api.KitsError as exc:
+        print("info: %s" % exc, file=sys.stderr)
+        return 1
+    if source.kind == api.KIND_ROM:
+        print("disc   %s" % source.path)
+        print("  data track     %s" % source.image_path)
+        print("  volume         %s" % source.volume_id)
+        print("  files          %d" % source.file_count)
+        print("  kit containers %d" % len(source.kit_tags()))
+        if not args.tag:
+            return 0
+    else:
+        print("lone TEX  %s (%d bytes)" % (source.path, source.size))
+    bad = 0
+    for name, kit in _kits_of(source, args.tag):
+        if isinstance(kit, Exception):
+            bad += 1
+            print("%s: %s: %s" % (name, type(kit).__name__, kit))
+            continue
+        bad += not kit.ok
+        print("%s  %d bytes  %s" % (name, kit.size, "passes the guard" if kit.ok
+                                    else "REFUSED"))
+        for p in kit.problems:
+            print("  problem: %s" % p)
+        for note in kit.notes:
+            print("  note: %s" % note)
+        for im in kit.images:
+            print("  image   record %2d  %-30s %3dx%-3d" % (im.record, im.name, im.width,
+                                                          im.height))
+        for pal in kit.palettes:
+            print("  palette record %2d  %-30s %3d colours" % (pal.record, pal.name,
+                                                             len(pal.raw) // 2))
+    return 1 if bad else 0
+
+
+# -- export, and confront 1 of plan section 5 ------------------------------
+#
+# The PNG is written and read here with the standard library only: the CLI
+# imports nothing but the facade, and the other side of confront 1 --
+# tools/pes2/bin_archive.py export -- runs as its own process.
+
+BIN_ARCHIVE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "pes2", "bin_archive.py")
+
+
+def bgr555_rgba(raw: bytes) -> list:
+    """(r, g, b, a) per BGR555 halfword; black with the STP bit clear is the
+    transparent entry (the PSX rule)."""
+    out = []
+    for i in range(0, len(raw), 2):
+        v = raw[i] | raw[i + 1] << 8
+        r, g, b = v & 0x1F, (v >> 5) & 0x1F, (v >> 10) & 0x1F
+        alpha = 0 if (v & 0x7FFF) == 0 and not v & 0x8000 else 255
+        out.append((r << 3 | r >> 2, g << 3 | g >> 2, b << 3 | b >> 2, alpha))
+    return out
+
+
+def write_png(path: str, width: int, height: int, indices: bytes, palette) -> None:
+    """An 8-bit indexed PNG with tRNS."""
+    def chunk(tag, body):
+        return (struct.pack(">I", len(body)) + tag + body
+                + struct.pack(">I", zlib.crc32(tag + body) & 0xFFFFFFFF))
+    raw = b"".join(b"\0" + indices[r * width:(r + 1) * width] for r in range(height))
+    with open(path, "wb") as fh:
+        fh.write(b"\x89PNG\r\n\x1a\n"
+                 + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 3, 0, 0, 0))
+                 + chunk(b"PLTE", b"".join(bytes(c[:3]) for c in palette))
+                 + chunk(b"tRNS", bytes(c[3] for c in palette))
+                 + chunk(b"IDAT", zlib.compress(raw, 9))
+                 + chunk(b"IEND", b""))
+
+
+def read_png(path: str) -> tuple:
+    """(width, height, indices, palette as [(r, g, b, a)]) of an 8-bit
+    indexed PNG with filter 0 on every row, which both writers emit."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    p, chunks = 8, {}
+    while p < len(data):
+        n = struct.unpack_from(">I", data, p)[0]
+        tag = data[p + 4:p + 8]
+        chunks[tag] = chunks.get(tag, b"") + data[p + 8:p + 8 + n]
+        p += 12 + n
+    width, height, depth, kind = struct.unpack_from(">IIBB", chunks[b"IHDR"])
+    if (depth, kind) != (8, 3):
+        raise ValueError("%s: not an 8-bit indexed PNG" % path)
+    raw = zlib.decompress(chunks[b"IDAT"])
+    rows = []
+    for r in range(height):
+        row = raw[r * (width + 1):(r + 1) * (width + 1)]
+        if row[0] != 0:
+            raise ValueError("%s: row %d uses filter %d" % (path, r, row[0]))
+        rows.append(row[1:])
+    plte, trns = chunks[b"PLTE"], chunks.get(b"tRNS", b"")
+    palette = [tuple(plte[3 * i:3 * i + 3]) + (trns[i] if i < len(trns) else 255,)
+               for i in range(len(plte) // 3)]
+    return width, height, b"".join(rows), palette
+
+
+def export_kit(kit, stem: str, out: str, palette: int, plant=None) -> int:
+    """Every image of *kit* as `<stem>_<i>.png`, painted with palette number
+    *palette* (0..4, file order) -- bin_archive's naming and its --clut.
+    *plant* = (image number, pixel) adds 1 to that index first: the control."""
+    colours = bgr555_rgba(kit.palettes[palette].raw)
+    for i, im in enumerate(kit.images):
+        indices = im.indices
+        if plant is not None and plant[0] == i:
+            buf = bytearray(indices)
+            buf[plant[1]] = (buf[plant[1]] + 1) & 0xFF
+            indices = bytes(buf)
+        write_png(os.path.join(out, "%s_%02d.png" % (stem, i)), im.width, im.height,
+                  indices, colours)
+    return len(kit.images)
+
+
+def cmd_export(args) -> int:
+    if args.confront:
+        return confront(args.path, args.tag, args.negative)
+    try:
+        source = api.open_source(args.path)
+    except api.KitsError as exc:
+        print("export: %s" % exc, file=sys.stderr)
+        return 1
+    os.makedirs(args.out, exist_ok=True)
+    written = refused = 0
+    for name, kit in _kits_of(source, args.tag):
+        if isinstance(kit, Exception) or not kit.ok:
+            refused += 1
+            print("  %s not exported: %s" % (name, kit if isinstance(kit, Exception)
+                                              else "; ".join(kit.problems)))
+            continue
+        written += export_kit(kit, name if source.kind == api.KIND_ROM
+                              else os.path.splitext(os.path.basename(source.path))[0],
+                              args.out, args.palette)
+    print("wrote %d PNG(s) to %s with palette %d (%s); %d kit(s) refused"
+          % (written, args.out, args.palette,
+             api.RECORD_NAMES[api.PALETTE_RECORDS[args.palette]], refused))
+    return 1 if refused else 0
+
+
+CONTROL_PIXEL = (0, 4096)
+"""The pixel --negative changes on our side: image 0, index 4096 (row 32)."""
+
+
+def confront(image_path: str, tags, negative: bool) -> int:
+    """Confront 1: our export against `bin_archive.py export`, for every
+    palette (0..4), on every kit the two can both read.  Compares the
+    decoded indices and palette of each PNG pair, not the PNG bytes."""
+    try:
+        source = api.open_source(image_path)
+    except api.KitsError as exc:
+        print("export: %s" % exc, file=sys.stderr)
+        return 1
+    if source.kind != api.KIND_ROM:
+        print("export: --confront needs a disc image, %s is a lone TEX" % image_path,
+              file=sys.stderr)
+        return 2
+    kits = [(name, k) for name, k in _kits_of(source, tags)
+            if not isinstance(k, Exception) and k.ok]
+    plant_tag = kits[0][0] if (negative and kits) else None
+    differ = {}
+    with tempfile.TemporaryDirectory(prefix="kits-confront-") as tmp:
+        for k in range(api.PALETTE_COUNT):
+            ours, theirs = os.path.join(tmp, "ours%d" % k), os.path.join(tmp, "theirs%d" % k)
+            os.makedirs(ours)
+            for name, kit in kits:
+                export_kit(kit, name, ours, k,
+                           CONTROL_PIXEL if name == plant_tag else None)
+            proc = subprocess.run([sys.executable, BIN_ARCHIVE, "export", source.image_path,
+                                   "--clut", str(k), "--out", theirs],
+                                  capture_output=True, text=True,
+                                  env=dict(os.environ, MSYS_NO_PATHCONV="1"))
+            if proc.returncode:
+                print("export: bin_archive.py export --clut %d failed: %s"
+                      % (k, proc.stderr.strip()), file=sys.stderr)
+                return 1
+            for name, kit in kits:
+                for i in range(len(kit.images)):
+                    png = "%s_%02d.png" % (name, i)
+                    a, b = os.path.join(ours, png), os.path.join(theirs, png)
+                    if not os.path.exists(b):
+                        differ.setdefault(name, []).append("%s missing on bin_archive's side" % png)
+                        continue
+                    wa, ha, ia, pa = read_png(a)
+                    wb, hb, ib, pb = read_png(b)
+                    if (wa, ha) != (wb, hb):
+                        differ.setdefault(name, []).append(
+                            "%s palette %d: %dx%d against %dx%d" % (png, k, wa, ha, wb, hb))
+                    elif ia != ib:
+                        first = next(j for j in range(len(ia)) if ia[j] != ib[j])
+                        count = sum(1 for x, y in zip(ia, ib) if x != y)
+                        differ.setdefault(name, []).append(
+                            "%s palette %d: %d pixel(s) differ, first at %d (%d,%d)"
+                            % (png, k, count, first, first % wa, first // wa))
+                    elif pa != pb:
+                        differ.setdefault(name, []).append("%s palette %d: palettes differ"
+                                                           % (png, k))
+    same = len(kits) - len(differ)
+    for name in sorted(differ):
+        for line in differ[name]:
+            print("  DIFFER %s" % line)
+    print("confront 1: %d of %d tags equal (%d images x %d palettes each), "
+          "tex.py against bin_archive.py export" % (same, len(kits), api.IMAGE_COUNT,
+                                                   api.PALETTE_COUNT))
+    if negative:
+        held = plant_tag is not None and list(differ) == [plant_tag]
+        print("control: %s image 0 pixel %d +1 on our side -- %s"
+              % (plant_tag, CONTROL_PIXEL[1], "red, held" if held else "FAILED"))
+        return 0 if held else 1
+    return 0 if not differ and kits else 1
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -508,7 +730,24 @@ def main(argv=None) -> int:
                    help="change one byte of record 0's LZSS stream in the first sound kit "
                         "and check it is refused")
     p.set_defaults(fn=cmd_tex)
+    p = sub.add_parser("info", help="what a source is, and what a kit of it holds")
+    p.add_argument("path", help="a disc image, a cue sheet or a lone TEX")
+    p.add_argument("--tag", action="append", help="describe this kit (repeatable; disc only)")
+    p.set_defaults(fn=cmd_info)
+    p = sub.add_parser("export", help="each image of each kit as an indexed PNG")
+    p.add_argument("path", help="a disc image, a cue sheet or a lone TEX")
+    p.add_argument("--out", help="folder for the PNGs (not with --confront)")
+    p.add_argument("--tag", action="append", help="only this tag (repeatable; disc only)")
+    p.add_argument("--palette", type=int, default=0, choices=range(5),
+                   help="which of the 5 palettes, in file order (default 0)")
+    p.add_argument("--confront", action="store_true",
+                   help="confront 1: compare with bin_archive.py export, every palette")
+    p.add_argument("--negative", action="store_true",
+                   help="with --confront: change one pixel on our side, which must differ")
+    p.set_defaults(fn=cmd_export)
     args = parser.parse_args(argv)
+    if args.command == "export" and not args.confront and not args.out:
+        parser.error("export needs --out (or --confront)")
     return args.fn(args)
 
 

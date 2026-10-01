@@ -24,4 +24,6 @@ id: KITS-TASK-15
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#3.1). PNG escrito sem Pillow no núcleo (`zlib` da stdlib) ou pela CLI; a escolha fica no Log.
 
+Da KITS-TASK-09: o `cli.py` já tem `bgr555_rgba`, `write_png` e `read_png` (stdlib), feitos para o `export` e o confronto 1 antes de existir `flat.py`. Quando o `flat.py` trouxer a conversão BGR555 → RGBA para o núcleo, o `cli.py` passa a usar a da fachada — uma regra de transparência em dois lugares é a que diverge.
+
 ## Log de Execução

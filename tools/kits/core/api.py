@@ -23,8 +23,9 @@ from .errors import (KitError, KitMissing, KitRefused, KitsError,  # noqa: F401
 from .source import KIND_ROM, KIND_TEX, OpenControl, RomSource, TexSource  # noqa: F401
 from .source import open_controls as _open_controls
 from .source import open_source as _open_source
-from .tex import (EXPECTED_SHAPE, NOTE_FORM2_TAIL, NOTE_PAST_ISO_SIZE,  # noqa: F401
-                  RECORD_NAMES, Image, Kit, Note, Palette, StreamControl)
+from .tex import (EXPECTED_SHAPE, IMAGE_RECORDS, NOTE_FORM2_TAIL,  # noqa: F401
+                  NOTE_PAST_ISO_SIZE, PALETTE_RECORDS, RECORD_NAMES, Image, Kit,
+                  Note, Palette, StreamControl)
 from .tex import stream_control as _stream_control
 from .source import DiscControl  # noqa: F401
 from .source import disc_controls as _disc_controls
@@ -39,8 +40,23 @@ __all__ = (
     "NOTE_PAST_ISO_SIZE", "NOTE_FORM2_TAIL",
     "stream_control", "StreamControl", "disc_controls", "DiscControl",
     "KitError", "KitMissing", "KitUnreadable", "KitRefused",
-    "measure",
+    "measure", "survey_image", "Survey", "SurveyError",
+    "IMAGE_RECORDS", "PALETTE_RECORDS", "IMAGE_COUNT", "PALETTE_COUNT",
 )
+
+IMAGE_COUNT = len(IMAGE_RECORDS)
+"""How many image records a kit container has (6), from `EXPECTED_SHAPE`."""
+PALETTE_COUNT = len(PALETTE_RECORDS)
+"""How many palette (CLUT) records a kit container has (5)."""
+
+Survey = measure.Survey
+SurveyError = measure.SurveyError
+
+
+def survey_image(image_path):
+    """The section 1.1 survey of every kit container of the disc at
+    *image_path*: a `Survey`, or `SurveyError` with the sentence to show."""
+    return measure.survey_image(image_path)
 
 # `measure` is the phase-0 measurement module as it is: survey, rects,
 # prims, uv and their negative controls (PLAN-KITS-PY.md sections 1.1, 4.3,
