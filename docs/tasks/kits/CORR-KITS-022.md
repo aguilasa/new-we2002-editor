@@ -105,3 +105,9 @@ exit 77
 ```
 
 Os 4 `.tim` sem par no `Mixto` e os 7 retângulos batem com a sonda da revisão e agora com as Notas.
+- **Closed** — commit `38231a25` (2026-10-01): fix(kits): count the flag corpus with confront.py --report
+  - Files (`git show --name-status 38231a25`):
+    - `M NOTICE.md`
+    - `M docs/tasks/kits/10-confronto-2-superpack.md`
+    - `M docs/tasks/kits/CORR-KITS-022.md`
+    - `M tools/kits/confront.py`
