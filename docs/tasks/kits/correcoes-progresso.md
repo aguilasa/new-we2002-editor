@@ -28,5 +28,5 @@
 | [CORR-KITS-023](/docs/tasks/kits/CORR-KITS-023.md) | Credit or account for the authors named by Banderas 3D folders | KITS-TASK-10 | medium | done | 2026-10-01 |
 | [CORR-KITS-024](/docs/tasks/kits/CORR-KITS-024.md) | Keep cross-task notes out of the task's commit or declare them | KITS-TASK-10 | low | done | 2026-10-01 |
 | [CORR-KITS-025](/docs/tasks/kits/CORR-KITS-025.md) | Correct the club 63 empty in both fields claim in the task Notes | KITS-TASK-13 | medium | done | 2026-10-01 |
-| [CORR-KITS-026](/docs/tasks/kits/CORR-KITS-026.md) | Correct why golden_tool exits 127 under Git Bash | KITS-TASK-13 | low | pending | — |
+| [CORR-KITS-026](/docs/tasks/kits/CORR-KITS-026.md) | Correct why golden_tool exits 127 under Git Bash | KITS-TASK-13 | low | done | 2026-10-01 |
 <!-- rite:end -->

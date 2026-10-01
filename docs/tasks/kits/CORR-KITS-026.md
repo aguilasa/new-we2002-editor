@@ -73,3 +73,7 @@ $ grep -n "sai 127 sem imprimir nada" docs/tasks/kits/13-nomes-dos-times.md
 $ grep -c "libstdc++-6.dll" docs/tasks/kits/13-nomes-dos-times.md
 1
 ```
+- **Closed** — commit `025e1073` (2026-10-01): docs(kits): say the golden_tool's 127 is the MinGW runtime DLLs, not the shell
+  - Files (`git show --name-status 025e1073`):
+    - `M docs/tasks/kits/13-nomes-dos-times.md`
+    - `M docs/tasks/kits/CORR-KITS-026.md`
