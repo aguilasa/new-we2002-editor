@@ -42,3 +42,28 @@ $ grep -n "28-confronto-3" docs/tasks/kits/10-confronto-2-superpack.md
 Hoje só a linha do Log; depois também uma linha na lista do Escopo.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `f66559ad`)
+
+```text
+$ git show --stat c05f012b | grep 28-confronto
+ docs/tasks/kits/28-confronto-3.md           |   2 +
+$ grep -n "28-confronto-3" docs/tasks/kits/10-confronto-2-superpack.md
+100:    - `M docs/tasks/kits/28-confronto-3.md`
+```
+
+REPRODUCED.
+
+### O que foi feito
+
+`docs/tasks/kits/28-confronto-3.md` entrou no "Arquivos a criar ou modificar" da KITS-TASK-10, com o motivo: a nota diz à KITS-TASK-28 que o `confront.py` já existe e é onde o `--score` entra.
+
+### Verificação
+
+```text
+$ grep -n "28-confronto-3" docs/tasks/kits/10-confronto-2-superpack.md | cut -c1-90
+18:- `docs/tasks/kits/28-confronto-3.md` — uma nota: o `confront.py` passou a existir aq
+119:    - `M docs/tasks/kits/28-confronto-3.md`
+```
+
+Duas linhas: a do Escopo e a do Log.

@@ -15,6 +15,7 @@ A descompressão do `.bin` de cada par do `Banderas 3D/` devolve os pixels do `.
 - `tools/kits/controls.py` — o controle `confront2-blind`, e o `expect` do `cli-imports-survey`, cuja linha passou a nomear os dois clientes da fachada
 - `tools/kits/core/tex.py`, `core/errors.py`, `core/api.py` — `decompress_stream` e `StreamError`: o `confront.py` é cliente da fachada como o `cli.py`, e o fluxo avulso do WEZip passa pelo mesmo decodificador dos registros do TEX
 - `NOTICE.md`, `docs/PLAN-KITS-PY.md` (§5.2, o número medido)
+- `docs/tasks/kits/28-confronto-3.md` — uma nota: o `confront.py` passou a existir aqui como o confronto 2, sem subcomando, e é onde o `--score` da KITS-TASK-28 entra (acrescentado ao Escopo pela [CORR-KITS-024](/docs/tasks/kits/CORR-KITS-024.md))
 
 ## Done criteria
 
