@@ -16,7 +16,7 @@
 | [CORR-KITS-011](/docs/tasks/kits/CORR-KITS-011.md) | Fix the broken.tex fixture recipe: offset 5056 is not tag byte +14 | KITS-TASK-06 | medium | done | 2026-10-01 |
 | [CORR-KITS-012](/docs/tasks/kits/CORR-KITS-012.md) | Declare cli.py and the open subcommand in the task's scope | KITS-TASK-06 | low | done | 2026-10-01 |
 | [CORR-KITS-013](/docs/tasks/kits/CORR-KITS-013.md) | Correct the §2.1 counts that no tool prints | KITS-TASK-07 | medium | done | 2026-10-01 |
-| [CORR-KITS-014](/docs/tasks/kits/CORR-KITS-014.md) | Add a planted control for the Form 2 and extent refusals | KITS-TASK-07 | medium | pending | — |
+| [CORR-KITS-014](/docs/tasks/kits/CORR-KITS-014.md) | Add a planted control for the Form 2 and extent refusals | KITS-TASK-07 | medium | done | 2026-10-01 |
 | [CORR-KITS-015](/docs/tasks/kits/CORR-KITS-015.md) | Update NOTICE.md kits rows to name tex.py as the CARP importer | KITS-TASK-07 | low | done | 2026-10-01 |
 | [CORR-KITS-016](/docs/tasks/kits/CORR-KITS-016.md) | Use layout.kit_path in RomSource.kits, restoring the lost line break | KITS-TASK-07 | low | done | 2026-10-01 |
 <!-- rite:end -->

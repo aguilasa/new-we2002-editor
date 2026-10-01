@@ -5,10 +5,10 @@ origin: KITS-TASK-07
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-10-01
+done_commit: a4943bd5
 ---
 
 # CORR-KITS-014 — Add a planted control for the Form 2 and extent refusals
@@ -130,3 +130,10 @@ c2ec025a808afd4ffbe4c39fca0d991a *-
 ```
 
 `tools/kits/controls.py` não foi criado: é da KITS-TASK-08, que o define como plantio numa cópia da árvore.
+- **Closed** — commit `a4943bd5` (2026-10-01): fix(kits): plant the Form 2 tail and next-file rules in tex --negative
+  - Files (`git show --name-status a4943bd5`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-014.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/source.py`
