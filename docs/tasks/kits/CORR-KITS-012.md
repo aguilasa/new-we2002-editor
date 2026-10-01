@@ -5,10 +5,10 @@ origin: KITS-TASK-06
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-10-01
+done_commit: 511abd91
 ---
 
 # CORR-KITS-012 — Declare cli.py and the open subcommand in the task's scope
@@ -77,3 +77,8 @@ REPRODUCED.
 $ grep -n 'tools/kits/cli.py' docs/tasks/kits/06-fachada-e-origem.md | grep files:
 8:files: ["tools/kits/core/api.py", "tools/kits/core/source.py", "tools/kits/core/errors.py", "NOTICE.md", "tools/kits/cli.py"]            # predicted paths/globs; batches build their conflict matrix from them
 ```
+- **Closed** — commit `511abd91` (2026-10-01): docs(kits): record cli.py open in KITS-TASK-06 files and plan 3.1
+  - Files (`git show --name-status 511abd91`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/06-fachada-e-origem.md`
+    - `M docs/tasks/kits/CORR-KITS-012.md`

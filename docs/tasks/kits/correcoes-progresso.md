@@ -14,5 +14,5 @@
 | [CORR-KITS-009](/docs/tasks/kits/CORR-KITS-009.md) | Paste the uv --negative transcript whole and give the survey md5 | KITS-TASK-04 | medium | done | 2026-09-30 |
 | [CORR-KITS-010](/docs/tasks/kits/CORR-KITS-010.md) | Re-run the plan's secondary subcommands in the closing Log | KITS-TASK-05 | low | done | 2026-09-30 |
 | [CORR-KITS-011](/docs/tasks/kits/CORR-KITS-011.md) | Fix the broken.tex fixture recipe: offset 5056 is not tag byte +14 | KITS-TASK-06 | medium | done | 2026-10-01 |
-| [CORR-KITS-012](/docs/tasks/kits/CORR-KITS-012.md) | Declare cli.py and the open subcommand in the task's scope | KITS-TASK-06 | low | pending | — |
+| [CORR-KITS-012](/docs/tasks/kits/CORR-KITS-012.md) | Declare cli.py and the open subcommand in the task's scope | KITS-TASK-06 | low | done | 2026-10-01 |
 <!-- rite:end -->
