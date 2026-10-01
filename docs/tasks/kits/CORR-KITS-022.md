@@ -52,3 +52,56 @@ $ WE2002_KITS_CORPUS=<…/Banderas 3D> python tools/kits/confront.py --report
 Hoje dá erro de argumento; depois tem de listar os 4 `.tim` sem par em `Mixto` e os 7 retângulos, batendo com as Notas.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `f66559ad`)
+
+O shell do `rite reproduce` não tinha `WE2002_KITS_CORPUS` (o `cd ""` ficou na raiz do repositório); refeita com a variável apontando a pasta do corpus:
+
+```text
+$ python tools/kits/confront.py --report
+usage: confront.py [-h] [--negative] [--scratch SCRATCH]
+confront.py: error: unrecognized arguments: --report
+$ cd "$WE2002_KITS_CORPUS"; for d in */; do echo "$d bin=$(find "$d" -type f -iname '*.bin'|wc -l) tim=$(find "$d" -type f -iname '*.tim'|wc -l)"; done
+Banderas 3D - Mixto/ bin=161 tim=164
+Banderas 3D Nacionales/ bin=0 tim=109
+Base bandera 3D - Neo2k3/ bin=0 tim=0
+Remover as bandeiras 3D grandes e pequenas dos estádios - Fabio FJA/ bin=0 tim=0
+```
+
+REPRODUCED: 164 `.tim` e 160 pares no `Mixto`, então 4 `.tim` sem par ali, contra as Notas que punham todos os que sobram em `Nacionales`.
+
+### O que foi feito
+
+- `tools/kits/confront.py --report`: por pasta, `.bin`/`.tim`/pares e os sem par (nomeados até 10); os pares por nome (`*_BND` ou não); e, de cada par, flags e CLUT do TIM e o retângulo da imagem em pixels (`tim_shape`). Docstring, uso e mensagem de pulo sem o "`*_BND`" geral.
+- KITS-TASK-10, Notas: a frase dos retângulos (eram dois; são sete) e a dos `.tim` que sobram (109 + 4), com a saída do `--report` colada.
+- `NOTICE.md`: "160 `.bin` / `.tim` pairs (152 named `*_BND`, 8 otherwise)".
+
+### Verificação
+
+```text
+$ WE2002_KITS_CORPUS=".../Superpackv6/We2002/TEX/Banderas 3D" python tools/kits/confront.py --report; echo "exit $?"
+Banderas 3D - Mixto/: 161 .bin, 164 .tim, 160 pair(s)
+  1 .bin without a partner: LENS_BND
+  4 .tim without a partner: BILB_BAND, BTS_BND, LEVK_BND, RNG_BND
+Banderas 3D Nacionales/: 0 .bin, 109 .tim, 0 pair(s)
+  109 .tim without a partner: (109, not listed)
+pairs: 160, 152 named *_BND, 8 otherwise: BAND_ARG, BAND_AUS, BAND_BRA, BAND_CMR, BAND_ING, BAND_IRA, BAND_URU, WBRE_BAND
+  TIM flags 9, CLUT block 524 bytes: 160
+  image at (704,256) 128x64 px: 76
+  image at (960,0) 128x128 px: 41
+  image at (896,0) 128x128 px: 28
+  image at (0,0) 128x64 px: 11
+  image at (0,0) 128x128 px: 2
+  image at (704,256) 128x128 px: 1
+  image at (960,0) 128x64 px: 1
+exit 0
+$ python tools/kits/confront.py | tail -1
+confront 2: 160 pairs read, 160 match byte for byte (no mismatch)
+$ python tools/kits/confront.py --negative | tail -1
+control held: the changed copy is refused
+$ env -u WE2002_KITS_CORPUS python tools/kits/confront.py; echo "exit $?"
+confront 2: skipped -- WE2002_KITS_CORPUS is not set (a folder with the community's .bin / .tim flag pairs)
+exit 77
+```
+
+Os 4 `.tim` sem par no `Mixto` e os 7 retângulos batem com a sonda da revisão e agora com as Notas.

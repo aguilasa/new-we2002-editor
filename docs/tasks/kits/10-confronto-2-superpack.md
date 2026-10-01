@@ -28,9 +28,27 @@ A descompressão do `.bin` de cada par do `Banderas 3D/` devolve os pixels do `.
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#5).
 
-O formato, medido antes de escrever o leitor: o `.bin` é **um fluxo LZSS avulso** começando no byte 0 (não um contêiner), e o `.tim` é um TIM de 8 bits com bloco de CLUT de 524 bytes e um bloco de imagem — 128×128 nas bandeiras de estádio em (960,0), 128×64 nas que vão em (704,256). O `confront.py` lê o TIM com um leitor próprio (o TIM não passa pelo nosso código) e descomprime o `.bin` por `api.decompress_stream`; um par é `.bin` + `.tim` de mesmo nome, em qualquer caixa (`ALVS_BND.TIM`).
+O formato, medido antes de escrever o leitor: o `.bin` é **um fluxo LZSS avulso** começando no byte 0 (não um contêiner), e o `.tim` é um TIM de 8 bits com bloco de CLUT de 524 bytes e um bloco de imagem, em sete retângulos diferentes — (704,256), (960,0), (896,0) e (0,0), em 128×64 ou 128×128 (a contagem é a do `--report` abaixo). O `confront.py` lê o TIM com um leitor próprio (o TIM não passa pelo nosso código) e descomprime o `.bin` por `api.decompress_stream`; um par é `.bin` + `.tim` de mesmo nome, em qualquer caixa (`ALVS_BND.TIM`).
 
-O que a pasta tem, contado com `find`: 161 `.bin` e 273 `.tim`; 160 pares. O `.bin` sem par é o `LENS_BND.bin`, que tem `.bmp` ao lado e não `.tim`; os `.tim` que sobram são os de `Banderas 3D Nacionales`, que não tem `.bin`.
+O que a pasta tem, contado com `find`: 161 `.bin` e 273 `.tim`; 160 pares. O `.bin` sem par é o `LENS_BND.bin`, que tem `.bmp` ao lado e não `.tim`. Dos 113 `.tim` sem par, 109 são de `Banderas 3D Nacionales`, que não tem `.bin`, e 4 de `Banderas 3D - Mixto` (`BILB_BAND`, `BTS_BND`, `LEVK_BND`, `RNG_BND`). Dos 160 pares, 152 se chamam `*_BND` e 8 não. Contado pela ferramenta desde a [CORR-KITS-022](/docs/tasks/kits/CORR-KITS-022.md) (antes a descrição saía de amostra):
+
+```
+$ python tools/kits/confront.py --report      # exit 0
+Banderas 3D - Mixto/: 161 .bin, 164 .tim, 160 pair(s)
+  1 .bin without a partner: LENS_BND
+  4 .tim without a partner: BILB_BAND, BTS_BND, LEVK_BND, RNG_BND
+Banderas 3D Nacionales/: 0 .bin, 109 .tim, 0 pair(s)
+  109 .tim without a partner: (109, not listed)
+pairs: 160, 152 named *_BND, 8 otherwise: BAND_ARG, BAND_AUS, BAND_BRA, BAND_CMR, BAND_ING, BAND_IRA, BAND_URU, WBRE_BAND
+  TIM flags 9, CLUT block 524 bytes: 160
+  image at (704,256) 128x64 px: 76
+  image at (960,0) 128x128 px: 41
+  image at (896,0) 128x128 px: 28
+  image at (0,0) 128x64 px: 11
+  image at (0,0) 128x128 px: 2
+  image at (704,256) 128x128 px: 1
+  image at (960,0) 128x64 px: 1
+```
 
 Créditos: nenhum arquivo, nome de arquivo ou nome de pasta dentro de `Banderas 3D` nomeia quem desenhou as bandeiras — no `NOTICE.md` ficaram como não identificados. O WEZip é creditado pelo `leeme.txt` que acompanha o executável em outras pastas da mesma coleção: "Secuencia de descompresion hecha por WarlockDC y Jordinator / Programado por LaGaRTo / Todos los derechos reservados para WeHispano España 2003". Os arquivos não dizem que ferramenta escreveu cada `.bin`; o `NOTICE.md` diz isso.
 

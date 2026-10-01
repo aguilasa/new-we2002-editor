@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Confront 2 of PLAN-KITS-PY.md section 5: the community as an outside oracle.
 
-The 3D flags the community made (`*_BND.bin` beside `*_BND.tim`) are a lone
+The 3D flags the community made (`.bin` beside `.tim`, mostly `*_BND`) are a lone
 LZSS stream and the TIM it was compressed from.  Our decompression of the
 `.bin` -- the decoder every kit record goes through, reached by the facade --
 has to give the TIM's pixels byte for byte.  The TIM never passed through our
@@ -13,6 +13,7 @@ Nothing of it enters the repository.
 
 Usage:
     python tools/kits/confront.py                 # every pair, exit 1 on any mismatch
+    python tools/kits/confront.py --report        # what the corpus holds, counted
     python tools/kits/confront.py --negative [--scratch DIR]
         # copies one matching .tim, changes one pixel of the copy, and needs it refused
 """
@@ -129,6 +130,62 @@ def confront_folder(folder: str) -> list:
     return [compare_pair(_read(b), _read(t), stem, b, t) for stem, b, t in find_pairs(folder)]
 
 
+def tim_shape(data: bytes) -> tuple:
+    """(flags, CLUT block length or 0, (x, y, width in pixels, h)) of a TIM.
+    Width in pixels: at 8 bits a halfword of the image block is two."""
+    _magic, flags = struct.unpack_from("<II", data, 0)
+    clut = struct.unpack_from("<I", data, 8)[0] if flags & TIM_HAS_CLUT else 0
+    (x, y, w, h), _ = tim_pixels(data)
+    return flags, clut, (x, y, w * 2 if flags & 7 == 1 else w, h)
+
+
+NAMED_LIST = 10
+"""A list of names this short or shorter is printed whole."""
+
+
+def report(folder: str) -> list:
+    """The lines of `--report`: what the corpus holds, counted -- the files
+    per folder and the ones without a partner, how the pairs are named, and
+    the TIM flags, CLUT length and image rectangle of every pair."""
+    from collections import Counter
+
+    lines = []
+    for root, _dirs, files in sorted(os.walk(folder)):
+        exts = Counter(os.path.splitext(f)[1].lower() for f in files)
+        if not (exts[".bin"] or exts[".tim"]):
+            continue
+        stems = {}
+        for f in files:
+            stem, ext = os.path.splitext(f)
+            if ext.lower() in (".bin", ".tim"):
+                stems.setdefault(stem.lower(), {})[ext.lower()] = stem
+        lone = {e: sorted(s[e] for s in stems.values() if set(s) == {e})
+                for e in (".bin", ".tim")}
+        lines.append("%s/: %d .bin, %d .tim, %d pair(s)"
+                     % (os.path.relpath(root, folder), exts[".bin"], exts[".tim"],
+                        sum(len(s) == 2 for s in stems.values())))
+        for e in (".bin", ".tim"):
+            if lone[e]:
+                names = (", ".join(lone[e]) if len(lone[e]) <= NAMED_LIST
+                         else "(%d, not listed)" % len(lone[e]))
+                lines.append("  %d %s without a partner: %s" % (len(lone[e]), e, names))
+    pairs = find_pairs(folder)
+    odd = sorted(stem for stem, _b, _t in pairs if not stem.upper().endswith("_BND"))
+    lines.append("pairs: %d, %d named *_BND, %d otherwise: %s"
+                 % (len(pairs), len(pairs) - len(odd), len(odd), ", ".join(odd) or "none"))
+    shapes = Counter()
+    rects = Counter()
+    for _stem, _b, tim in pairs:
+        flags, clut, rect = tim_shape(_read(tim))
+        shapes[(flags, clut)] += 1
+        rects[rect] += 1
+    for (flags, clut), n in sorted(shapes.items()):
+        lines.append("  TIM flags %d, CLUT block %d bytes: %d" % (flags, clut, n))
+    for rect, n in sorted(rects.items(), key=lambda kv: (-kv[1], kv[0])):
+        lines.append("  image at (%d,%d) %dx%d px: %d" % (rect + (n,)))
+    return lines
+
+
 CONTROL_PIXEL = 1000
 """Pixel byte the negative control changes in its copy of a .tim."""
 
@@ -169,16 +226,23 @@ def main(argv=None) -> int:
     parser.add_argument("--negative", action="store_true",
                         help="change one pixel of a copied .tim and require a mismatch")
     parser.add_argument("--scratch", help="where --negative puts its copy (default: a temp folder)")
+    parser.add_argument("--report", action="store_true",
+                        help="count what the corpus holds: files per folder, the unpaired, "
+                             "the pair names, and each pair's TIM shape")
     args = parser.parse_args(argv)
 
     folder = os.environ.get(CORPUS_VARIABLE)
     if not folder:
         print("confront 2: skipped -- %s is not set (a folder with the community's "
-              "*_BND.bin / *_BND.tim pairs)" % CORPUS_VARIABLE)
+              ".bin / .tim flag pairs)" % CORPUS_VARIABLE)
         return SKIP
     if not os.path.isdir(folder):
         print("confront 2: %s points at %s, which is not a folder" % (CORPUS_VARIABLE, folder))
         return 1
+    if args.report:
+        for line in report(folder):
+            print(line)
+        return 0
     results = confront_folder(folder)
     if args.negative:
         return negative(results, args.scratch)
