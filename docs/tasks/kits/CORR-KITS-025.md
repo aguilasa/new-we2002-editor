@@ -75,3 +75,7 @@ rows 95 col2 ascii-only 0 col2 empty 0
 $ grep -n "clube 63 vem vazio" docs/tasks/kits/13-nomes-dos-times.md
 (sem saída, exit 1)
 ```
+- **Closed** — commit `bb11a4e9` (2026-10-01): docs(kits): drop the empty club 63 from KITS-TASK-13's Notes, give what the dump measures
+  - Files (`git show --name-status bb11a4e9`):
+    - `M docs/tasks/kits/13-nomes-dos-times.md`
+    - `M docs/tasks/kits/CORR-KITS-025.md`
