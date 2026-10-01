@@ -91,7 +91,7 @@ graph TD
 | [KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md) | Contar primitivas de cada figura por retângulo do TEX | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-04](/docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md) | Levantar as UV que o boneco amostra no bitmap de 256×128 | 0 | investigação | KITS-TASK-03 | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-05](/docs/tasks/kits/05-fechamento-fase-0.md) | Fechamento da fase 0 — medições no disco | 0 | closing | KITS-TASK-01, KITS-TASK-02, KITS-TASK-03, KITS-TASK-04 | done | 2026-09-30 | 2026-09-30 |
-| [KITS-TASK-06](/docs/tasks/kits/06-fachada-e-origem.md) | Criar a fachada `api.py` e o `source.py` que reconhece ROM ou TEX pelo conteúdo | 1 | implementação | KITS-TASK-05 | done | 2026-09-30 | pending |
+| [KITS-TASK-06](/docs/tasks/kits/06-fachada-e-origem.md) | Criar a fachada `api.py` e o `source.py` que reconhece ROM ou TEX pelo conteúdo | 1 | implementação | KITS-TASK-05 | done | 2026-09-30 | 2026-10-01 |
 | [KITS-TASK-07](/docs/tasks/kits/07-tex-e-guarda-de-forma.md) | Ler o TEX com guarda de forma e a cauda marcada Form 2 no leiaute Form 1 | 1 | implementação | KITS-TASK-06 | pending | — | — |
 | [KITS-TASK-08](/docs/tasks/kits/08-selftest-e-ctest.md) | Criar selftest, controles negativos e os alvos `kits_selftest` e `kits_image` | 1 | infra | KITS-TASK-07 | pending | — | — |
 | [KITS-TASK-09](/docs/tasks/kits/09-cli-e-confronto-1.md) | `cli.py info/export` e o confronto 1: `tex.py` contra `bin_archive.py export` | 1 | verificação | KITS-TASK-08 | pending | — | — |

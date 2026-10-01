@@ -10,8 +10,8 @@ resources: []        # serialized resources this item needs (rite.toml [resource
 status: done
 done_on: 2026-09-30
 done_commit: 51c8a6a0
-reviewed_on: pending
-review_commit: null
+reviewed_on: 2026-10-01
+review_commit: bc9a09e2
 ---
 
 # KITS-TASK-06 — Criar a fachada `api.py` e o `source.py` que reconhece ROM ou TEX pelo conteúdo
@@ -109,3 +109,4 @@ $ grep -rnE '^[A-Za-z_]+ *= *(\[|\{|dict\(|list\(|set\()' tools/kits/core/api.py
     - `A tools/kits/core/api.py`
     - `A tools/kits/core/errors.py`
     - `A tools/kits/core/source.py`
+- **Reviewed** (2026-10-01) at `bc9a09e2`: CORR-KITS-011, CORR-KITS-012
