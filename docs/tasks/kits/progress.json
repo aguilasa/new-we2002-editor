@@ -208,10 +208,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#3.3",
       "files": ["tools/kits/core/teams.py", "tools/kits/core/source.py", "tools/kits/core/api.py", "tools/kits/cli.py", "tests/golden_tool.cpp"],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-01",
+      "done_commit": "95907493",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

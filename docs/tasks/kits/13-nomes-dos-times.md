@@ -94,3 +94,13 @@ $ python tools/kits/selftest.py --quiet | grep -E "FAIL|controls red|kits_selfte
   ..... 12 of 12 controls red
 kits_selftest: 0 failure(s)
 ```
+- **Closed** — commit `95907493` (2026-10-01): feat(kits): list a disc's teams, the ROM name or the English table, decided by the disc
+  - Files (`git show --name-status 95907493`):
+    - `M docs/tasks/kits/13-nomes-dos-times.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tests/golden_tool.cpp`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/source.py`
+    - `A tools/kits/core/teams.py`
