@@ -217,7 +217,7 @@ commit that brings it in.
 
 | Author | Work | What reaches `tools/kits/` |
 |---|---|---|
-| **Maximiliano Ducoli (CARP)** | [WECompressor](https://github.com/maxiducoli/WECompressor) — the `.BIN` container format and the LZSS codec of `WECompress.cpp` | Through `tools/pes2/lzss.py` and `tools/pes2/bin_archive.py`, which `tools/kits/core/survey.py` imports to read every kit container. Same terms and same caveat on `WECompress.cpp`'s authorship as in the `BIN/*.BIN` section above: non-commercial use, with credit. |
+| **Maximiliano Ducoli (CARP)** | [WECompressor](https://github.com/maxiducoli/WECompressor) — the `.BIN` container format and the LZSS codec of `WECompress.cpp` | Through `tools/pes2/lzss.py` and `tools/pes2/bin_archive.py`, which `tools/kits/core/tex.py` imports to read every kit container behind its guard of form, and `tools/kits/core/survey.py` imports for the survey and the VRAM rects. Same terms and same caveat on `WECompress.cpp`'s authorship as in the `BIN/*.BIN` section above: non-commercial use, with credit. |
 | **Darkensses** | [`we3d`](https://github.com/Darkensses/we3d) — **MIT**, reusable with credit | The `MODEL.BIN` section format (vertex and primitive counts, 24-byte primitives, 8-byte vertices), through `tools/looks/section.py`, `modelfile.py` and `assembly.py`, which `tools/kits/core/survey.py` imports to count and map the figure's primitives (`cli.py prims`, `cli.py uv`). What the `looks` section above says about which of its readings were taken and which were not holds here unchanged. |
 
 ## Copyright and license status

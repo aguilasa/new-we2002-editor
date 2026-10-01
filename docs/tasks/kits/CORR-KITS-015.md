@@ -5,7 +5,7 @@ origin: KITS-TASK-07
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -52,3 +52,26 @@ $ grep -c "tools/kits/core/tex.py" NOTICE.md
 Hoje dá 0; depois, pelo menos 1.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `bc81d3ab`)
+
+```text
+$ grep -n "^import bin_archive\|^import lzss" tools/kits/core/tex.py
+37:import bin_archive  # noqa: E402  (tools/pes2, after the path insert)
+38:import lzss  # noqa: E402
+$ grep -c "tools/kits/core/tex.py" NOTICE.md
+0
+```
+
+REPRODUCED.
+
+### O que foi feito
+
+Linha do CARP na seção do `tools/kits/` do `NOTICE.md`: a rota passa a nomear o `tex.py` (a guarda de forma, que lê todo contêiner de kit) e mantém o `survey.py`, que continua importando os dois (`grep -n "^import bin_archive\|^import lzss" tools/kits/core/survey.py` → linhas 32 e 34) para o levantamento e os retângulos de VRAM.
+
+### Verificação
+
+```text
+$ grep -c "tools/kits/core/tex.py" NOTICE.md
+1
+```
