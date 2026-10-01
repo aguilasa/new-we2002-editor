@@ -106,3 +106,4 @@ Um vermelho errado visto no caminho: a linha da regra da fachada passou a nomear
     - `M tools/kits/core/errors.py`
     - `M tools/kits/core/tex.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-01) at `aa6d60ce`: CORR-KITS-022, CORR-KITS-023, CORR-KITS-024

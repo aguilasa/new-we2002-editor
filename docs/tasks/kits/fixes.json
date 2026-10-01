@@ -274,6 +274,45 @@
       "depends_on": [],
       "done_on": "2026-10-01",
       "done_commit": "a735d97f"
+    },
+    {
+      "id": "CORR-KITS-022",
+      "file": "CORR-KITS-022.md",
+      "title": "Correct the corpus description in the task notes and NOTICE",
+      "origin": "KITS-TASK-10",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-023",
+      "file": "CORR-KITS-023.md",
+      "title": "Credit or account for the authors named by Banderas 3D folders",
+      "origin": "KITS-TASK-10",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-024",
+      "file": "CORR-KITS-024.md",
+      "title": "Keep cross-task notes out of the task's commit or declare them",
+      "origin": "KITS-TASK-10",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
