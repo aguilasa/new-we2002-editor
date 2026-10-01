@@ -27,6 +27,8 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#5).
 
 Da [CORR-KITS-001](/docs/tasks/kits/CORR-KITS-001.md): o subcomando `survey`, entregue na KITS-TASK-01 antes de a fachada existir, importa `core.survey` direto e lê `survey_mod.EXPECTED_SHAPE`/`KIND_IMAGE`. Esta task o passa para trás de `core/api.py`, com as constantes de forma vindo de lá.
 
+Da [CORR-KITS-018](/docs/tasks/kits/CORR-KITS-018.md): o `cli.py` já não importa `core.survey` — as sondas chegam como `api.measure` —, e o `kits_selftest` confere a regra (`facade_breaks`, com o controle `cli-imports-survey`). O critério acima continua desta task: conferir na HEAD, e decidir se `api.measure` basta ou se o levantamento ganha entrada própria na fachada.
+
 Da KITS-TASK-02: `texture.tables` (do `looks`) e `bin_archive.entries` (de `tools/pes2`) discordam sobre `/BIN/DATSEL2.BIN` — o primeiro acha nele registro sobre (576,256)/(608,256), o segundo não (`atlas.py --elsewhere` contra `cli.py rects ... 576,256 608,256`). Não é TEX, mas é o mesmo tipo de pergunta: vale saber qual leitor está certo antes de declarar os dois decodificadores concordes.
 
 ## Log de Execução
