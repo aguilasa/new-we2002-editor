@@ -98,7 +98,7 @@ class RomSource:
         try:
             out = []
             for tag in tags:
-                path = survey.layout.KIT_DIR + survey.layout.KIT_PREFIX + tag                     + survey.layout.KIT_SUFFIX
+                path = survey.layout.kit_path(tag)
                 data, notes = read_disc_file(image, path, trust_iso_size)
                 out.append(tex.read_kit(data, label="%s on %s" % (path, self.path),
                                         notes=notes))
