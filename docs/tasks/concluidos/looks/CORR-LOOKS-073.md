@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-073
-title: Fix the width-0 self-check that claims the pen stays put
-origin: LOOKS-TASK-37
-severity: low
-files: [tools/looks/glyphs.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 59a3ad96
 ---
 
 # CORR-LOOKS-073 — Fix the width-0 self-check that claims the pen stays put

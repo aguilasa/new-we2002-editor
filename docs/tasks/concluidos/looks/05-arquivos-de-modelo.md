@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-05
-title: "`modelfile.py` — as 106 seções do `MODEL.BIN` e as 20 do `EDT_MOD.BIN`"
-type: implementação
-category: formato
-phase: 1
-depends_on: [LOOKS-TASK-04]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#1.5"
-reviewed_on: 2026-09-14
-review_commit: null
-done_on: 2026-09-14
-done_commit: d524d8c
 ---
 
 # LOOKS-TASK-05: Os dois arquivos de modelo

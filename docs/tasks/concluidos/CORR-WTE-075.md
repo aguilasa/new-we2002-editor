@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-075
-title: "Correção: o teste do round-trip sobrescreve a medição versionada e a repõe na mão"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-28
-severity: low
-done_on: 2026-08-20
-done_commit: b06b670
 ---
 
 # CORR-WTE-075: o teste do round-trip sobrescreve a medição versionada e a repõe na mão

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-050
-title: "Correção: a razão entrada × saída divide 3.692 linhas de Pascal por uma entrada que só explica 2.984 delas"
-type: correção
-category: dados
-status: done
-depends_on: []
-origin: WTE-TASK-21
-severity: high
-done_on: 2026-08-10
-done_commit: bc02608
 ---
 
 # CORR-WTE-050: as 708 linhas do `gen_tables_pas` entram no numerador e a entrada delas não entra no denominador

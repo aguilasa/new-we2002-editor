@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-080
-title: "Marcar as entregas da Fase 10 das tasks 36, 37 e 38 no progresso"
-origin: LOOKS-TASK-38
-severity: low
-files: [docs/tasks/looks/progresso.md]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 9b7be2ac
 ---
 
 # CORR-LOOKS-080 — Marcar as entregas da Fase 10 das tasks 36, 37 e 38 no progresso

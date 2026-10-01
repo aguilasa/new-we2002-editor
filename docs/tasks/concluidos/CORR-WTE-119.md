@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-119
-title: "Correção: o nativo.md repete os sete valores do nativo.tsv e nada amarra os dois"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-40
-severity: medium
-done_on: 2026-08-26
-done_commit: 061ea53
 ---
 
 # CORR-WTE-119: a evidência da condição 3 não tem `--check`

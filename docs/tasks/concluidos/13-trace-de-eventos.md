@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-13
-title: "Trace de eventos — a ordem de disparo dos dois lados"
-type: verificação
-category: comportamento
-phase: 2
-depends_on: [WTE-TASK-11]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.3"
-reviewed_on: 2026-08-09
-review_commit: null
-done_on: 2026-08-09
-done_commit: af424c0
 ---
 
 # WTE-TASK-13: Trace de eventos

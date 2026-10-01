@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-15
-title: "`flat.py`: imagem + paleta em RGBA, o bitmap de trabalho e a grade 16×16"
-type: "implementação"
-phase: 3
-depends_on: [KITS-TASK-11]
-source_of_truth: "/docs/PLAN-KITS-PY.md#3.1"
-files: ["tools/kits/core/flat.py", "tools/kits/core/api.py", "tools/kits/cli.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-15 — `flat.py`: imagem + paleta em RGBA, o bitmap de trabalho e a grade 16×16

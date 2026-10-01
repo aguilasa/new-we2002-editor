@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-40
-title: "A câmera do close-up — o painel aproxima nas seis linhas em que o jogo aproxima"
-type: implementação
-category: render
-phase: 10
-depends_on: [LOOKS-TASK-28]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: 2026-09-23
-review_commit: e76d2740
-done_on: 2026-09-23
-done_commit: 45734fe1
 ---
 
 # LOOKS-TASK-40: A câmera do close-up

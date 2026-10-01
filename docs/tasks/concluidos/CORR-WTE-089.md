@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-089
-title: "Correção: três vereditos `aberto` por 'nada exercita o corpo' quando a bateria golden já os exercita"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-31
-severity: high
-done_on: 2026-08-24
-done_commit: 7cf7ba0
 ---
 
 # CORR-WTE-089: a cobertura que a bateria golden já dava

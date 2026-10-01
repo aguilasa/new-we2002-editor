@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-15
-title: "Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível"
-type: implementação
-category: ui
-phase: 5
-depends_on: [MCR-TASK-12]
-status: done
-source_of_truth: /docs/tasks/concluidos/port-mcr/15-abrir-cartao-pela-tela.md
-reviewed_on: 2026-09-09
-review_commit: null
-done_on: 2026-09-09
-done_commit: 49bf095
 ---
 
 # MCR-TASK-15: abrir um cartão pela janela, sem diálogo que se antecipa a ela

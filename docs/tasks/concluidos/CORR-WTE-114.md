@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-114
-title: "Correção: três divergências novas ficaram numa task concluída, e o registro que existe para elas não as tem"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-37
-severity: medium
-done_on: 2026-08-25
-done_commit: e247f8f
 ---
 
 # CORR-WTE-114: as três candidatas da UI não chegaram ao `divergencias.md`

@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-28
-title: "`T_NAME_I` e `T_NAME_S` — o conjunto de cópias por idioma"
-type: engenharia-reversa
-category: formato
-phase: 7
-depends_on: [PES2-TASK-27]
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#6.12"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-28: As cópias de idioma dos assets

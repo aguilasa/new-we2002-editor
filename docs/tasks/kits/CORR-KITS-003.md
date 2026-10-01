@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-003
-title: "Version the rects probes: full owner list and negative control"
-origin: KITS-TASK-02
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: 921ed149
 ---
 
 # CORR-KITS-003 — Version the rects probes: full owner list and negative control

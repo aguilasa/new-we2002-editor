@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-014
-title: "Correção: o 197 bitmaps ficou sem dono — não está no quadro de reconciliação da WTE-TASK-09 e sobrevive em nove lugares"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-08
-severity: high
-done_on: 2026-08-06
-done_commit: b46460b
 ---
 
 # CORR-WTE-014: são 198, e o número errado não tem quem o conserte

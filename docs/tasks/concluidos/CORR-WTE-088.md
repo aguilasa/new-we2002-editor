@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-088
-title: "Correção: nove comentários de comportamento corrente ainda dizem :99 depois da mudança para o :98"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-30
-severity: low
-done_on: 2026-08-23
-done_commit: d2ef858
 ---
 
 # CORR-WTE-088: comentário de comportamento corrente ainda diz `:99`

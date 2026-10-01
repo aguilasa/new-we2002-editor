@@ -1,15 +1,5 @@
 ---
 id: CORR-LOOKS-088
-title: "O gate do close-up afrouxa um limiar que a LOOKS-TASK-28 já mediu mais apertado"
-origin: LOOKS-TASK-40
-severity: medium
-files: [tools/looks/confront.py, docs/tasks/looks/40-a-camera-do-close-up.md, docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md]
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-25
-done_commit: 77118e44
-unblocked_by: null
 ---
 
 # CORR-LOOKS-088 — O gate do close-up afrouxa um limiar que a LOOKS-TASK-28 já mediu mais apertado

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-085
-title: "Correção: o plano e o progresso ainda dizem \"seis gravações\" onde a ferramenta mede dezessete"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-30
-severity: high
-done_on: 2026-08-23
-done_commit: e39da48
 ---
 
 # CORR-WTE-085: o plano e o progresso ainda dizem "seis gravações"

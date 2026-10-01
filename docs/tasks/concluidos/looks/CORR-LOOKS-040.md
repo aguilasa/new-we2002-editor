@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-040
-title: "Correção: o `looks_ui` só julga a cabeça, e passa com a figura inteira apagada"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: LOOKS-TASK-16
-severity: medium
-done_on: 2026-09-16
-done_commit: 3c65af4
 ---
 
 # CORR-LOOKS-040: onze das doze peças estão fora do gate da UI

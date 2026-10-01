@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-22
-title: "A tela `LOOKS SET` na janela — doze linhas trocáveis, e o boneco redesenhado a cada troca"
-type: implementação
-category: ui
-phase: 8
-depends_on: [LOOKS-TASK-21]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
-reviewed_on: 2026-09-17
-review_commit: null
-done_on: 2026-09-17
-done_commit: 9ed647b
 ---
 
 # LOOKS-TASK-22: A tela `LOOKS SET` na janela

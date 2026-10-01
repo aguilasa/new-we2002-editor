@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-115
-title: "Correção: o check_carregado.py aborta e não tem teste, enquanto o irmão nascido no mesmo commit tem"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-37
-severity: low
-done_on: 2026-08-25
-done_commit: f779b58
 ---
 
 # CORR-WTE-115: o `check_carregado.py` não tem par de teste

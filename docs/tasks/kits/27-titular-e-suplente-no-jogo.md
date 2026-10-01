@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-27
-title: "§4.1 no emulador: suplente em campo e a VRAM lida"
-type: "investigação"
-phase: 7
-depends_on: [KITS-TASK-26]
-source_of_truth: "/docs/PLAN-KITS-PY.md#4.1"
-files: ["tools/kits/oracle.py", "docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: ["emulador", "save-states"]        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-27 — §4.1 no emulador: suplente em campo e a VRAM lida

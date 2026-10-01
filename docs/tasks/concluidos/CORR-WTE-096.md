@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-096
-title: "Correção: chave duplicada no GOLDEN_DE apaga o gate do base_teamClick, e o fase-4.md publica \"nenhum\""
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-32
-severity: high
-done_on: 2026-08-24
-done_commit: 2731f2f
 ---
 
 # CORR-WTE-096: chave duplicada no `GOLDEN_DE` apaga o gate do `base_teamClick`

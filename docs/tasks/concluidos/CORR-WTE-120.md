@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-120
-title: "Correção: a guarda do sem_wine.sh é creditada à metade que nesta máquina não pode disparar"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-40
-severity: low
-done_on: 2026-08-26
-done_commit: 17cc31a
 ---
 
 # CORR-WTE-120: a guarda tem duas metades, e a prosa credita a inerte

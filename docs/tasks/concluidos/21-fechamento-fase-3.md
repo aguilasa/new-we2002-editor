@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-21
-title: "Fechamento da fase 3 — a camada de dados é 100% gerada?"
-type: closing
-category: dados
-phase: 3
-depends_on: [WTE-TASK-20]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-10
-review_commit: null
-done_on: 2026-08-10
-done_commit: 691a025
 ---
 
 # WTE-TASK-21: Fechamento da fase 3

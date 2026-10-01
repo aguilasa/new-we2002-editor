@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-011
-title: "Fix the broken.tex fixture recipe: offset 5056 is not tag byte +14"
-origin: KITS-TASK-06
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-10-01
-done_commit: 5f0588e4
 ---
 
 # CORR-KITS-011 — Fix the broken.tex fixture recipe: offset 5056 is not tag byte +14

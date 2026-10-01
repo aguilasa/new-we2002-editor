@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-071
-title: "Hold the rule's pen advance against the game, not only the uv"
-origin: LOOKS-TASK-37
-severity: high
-files: [tools/looks/oracle.py, tools/looks/glyphs.py, tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 6a4944fc
 ---
 
 # CORR-LOOKS-071 — Hold the rule's pen advance against the game, not only the uv

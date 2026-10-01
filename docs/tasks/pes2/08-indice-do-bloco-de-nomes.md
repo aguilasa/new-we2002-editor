@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-08
-title: "Os 624 candidatos de 16 bits — existe índice para o bloco de nomes?"
-type: engenharia-reversa
-category: formato
-phase: 3
-depends_on: []
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#1.10"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-08: O índice do bloco de nomes

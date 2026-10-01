@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-004
-title: Paste the rects transcript as the tool prints it
-origin: KITS-TASK-02
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: fc984d0a
 ---
 
 # CORR-KITS-004 — Paste the rects transcript as the tool prints it

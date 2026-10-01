@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-25
-title: "Handlers de carga — abrir a imagem e popular as telas"
-type: implementação
-category: comportamento
-phase: 4
-depends_on: [WTE-TASK-22, WTE-TASK-23, WTE-TASK-24]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-11
-review_commit: null
-done_on: 2026-08-11
-done_commit: cc04442
 ---
 
 # WTE-TASK-25: Handlers de carga

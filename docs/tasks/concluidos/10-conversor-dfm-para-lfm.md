@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-10
-title: "tools/dfm2lfm.py — gerador dos .lfm e do esqueleto das units"
-type: ferramenta
-category: ui
-phase: 2
-depends_on: [WTE-TASK-03, WTE-TASK-04, WTE-TASK-07]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.4"
-reviewed_on: 2026-08-09
-review_commit: null
-done_on: 2026-08-06
-done_commit: a868d7a
 ---
 
 # WTE-TASK-10: Conversor DFM → LFM

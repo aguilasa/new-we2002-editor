@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-101
-title: "Correção: \"seis seções obrigatórias\" onde o gabarito e a ferramenta têm cinco, e a conta de 481 é só delas"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-31
-severity: medium
-done_on: 2026-08-24
-done_commit: c1635ff
 ---
 
 # CORR-WTE-101: são cinco seções obrigatórias, não seis

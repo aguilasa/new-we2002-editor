@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-112
-title: "Correção: o `filtro` de cada campo é publicado no buffers.md e nunca conferido contra o KeyPress"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-36
-severity: low
-done_on: 2026-08-25
-done_commit: 1af0d4e
 ---
 
 # CORR-WTE-112: o `filtro` é afirmação de doc sem guarda

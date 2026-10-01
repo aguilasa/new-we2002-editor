@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-018
-title: "Correção: o `02-revisar.md` cita ~430, 70 e 197 como “o que já está no plano”, e o plano não diz mais isso"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-09
-severity: low
-done_on: 2026-08-09
-done_commit: dac5638
 ---
 
 # CORR-WTE-018: o prompt de revisão dá exemplo com três números aposentados

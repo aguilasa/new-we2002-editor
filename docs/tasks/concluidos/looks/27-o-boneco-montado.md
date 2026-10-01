@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-27
-title: "As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado"
-type: implementação
-category: render
-phase: 9
-depends_on: [LOOKS-TASK-22, LOOKS-TASK-26]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
-reviewed_on: 2026-09-18
-review_commit: null
-done_on: 2026-09-18
-done_commit: 5013e54
 ---
 
 # LOOKS-TASK-27: O boneco montado

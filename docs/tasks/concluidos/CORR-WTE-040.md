@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-040
-title: "Correção: o GABARITO diz quatro famílias de `BitBtnNClick`, e são três"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-23
-severity: high
-done_on: 2026-08-10
-done_commit: 77864c6
 ---
 
 # CORR-WTE-040: o número que justifica o nome de arquivo não foi medido

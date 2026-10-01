@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-005
-title: Add versioned probes for the 105-TEX and tuple-independence claims
-origin: KITS-TASK-03
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: f0a54db5
 ---
 
 # CORR-KITS-005 — Add versioned probes for the 105-TEX and tuple-independence claims

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-091
-title: "Correção: o `Original ` da ficha esperava uma mudança de estrutura, e a régua dele precisa ser um par"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-31
-severity: high
-done_on: 2026-08-24
-done_commit: 0d13ab1
 ---
 
 # CORR-WTE-091: `jugador.BitBtn1Click` e a régua diferencial

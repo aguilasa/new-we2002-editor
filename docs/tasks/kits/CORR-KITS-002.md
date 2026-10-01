@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-002
-title: "Version the survey's negative controls instead of an ad hoc probe"
-origin: KITS-TASK-01
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: b9bce55b
 ---
 
 # CORR-KITS-002 — Version the survey's negative controls instead of an ad hoc probe

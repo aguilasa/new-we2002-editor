@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-100
-title: O selftest do oracle.py grava no slot real do DuckStation no Linux
-origin: LOOKS-TASK-08
-severity: high
-files: [tools/looks/oracle.py]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-28
-done_commit: 44bcba2
 ---
 
 # CORR-LOOKS-100 — O selftest do oracle.py grava no slot real do DuckStation no Linux

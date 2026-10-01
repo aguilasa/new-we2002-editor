@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-023
-title: "Correção: o critério de build da WTE-TASK-11 diz 2.482 linhas e atribui os 2 hints ao Lazarus; são 2.562 e vêm do /etc/fpc.cfg"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-11
-severity: high
-done_on: 2026-08-09
-done_commit: b60d955
 ---
 
 # CORR-WTE-023: os três números do critério de compilação não reproduzem

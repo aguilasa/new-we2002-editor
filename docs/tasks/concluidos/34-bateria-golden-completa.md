@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-34
-title: "Bateria golden completa — toda gravação, nas duas ROMs"
-type: verificação
-category: verificação
-phase: 6
-depends_on: [WTE-TASK-31, WTE-TASK-32, WTE-TASK-33]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-25
-review_commit: null
-done_on: 2026-08-25
-done_commit: 8cfd02b
 ---
 
 # WTE-TASK-34: Bateria golden completa

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-074
-title: "Correção: a confrontação Pascal × Python do .mcr aponta para um arquivo transitório"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-28
-severity: low
-done_on: 2026-08-20
-done_commit: 0f1b9ae
 ---
 
 # CORR-WTE-074: a confrontação Pascal × Python do `.mcr` aponta para um arquivo transitório

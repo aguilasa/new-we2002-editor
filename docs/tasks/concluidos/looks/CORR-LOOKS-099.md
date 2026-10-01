@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-099
-title: "Corrigir o custo do --pose citado na §4.4 do plano"
-origin: LOOKS-TASK-35
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-27
-done_commit: 1df1fa74
 ---
 
 # CORR-LOOKS-099 — Corrigir o custo do --pose citado na §4.4 do plano

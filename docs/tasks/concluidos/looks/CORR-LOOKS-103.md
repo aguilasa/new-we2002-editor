@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-103
-title: "SKIN recolore só a cabeça, e o corpo fica em A"
-origin: LOOKS-TASK-13
-severity: medium
-files: [tools/looks/assembly.py, tools/looks/layout.py]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-28
-done_commit: 1f2286a
 ---
 
 # CORR-LOOKS-103 — SKIN recolore só a cabeça, e o corpo fica em A

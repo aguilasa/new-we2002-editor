@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-076
-title: "O primeiro critério marca um --screen que não foi rodado"
-origin: LOOKS-TASK-38
-severity: medium
-files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: be3df6bb
 ---
 
 # CORR-LOOKS-076 — O primeiro critério marca um --screen que não foi rodado

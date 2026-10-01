@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-111
-title: "Correção: o campo `faixa` do CAMPOS é dado morto, e dois dos quatro valores contradizem o medido"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-36
-severity: low
-done_on: 2026-08-25
-done_commit: a6af0a2
 ---
 
 # CORR-WTE-111: `faixa` no `CAMPOS` — ninguém lê, e dois estão errados

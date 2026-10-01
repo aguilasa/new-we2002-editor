@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-109
-title: "Correção: quatro sítios do lado WTE atribuem a não-idempotência ao \"editor original\", que aqui é o wte.exe — e o único caminho medido não a tem"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-35
-severity: medium
-done_on: 2026-08-25
-done_commit: e07dbca
 ---
 
 # CORR-WTE-109: "o editor original não é idempotente" — qual editor?

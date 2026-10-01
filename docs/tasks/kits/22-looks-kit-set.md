@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-22
-title: "Parâmetro `kit_set`: o banco do TEX entrega o 2º par de registros"
-type: "implementação"
-phase: 5
-depends_on: [KITS-TASK-21]
-source_of_truth: "/docs/PLAN-KITS-PY.md#2"
-files: ["tools/looks/scene.py", "tools/looks/assembly.py", "tools/looks/atlas.py", "tools/looks/texture.py", "tools/looks/selftest.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-22 — Parâmetro `kit_set`: o banco do TEX entrega o 2º par de registros

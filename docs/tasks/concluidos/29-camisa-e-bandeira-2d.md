@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-29
-title: "Camisa e bandeira 2D em tempo real, com colar-cores"
-type: implementação
-category: features
-phase: 4
-depends_on: [WTE-TASK-08, WTE-TASK-24, WTE-TASK-27]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#5.3"
-reviewed_on: 2026-08-21
-review_commit: null
-done_on: 2026-08-21
-done_commit: b0e3cd9
 ---
 
 # WTE-TASK-29: Render 2D

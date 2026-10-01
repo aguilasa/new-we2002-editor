@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-05
-title: "Fechamento da fase 0 — medições no disco"
-type: closing
-phase: 0
-depends_on: [KITS-TASK-01, KITS-TASK-02, KITS-TASK-03, KITS-TASK-04]
-source_of_truth: "/docs/PLAN-KITS-PY.md#7"
-files: ["docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-done_on: 2026-09-30
-done_commit: b040bd96
-reviewed_on: 2026-09-30
-review_commit: 38e3c386
 ---
 
 # KITS-TASK-05 — Fechamento da fase 0 — medições no disco

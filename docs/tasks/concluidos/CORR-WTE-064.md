@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-064
-title: "Correção: o lote do `edit_nombre1` está provado e a conta dá um a mais que o oráculo"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-26
-severity: medium
-done_on: 2026-08-18
-done_commit: 63c2745
 ---
 
 # CORR-WTE-064: um a mais, e não é o campo errado desta vez

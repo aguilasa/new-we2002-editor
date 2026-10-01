@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-30
-title: "Handlers dos 13 diálogos auxiliares"
-type: implementação
-category: comportamento
-phase: 4
-depends_on: [WTE-TASK-25]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-23
-review_commit: null
-done_on: 2026-08-21
-done_commit: fb640cd
 ---
 
 # WTE-TASK-30: Handlers auxiliares

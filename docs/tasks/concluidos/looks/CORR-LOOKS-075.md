@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-075
-title: "As linhas de --keys do log não rodam como estão escritas"
-origin: LOOKS-TASK-38
-severity: medium
-files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: cc5afa6d
 ---
 
 # CORR-LOOKS-075 — As linhas de --keys do log não rodam como estão escritas

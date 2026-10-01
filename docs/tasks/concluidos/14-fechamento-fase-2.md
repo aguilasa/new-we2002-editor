@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-14
-title: "Fechamento da fase 2 — a casca está fiel?"
-type: closing
-category: ui
-phase: 2
-depends_on: [WTE-TASK-12, WTE-TASK-13]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-09
-review_commit: null
-done_on: 2026-08-09
-done_commit: b252de3
 ---
 
 # WTE-TASK-14: Fechamento da fase 2

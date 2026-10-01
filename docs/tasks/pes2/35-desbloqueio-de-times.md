@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-35
-title: "Desbloqueio de times secretos e da lista de Master League, pelo disco"
-type: engenharia-reversa
-category: engenharia-reversa
-phase: 4
-depends_on: []
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#1.15"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-35: Desbloqueio de times secretos e da lista de ML

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-055
-title: "Correção: `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual"
-type: correção
-category: ferramenta
-status: done
-depends_on: []
-origin: LOOKS-TASK-21
-severity: medium
-done_on: 2026-09-17
-done_commit: 45b9763
 ---
 
 # CORR-LOOKS-055: o `■` da ajuda derruba quem o imprime nesta máquina

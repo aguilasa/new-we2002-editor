@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-014
-title: Add a planted control for the Form 2 and extent refusals
-origin: KITS-TASK-07
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-10-01
-done_commit: a4943bd5
 ---
 
 # CORR-KITS-014 — Add a planted control for the Form 2 and extent refusals

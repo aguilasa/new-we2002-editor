@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-38
-title: "Decidir o nome do produto e registrar a linhagem"
-type: decisão
-category: empacotamento
-phase: 7
-depends_on: [WTE-TASK-35]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#2"
-reviewed_on: 2026-08-25
-review_commit: null
-done_on: 2026-08-25
-done_commit: "0277199"
 ---
 
 # WTE-TASK-38: Nome e linhagem

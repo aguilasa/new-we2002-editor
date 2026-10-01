@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-21
-title: "`scene.Builder(kit=...)` no `looks`, com `TEX_A4` de default"
-type: "implementação"
-phase: 5
-depends_on: []
-source_of_truth: "/docs/PLAN-KITS-PY.md#2"
-files: ["tools/looks/scene.py", "tools/looks/selftest.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-21 — `scene.Builder(kit=...)` no `looks`, com `TEX_A4` de default

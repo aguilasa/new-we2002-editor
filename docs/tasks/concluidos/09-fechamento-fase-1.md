@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-09
-title: "Fechamento da fase 1 — a extração estática está completa?"
-type: closing
-category: engenharia-reversa
-phase: 1
-depends_on: [WTE-TASK-03, WTE-TASK-04, WTE-TASK-05, WTE-TASK-06, WTE-TASK-07, WTE-TASK-08]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-06
-review_commit: null
-done_on: 2026-08-06
-done_commit: 1131b90
 ---
 
 # WTE-TASK-09: Fechamento da fase 1

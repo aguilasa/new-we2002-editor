@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-089
-title: Marcar a linha da Fase 10 da LOOKS-TASK-40 no progresso
-origin: LOOKS-TASK-40
-severity: medium
-files: [docs/tasks/looks/progresso.md]
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-25
-done_commit: 537660fe
 ---
 
 # CORR-LOOKS-089 — Marcar a linha da Fase 10 da LOOKS-TASK-40 no progresso

@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-34
-title: "Rotas MCP no lugar do `drive.py`"
-type: ferramenta
-category: ferramental
-phase: 0
-depends_on: [PES2-TASK-33]
-status: done
-source_of_truth: "/docs/PLAN-PES2-PSX.md#6.14"
-reviewed_on: 2026-09-03
-review_commit: null
-done_on: 2026-09-03
-done_commit: 648e60d
 ---
 
 # PES2-TASK-34: Rotas MCP no lugar do `drive.py`

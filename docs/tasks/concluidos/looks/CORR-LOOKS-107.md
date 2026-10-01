@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-107
-title: "O close-up não gira o modelo, e no jogo ele gira"
-origin: LOOKS-TASK-35
-severity: medium
-files: [tools/looks/layout.py, tools/looks/scene.py, tools/looks/oracle.py, tools/looks/ui/looks_set.py, tools/looks/ui/app.py, tools/looks/ui_check.py, docs/PLAN-LOOKS-PY.md, CLAUDE.md]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-29
-done_commit: ac4d250
 ---
 
 # CORR-LOOKS-107 — O close-up não gira o modelo, e no jogo ele gira

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-048
-title: "Correção: o `fase-3.md` ainda diz que o `wte.exe` não passa da tela de carga"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-20
-severity: low
-done_on: 2026-08-10
-done_commit: d575092
 ---
 
 # CORR-WTE-048: a afirmação aposentada sobrevive num quinto sítio, e ele é gerado

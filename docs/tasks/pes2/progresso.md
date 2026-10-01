@@ -1,8 +1,3 @@
----
-cycle: pes2
-prefix: PES2
-profile: /docs/prompts/perfil-pes2.md
----
 # Progresso — mapeamento do Pro Evolution Soccer 2 (PSX), rumo a um editor
 
 Rastreamento das tasks de [`../PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md), que

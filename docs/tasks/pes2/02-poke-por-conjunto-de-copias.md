@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-02
-title: "`tools/pes2/poke.py` — gravação pelo conjunto de cópias"
-type: ferramenta
-category: verificação
-phase: 2
-depends_on: []
-status: done
-source_of_truth: "/docs/PLAN-PES2-PSX.md#6.1"
-reviewed_on: 2026-09-01
-review_commit: null
-done_on: 2026-09-01
-done_commit: 02f419b
 ---
 
 # PES2-TASK-02: Gravação pelo conjunto de cópias

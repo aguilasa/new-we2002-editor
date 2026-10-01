@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-079
-title: "A seta esquerda está em x 384 em nove linhas, não oito"
-origin: LOOKS-TASK-38
-severity: low
-files: [docs/tasks/looks/38-o-alinhamento-dos-valores.md, docs/PLAN-LOOKS-PY.md, docs/tasks/looks/36-os-sprites-estaticos.md]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 8d920cde
 ---
 
 # CORR-LOOKS-079 — A seta esquerda está em x 384 em nove linhas, não oito

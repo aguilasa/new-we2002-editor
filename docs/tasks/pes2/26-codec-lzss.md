@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-26
-title: "O codec LZSS dos contêineres `BIN/*.BIN`"
-type: engenharia-reversa
-category: formato
-phase: 7
-depends_on: []
-status: done
-source_of_truth: "/docs/PLAN-PES2-PSX.md#1.14"
-reviewed_on: 2026-09-01
-review_commit: null
-done_on: 2026-09-01
-done_commit: a3c8a2c
 ---
 
 # PES2-TASK-26: O codec LZSS dos contêineres

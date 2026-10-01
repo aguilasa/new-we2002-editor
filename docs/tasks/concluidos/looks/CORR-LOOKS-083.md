@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-083
-title: Plantar o controle do parse_keys que ignora a contagem
-origin: CORR-LOOKS-082
-severity: low
-files: [tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 6c9e0cdc
 ---
 
 # CORR-LOOKS-083 — Plantar o controle do parse_keys que ignora a contagem

@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-001
-title: "Route cli.py survey through core/api.py, or record the exception"
-origin: KITS-TASK-01
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: a9cafeb4
 ---
 
 # CORR-KITS-001 — Route cli.py survey through core/api.py, or record the exception

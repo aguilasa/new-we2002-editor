@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-012
-title: "Declare cli.py and the open subcommand in the task's scope"
-origin: KITS-TASK-06
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-10-01
-done_commit: 511abd91
 ---
 
 # CORR-KITS-012 — Declare cli.py and the open subcommand in the task's scope

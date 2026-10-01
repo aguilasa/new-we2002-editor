@@ -1,17 +1,5 @@
 ---
 id: PAR-TASK-11
-title: "SoFIFA: o que dá para conferir sem rede"
-type: verificação
-category: features
-projeto: newWe2002
-depends_on: [PAR-TASK-01, PAR-TASK-02, PAR-TASK-03, PAR-TASK-04, PAR-TASK-05, PAR-TASK-06, PAR-TASK-07, PAR-TASK-08, PAR-TASK-09]
-status: blocked
-source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.6"
-phase: null
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PAR-TASK-11: SoFIFA, o possível sem rede

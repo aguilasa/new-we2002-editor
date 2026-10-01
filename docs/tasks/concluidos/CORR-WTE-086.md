@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-086
-title: "Correção: o dono do ficha_enlaza não é o pabajoClick — nenhuma spec ou código liga os dois"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-30
-severity: low
-done_on: 2026-08-23
-done_commit: e82403c
 ---
 
 # CORR-WTE-086: o dono do `ficha_enlaza` não é o `pabajoClick`

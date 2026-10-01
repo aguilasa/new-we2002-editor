@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-032
-title: "Correção: a \"regra zero\" do `tipos.md` proíbe `LongInt` e `SizeInt` em campo de registro, e a tabela usa os dois"
-type: correção
-category: dados
-status: done
-depends_on: []
-origin: WTE-TASK-15
-severity: high
-done_on: 2026-08-10
-done_commit: 102dd1d
 ---
 
 # CORR-WTE-032: o documento que governa os dois geradores se contradiz na primeira seção

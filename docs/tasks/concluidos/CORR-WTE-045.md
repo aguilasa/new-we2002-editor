@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-045
-title: "Correção: a seção das seis áreas cita `roms/09-areas-com-time`, que é o nome da sessão e não o da imagem"
-type: correção
-category: dados
-status: done
-depends_on: []
-origin: WTE-TASK-19
-severity: low
-done_on: 2026-08-10
-done_commit: e130b96
 ---
 
 # CORR-WTE-045: o `offsets-novos.md` nomeia uma ROM que não existe

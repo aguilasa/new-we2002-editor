@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-13
-title: "`looks.py` — os doze campos, seus domínios e os rótulos"
-type: implementação
-category: núcleo
-phase: 4
-depends_on: [LOOKS-TASK-09]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#1.9"
-reviewed_on: 2026-09-15
-review_commit: null
-done_on: 2026-09-15
-done_commit: db56eb8
 ---
 
 # LOOKS-TASK-13: Os campos e seus domínios

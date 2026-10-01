@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-139
-title: "Correção: `Return` depois de clicar um botão do `DefaultTacticsDialog` reabre o botão no port e fecha o diálogo no original"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: CORR-WTE-135
-severity: medium
-done_on: 2026-08-31
-done_commit: b9c10aa
 ---
 
 # CORR-WTE-139: o botão focado come o `Return` no port

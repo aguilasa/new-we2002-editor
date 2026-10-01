@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-100
-title: "Correção: a citação `{$Q-}` num comentário abre nível 2 — o único warning do build, e um erro fatal em modo delphi"
-type: correção
-category: código
-status: done
-depends_on: []
-origin: CORR-WTE-095
-severity: low
-done_on: 2026-08-24
-done_commit: e82bb3b
 ---
 
 # CORR-WTE-100: a citação com chaves abre comentário de nível 2

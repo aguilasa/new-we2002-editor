@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-043
-title: "Correção: `players[i].cost := Ord(buf1[0])` perde o sinal que o C++ tem"
-type: correção
-category: dados
-status: done
-depends_on: []
-origin: WTE-TASK-18
-severity: low
-done_on: 2026-08-10
-done_commit: 8db4aba
 ---
 
 # CORR-WTE-043: o custo do jogador NC entra sem sinal na camada Pascal

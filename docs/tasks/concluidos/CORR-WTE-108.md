@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-108
-title: "Correção: a WTE-TASK-35 deixa \"o plano é o que falta conferir\" e o plano nunca afirmou aquilo"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-35
-severity: low
-done_on: 2026-08-25
-done_commit: 0c8fa41
 ---
 
 # CORR-WTE-108: um "falta conferir" que já está conferido

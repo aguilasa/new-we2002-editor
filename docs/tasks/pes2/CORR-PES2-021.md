@@ -1,14 +1,5 @@
 ---
 id: CORR-PES2-021
-title: "Correção: o `boot_check.sh` justifica nomear o binário com um 0,019 que a própria task mediu e desmentiu"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: PES2-TASK-34
-severity: high
-done_on: 2026-09-03
-done_commit: d26db51
 ---
 
 # CORR-PES2-021: o `boot_check.sh` afirma 0,019 entre os dois binários; medido são ~0,0015

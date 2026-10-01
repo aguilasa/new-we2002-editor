@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-01
-title: "O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers"
-type: infraestrutura
-category: processo
-phase: 0
-depends_on: []
-status: done
-source_of_truth: /docs/tasks/concluidos/port-mcr/01-ciclo-em-subpasta.md
-reviewed_on: 2026-09-07
-review_commit: null
-done_on: 2026-09-07
-done_commit: 2a71f1b
 ---
 
 # MCR-TASK-01: O ciclo em subpasta

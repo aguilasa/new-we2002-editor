@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-038
-title: "Correção: a cor de barba troca a superfície e não muda um pixel do quadro"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: LOOKS-TASK-15
-severity: medium
-done_on: 2026-09-16
-done_commit: 0efd5e2
 ---
 
 # CORR-LOOKS-038: `H.F.COL.` chega à textura e não chega à tela

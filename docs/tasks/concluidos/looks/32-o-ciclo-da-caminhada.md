@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-32
-title: "Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço"
-type: investigação
-category: oráculo
-phase: 11
-depends_on: [LOOKS-TASK-26]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: 2026-09-24
-review_commit: 42c23a32
-done_on: 2026-09-23
-done_commit: 6a2c16fb
 ---
 
 # LOOKS-TASK-32: O ciclo da caminhada

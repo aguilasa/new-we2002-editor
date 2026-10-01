@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-34
-title: "Conferir a Definição de pronto do §0, item por item"
-type: "verificação"
-phase: 9
-depends_on: [KITS-TASK-05, KITS-TASK-11, KITS-TASK-14, KITS-TASK-17, KITS-TASK-20, KITS-TASK-23, KITS-TASK-26, KITS-TASK-29, KITS-TASK-32, KITS-TASK-33]
-source_of_truth: "/docs/PLAN-KITS-PY.md#definição-de-pronto"
-files: ["docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: ["tela", "emulador"]        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-34 — Conferir a Definição de pronto do §0, item por item

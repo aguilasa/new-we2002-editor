@@ -1,14 +1,5 @@
 ---
 id: CORR-PES2-027
-title: "Correção: o `pes2_boot` nunca roda pela receita documentada — ele quer `PES2_IMAGE`, e os docs só dão `WE2002_PES2_*`"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: PES2-TASK-32
-severity: high
-done_on: 2026-09-03
-done_commit: 1a247bb
 ---
 
 # CORR-PES2-027: o gate de boot se reporta *skipped* na única receita escrita

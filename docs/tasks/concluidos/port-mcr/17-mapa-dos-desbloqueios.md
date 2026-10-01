@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-17
-title: "Onde o option file guarda os times secretos e a opção de Master League no modo exibição"
-type: verificação
-category: engenharia-reversa
-phase: 5
-depends_on: [MCR-TASK-09]
-status: done
-source_of_truth: /docs/tasks/concluidos/port-mcr/17-mapa-dos-desbloqueios.md
-reviewed_on: 2026-09-10
-review_commit: null
-done_on: 2026-09-10
-done_commit: 3b1564d
 ---
 
 # MCR-TASK-17: o mapa dos desbloqueios

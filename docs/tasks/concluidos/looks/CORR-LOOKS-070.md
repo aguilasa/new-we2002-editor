@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-070
-title: "A caixa do cursor no valor do DEFAUL começa em x 396 no jogo, e a tabela a carrega da linha de carga em x 314"
-origin: CORR-LOOKS-067
-severity: low
-files: [tools/looks/oracle.py, tools/looks/screen.py, tools/looks/screen.json]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 145d2798
 ---
 
 # CORR-LOOKS-070 — A caixa do cursor no valor do DEFAUL começa em x 396 no jogo, e a tabela a carrega da linha de carga em x 314

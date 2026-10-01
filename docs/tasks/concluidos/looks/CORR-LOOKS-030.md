@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-030
-title: "Correção: a treze seções de cabelo faltou uma na lista — o `E2` e a seção 54 não aparecem em lugar nenhum"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: LOOKS-TASK-14
-severity: low
-done_on: 2026-09-16
-done_commit: 1a632ae
 ---
 
 # CORR-LOOKS-030: a décima terceira seção do mapa de cabelo não está escrita

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-094
-title: "Tirar das docstrings do ritmo o timer de HBlank que o código não lê"
-origin: LOOKS-TASK-33
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-26
-done_commit: 29d2b277
 ---
 
 # CORR-LOOKS-094 — Tirar das docstrings do ritmo o timer de HBlank que o código não lê

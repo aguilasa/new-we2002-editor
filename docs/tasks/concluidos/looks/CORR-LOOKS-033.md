@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-033
-title: "Correção: a §6(c) do plano ainda se declara medida em parte, com a task pendente"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: LOOKS-TASK-14
-severity: low
-done_on: 2026-09-16
-done_commit: 38705b2
 ---
 
 # CORR-LOOKS-033: a fonte de verdade da LOOKS-TASK-14 diz que ela não fechou

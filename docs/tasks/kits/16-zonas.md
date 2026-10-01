@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-16
-title: "`zones.py` com proveniência, e a §4.6 fechada contra a geometria"
-type: "verificação"
-phase: 3
-depends_on: [KITS-TASK-15, KITS-TASK-04]
-source_of_truth: "/docs/PLAN-KITS-PY.md#4.6"
-files: ["tools/kits/core/zones.py", "tools/kits/core/api.py", "tools/kits/controls.py", "docs/PLAN-KITS-PY.md", "NOTICE.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-16 — `zones.py` com proveniência, e a §4.6 fechada contra a geometria

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-132
-title: "Correção: nenhuma — os 52 bytes do port é que estão certos; quem diverge é o ed.exe x64"
-type: correção
-category: paridade
-status: done
-depends_on: []
-origin: PAR-TASK-06
-severity: high
-done_on: 2026-09-01
-done_commit: b3658f4
 ---
 
 # CORR-WTE-132: o `.t2002` do port não é o do original

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-090
-title: "Retitular a task: a medição desmentiu 'quando a linha é de cabeça'"
-origin: LOOKS-TASK-40
-severity: low
-files: [docs/tasks/looks/40-a-camera-do-close-up.md, docs/tasks/looks/progresso.md]
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-25
-done_commit: 73d81b00
 ---
 
 # CORR-LOOKS-090 — Retitular a task: a medição desmentiu 'quando a linha é de cabeça'

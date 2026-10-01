@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-20
-title: "Reconciliação do plano, `perfil-looks.md` e os entregáveis"
-type: documentação
-category: fechamento
-phase: 7
-depends_on: [LOOKS-TASK-19]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#9"
-reviewed_on: 2026-09-17
-review_commit: null
-done_on: 2026-09-17
-done_commit: bc6c238
 ---
 
 # LOOKS-TASK-20: Reconciliação e fechamento

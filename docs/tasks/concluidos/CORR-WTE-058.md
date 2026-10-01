@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-058
-title: "Correção: o `visual.md` manda rodar o `capture_forms.sh`, que a WTE-TASK-25 removeu"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-25
-severity: low
-done_on: 2026-08-11
-done_commit: 74394e1
 ---
 
 # CORR-WTE-058: documentos que a remoção do andaime deixou apontando para o vazio

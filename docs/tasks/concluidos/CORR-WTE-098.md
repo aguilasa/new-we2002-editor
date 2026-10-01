@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-098
-title: "Correção: a §5.1 do plano ainda diz que o preço não precisa de golden, e ele tem um"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-32
-severity: medium
-done_on: 2026-08-24
-done_commit: 9bffd69
 ---
 
 # CORR-WTE-098: a §5.1 do plano ainda diz que o preço não precisa de golden

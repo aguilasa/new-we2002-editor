@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-035
-title: "Correção: a definição de pronto do plano pede uma tupla que a tabela recusa"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: LOOKS-TASK-15
-severity: medium
-done_on: 2026-09-16
-done_commit: 0a2a6cf
 ---
 
 # CORR-LOOKS-035: o item 3 da definição de pronto sai 2

@@ -1,17 +1,5 @@
 ---
 id: LOOKS-TASK-33
-title: "A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo"
-type: implementação
-category: render
-phase: 11
-depends_on: [LOOKS-TASK-28, LOOKS-TASK-32, LOOKS-TASK-40]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
-reviewed_on: 2026-09-26
-review_commit: f3bdbcb2
-done_on: 2026-09-25
-done_commit: 7b5a01a3
-resources: [emulador, tela]
 ---
 
 # LOOKS-TASK-33: A janela animada

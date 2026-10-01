@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-19
-title: "`cli.py` e os quatro alvos de `ctest`"
-type: implementação
-category: verificação
-phase: 7
-depends_on: [LOOKS-TASK-18]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#4.4"
-reviewed_on: 2026-09-17
-review_commit: null
-done_on: 2026-09-17
-done_commit: 66eeb6e
 ---
 
 # LOOKS-TASK-19: A linha de comando e os gates

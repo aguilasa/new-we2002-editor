@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-063
-title: "Correção: cara, cabelo e barba da ficha não têm dono em nenhuma das 40 tasks"
-type: correção
-category: escopo
-status: done
-depends_on: []
-origin: WTE-TASK-26
-severity: high
-done_on: 2026-08-18
-done_commit: 66393d1
 ---
 
 # CORR-WTE-063: uma exclusão de escopo sem dono nomeado

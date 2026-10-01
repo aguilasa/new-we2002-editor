@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-104
-title: "Correção: o golden-24 grava duas vezes num time cujos dois primeiros cobradores são iguais — o vaivém seria invisível"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-34
-severity: high
-done_on: 2026-08-25
-done_commit: bd1a550
 ---
 
 # CORR-WTE-104: o `golden-24` é cego para o vaivém que ele existe para medir

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-051
-title: "Correção: a fração de 92,5% subtrai linhas úteis de um total que conta linhas em branco"
-type: correção
-category: dados
-status: done
-depends_on: []
-origin: WTE-TASK-21
-severity: low
-done_on: 2026-08-10
-done_commit: 2b03e51
 ---
 
 # CORR-WTE-051: as duas colunas da fração não contam a mesma coisa

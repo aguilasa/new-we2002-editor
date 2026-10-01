@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-35
-title: "Registro das divergências deliberadas"
-type: verificação
-category: verificação
-phase: 6
-depends_on: [WTE-TASK-34]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-25
-review_commit: null
-done_on: 2026-08-25
-done_commit: e247f8f
 ---
 
 # WTE-TASK-35: Divergências deliberadas

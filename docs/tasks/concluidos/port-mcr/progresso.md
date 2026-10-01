@@ -1,8 +1,3 @@
----
-cycle: port-mcr
-prefix: MCR
-profile: /docs/prompts/perfil-mcr.md
----
 # Progresso — port em Python do editor de `.mcr` do WE2002
 
 Rastreamento das tasks de [`/docs/PLAN-MCR-PY.md`](/docs/PLAN-MCR-PY.md), que é

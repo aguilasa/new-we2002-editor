@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-19
-title: "Descobrir os offsets que o Obocaman tem e nós não"
-type: extração
-category: dados
-phase: 3
-depends_on: [WTE-TASK-06, WTE-TASK-18]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.2"
-reviewed_on: 2026-08-10
-review_commit: null
-done_on: 2026-08-10
-done_commit: 9ab8527
 ---
 
 # WTE-TASK-19: Os offsets restantes

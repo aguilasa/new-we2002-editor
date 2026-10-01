@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-019
-title: "Correção: o `--tmds` promete dizer se algum campo move um TMD, e não pergunta — a metade negativa do veredito não sai de comando nenhum"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: LOOKS-TASK-08
-severity: medium
-done_on: 2026-09-15
-done_commit: a698002
 ---
 
 # CORR-LOOKS-019: a metade negativa do veredito não é medida por comando

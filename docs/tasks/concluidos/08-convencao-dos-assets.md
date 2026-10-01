@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-08
-title: "Convenção de nome dos 198 bitmaps e do dat.bin"
-type: extração
-category: engenharia-reversa
-phase: 1
-depends_on: [WTE-TASK-05]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#1.8"
-reviewed_on: 2026-08-06
-review_commit: null
-done_on: 2026-08-06
-done_commit: a868d7a
 ---
 
 # WTE-TASK-08: Convenção dos assets

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-034
-title: "Correção: nenhum campo de cor alcança a cabeça quando o cabelo não é da família A"
-type: correção
-category: núcleo
-status: done
-depends_on: []
-origin: LOOKS-TASK-15
-severity: high
-done_on: 2026-09-16
-done_commit: 0efd5e2
 ---
 
 # CORR-LOOKS-034: as quatro linhas de cor só pintam a seção 24

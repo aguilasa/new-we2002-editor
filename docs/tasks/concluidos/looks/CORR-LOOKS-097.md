@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-097
-title: "Versionar a sonda por trás dos números de posição no painel"
-origin: LOOKS-TASK-34
-severity: medium
-files: [tools/looks/confront.py, docs/tasks/looks/34-o-goleiro-andando.md, docs/tasks/looks/35-fechamento-da-v2.md]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-26
-done_commit: 9aeb050d
 ---
 
 # CORR-LOOKS-097 — Versionar a sonda por trás dos números de posição no painel

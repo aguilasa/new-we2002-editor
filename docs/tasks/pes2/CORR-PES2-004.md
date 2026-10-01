@@ -1,14 +1,5 @@
 ---
 id: CORR-PES2-004
-title: "Correção: os prompts ficaram agnósticos de plano e de prefixo, e continuam cheios de corpo WTE-específico"
-type: correção
-category: processo
-status: done
-depends_on: [CORR-PES2-003]
-origin: CORR-PES2-003
-severity: medium
-done_on: 2026-09-01
-done_commit: 5e2b8bd
 ---
 
 # CORR-PES2-004: agnóstico no cabeçalho, WTE-específico no corpo

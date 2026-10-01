@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-053
-title: "Correção: a LOOKS-TASK-19 diz \"quatro alvos\" no título e \"três\" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: LOOKS-TASK-19
-severity: low
-done_on: 2026-09-17
-done_commit: 227bc64
 ---
 
 # CORR-LOOKS-053: prosa vencida dentro da própria task

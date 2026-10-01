@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-04
-title: "published_methods.tsv — os 96 handlers, com dono"
-type: extração
-category: engenharia-reversa
-phase: 1
-depends_on: [WTE-TASK-02]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#1.4"
-reviewed_on: 2026-08-06
-review_commit: null
-done_on: 2026-08-05
-done_commit: 81f8e21
 ---
 
 # WTE-TASK-04: Mapa de handlers

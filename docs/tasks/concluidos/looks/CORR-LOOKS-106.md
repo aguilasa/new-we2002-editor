@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-106
-title: "A janela cai em toda linha de cabeça quando o fontconfig põe um WOFF na reserva"
-origin: LOOKS-TASK-39
-severity: high
-files: [tools/looks/ui/looks_set.py]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-29
-done_commit: 1101cb5
 ---
 
 # CORR-LOOKS-106 — A janela cai em toda linha de cabeça quando o fontconfig põe um WOFF na reserva

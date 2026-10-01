@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-067
-title: "Correção: o DEFAUL tem uma segunda posição — Left leva o cursor ao rótulo, com a ajuda \"Undo\" —, e o screen.json a registra como trava"
-origin: LOOKS-TASK-36
-severity: medium
-files: [tools/looks/oracle.py, tools/looks/screen.py, tools/looks/screen.json, tools/looks/ui/looks_set.py, tools/looks/ui/app.py]
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-21
-done_commit: 83f190cd
 ---
 
 # CORR-LOOKS-067 — Correção: o DEFAUL tem uma segunda posição — Left leva o cursor ao rótulo, com a ajuda "Undo" —, e o screen.json a registra como trava

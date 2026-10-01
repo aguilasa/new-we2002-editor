@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-36
-title: "Os sprites estáticos da tela — placa, caixas, ícone, barra, título e setas, lidos do disco"
-type: implementação
-category: render
-phase: 10
-depends_on: [LOOKS-TASK-31]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: 2026-09-21
-review_commit: 3fba5391
-done_on: 2026-09-21
-done_commit: 2b698730
 ---
 
 # LOOKS-TASK-36: Os sprites estáticos da tela

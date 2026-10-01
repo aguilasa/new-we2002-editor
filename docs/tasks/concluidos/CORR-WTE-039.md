@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-039
-title: "Correção: o GABARITO diz que o gerador recusa `(int)*(int *)`, e ele aceita"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-23
-severity: high
-done_on: 2026-08-10
-done_commit: d41c982
 ---
 
 # CORR-WTE-039: a marca de decompilado que só existe no texto

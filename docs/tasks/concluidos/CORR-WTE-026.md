@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-026
-title: "Correção: a coluna VCL da tabela do achado 2 não foi medida, e a tabela se anuncia inteira como medida"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-13
-severity: low
-done_on: 2026-08-10
-done_commit: 35c2002
 ---
 
 # CORR-WTE-026: metade da tabela de semântica de sinal é memória, não medida

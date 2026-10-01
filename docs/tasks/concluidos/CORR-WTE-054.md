@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-054
-title: "Correção: o `vmt.md` diz que todo número saiu do `vmt_probe.java`, e os votos da âncora não saíram"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-24
-severity: high
-done_on: 2026-08-11
-done_commit: c747bf2
 ---
 
 # CORR-WTE-054: os "4 votos entre ~150 referências" não têm ferramenta versionada

@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-36
-title: "Buffers de tamanho fixo e comportamento de truncamento"
-type: verificação
-category: verificação
-phase: 6
-depends_on: [WTE-TASK-26, WTE-TASK-34]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-25
-review_commit: null
-done_on: 2026-08-25
-done_commit: 5b13092
 ---
 
 # WTE-TASK-36: Buffers e truncamento

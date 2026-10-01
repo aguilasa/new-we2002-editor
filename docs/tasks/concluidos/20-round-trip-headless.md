@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-20
-title: "Round-trip headless contra o we2002_core, nas duas ROMs"
-type: verificação
-category: dados
-phase: 3
-depends_on: [WTE-TASK-18, WTE-TASK-19]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.2"
-reviewed_on: 2026-08-10
-review_commit: null
-done_on: 2026-08-10
-done_commit: 691a025
 ---
 
 # WTE-TASK-20: Round-trip headless

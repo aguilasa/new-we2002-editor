@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-006
-title: "Paste prims transcripts in the Log whole, not trimmed"
-origin: KITS-TASK-03
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: 0f48d058
 ---
 
 # CORR-KITS-006 — Paste prims transcripts in the Log whole, not trimmed

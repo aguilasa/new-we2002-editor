@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-01
-title: "Promover o levantamento do §1.1 a ferramenta versionada"
-type: ferramenta
-phase: 0
-depends_on: []
-source_of_truth: "/docs/PLAN-KITS-PY.md#1.1"
-files: ["tools/kits/core/__init__.py", "tools/kits/core/survey.py", "tools/kits/cli.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-done_on: 2026-09-30
-done_commit: fc5717ae
-reviewed_on: 2026-09-30
-review_commit: da75b135
 ---
 
 # KITS-TASK-01 — Promover o levantamento do §1.1 a ferramenta versionada

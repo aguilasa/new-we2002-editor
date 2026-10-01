@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-32
-title: "Preço derivado dos atributos — jogador e time inteiro"
-type: implementação
-category: features
-phase: 5
-depends_on: [WTE-TASK-24, WTE-TASK-25]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#5.1"
-reviewed_on: 2026-08-24
-review_commit: null
-done_on: 2026-08-24
-done_commit: 04182fd
 ---
 
 # WTE-TASK-32: Preço do jogador

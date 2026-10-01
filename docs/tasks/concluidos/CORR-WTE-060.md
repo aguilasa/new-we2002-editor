@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-060
-title: "Correção: o `iguala_nombres` não acinzenta no port, e o defeito atravessou duas tasks sem correção própria"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-26
-severity: high
-done_on: 2026-08-18
-done_commit: 1dfb765
 ---
 
 # CORR-WTE-060: o botão que não acinzenta, e a correção que ninguém abriu

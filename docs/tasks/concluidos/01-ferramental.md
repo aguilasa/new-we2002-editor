@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-01
-title: "Instalar e verificar o ferramental (Lazarus, FPC, Ghidra)"
-type: infra
-category: infra
-phase: 0
-depends_on: []
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#3"
-reviewed_on: 2026-08-05
-review_commit: null
-done_on: 2026-08-05
-done_commit: dde7062
 ---
 
 # WTE-TASK-01: Ferramental

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-082
-title: "Dar ao parse_keys uma sintaxe de repetição, em vez de linhas de 317 caracteres"
-origin: CORR-LOOKS-075
-severity: low
-files: [tools/looks/screen.py, docs/tasks/looks/38-o-alinhamento-dos-valores.md]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 9246c32a
 ---
 
 # CORR-LOOKS-082 — Dar ao parse_keys uma sintaxe de repetição, em vez de linhas de 317 caracteres

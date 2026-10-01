@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-34
-title: "O goleiro — figura 1 montada e andando na tela, conferida no slot 1"
-type: verificação
-category: oráculo
-phase: 11
-depends_on: [LOOKS-TASK-33]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.4"
-reviewed_on: 2026-09-26
-review_commit: 76b371bc
-done_on: 2026-09-26
-done_commit: 0d289714
 ---
 
 # LOOKS-TASK-34: O goleiro

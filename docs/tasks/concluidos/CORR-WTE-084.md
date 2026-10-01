@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-084
-title: "Correção: a bandeira do ml_teams[22] sai 2 px mais abaixo, e a barra `equipe` do oráculo sai fora da grade"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: CORR-WTE-083
-severity: medium
-done_on: 2026-08-23
-done_commit: 657b349
 ---
 
 # CORR-WTE-084: o time 85 diverge por posição, não por cor

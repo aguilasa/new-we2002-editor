@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-31
-title: "Fechamento da fase 4 — os 96 têm veredito?"
-type: closing
-category: comportamento
-phase: 4
-depends_on: [WTE-TASK-25, WTE-TASK-26, WTE-TASK-27, WTE-TASK-28, WTE-TASK-29, WTE-TASK-30]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-24
-review_commit: null
-done_on: 2026-08-24
-done_commit: c3ccd5d
 ---
 
 # WTE-TASK-31: Fechamento da fase 4

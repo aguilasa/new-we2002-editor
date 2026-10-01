@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-12
-title: "Gerador de `generated/` a partir do C++, com `--check` no ctest"
-type: ferramenta
-phase: 2
-depends_on: [KITS-TASK-11]
-source_of_truth: "/docs/PLAN-KITS-PY.md#3.3"
-files: ["tools/kits/gen_tables.py", "tools/kits/core/generated/", "tests/CMakeLists.txt", "NOTICE.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-12 — Gerador de `generated/` a partir do C++, com `--check` no ctest

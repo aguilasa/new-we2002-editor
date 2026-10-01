@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-18
-title: "`pes2_map.json` — o mapa consolidado"
-type: implementação
-category: formato
-phase: 5
-depends_on: [PES2-TASK-16, PES2-TASK-17]
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#5"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-18: O mapa consolidado

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-065
-title: "Correção: \"o maior b0 medido é 43\" — é 111 na europeia e 116 na japonesa"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-33
-severity: high
-done_on: 2026-08-19
-done_commit: 735c571
 ---
 
 # CORR-WTE-065: o maior `b0` medido não é 43

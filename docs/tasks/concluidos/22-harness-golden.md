@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-22
-title: "golden_check.sh — o gate: wte.exe contra o app Lazarus"
-type: ferramenta
-category: verificação
-phase: 4
-depends_on: [WTE-TASK-11, WTE-TASK-21]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#6"
-reviewed_on: 2026-08-11
-review_commit: null
-done_on: 2026-08-10
-done_commit: e139f46
 ---
 
 # WTE-TASK-22: Harness golden

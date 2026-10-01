@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-02
-title: "Esqueleto de wte/ e build por linha de comando"
-type: infra
-category: infra
-phase: 0
-depends_on: [WTE-TASK-01]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-05
-review_commit: null
-done_on: 2026-08-05
-done_commit: e910e1e
 ---
 
 # WTE-TASK-02: Esqueleto do projeto

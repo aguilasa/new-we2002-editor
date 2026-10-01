@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-044
-title: "Correção: o oráculo comportamental está morto e a fase 4 é circular"
-type: correção
-category: comportamento
-status: done
-depends_on: [WTE-TASK-24]
-origin: WTE-TASK-19
-severity: high
-done_on: 2026-08-10
-done_commit: b9562ce
 ---
 
 # CORR-WTE-044: quebrar a circularidade do oráculo A

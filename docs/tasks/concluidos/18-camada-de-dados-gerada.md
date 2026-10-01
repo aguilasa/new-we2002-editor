@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-18
-title: "Gerar a camada de dados e fazê-la compilar"
-type: implementação
-category: dados
-phase: 3
-depends_on: [WTE-TASK-17]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-10
-review_commit: null
-done_on: 2026-08-10
-done_commit: 7b642f7
 ---
 
 # WTE-TASK-18: Camada de dados gerada

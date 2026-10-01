@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-140
-title: "Correção: cancelar o diálogo de abertura encerra o port e deixa o `ed.exe` com a janela vazia"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: PAR-TASK-09
-severity: medium
-done_on: 2026-08-31
-done_commit: 759e4d9
 ---
 
 # CORR-WTE-140: `return FALSE` no `OnInitDialog` não fecha diálogo nenhum

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-021
-title: "Correção: \"mesma malha, uniforme diferente\" não vale para quatro das onze peças, e o tronco está do lado errado da conta"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: LOOKS-TASK-09
-severity: medium
-done_on: 2026-09-15
-done_commit: e674f10
 ---
 
 # CORR-LOOKS-021: o resumo do goleiro contra o jogador de linha diz o contrário do que o arquivo diz

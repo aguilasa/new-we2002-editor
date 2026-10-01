@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-21
-title: "Incógnita (q) — a tela `LOOKS SET` medida no jogo: texto de cada valor, ajuda, cursor e valores iniciais"
-type: investigação
-category: oráculo
-phase: 8
-depends_on: [LOOKS-TASK-20]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: 2026-09-17
-review_commit: null
-done_on: 2026-09-17
-done_commit: 1fb8488
 ---
 
 # LOOKS-TASK-21: A tela `LOOKS SET`, medida

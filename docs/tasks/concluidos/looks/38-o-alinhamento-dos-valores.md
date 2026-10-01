@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-38
-title: "O alinhamento dos valores — a caixa do objeto de texto no `screen.json`, e o valor à direita"
-type: implementação
-category: ui
-phase: 10
-depends_on: [LOOKS-TASK-37]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: 2026-09-22
-review_commit: 84c8f97f
-done_on: 2026-09-22
-done_commit: 19bcdf0a
 ---
 
 # LOOKS-TASK-38: O alinhamento dos valores

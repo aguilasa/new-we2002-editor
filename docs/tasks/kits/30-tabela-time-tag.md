@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-30
-title: "§4.2: qual TEX cada time veste"
-type: "investigação"
-phase: 8
-depends_on: [KITS-TASK-14]
-source_of_truth: "/docs/PLAN-KITS-PY.md#4.2"
-files: ["tools/kits/core/generated/", "tools/kits/gen_tables.py", "docs/PLAN-KITS-PY.md", "NOTICE.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: ["emulador"]        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-30 — §4.2: qual TEX cada time veste

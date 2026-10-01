@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-072
-title: "Say 'within 16 per channel', not 'pixel a pixel', for the labels"
-origin: LOOKS-TASK-37
-severity: medium
-files: [docs/PLAN-LOOKS-PY.md, docs/prompts/perfil-looks.md, tools/looks/confront.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: e18fe0bb
 ---
 
 # CORR-LOOKS-072 — Say 'within 16 per channel', not 'pixel a pixel', for the labels

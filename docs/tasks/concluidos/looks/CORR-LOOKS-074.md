@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-074
-title: "Um código de largura 0 entra na lista de sprites do jogo e não na do Font.run"
-origin: CORR-LOOKS-073
-severity: low
-files: [tools/looks/glyphs.py, tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 4e210d9d
 ---
 
 # CORR-LOOKS-074 — Um código de largura 0 entra na lista de sprites do jogo e não na do Font.run

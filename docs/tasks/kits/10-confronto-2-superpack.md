@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-10
-title: "Confronto 2: os pares `_BND.bin`/`_BND.tim` do Superpack"
-type: "verificação"
-phase: 1
-depends_on: [KITS-TASK-08]
-source_of_truth: "/docs/PLAN-KITS-PY.md#5"
-files: ["tools/kits/confront.py", "tools/kits/selftest.py", "NOTICE.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-10 — Confronto 2: os pares `_BND.bin`/`_BND.tim` do Superpack

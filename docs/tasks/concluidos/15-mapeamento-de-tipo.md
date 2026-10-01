@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-15
-title: "Decidir o mapeamento de tipo C++ → Pascal"
-type: decisão
-category: dados
-phase: 3
-depends_on: [WTE-TASK-02]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-09
-review_commit: null
-done_on: 2026-08-09
-done_commit: f50d263
 ---
 
 # WTE-TASK-15: Mapeamento de tipo

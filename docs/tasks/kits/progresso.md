@@ -1,11 +1,3 @@
----
-cycle: kits
-prefix: KITS
-plan: /docs/PLAN-KITS-PY.md
-ticket: null
-local: false
----
-
 # Progress — kits
 
 ## Scope

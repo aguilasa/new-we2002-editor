@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-037
-title: "Correção: as alturas da cabeça e da chuteira estão escritas com o sinal trocado"
-type: correção
-category: dados
-status: done
-depends_on: []
-origin: LOOKS-TASK-15
-severity: low
-done_on: 2026-09-16
-done_commit: efd4440
 ---
 
 # CORR-LOOKS-037: "a cabeça de y -15 a 48" é a do render, não a do arquivo

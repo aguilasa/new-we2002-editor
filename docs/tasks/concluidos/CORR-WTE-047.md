@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-047
-title: "Correção: a segunda régua (`cmp`) das sessões 10 e 11 não ficou registrada em lugar nenhum"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-19
-severity: low
-done_on: 2026-08-10
-done_commit: 25db58b
 ---
 
 # CORR-WTE-047: as sessões que deram 18 dos 33 offsets não têm o resultado da conferência das duas réguas

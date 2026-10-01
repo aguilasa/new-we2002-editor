@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-061
-title: "Correção: o `MaxLength` de `edit_nombre1` é o literal 5, lido da tela, sem lastro no formato"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-26
-severity: low
-done_on: 2026-08-18
-done_commit: 1dfb765
 ---
 
 # CORR-WTE-061: um limite que só a tela sustenta

@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-010
-title: "Re-run the plan's secondary subcommands in the closing Log"
-origin: KITS-TASK-05
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: "22555288"
 ---
 
 # CORR-KITS-010 — Re-run the plan's secondary subcommands in the closing Log

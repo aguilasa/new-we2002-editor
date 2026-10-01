@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-068
-title: "Julgar os pixels das setas, não só a lista, e medir a CLUT da ◀"
-origin: LOOKS-TASK-36
-severity: medium
-files: [tools/looks/oracle.py, tools/looks/ui_check.py, tools/looks/sprites.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-21
-done_commit: 9716a6be
 ---
 
 # CORR-LOOKS-068 — Julgar os pixels das setas, não só a lista, e medir a CLUT da ◀

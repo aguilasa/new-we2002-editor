@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-083
-title: "Correção: dez times desenham bandeira preta — o ed.exe não lê a paleta deles, e o editor do Obocaman lê"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-31
-severity: high
-done_on: 2026-08-23
-done_commit: 5bd7216
 ---
 
 # CORR-WTE-083: dez times desenham bandeira preta

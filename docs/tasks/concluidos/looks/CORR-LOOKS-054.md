@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-054
-title: "Correção: o `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: LOOKS-TASK-21
-severity: low
-done_on: 2026-09-17
-done_commit: 45b9763
 ---
 
 # CORR-LOOKS-054: o único texto da tela que ninguém confere contra o que o jogo desenhou

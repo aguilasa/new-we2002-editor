@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-03
-title: "A fixture nomeada, o venv e o binding Qt"
-type: ferramenta
-category: ferramental
-phase: 0
-depends_on: [MCR-TASK-01]
-status: done
-source_of_truth: "/docs/PLAN-MCR-PY.md#4"
-reviewed_on: 2026-09-07
-review_commit: null
-done_on: 2026-09-07
-done_commit: 43f54b1
 ---
 
 # MCR-TASK-03: Fixture, venv e Qt

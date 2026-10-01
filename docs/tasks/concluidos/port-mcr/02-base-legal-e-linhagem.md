@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-02
-title: "Base legal, linhagem e o SHA fixado do upstream"
-type: documentação
-category: processo
-phase: 0
-depends_on: [MCR-TASK-01]
-status: done
-source_of_truth: "/docs/PLAN-MCR-PY.md#2"
-reviewed_on: 2026-09-07
-review_commit: null
-done_on: 2026-09-07
-done_commit: 6870da3
 ---
 
 # MCR-TASK-02: Base legal e linhagem

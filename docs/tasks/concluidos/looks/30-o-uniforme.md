@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-30
-title: "Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas"
-type: implementação
-category: textura
-phase: 10
-depends_on: [LOOKS-TASK-20]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: 2026-09-20
-review_commit: null
-done_on: 2026-09-20
-done_commit: 10c1026
 ---
 
 # LOOKS-TASK-30: O uniforme

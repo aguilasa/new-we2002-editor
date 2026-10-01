@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-12
-title: "Gravação pela UI: ficha, formação e dorsais"
-type: implementação
-category: ui
-phase: 3
-depends_on: [MCR-TASK-11]
-status: done
-source_of_truth: "/docs/PLAN-MCR-PY.md#3"
-reviewed_on: 2026-09-08
-review_commit: null
-done_on: 2026-09-08
-done_commit: 0dce63e
 ---
 
 # MCR-TASK-12: A UI em gravação

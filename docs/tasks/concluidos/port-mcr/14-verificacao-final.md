@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-14
-title: "Verificação final contra a definição de pronto"
-type: verificação
-category: processo
-phase: 4
-depends_on: [MCR-TASK-12, MCR-TASK-13]
-status: done
-source_of_truth: "/docs/PLAN-MCR-PY.md#9"
-reviewed_on: 2026-09-08
-review_commit: null
-done_on: 2026-09-08
-done_commit: 03918cb
 ---
 
 # MCR-TASK-14: Fechamento

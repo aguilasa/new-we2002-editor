@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-17
-title: "tools/port_database_pas.py — transpilar o we2002_core"
-type: ferramenta
-category: dados
-phase: 3
-depends_on: [WTE-TASK-15, WTE-TASK-16]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.5"
-reviewed_on: 2026-08-10
-review_commit: null
-done_on: 2026-08-09
-done_commit: 8ae9170
 ---
 
 # WTE-TASK-17: Transpilador da camada de dados

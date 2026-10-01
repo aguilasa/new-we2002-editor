@@ -1,14 +1,5 @@
 ---
 id: CORR-MCR-025
-title: "Correção: o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: MCR-TASK-16
-severity: high
-done_on: 2026-09-09
-done_commit: 45f30c0
 ---
 
 # CORR-MCR-025: guarda nova sem controle negativo, conferida à mão uma vez

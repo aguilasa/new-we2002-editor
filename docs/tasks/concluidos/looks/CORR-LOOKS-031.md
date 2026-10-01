@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-031
-title: "Correção: a constante `AGREEMENT` justifica o piso com 0,005 e a medição dá 0,008"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: LOOKS-TASK-14
-severity: low
-done_on: 2026-09-16
-done_commit: "0819598"
 ---
 
 # CORR-LOOKS-031: o número que justifica o piso do corpus não é o número medido

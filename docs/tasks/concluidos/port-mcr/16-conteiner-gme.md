@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-16
-title: "Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos"
-type: implementação
-category: core
-phase: 5
-depends_on: [MCR-TASK-15]
-status: done
-source_of_truth: /docs/tasks/concluidos/port-mcr/16-conteiner-gme.md
-reviewed_on: 2026-09-09
-review_commit: null
-done_on: 2026-09-09
-done_commit: 45f30c0
 ---
 
 # MCR-TASK-16: `.gme` como formato de entrada e de saída, e a conversão nos dois sentidos

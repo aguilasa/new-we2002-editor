@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-008
-title: Plant a red for the outside-256x128 count in uv --negative
-origin: KITS-TASK-04
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: 8f635307
 ---
 
 # CORR-KITS-008 — Plant a red for the outside-256x128 count in uv --negative

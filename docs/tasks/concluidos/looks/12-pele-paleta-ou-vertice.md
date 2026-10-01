@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-12
-title: "Incógnita (d) — pele é troca de paleta ou de cor de vértice?"
-type: engenharia-reversa
-category: textura
-phase: 3
-depends_on: [LOOKS-TASK-11]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#6"
-reviewed_on: 2026-09-15
-review_commit: null
-done_on: 2026-09-15
-done_commit: bb34937
 ---
 
 # LOOKS-TASK-12: Pele — paleta ou cor de vértice

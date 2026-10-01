@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-02
-title: "Medir o que são os retângulos (608,256) e (704,256)"
-type: "investigação"
-phase: 0
-depends_on: []
-source_of_truth: "/docs/PLAN-KITS-PY.md#4.4"
-files: ["tools/kits/cli.py", "tools/kits/core/survey.py", "docs/PLAN-KITS-PY.md", "docs/PLAN-LOOKS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-done_on: 2026-09-30
-done_commit: 18e7ec61
-reviewed_on: 2026-09-30
-review_commit: b529ac6b
 ---
 
 # KITS-TASK-02 — Medir o que são os retângulos (608,256) e (704,256)

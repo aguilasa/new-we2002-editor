@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-08
-title: "Criar selftest, controles negativos e os alvos `kits_selftest` e `kits_image`"
-type: infra
-phase: 1
-depends_on: [KITS-TASK-07]
-source_of_truth: "/docs/PLAN-KITS-PY.md#3.5"
-files: ["tools/kits/selftest.py", "tools/kits/controls.py", "tests/CMakeLists.txt"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-done_on: 2026-10-01
-done_commit: e243594d
-reviewed_on: pending
-review_commit: null
 ---
 
 # KITS-TASK-08 — Criar selftest, controles negativos e os alvos `kits_selftest` e `kits_image`

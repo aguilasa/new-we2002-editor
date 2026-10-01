@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-049
-title: "Correção: o parágrafo de dependência da WTE-TASK-20 troca as duas populações de offset, e cita a 19 como bloqueada"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-20
-severity: low
-done_on: 2026-08-10
-done_commit: 691a025
 ---
 
 # CORR-WTE-049: os 36 "que o `we2002_core` não tem" são justamente os que ele tem

@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-013
-title: "Correct the §2.1 counts that no tool prints"
-origin: KITS-TASK-07
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-10-01
-done_commit: b71d9cef
 ---
 
 # CORR-KITS-013 — Correct the §2.1 counts that no tool prints

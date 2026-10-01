@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-31
-title: "Áudio — o banco `.RA` (VAB) e os VAG"
-type: engenharia-reversa
-category: formato
-phase: 7
-depends_on: []
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#1.14"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-31: Áudio `.RA` / VAB / VAG

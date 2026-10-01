@@ -1,14 +1,5 @@
 ---
 id: CORR-MCR-015
-title: "Correção: o bloco do `mcr_ui` entrou entre o comentário do `pes2_boot` e o teste dele"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: MCR-TASK-10
-severity: low
-done_on: 2026-09-08
-done_commit: 298856b
 ---
 
 # CORR-MCR-015: um comentário de DuckStation em cima de um teste de Qt

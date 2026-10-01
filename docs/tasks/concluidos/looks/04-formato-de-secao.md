@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-04
-title: "`section.py` — primitiva de 24 B, vértice de 8 B e o separador de zeros"
-type: implementação
-category: formato
-phase: 1
-depends_on: [LOOKS-TASK-03]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#1.4"
-reviewed_on: 2026-09-14
-review_commit: null
-done_on: 2026-09-14
-done_commit: 83a24c0
 ---
 
 # LOOKS-TASK-04: O formato de seção

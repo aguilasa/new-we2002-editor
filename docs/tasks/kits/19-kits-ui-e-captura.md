@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-19
-title: "Gate `kits_ui` e a mesma captura no Windows e no Linux"
-type: "verificação"
-phase: 4
-depends_on: [KITS-TASK-18]
-source_of_truth: "/docs/PLAN-KITS-PY.md#3.4"
-files: ["tools/kits/ui_check.py", "tests/CMakeLists.txt"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: ["tela"]        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-19 — Gate `kits_ui` e a mesma captura no Windows e no Linux

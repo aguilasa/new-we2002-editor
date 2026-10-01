@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-029
-title: "Correção: o `HEAD_RUNS` diz \"todo corpo distinto, cada um com sua janela\" e o disco diz doze corpos e catorze janelas"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: LOOKS-TASK-14
-severity: medium
-done_on: 2026-09-16
-done_commit: 971c21a
 ---
 
 # CORR-LOOKS-029: "32 corpos distintos" são 32 seções distintas, e as janelas não são 32

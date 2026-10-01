@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-25
-title: "Aba 3D: titular/suplente, jogador/goleiro, giro livre"
-type: "implementação"
-phase: 6
-depends_on: [KITS-TASK-24]
-source_of_truth: "/docs/PLAN-KITS-PY.md#3.2"
-files: ["tools/kits/ui/*.py", "tools/kits/ui_check.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: ["tela"]        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-25 — Aba 3D: titular/suplente, jogador/goleiro, giro livre

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-087
-title: "Correção: o Log da WTE-TASK-30 conta 12 .inc novos e 6 .uses tocados; são 11 e 5"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-30
-severity: low
-done_on: 2026-08-23
-done_commit: 85bc04f
 ---
 
 # CORR-WTE-087: o Log da WTE-TASK-30 conta 12 `.inc` novos, e são 11

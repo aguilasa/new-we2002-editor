@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-27
-title: "Handlers de gravação — escrever na imagem de CD"
-type: implementação
-category: comportamento
-phase: 4
-depends_on: [WTE-TASK-26]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-20
-review_commit: null
-done_on: 2026-08-20
-done_commit: a660ac7
 ---
 
 # WTE-TASK-27: Handlers de gravação

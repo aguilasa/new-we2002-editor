@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-102
-title: "Os limiares do oracle.py dependem da largura de janela salva no DuckStation de cada máquina"
-origin: LOOKS-TASK-08
-severity: high
-files: [tools/looks/oracle.py]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-28
-done_commit: "1843180"
 ---
 
 # CORR-LOOKS-102 — Os limiares do oracle.py dependem da largura de janela salva no DuckStation de cada máquina

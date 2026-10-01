@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-121
-title: "Correção: o port grava três faixas de nome de time diferentes do oráculo, e só a ptbr-remaster expõe"
-type: correção
-category: paridade
-status: done
-depends_on: []
-origin: WTE-TASK-34
-severity: high
-done_on: 2026-08-28
-done_commit: edff503
 ---
 
 # CORR-WTE-121: três faixas de nome de time que só a régua nova enxerga

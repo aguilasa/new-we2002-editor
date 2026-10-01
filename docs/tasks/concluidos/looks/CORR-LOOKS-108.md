@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-108
-title: "O mapa de cabelo guarda quatro faixas para o K1, e o K1 não grava nenhuma"
-origin: LOOKS-TASK-14
-severity: low
-files: [tools/looks/assembly.py, docs/PLAN-LOOKS-PY.md]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-29
-done_commit: 14442eb
 ---
 
 # CORR-LOOKS-108 — O mapa de cabelo guarda quatro faixas para o K1, e o K1 não grava nenhuma

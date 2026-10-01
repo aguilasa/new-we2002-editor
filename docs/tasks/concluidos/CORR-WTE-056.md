@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-056
-title: "Correção: três sítios ainda mandam rodar `apply_names.py`, e o script é `.java`"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-24
-severity: low
-done_on: 2026-08-11
-done_commit: ce86fac
 ---
 
 # CORR-WTE-056: o procedimento para refazer o projeto Ghidra cita um arquivo que não existe

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-095
-title: "Investigar: o editor do Obocaman nunca preça o slot 22, e o `ed.exe` diz que ele tem preço"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-32
-severity: medium
-done_on: 2026-08-24
-done_commit: 0d1044a
 ---
 
 # CORR-WTE-095: os dois editores discordam sobre o 23º slot

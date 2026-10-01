@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-093
-title: "Correção: os dois últimos corpos da fase 4 — a tela de tática e o diálogo de textura"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-31
-severity: high
-done_on: 2026-08-24
-done_commit: b46fa17
 ---
 
 # CORR-WTE-093: os dois corpos que sobravam fora de preço

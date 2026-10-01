@@ -1,14 +1,5 @@
 ---
 id: CORR-MCR-029
-title: "Correção: \"a diferença entre c-opcao e c-opcao2 é a câmera e nada mais\" omite os 15 bytes de alta entropia"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: MCR-TASK-17
-severity: low
-done_on: 2026-09-10
-done_commit: 6f7ae17
 ---
 
 # CORR-MCR-029: são 17 bytes de diferença, não 2

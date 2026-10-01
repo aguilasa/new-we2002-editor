@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-017
-title: "Correção: o `fase-1.md` separa offset em tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-09
-severity: low
-done_on: 2026-08-06
-done_commit: b5a918b
 ---
 
 # CORR-WTE-017: `"0x0042" not in va` é teste de faixa escrito como teste de texto

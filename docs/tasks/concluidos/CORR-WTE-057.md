@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-057
-title: "Correção: a conferência de tela cobre 3 dos 5 grupos de campo que o critério enumera"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-25
-severity: high
-done_on: 2026-08-11
-done_commit: 0cdfbe4
 ---
 
 # CORR-WTE-057: a conferência de tela cobre 3 dos 5 grupos de campo que o critério enumera

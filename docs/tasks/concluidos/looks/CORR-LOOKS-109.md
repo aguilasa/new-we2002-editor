@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-109
-title: "BOOTS desenha a mesma chuteira para todo valor na tela LOOKS SET"
-origin: LOOKS-TASK-13
-severity: high
-files: [tools/looks/looks.py, tools/looks/screen.py, tools/looks/ui_check.py, tools/looks/controls.py]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-29
-done_commit: 533d16b
 ---
 
 # CORR-LOOKS-109 — BOOTS desenha a mesma chuteira para todo valor na tela LOOKS SET

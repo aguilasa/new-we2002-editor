@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-28
-title: "Confronto 3: `confront.py --score` com um uniforme que não é o `A4`"
-type: "verificação"
-phase: 7
-depends_on: [KITS-TASK-27]
-source_of_truth: "/docs/PLAN-KITS-PY.md#5"
-files: ["tools/kits/confront.py", "docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: ["emulador", "save-states"]        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-28 — Confronto 3: `confront.py --score` com um uniforme que não é o `A4`

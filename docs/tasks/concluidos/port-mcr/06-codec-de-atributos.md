@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-06
-title: "`attributes.py` — o codec de 12 bytes, contra `Player::Decode/Encode`"
-type: implementação
-category: núcleo
-phase: 1
-depends_on: [MCR-TASK-05]
-status: done
-source_of_truth: "/docs/PLAN-MCR-PY.md#1.4"
-reviewed_on: 2026-09-07
-review_commit: null
-done_on: 2026-09-07
-done_commit: 7feacf6
 ---
 
 # MCR-TASK-06: O codec de atributos

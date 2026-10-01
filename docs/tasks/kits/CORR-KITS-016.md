@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-016
-title: "Use layout.kit_path in RomSource.kits, restoring the lost line break"
-origin: KITS-TASK-07
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-10-01
-done_commit: 80c944cb
 ---
 
 # CORR-KITS-016 — Use layout.kit_path in RomSource.kits, restoring the lost line break

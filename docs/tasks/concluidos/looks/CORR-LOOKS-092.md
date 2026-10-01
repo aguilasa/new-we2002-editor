@@ -1,15 +1,5 @@
 ---
 id: CORR-LOOKS-092
-title: "Recontar o 132 de 480 do par: medido 316 de 520"
-origin: LOOKS-TASK-32
-severity: medium
-files: [tools/looks/layout.py, tools/looks/oracle.py, docs/prompts/perfil-looks.md, docs/prompts/perfil-looks.armadilhas.md, docs/tasks/looks/32-o-ciclo-da-caminhada.md]
-resources: [emulador, save-states]
-status: done
-depends_on: []
-done_on: 2026-09-25
-done_commit: 32adb774
-unblocked_by: null
 ---
 
 # CORR-LOOKS-092 — Recontar o 132 de 480 do par: medido 316 de 520

@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-13
-title: "`teams.py` e `cli.py teams`: nome da ROM ou tabela inglesa, decidido pelo disco"
-type: "implementação"
-phase: 2
-depends_on: [KITS-TASK-12]
-source_of_truth: "/docs/PLAN-KITS-PY.md#3.3"
-files: ["tools/kits/core/teams.py", "tools/kits/core/source.py", "tools/kits/core/api.py", "tools/kits/cli.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-13 — `teams.py` e `cli.py teams`: nome da ROM ou tabela inglesa, decidido pelo disco

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-101
-title: "A guarda de disco do oracle.py recusa o state em outra máquina por comparar o caminho absoluto"
-origin: LOOKS-TASK-08
-severity: high
-files: [tools/looks/oracle.py]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-28
-done_commit: fca4bdd
 ---
 
 # CORR-LOOKS-101 — A guarda de disco do oracle.py recusa o state em outra máquina por comparar o caminho absoluto

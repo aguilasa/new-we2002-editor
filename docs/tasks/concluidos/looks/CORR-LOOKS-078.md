@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-078
-title: "A linha de falha de glifo mostra o primeiro da linha, não o que difere"
-origin: LOOKS-TASK-38
-severity: low
-files: [tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: ac1fa29b
 ---
 
 # CORR-LOOKS-078 — A linha de falha de glifo mostra o primeiro da linha, não o que difere

@@ -1,17 +1,5 @@
 ---
 id: PAR-TASK-08
-title: "Operações em massa"
-type: verificação
-category: core
-projeto: newWe2002
-depends_on: [PAR-TASK-04, PAR-TASK-07]
-status: blocked
-source_of_truth: "/docs/PARIDADE-FUNCIONAL.md#8.9"
-phase: null
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PAR-TASK-08: Operações em massa

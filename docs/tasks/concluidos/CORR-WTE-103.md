@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-103
-title: "Correção: no estado zero o fase-4.md perde a linha em branco antes do título seguinte"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-31
-severity: low
-done_on: 2026-08-24
-done_commit: c3ccd5d
 ---
 
 # CORR-WTE-103: linha em branco que só existe quando há o que listar

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-069
-title: "Dizer quantos sprites estáticos foram amostrados, não 14"
-origin: LOOKS-TASK-36
-severity: low
-files: [tools/looks/oracle.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-21
-done_commit: c4489fa7
 ---
 
 # CORR-LOOKS-069 — Dizer quantos sprites estáticos foram amostrados, não 14

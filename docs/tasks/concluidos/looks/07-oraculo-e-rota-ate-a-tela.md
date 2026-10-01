@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-07
-title: "`oracle.py` — o emulador por MCP e a rota até a tela `LOOKS SET`"
-type: implementação
-category: oráculo
-phase: 2
-depends_on: [LOOKS-TASK-06]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#1.11"
-reviewed_on: 2026-09-14
-review_commit: null
-done_on: 2026-09-14
-done_commit: 66eeb6e
 ---
 
 # LOOKS-TASK-07: O oráculo, e a rota que falta

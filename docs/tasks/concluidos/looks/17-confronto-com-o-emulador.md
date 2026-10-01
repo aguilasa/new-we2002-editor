@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-17
-title: "Confronto — nosso quadro contra o quadro do emulador, na mesma tupla"
-type: verificação
-category: oráculo
-phase: 6
-depends_on: [LOOKS-TASK-16]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#5.3"
-reviewed_on: 2026-09-16
-review_commit: null
-done_on: 2026-09-16
-done_commit: 0efd5e2
 ---
 
 # LOOKS-TASK-17: O confronto com o gabarito vivo

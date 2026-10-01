@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-09
-title: "Os 25 blocos de nome depois do pool, em `SELECTC.BIN`"
-type: engenharia-reversa
-category: formato
-phase: 3
-depends_on: []
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#1.5"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-09: Os blocos de nome depois do pool

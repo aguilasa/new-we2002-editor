@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-123
-title: "Correção: os seis roteiros da PAR-TASK-01 não estão em lugar nenhum, e a 'Definição de pronto' promete o comando"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: PAR-TASK-01
-severity: high
-done_on: 2026-08-28
-done_commit: c86e794
 ---
 
 # CORR-WTE-123: as seis corridas verdes que ninguém consegue repetir

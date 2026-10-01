@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-041
-title: "Correção: o `spec_index.py` tem 15 rotas de recusa, e o README chama as onze testadas de \"as\" rotas"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-23
-severity: low
-done_on: 2026-08-10
-done_commit: d575539
 ---
 
 # CORR-WTE-041: quatro rotas de recusa sem teste de regressão

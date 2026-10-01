@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-030
-title: "Correção: o `tipos.md` conta 38 `strcpy`, e o `Database.cpp` tem 40 — os dois que faltam são `std::strcpy`"
-type: correção
-category: dados
-status: done
-depends_on: []
-origin: WTE-TASK-15
-severity: high
-done_on: 2026-08-10
-done_commit: f50d263
 ---
 
 # CORR-WTE-030: 38 `strcpy` é a contagem de dentro do `Load()`, não a do arquivo

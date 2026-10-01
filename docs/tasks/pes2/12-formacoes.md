@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-12
-title: "Formações — a tabela tática por time"
-type: engenharia-reversa
-category: formato
-phase: 4
-depends_on: [PES2-TASK-11]
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#5"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-12: Formações

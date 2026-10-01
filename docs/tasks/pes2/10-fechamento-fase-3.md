@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-10
-title: "Fechamento da Fase 3 — o registro de jogador"
-type: closing
-category: verificação
-phase: 3
-depends_on: [PES2-TASK-06, PES2-TASK-07, PES2-TASK-08, PES2-TASK-09]
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#7"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-10: Fechamento da Fase 3

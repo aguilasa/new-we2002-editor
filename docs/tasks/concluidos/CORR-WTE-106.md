@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-106
-title: "Correção: o check_divergencias.py é o único gate de recusa sem teste — as \"três recusas vistas\" não deixaram artefato"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-35
-severity: medium
-done_on: 2026-08-25
-done_commit: f0879de
 ---
 
 # CORR-WTE-106: o gate das divergências não tem teste

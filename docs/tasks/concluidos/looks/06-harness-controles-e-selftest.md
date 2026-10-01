@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-06
-title: "`harness.py`, `controls.py` e `selftest.py` — o gate e os primeiros casos vermelhos"
-type: implementação
-category: verificação
-phase: 1
-depends_on: [LOOKS-TASK-05]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#5.5"
-reviewed_on: 2026-09-14
-review_commit: null
-done_on: 2026-09-14
-done_commit: 2c846f5
 ---
 
 # LOOKS-TASK-06: O gate e o controle negativo

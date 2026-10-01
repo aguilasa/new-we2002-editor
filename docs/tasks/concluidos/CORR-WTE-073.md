@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-073
-title: "Correção: check_lcl_combo.py ficou preso no :99 depois da mudança para o :98"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-28
-severity: high
-done_on: 2026-08-20
-done_commit: edd305f
 ---
 
 # CORR-WTE-073: `check_lcl_combo.py` ficou preso no `:99` depois da mudança para o `:98`

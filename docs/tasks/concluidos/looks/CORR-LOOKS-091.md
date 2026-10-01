@@ -1,15 +1,5 @@
 ---
 id: CORR-LOOKS-091
-title: "O bloco de evidência mistura prosa à transcrição do comando"
-origin: LOOKS-TASK-40
-severity: low
-files: [docs/tasks/looks/40-a-camera-do-close-up.md]
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-25
-done_commit: 5bf4c7ae
-unblocked_by: null
 ---
 
 # CORR-LOOKS-091 — O bloco de evidência mistura prosa à transcrição do comando

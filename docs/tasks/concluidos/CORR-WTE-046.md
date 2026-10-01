@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-046
-title: "Correção: três vereditos citam `case N` onde o `Database.cpp` tem `if(i == N)`"
-type: correção
-category: dados
-status: done
-depends_on: []
-origin: WTE-TASK-19
-severity: low
-done_on: 2026-08-10
-done_commit: 01f63b3
 ---
 
 # CORR-WTE-046: a prova do veredito aponta para uma construção que não está lá

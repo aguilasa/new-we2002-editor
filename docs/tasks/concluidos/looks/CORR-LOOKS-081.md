@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-081
-title: Plantar o controle do pulo por acumulador no controls.py
-origin: CORR-LOOKS-077
-severity: low
-files: [tools/looks/controls.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 49e44b46
 ---
 
 # CORR-LOOKS-081 — Plantar o controle do pulo por acumulador no controls.py

@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-06
-title: "Criar a fachada `api.py` e o `source.py` que reconhece ROM ou TEX pelo conteúdo"
-type: "implementação"
-phase: 1
-depends_on: [KITS-TASK-05]
-source_of_truth: "/docs/PLAN-KITS-PY.md#3.1"
-files: ["tools/kits/core/api.py", "tools/kits/core/source.py", "tools/kits/core/errors.py", "NOTICE.md", "tools/kits/cli.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-done_on: 2026-09-30
-done_commit: 51c8a6a0
-reviewed_on: 2026-10-01
-review_commit: bc9a09e2
 ---
 
 # KITS-TASK-06 — Criar a fachada `api.py` e o `source.py` que reconhece ROM ou TEX pelo conteúdo

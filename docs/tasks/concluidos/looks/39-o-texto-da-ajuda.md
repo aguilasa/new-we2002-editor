@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-39
-title: "O texto da ajuda — quem escreve a página (832,256) na VRAM, e de onde"
-type: investigação
-category: render
-phase: 10
-depends_on: [LOOKS-TASK-37]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: 2026-09-23
-review_commit: 378d2b3d
-done_on: 2026-09-22
-done_commit: 42c4ebfa
 ---
 
 # LOOKS-TASK-39: O texto da ajuda

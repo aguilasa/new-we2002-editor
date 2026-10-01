@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-110
-title: "Correção: os quatro casos de borda foram medidos num vetor só, e o critério diz \"por campo\""
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-36
-severity: medium
-done_on: 2026-08-25
-done_commit: 49b57c5
 ---
 
 # CORR-WTE-110: as bordas foram medidas em `names`, e são quatro campos

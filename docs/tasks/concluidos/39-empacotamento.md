@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-39
-title: "Ícone, .desktop, AppStream e regras de instalação"
-type: implementação
-category: empacotamento
-phase: 7
-depends_on: [WTE-TASK-38]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-26
-review_commit: null
-done_on: 2026-08-26
-done_commit: a868d7a
 ---
 
 # WTE-TASK-39: Empacotamento

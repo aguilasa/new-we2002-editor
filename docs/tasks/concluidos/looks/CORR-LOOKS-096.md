@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-096
-title: Recontar o atraso e as margens da silhueta escritos nos docs
-origin: LOOKS-TASK-33
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-26
-done_commit: f18f2363
 ---
 
 # CORR-LOOKS-096 — Recontar o atraso e as margens da silhueta escritos nos docs

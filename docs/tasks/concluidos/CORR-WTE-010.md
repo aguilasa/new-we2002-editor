@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-010
-title: "Correção: a §8.7 do plano e o enunciado da WTE-TASK-06 apontam o lado errado, e o ASCII citado não é o do binário"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-06
-severity: high
-done_on: 2026-08-06
-done_commit: 3ce86bf
 ---
 
 # CORR-WTE-010: o dword que obriga a medir está **abaixo** da tabela, e é `lmno`

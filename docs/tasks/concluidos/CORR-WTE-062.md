@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-062
-title: "Correção: o `lista_formacionesClick` ficou entre duas tasks concluídas e continua `REStub`"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: WTE-TASK-25
-severity: high
-done_on: 2026-08-18
-done_commit: 89a04d2
 ---
 
 # CORR-WTE-062: o handler que as duas tasks apontaram uma para a outra

@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-06
-title: "re/offsets.md — a tabela em .data cruzada com Offsets.hpp"
-type: extração
-category: engenharia-reversa
-phase: 1
-depends_on: [WTE-TASK-02]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#1.7"
-reviewed_on: 2026-08-06
-review_commit: null
-done_on: 2026-08-05
-done_commit: 9907df9
 ---
 
 # WTE-TASK-06: Mapa de offsets

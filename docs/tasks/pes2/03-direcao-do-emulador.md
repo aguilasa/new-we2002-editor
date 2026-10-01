@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-03
-title: "Direção do DuckStation — navegar até a tela e capturar"
-type: ferramenta
-category: verificação
-phase: 2
-depends_on: []
-status: in-progress
-source_of_truth: "/docs/PLAN-PES2-PSX.md#3.4"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-03: Direção do emulador

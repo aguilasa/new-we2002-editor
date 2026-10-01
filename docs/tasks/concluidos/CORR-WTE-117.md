@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-117
-title: "Correção: o app procura os assets em quatro lugares e a mensagem promete três, sem dizer o que é o quarto"
-type: correção
-category: empacotamento
-status: done
-depends_on: []
-origin: WTE-TASK-39
-severity: medium
-done_on: 2026-08-26
-done_commit: 04b28d8
 ---
 
 # CORR-WTE-117: quatro candidatos no código, três na mensagem

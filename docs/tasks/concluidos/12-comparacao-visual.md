@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-12
-title: "Comparação visual dos 18 formulários contra o original"
-type: verificação
-category: ui
-phase: 2
-depends_on: [WTE-TASK-11]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#6"
-reviewed_on: 2026-08-09
-review_commit: null
-done_on: 2026-08-09
-done_commit: 588508b
 ---
 
 # WTE-TASK-12: Comparação visual

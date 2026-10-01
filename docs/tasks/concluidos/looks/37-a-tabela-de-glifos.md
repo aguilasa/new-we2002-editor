@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-37
-title: "A tabela de glifos — o texto da tela desenhado com a fonte do `EDT_2D.BIN`"
-type: implementação
-category: render
-phase: 10
-depends_on: [LOOKS-TASK-31]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#10.3"
-reviewed_on: 2026-09-22
-review_commit: 5cd4936e
-done_on: 2026-09-22
-done_commit: 0297ea1c
 ---
 
 # LOOKS-TASK-37: A tabela de glifos

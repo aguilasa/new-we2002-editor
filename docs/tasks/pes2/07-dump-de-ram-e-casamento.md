@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-07
-title: "Dump de RAM e casamento com o bloco do disco"
-type: engenharia-reversa
-category: formato
-phase: 3
-depends_on: [PES2-TASK-06]
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#5"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-07: Dump de RAM e casamento com o disco

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-080
-title: "Correção: o golden-14-uniforme falha por tempo em boa parte das corridas"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-29
-severity: high
-done_on: 2026-08-21
-done_commit: b0e3cd9
 ---
 
 # CORR-WTE-080: o `golden-14-uniforme` falha por tempo em boa parte das corridas

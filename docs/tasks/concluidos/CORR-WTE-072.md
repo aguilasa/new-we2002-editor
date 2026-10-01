@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-072
-title: "Correção: gravacao-controle.md fecha com a premissa que a WTE-TASK-28 refutou"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-28
-severity: high
-done_on: 2026-08-20
-done_commit: f354787
 ---
 
 # CORR-WTE-072: `gravacao-controle.md` fecha com a premissa que a WTE-TASK-28 refutou

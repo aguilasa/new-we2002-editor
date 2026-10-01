@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-015
-title: "Correção: duas transcrições de evidência do assets.md não batem com a medida — o ano dos 195 .bmp e o endereço do fread"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-08
-severity: low
-done_on: 2026-08-06
-done_commit: b46460b
 ---
 
 # CORR-WTE-015: o `assets.md` acerta as conclusões e erra duas evidências

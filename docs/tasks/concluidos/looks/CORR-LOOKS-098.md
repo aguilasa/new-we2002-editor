@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-098
-title: "Reconciliar a lista de abertos da §0 com o veredito da (o) na §10.3"
-origin: LOOKS-TASK-35
-severity: medium
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-27
-done_commit: 3e1f3abc
 ---
 
 # CORR-LOOKS-098 — Reconciliar a lista de abertos da §0 com o veredito da (o) na §10.3

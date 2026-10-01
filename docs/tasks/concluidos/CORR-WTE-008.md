@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-008
-title: "Correção: o decodificador de instrução x86 do dump_strings.py só foi conferido à mão, e a coluna `handler` inteira depende dele"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-05
-severity: low
-done_on: 2026-08-06
-done_commit: a4cbc67
 ---
 
 # CORR-WTE-008: a conferência que sustenta a coluna `handler` não tem rota de volta

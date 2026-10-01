@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-059
-title: "Correção: a spec do `lista_equiposChange` dá para o veredito `aberto` uma razão que a seção seguinte desmente"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-25
-severity: low
-done_on: 2026-08-11
-done_commit: 783fb5b
 ---
 
 # CORR-WTE-059: a razão escrita do `aberto` já não é a razão verdadeira

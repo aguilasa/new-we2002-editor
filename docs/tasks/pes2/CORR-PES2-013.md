@@ -1,14 +1,5 @@
 ---
 id: CORR-PES2-013
-title: "Correção: o `check` do `bin_archive.py` sai vermelho na imagem golden, e nenhum documento diz isso"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: PES2-TASK-27
-severity: high
-done_on: 2026-09-01
-done_commit: dd70840
 ---
 
 # CORR-PES2-013: gate vermelho num dos quatro discos, sem veredito escrito

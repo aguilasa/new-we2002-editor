@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-09
-title: "Incógnita (b) — nomear as onze peças pelo emulador, não pelo tamanho"
-type: engenharia-reversa
-category: formato
-phase: 2
-depends_on: [LOOKS-TASK-08]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#6"
-reviewed_on: 2026-09-15
-review_commit: null
-done_on: 2026-09-15
-done_commit: bb34937
 ---
 
 # LOOKS-TASK-09: Qual peça é qual

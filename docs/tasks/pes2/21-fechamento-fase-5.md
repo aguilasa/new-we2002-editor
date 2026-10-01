@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-21
-title: "Fechamento da Fase 5 — o portão da Fase 6"
-type: closing
-category: verificação
-phase: 5
-depends_on: [PES2-TASK-04, PES2-TASK-18, PES2-TASK-20]
-status: pending
-source_of_truth: "/docs/PLAN-PES2-PSX.md#0"
-reviewed_on: null
-review_commit: null
-done_on: null
-done_commit: null
 ---
 
 # PES2-TASK-21: Fechamento da Fase 5

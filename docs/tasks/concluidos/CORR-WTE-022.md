@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-022
-title: "Correção: o comando publicado da ordem de auto-create devolve 17 das 18 classes, e a que ele perde é TMainForm"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: WTE-TASK-11
-severity: high
-done_on: 2026-08-09
-done_commit: b60d955
 ---
 
 # CORR-WTE-022: a receita de reprodução da ordem de auto-create perde o primeiro formulário

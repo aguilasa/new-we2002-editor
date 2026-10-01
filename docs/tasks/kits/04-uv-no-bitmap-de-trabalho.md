@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-04
-title: "Levantar as UV que o boneco amostra no bitmap de 256×128"
-type: "investigação"
-phase: 0
-depends_on: [KITS-TASK-03]
-source_of_truth: "/docs/PLAN-KITS-PY.md#4.6"
-files: ["tools/kits/core/survey.py", "tools/kits/cli.py", "docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-done_on: 2026-09-30
-done_commit: 63dde69c
-reviewed_on: 2026-09-30
-review_commit: 2a63d8ac
 ---
 
 # KITS-TASK-04 — Levantar as UV que o boneco amostra no bitmap de 256×128

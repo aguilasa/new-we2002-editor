@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-118
-title: "Correção: a seção de renomeação da WTE-TASK-39 ainda manda renomear o que a própria task decidiu não renomear"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-39
-severity: low
-done_on: 2026-08-26
-done_commit: ff6052f
 ---
 
 # CORR-WTE-118: a instrução de renomear ficou de pé depois de revogada

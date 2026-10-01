@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-015
-title: Update NOTICE.md kits rows to name tex.py as the CARP importer
-origin: KITS-TASK-07
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-10-01
-done_commit: 5c544533
 ---
 
 # CORR-KITS-015 — Update NOTICE.md kits rows to name tex.py as the CARP importer

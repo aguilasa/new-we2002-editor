@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-084
-title: "As ajudas e os docs do --keys não nomeiam a forma de repetição"
-origin: CORR-LOOKS-082
-severity: low
-files: [tools/looks/oracle.py, tools/looks/ui/app.py, tools/looks/scene.py, CLAUDE.md, docs/prompts/perfil-looks.md, docs/PLAN-LOOKS-PY.md]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-22
-done_commit: 73a4419a
 ---
 
 # CORR-LOOKS-084 — As ajudas e os docs do `--keys` não nomeiam a forma de repetição

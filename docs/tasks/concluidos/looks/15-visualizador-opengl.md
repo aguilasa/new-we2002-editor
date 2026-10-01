@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-15
-title: "`ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela"
-type: implementação
-category: ui
-phase: 5
-depends_on: [LOOKS-TASK-14]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#3.2"
-reviewed_on: 2026-09-16
-review_commit: null
-done_on: 2026-09-16
-done_commit: f2df3fc
 ---
 
 # LOOKS-TASK-15: O visualizador

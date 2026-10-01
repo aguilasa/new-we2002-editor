@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-03
-title: "Contar primitivas de cada figura por retângulo do TEX"
-type: "investigação"
-phase: 0
-depends_on: []
-source_of_truth: "/docs/PLAN-KITS-PY.md#4.3"
-files: ["tools/kits/core/survey.py", "tools/kits/cli.py", "docs/PLAN-KITS-PY.md"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-done_on: 2026-09-30
-done_commit: f71b47d6
-reviewed_on: 2026-09-30
-review_commit: 1969acad
 ---
 
 # KITS-TASK-03 — Contar primitivas de cada figura por retângulo do TEX

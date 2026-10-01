@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-01
-title: "Base legal e linhagem — `we3d` (MIT), Superpack e o fonte `en_we2000edit`"
-type: documentação
-category: legal
-phase: 0
-depends_on: []
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#2"
-reviewed_on: 2026-09-14
-review_commit: null
-done_on: 2026-09-14
-done_commit: b6c5575
 ---
 
 # LOOKS-TASK-01: Base legal e linhagem

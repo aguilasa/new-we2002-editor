@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-018
-title: "Correção: a página de textura declara a profundidade da CLUT, e 1.039 das 2.841 primitivas dizem 8 bits — o plano só registra 4"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: LOOKS-TASK-08
-severity: high
-done_on: 2026-09-15
-done_commit: "2273318"
 ---
 
 # CORR-LOOKS-018: a palavra de página traz a profundidade, e ela não é sempre 4 bits

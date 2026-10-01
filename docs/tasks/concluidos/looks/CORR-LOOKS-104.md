@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-104
-title: "C2, D2, F2 e F3 desenham o cabelo do primeiro estilo da família"
-origin: LOOKS-TASK-14
-severity: medium
-files: [tools/looks/assembly.py, tools/looks/layout.py]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-28
-done_commit: f5939f3
 ---
 
 # CORR-LOOKS-104 — C2, D2, F2 e F3 desenham o cabelo do primeiro estilo da família

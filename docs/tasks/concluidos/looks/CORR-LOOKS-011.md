@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-011
-title: "Correção: o `sweep_addresses()` guarda duas regex mortas com o nome das vivas"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: LOOKS-TASK-04
-severity: low
-done_on: 2026-09-14
-done_commit: 3e223d2
 ---
 
 # CORR-LOOKS-011: o `sweep_addresses()` guarda duas regex mortas com o nome das vivas

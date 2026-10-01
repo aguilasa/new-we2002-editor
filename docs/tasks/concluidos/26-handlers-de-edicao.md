@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-26
-title: "Handlers de edição — nomes, números, atributos, mover jogador"
-type: implementação
-category: comportamento
-phase: 4
-depends_on: [WTE-TASK-25]
-status: done
-source_of_truth: /docs/PLAN-WTE-LAZARUS.md
-reviewed_on: 2026-08-18
-review_commit: null
-done_on: 2026-08-18
-done_commit: e7fc23d
 ---
 
 # WTE-TASK-26: Handlers de edição

@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-27
-title: "Cabeçalho de contêiner e entradas TIM — 4 e 8 bpp com CLUT"
-type: engenharia-reversa
-category: formato
-phase: 7
-depends_on: [PES2-TASK-26]
-status: done
-source_of_truth: "/docs/PLAN-PES2-PSX.md#1.14"
-reviewed_on: 2026-09-01
-review_commit: null
-done_on: 2026-09-01
-done_commit: a5476f7
 ---
 
 # PES2-TASK-27: Contêiner e TIM

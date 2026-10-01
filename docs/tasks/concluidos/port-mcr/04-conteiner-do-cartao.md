@@ -1,16 +1,5 @@
 ---
 id: MCR-TASK-04
-title: "`card.py` — diretório, blocos, quadros, checksum e as recusas"
-type: implementação
-category: núcleo
-phase: 1
-depends_on: [MCR-TASK-03]
-status: done
-source_of_truth: "/docs/PLAN-MCR-PY.md#1.1"
-reviewed_on: 2026-09-07
-review_commit: null
-done_on: 2026-09-07
-done_commit: d663d76
 ---
 
 # MCR-TASK-04: O contêiner do cartão

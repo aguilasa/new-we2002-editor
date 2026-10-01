@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-024
-title: "Correção: as duas coisas que a WTE-TASK-11 delegou — o sufixo [Lazarus] e o --show — não chegaram a quem recebe"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-11
-severity: low
-done_on: 2026-08-09
-done_commit: 323a5de
 ---
 
 # CORR-WTE-024: a WTE-TASK-11 delegou duas coisas e nenhum destinatário foi avisado

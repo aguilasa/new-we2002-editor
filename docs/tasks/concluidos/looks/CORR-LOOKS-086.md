@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-086
-title: Levar a ressalva da armadilha 96 ao docstring do HELP_UPLOAD
-origin: LOOKS-TASK-39
-severity: low
-files: [tools/looks/layout.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-23
-done_commit: 336aedce
 ---
 
 # CORR-LOOKS-086 — Levar a ressalva da armadilha 96 ao docstring do HELP_UPLOAD

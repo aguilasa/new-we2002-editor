@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-116
-title: "Correção: o controle do `trace.log` diz \"mkdir re ao lado da cópia\", e ao lado da cópia não funciona"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-38
-severity: low
-done_on: 2026-08-25
-done_commit: c4adf6d
 ---
 
 # CORR-WTE-116: o `re/` vai um nível **acima** do binário, não ao lado dele

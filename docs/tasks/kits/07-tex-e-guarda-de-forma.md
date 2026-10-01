@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-07
-title: Ler o TEX com guarda de forma e a cauda marcada Form 2 no leiaute Form 1
-type: "implementação"
-phase: 1
-depends_on: [KITS-TASK-06]
-source_of_truth: "/docs/PLAN-KITS-PY.md#2.1"
-files: ["tools/kits/core/tex.py", "tools/kits/core/source.py", "tools/kits/core/api.py", "tools/kits/core/errors.py", "tools/kits/core/survey.py", "tools/kits/cli.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-done_on: 2026-10-01
-done_commit: c1d3fc48
-reviewed_on: 2026-10-01
-review_commit: 9938704a
 ---
 
 # KITS-TASK-07 — Ler o TEX com guarda de forma e a cauda marcada Form 2 no leiaute Form 1

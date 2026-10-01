@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-11
-title: "App Lazarus abrindo os 18 formulários, com os 96 stubs logando"
-type: implementação
-category: ui
-phase: 2
-depends_on: [WTE-TASK-10]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#4.3"
-reviewed_on: 2026-08-09
-review_commit: null
-done_on: 2026-08-06
-done_commit: 46a82e5
 ---
 
 # WTE-TASK-11: A casca completa

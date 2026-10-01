@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-070
-title: "Correção: a tabela \"Arquivos a criar ou modificar\" da WTE-TASK-27 aponta para arquivos que não existem"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-27
-severity: low
-done_on: 2026-08-20
-done_commit: "5420738"
 ---
 
 # CORR-WTE-070: `wte/tools/roteiros/gravacao-*.sh` nunca existiu

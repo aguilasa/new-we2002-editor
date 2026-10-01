@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-097
-title: "Correção: o comentário do base_teamClick diz \"medido em dois times\" e a medida final tem seis"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-32
-severity: low
-done_on: 2026-08-24
-done_commit: 1a996de
 ---
 
 # CORR-WTE-097: o `.inc` do `base_teamClick` ainda diz "dois times"

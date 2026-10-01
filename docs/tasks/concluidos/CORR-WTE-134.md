@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-134
-title: "Correção: o `Escape` nos dez combos de papel do `DefaultTacticsDialog` diverge do original"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: PAR-TASK-06
-severity: high
-done_on: 2026-08-31
-done_commit: 2d317a6
 ---
 
 # CORR-WTE-134: o `Escape` do combo de papel dentro do diálogo de presets

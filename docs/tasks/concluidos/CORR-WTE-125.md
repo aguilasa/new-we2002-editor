@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-125
-title: "Correção: Escape num combo de cobrador descarta a navegação no port e não no ed.exe"
-type: correção
-category: paridade
-status: done
-depends_on: []
-origin: PAR-TASK-03
-severity: high
-done_on: 2026-08-29
-done_commit: 295fa5d
 ---
 
 # CORR-WTE-125: `Escape` no combo de cobrador diverge

@@ -1,14 +1,5 @@
 ---
 id: CORR-PES2-003
-title: "Correção: os prompts e os wrappers cravam WTE-TASK-XX; o ciclo vivo é PES2-TASK-XX"
-type: correção
-category: processo
-status: done
-depends_on: [CORR-PES2-002]
-origin: CORR-PES2-002
-severity: medium
-done_on: 2026-09-01
-done_commit: ef5f7fb
 ---
 
 # CORR-PES2-003: o prefixo de *task* está cravado nos prompts, pela mesma razão que o de correção estava

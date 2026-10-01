@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-085
-title: "O docstring do HELP_ICON_CODES contradiz a medição"
-origin: LOOKS-TASK-39
-severity: medium
-files: [tools/looks/layout.py]   # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-23
-done_commit: 48d2fbcc
 ---
 
 # CORR-LOOKS-085 — O docstring do HELP_ICON_CODES contradiz a medição

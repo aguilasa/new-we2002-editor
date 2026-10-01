@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-001
-title: "Correção: frontmatter da task diz `pendente` numa tarefa concluída"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-01
-severity: low
-done_on: 2026-08-05
-done_commit: 5d31631
 ---
 
 # CORR-WTE-001: o campo `status` do frontmatter não acompanha o `progresso.md`

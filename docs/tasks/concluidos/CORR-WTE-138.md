@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-138
-title: "Correção: os ids 69 e 86 do item 2 da §8.8 estão marcados sem terem sido medidos"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: PAR-TASK-07
-severity: low
-done_on: 2026-08-31
-done_commit: 98658e9
 ---
 
 # CORR-WTE-138: dois dos ids sem bandeira própria nunca foram à tela

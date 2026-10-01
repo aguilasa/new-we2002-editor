@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-082
-title: "Correção: a tela de tática não é enchida, e sem isso o ` Accept` do estrategia grava as coordenadas do .lfm"
-type: correção
-category: comportamento
-status: done
-depends_on: []
-origin: CORR-WTE-081
-severity: high
-done_on: 2026-08-21
-done_commit: c0e9d7a
 ---
 
 # CORR-WTE-082: encher a tela de tática antes de deixar alguém gravá-la

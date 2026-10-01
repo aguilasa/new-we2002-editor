@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-019
-title: "Correção: a reversão que versionou 816.880 bytes de arte do Obocaman só está registrada num README derivado"
-type: correção
-category: processo
-status: done
-depends_on: []
-origin: WTE-TASK-10
-severity: high
-done_on: 2026-08-09
-done_commit: 8bc5a5d
 ---
 
 # CORR-WTE-019: a reversão do versionamento dos blobs não chegou ao plano, ao `.gitignore` nem ao `progresso.md`

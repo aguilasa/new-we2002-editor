@@ -1,16 +1,5 @@
 ---
 id: PES2-TASK-32
-title: "Prova de conceito do MCP do DuckStation"
-type: decisão
-category: ferramental
-phase: 0
-depends_on: []
-status: done
-source_of_truth: "/docs/PLAN-PES2-PSX.md#6.14"
-reviewed_on: 2026-09-03
-review_commit: null
-done_on: 2026-09-02
-done_commit: d9d090e
 ---
 
 # PES2-TASK-32: Prova de conceito do MCP do DuckStation

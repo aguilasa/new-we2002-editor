@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-095
-title: O ritmo do ui_check tem de ficar vermelho com a taxa errada
-origin: LOOKS-TASK-33
-severity: medium
-files: [tools/looks/ui_check.py, tools/looks/scene.py, tools/looks/ui/app.py]  # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-26
-done_commit: af452cad
 ---
 
 # CORR-LOOKS-095 — O ritmo do ui_check tem de ficar vermelho com a taxa errada

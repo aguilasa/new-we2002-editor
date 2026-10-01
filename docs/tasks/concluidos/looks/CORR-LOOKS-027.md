@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-027
-title: "Correção: o cross-check contra os 50 JPGs é critério marcado e não existe comando que o rode"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: LOOKS-TASK-13
-severity: low
-done_on: 2026-09-15
-done_commit: c08f605
 ---
 
 # CORR-LOOKS-027: a metade do cross-check da tupla que não virou comando

@@ -1,14 +1,5 @@
 ---
 id: CORR-LOOKS-045
-title: "Correção: o veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: LOOKS-TASK-17
-severity: medium
-done_on: 2026-09-16
-done_commit: 495dd86
 ---
 
 # CORR-LOOKS-045: o piso do confronto é zero, e a justificativa diz outra coisa

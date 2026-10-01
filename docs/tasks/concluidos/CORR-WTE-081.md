@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-081
-title: "Correção: três gravações na imagem sem dono — o OK do ficha_color, o Comple. do jugador e o Accept do estrategia"
-type: correção
-category: comportamento
-status: done
-depends_on: [CORR-WTE-082]
-origin: WTE-TASK-30
-severity: high
-done_on: 2026-08-21
-done_commit: 519ff09
 ---
 
 # CORR-WTE-081: três gravações na imagem sem dono

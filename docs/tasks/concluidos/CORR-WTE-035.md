@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-035
-title: "Correção: a decisão 5 do `tipos.md` não tem o \"teste que prova\", e o critério que o exige está marcado"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-15
-severity: low
-done_on: 2026-08-10
-done_commit: 003bc9b
 ---
 
 # CORR-WTE-035: quatro das cinco decisões têm teste nomeado; a do `_url.txt` não

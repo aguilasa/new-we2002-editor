@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-053
-title: "Correção: a seção 2 da WTE-TASK-22 descreve o controle como uma faixa só, e o gate declara nove"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: WTE-TASK-22
-severity: low
-done_on: 2026-08-11
-done_commit: 1e19f1a
 ---
 
 # CORR-WTE-053: 11.952 bytes numa faixa contra 11.955 em nove, e nenhum dos dois diz de qual imagem fala

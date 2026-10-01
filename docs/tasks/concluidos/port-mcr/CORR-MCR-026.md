@@ -1,14 +1,5 @@
 ---
 id: CORR-MCR-026
-title: "Correção: a regra da soma é creditada a sete cartões independentes e dois de terceiros, e a medição dá seis padrões distintos e um de terceiro"
-type: correção
-category: engenharia-reversa
-status: done
-depends_on: []
-origin: MCR-TASK-17
-severity: high
-done_on: 2026-09-10
-done_commit: 928bd81
 ---
 
 # CORR-MCR-026: sete cartões independentes, dos quais três são o mesmo arquivo

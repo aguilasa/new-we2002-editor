@@ -1,17 +1,5 @@
 ---
 id: KITS-TASK-24
-title: "`figure.py` e `api.figure`: a única ponte com o `looks`"
-type: "implementação"
-phase: 6
-depends_on: [KITS-TASK-20, KITS-TASK-23]
-source_of_truth: "/docs/PLAN-KITS-PY.md#3.1"
-files: ["tools/kits/core/figure.py", "tools/kits/core/api.py"]            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
-done_on: null
-done_commit: null
-reviewed_on: null
-review_commit: null
 ---
 
 # KITS-TASK-24 — `figure.py` e `api.figure`: a única ponte com o `looks`

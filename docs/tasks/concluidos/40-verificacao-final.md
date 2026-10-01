@@ -1,16 +1,5 @@
 ---
 id: WTE-TASK-40
-title: "Verificação final — as três condições da definição de pronto"
-type: closing
-category: verificação
-phase: 7
-depends_on: [WTE-TASK-36, WTE-TASK-37, WTE-TASK-39]
-status: done
-source_of_truth: "/docs/PLAN-WTE-LAZARUS.md#0"
-reviewed_on: 2026-08-26
-review_commit: null
-done_on: 2026-08-26
-done_commit: 061ea53
 ---
 
 # WTE-TASK-40: Verificação final

@@ -1,14 +1,5 @@
 ---
 id: CORR-WTE-137
-title: "Correção: `8.8-b2002-exportar.sh` não reproduz, não confere nada e deixa o modal aberto"
-type: correção
-category: verificação
-status: done
-depends_on: []
-origin: PAR-TASK-07
-severity: high
-done_on: 2026-08-31
-done_commit: 866e3c0
 ---
 
 # CORR-WTE-137: o roteiro de exportação da §8.8 é um falso verde à espera

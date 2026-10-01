@@ -1,16 +1,5 @@
 ---
 id: LOOKS-TASK-08
-title: "Incógnita (a) — de onde vem o boneco: `EDT_MOD.BIN` ou os TMDs de `0x00168xxx`"
-type: engenharia-reversa
-category: formato
-phase: 2
-depends_on: [LOOKS-TASK-07]
-status: done
-source_of_truth: "/docs/PLAN-LOOKS-PY.md#6"
-reviewed_on: 2026-09-14
-review_commit: null
-done_on: 2026-09-14
-done_commit: 727e00d
 ---
 
 # LOOKS-TASK-08: De onde vem o boneco da tela

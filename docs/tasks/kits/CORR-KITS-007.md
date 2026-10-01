@@ -1,14 +1,5 @@
 ---
 id: CORR-KITS-007
-title: "State in §4.3 where the zone-map half of the question is answered"
-origin: KITS-TASK-03
-severity: low
-files: []            # predicted paths/globs; batches build their conflict matrix from them
-resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: done
-depends_on: []
-done_on: 2026-09-30
-done_commit: d197ec19
 ---
 
 # CORR-KITS-007 — State in §4.3 where the zone-map half of the question is answered
