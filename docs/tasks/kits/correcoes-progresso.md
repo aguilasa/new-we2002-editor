@@ -26,5 +26,5 @@
 | [CORR-KITS-021](/docs/tasks/kits/CORR-KITS-021.md) | Add a versioned control that plants a palette defect in confront 1 | KITS-TASK-09 | medium | done | 2026-10-01 |
 | [CORR-KITS-022](/docs/tasks/kits/CORR-KITS-022.md) | Correct the corpus description in the task notes and NOTICE | KITS-TASK-10 | medium | done | 2026-10-01 |
 | [CORR-KITS-023](/docs/tasks/kits/CORR-KITS-023.md) | Credit or account for the authors named by Banderas 3D folders | KITS-TASK-10 | medium | done | 2026-10-01 |
-| [CORR-KITS-024](/docs/tasks/kits/CORR-KITS-024.md) | Keep cross-task notes out of the task's commit or declare them | KITS-TASK-10 | low | pending | — |
+| [CORR-KITS-024](/docs/tasks/kits/CORR-KITS-024.md) | Keep cross-task notes out of the task's commit or declare them | KITS-TASK-10 | low | done | 2026-10-01 |
 <!-- rite:end -->

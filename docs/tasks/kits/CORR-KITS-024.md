@@ -67,3 +67,7 @@ $ grep -n "28-confronto-3" docs/tasks/kits/10-confronto-2-superpack.md | cut -c1
 ```
 
 Duas linhas: a do Escopo e a do Log.
+- **Closed** — commit `95031c9c` (2026-10-01): docs(kits): add the KITS-TASK-28 note to KITS-TASK-10's scope
+  - Files (`git show --name-status 95031c9c`):
+    - `M docs/tasks/kits/10-confronto-2-superpack.md`
+    - `M docs/tasks/kits/CORR-KITS-024.md`
