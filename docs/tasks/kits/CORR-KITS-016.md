@@ -5,10 +5,10 @@ origin: KITS-TASK-07
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-10-01
+done_commit: 80c944cb
 ---
 
 # CORR-KITS-016 — Use layout.kit_path in RomSource.kits, restoring the lost line break
@@ -75,3 +75,7 @@ f5cc3872f6a2a6a066b23b05272ed73c *-
 ```
 
 `cmp` das saídas de antes e depois: idênticas nas duas imagens.
+- **Closed** — commit `80c944cb` (2026-10-01): refactor(kits): build the kit path with layout.kit_path in RomSource
+  - Files (`git show --name-status 80c944cb`):
+    - `M docs/tasks/kits/CORR-KITS-016.md`
+    - `M tools/kits/core/source.py`
