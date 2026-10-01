@@ -192,10 +192,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#3.3",
       "files": ["tools/kits/gen_tables.py", "tools/kits/core/generated/", "tests/CMakeLists.txt", "NOTICE.md", "docs/prompts/perfil-kits.md"],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-01",
+      "done_commit": "a700d248",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

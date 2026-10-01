@@ -92,3 +92,14 @@ O que a tabela gerada dá nos limites das três faixas:
 $ python -c "import sys;sys.path.insert(0,'tools/kits');from core.generated import team_names as t;print(len(t.TEAM_NAMES), t.TEAM_NAMES[53], t.TEAM_NAMES[54], t.TEAM_NAMES[62], t.TEAM_NAMES[63], t.TEAM_NAMES[94])"
 120 Australia Euro All Stars Clas. Argentina Manchester U. Basilea
 ```
+- **Closed** — commit `a700d248` (2026-10-01): feat(kits): generate the team-name constants from the C++ core, with --check in ctest
+  - Files (`git show --name-status a700d248`):
+    - `M NOTICE.md`
+    - `M docs/prompts/perfil-kits.md`
+    - `M docs/tasks/kits/12-gerador-de-nomes.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tests/CMakeLists.txt`
+    - `A tools/kits/core/generated/__init__.py`
+    - `A tools/kits/core/generated/team_names.py`
+    - `A tools/kits/gen_tables.py`
