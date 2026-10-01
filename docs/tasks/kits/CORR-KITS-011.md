@@ -5,10 +5,10 @@ origin: KITS-TASK-06
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-10-01
+done_commit: 5f0588e4
 ---
 
 # CORR-KITS-011 — Fix the broken.tex fixture recipe: offset 5056 is not tag byte +14
@@ -99,3 +99,10 @@ $ grep -rnE 'print\(|sys\.exit|PySide|^[A-Z_]+ *= *\[\]' tools/kits/core/
 $ python tools/kits/cli.py survey roms/japanese-shift-jis.bin | md5sum
 c2ec025a808afd4ffbe4c39fca0d991a *-
 ```
+- **Closed** — commit `5f0588e4` (2026-10-01): fix(kits): build the source-recognition fixtures by command, with the tag byte found
+  - Files (`git show --name-status 5f0588e4`):
+    - `M docs/tasks/kits/06-fachada-e-origem.md`
+    - `M docs/tasks/kits/CORR-KITS-011.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/source.py`
