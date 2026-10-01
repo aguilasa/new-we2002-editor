@@ -94,3 +94,9 @@ $ python tools/kits/cli.py export --confront --negative --tag 00 roms/japanese-s
 control: TEX_00 image 0 pixel 4096 +1, and None palette 0 colour 1 red ^1, on our side -- FAILED
 exit 1
 ```
+- **Closed** — commit `a735d97f` (2026-10-01): fix(kits): give confront 1's control a palette half
+  - Files (`git show --name-status a735d97f`):
+    - `M docs/tasks/kits/09-cli-e-confronto-1.md`
+    - `M docs/tasks/kits/CORR-KITS-021.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/selftest.py`
