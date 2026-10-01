@@ -26,6 +26,8 @@ from .source import open_source as _open_source
 from .tex import (EXPECTED_SHAPE, NOTE_FORM2_TAIL, NOTE_PAST_ISO_SIZE,  # noqa: F401
                   RECORD_NAMES, Image, Kit, Note, Palette, StreamControl)
 from .tex import stream_control as _stream_control
+from .source import DiscControl  # noqa: F401
+from .source import disc_controls as _disc_controls
 
 __all__ = (
     "open_source", "open_controls", "OpenControl",
@@ -34,7 +36,7 @@ __all__ = (
     "SourceEmpty", "NotASource",
     "Kit", "Image", "Palette", "Note", "EXPECTED_SHAPE", "RECORD_NAMES",
     "NOTE_PAST_ISO_SIZE", "NOTE_FORM2_TAIL",
-    "stream_control", "StreamControl",
+    "stream_control", "StreamControl", "disc_controls", "DiscControl",
     "KitError", "KitMissing", "KitUnreadable", "KitRefused",
 )
 
@@ -62,3 +64,9 @@ def stream_control(kit):
     copy of *kit*, and the guard read on both.  `StreamControl.ok` says the
     sound copy passed and the planted one was refused on record 0."""
     return _stream_control(kit.data, kit.label)
+
+
+def disc_controls(source):
+    """The two read rules of a disc (Form 2 tail, next-file limit), each
+    planted on the kit it applies to: a tuple of `DiscControl`."""
+    return _disc_controls(source.image_path, source.kit_tags())

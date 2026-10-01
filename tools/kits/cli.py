@@ -398,6 +398,23 @@ def _tex_negative(kits) -> int:
     return 0 if c.ok else 1
 
 
+def _disc_negative(source) -> int:
+    """The two read rules of section 2.1, each planted; exit 1 unless both held."""
+    try:
+        controls = api.disc_controls(source)
+    except api.KitsError as exc:
+        print("disc controls: not run: %s" % exc)
+        return 0
+    bad = 0
+    for c in controls:
+        bad += not c.ok
+        print("control: %s -- %s" % (c.name, c.planted))
+        print("  clean:   %s" % c.clean)
+        print("  planted: %s" % c.after)
+        print("control %s" % ("held" if c.ok else "FAILED"))
+    return 1 if bad else 0
+
+
 def cmd_tex(args) -> int:
     """Each kit container of a source through the guard of form (section 2.1).
 
@@ -411,7 +428,10 @@ def cmd_tex(args) -> int:
         return 1
     kits = _kits_of(source, args.tag, args.iso_size)
     if args.negative:
-        return _tex_negative(kits)
+        code = _tex_negative(kits)
+        if source.kind == api.KIND_ROM and not args.tag:
+            code = max(code, _disc_negative(source))
+        return code
     refused = 0
     noted = {api.NOTE_PAST_ISO_SIZE: 0, api.NOTE_FORM2_TAIL: 0}
     for name, kit in kits:

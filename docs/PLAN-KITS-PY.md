@@ -491,6 +491,11 @@ em x 48–63. A fase 3 cruza essa lista com o mapa de zonas.
    - trocar as paletas 486 e 488 tem de trocar jogador e goleiro no 3D;
    - um byte trocado no fluxo LZSS de um TEX tem de ser **recusado** pela guarda
      de forma;
+   - na European Deluxe, dado nos bytes 2072–2347 de um setor marcado Form 2
+     tem de dar `KitUnreadable`, e um arquivo posto logo depois dos setores ISO
+     de um TEX cujo cabeçalho acaba além deles tem de parar a leitura no tamanho
+     ISO e deixar o TEX recusado — as duas regras do §2.1, no
+     `cli.py tex --negative` ([CORR-KITS-014](/docs/tasks/kits/CORR-KITS-014.md));
    - o mapa de zonas deslocado 1 px tem de reprovar a §4.6;
    - pedir o suplente do `TEX_A4` tem de dar o mesmo quadro que o titular, e
      de qualquer tag do §1.1 que difere, um quadro diferente.

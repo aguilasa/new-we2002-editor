@@ -440,3 +440,151 @@ def open_controls(image_path: str, folder: str) -> tuple:
         out.append(OpenControl(name=name, built=built, expect=expect, phrase=phrase,
                                got=got, message=message))
     return tuple(out)
+
+
+# -- the two rules of read_disc_file, seen refusing -----------------------
+#
+# CORR-KITS-014: the Form 2 tail check and the "only up to the next file"
+# limit had no planted control.  Both are planted here through a proxy of
+# the opened image -- one sector's bytes, or one fake file in the
+# directory -- so nothing of the disc is copied or written.
+
+FORM2_PLANT_AT = 2100
+"""Byte of the raw sector that the Form 2 control makes non-zero: inside
+FORM2_TAIL (2072..2347)."""
+
+FORM2_PLANT_VALUE = 0x55
+
+
+class _PlantedFile:
+    """A read-only file whose bytes at *at* read as *value*."""
+
+    def __init__(self, f, at: int, value: int):
+        self._f, self._at, self._value = f, at, value
+
+    def seek(self, pos, whence=0):
+        return self._f.seek(pos, whence)
+
+    def tell(self):
+        return self._f.tell()
+
+    def read(self, n=-1):
+        start = self._f.tell()
+        data = self._f.read(n)
+        if start <= self._at < start + len(data):
+            buf = bytearray(data)
+            buf[self._at - start] = self._value
+            data = bytes(buf)
+        return data
+
+
+class _PlantedImage:
+    """An opened `iso.Image` seen through one planted change: a byte of the
+    file (*f*) or an extra entry in the directory (*files*)."""
+
+    def __init__(self, image, f=None, files=None):
+        self._image = image
+        self.f = f if f is not None else image.f
+        self.files = files if files is not None else image.files
+
+    def __getattr__(self, name):
+        return getattr(self._image, name)
+
+
+@dataclass(frozen=True)
+class DiscControl:
+    """One rule of read_disc_file, its kit clean and planted."""
+
+    name: str
+    planted: str        # what was changed
+    clean: str          # what the clean read gave
+    after: str          # what the planted read gave
+    ok: bool
+
+
+def _read_kit_as(image, path: str):
+    """(Kit, None) or (None, the KitUnreadable raised)."""
+    try:
+        data, notes = read_disc_file(image, path)
+    except KitUnreadable as exc:
+        return None, exc
+    return tex.read_kit(data, label=path, notes=notes), None
+
+
+def _describe(kit, exc) -> str:
+    if exc is not None:
+        return "%s: %s" % (type(exc).__name__, exc)
+    kinds = ", ".join(n.kind for n in kit.notes) or "no note"
+    return "%s (%d bytes; %s)" % ("passes" if kit.ok else "refused: " + "; ".join(kit.problems),
+                                  kit.size, kinds)
+
+
+def disc_controls(image_path: str, tags) -> tuple:
+    """Plant (a) data in the Form 2 tail of the first marked sector of a kit
+    and (b) a file right after the ISO sectors of the first kit whose header
+    ends past them.
+    (a) has to raise `KitUnreadable`; (b) has to stop the read at the ISO
+    size and leave the kit refused.  Raises `SourceError` when the disc has
+    no kit that either rule applies to (the Japanese disc has none)."""
+    try:
+        image = iso.Image(image_path)
+    except OSError as exc:
+        raise SourceUnreadable("Could not read %s: %s"
+                               % (image_path, exc.strerror or exc)) from exc
+    try:
+        marked = past = None
+        for tag in tags:
+            path = survey.layout.kit_path(tag)
+            entry = image.entry(path)
+            kit, exc = _read_kit_as(image, path)
+            if exc is not None:
+                continue
+            kinds = {n.kind for n in kit.notes}
+            if marked is None and tex.NOTE_FORM2_TAIL in kinds:
+                lba = next(entry.lba + i for i in range(entry.sectors)
+                           if image.form(entry.lba + i) != 1)
+                marked = (path, lba, kit)
+            # Past the ISO size *and* past its last ISO sector: a header end
+            # inside that sector's slack is read without the slot at all.
+            if (past is None and tex.NOTE_PAST_ISO_SIZE in kinds and kit.ok
+                    and kit.size > entry.sectors * iso.FORM1_DATA):
+                past = (path, entry, kit)
+            if marked and past:
+                break
+        if marked is None or past is None:
+            raise NotASource("%s has no kit read through a wrong Form 2 bit and past "
+                             "its ISO size, so the two read controls have nothing to plant."
+                             % image_path)
+        out = []
+
+        path, lba, kit = marked
+        at = lba * iso.RAW_SECTOR + FORM2_PLANT_AT
+        planted = _PlantedImage(image, f=_PlantedFile(image.f, at, FORM2_PLANT_VALUE))
+        got, exc = _read_kit_as(planted, path)
+        out.append(DiscControl(
+            name="Form 2 tail with data",
+            planted="%s, sector %d, byte %d = 0x%02x"
+                    % (path, lba, FORM2_PLANT_AT, FORM2_PLANT_VALUE),
+            clean=_describe(kit, None), after=_describe(got, exc),
+            ok=kit.ok and isinstance(exc, KitUnreadable)))
+
+        path, entry, kit = past
+        fence = entry.lba + entry.sectors
+        files = dict(image.files)
+        files["/PLANTED.BIN"] = _FakeEntry(fence)   # _slot_end reads only .lba
+        planted = _PlantedImage(image, files=files)
+        got, exc = _read_kit_as(planted, path)
+        out.append(DiscControl(
+            name="next file at the ISO size",
+            planted="%s, a file placed at sector %d (its ISO end)" % (path, fence),
+            clean=_describe(kit, None), after=_describe(got, exc),
+            ok=(kit.ok and exc is None and not got.ok
+                and tex.NOTE_PAST_ISO_SIZE not in {n.kind for n in got.notes})))
+        return tuple(out)
+    finally:
+        image.close()
+
+
+@dataclass(frozen=True)
+class _FakeEntry:
+    lba: int
