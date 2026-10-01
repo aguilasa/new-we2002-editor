@@ -97,3 +97,4 @@ controls: 9 of 9 red
     - `M tests/CMakeLists.txt`
     - `A tools/kits/controls.py`
     - `A tools/kits/selftest.py`
+- **Reviewed** (2026-10-01) at `030bd7d9`: CORR-KITS-017, CORR-KITS-018, CORR-KITS-019, CORR-KITS-020

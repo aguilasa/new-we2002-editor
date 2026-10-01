@@ -209,6 +209,58 @@
       "depends_on": [],
       "done_on": "2026-10-01",
       "done_commit": "80c944cb"
+    },
+    {
+      "id": "CORR-KITS-017",
+      "file": "CORR-KITS-017.md",
+      "title": "Run self-checks of looks modules kits uses indirectly",
+      "origin": "KITS-TASK-08",
+      "severity": "high",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-018",
+      "file": "CORR-KITS-018.md",
+      "title": "Make cli.py import only core.api, and gate that rule",
+      "origin": "KITS-TASK-08",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-019",
+      "file": "CORR-KITS-019.md",
+      "title": "Transcribe the full ED kits_image red, and fix open_controls on ED",
+      "origin": "KITS-TASK-08",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-020",
+      "file": "CORR-KITS-020.md",
+      "title": "Fail kits_image when WE2002_LOOKS_IMAGE points at no file",
+      "origin": "KITS-TASK-08",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

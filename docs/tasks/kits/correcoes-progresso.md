@@ -19,4 +19,8 @@
 | [CORR-KITS-014](/docs/tasks/kits/CORR-KITS-014.md) | Add a planted control for the Form 2 and extent refusals | KITS-TASK-07 | medium | done | 2026-10-01 |
 | [CORR-KITS-015](/docs/tasks/kits/CORR-KITS-015.md) | Update NOTICE.md kits rows to name tex.py as the CARP importer | KITS-TASK-07 | low | done | 2026-10-01 |
 | [CORR-KITS-016](/docs/tasks/kits/CORR-KITS-016.md) | Use layout.kit_path in RomSource.kits, restoring the lost line break | KITS-TASK-07 | low | done | 2026-10-01 |
+| [CORR-KITS-017](/docs/tasks/kits/CORR-KITS-017.md) | Run self-checks of looks modules kits uses indirectly | KITS-TASK-08 | high | pending | — |
+| [CORR-KITS-018](/docs/tasks/kits/CORR-KITS-018.md) | Make cli.py import only core.api, and gate that rule | KITS-TASK-08 | medium | pending | — |
+| [CORR-KITS-019](/docs/tasks/kits/CORR-KITS-019.md) | Transcribe the full ED kits_image red, and fix open_controls on ED | KITS-TASK-08 | low | pending | — |
+| [CORR-KITS-020](/docs/tasks/kits/CORR-KITS-020.md) | Fail kits_image when WE2002_LOOKS_IMAGE points at no file | KITS-TASK-08 | low | pending | — |
 <!-- rite:end -->

@@ -131,8 +131,8 @@
       "status": "done",
       "done_on": "2026-10-01",
       "done_commit": "e243594d",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-01",
+      "review_commit": "030bd7d9"
     },
     {
       "id": "KITS-TASK-09",
