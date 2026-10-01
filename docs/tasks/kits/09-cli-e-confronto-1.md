@@ -116,3 +116,4 @@ $ WE2002_LOOKS_IMAGE=.../roms/japanese-shift-jis.bin ctest -R kits -V
     - `M tools/kits/cli.py`
     - `M tools/kits/core/api.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-01) at `2eb1b68a`: CORR-KITS-021

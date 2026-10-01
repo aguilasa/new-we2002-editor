@@ -23,4 +23,5 @@
 | [CORR-KITS-018](/docs/tasks/kits/CORR-KITS-018.md) | Make cli.py import only core.api, and gate that rule | KITS-TASK-08 | medium | done | 2026-10-01 |
 | [CORR-KITS-019](/docs/tasks/kits/CORR-KITS-019.md) | Transcribe the full ED kits_image red, and fix open_controls on ED | KITS-TASK-08 | low | done | 2026-10-01 |
 | [CORR-KITS-020](/docs/tasks/kits/CORR-KITS-020.md) | Fail kits_image when WE2002_LOOKS_IMAGE points at no file | KITS-TASK-08 | low | done | 2026-10-01 |
+| [CORR-KITS-021](/docs/tasks/kits/CORR-KITS-021.md) | Add a versioned control that plants a palette defect in confront 1 | KITS-TASK-09 | medium | pending | — |
 <!-- rite:end -->

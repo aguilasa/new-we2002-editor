@@ -261,6 +261,19 @@
       "depends_on": [],
       "done_on": "2026-10-01",
       "done_commit": "a9b57017"
+    },
+    {
+      "id": "CORR-KITS-021",
+      "file": "CORR-KITS-021.md",
+      "title": "Add a versioned control that plants a palette defect in confront 1",
+      "origin": "KITS-TASK-09",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
