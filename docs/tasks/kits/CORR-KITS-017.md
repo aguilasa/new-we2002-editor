@@ -93,3 +93,8 @@ $ python tools/kits/controls.py; echo "exit $?"
 controls: 10 of 10 red
 exit 0
 ```
+- **Closed** — commit `fd819f77` (2026-10-01): fix(kits): run the self-checks of every looks module the kits code reaches
+  - Files (`git show --name-status fd819f77`):
+    - `M docs/tasks/kits/CORR-KITS-017.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
