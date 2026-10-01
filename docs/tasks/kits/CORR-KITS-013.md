@@ -5,10 +5,10 @@ origin: KITS-TASK-07
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-10-01
+done_commit: b71d9cef
 ---
 
 # CORR-KITS-013 — Correct the §2.1 counts that no tool prints
@@ -92,3 +92,7 @@ $ grep -n "65 TEX" docs/PLAN-KITS-PY.md
 $ grep -n "20 setores" docs/PLAN-KITS-PY.md
 (sem saída, exit 1)
 ```
+- **Closed** — commit `b71d9cef` (2026-10-01): docs(kits): split the 65 ISO-size refusals in plan 2.1 and drop the 20-sector rule
+  - Files (`git show --name-status b71d9cef`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-013.md`
