@@ -39,6 +39,8 @@ este perfil e o plano divergirem, o plano ganha.
 
 <!-- Output -> generator -> check command. Never edit the output. -->
 
+- `tools/kits/core/generated/team_names.py` → `python tools/kits/gen_tables.py` (de `Offsets.hpp`, `Types.hpp`, `Tables.cpp`) → `python tools/kits/gen_tables.py --check` (`ctest -R kits_gen`); `--negative` planta o vermelho.
+
 ## Gates deste ciclo
 
 <!-- Commands that must pass before any item of this cycle closes (in addition to rite.toml [gates].global). -->

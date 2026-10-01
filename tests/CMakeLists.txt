@@ -311,4 +311,12 @@ if(Python3_FOUND)
     set_tests_properties(kits_image PROPERTIES
         SKIP_RETURN_CODE 77
         TIMEOUT 300)
+
+    # The generator guard, like ui_forms: the team-name offsets, lengths and
+    # TEAM_NAMES of tools/kits/core/generated/ come from Offsets.hpp, Types.hpp
+    # and Tables.cpp, and --check fails when the C++ changed and the Python
+    # did not (PLAN-KITS-PY.md section 3.3).
+    add_test(NAME kits_gen
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/kits/gen_tables.py --check)
 endif()
