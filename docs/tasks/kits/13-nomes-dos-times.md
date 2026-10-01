@@ -34,7 +34,12 @@ O que ficou decidido, medido antes:
 - **Por que a tabela no japonês:** lá o `mixed_case_name` é katakana de meia largura em todo time — no `we2002_golden_tool names roms/japanese-shift-jis.bin`, 0 dos 95 nomes em caixa mista são só ASCII, e nenhum campo vem vazio. (Esta linha dizia, até a [CORR-KITS-025](/docs/tasks/kits/CORR-KITS-025.md), que o clube 63 vinha com os dois campos vazios; era a vaga sobrando da primeira versão do verbo, a de 64 linhas, e na HEAD a linha do 63 traz katakana e `ARAGON`.)
 - **Disco desconhecido cai no nome da ROM**, e o `name_origin == "rom"` diz isso: a PT-BR, que também boota `SLPM_870.56`, sai `95 rom` com "Irlanda", "Escocia".
 - O `golden_tool names` precisou de um conserto antes de servir: `db.teams` tem 64 posições (`TEAMS_NATIONAL_ALLSTAR_SLOTS`, a vaga a mais do array), e a primeira versão imprimia as 64 — 96 linhas, e os 32 clubes saíam deslocados de um (`63 of 95 ROM names equal`, com `DIFFER 93: 'Kiev' here, 'Galatasaray' in we2002_core`). Ele imprime só os 63 que o editor lista.
-- O `golden_tool` roda pelo PowerShell; pelo Git Bash o mesmo `.exe` sai 127 sem imprimir nada.
+- O `golden_tool` é compilado pelo MinGW e precisa das DLLs do runtime dele (`libstdc++-6.dll`, `libgcc_s_seh-1.dll`, `libwinpthread-1.dll`), que moram no `bin` do compilador. Sem esse diretório no `PATH` o `.exe` sai **127** sem imprimir nada — em qualquer shell; o Git Bash desta máquina só não o tem por padrão. Com ele, roda igual (corrigido pela [CORR-KITS-026](/docs/tasks/kits/CORR-KITS-026.md), que media 0 linhas e exit 127 sem o prefixo, 95 linhas e exit 0 com ele):
+
+  ```sh
+  PATH="/c/Users/ingcvs/AppData/Local/Microsoft/WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/mingw64/bin:$PATH" \
+    $TEMP/build-kits08/tests/we2002_golden_tool.exe names roms/golden-european-deluxe.bin
+  ```
 
 ## Log de Execução
 

@@ -43,3 +43,33 @@ $ grep -n "sai 127 sem imprimir nada" docs/tasks/kits/13-nomes-dos-times.md
 Hoje imprime a linha 37; depois tem de dar lugar à explicação de DLL/`PATH`.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `eee0e6fd`)
+
+```text
+$ $TEMP/build-kits08/tests/we2002_golden_tool.exe names roms/golden-european-deluxe.bin | wc -l; echo exit ${PIPESTATUS[0]}
+0
+exit 127
+$ PATH="$M:$PATH" $TEMP/build-kits08/tests/we2002_golden_tool.exe names roms/golden-european-deluxe.bin | wc -l; echo exit ${PIPESTATUS[0]}
+95
+exit 0
+$ ls "$M" | grep -iE "libstdc|libgcc|winpthread"
+libgcc_s_seh-1.dll
+libstdc++-6.dll
+libwinpthread-1.dll
+```
+
+(`$M` = `.../WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/mingw64/bin`.) REPRODUCED: o mesmo Git Bash roda o `.exe` com o `bin` do MinGW no `PATH`.
+
+### O que foi feito
+
+Notas da KITS-TASK-13: a linha do "pelo Git Bash sai 127" virou a explicação — o 127 é a busca das três DLLs do runtime MinGW, não o shell —, com o prefixo de `PATH` que faz o Git Bash funcionar.
+
+### Verificação
+
+```text
+$ grep -n "sai 127 sem imprimir nada" docs/tasks/kits/13-nomes-dos-times.md
+(sem saída, exit 1)
+$ grep -c "libstdc++-6.dll" docs/tasks/kits/13-nomes-dos-times.md
+1
+```
