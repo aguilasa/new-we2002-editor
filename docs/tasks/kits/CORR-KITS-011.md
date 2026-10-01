@@ -5,7 +5,7 @@ origin: KITS-TASK-06
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -53,3 +53,49 @@ Corrigir a receita em `docs/tasks/kits/06-fachada-e-origem.md` para o offset 507
 Montar o `broken.tex` pela receita do Log, como ela estiver escrita, e rodar `python tools/kits/cli.py open <scratch>/broken.tex`. Hoje a saída diz "record 0 is kind 245"; depois tem de dizer "it has 10 image/palette records where a kit container has 11".
 
 ## Log de Execução
+
+### Reprodução (HEAD `da8c435a`)
+
+O `rite reproduce` não roda a Evidência (os caminhos são `<scratch>`); refeita à mão, com `<scratch>` = pasta da sessão:
+
+```text
+$ MSYS_NO_PATHCONV=1 python tools/pes2/iso.py extract roms/japanese-shift-jis.bin /BIN/TEX_00.BIN -o <scratch>/tex00.bin
+$ (d[5056] ^= 0xFF) python tools/kits/cli.py open <scratch>/broken5056.tex
+REFUSE broken5056.tex -> NotASource: <scratch>/broken5056.tex is neither a CD image nor a kit container (TEX): as a CD image, 29944 bytes is not a whole number of 2352-byte sectors; as a TEX, record 0 is kind 245 at (576,256) 64x128 where a kit container has image at (576,256) 64x128.
+$ (d[5070] ^= 0xFF) python tools/kits/cli.py open <scratch>/broken5070.tex
+REFUSE broken5070.tex -> NotASource: <scratch>/broken5070.tex is neither a CD image nor a kit container (TEX): as a CD image, 29944 bytes is not a whole number of 2352-byte sectors; as a TEX, it has 10 image/palette records where a kit container has 11.
+$ cd tools/pes2 && python -c "...; print(d.find(b'\x0f\x80\xff\x00'))" <scratch>/tex00.bin
+5070
+```
+
+REPRODUCED. Causa raiz confirmada: 5056 é o início do registro 0, e a tag fica em +14.
+
+### O que foi feito
+
+- `tools/kits/core/source.py`: `build_open_fixtures(imagem, pasta)` monta as fixtures do Log a partir do disco — `kit.bin` (o `TEX_00` extraído), `disc.tex` (hardlink, nada copiado), `disc.cue`, `broken-tag.tex` (byte = início do registro 0 + `TEX_TAG_FIELD`, **achado pela lista de registros**), `broken-kind.tex` (o byte 5056 da receita velha, como controle do outro veredito), `note.txt`, `empty.bin`, `zeros.iso`, `gone.cue`, `missing.bin` e uma pasta — e `open_controls` abre cada uma e confere tipo e frase (`OpenControl.ok`). Exportado em `core/api.py`, de modo que o `cli.py` continua só na fachada.
+- `tools/kits/cli.py open --negative <imagem>`: monta numa pasta temporária, imprime cada desfecho, sai 1 se algum falhar.
+- KITS-TASK-06: a receita passa a dizer 5070, e o Log ganhou a saída do comando.
+
+### Verificação
+
+```text
+$ (receita do Log, d[5070] ^= 0xFF) python tools/kits/cli.py open <scratch>/broken.tex
+REFUSE broken.tex -> NotASource: <scratch>/broken.tex is neither a CD image nor a kit container (TEX): as a CD image, 29944 bytes is not a whole number of 2352-byte sectors; as a TEX, it has 10 image/palette records where a kit container has 11.
+$ python tools/kits/cli.py open --negative roms/japanese-shift-jis.bin | tail -1
+11 of 11 expectations held
+```
+
+O verificador visto falhando — `TEX_TAG_FIELD` posto em 0, que é a receita velha:
+
+```text
+$ python -c "import sys; sys.path.insert(0,'tools/kits'); import cli; from core import source
+source.TEX_TAG_FIELD = 0
+raise SystemExit(cli.main(['open','--negative','roms/japanese-shift-jis.bin']))"
+broken-tag.tex  kit.bin, byte 5056 (record 0 at 5056, +0: the tag) XOR 0xFF expect NotASource       got NotASource       FAILED
+    <tmp>\broken-tag.tex is neither ... as a TEX, record 0 is kind 245 at (576,256) 64x128 where a kit container has image at (576,256) 64x128.
+exit 1
+$ grep -rnE 'print\(|sys\.exit|PySide|^[A-Z_]+ *= *\[\]' tools/kits/core/
+(sem saída, exit 1)
+$ python tools/kits/cli.py survey roms/japanese-shift-jis.bin | md5sum
+c2ec025a808afd4ffbe4c39fca0d991a *-
+```

@@ -214,3 +214,110 @@ def open_source(path: str):
         return TexSource(path=path, data=data)
     raise NotASource("%s is neither a CD image nor a kit container (TEX): "
                      "as a CD image, %s; as a TEX, %s." % (path, rom_why, tex_why))
+
+
+# -- the recognition, seen deciding each way -----------------------------
+#
+# KITS-TASK-06 built these fixtures by hand, and its Log named the wrong byte
+# for the planted one (CORR-KITS-011).  Here each fixture is made from the
+# disc, the byte to plant is found from the record list instead of written
+# down, and every outcome is checked against what it has to be.
+
+CONTROL_KIT_TAG = "00"
+TEX_TAG_FIELD = 14
+"""Byte offset, inside a 16-byte record, of the 0x800f tag the record scan
+looks for: field [7], a little-endian halfword."""
+
+ZERO_SECTORS = 20
+
+
+@dataclass(frozen=True)
+class OpenControl:
+    """One fixture, what opening it has to give, and what it gave."""
+
+    name: str
+    built: str          # how the fixture was made
+    expect: str         # "rom", "tex", or an error class name
+    phrase: str         # a piece of the message that has to be there ("" for none)
+    got: str            # "rom", "tex", or the error class name raised
+    message: str        # the error message, or what opened
+
+    @property
+    def ok(self) -> bool:
+        return self.got == self.expect and self.phrase in self.message
+
+
+def _write(path: str, data: bytes) -> None:
+    with open(path, "wb") as fh:
+        fh.write(data)
+
+
+def build_open_fixtures(image_path: str, folder: str) -> tuple:
+    """Write the fixtures into *folder* (which must exist and be empty) and
+    return ((name, how it was built, expected kind or error, phrase), ...).
+    The disc itself is hard-linked, never copied."""
+    kit_path = survey.layout.kit_path(CONTROL_KIT_TAG)
+    image = iso.Image(image_path)
+    try:
+        tex = image.read_file(kit_path)
+    finally:
+        image.close()
+    first = bin_archive.entries(tex)[0]
+    tag_at = first.pos + TEX_TAG_FIELD
+    j = lambda name: os.path.join(folder, name)  # noqa: E731
+
+    _write(j("kit.bin"), tex)
+    os.link(image_path, j("disc.tex"))
+    with open(j("disc.cue"), "w", encoding="ascii") as fh:
+        fh.write('FILE "disc.tex" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n')
+    broken = bytearray(tex)
+    broken[tag_at] ^= 0xFF
+    _write(j("broken-tag.tex"), bytes(broken))
+    kind = bytearray(tex)
+    kind[first.pos] ^= 0xFF
+    _write(j("broken-kind.tex"), bytes(kind))
+    _write(j("note.txt"), b"this is not a CD image")
+    _write(j("empty.bin"), b"")
+    _write(j("zeros.iso"), bytes(ZERO_SECTORS * iso.RAW_SECTOR))
+    with open(j("gone.cue"), "w", encoding="ascii") as fh:
+        fh.write('FILE "nothere.bin" BINARY\n  TRACK 01 MODE2/2352\n')
+    os.mkdir(j("folder"))
+
+    n = len(survey.EXPECTED_SHAPE)
+    return (
+        ("disc.tex", "hard link to the disc", KIND_ROM, ""),
+        ("disc.cue", "cue sheet naming disc.tex", KIND_ROM, ""),
+        ("kit.bin", "%s extracted (%d bytes)" % (kit_path, len(tex)), KIND_TEX, ""),
+        ("broken-tag.tex", "kit.bin, byte %d (record 0 at %d, +%d: the tag) XOR 0xFF"
+         % (tag_at, first.pos, TEX_TAG_FIELD), "NotASource",
+         "it has %d image/palette records where a kit container has %d" % (n - 1, n)),
+        ("broken-kind.tex", "kit.bin, byte %d (record 0, +0: the kind) XOR 0xFF" % first.pos,
+         "NotASource", "record 0 is kind %d" % (bin_archive.KIND_IMAGE ^ 0xFF)),
+        ("note.txt", "22 bytes of text", "NotASource", "not a whole number of"),
+        ("empty.bin", "0 bytes", "SourceEmpty", "is empty"),
+        ("zeros.iso", "%d zeroed sectors" % ZERO_SECTORS, "NotASource", "no CD001"),
+        ("gone.cue", "cue sheet naming nothere.bin", "SourceMissing", "nothere.bin"),
+        ("missing.bin", "never written", "SourceMissing", "does not exist"),
+        ("folder", "a folder", "SourceUnreadable", "is a folder"),
+    )
+
+
+def open_controls(image_path: str, folder: str) -> tuple:
+    """Build the fixtures in *folder* and open each one.  Returns OpenControl
+    per fixture; never raises for a fixture that is refused -- that is the
+    point -- only for a disc that cannot give the fixtures at all."""
+    try:
+        fixtures = build_open_fixtures(image_path, folder)
+    except OSError as exc:
+        raise SourceUnreadable("Could not build the fixtures from %s in %s: %s"
+                               % (image_path, folder, exc.strerror or exc)) from exc
+    out = []
+    for name, built, expect, phrase in fixtures:
+        try:
+            src = open_source(os.path.join(folder, name))
+            got, message = src.kind, "opened as %s" % src.kind
+        except (SourceMissing, SourceUnreadable, SourceEmpty, NotASource) as exc:
+            got, message = type(exc).__name__, str(exc)
+        out.append(OpenControl(name=name, built=built, expect=expect, phrase=phrase,
+                               got=got, message=message))
+    return tuple(out)

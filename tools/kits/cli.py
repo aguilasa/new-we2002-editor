@@ -317,12 +317,38 @@ def cmd_uv(args) -> int:
     return 0
 
 
+def _open_negative(paths) -> int:
+    """Build the fixtures from the one disc given and check each outcome."""
+    import tempfile
+
+    if len(paths) != 1:
+        print("open: --negative takes one disc image", file=sys.stderr)
+        return 2
+    with tempfile.TemporaryDirectory(prefix="kits-open-") as folder:
+        try:
+            controls = api.open_controls(paths[0], folder)
+        except api.KitsError as exc:
+            print("open: %s" % exc, file=sys.stderr)
+            return 1
+        bad = 0
+        for c in controls:
+            bad += not c.ok
+            print("%-15s %-54s expect %-16s got %-16s %s"
+                  % (c.name, c.built, c.expect, c.got, "held" if c.ok else "FAILED"))
+            if c.phrase or not c.ok:
+                print("    %s" % c.message.replace(folder, "<tmp>"))
+    print("%d of %d expectations held" % (len(controls) - bad, len(controls)))
+    return 1 if bad else 0
+
+
 def cmd_open(args) -> int:
     """What `api.open_source` makes of each path: its kind, or the refusal.
 
     Only the facade is used here.  Exit 1 when any path is refused, so a
     list that should all open fails loudly on the first one that does not.
     """
+    if args.negative:
+        return _open_negative(args.paths)
     refused = 0
     for path in args.paths:
         name = os.path.basename(path)
@@ -380,6 +406,8 @@ def main(argv=None) -> int:
     p.set_defaults(fn=cmd_uv)
     p = sub.add_parser("open", help="what the core makes of a file: a disc, a lone TEX, or a refusal")
     p.add_argument("paths", nargs="+", metavar="path")
+    p.add_argument("--negative", action="store_true",
+                   help="build the recognition fixtures from one disc and check each outcome")
     p.set_defaults(fn=cmd_open)
     args = parser.parse_args(argv)
     return args.fn(args)

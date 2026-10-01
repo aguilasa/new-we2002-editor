@@ -57,7 +57,7 @@ Fixtures no scratchpad (`<scratch>`), feitas assim:
 $ MSYS_NO_PATHCONV=1 python tools/pes2/iso.py extract roms/japanese-shift-jis.bin /BIN/TEX_00.BIN -o <scratch>/tex00.bin   # 29944 bytes
 kit.bin    = cópia de tex00.bin
 disc.tex   = os.link(roms/japanese-shift-jis.bin)   (hardlink, nada copiado)
-broken.tex = tex00.bin com o byte +14 do registro 0 (offset 5056) em XOR 0xFF
+broken.tex = tex00.bin com o byte +14 do registro 0 (offset 5070: registro em 5056, tag em +14) em XOR 0xFF
 note.txt (22 bytes de texto), empty.bin (0 bytes), zeros.iso (20 setores zerados),
 gone.cue (aponta nothere.bin), missing.bin (não existe), e a própria pasta
 ```
@@ -85,6 +85,32 @@ REFUSE k6 -> SourceUnreadable: <scratch> is a folder, not a file.
 ```
 
 O `broken.tex` é o controle do lado TEX: um byte de tag trocado e o reconhecimento cai de 11 para 10 registros.
+
+A receita acima dizia "offset 5056" até a [CORR-KITS-011](/docs/tasks/kits/CORR-KITS-011.md): 5056 é onde o registro 0 começa, e trocar esse byte dá outra recusa ("record 0 is kind 245"). As fixtures agora saem de um comando, que acha o byte pela lista de registros em vez de tê-lo escrito, e confere cada desfecho:
+
+```
+$ python tools/kits/cli.py open --negative roms/japanese-shift-jis.bin      # exit 0
+disc.tex        hard link to the disc                                  expect rom              got rom              held
+disc.cue        cue sheet naming disc.tex                              expect rom              got rom              held
+kit.bin         /BIN/TEX_00.BIN extracted (29944 bytes)                expect tex              got tex              held
+broken-tag.tex  kit.bin, byte 5070 (record 0 at 5056, +14: the tag) XOR 0xFF expect NotASource       got NotASource       held
+    <tmp>\broken-tag.tex is neither a CD image nor a kit container (TEX): as a CD image, 29944 bytes is not a whole number of 2352-byte sectors; as a TEX, it has 10 image/palette records where a kit container has 11.
+broken-kind.tex kit.bin, byte 5056 (record 0, +0: the kind) XOR 0xFF   expect NotASource       got NotASource       held
+    <tmp>\broken-kind.tex is neither a CD image nor a kit container (TEX): as a CD image, 29944 bytes is not a whole number of 2352-byte sectors; as a TEX, record 0 is kind 245 at (576,256) 64x128 where a kit container has image at (576,256) 64x128.
+note.txt        22 bytes of text                                       expect NotASource       got NotASource       held
+    <tmp>\note.txt is neither a CD image nor a kit container (TEX): as a CD image, 22 bytes is not a whole number of 2352-byte sectors; as a TEX, it holds no image or palette record list.
+empty.bin       0 bytes                                                expect SourceEmpty      got SourceEmpty      held
+    <tmp>\empty.bin is empty (0 bytes).
+zeros.iso       20 zeroed sectors                                      expect NotASource       got NotASource       held
+    <tmp>\zeros.iso is neither a CD image nor a kit container (TEX): as a CD image, no ISO 9660 filesystem on it (no CD001 at sector 16); as a TEX, it holds no image or palette record list.
+gone.cue        cue sheet naming nothere.bin                           expect SourceMissing    got SourceMissing    held
+    The cue sheet <tmp>\gone.cue names nothere.bin, and <tmp>\nothere.bin does not exist.
+missing.bin     never written                                          expect SourceMissing    got SourceMissing    held
+    <tmp>\missing.bin does not exist.
+folder          a folder                                               expect SourceUnreadable got SourceUnreadable held
+    <tmp>\folder is a folder, not a file.
+11 of 11 expectations held
+```
 
 Critério 3:
 
