@@ -67,20 +67,46 @@ def _kits_sources() -> list:
     return sorted(out)
 
 
-def looks_modules_imported() -> list:
-    """Names of `tools/looks/*.py` with a self_check that kits code imports."""
+def _imported_names(path: str) -> set:
+    """Every module name an `import`/`from ... import` line of *path* names,
+    indented ones (imports inside a function) included."""
+    with open(path, encoding="utf-8") as fh:
+        return {m.group(1) or m.group(2) for m in _IMPORT.finditer(fh.read())}
+
+
+def _looks_path(name: str) -> str:
+    return os.path.join(LOOKS_DIR, name + ".py")
+
+
+def looks_modules_reached() -> list:
+    """Names of every `tools/looks/*.py` the kits code reaches: imported by
+    kits code, or by a looks module so reached -- the transitive closure,
+    since a break two imports away breaks the kits all the same."""
     names = set()
     for path in _kits_sources():
-        with open(path, encoding="utf-8") as fh:
-            for m in _IMPORT.finditer(fh.read()):
-                names.add(m.group(1) or m.group(2))
+        names |= _imported_names(path)
+    # A kits module of the same name as a looks one (cli) is the kits one.
+    names -= {os.path.splitext(os.path.basename(p))[0] for p in _kits_sources()}
+    todo = sorted(n for n in names if os.path.isfile(_looks_path(n)))
+    seen = set()
+    while todo:
+        name = todo.pop()
+        if name in seen:
+            continue
+        seen.add(name)
+        todo += [n for n in _imported_names(_looks_path(name))
+                 if n not in seen and os.path.isfile(_looks_path(n))]
+    return sorted(seen)
+
+
+def looks_modules_imported() -> list:
+    """Names of the reached `tools/looks/*.py` (`looks_modules_reached`) that
+    have a self_check."""
     out = []
-    for name in sorted(names):
-        path = os.path.join(LOOKS_DIR, name + ".py")
-        if os.path.isfile(path):
-            with open(path, encoding="utf-8") as fh:
-                if "def self_check(" in fh.read():
-                    out.append(name)
+    for name in looks_modules_reached():
+        with open(_looks_path(name), encoding="utf-8") as fh:
+            if "def self_check(" in fh.read():
+                out.append(name)
     return out
 
 

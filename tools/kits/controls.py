@@ -120,6 +120,16 @@ CONTROLS = (
         "`layout-empty-slot`, which its self-check is known to catch; a constant "
         "no looks self-check reads (texture's KIND_IMAGE) stayed green",
     ),
+    Control(
+        "looks-skin-union", "looks/skin.py", "the union of a field's primitives",
+        "        out |= set(field.primitives or ())",
+        "        out = set(field.primitives or ())",
+        "FAIL  looks skin.self_check()",
+        "section 6, coupling, two imports away: no kits file imports skin, "
+        "assembly does.  The looks catalogue's own `skin-union-of-one-field`; "
+        "before CORR-KITS-017 the gate scanned only the kits imports and "
+        "stayed green on it",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 
