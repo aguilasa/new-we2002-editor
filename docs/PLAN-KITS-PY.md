@@ -172,10 +172,14 @@ verdade; é não confiar num bit que o patch deixou errado.
 European Deluxe, **64 dos 105** TEX têm, na tabela de ponteiros do próprio
 cabeçalho, uma lista de registros **depois** do tamanho que o diretório ISO
 declara — o patch aumentou os arquivos e deixou o tamanho do diretório como
-estava. Cada TEX ocupa um espaço de 20 setores até o arquivo seguinte, e o
-que o cabeçalho aponta está dentro dele. Lido pelo tamanho ISO, 65 TEX
-saem com 8 a 10 registros; lido até onde o cabeçalho diz que o contêiner
-acaba, eles têm os 11. Então o `source.py` também **não** confia no tamanho:
+estava. Nos 64, o que o cabeçalho aponta cabe antes do arquivo seguinte — é a
+condição para o `tex` ler além do tamanho, e a contagem "64 read past the ISO
+size" abaixo é a dos que a cumpriram. Lido pelo tamanho ISO, as recusas são
+65: 64 por terem de 8 a 10 registros (54 com 10, 6 com 9, 4 com 8), e o
+`TEX_48`, que tem os 11 e cai no LZSS, como cai na leitura nova; lido até onde o
+cabeçalho diz que o contêiner acaba, os 64 têm os 11 — sete deles caem depois,
+no LZSS ou no tamanho descomprimido, e estão entre os 8 recusados abaixo
+([CORR-KITS-013](/docs/tasks/kits/CORR-KITS-013.md)). Então o `source.py` também **não** confia no tamanho:
 lê até o fim que o cabeçalho declara (`tex.declared_extent`) quando ele passa
 do tamanho ISO e cabe antes do arquivo seguinte, e o diagnóstico diz que leu
 assim. Os setores que essa leitura alcança têm o mesmo bit Form 2 errado; os

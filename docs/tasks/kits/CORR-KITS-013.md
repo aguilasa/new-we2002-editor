@@ -5,7 +5,7 @@ origin: KITS-TASK-07
 severity: medium
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: pending
+status: in-progress
 depends_on: []
 done_on: null
 done_commit: null
@@ -61,3 +61,34 @@ $ grep -n "65 TEX" docs/PLAN-KITS-PY.md
 Hoje imprime a linha 176; depois do conserto, não imprime nada.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `bc81d3ab`)
+
+```text
+$ python tools/kits/cli.py tex --iso-size roms/golden-european-deluxe.bin > i.txt; grep "^REFUSE" i.txt | grep -o "it has [0-9]* image" | sort | uniq -c; grep "^REFUSE" i.txt | grep -v "it has" | cut -c1-60
+     54 it has 10 image
+      4 it has 8 image
+      6 it has 9 image
+REFUSE TEX_48 (31464 bytes): record 0 (uniform, first set)
+```
+
+REPRODUCED: 64 com 8 a 10 registros, e o `TEX_48` recusado pelo LZSS (`stream at 48: distance 0 at 4810`), na leitura antiga e na nova.
+
+### O que foi feito
+
+§2.1 do plano:
+
+- "65 TEX saem com 8 a 10 registros" virou as 65 recusas separadas: 64 por lista curta (54/6/4) e o `TEX_48` pelo LZSS.
+- "Cada TEX ocupa um espaço de 20 setores" saiu — é um caso medido (104 de 105, por sonda) e nenhuma ferramenta o imprime. No lugar, o que a ferramenta afirma: nos 64, o que o cabeçalho aponta cabe antes do arquivo seguinte, que é a condição do `tex` para ler além do tamanho, e o "64 read past the ISO size" do resumo conta os que a cumpriram. Sem opção nova no `cli.py`.
+- "lido até onde o cabeçalho diz, eles têm os 11" ganhou a ressalva medida: 7 dos 64 (`TEX_03`, `06`, `28`, `70`, `84`, `92`, `A2`) caem depois no LZSS ou no tamanho descomprimido e estão entre os 8 recusados.
+
+Conferido sobre as duas saídas do `tex` (com e sem `--iso-size`): os 64 que a leitura nova lê além do tamanho são **o mesmo conjunto** dos 64 recusados por lista curta na antiga, e nenhuma recusa da leitura nova é por lista curta (`grep -c "it has [0-9]* image"` → 0, de 8 `REFUSE`).
+
+### Verificação
+
+```text
+$ grep -n "65 TEX" docs/PLAN-KITS-PY.md
+(sem saída, exit 1)
+$ grep -n "20 setores" docs/PLAN-KITS-PY.md
+(sem saída, exit 1)
+```
