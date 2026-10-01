@@ -104,3 +104,4 @@ kits_selftest: 0 failure(s)
     - `M tools/kits/core/api.py`
     - `M tools/kits/core/source.py`
     - `A tools/kits/core/teams.py`
+- **Reviewed** (2026-10-01) at `57f24928`: CORR-KITS-025, CORR-KITS-026

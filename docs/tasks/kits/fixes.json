@@ -313,6 +313,32 @@
       "depends_on": [],
       "done_on": "2026-10-01",
       "done_commit": "95031c9c"
+    },
+    {
+      "id": "CORR-KITS-025",
+      "file": "CORR-KITS-025.md",
+      "title": "Correct the club 63 empty in both fields claim in the task Notes",
+      "origin": "KITS-TASK-13",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-026",
+      "file": "CORR-KITS-026.md",
+      "title": "Correct why golden_tool exits 127 under Git Bash",
+      "origin": "KITS-TASK-13",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
