@@ -7,10 +7,10 @@ depends_on: [KITS-TASK-06]
 source_of_truth: "/docs/PLAN-KITS-PY.md#2.1"
 files: ["tools/kits/core/tex.py", "tools/kits/core/source.py", "tools/kits/core/api.py", "tools/kits/core/errors.py", "tools/kits/core/survey.py", "tools/kits/cli.py"]            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
-done_on: null
-done_commit: null
-reviewed_on: null
+status: done
+done_on: 2026-10-01
+done_commit: c1d3fc48
+reviewed_on: pending
 review_commit: null
 ---
 
@@ -110,3 +110,16 @@ $ python tools/kits/cli.py open --negative roms/japanese-shift-jis.bin | tail -1
 $ python tools/kits/cli.py survey --negative roms/japanese-shift-jis.bin | tail -1
 4 of 4 controls red
 ```
+- **Closed** — commit `c1d3fc48` (2026-10-01): feat(kits): read a TEX behind a guard of form, past a stale ISO size and a wrong Form 2 bit
+  - Files (`git show --name-status c1d3fc48`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/prompts/perfil-kits.md`
+    - `M docs/tasks/kits/07-tex-e-guarda-de-forma.md`
+    - `M docs/tasks/kits/33-aba-diagnostico.md`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/errors.py`
+    - `M tools/kits/core/source.py`
+    - `M tools/kits/core/survey.py`
+    - `A tools/kits/core/tex.py`
