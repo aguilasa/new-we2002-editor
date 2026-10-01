@@ -104,7 +104,10 @@ O **uniforme 2D** — a camisinha da tela de opções de partida, que não é TE
 este projeto não cobre — tem o seu próprio levantamento no
 [SUPERPACK-UNIFORMES-2D.md](/docs/SUPERPACK-UNIFORMES-2D.md): paletas em
 `SELECT2.BIN` (`OFS_KIT_PREVIEW`), 190 ponteiros de modelo, gráficos no
-`DATSEL.BIN`.
+`DATSEL.BIN`. O visualizador/editor dele é outro projeto, o
+[PLAN-KIT2D-PY.md](/docs/PLAN-KIT2D-PY.md), que importa daqui o reconhecimento
+de origem e os nomes de time (§3.3) — a KITS-TASK-12 e a KITS-TASK-13 passam a
+ter um segundo cliente.
 
 ## 2. A decisão: projeto novo, núcleo do `looks` por import
 

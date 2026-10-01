@@ -612,12 +612,16 @@ item da §8.
 
 - **Uma ferramenta versionada** com `--check` que reproduza os três snippets —
   paletas, tabela de ponteiros, os 56 streams e o casamento com os `.bmp`, a
-  paleta 7, o radar. Cabe no ciclo `kits` ou num ciclo próprio; não é deste doc.
+  paleta 7, o radar. É o `cli.py` do
+  [PLAN-KIT2D-PY.md](/docs/PLAN-KIT2D-PY.md) (§3.1 e fase 0 de lá).
 - **Para onde apontam os 190 ponteiros.** `0x800FB8AC..0x8010000C` é dentro do
   `SELECT2.BIN` carregado; a base de carga do overlay não foi medida, então o
   offset de arquivo de cada "modelo" e a estrutura dele (camisa, gola, calção,
   mangas, detalhes — os cinco campos que o polipoli infere) continuam por ler. O
-  `savestate.py` e o fork do DuckStation de `tools/pes2/` são o caminho.
+  `savestate.py` e o fork do DuckStation de `tools/pes2/` são o caminho. **A
+  §1.2 do [PLAN-KIT2D-PY.md](/docs/PLAN-KIT2D-PY.md) já deu o primeiro passo**:
+  base inferida `0x800CA930`, listas de registros de sprite de 10 bytes, e a
+  medição no emulador é a fase 0 daquele plano.
 - **O leiaute do `DATSEL.BIN`.** Cabeçalho de quatro ponteiros `0x8012xxxx`,
   registros no fim do arquivo com ponteiro no lugar do offset (`00 65 12 80` no
   lógico 223476 é um deles). O `bin_archive.py` não os lê; a §1.14 do
