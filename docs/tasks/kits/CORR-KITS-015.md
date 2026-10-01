@@ -5,10 +5,10 @@ origin: KITS-TASK-07
 severity: low
 files: []            # predicted paths/globs; batches build their conflict matrix from them
 resources: []        # serialized resources this item needs (rite.toml [resources] / profile)
-status: in-progress
+status: done
 depends_on: []
-done_on: null
-done_commit: null
+done_on: 2026-10-01
+done_commit: 5c544533
 ---
 
 # CORR-KITS-015 — Update NOTICE.md kits rows to name tex.py as the CARP importer
@@ -75,3 +75,7 @@ Linha do CARP na seção do `tools/kits/` do `NOTICE.md`: a rota passa a nomear 
 $ grep -c "tools/kits/core/tex.py" NOTICE.md
 1
 ```
+- **Closed** — commit `5c544533` (2026-10-01): docs(notice): name tex.py as the kits route to the CARP LZSS and BIN format
+  - Files (`git show --name-status 5c544533`):
+    - `M NOTICE.md`
+    - `M docs/tasks/kits/CORR-KITS-015.md`
