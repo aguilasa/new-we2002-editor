@@ -28,6 +28,7 @@ from .tex import (EXPECTED_SHAPE, NOTE_FORM2_TAIL, NOTE_PAST_ISO_SIZE,  # noqa: 
 from .tex import stream_control as _stream_control
 from .source import DiscControl  # noqa: F401
 from .source import disc_controls as _disc_controls
+from . import survey as measure  # noqa: F401  (the phase-0 probes, below)
 
 __all__ = (
     "open_source", "open_controls", "OpenControl",
@@ -38,7 +39,14 @@ __all__ = (
     "NOTE_PAST_ISO_SIZE", "NOTE_FORM2_TAIL",
     "stream_control", "StreamControl", "disc_controls", "DiscControl",
     "KitError", "KitMissing", "KitUnreadable", "KitRefused",
+    "measure",
 )
+
+# `measure` is the phase-0 measurement module as it is: survey, rects,
+# prims, uv and their negative controls (PLAN-KITS-PY.md sections 1.1, 4.3,
+# 4.4, 4.6).  It is reached through the facade so that the CLI imports
+# nothing else (CORR-KITS-018); giving it a contract of its own is not
+# what the probes are for.
 
 
 def open_source(path):

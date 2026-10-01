@@ -25,7 +25,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import api  # noqa: E402
-from core import survey as survey_mod  # noqa: E402
+
+survey_mod = api.measure
 
 SHORT_LIST = 5
 """A count this small or smaller is printed with its tags."""

@@ -130,6 +130,15 @@ CONTROLS = (
         "before CORR-KITS-017 the gate scanned only the kits imports and "
         "stayed green on it",
     ),
+    Control(
+        "cli-imports-survey", "kits/cli.py", "the imports",
+        "from core import api  # noqa: E402\n",
+        "from core import api  # noqa: E402\nfrom core import survey  # noqa: E402\n",
+        "FAIL  cli.py imports only core.api",
+        "section 3.1: the CLI is the second client of the facade and the proof it "
+        "is enough; before CORR-KITS-018 it imported core.survey and the gate "
+        "stayed green",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

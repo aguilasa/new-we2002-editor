@@ -298,10 +298,49 @@ def core_rule_breaks() -> list:
     return out
 
 
+FACADE_CLIENTS = ("cli.py",)
+"""Files of tools/kits that may import nothing of the core but `core.api`
+(section 3.1); the window's `ui/` joins them when it exists."""
+
+
+def facade_breaks() -> list:
+    """(file, line, module) for every import in FACADE_CLIENTS that is
+    neither the standard library nor `core.api`."""
+    import ast
+
+    out = []
+    for name in FACADE_CLIENTS:
+        path = os.path.join(KITS_DIR, name)
+        with open(path, encoding="utf-8") as fh:
+            tree = ast.parse(fh.read(), path)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                mods = [a.name for a in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                if node.level or node.module is None:
+                    mods = ["." * node.level + (node.module or "")]
+                elif node.module == "core":
+                    mods = ["core." + a.name for a in node.names]
+                else:
+                    mods = [node.module]
+            else:
+                continue
+            for mod in mods:
+                top = mod.split(".")[0]
+                if (mod == "core.api" or top == "__future__"
+                        or (top and top in sys.stdlib_module_names)):
+                    continue
+                out.append((name, node.lineno, mod))
+    return out
+
+
 def _rule_checks(c) -> None:
     breaks = c.attempt("sweep tools/kits/core", core_rule_breaks, default=None)
     c.ok("core/ has no print, exit, input or Qt (section 3.1)", breaks == [],
          "%s" % breaks)
+    breaks = c.attempt("sweep the facade clients", facade_breaks, default=None)
+    c.ok("cli.py imports only core.api and the standard library (section 3.1)",
+         breaks == [], "%s" % breaks)
 
 
 # -- 4. the negative controls ----------------------------------------------

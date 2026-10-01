@@ -46,3 +46,47 @@ $ grep -n "^from core import" tools/kits/cli.py | grep -v "import api"
 Hoje imprime a linha 28; depois, nada. `python tools/kits/controls.py` tem de mostrar o controle novo vermelho.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `201c7915`)
+
+```text
+$ grep -n "^from core" tools/kits/cli.py
+27:from core import api  # noqa: E402
+28:from core import survey as survey_mod  # noqa: E402
+$ env -u WE2002_LOOKS_IMAGE python tools/kits/selftest.py --quiet | grep rules
+rules self-check
+rules: 0 failure(s)
+```
+
+REPRODUCED (o `git log -L` da Evidência falhou só porque o `--scratch` rodou fora do repositório).
+
+### O que foi feito
+
+- `tools/kits/core/api.py`: `api.measure` é o módulo de medição da fase 0 (`survey`, `rects`, `prims`, `uv` e os controles deles), alcançado pela fachada e dito assim no comentário — dar contrato próprio às sondas não é o que elas são.
+- `tools/kits/cli.py`: sem `from core import survey`; `survey_mod = api.measure`, e o resto do arquivo não mudou.
+- `tools/kits/selftest.py`: `facade_breaks()` lê os imports do `cli.py` por `ast` (lista `FACADE_CLIENTS`, onde o `ui/` entra quando existir) e aceita só `core.api`, a biblioteca padrão e `__future__`; regra nova no `rules`.
+- `tools/kits/controls.py`: controle `cli-imports-survey`, que planta `from core import survey` no `cli.py`.
+
+### Verificação
+
+```text
+$ grep -n "^from core import" tools/kits/cli.py | grep -v "import api"
+(sem saída, exit 1)
+$ env -u WE2002_LOOKS_IMAGE python tools/kits/selftest.py --no-plant | grep "cli.py imports"
+  ok    cli.py imports only core.api and the standard library (section 3.1)
+```
+
+A regra contra o `cli.py` da HEAD de antes (`git show HEAD:tools/kits/cli.py` posto no lugar e devolvido):
+
+```text
+HEAD cli.py: [('cli.py', 28, 'core.survey')]
+now: []
+```
+
+```text
+$ python tools/kits/controls.py | tail -2
+  RED    cli-imports-survey           kits/cli.py :: the imports
+controls: 11 of 11 red
+```
+
+Saídas do CLI iguais: `survey | md5sum` → `c2ec025a808afd4ffbe4c39fca0d991a`; `uv` → `2360a921…48fb84`; `prims --negative` 14 de 14, `rects --negative` 1 de 1, `survey --negative` 4 de 4, `uv --negative` 11 de 11.
