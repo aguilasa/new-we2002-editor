@@ -13,6 +13,7 @@ Usage:
     python tools/kits/cli.py uv [--kit TAG] [--json | --negative] <image.bin>
     python tools/kits/cli.py open <path> [<path> ...]
     python tools/kits/cli.py tex [--tag TAG ...] [--iso-size] [--negative] <path>
+    python tools/kits/cli.py teams [--against <golden_tool names dump>] <image.bin>
     python tools/kits/cli.py info [--tag TAG ...] <path>
     python tools/kits/cli.py export --out DIR [--tag TAG ...] [--palette K] <path>
     python tools/kits/cli.py export --confront [--negative] [--tag TAG ...] <image.bin>
@@ -462,6 +463,52 @@ def cmd_tex(args) -> int:
     return 1 if refused else 0
 
 
+def _read_against(path: str) -> dict:
+    """{index: name} from a `we2002_golden_tool names` dump: tab-separated
+    index, mixed-case name, first all-caps name; other lines are ignored."""
+    out = {}
+    with open(path, "rb") as fh:
+        for line in fh.read().decode("latin-1").splitlines():
+            parts = line.split("\t")
+            if len(parts) == 3 and parts[0].isdigit():
+                out[int(parts[0])] = parts[1]
+    return out
+
+
+def cmd_teams(args) -> int:
+    """The team list of a disc: index, where the name came from, the name.
+    With --against, each name is compared with what we2002_core read."""
+    try:
+        source = api.open_source(args.path)
+        if source.kind != api.KIND_ROM:
+            print("teams: %s is a lone TEX; only a disc has teams" % args.path, file=sys.stderr)
+            return 2
+        teams = source.teams()
+    except api.KitsError as exc:
+        print("teams: %s" % exc, file=sys.stderr)
+        return 1
+    for t in teams:
+        print("%3d  %-8s %-5s %s" % (t.index, t.group, t.name_origin, t.name))
+    origins = {}
+    for t in teams:
+        origins[t.name_origin] = origins.get(t.name_origin, 0) + 1
+    empty = [t.index for t in teams if not t.name.strip()]
+    tagged = [t.index for t in teams if t.tag is not None]
+    print("%d teams: %s; %d empty name(s)%s; %d with a kit tag"
+          % (len(teams), ", ".join("%d %s" % (n, o) for o, n in sorted(origins.items())),
+             len(empty), " %s" % empty if empty else "", len(tagged)))
+    if not args.against:
+        return 1 if empty else 0
+    core = _read_against(args.against)
+    rom = [t for t in teams if t.name_origin == api.ORIGIN_ROM]
+    differ = [(t.index, t.name, core.get(t.index)) for t in rom if core.get(t.index) != t.name]
+    for index, ours, theirs in differ:
+        print("  DIFFER %3d: %r here, %r in we2002_core" % (index, ours, theirs))
+    print("against we2002_core: %d of %d ROM names equal (%d lines in %s)"
+          % (len(rom) - len(differ), len(rom), len(core), os.path.basename(args.against)))
+    return 1 if differ or not rom or empty else 0
+
+
 def cmd_info(args) -> int:
     """What a source is, and with --tag (or a lone TEX) what one kit holds."""
     try:
@@ -748,6 +795,11 @@ def main(argv=None) -> int:
                    help="change one byte of record 0's LZSS stream in the first sound kit "
                         "and check it is refused")
     p.set_defaults(fn=cmd_tex)
+    p = sub.add_parser("teams", help="the 95 teams of a disc, with where each name came from")
+    p.add_argument("path", help="a disc image or a cue sheet")
+    p.add_argument("--against", metavar="TSV",
+                   help="compare the ROM names with `we2002_golden_tool names <image>` output")
+    p.set_defaults(fn=cmd_teams)
     p = sub.add_parser("info", help="what a source is, and what a kit of it holds")
     p.add_argument("path", help="a disc image, a cue sheet or a lone TEX")
     p.add_argument("--tag", action="append", help="describe this kit (repeatable; disc only)")

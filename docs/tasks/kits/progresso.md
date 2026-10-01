@@ -90,7 +90,7 @@ graph TD
 | [KITS-TASK-10](/docs/tasks/kits/10-confronto-2-superpack.md) | Confronto 2: os pares `_BND.bin`/`_BND.tim` do Superpack | 1 | verificação | KITS-TASK-08 | done | 2026-10-01 | 2026-10-01 |
 | [KITS-TASK-11](/docs/tasks/kits/11-fechamento-fase-1.md) | Fechamento da fase 1 — núcleo, lado TEX | 1 | closing | KITS-TASK-06, KITS-TASK-07, KITS-TASK-08, KITS-TASK-09, KITS-TASK-10 | done | 2026-10-01 | 2026-10-01 |
 | [KITS-TASK-12](/docs/tasks/kits/12-gerador-de-nomes.md) | Gerador de `generated/` a partir do C++, com `--check` no ctest | 2 | ferramenta | KITS-TASK-11 | done | 2026-10-01 | 2026-10-01 |
-| [KITS-TASK-13](/docs/tasks/kits/13-nomes-dos-times.md) | `teams.py` e `cli.py teams`: nome da ROM ou tabela inglesa, decidido pelo disco | 2 | implementação | KITS-TASK-12 | pending | — | — |
+| [KITS-TASK-13](/docs/tasks/kits/13-nomes-dos-times.md) | `teams.py` e `cli.py teams`: nome da ROM ou tabela inglesa, decidido pelo disco | 2 | implementação | KITS-TASK-12 | in-progress | — | — |
 | [KITS-TASK-14](/docs/tasks/kits/14-fechamento-fase-2.md) | Fechamento da fase 2 — núcleo, lado ROM | 2 | closing | KITS-TASK-12, KITS-TASK-13 | pending | — | — |
 | [KITS-TASK-15](/docs/tasks/kits/15-flat.md) | `flat.py`: imagem + paleta em RGBA, o bitmap de trabalho e a grade 16×16 | 3 | implementação | KITS-TASK-11 | pending | — | — |
 | [KITS-TASK-16](/docs/tasks/kits/16-zonas.md) | `zones.py` com proveniência, e a §4.6 fechada contra a geometria | 3 | verificação | KITS-TASK-15, KITS-TASK-04 | pending | — | — |

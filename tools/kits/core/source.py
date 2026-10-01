@@ -30,7 +30,7 @@ import struct
 from dataclasses import dataclass
 from typing import Optional
 
-from . import survey, tex
+from . import survey, teams, tex
 from .errors import (KitMissing, KitUnreadable, NotASource, SourceEmpty,
                      SourceMissing, SourceUnreadable)
 
@@ -72,6 +72,19 @@ class RomSource:
     def kit_tags(self) -> tuple:
         """The tags of every kit container on the disc, sorted."""
         return self.tags
+
+    def teams(self) -> tuple:
+        """The 95 `teams.TeamEntry` of the disc: the English table on the
+        Japanese release, the ROM's mixed-case names on any other."""
+        try:
+            image = iso.Image(self.image_path)
+        except OSError as exc:
+            raise SourceUnreadable("Could not read %s: %s"
+                                   % (self.image_path, exc.strerror or exc)) from exc
+        try:
+            return teams.read_teams(self.image_path, image)
+        finally:
+            image.close()
 
     def kit(self, tag: str, trust_iso_size: bool = False) -> tex.Kit:
         """The kit container *tag*, read behind the guard of form.

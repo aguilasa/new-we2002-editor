@@ -8,6 +8,7 @@ build it.
     source = api.open_source(path)   # disc image (.bin/.iso/.cue) or lone TEX
     source.kind                      # "rom" or "tex", decided by content
     source.kit_tags()                # rom only: the TEX tags on the disc
+    source.teams()                   # rom only: 95 TeamEntry(index, name, name_origin, tag)
     kit = source.kit(tag)            # rom: by tag; lone TEX: the file itself
     kit.problems                     # the guard of form, one sentence per record
     kit.notes                        # how it was read, when not plainly (api.Note)
@@ -28,6 +29,7 @@ from .tex import (EXPECTED_SHAPE, IMAGE_RECORDS, NOTE_FORM2_TAIL,  # noqa: F401
                   Note, Palette, StreamControl)
 from .tex import stream_control as _stream_control
 from .tex import decompress_stream as _decompress_stream
+from .teams import ORIGIN_ROM, ORIGIN_TABLE, TeamEntry  # noqa: F401
 from .source import DiscControl  # noqa: F401
 from .source import disc_controls as _disc_controls
 from . import survey as measure  # noqa: F401  (the phase-0 probes, below)
@@ -44,6 +46,7 @@ __all__ = (
     "measure", "survey_image", "Survey", "SurveyError",
     "IMAGE_RECORDS", "PALETTE_RECORDS", "IMAGE_COUNT", "PALETTE_COUNT",
     "decompress_stream", "StreamError",
+    "TeamEntry", "ORIGIN_TABLE", "ORIGIN_ROM",
 )
 
 IMAGE_COUNT = len(IMAGE_RECORDS)

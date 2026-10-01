@@ -28,7 +28,7 @@ void PrintReport(const std::string& message) {
 }
 
 int Usage() {
-    std::cerr << "usage: golden_tool <roundtrip|digest> <image.bin>\n";
+    std::cerr << "usage: golden_tool <roundtrip|digest|names> <image.bin>\n";
     return 2;
 }
 
@@ -98,6 +98,26 @@ int Roundtrip(const std::filesystem::path& image) {
     return 0;
 }
 
+// Every team's name slots as Database::Load read them, one line per team
+// index in the order of the original editor's team combobox (nations,
+// all-stars, Master League): index, mixed-case name, first all-caps name.
+// tools/kits/cli.py teams is checked against this (KITS-TASK-13).
+int Names(const std::filesystem::path& image) {
+    we2002::Database db;
+    if (!db.Load(image, PrintReport)) {
+        std::cerr << "golden_tool: cannot load " << image << "\n";
+        return 1;
+    }
+    // teams[] has one slot more than there are teams (the 64th of
+    // TEAMS_NATIONAL_ALLSTAR_SLOTS); only the 63 the editor lists are printed.
+    int index = 0;
+    for (int i = 0; i < we2002::TEAMS_NATIONAL_ALLSTAR; ++i)
+        std::printf("%d\t%s\t%s\n", index++, db.teams[i].mixed_case_name, db.teams[i].names[0]);
+    for (const auto& t : db.ml_teams)
+        std::printf("%d\t%s\t%s\n", index++, t.mixed_case_name, t.names[0]);
+    return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -108,5 +128,6 @@ int main(int argc, char** argv) {
 
     if (verb == "roundtrip") return Roundtrip(image);
     if (verb == "digest") return Digest(image);
+    if (verb == "names") return Names(image);
     return Usage();
 }
