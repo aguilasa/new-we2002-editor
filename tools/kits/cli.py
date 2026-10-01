@@ -565,11 +565,16 @@ def read_png(path: str) -> tuple:
     return width, height, b"".join(rows), palette
 
 
-def export_kit(kit, stem: str, out: str, palette: int, plant=None) -> int:
+def export_kit(kit, stem: str, out: str, palette: int, plant=None, colour_plant=None) -> int:
     """Every image of *kit* as `<stem>_<i>.png`, painted with palette number
     *palette* (0..4, file order) -- bin_archive's naming and its --clut.
-    *plant* = (image number, pixel) adds 1 to that index first: the control."""
+    *plant* = (image number, pixel) adds 1 to that index first: the control.
+    *colour_plant* = (palette number, colour) flips the low bit of that
+    colour's red when *palette* is that one: the palette control."""
     colours = bgr555_rgba(kit.palettes[palette].raw)
+    if colour_plant is not None and colour_plant[0] == palette:
+        r, g, b, a = colours[colour_plant[1]]
+        colours[colour_plant[1]] = (r ^ 1, g, b, a)
     for i, im in enumerate(kit.images):
         indices = im.indices
         if plant is not None and plant[0] == i:
@@ -609,6 +614,11 @@ def cmd_export(args) -> int:
 CONTROL_PIXEL = (0, 4096)
 """The pixel --negative changes on our side: image 0, index 4096 (row 32)."""
 
+CONTROL_COLOUR = (0, 1)
+"""The colour --negative changes on our side, on a second kit: palette 0,
+colour 1, the low bit of its red.  The indices stay equal, so only the
+palette comparison can see it (CORR-KITS-021)."""
+
 
 def confront(image_path: str, tags, negative: bool) -> int:
     """Confront 1: our export against `bin_archive.py export`, for every
@@ -626,6 +636,7 @@ def confront(image_path: str, tags, negative: bool) -> int:
     kits = [(name, k) for name, k in _kits_of(source, tags)
             if not isinstance(k, Exception) and k.ok]
     plant_tag = kits[0][0] if (negative and kits) else None
+    colour_tag = kits[1][0] if (negative and len(kits) > 1) else None
     differ = {}
     with tempfile.TemporaryDirectory(prefix="kits-confront-") as tmp:
         for k in range(api.PALETTE_COUNT):
@@ -633,7 +644,8 @@ def confront(image_path: str, tags, negative: bool) -> int:
             os.makedirs(ours)
             for name, kit in kits:
                 export_kit(kit, name, ours, k,
-                           CONTROL_PIXEL if name == plant_tag else None)
+                           CONTROL_PIXEL if name == plant_tag else None,
+                           CONTROL_COLOUR if name == colour_tag else None)
             proc = subprocess.run([sys.executable, BIN_ARCHIVE, "export", source.image_path,
                                    "--clut", str(k), "--out", theirs],
                                   capture_output=True, text=True,
@@ -671,9 +683,15 @@ def confront(image_path: str, tags, negative: bool) -> int:
           "tex.py against bin_archive.py export" % (same, len(kits), api.IMAGE_COUNT,
                                                    api.PALETTE_COUNT))
     if negative:
-        held = plant_tag is not None and list(differ) == [plant_tag]
-        print("control: %s image 0 pixel %d +1 on our side -- %s"
-              % (plant_tag, CONTROL_PIXEL[1], "red, held" if held else "FAILED"))
+        pixel = plant_tag is not None and plant_tag in differ
+        colour = (colour_tag is not None and colour_tag in differ
+                  and all(line.endswith("palette %d: palettes differ" % CONTROL_COLOUR[0])
+                          for line in differ[colour_tag]))
+        held = pixel and colour and sorted(differ) == sorted((plant_tag, colour_tag))
+        print("control: %s image 0 pixel %d +1, and %s palette %d colour %d red ^1, "
+              "on our side -- %s"
+              % (plant_tag, CONTROL_PIXEL[1], colour_tag, CONTROL_COLOUR[0],
+                 CONTROL_COLOUR[1], "red, held" if held else "FAILED"))
         return 0 if held else 1
     return 0 if not differ and kits else 1
 

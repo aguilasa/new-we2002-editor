@@ -53,3 +53,44 @@ $ python tools/kits/cli.py export --confront --negative roms/japanese-shift-jis.
 Hoje imprime 0; depois, pelo menos 1, com a linha do controle continuando "red, held".
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `d722ca1a`)
+
+```text
+$ python tools/kits/cli.py export --confront --negative roms/japanese-shift-jis.bin | grep -c "palettes differ"
+0
+```
+
+REPRODUCED. Causa raiz confirmada: o único plantio (`CONTROL_PIXEL`) muda índice, e o ramo `pa != pb` do `confront()` só é alcançado quando os índices batem.
+
+### O que foi feito
+
+- `tools/kits/cli.py`: `export_kit(..., colour_plant=)` troca o bit baixo do vermelho de uma cor depois da conversão BGR555; `CONTROL_COLOUR = (0, 1)` (paleta 0, cor 1). O `--negative` do confronto planta o pixel no 1º kit, como antes, e a cor no 2º; o controle só fica "red, held" se os dois diferirem, nada mais, e o 2º apenas por "palette 0: palettes differ".
+- `tools/kits/selftest.py`, `_confront_checks`: exige `n_kits - 2` de `n_kits` iguais, "red, held" e "palettes differ".
+- KITS-TASK-09: o vermelho novo colado no Log.
+
+### Verificação
+
+```text
+$ python tools/kits/cli.py export --confront --negative roms/japanese-shift-jis.bin | grep -c "palettes differ"; echo "exit ${PIPESTATUS[0]}"
+6
+exit 0
+$ python tools/kits/cli.py export --confront --negative roms/japanese-shift-jis.bin | tail -2
+confront 1: 103 of 105 tags equal (6 images x 5 palettes each), tex.py against bin_archive.py export
+control: TEX_00 image 0 pixel 4096 +1, and TEX_01 palette 0 colour 1 red ^1, on our side -- red, held
+$ python tools/kits/cli.py export --confront roms/japanese-shift-jis.bin | tail -1
+confront 1: 105 of 105 tags equal (6 images x 5 palettes each), tex.py against bin_archive.py export
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python tools/kits/selftest.py --image | grep -E "confront|kits_image"
+  ok    confront 1: every kit equal to bin_archive.py export
+  ..... confront 1: 105 of 105 tags equal
+  ok    confront 1 control: one pixel and one palette colour changed on our side make two tags differ, the second by its palette
+kits_image: 0 failure(s)
+```
+
+O controle visto falhando — com um kit só não há onde plantar a cor:
+
+```text
+$ python tools/kits/cli.py export --confront --negative --tag 00 roms/japanese-shift-jis.bin | tail -1; echo "exit ${PIPESTATUS[0]}"
+control: TEX_00 image 0 pixel 4096 +1, and None palette 0 colour 1 red ^1, on our side -- FAILED
+exit 1
+```

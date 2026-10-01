@@ -105,6 +105,25 @@ $ WE2002_LOOKS_IMAGE=.../roms/japanese-shift-jis.bin ctest -R kits -V
 15: kits_image: 0 failure(s)
 2/2 Test #15: kits_image .......................   Passed   49.45 sec
 ```
+O controle do confronto 1 ganhou a metade da paleta pela [CORR-KITS-021](/docs/tasks/kits/CORR-KITS-021.md): além do pixel no primeiro kit, o `--negative` troca o bit baixo do vermelho da cor 1 da paleta 0 num segundo kit, que tem de diferir **só** por "palettes differ" — os índices ficam iguais, então só a comparação de paleta o vê. Saída inteira:
+
+```
+$ python tools/kits/cli.py export --confront --negative roms/japanese-shift-jis.bin      # exit 0
+  DIFFER TEX_00_00.png palette 0: 1 pixel(s) differ, first at 4096 (0,32)
+  DIFFER TEX_00_00.png palette 1: 1 pixel(s) differ, first at 4096 (0,32)
+  DIFFER TEX_00_00.png palette 2: 1 pixel(s) differ, first at 4096 (0,32)
+  DIFFER TEX_00_00.png palette 3: 1 pixel(s) differ, first at 4096 (0,32)
+  DIFFER TEX_00_00.png palette 4: 1 pixel(s) differ, first at 4096 (0,32)
+  DIFFER TEX_01_00.png palette 0: palettes differ
+  DIFFER TEX_01_01.png palette 0: palettes differ
+  DIFFER TEX_01_02.png palette 0: palettes differ
+  DIFFER TEX_01_03.png palette 0: palettes differ
+  DIFFER TEX_01_04.png palette 0: palettes differ
+  DIFFER TEX_01_05.png palette 0: palettes differ
+confront 1: 103 of 105 tags equal (6 images x 5 palettes each), tex.py against bin_archive.py export
+control: TEX_00 image 0 pixel 4096 +1, and TEX_01 palette 0 colour 1 red ^1, on our side -- red, held
+```
+
 - **Closed** — commit `7b1143ef` (2026-10-01): feat(kits): add cli.py info/export and confront 1 against bin_archive.py export
   - Files (`git show --name-status 7b1143ef`):
     - `M docs/PLAN-KITS-PY.md`

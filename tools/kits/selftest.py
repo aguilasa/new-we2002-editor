@@ -434,9 +434,10 @@ def _confront_checks(c, image_path, n_kits) -> None:
                  "exit %d, %s" % (proc.returncode, got))
             print("  ..... confront 1: %s of %s tags equal" % (got or ("?", "?")))
         else:
-            c.ok("confront 1 control: one pixel changed on our side makes one tag differ",
-                 proc.returncode == 0 and got == (n_kits - 1, n_kits)
-                 and "red, held" in proc.stdout,
+            c.ok("confront 1 control: one pixel and one palette colour changed on our "
+                 "side make two tags differ, the second by its palette",
+                 proc.returncode == 0 and got == (n_kits - 2, n_kits)
+                 and "red, held" in proc.stdout and "palettes differ" in proc.stdout,
                  "exit %d, %s" % (proc.returncode, got))
 
 
