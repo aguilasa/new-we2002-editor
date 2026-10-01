@@ -44,3 +44,34 @@ $ grep -n "clube 63 vem vazio" docs/tasks/kits/13-nomes-dos-times.md
 Hoje imprime a linha 34; depois do conserto, nada.
 
 ## Log de Execução
+
+### Reprodução (HEAD `eee0e6fd`)
+
+O `rite reproduce` rodou o `golden_tool` com o `PATH` de placeholder da Evidência e ele não imprimiu nada (`total: 0`); refeito com o `bin` do MinGW no `PATH` (`$M` = `.../BrechtSanders.WinLibs.POSIX.UCRT_.../mingw64/bin`):
+
+```text
+$ PATH="$M:$PATH" $TEMP/build-kits08/tests/we2002_golden_tool.exe names roms/japanese-shift-jis.bin > jp.tsv; echo exit $?
+exit 0
+$ awk -F'\t' '$2=="" || $3=="" {n++} END{print "empty-field lines:", n+0, "total:", NR}' jp.tsv
+empty-field lines: 0 total: 95
+$ sed -n 64p jp.tsv | od -c | head -1
+0000000   6   3  \t 261 327 272 336 335  \t   A   R   A   G   O   N  \n
+```
+
+REPRODUCED: nenhum campo vazio, e o 63 é `ARAGON`.
+
+### O que foi feito
+
+Notas da KITS-TASK-13, "Por que a tabela no japonês": a cláusula do clube 63 saiu, e no lugar ficou o que a mesma corrida mede — 0 dos 95 nomes em caixa mista são só ASCII, nenhum campo vazio —, com a nota do que a frase dizia antes e de onde veio.
+
+```text
+$ python -c "...rows=[l.split('\t') for l in jp.tsv]; print(len(rows), sum(all(ord(c)<128 for c in r[1]) for r in rows), sum(r[1]=='' for r in rows))"
+rows 95 col2 ascii-only 0 col2 empty 0
+```
+
+### Verificação
+
+```text
+$ grep -n "clube 63 vem vazio" docs/tasks/kits/13-nomes-dos-times.md
+(sem saída, exit 1)
+```
