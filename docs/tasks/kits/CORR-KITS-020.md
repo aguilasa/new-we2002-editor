@@ -71,3 +71,7 @@ $ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python tools/kits/selftest.py -
 kits_image: 0 failure(s)
 0
 ```
+- **Closed** — commit `a9b57017` (2026-10-01): fix(kits): fail kits_image when WE2002_LOOKS_IMAGE points at no file
+  - Files (`git show --name-status a9b57017`):
+    - `M docs/tasks/kits/CORR-KITS-020.md`
+    - `M tools/kits/selftest.py`
