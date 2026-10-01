@@ -100,6 +100,12 @@ estão no [SUPERPACK-UNIFORMES.md](/docs/SUPERPACK-UNIFORMES.md) §1.3 e §2. É
 fonte do mapa de zonas deste projeto, com a proveniência dita: **comunidade,
 medido no PNG do polipoli**, até a fase 3 conferi-lo contra a geometria.
 
+O **uniforme 2D** — a camisinha da tela de opções de partida, que não é TEX e
+este projeto não cobre — tem o seu próprio levantamento no
+[SUPERPACK-UNIFORMES-2D.md](/docs/SUPERPACK-UNIFORMES-2D.md): paletas em
+`SELECT2.BIN` (`OFS_KIT_PREVIEW`), 190 ponteiros de modelo, gráficos no
+`DATSEL.BIN`.
+
 ## 2. A decisão: projeto novo, núcleo do `looks` por import
 
 **Recomendação: `tools/kits/`, projeto próprio, que importa o núcleo do

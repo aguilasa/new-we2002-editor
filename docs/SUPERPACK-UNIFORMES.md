@@ -475,7 +475,9 @@ modelo, posição de número); servem só para achar a cor do número.
 
 - O port **não edita TEX**. O `FlagKitDialog` (ex-`graf.cpp`) mexe nas paletas
   de 16 cores da **camisa 2D** e da **bandeira 2D** — o "uniforme 2D" do §8a da
-  Bíblia —, não no uniforme 3D.
+  Bíblia —, não no uniforme 3D. Onde o 2D mora no disco (`SELECT2.BIN`,
+  `DATSEL.BIN`, `DAT2D.BIN`) e o que a pasta `Uniformes 2D` do Superpack sabe
+  dele está no [SUPERPACK-UNIFORMES-2D.md](/docs/SUPERPACK-UNIFORMES-2D.md).
 - O `tools/looks/` **lê** os TEX para vestir o boneco da tela `LOOKS SET`, e o
   `oracle.py --kit` mede que a tela dos states usa o `TEX_A4`. As regras deste
   documento sobre as duas paletas por imagem e a paleta da bandeira respondem,
