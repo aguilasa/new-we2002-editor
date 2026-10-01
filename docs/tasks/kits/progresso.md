@@ -86,7 +86,7 @@ graph TD
 | [KITS-TASK-06](/docs/tasks/kits/06-fachada-e-origem.md) | Criar a fachada `api.py` e o `source.py` que reconhece ROM ou TEX pelo conteúdo | 1 | implementação | KITS-TASK-05 | done | 2026-09-30 | 2026-10-01 |
 | [KITS-TASK-07](/docs/tasks/kits/07-tex-e-guarda-de-forma.md) | Ler o TEX com guarda de forma e a cauda marcada Form 2 no leiaute Form 1 | 1 | implementação | KITS-TASK-06 | done | 2026-10-01 | 2026-10-01 |
 | [KITS-TASK-08](/docs/tasks/kits/08-selftest-e-ctest.md) | Criar selftest, controles negativos e os alvos `kits_selftest` e `kits_image` | 1 | infra | KITS-TASK-07 | done | 2026-10-01 | 2026-10-01 |
-| [KITS-TASK-09](/docs/tasks/kits/09-cli-e-confronto-1.md) | `cli.py info/export` e o confronto 1: `tex.py` contra `bin_archive.py export` | 1 | verificação | KITS-TASK-08 | in-progress | — | — |
+| [KITS-TASK-09](/docs/tasks/kits/09-cli-e-confronto-1.md) | `cli.py info/export` e o confronto 1: `tex.py` contra `bin_archive.py export` | 1 | verificação | KITS-TASK-08 | done | 2026-10-01 | pending |
 | [KITS-TASK-10](/docs/tasks/kits/10-confronto-2-superpack.md) | Confronto 2: os pares `_BND.bin`/`_BND.tim` do Superpack | 1 | verificação | KITS-TASK-08 | pending | — | — |
 | [KITS-TASK-11](/docs/tasks/kits/11-fechamento-fase-1.md) | Fechamento da fase 1 — núcleo, lado TEX | 1 | closing | KITS-TASK-06, KITS-TASK-07, KITS-TASK-08, KITS-TASK-09, KITS-TASK-10 | pending | — | — |
 | [KITS-TASK-12](/docs/tasks/kits/12-gerador-de-nomes.md) | Gerador de `generated/` a partir do C++, com `--check` no ctest | 2 | ferramenta | KITS-TASK-11 | pending | — | — |

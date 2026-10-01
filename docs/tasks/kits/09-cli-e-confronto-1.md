@@ -105,3 +105,14 @@ $ WE2002_LOOKS_IMAGE=.../roms/japanese-shift-jis.bin ctest -R kits -V
 15: kits_image: 0 failure(s)
 2/2 Test #15: kits_image .......................   Passed   49.45 sec
 ```
+- **Closed** — commit `7b1143ef` (2026-10-01): feat(kits): add cli.py info/export and confront 1 against bin_archive.py export
+  - Files (`git show --name-status 7b1143ef`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/09-cli-e-confronto-1.md`
+    - `M docs/tasks/kits/11-fechamento-fase-1.md`
+    - `M docs/tasks/kits/15-flat.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/selftest.py`
