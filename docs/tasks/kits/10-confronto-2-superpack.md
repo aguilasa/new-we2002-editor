@@ -92,3 +92,17 @@ kits_selftest: 0 failure(s)
 ```
 
 Um vermelho errado visto no caminho: a linha da regra da fachada passou a nomear `cli.py and confront.py`, e o controle `cli-imports-survey`, que procurava `FAIL  cli.py imports only core.api`, saiu `GREEN` (`10 of 11 controls red`). O `expect` dele foi atualizado.
+- **Closed** — commit `c05f012b` (2026-10-01): feat(kits): add confront 2, the community's 3D flag pairs as an outside oracle
+  - Files (`git show --name-status c05f012b`):
+    - `M NOTICE.md`
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/10-confronto-2-superpack.md`
+    - `M docs/tasks/kits/28-confronto-3.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `A tools/kits/confront.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/errors.py`
+    - `M tools/kits/core/tex.py`
+    - `M tools/kits/selftest.py`

@@ -160,10 +160,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#5",
       "files": ["tools/kits/confront.py", "tools/kits/selftest.py", "tools/kits/controls.py", "tools/kits/core/api.py", "tools/kits/core/tex.py", "tools/kits/core/errors.py", "NOTICE.md", "docs/PLAN-KITS-PY.md"],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-01",
+      "done_commit": "c05f012b",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
