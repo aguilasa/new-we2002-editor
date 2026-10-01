@@ -57,13 +57,18 @@ $ WE2002_LOOKS_IMAGE=C:/github/new-we2002-editor/roms/japanese-shift-jis.bin cte
 15:   ..... 105 of 105 kits pass the guard
 ```
 
-O `kits_image` visto vermelho, apontado para a European Deluxe (os 8 recusados do §2.1):
+O `kits_image` visto vermelho, apontado para a European Deluxe (os 8 recusados do §2.1). Retranscrito inteiro pela [CORR-KITS-019](/docs/tasks/kits/CORR-KITS-019.md): o trecho que estava aqui mostrava uma linha FAIL só, e a corrida tinha **três** — as outras duas eram as fixtures de reconhecimento, que liam o `TEX_00` por `iso.Image.read_file` e quebravam com `Form2Sector: sector 8415 is Form 2` nesse disco. Corrigida a leitura (`read_disc_file`, como o resto do `source.py`), a única causa do vermelho é a guarda:
 
 ```
-$ WE2002_LOOKS_IMAGE=.../roms/golden-european-deluxe.bin ctest -R kits_image -V
-15:   FAIL  every kit passes the guard of form  ['/BIN/TEX_03.BIN on ...', ...]
-15:   ..... 97 of 105 kits pass the guard
-1/1 Test #15: kits_image .......................***Failed    1.26 sec
+$ WE2002_LOOKS_IMAGE=roms/golden-european-deluxe.bin python tools/kits/selftest.py --image      # exit 1
+kits_image self-check
+  ok    it opens as a disc
+  ok    it has kit containers
+  FAIL  every kit passes the guard of form  ['/BIN/TEX_03.BIN on roms/golden-european-deluxe.bin', '/BIN/TEX_06.BIN on roms/golden-european-deluxe.bin', '/BIN/TEX_28.BIN on roms/golden-european-deluxe.bin', '/BIN/TEX_48.BIN on roms/golden-european-deluxe.bin', '/BIN/TEX_70.BIN on roms/golden-european-deluxe.bin', '/BIN/TEX_84.BIN on roms/golden-european-deluxe.bin', '/BIN/TEX_92.BIN on roms/golden-european-deluxe.bin', '/BIN/TEX_A2.BIN on roms/golden-european-deluxe.bin']
+  ..... 97 of 105 kits pass the guard
+  ok    section 5 control 4 on /BIN/TEX_00.BIN on roms/golden-european-deluxe.bin
+  ok    every recognition fixture gives what it has to
+kits_image: 1 failure(s)
 ```
 
 Os self-checks do `looks`, dentro do `kits_selftest` (`ctest -R kits_selftest -V`):

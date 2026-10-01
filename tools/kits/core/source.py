@@ -378,7 +378,7 @@ def build_open_fixtures(image_path: str, folder: str) -> tuple:
     kit_path = survey.layout.kit_path(CONTROL_KIT_TAG)
     image = iso.Image(image_path)
     try:
-        kit_bytes = image.read_file(kit_path)
+        kit_bytes, _ = read_disc_file(image, kit_path)   # the Form 2 bit and ISO size it fixes
     finally:
         image.close()
     first = bin_archive.entries(kit_bytes)[0]

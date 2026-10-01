@@ -43,3 +43,36 @@ $ python tools/kits/cli.py open --negative roms/golden-european-deluxe.bin
 Hoje levanta `Form2Sector`; depois tem de terminar sem traceback.
 
 ## Log de Execução
+
+### Reprodução (HEAD `201c7915`)
+
+O `rite reproduce --scratch` rodou fora da árvore e não achou `roms/`; refeita no repositório:
+
+```text
+$ python tools/kits/cli.py open --negative roms/golden-european-deluxe.bin
+  ...
+  File "C:\github\new-we2002-editor\tools\kits\core\source.py", line 381, in build_open_fixtures
+    kit_bytes = image.read_file(kit_path)
+  ...
+iso.Form2Sector: sector 8415 is Form 2; it has no 2048-byte area
+exit 1
+```
+
+REPRODUCED. Causa raiz confirmada pelo traceback: `build_open_fixtures` lia o `TEX_00` por `iso.Image.read_file`, que recusa setor marcado Form 2; o resto do `source.py` lê por `read_disc_file`, que sabe do bit errado da European Deluxe.
+
+### O que foi feito
+
+- `tools/kits/core/source.py`, `build_open_fixtures`: o `TEX_00` sai de `read_disc_file(image, kit_path)`. Na ED o kit tem 32.496 bytes (lido até o fim que o cabeçalho declara) e o registro 0 está em 6484; o byte da tag é achado da lista, então segue certo sem mudar nada além da leitura.
+- KITS-TASK-08: o vermelho da ED retranscrito inteiro, com a nota das duas linhas FAIL que sumiram e por quê.
+
+### Verificação
+
+```text
+$ python tools/kits/cli.py open --negative roms/golden-european-deluxe.bin | tail -1; echo "exit ${PIPESTATUS[0]}"
+11 of 11 expectations held
+exit 0
+$ python tools/kits/cli.py open --negative roms/japanese-shift-jis.bin | tail -1
+11 of 11 expectations held
+$ WE2002_LOOKS_IMAGE=roms/golden-european-deluxe.bin python tools/kits/selftest.py --image | grep -c FAIL
+1
+```
