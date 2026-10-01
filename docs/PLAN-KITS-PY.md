@@ -223,7 +223,11 @@ Os módulos atrás da fachada:
 
 A **CLI** (`tools/kits/cli.py`: `info`, `teams`, `export`, `check`) é o segundo
 cliente da fachada e a prova de que ela basta: se a CLI precisar importar algo
-além de `api`, a fachada está incompleta.
+além de `api`, a fachada está incompleta. Ao lado desses quatro ela tem `open`,
+o que a fachada faz de cada arquivo (§3.2; `open --negative` monta as fixtures e
+confere cada recusa), entrado na KITS-TASK-06 para a evidência sair de comando
+versionado, e as sondas de medição da fase 0 (`survey`, `rects`, `prims`, `uv`)
+([CORR-KITS-012](/docs/tasks/kits/CORR-KITS-012.md)).
 
 Endereço só em um módulo, como no `looks` (regra 1 dele): os offsets de nome de
 time moram no `generated/`, o resto de endereço no `layout.py` do `looks`.
