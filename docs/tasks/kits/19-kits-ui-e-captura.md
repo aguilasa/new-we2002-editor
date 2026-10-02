@@ -94,6 +94,7 @@ O critério 3 — a metade do Windows, e o comando contra si mesmo e contra outr
 ```
 $ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png
   wrote work/kits-ui-windows.png, 980x640                  # sha256 e973a8aa5991a7ff…
+  …                                                          # as outras duas linhas da saída não foram coladas
 $ python tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-windows.png | tail -1
 0 of 627200 pixels differ (0.00 %)
 $ python tools/kits/ui_check.py --compare work/kits-ui-windows.png <o mesmo com --tag A4> | tail -1
@@ -120,6 +121,7 @@ e973a8aa5991a7ff258ae482ea199b054ad7f0d4338c918a79ca38830f80d288
 $ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin \
     --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png
   wrote work/kits-ui-linux.png, 980x640
+  TEX_00 · imagem bitmap de trabalho, 1º conjunto · paleta player palette, first set · /BIN/TEX_00.BIN on roms/japanese-shift-jis.bin, 29944 bytes
   window up, at -32000,-32000
 $ python3 tools/kits/ui_check.py --compare \
     /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png
