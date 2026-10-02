@@ -45,3 +45,31 @@ $ sed -n 468,476p docs/PLAN-KITS-PY.md | grep -c "números"
 Hoje dá 0; depois, pelo menos 1.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `eaeb6838`)
+
+```text
+$ sed -n 468,476p docs/PLAN-KITS-PY.md | grep -c "números"
+0
+$ python tools/kits/cli.py zones roms/japanese-shift-jis.bin | grep -A1 "1 zone(s)"
+  1 zone(s): no primitive of the LOOKS SET samples the shirt numbers; who draws them is not on this screen
+    shared    (64,68) 60x12  numbers 0-9
+```
+
+REPRODUCED.
+
+### O que foi feito
+
+Regra de abertura do §4.6 reescrita: zona que nenhuma primitiva amostra traz o motivo declarado, e os aceitos são os dois que o `cli.py zones` imprime — a imagem de mangas, não amostrada nesta tela (15 zonas: manga longa, braçadeira, cotovelos e a manga curta de capitão das duas figuras), e os números (1 zona). A frase velha fica citada, com o motivo da troca.
+
+```text
+$ python tools/kits/cli.py zones roms/japanese-shift-jis.bin | sed -n '/15 zone(s)/,/^[a-z]/p' | grep -c "^    "
+15
+```
+
+### Verificação
+
+```text
+$ sed -n 468,476p docs/PLAN-KITS-PY.md | grep -c "números"
+1
+```

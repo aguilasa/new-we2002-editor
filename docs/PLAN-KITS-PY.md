@@ -469,8 +469,14 @@ usuário escolher, e a janela diz que não é a do jogo.
 
 O mapa é da comunidade. A conferência
 é mecânica: toda primitiva do boneco com UV no TEX cai numa zona do mapa, e zona
-que nenhuma primitiva amostra ou é da manga longa, da braçadeira e dos figurantes
-com bandeira — ou está errada.
+que nenhuma primitiva amostra traz o motivo declarado — ou está errada. Os
+motivos aceitos são dois, e é a ferramenta que os imprime: a zona é da imagem de
+mangas, que nenhuma primitiva desta tela amostra (manga longa, braçadeira,
+cotovelos, a manga curta de capitão das duas figuras — §4.3), ou é a dos números, que
+quem desenha o número de camisa não está nesta tela. A frase dizia antes "manga
+longa, braçadeira e figurantes com bandeira", e o veredito abaixo aceitou os
+números por outro motivo; a regra foi reescrita para bater
+([CORR-KITS-029](/docs/tasks/kits/CORR-KITS-029.md)).
 
 **A entrada da conferência foi medida em 2026-09-30 ([KITS-TASK-04](/docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md)).**
 Ela não é um arquivo versionado: mora no comando, que a refaz do disco —
