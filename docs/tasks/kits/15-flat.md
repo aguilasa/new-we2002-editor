@@ -96,3 +96,13 @@ $ python tools/kits/selftest.py --quiet | grep -E "FAIL|controls red|kits_selfte
   ..... 12 of 12 controls red
 kits_selftest: 0 failure(s)
 ```
+- **Closed** — commit `36ec9b3b` (2026-10-02): feat(kits): paint a kit in 2D: image + palette, the work bitmap, the palette grid
+  - Files (`git show --name-status 36ec9b3b`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/15-flat.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
+    - `A tools/kits/core/flat.py`
+    - `M tools/kits/core/tex.py`
