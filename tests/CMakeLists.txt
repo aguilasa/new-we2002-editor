@@ -319,4 +319,16 @@ if(Python3_FOUND)
     add_test(NAME kits_gen
         COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/kits/gen_tables.py --check)
+
+    # The window (section 3.4), judged from its PNGs by a decoder that is not
+    # the window's: it comes up off the desktop, draws, keeps the fixed look
+    # (Fusion and the fixed palette, each planted out in a copy and required to
+    # fail), repeats itself and tells two kits apart.  77 without the venv,
+    # WE2002_LOOKS_IMAGE or, on Linux, the :98 display.
+    add_test(NAME kits_ui
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/kits/ui_check.py)
+    set_tests_properties(kits_ui PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 600)
 endif()

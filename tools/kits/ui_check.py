@@ -1,0 +1,479 @@
+#!/usr/bin/env python3
+"""The `kits_ui` gate: the kit viewer's window judged from its pictures.
+
+PLAN-KITS-PY.md section 3.4.  This file runs `tools/kits/ui/app.py` as a
+separate process, reads the PNGs it writes with a decoder of its own (zlib and
+struct of the standard library) and judges them.  It imports nothing of the
+code under test: a gate that asked the window how its picture came out would
+be the window agreeing with itself.
+
+WHAT CAN BE MISSING, and then it exits 77 (ctest's skip):
+
+  the venv with PySide6 (`work/venv-looks`, the looks one);
+  `WE2002_LOOKS_IMAGE`, the Japanese data track -- unset skips, set and
+      pointing at no file FAILS, because the run asked for the gate;
+  a display on Linux: `:98`, with the XAUTHORITY rule of `CLAUDE.md`.  On
+      Windows there is no display to need: the app parks the window at -32000.
+
+WHAT IT JUDGES:
+
+  the window comes up off the user's screen and writes a picture;
+  the picture is not blank -- many colours, none covering it;
+  **the look is the fixed one**: the window colour of the fixed palette and
+      the tab pane Fusion paints from it each cover a share of the picture.
+      Both were measured on 2026-10-02: without `setPalette` the window colour
+      is gone (the system's comes instead), without `setStyle("Fusion")` the
+      pane is gone (the native style paints it white);
+  the same state twice is the same picture, and another kit is another one;
+  a tag the disc does not have exits 2 and writes no file;
+  **the reading under the mouse** -- `app.py --hover X,Y`, a real mouse move
+      through the canvas -- names the index and the colour that
+      `cli.py export --work-bitmap` writes for that pixel in its indexed PNG,
+      another process whose file is read here; a point off the image exits 1;
+  and the plants, each in a copy of the tree: the window without Fusion and
+      without the fixed palette (section 3.4) FAIL the style judge, and the
+      readout reading the pixel to the right FAILS the hover judge.  A plant
+      that passes is a red gate.
+
+`--compare A.png B.png` is the cross-platform half (KITS-TASK-19): the same
+state captured on Windows and on Linux, compared here, pixel by pixel.
+
+Usage:
+    python tools/kits/ui_check.py
+    python tools/kits/ui_check.py --compare windows.png linux.png
+    ctest -R kits_ui
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+import struct
+import subprocess
+import sys
+import tempfile
+import zlib
+
+SKIP = 77
+IMAGE_VARIABLE = "WE2002_LOOKS_IMAGE"
+DISPLAY = ":98"
+VENV = os.path.join("work", "venv-looks")
+VENV_PYTHON = os.path.join("Scripts", "python.exe") if os.name == "nt" else os.path.join("bin", "python")
+TIMEOUT = 180
+
+KITS_DIR = os.path.dirname(os.path.abspath(__file__))
+TOOLS_DIR = os.path.dirname(KITS_DIR)
+APP = os.path.join(KITS_DIR, "ui", "app.py")
+COPIED = ("kits", "looks", "pes2")
+"""What a planted copy holds under tools/: the window, the core, and the two
+trees the core imports."""
+
+STATE = ["--tag", "00", "--image", "work1", "--palette", "2", "--zoom", "3", "--zones"]
+"""The state the gate captures, and the one KITS-TASK-19 compares across systems."""
+OTHER = ["--tag", "A4", "--image", "work1", "--palette", "2", "--zoom", "3", "--zones"]
+MISSING_TAG = ["--tag", "ZZ"]
+
+WINDOW_COLOUR = (0xEC, 0xEC, 0xEC)
+"""`QPalette.Window` of the fixed palette."""
+FUSION_PANE = (0xEB, 0xEB, 0xEB)
+"""The tab pane Fusion paints from that window colour (measured: 18.8 % of the
+state's picture; white without Fusion)."""
+STYLE_SHARE = 10.0
+"""Each of the two covers at least this percentage of the picture (measured:
+22.8 % and 18.8 %; 0 when its line is removed)."""
+MIN_COLOURS = 50
+MAX_SHARE = 60.0
+"""Not blank: at least this many colours, and none above this percentage."""
+OTHER_FLOOR = 1.0
+"""Another kit changes at least this percentage of the picture."""
+
+HOVER_TAG = "00"
+HOVER_POINTS = ((15, 10), (100, 40), (40, 70), (5, 90))
+"""Work-bitmap pixels of the first set, player palette, that --hover reads:
+shirt front, goalkeeper socks, short sleeve, and the torso gap under the
+map (index 0, transparent in this kit)."""
+OFF_IMAGE = (9999, 0)
+HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
+"""What `cli.py export --work-bitmap` names that bitmap."""
+
+STYLE, HOVER = "style", "hover"
+PLANTS = (
+    ("no Fusion", STYLE, '    app.setStyle("Fusion")\n', "    pass  # planted: no Fusion\n"),
+    ("no fixed palette", STYLE, "    app.setPalette(fixed_palette())\n",
+     "    pass  # planted: no fixed palette\n"),
+    ("readout one pixel right", HOVER,
+     "        index = self.picture.indices[y * self.picture.width + x]\n",
+     "        index = self.picture.indices[y * self.picture.width + x + 1]\n"),
+)
+
+
+class BadPicture(Exception):
+    pass
+
+
+# -- the PNG, read here -----------------------------------------------------------
+
+def read_png(data: bytes) -> tuple:
+    """(width, height, [(r, g, b), ...], indices or None) of an 8-bit RGB,
+    RGBA or indexed PNG; raises on anything else rather than read it wrong."""
+    if data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise BadPicture("not a PNG")
+    at, head, parts, plte = 8, None, [], b""
+    while at + 8 <= len(data):
+        length, kind = struct.unpack(">I4s", data[at:at + 8])
+        body = data[at + 8:at + 8 + length]
+        if kind == b"IHDR":
+            head = struct.unpack(">IIBBBBB", body)
+        elif kind == b"IDAT":
+            parts.append(body)
+        elif kind == b"PLTE":
+            plte = body
+        at += 12 + length
+    if head is None or not parts:
+        raise BadPicture("no IHDR or no IDAT")
+    width, height, depth, colour, _, _, interlace = head
+    if depth != 8 or colour not in (2, 3, 6) or interlace:
+        raise BadPicture("depth %d, colour type %d, interlace %d: only 8-bit RGB/RGBA/indexed"
+                         % (depth, colour, interlace))
+    channels = {2: 3, 3: 1, 6: 4}[colour]
+    raw = zlib.decompress(b"".join(parts))
+    stride = width * channels
+    if len(raw) != (stride + 1) * height:
+        raise BadPicture("%d bytes of pixels for %dx%d" % (len(raw), width, height))
+    pixels, indices, previous, at = [], [], bytearray(stride), 0
+    for _ in range(height):
+        kind = raw[at]
+        line = bytearray(raw[at + 1:at + 1 + stride])
+        at += stride + 1
+        for i in range(stride):
+            a = line[i - channels] if i >= channels else 0
+            b = previous[i]
+            c = previous[i - channels] if i >= channels else 0
+            if kind == 1:
+                line[i] = (line[i] + a) & 0xFF
+            elif kind == 2:
+                line[i] = (line[i] + b) & 0xFF
+            elif kind == 3:
+                line[i] = (line[i] + (a + b) // 2) & 0xFF
+            elif kind == 4:
+                p = a + b - c
+                pa, pb, pc = abs(p - a), abs(p - b), abs(p - c)
+                line[i] = (line[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 0xFF
+            elif kind:
+                raise BadPicture("filter type %d" % kind)
+        if colour == 3:
+            indices.extend(line)
+            pixels.extend(tuple(plte[3 * k:3 * k + 3]) for k in line)
+        else:
+            pixels.extend(tuple(line[x * channels:x * channels + 3]) for x in range(width))
+        previous = line
+    return width, height, pixels, (indices if colour == 3 else None)
+
+
+def picture(path: str) -> tuple:
+    with open(path, "rb") as fh:
+        return read_png(fh.read())
+
+
+def share(shot: tuple, colour: tuple) -> float:
+    return 100.0 * sum(1 for p in shot[2] if p == colour) / (shot[0] * shot[1])
+
+
+def expected_readout(shot: tuple, point) -> tuple:
+    """(index, (r, g, b)) of *point* in an indexed picture."""
+    i = point[1] * shot[0] + point[0]
+    return shot[3][i], shot[2][i]
+
+
+def judge_hover(output: str, code, point, want) -> list:
+    """Failures of one `--hover` run against the index and colour expected."""
+    index, rgb = want
+    readout = next((ln.split("readout:", 1)[1].strip() for ln in output.splitlines()
+                    if "readout:" in ln), "")
+    marked = next((ln.split("marked:", 1)[1].strip() for ln in output.splitlines()
+                   if "marked:" in ln), "")
+    bad = []
+    if code != 0:
+        bad.append("exit %s" % code)
+    for piece in ("x %d, y %d" % point, "índice %d " % index, "RGB %d,%d,%d" % rgb):
+        if piece not in readout + " ":
+            bad.append("%r not in the readout %r" % (piece.strip(), readout))
+    if marked != str(index):
+        bad.append("the grid marks %r, not %d" % (marked, index))
+    return bad
+
+
+def differing(one: tuple, two: tuple) -> int:
+    if one[:2] != two[:2]:
+        raise BadPicture("%dx%d against %dx%d" % (one[0], one[1], two[0], two[1]))
+    return sum(1 for a, b in zip(one[2], two[2]) if a != b)
+
+
+# -- the judges -------------------------------------------------------------------
+
+def judge_frame(shot: tuple) -> list:
+    """Failures of a picture that has to show something."""
+    counts = {}
+    for p in shot[2]:
+        counts[p] = counts.get(p, 0) + 1
+    top = max(counts.values()) * 100.0 / len(shot[2])
+    bad = []
+    if len(counts) < MIN_COLOURS:
+        bad.append("%d colour(s), fewer than %d: a blank frame" % (len(counts), MIN_COLOURS))
+    if top > MAX_SHARE:
+        bad.append("one colour covers %.1f %% of the picture" % top)
+    return bad
+
+
+def judge_style(shot: tuple) -> list:
+    """Failures of the fixed look: the palette's window colour and Fusion's pane."""
+    bad = []
+    for what, colour in (("the fixed palette's window colour", WINDOW_COLOUR),
+                         ("Fusion's tab pane", FUSION_PANE)):
+        got = share(shot, colour)
+        if got < STYLE_SHARE:
+            bad.append("%s #%02x%02x%02x covers %.1f %%, under %.0f %%"
+                       % ((what,) + colour + (got, STYLE_SHARE)))
+    return bad
+
+
+# -- running the window -----------------------------------------------------------
+
+def find_upward(relative: str):
+    here = KITS_DIR
+    while True:
+        candidate = os.path.join(here, relative)
+        if os.path.exists(candidate):
+            return candidate
+        parent = os.path.dirname(here)
+        if parent == here:
+            return None
+        here = parent
+
+
+def xauthority() -> str:
+    """The Xvfb's cookie, or "" when it runs without -auth (CLAUDE.md)."""
+    try:
+        out = subprocess.run(["ps", "-o", "args=", "-C", "Xvfb"],
+                             capture_output=True, text=True).stdout
+    except OSError:
+        return ""
+    for line in out.splitlines():
+        if ("Xvfb %s " % DISPLAY) in line + " " and "-auth" in line:
+            parts = line.split()
+            return parts[parts.index("-auth") + 1]
+    return ""
+
+
+def environment() -> dict:
+    env = dict(os.environ)
+    env["PYTHONIOENCODING"] = "utf-8"
+    if os.name == "nt":
+        return env           # the app parks the window at -32000 itself
+    env["DISPLAY"] = DISPLAY
+    auth = xauthority()
+    if auth:
+        env["XAUTHORITY"] = auth
+    else:
+        env.pop("XAUTHORITY", None)
+    return env
+
+
+def run_app(python: str, app: str, args: list, env: dict) -> tuple:
+    try:
+        done = subprocess.run([python, app] + args, env=env, capture_output=True,
+                              text=True, encoding="utf-8", errors="replace",
+                              timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return None, "did not exit within %d s" % TIMEOUT
+    return done.returncode, done.stdout + done.stderr
+
+
+def no_display(output: str) -> bool:
+    return "could not connect to display" in output or "cannot open display" in output
+
+
+def capture(python, app, image, args, out, env) -> tuple:
+    """(picture or None, failures, output) of one --screenshot run."""
+    code, output = run_app(python, app, [image] + args + ["--screenshot", out], env)
+    if code != 0:
+        return None, ["app.py exited %s: %s" % (code, output.strip()[-300:])], output
+    bad = []
+    if os.name == "nt" and "at -32000,-32000" not in output:
+        bad.append("the window was not parked off the desktop: %s" % output.strip()[-200:])
+    try:
+        return picture(out), bad, output
+    except (OSError, BadPicture, zlib.error) as exc:
+        return None, bad + ["the picture does not read: %s" % exc], output
+
+
+def hover_judge(python, app, image, env, want) -> list:
+    """Every HOVER_POINT through --hover, judged against *want* {point: (index, rgb)}."""
+    bad = []
+    for point in HOVER_POINTS:
+        code, output = run_app(python, app, [image, "--tag", HOVER_TAG, "--hover",
+                                             "%d,%d" % point], env)
+        bad += ["%s: %s" % (point, b) for b in judge_hover(output, code, point, want[point])]
+    return bad
+
+
+def cli_export(image: str, out: str) -> tuple:
+    """The work bitmap HOVER_TAG as the CLI writes it, decoded here."""
+    done = subprocess.run([sys.executable, os.path.join(KITS_DIR, "cli.py"), "export",
+                           "--work-bitmap", "--tag", HOVER_TAG, "--out", out, image],
+                          capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if done.returncode:
+        raise BadPicture("cli.py export exited %d: %s" % (done.returncode, done.stderr.strip()))
+    shot = picture(os.path.join(out, HOVER_PNG))
+    if shot[3] is None:
+        raise BadPicture("%s is not indexed" % HOVER_PNG)
+    return shot
+
+
+def sandbox(tmp: str, old: str, new: str) -> str:
+    """A copy of tools/{kits,looks,pes2} with *old* replaced once in the app."""
+    ignore = shutil.ignore_patterns("__pycache__", "*.pyc")
+    for sub in COPIED:
+        shutil.copytree(os.path.join(TOOLS_DIR, sub), os.path.join(tmp, "tools", sub),
+                        ignore=ignore)
+    app = os.path.join(tmp, "tools", "kits", "ui", "app.py")
+    with open(app, encoding="utf-8") as fh:
+        text = fh.read()
+    if text.count(old) != 1:
+        raise BadPicture("the plant %r matches %d time(s), not once" % (old.strip(), text.count(old)))
+    with open(app, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(text.replace(old, new))
+    return app
+
+
+class Tally:
+    def __init__(self) -> None:
+        self.failures = 0
+
+    def ok(self, what: str, bad: list) -> None:
+        print("  %s  %s" % ("ok  " if not bad else "FAIL", what))
+        for b in bad:
+            print("        %s" % b)
+        self.failures += bool(bad)
+
+
+def run(python: str, image: str) -> int:
+    env = environment()
+    t = Tally()
+    with tempfile.TemporaryDirectory(prefix="kits-ui-") as tmp:
+        first, bad, output = capture(python, APP, image, STATE, os.path.join(tmp, "a.png"), env)
+        if first is None and no_display(output):
+            print("kits_ui: skipped -- no display %s (Xvfb %s -screen 0 1280x1024x24 "
+                  "-nolisten tcp &)" % (DISPLAY, DISPLAY))
+            return SKIP
+        t.ok("the window comes up off the desktop and writes a picture", bad)
+        if first is None:
+            print("kits_ui: %d failure(s)" % t.failures)
+            return 1
+        print("        %dx%d" % (first[0], first[1]))
+        t.ok("the picture shows something", judge_frame(first))
+        t.ok("the look is the fixed one: palette window colour %.1f %%, Fusion pane %.1f %%"
+             % (share(first, WINDOW_COLOUR), share(first, FUSION_PANE)), judge_style(first))
+
+        again, bad, _ = capture(python, APP, image, STATE, os.path.join(tmp, "b.png"), env)
+        n = differing(first, again) if again is not None and again[:2] == first[:2] else -1
+        t.ok("the same state twice is the same picture (%d px differ)" % n,
+             bad + ([] if n == 0 else ["%d pixel(s) differ" % n]))
+
+        other, bad, _ = capture(python, APP, image, OTHER, os.path.join(tmp, "c.png"), env)
+        n = differing(first, other) if other is not None and other[:2] == first[:2] else -1
+        pct = 100.0 * n / (first[0] * first[1]) if n >= 0 else -1.0
+        t.ok("another kit is another picture (%d px, %.1f %%)" % (n, pct),
+             bad + ([] if pct >= OTHER_FLOOR else ["under %.1f %%" % OTHER_FLOOR]))
+
+        out = os.path.join(tmp, "missing.png")
+        code, output = run_app(python, APP, [image] + MISSING_TAG + ["--screenshot", out], env)
+        t.ok("a tag the disc does not have exits 2 and writes nothing (exit %s)" % code,
+             [] if code == 2 and not os.path.exists(out)
+             else ["exit %s, file %s" % (code, "written" if os.path.exists(out) else "absent")])
+
+        want = {}
+        try:
+            ref = cli_export(image, os.path.join(tmp, "cli"))
+            want = {p: expected_readout(ref, p) for p in HOVER_POINTS}
+            bad = hover_judge(python, APP, image, env, want)
+        except BadPicture as exc:
+            bad = [str(exc)]
+        t.ok("the reading under the mouse names the index and colour cli.py export writes, "
+             "at %d point(s): %s" % (len(HOVER_POINTS), ", ".join(
+                 "%s=%d" % (p, want[p][0]) for p in HOVER_POINTS) if want else "-"), bad)
+        code, output = run_app(python, APP, [image, "--tag", HOVER_TAG, "--hover",
+                                             "%d,%d" % OFF_IMAGE], env)
+        t.ok("a point off the image reads blank and exits 1 (exit %s)" % code,
+             [] if code == 1 and "(blank)" in output else [output.strip()[-200:]])
+
+        for name, judge, old, new in PLANTS:
+            with tempfile.TemporaryDirectory(prefix="kits-ui-plant-") as box:
+                try:
+                    app = sandbox(box, old, new)
+                except BadPicture as exc:
+                    t.ok("plant '%s'" % name, [str(exc)])
+                    continue
+                if judge == STYLE:
+                    shot, bad, _ = capture(python, app, image, STATE,
+                                           os.path.join(box, "p.png"), env)
+                    red = judge_style(shot) if shot is not None else ["no picture"]
+                else:
+                    bad, red = [], hover_judge(python, app, image, env, want) if want else []
+                print("        plant '%s': %s" % (name, "; ".join(red)[:300] or "judge passed"))
+                t.ok("plant '%s' fails the %s judge" % (name, judge),
+                     bad + ([] if red else ["the window with it passed: the judge is blind"]))
+    print("kits_ui: %d failure(s)" % t.failures)
+    return 1 if t.failures else 0
+
+
+def compare(a: str, b: str) -> int:
+    """The cross-platform comparison: pixels that differ between two captures."""
+    try:
+        one, two = picture(a), picture(b)
+    except (OSError, BadPicture, zlib.error) as exc:
+        print("compare: %s" % exc, file=sys.stderr)
+        return 1
+    print("%s: %dx%d, window colour %.1f %%, Fusion pane %.1f %%"
+          % (os.path.basename(a), one[0], one[1], share(one, WINDOW_COLOUR), share(one, FUSION_PANE)))
+    print("%s: %dx%d, window colour %.1f %%, Fusion pane %.1f %%"
+          % (os.path.basename(b), two[0], two[1], share(two, WINDOW_COLOUR), share(two, FUSION_PANE)))
+    if one[:2] != two[:2]:
+        print("different sizes: %dx%d against %dx%d" % (one[0], one[1], two[0], two[1]))
+        return 1
+    n = differing(one, two)
+    print("%d of %d pixels differ (%.2f %%)" % (n, one[0] * one[1], 100.0 * n / (one[0] * one[1])))
+    return 0
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--compare", nargs=2, metavar="PNG",
+                        help="count the pixels that differ between two captures")
+    args = parser.parse_args(argv)
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if args.compare:
+        return compare(*args.compare)
+    python = find_upward(os.path.join(VENV, VENV_PYTHON))
+    if python is None:
+        print("kits_ui: skipped -- no venv at %s (python -m venv %s; pip install PySide6)"
+              % (VENV, VENV))
+        return SKIP
+    if subprocess.run([python, "-c", "import PySide6"], capture_output=True).returncode:
+        print("kits_ui: skipped -- the venv at %s has no PySide6" % VENV)
+        return SKIP
+    image = os.environ.get(IMAGE_VARIABLE)
+    if not image:
+        print("kits_ui: skipped -- %s is not set (the Japanese data track .bin)" % IMAGE_VARIABLE)
+        return SKIP
+    if not os.path.isfile(image):
+        print("  FAIL  %s points at a file  %s is not one" % (IMAGE_VARIABLE, image))
+        print("kits_ui: 1 failure(s)")
+        return 1
+    return run(python, os.path.abspath(image))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -15,12 +15,92 @@ id: KITS-TASK-19
 
 ## Done criteria
 
-- [ ] `ctest -R kits_ui` passa com venv e tela, e sai 77 sem eles
-- [ ] Controle: tirar o `setStyle("Fusion")` (ou a `QPalette` fixa) numa cópia derruba o `kits_ui`
+- [x] `ctest -R kits_ui` passa com venv e tela, e sai 77 sem eles
+- [x] Controle: tirar o `setStyle("Fusion")` (ou a `QPalette` fixa) numa cópia derruba o `kits_ui`
 - [ ] Captura do mesmo estado no Windows e no Linux (`:98`), comparadas por comando versionado; diferença em pixels colada no Log
 
 ## Notes
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#3.4). O Linux é outra máquina: se não estiver à mão, a task fica bloqueada com o comando que a destrava, não fechada.
 
+O que ficou decidido:
+
+- **O juiz da aparência é a cor, contada no PNG.** Medido nesta task, sobre o estado do gate (`TEX_00`, bitmap de trabalho do 1º conjunto, paleta 2, zoom 3, zonas): a cor de janela da `QPalette` fixa, `#ececec`, cobre 22,8 % da captura e some sem `setPalette` (vem a do sistema, `#f0f0f0`); o painel da aba que o Fusion pinta a partir dela, `#ebebeb`, cobre 18,8 % e some sem `setStyle("Fusion")` (o estilo nativo o pinta de branco). O `kits_ui` exige as duas acima de 10 %.
+- **Os dois controles moram no próprio gate:** o `ui_check.py` copia `tools/{kits,looks,pes2}` para um temporário, tira uma das duas linhas do `app.py` e exige que o juiz de estilo reprove a cópia. Planta que não casa uma vez só é falha, não vermelho.
+- **A leitura sob o mouse entra no gate** (a [CORR-KITS-032](/docs/tasks/kits/CORR-KITS-032.md) deixou a asserção para esta task): `app.py --hover X,Y` em quatro pixels do `TEX_00` — frente da camisa, meia do goleiro, manga curta e a lacuna do torso — tem de dizer o índice e o RGB que o `cli.py export --work-bitmap` grava no PNG indexado daquele pixel, e a grade tem de marcar o mesmo índice. O PNG da CLI é lido pelo decodificador do próprio `ui_check.py`. A planta é o `app.py` lendo o pixel à direita.
+- **`--compare A B`** é o comando versionado do critério 3. O caminho aberto aparece na barra de cima, então as duas capturas têm de abrir o disco pelo mesmo caminho relativo, a partir da raiz do repositório: medido aqui, o mesmo estado com o caminho absoluto em vez do relativo muda a cor de janela de 22,8 % para 23,1 %.
+
 ## Log de Execução
+
+### 2026-10-02
+
+O critério 1:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir $TEMP/build-kits08 -R kits_ui
+1/1 Test #17: kits_ui ..........................   Passed   10.00 sec
+$ env -u WE2002_LOOKS_IMAGE ctest --test-dir $TEMP/build-kits08 -R kits_ui
+1/1 Test #17: kits_ui ..........................***Skipped   0.28 sec
+$ python tools/kits/ui_check.py; echo $?
+kits_ui: skipped -- WE2002_LOOKS_IMAGE is not set (the Japanese data track .bin)
+77
+$ cp tools/kits/ui_check.py $TEMP/nouv/ && WE2002_LOOKS_IMAGE=x python $TEMP/nouv/ui_check.py; echo $?
+kits_ui: skipped -- no venv at workenv-looks (python -m venv workenv-looks; pip install PySide6)
+77
+```
+
+O que o gate diz, verde, na versão entregue:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir $TEMP/build-kits08 -R kits_ui -V
+  ok    the window comes up off the desktop and writes a picture
+  ok    the picture shows something
+  ok    the look is the fixed one: palette window colour 22.8 %, Fusion pane 18.8 %
+  ok    the same state twice is the same picture (0 px differ)
+  ok    another kit is another picture (301598 px, 48.1 %)
+  ok    a tag the disc does not have exits 2 and writes nothing (exit 2)
+  ok    the reading under the mouse names the index and colour cli.py export writes, at 4 point(s): (15, 10)=36, (100, 40)=91, (40, 70)=4, (5, 90)=0
+  ok    a point off the image reads blank and exits 1 (exit 1)
+        plant 'no Fusion': Fusion's tab pane #ebebeb covers 0.0 %, under 10 %
+  ok    plant 'no Fusion' fails the style judge
+        plant 'no fixed palette': the fixed palette's window colour #ececec covers 0.0 %, under 10 %; Fusion's tab pane #ebebeb covers 0.0 %, under 10 %
+  ok    plant 'no fixed palette' fails the style judge
+        plant 'readout one pixel right': (100, 40): 'índice 91' not in the readout 'x 100, y 40 · zona: socks · índice 90 · BGR555 0x0000 · RGB 0,0,0 · transparente'; (100, 40): the grid marks '90', not 91; (40, 70): 'índice 4' not in the readout 'x 40, y 70 · zona: short sleeve, left · índice 5 · BGR555 0x737b · RGB 222,222,231'; (40, 70)
+  ok    plant 'readout one pixel right' fails the hover judge
+kits_ui: 0 failure(s)
+1/1 Test #17: kits_ui ..........................   Passed   17.59 sec
+```
+
+O critério 2 — a linha tirada da janela numa cópia da árvore em `work/kits-ui-plant/` (fora do git, e de onde o gate ainda acha o venv), e o gate inteiro, na versão entregue, rodado nela:
+
+```
+$ (app.setStyle("Fusion") trocado por pass em work/kits-ui-plant/tools/kits/ui/app.py)
+$ python work/kits-ui-plant/tools/kits/ui_check.py      # exit 1
+  FAIL  the look is the fixed one: palette window colour 22.1 %, Fusion pane 0.0 %
+  FAIL  plant 'no Fusion'
+kits_ui: 2 failure(s)
+$ (o mesmo com app.setPalette(fixed_palette()) tirado)      # exit 1
+  FAIL  the look is the fixed one: palette window colour 0.0 %, Fusion pane 0.0 %
+  FAIL  plant 'no fixed palette'
+kits_ui: 2 failure(s)
+```
+
+(O segundo `FAIL` de cada um é a planta do gate que não casa mais na cópia já plantada — falha, não vermelho falso.)
+
+O critério 3 — a metade do Windows, e o comando contra si mesmo e contra outro kit:
+
+```
+$ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png
+  wrote work/kits-ui-windows.png, 980x640                  # sha256 e973a8aa5991a7ff…
+$ python tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-windows.png | tail -1
+0 of 627200 pixels differ (0.00 %)
+$ python tools/kits/ui_check.py --compare work/kits-ui-windows.png <o mesmo com --tag A4> | tail -1
+300308 of 627200 pixels differ (47.88 %)
+```
+
+**Falta o Linux**, que é outra máquina: a captura do mesmo estado no `:98`, e o `--compare` das duas. A task fica bloqueada com o comando que a destrava (no Linux, a partir da raiz do repositório, com `work/kits-ui-windows.png` levado para lá):
+
+```
+DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin   --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png
+python3 tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-linux.png
+```
