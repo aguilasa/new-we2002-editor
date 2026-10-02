@@ -69,3 +69,8 @@ $ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-ji
 ```
 
 A asserção sobre esta linha num gate é da KITS-TASK-19 (`kits_ui`).
+- **Closed** — commit `30773b88` (2026-10-02): fix(kits): version the mouse-readout probe as app.py --hover
+  - Files (`git show --name-status 30773b88`):
+    - `M docs/tasks/kits/18-janela-minima.md`
+    - `M docs/tasks/kits/CORR-KITS-032.md`
+    - `M tools/kits/ui/app.py`

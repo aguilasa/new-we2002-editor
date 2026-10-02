@@ -34,5 +34,5 @@
 | [CORR-KITS-029](/docs/tasks/kits/CORR-KITS-029.md) | Reconcile the 4.6 unsampled-zone rule with the verdict | KITS-TASK-16 | medium | done | 2026-10-02 |
 | [CORR-KITS-030](/docs/tasks/kits/CORR-KITS-030.md) | Make the 4.6 gap count match the tool's six gaps | KITS-TASK-16 | low | done | 2026-10-02 |
 | [CORR-KITS-031](/docs/tasks/kits/CORR-KITS-031.md) | Plant controls for the three other 4.6 failure branches | KITS-TASK-16 | low | done | 2026-10-02 |
-| [CORR-KITS-032](/docs/tasks/kits/CORR-KITS-032.md) | Version the mouse-readout probe behind the Log's readout line | KITS-TASK-18 | medium | pending | — |
+| [CORR-KITS-032](/docs/tasks/kits/CORR-KITS-032.md) | Version the mouse-readout probe behind the Log's readout line | KITS-TASK-18 | medium | done | 2026-10-02 |
 <!-- rite:end -->
