@@ -69,3 +69,7 @@ Conserto: a nota do `--compare` diz relativo → absoluto, 23,1 → 22,8 % no Wi
 $ grep -n "de 22,8 % para 23,1 %" docs/tasks/kits/19-kits-ui-e-captura.md
 (vazio, exit 1)
 ```
+- **Closed** — commit `5ea909c` (2026-10-02): docs(kits): un-invert the relative/absolute path numbers in the KITS-TASK-19 notes
+  - Files (`git show --name-status 5ea909c`):
+    - `M docs/tasks/kits/19-kits-ui-e-captura.md`
+    - `M docs/tasks/kits/CORR-KITS-034.md`
