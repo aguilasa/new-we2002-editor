@@ -15,7 +15,8 @@ Usage:
     python tools/kits/cli.py tex [--tag TAG ...] [--iso-size] [--negative] <path>
     python tools/kits/cli.py teams [--against <golden_tool names dump>] <image.bin>
     python tools/kits/cli.py info [--tag TAG ...] <path>
-    python tools/kits/cli.py export --out DIR [--tag TAG ...] [--palette K] <path>
+    python tools/kits/cli.py export --out DIR [--tag TAG ...] [--palette K | --work-bitmap] <path>
+    python tools/kits/cli.py flat [--tag TAG ...] [--negative] <path>
     python tools/kits/cli.py export --confront [--negative] [--tag TAG ...] <image.bin>
 """
 
@@ -509,6 +510,94 @@ def cmd_teams(args) -> int:
     return 1 if differ or not rom or empty else 0
 
 
+FLAT_CONTROL_PALETTE = 2
+"""The palette record --negative flattens: the player palette of the first set."""
+
+
+def flat_negative(source, tags) -> int:
+    """Take the first sound kit, write it as a lone TEX whose player palette
+    (first set) is one colour repeated 256 times, and count it: the two
+    pairings that wear that palette have to come out single-coloured."""
+    sound = [(n, k) for n, k in _kits_of(source, tags) if not isinstance(k, Exception) and k.ok]
+    if not sound:
+        print("flat: --negative needs a kit that passes the guard", file=sys.stderr)
+        return 1
+    name, kit = sound[0]
+    pal = next(p for p in kit.palettes if p.record == FLAT_CONTROL_PALETTE)
+    at = kit.data.find(pal.raw)
+    planted = kit.data[:at] + pal.raw[:2] * (len(pal.raw) // 2) + kit.data[at + len(pal.raw):]
+    with tempfile.TemporaryDirectory(prefix="kits-flat-") as tmp:
+        path = os.path.join(tmp, name + ".BIN")
+        with open(path, "wb") as fh:
+            fh.write(planted)
+        lone = api.open_source(path).kit()
+        single = [(i, p) for i, p in api.GAME_PAIRS
+                  if len({lone.flat(i, p).rgba[j:j + 4]
+                          for j in range(0, len(lone.flat(i, p).rgba), 4)}) < 2]
+    wearing = [(i, p) for i, p in api.GAME_PAIRS if p == FLAT_CONTROL_PALETTE]
+    print("control: %s, %s (bytes %d..%d) set to its first colour, as a lone TEX"
+          % (name, api.RECORD_NAMES[FLAT_CONTROL_PALETTE], at, at + len(pal.raw) - 1))
+    for i, p in single:
+        print("  SINGLE  %s / %s" % (api.RECORD_NAMES[i], api.RECORD_NAMES[p]))
+    held = single == wearing
+    print("control %s" % ("held: exactly the %d pairing(s) wearing it are single-coloured"
+                          % len(wearing) if held else "FAILED"))
+    return 0 if held else 1
+
+
+def cmd_flat(args) -> int:
+    """Paint every image-palette pairing the game draws (`api.GAME_PAIRS`) on
+    every kit of a source, and the four work bitmaps, and count what is
+    wrong: an index past its palette, a picture of a single colour."""
+    try:
+        source = api.open_source(args.path)
+    except api.KitsError as exc:
+        print("flat: %s" % exc, file=sys.stderr)
+        return 1
+    if args.negative:
+        return flat_negative(source, args.tag)
+    pairs = single = outside = index0_clear = palettes = refused = bitmaps = 0
+    index0 = {}         # palette record -> {first colour: count}
+    for name, kit in _kits_of(source, args.tag):
+        if isinstance(kit, Exception) or not kit.ok:
+            refused += 1
+            continue
+        for image, palette in api.GAME_PAIRS:
+            pairs += 1
+            try:
+                fi = kit.flat(image, palette)
+            except api.KitsError as exc:
+                outside += 1
+                print("  OUTSIDE %s %s / %s: %s" % (name, api.RECORD_NAMES[image],
+                                                   api.RECORD_NAMES[palette], exc))
+                continue
+            if len({fi.rgba[i:i + 4] for i in range(0, len(fi.rgba), 4)}) < 2:
+                single += 1
+                print("  SINGLE  %s %s / %s" % (name, api.RECORD_NAMES[image],
+                                               api.RECORD_NAMES[palette]))
+        for kit_set in api.KIT_SETS:
+            for figure in api.FIGURES:
+                bm = kit.work_bitmap(kit_set, figure)
+                bitmaps += (bm.width, bm.height) == (api.WORK_W, api.WORK_H)
+        for pal in kit.palettes:
+            palettes += 1
+            first = kit.palette_grid(pal.record)[0]
+            index0_clear += first.transparent
+            seen = index0.setdefault(pal.record, {})
+            seen[first.bgr555] = seen.get(first.bgr555, 0) + 1
+    print("%d pairings painted (%d per kit): %d with an index past its palette, "
+          "%d of a single colour; %d of %d work bitmaps %dx%d; index 0 transparent "
+          "in %d of %d palettes; %d kit(s) refused"
+          % (pairs, len(api.GAME_PAIRS), outside, single, bitmaps,
+             (pairs // len(api.GAME_PAIRS)) * 4 if api.GAME_PAIRS else 0, api.WORK_W,
+             api.WORK_H, index0_clear, palettes, refused))
+    for record in sorted(index0):
+        values = index0[record]
+        print("  index 0 of %-31s %s" % (api.RECORD_NAMES[record] + ":", ", ".join(
+            "0x%04x in %d" % (v, n) for v, n in sorted(values.items(), key=lambda t: -t[1]))))
+    return 1 if outside or single or refused else 0
+
+
 def cmd_info(args) -> int:
     """What a source is, and with --tag (or a lone TEX) what one kit holds."""
     try:
@@ -559,15 +648,9 @@ BIN_ARCHIVE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 
 def bgr555_rgba(raw: bytes) -> list:
-    """(r, g, b, a) per BGR555 halfword; black with the STP bit clear is the
-    transparent entry (the PSX rule)."""
-    out = []
-    for i in range(0, len(raw), 2):
-        v = raw[i] | raw[i + 1] << 8
-        r, g, b = v & 0x1F, (v >> 5) & 0x1F, (v >> 10) & 0x1F
-        alpha = 0 if (v & 0x7FFF) == 0 and not v & 0x8000 else 255
-        out.append((r << 3 | r >> 2, g << 3 | g >> 2, b << 3 | b >> 2, alpha))
-    return out
+    """(r, g, b, a) per BGR555 halfword, by the core's colour rule
+    (`api.palette_rgba`: black with the STP bit clear is transparent)."""
+    return list(api.palette_rgba(raw))
 
 
 def write_png(path: str, width: int, height: int, indices: bytes, palette) -> None:
@@ -633,6 +716,18 @@ def export_kit(kit, stem: str, out: str, palette: int, plant=None, colour_plant=
     return len(kit.images)
 
 
+def export_work_bitmaps(kit, stem: str, out: str) -> int:
+    """The four 256x128 work bitmaps of *kit* -- set 1 and 2, player and
+    goalkeeper -- as `<stem>_set<s>_<player|keeper>.png`."""
+    for kit_set in api.KIT_SETS:
+        for figure in api.FIGURES:
+            bm = kit.work_bitmap(kit_set, figure)
+            write_png(os.path.join(out, "%s_set%d_%s.png"
+                                   % (stem, kit_set, ("player", "keeper")[figure])),
+                      bm.width, bm.height, bm.indices, bm.palette)
+    return len(api.KIT_SETS) * len(api.FIGURES)
+
+
 def cmd_export(args) -> int:
     if args.confront:
         return confront(args.path, args.tag, args.negative)
@@ -649,9 +744,16 @@ def cmd_export(args) -> int:
             print("  %s not exported: %s" % (name, kit if isinstance(kit, Exception)
                                               else "; ".join(kit.problems)))
             continue
-        written += export_kit(kit, name if source.kind == api.KIND_ROM
-                              else os.path.splitext(os.path.basename(source.path))[0],
-                              args.out, args.palette)
+        stem = (name if source.kind == api.KIND_ROM
+                else os.path.splitext(os.path.basename(source.path))[0])
+        if args.work_bitmap:
+            written += export_work_bitmaps(kit, stem, args.out)
+            continue
+        written += export_kit(kit, stem, args.out, args.palette)
+    if args.work_bitmap:
+        print("wrote %d work bitmap PNG(s) (%dx%d) to %s; %d kit(s) refused"
+              % (written, api.WORK_W, api.WORK_H, args.out, refused))
+        return 1 if refused else 0
     print("wrote %d PNG(s) to %s with palette %d (%s); %d kit(s) refused"
           % (written, args.out, args.palette,
              api.RECORD_NAMES[api.PALETTE_RECORDS[args.palette]], refused))
@@ -814,7 +916,15 @@ def main(argv=None) -> int:
                    help="confront 1: compare with bin_archive.py export, every palette")
     p.add_argument("--negative", action="store_true",
                    help="with --confront: change one pixel on our side, which must differ")
+    p.add_argument("--work-bitmap", action="store_true",
+                   help="write the four 256x128 work bitmaps of each kit instead")
     p.set_defaults(fn=cmd_export)
+    p = sub.add_parser("flat", help="paint every pairing the game draws and count what is wrong")
+    p.add_argument("path", help="a disc image, a cue sheet or a lone TEX")
+    p.add_argument("--tag", action="append", help="only this tag (repeatable; disc only)")
+    p.add_argument("--negative", action="store_true",
+                   help="flatten one palette of a kit to one colour and require it counted")
+    p.set_defaults(fn=cmd_flat)
     args = parser.parse_args(argv)
     if args.command == "export" and not args.confront and not args.out:
         parser.error("export needs --out (or --confront)")

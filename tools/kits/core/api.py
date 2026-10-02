@@ -14,6 +14,9 @@ build it.
     kit.notes                        # how it was read, when not plainly (api.Note)
     kit.images, kit.palettes         # the 6 images and 5 palettes, by name
     kit.require()                    # the kit, or KitRefused with every problem
+    kit.flat(image, palette)         # FlatImage(width, height, indices, palette, rgba)
+    kit.work_bitmap(kit_set, figure) # the 256x128 uniform | sleeves (set 1/2, figure 0/1)
+    kit.palette_grid(palette)        # 256 PaletteEntry(index, bgr555, rgba)
 """
 
 from __future__ import annotations
@@ -30,6 +33,8 @@ from .tex import (EXPECTED_SHAPE, IMAGE_RECORDS, NOTE_FORM2_TAIL,  # noqa: F401
 from .tex import stream_control as _stream_control
 from .tex import decompress_stream as _decompress_stream
 from .teams import ORIGIN_ROM, ORIGIN_TABLE, TeamEntry  # noqa: F401
+from .flat import (FIGURES, GAME_PAIRS, KIT_SETS, WORK_H, WORK_W,  # noqa: F401
+                   FlatImage, PaletteEntry, palette_rgba)
 from .source import DiscControl  # noqa: F401
 from .source import disc_controls as _disc_controls
 from . import survey as measure  # noqa: F401  (the phase-0 probes, below)
@@ -47,6 +52,8 @@ __all__ = (
     "IMAGE_RECORDS", "PALETTE_RECORDS", "IMAGE_COUNT", "PALETTE_COUNT",
     "decompress_stream", "StreamError",
     "TeamEntry", "ORIGIN_TABLE", "ORIGIN_ROM",
+    "FlatImage", "PaletteEntry", "palette_rgba", "GAME_PAIRS", "KIT_SETS", "FIGURES",
+    "WORK_W", "WORK_H",
 )
 
 IMAGE_COUNT = len(IMAGE_RECORDS)

@@ -100,6 +100,13 @@ estão no [SUPERPACK-UNIFORMES.md](/docs/SUPERPACK-UNIFORMES.md) §1.3 e §2. É
 fonte do mapa de zonas deste projeto, com a proveniência dita: **comunidade,
 medido no PNG do polipoli**, até a fase 3 conferi-lo contra a geometria.
 
+**A transparência é a regra do console, pela cor** — a entrada `0x0000` com o
+bit STP limpo —, e o `flat.py` a aplica assim. "Índice 0 transparente" é essa
+regra vista das ferramentas, que forçam preto no índice 0, e **não vale para
+todo TEX**: medido na KITS-TASK-15 no disco japonês, o índice 0 é `0x0000` em
+95 dos 105 kits em cada uma das quatro paletas de jogador e goleiro, e em 17 das
+105 paletas de bandeira (72 têm branco ali) — `cli.py flat roms/japanese-shift-jis.bin`.
+
 O **uniforme 2D** — a camisinha da tela de opções de partida, que não é TEX e
 este projeto não cobre — tem o seu próprio levantamento no
 [SUPERPACK-UNIFORMES-2D.md](/docs/SUPERPACK-UNIFORMES-2D.md): paletas em
@@ -244,7 +251,7 @@ source.kind                           # "rom" ou "tex"
 source.teams()                        # [TeamEntry(index, name, name_origin, tag)]  -- só ROM
 kit = source.kit(team_or_tag)         # ROM: pelo time; TEX avulso: o próprio arquivo
 kit.problems                          # a guarda de forma, registro a registro (§2.1)
-kit.flat(image, palette)              # FlatImage(width, height, rgba, indices)
+kit.flat(image, palette)              # FlatImage(width, height, indices, palette, rgba)
 kit.work_bitmap(kit_set, figure)      # o 256×128 da comunidade, uniforme + mangas
 kit.palette_grid(palette)             # 256 cores, BGR555 e RGB
 api.zone_at(x, y)                     # zona do mapa (§1.3) num ponto do 256×128

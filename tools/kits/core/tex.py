@@ -203,6 +203,29 @@ class Kit:
             raise KitRefused("%s is refused: %s." % (self.label, "; ".join(self.problems)))
         return self
 
+    # The 2D views (section 3.1), made by `flat`; imported here, not at the
+    # top, because `flat` is the module that knows how a kit is painted and
+    # `tex` only how it is read.
+
+    def flat(self, image: int, palette: int):
+        """Image record *image* painted with palette record *palette*: a `flat.FlatImage`."""
+        from . import flat
+        return flat.flat(self, image, palette)
+
+    def work_bitmap(self, kit_set: int, figure: int):
+        """The community's 256x128 (uniform | sleeves) of *kit_set* (1, 2) in
+        *figure*'s palette (0 player, 1 goalkeeper)."""
+        from . import flat
+        return flat.work_bitmap(self, kit_set, figure)
+
+    def palette_grid(self, palette: int) -> tuple:
+        """The 256 `flat.PaletteEntry` of palette record *palette*."""
+        from . import flat
+        for pal in self.palettes:
+            if pal.record == palette:
+                return flat.palette_grid(pal)
+        raise KitRefused("%s has no palette record %d" % (self.label, palette))
+
 
 def decompress_stream(data: bytes, label: str = "the stream") -> bytes:
     """The plain bytes of one LZSS stream starting at byte 0 of *data* -- a
