@@ -104,3 +104,9 @@ zones-map: 1 failure(s)
   ..... zones --map: not run, WE2002_KITS_ZONES_PNG is not set (polipoli's Zonas We2002.png)
 zones-map: 0 failure(s)
 ```
+- **Closed** — commit `9ca8ef33` (2026-10-02): fix(kits): run zones --map in kits_image when WE2002_KITS_ZONES_PNG is set
+  - Files (`git show --name-status 9ca8ef33`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/16-zonas.md`
+    - `M docs/tasks/kits/CORR-KITS-028.md`
+    - `M tools/kits/selftest.py`
