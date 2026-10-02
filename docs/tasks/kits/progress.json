@@ -334,12 +334,12 @@
       "phase": 5,
       "depends_on": [],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#2",
-      "files": ["tools/looks/scene.py", "tools/looks/selftest.py"],
+      "files": ["tools/looks/scene.py", "tools/looks/selftest.py", "tools/looks/controls.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-02",
+      "done_commit": "e6bf293",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

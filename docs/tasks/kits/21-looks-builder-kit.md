@@ -87,4 +87,9 @@ $ ctest --test-dir build -R looks_image -V | grep scene
 ```
 
 O `selftest.py` não precisou mudar: ele já planta o catálogo inteiro, e o controle novo entrou nele pelo `controls.py`, que passou a constar dos arquivos da task.
-
+- **Closed** — commit `e6bf293` (2026-10-02): feat(looks): scene.Builder(kit=...), TEX_A4 by default
+  - Files (`git show --name-status e6bf293`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/21-looks-builder-kit.md`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/scene.py`
