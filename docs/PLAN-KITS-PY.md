@@ -498,7 +498,7 @@ das mangas (§4.3). As duas figuras dividem a imagem de uniforme e se sobrepõem
 em x 48–63. A fase 3 cruza essa lista com o mapa de zonas.
 
 **Veredito, medido em 2026-10-02 ([KITS-TASK-16](/docs/tasks/kits/16-zonas.md)): a
-§4.6 vale, com quatro lacunas declaradas.** O mapa é o `ZONES` do
+§4.6 vale, com seis lacunas declaradas** — tronco e gola nas duas figuras, a gola em dois retângulos cada; o número é o da linha `gaps: (...)` do `cli.py zones`. O mapa é o `ZONES` do
 `tools/kits/core/zones.py` — cada linha remedida do `Zonas We2002.png` do
 polipoli, e `cli.py zones --map <Zonas We2002.png>` confere: nenhum pixel pintado
 fora de zona, e só a zona dos números guarda fundo dentro, porque os dígitos são
