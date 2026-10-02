@@ -58,7 +58,7 @@ COPY := $(WORK)/$(notdir $(IMAGE))
         we2002-ptbr-play we2002-ptbr-play-fresh we2002-ptbr-98 \
         we2002-card-snap we2002-card-list \
         we2002-src-check \
-        mcr mcr-98 mcr-venv looks looks-98 looks-venv
+        mcr mcr-98 mcr-venv looks looks-98 looks-venv kits kits-98
 
 # ------------------------------------------------------------------ help ----
 
@@ -115,6 +115,12 @@ help:
 	@echo '                so (FIGURE=1 o goleiro; ARGS=--wireframe etc.)'
 	@echo '  looks-98      idem, forcando DISPLAY=$(XVFB)'
 	@echo
+	@echo '  Visualizador de uniformes (TEX_*.BIN) -- so le, nao grava:'
+	@echo '  kits          abre a janela do kits na SUA tela (usa o venv do looks)'
+	@echo '                TAG=A4 escolhe o kit; KITS_IMAGE=<bin|cue|TEX> o que'
+	@echo '                abrir; ARGS=--zoom 3 --zones etc. vao ao app.py'
+	@echo '  kits-98       idem, forcando DISPLAY=$(XVFB)'
+	@echo
 	@echo '  fresh        descarta a copia de trabalho e refaz do original'
 	@echo '  test          testes unitarios (sem imagem)'
 	@echo '  test-release  testes no preset release (pega _FORTIFY_SOURCE)'
@@ -136,6 +142,7 @@ help:
 	@echo '              ->  $(GAME_COPY)'
 	@echo 'Cartao .mcr:  $(WE2002_MCR_CARD)  ->  $(MCR_COPY)'
 	@echo 'Imagem looks: $(LOOKS_IMAGE)'
+	@echo 'Imagem kits:  $(KITS_IMAGE)'
 
 # ----------------------------------------------------------------- build ----
 
@@ -841,6 +848,42 @@ looks: $(LOOKS_PY)
 
 looks-98:
 	@$(MAKE) --no-print-directory looks DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
+
+# ------------------------------------------- visualizador de uniformes (kits) -
+
+# O visualizador de uniformes (docs/PLAN-KITS-PY.md). Projeto separado em
+# tools/kits/, que importa o nucleo do tools/looks/ e roda no MESMO venv. SO LE
+# -- nada aqui grava na imagem nem no TEX, entao a imagem de roms/ serve sem
+# copia.
+#
+#   KITS_IMAGE=<arq>   o que abrir: imagem de disco (.bin/.cue) ou um TEX solto,
+#                      reconhecido pelo conteudo. Default: WE2002_LOOKS_IMAGE,
+#                      senao a japonesa de roms/. Vazio abre a janela sem nada,
+#                      e o Abrir... escolhe.
+#   TAG=A4             o kit mostrado (so com disco)
+#   ARGS=...           o resto vai direto ao app.py (--zoom 3 --zones ...)
+#
+# O `--visible` e o ponto do alvo, como no `looks`: o app.py estaciona a janela
+# fora da tela por default, porque e o que o kits_ui roda.
+
+KITS_APP   := tools/kits/ui/app.py
+KITS_IMAGE ?= $(or $(WE2002_LOOKS_IMAGE),roms/japanese-shift-jis.bin)
+TAG        ?=
+
+.PHONY: kits kits-98
+
+kits: $(LOOKS_PY)
+	@test -z '$(KITS_IMAGE)' || test -f '$(KITS_IMAGE)' || { \
+	  echo 'ERRO: arquivo ausente: $(KITS_IMAGE)'; \
+	  echo '      aponte com KITS_IMAGE=<bin|cue|TEX>, ou KITS_IMAGE= para abrir vazio.'; \
+	  exit 1; }
+	@echo '>> $(LOOKS_PY) $(KITS_APP) $(KITS_IMAGE) $(if $(TAG),--tag $(TAG)) --visible $(ARGS)   (DISPLAY=$(DISPLAY))'
+	@env $(if $(XAUTH),XAUTHORITY='$(XAUTH)') \
+	  '$(LOOKS_PY)' '$(KITS_APP)' $(if $(KITS_IMAGE),'$(KITS_IMAGE)') \
+	  $(if $(TAG),--tag '$(TAG)') --visible $(ARGS)
+
+kits-98:
+	@$(MAKE) --no-print-directory kits DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
 
 # ----------------------------------------------------------------- testes ---
 

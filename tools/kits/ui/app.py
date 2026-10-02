@@ -23,6 +23,9 @@ work/venv-looks/bin/python on Linux):
         --zoom 4 --zones --screenshot out.png
     <venv>/python tools/kits/ui/app.py <rom> --walk
     <venv>/python tools/kits/ui/app.py <rom> --tag 00 --hover 15,10
+
+On Linux `make kits` (`make kits-98` for the Xvfb) runs it with `--visible`:
+TAG=, KITS_IMAGE=, ARGS=.
 """
 
 from __future__ import annotations
