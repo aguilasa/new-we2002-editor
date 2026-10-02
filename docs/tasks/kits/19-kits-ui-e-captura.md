@@ -166,3 +166,4 @@ A planta nova não foi rodada no Windows: lá a corrida de `19a3e733` viu a anti
     - `M docs/PLAN-KITS-PY.md`
     - `M docs/tasks/kits/19-kits-ui-e-captura.md`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-02) at `05f246b`: CORR-KITS-033, CORR-KITS-034

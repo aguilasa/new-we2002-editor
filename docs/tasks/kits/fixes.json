@@ -417,6 +417,32 @@
       "depends_on": [],
       "done_on": "2026-10-02",
       "done_commit": "30773b88"
+    },
+    {
+      "id": "CORR-KITS-033",
+      "file": "CORR-KITS-033.md",
+      "title": "Levar a troca da planta \"no Fusion\" à docstring, ao comentário do ctest e às Notas",
+      "origin": "KITS-TASK-19",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-034",
+      "file": "CORR-KITS-034.md",
+      "title": "Desinverter a afirmação de caminho relativo/absoluto nas Notas da task",
+      "origin": "KITS-TASK-19",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
