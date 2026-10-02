@@ -37,6 +37,9 @@ from .tex import decompress_stream as _decompress_stream
 from .teams import ORIGIN_ROM, ORIGIN_TABLE, TeamEntry  # noqa: F401
 from .flat import (FIGURES, GAME_PAIRS, KIT_SETS, WORK_H, WORK_W,  # noqa: F401
                    FlatImage, PaletteEntry, paint, palette_rgba)
+from .flat import PALETTE_OF as WORK_PALETTE  # noqa: F401
+from .flat import SLEEVES as SLEEVES_OF_SET  # noqa: F401
+from .flat import UNIFORM as UNIFORM_OF_SET  # noqa: F401
 from .zones import (CLASSES as ZONE_CLASSES, GAPS, GLYPH_ZONES,  # noqa: F401
                     MAP_BACKGROUND, MEASURES, ZONES, Confrontation, Gap, MapCheck,
                     Measure, Placed, Zone)
@@ -59,7 +62,7 @@ __all__ = (
     "decompress_stream", "StreamError",
     "TeamEntry", "ORIGIN_TABLE", "ORIGIN_ROM",
     "FlatImage", "PaletteEntry", "paint", "palette_rgba", "GAME_PAIRS", "KIT_SETS", "FIGURES",
-    "WORK_W", "WORK_H",
+    "WORK_W", "WORK_H", "WORK_PALETTE", "UNIFORM_OF_SET", "SLEEVES_OF_SET",
     "zone_at", "Zone", "ZONES", "Gap", "GAPS", "Measure", "MEASURES", "ZONE_CLASSES",
     "confront_zones", "Confrontation", "Placed", "shifted_zones", "zone_agreement",
     "map_check", "MapCheck", "MAP_BACKGROUND", "GLYPH_ZONES", "zones_self_check",

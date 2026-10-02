@@ -340,16 +340,27 @@ def core_rule_breaks() -> list:
 
 FACADE_CLIENTS = ("cli.py", "confront.py")
 """Files of tools/kits that may import nothing of the core but `core.api`
-(section 3.1); the window's `ui/` joins them when it exists."""
+(section 3.1)."""
+UI_DIR = "ui"
+UI_TOOLKIT = "PySide6"
+"""The window's files are facade clients too, and the only ones that may
+import the toolkit."""
 
 
-def facade_breaks() -> list:
-    """(file, line, module) for every import in FACADE_CLIENTS that is
-    neither the standard library nor `core.api`."""
+def ui_clients() -> tuple:
+    folder = os.path.join(KITS_DIR, UI_DIR)
+    if not os.path.isdir(folder):
+        return ()
+    return tuple(UI_DIR + "/" + n for n in sorted(os.listdir(folder)) if n.endswith(".py"))
+
+
+def facade_breaks(clients=FACADE_CLIENTS, allowed=()) -> list:
+    """(file, line, module) for every import in *clients* that is neither
+    the standard library, `core.api` nor a top-level module in *allowed*."""
     import ast
 
     out = []
-    for name in FACADE_CLIENTS:
+    for name in clients:
         path = os.path.join(KITS_DIR, name)
         with open(path, encoding="utf-8") as fh:
             tree = ast.parse(fh.read(), path)
@@ -367,7 +378,7 @@ def facade_breaks() -> list:
                 continue
             for mod in mods:
                 top = mod.split(".")[0]
-                if (mod == "core.api" or top == "__future__"
+                if (mod == "core.api" or top == "__future__" or top in allowed
                         or (top and top in sys.stdlib_module_names)):
                     continue
                 out.append((name, node.lineno, mod))
@@ -382,6 +393,11 @@ def _rule_checks(c) -> None:
     c.ok("cli.py and confront.py import only core.api and the standard library "
          "(section 3.1)",
          breaks == [], "%s" % breaks)
+    clients = ui_clients()
+    breaks = c.attempt("sweep the window",
+                       lambda: facade_breaks(clients, (UI_TOOLKIT,)), default=None)
+    c.ok("ui/ imports only PySide6, core.api and the standard library (section 3.1)",
+         bool(clients) and breaks == [], "%s in %s" % (breaks, clients))
 
 
 # -- 4. the negative controls ----------------------------------------------

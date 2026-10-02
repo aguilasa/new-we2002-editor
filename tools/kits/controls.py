@@ -148,6 +148,14 @@ CONTROLS = (
         "nothing about the decoder",
     ),
     Control(
+        "ui-imports-core", "kits/ui/app.py", "module imports",
+        "from core import api  # noqa: E402",
+        "from core import api, zones  # noqa: E402",
+        "FAIL  ui/ imports only PySide6, core.api and the standard library",
+        "section 3.1: the window draws what the facade returns; reaching past it "
+        "is the coupling the facade exists to stop",
+    ),
+    Control(
         "zones-front-moved", "kits/core/zones.py", "ZONES",
         '    _z("shirt front", PLAYER, 12, 8, 20, 22),',
         '    _z("shirt front", PLAYER, 13, 8, 20, 22),',
