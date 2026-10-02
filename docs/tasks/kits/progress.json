@@ -304,7 +304,7 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#3.4",
       "files": ["tools/kits/ui_check.py", "tests/CMakeLists.txt"],
       "resources": ["tela"],
-      "status": "blocked",
+      "status": "pending",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,
