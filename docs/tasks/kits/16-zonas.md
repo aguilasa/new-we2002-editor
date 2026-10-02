@@ -127,3 +127,4 @@ $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir $TEMP/bui
     - `M tools/kits/core/api.py`
     - `A tools/kits/core/zones.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-02) at `62f74808`: CORR-KITS-028, CORR-KITS-029, CORR-KITS-030, CORR-KITS-031

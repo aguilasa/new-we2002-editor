@@ -259,8 +259,8 @@
       "status": "done",
       "done_on": "2026-10-02",
       "done_commit": "d8f46392",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-02",
+      "review_commit": "62f74808"
     },
     {
       "id": "KITS-TASK-17",
