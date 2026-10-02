@@ -52,3 +52,37 @@ $ python tools/kits/controls.py | tail -1
 Hoje dá "13 of 13"; depois tem de listar os três controles novos vermelhos.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `eaeb6838`)
+
+```text
+$ grep -n "zones" tools/kits/controls.py
+151:        "zones-front-moved", "kits/core/zones.py", "ZONES",
+154:        "FAIL  zones.self_check() reports no failure",
+156:        "overlap its neighbour (section 5, control 4 on the disc is `cli.py zones "
+```
+
+REPRODUCED: só o `zones-front-moved`; nenhum controle nem check toca `unsampled_unexplained`, `sampled_but_excused` ou `gaps_unused`.
+
+### O que foi feito
+
+- `tools/kits/selftest.py`: casos puros no bloco do mapa, sobre um mapa de três zonas e uma lacuna montados ali — uma zona sem amostra e sem motivo, uma com motivo e amostrada, uma lacuna que ninguém amostra —, cada um exigindo que o seu ramo do `Confrontation` a nomeie, e o veredito `ok` falso. Rodam no `kits_selftest`, sem disco.
+- `tools/kits/controls.py`: três controles, um por ramo, que trocam o corpo da propriedade por `return ()` e exigem a linha FAIL do caso correspondente. Plantam a lógica, não os dados do `ZONES`/`GAPS` — os plantios de dados da revisão só ficam vermelhos com o disco, e o `controls.py` roda o `kits_selftest`, sem disco.
+
+### Verificação
+
+```text
+$ env -u WE2002_LOOKS_IMAGE python tools/kits/selftest.py --no-plant | grep -E "section 4.6|verdict says|kits_selftest"
+  ok    a zone nobody samples, with no reason, fails section 4.6
+  ok    a zone excused from sampling, and sampled, fails section 4.6
+  ok    a declared gap nobody samples fails section 4.6
+  ok    and the verdict says so
+kits_selftest: 0 failure(s)
+$ python tools/kits/controls.py | tail -4
+  RED    zones-quiet-unexplained      kits/core/zones.py :: Confrontation.unsampled_unexplained
+  RED    zones-excused-sampled        kits/core/zones.py :: Confrontation.sampled_but_excused
+  RED    zones-gap-unused             kits/core/zones.py :: Confrontation.gaps_unused
+controls: 16 of 16 red
+$ python tools/kits/cli.py zones roms/japanese-shift-jis.bin | tail -1
+verdict: section 4.6 holds
+```

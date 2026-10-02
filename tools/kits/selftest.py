@@ -294,6 +294,26 @@ def _core_checks(c) -> None:
     ok("a rect falls in one zone, across two, in a gap, or outside the map",
        got == zones.CLASSES, got)
 
+    # The other three ways section 4.6 fails (CORR-KITS-031), on a map of
+    # four rows built here: a quiet zone with no reason, an excused zone that
+    # is sampled, and a gap nobody samples.
+    quiet = zones.Zone("quiet", 0, 10, 0, 4, 4, "selftest")
+    excused = zones.Zone("excused", 0, 20, 0, 4, 4, "selftest", "planted reason")
+    mini = (zones.Zone("sampled", 0, 0, 0, 4, 4, "selftest"), quiet, excused)
+    gap = zones.Gap("unused", 0, 30, 0, 2, 2, "planted")
+    rects = tuple(m.UvRect(file="f", section=0, primitive=i, role="uniform", rect=r, outside="")
+                  for i, r in enumerate(((0, 0, 1, 1), (20, 0, 21, 1))))
+    con = zones.confront(m.UvReport(source="", kit="", tuple_text="",
+                                    figures=(m.FigureUv(figure=0, rects=rects),)),
+                         mini, (gap,))
+    ok("a zone nobody samples, with no reason, fails section 4.6",
+       con.unsampled_unexplained == (quiet,), con.unsampled_unexplained)
+    ok("a zone excused from sampling, and sampled, fails section 4.6",
+       con.sampled_but_excused == (excused,), con.sampled_but_excused)
+    ok("a declared gap nobody samples fails section 4.6",
+       con.gaps_unused == (gap,), con.gaps_unused)
+    ok("and the verdict says so", not con.ok)
+
 
 # -- 3. the rules of section 3.1 on the core -------------------------------
 

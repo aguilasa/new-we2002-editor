@@ -156,6 +156,29 @@ CONTROLS = (
         "overlap its neighbour (section 5, control 4 on the disc is `cli.py zones "
         "--negative`)",
     ),
+    Control(
+        "zones-quiet-unexplained", "kits/core/zones.py", "Confrontation.unsampled_unexplained",
+        "        return tuple(z for z, n in self.sampled if not n and not z.unsampled)",
+        "        return ()",
+        "FAIL  a zone nobody samples, with no reason, fails section 4.6",
+        "section 4.6: a quiet zone has to say why (CORR-KITS-031)",
+    ),
+    Control(
+        "zones-excused-sampled", "kits/core/zones.py", "Confrontation.sampled_but_excused",
+        "        return tuple(z for z, n in self.sampled if n and z.unsampled)",
+        "        return ()",
+        "FAIL  a zone excused from sampling, and sampled, fails section 4.6",
+        "section 4.6: a reason for silence on a zone that is sampled is a wrong "
+        "reason (CORR-KITS-031)",
+    ),
+    Control(
+        "zones-gap-unused", "kits/core/zones.py", "Confrontation.gaps_unused",
+        "        return tuple(g for g in self.gaps if (g.name, g.figure) not in used)",
+        "        return ()",
+        "FAIL  a declared gap nobody samples fails section 4.6",
+        "section 4.6: a gap is declared because the game samples it; one that "
+        "nobody samples is stale (CORR-KITS-031)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 
