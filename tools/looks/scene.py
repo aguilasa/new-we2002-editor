@@ -445,6 +445,13 @@ class Builder:
 
     It lives here and not in the window for rule 3: opening the disc is
     `iso_source`'s, and `ui/` may not import it.
+
+    *kit* is the tag of the kit container the body is dressed in, any of the
+    105 `layout.KIT_DIGEST` knows (PLAN-KITS-PY.md section 2, KITS-TASK-21).
+    Without it the figure wears `layout.KIT_ON_SCREEN`, the one the LOOKS SET
+    screen wears, which is what this class drew before the argument existed.
+    A tag nobody measured is refused by `layout.kit_path` before the disc is
+    opened.
     """
 
     __slots__ = ("image_path", "figure", "frame", "kit", "_data", "_art",
@@ -452,23 +459,23 @@ class Builder:
                  "_posed")
 
     def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE,
-                 frame: int = None):
+                 frame: int = None, kit: str = layout.KIT_ON_SCREEN):
         import iso_source
 
+        container = layout.kit_path(kit)
         self.image_path = image_path
         self.figure = figure
         # The frame every `build` poses in unless one is named.  The screen
         # carries it so that the panel opens with the figure ASSEMBLED, which
         # is what LOOKS-TASK-27 delivers; `None` is the shelf, still reachable.
         self.frame = frame
-        self.kit = layout.KIT_ON_SCREEN
+        self.kit = kit
         with iso_source.open_disc(image_path) as disc:
             self._data = {name: disc.read(name)
                           for name in (layout.EDT_MOD, layout.MODEL,
                                        layout.DAT2D, layout.ANIME,
                                        layout.SELECT8, layout.EDT_2D,
-                                       layout.SELECTC,
-                                       layout.kit_path(self.kit))}
+                                       layout.SELECTC, container)}
         self._art = None
         self._font = None
         # The walk (LOOKS-TASK-33): with it on, `walk_build` poses by pass and
@@ -2555,10 +2562,59 @@ def _checks(c) -> None:
     ok("and a point behind the lens has no pixel",
        clip_to_pixel(behind, size) is None)
 
+    # Builder(kit=...) (KITS-TASK-21), with no disc: a made-up one hands every
+    # file back as its own name, so which container the builder read and which
+    # tag it passes on to build() can be told apart without a single real byte.
+    _builder_kit(c)
+
     ok("the scene reports what it could not texture instead of hiding it",
        set(Scene([], {}, {}, 0, {"no image": 0}).notes) == {"no image"})
     refuses("an empty scene refuses to have bounds",
             lambda: Scene([], {}, {}, 0, {}).bounds(), "empty scene")
+
+
+def _builder_kit(c) -> None:
+    """Which kit a Builder reads and builds with, on a disc of names."""
+    import iso_source
+
+    class _NameDisc:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self, name):
+            return name.encode("ascii")
+
+    passed = []
+
+    def _capture(data, values, figure=None, frame=None, kit=None):
+        passed.append(kit)
+        return kit
+
+    opened, built = iso_source.open_disc, globals()["build"]
+    iso_source.open_disc = lambda path: _NameDisc()
+    globals()["build"] = _capture
+    try:
+        default = Builder("made-up.bin")
+        other = Builder("made-up.bin", kit="00")
+        default.build(assembly.CORPUS_REFERENCE)
+        other.build(assembly.CORPUS_REFERENCE)
+    finally:
+        iso_source.open_disc, globals()["build"] = opened, built
+    c.ok("with no kit named, the Builder wears TEX_A4, the screen's kit",
+         default.kit == layout.KIT_ON_SCREEN == "A4"
+         and layout.kit_path("A4") in default._data, "%r" % default.kit)
+    c.ok("Builder(kit='00') reads TEX_00 and not TEX_A4",
+         other._data.get(layout.kit_path("00")) == layout.kit_path("00").encode("ascii")
+         and layout.kit_path("A4") not in other._data,
+         "%s" % sorted(k for k in other._data if "TEX_" in k))
+    c.ok("and builds with the tag it was given", passed == ["A4", "00"],
+         "%r" % passed)
+    c.refusing(layout.WrongDisc)(
+        "a tag nobody measured, before the disc is opened",
+        lambda: Builder("no-such.bin", kit="ZZ"), "kit tags measured")
 
 
 # ---- the disc ------------------------------------------------------------
@@ -2596,6 +2652,20 @@ def _check_image(image_path: str) -> int:
             problems.append("figure %d left %d primitive(s) untextured with "
                             "the kit container read"
                             % (figure, counts["parts"] - counts["textured"]))
+    # Another kit, through the Builder (KITS-TASK-21): every surface the body
+    # samples has to come out of THAT container, and none out of TEX_A4.
+    other_tag = "00"
+    other = Builder(image_path, kit=other_tag).build(assembly.CORPUS_REFERENCE)
+    containers = {key[0] for key in other.surfaces}
+    print("      Builder(kit=%r): surfaces from %s"
+          % (other_tag, sorted(c for c in containers if c)))
+    if layout.kit_path(other_tag) not in containers:
+        problems.append("Builder(kit=%r) sampled nothing from %s"
+                        % (other_tag, layout.kit_path(other_tag)))
+    if layout.kit_path(layout.KIT_ON_SCREEN) in containers:
+        problems.append("Builder(kit=%r) still sampled %s"
+                        % (other_tag, layout.kit_path(layout.KIT_ON_SCREEN)))
+
     # And the red case beside it, so the line above is a measurement and not a
     # description: with no kit, the body is grey.
     bare = summary(from_image(image_path, assembly.CORPUS_REFERENCE,

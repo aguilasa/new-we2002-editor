@@ -139,8 +139,8 @@ pequenas custaria mais do que fazê-las aqui. Elas são **aditivas**: default
 igual ao de hoje, e os gates do `looks` (`looks_selftest`, `looks_image`,
 `looks_ui`, `looks_live`) continuam verdes depois delas.
 
-1. **`scene.Builder(kit=...)`**, com o `TEX_A4` de default — hoje só o caminho
-   de tupla avulsa aceita outra tag.
+1. **`scene.Builder(kit=...)`**, com o `TEX_A4` de default — antes só o caminho
+   de tupla avulsa aceitava outra tag. Feito na KITS-TASK-21.
 2. **Escolha do conjunto.** Um parâmetro `kit_set` (1 = titular, 2 = suplente)
    que faça o banco do TEX entregar o 2º par de registros em vez do 1º. A
    pergunta é de ordem de busca, e a resposta cabe no banco — o resto do

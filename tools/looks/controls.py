@@ -857,6 +857,15 @@ CONTROLS = (
         "loaded at 210 cm is what says no (LOOKS-TASK-29)",
     ),
     Control(
+        "scene-builder-default-kit", "scene.py", "Builder.__init__",
+        "                 frame: int = None, kit: str = layout.KIT_ON_SCREEN):",
+        '                 frame: int = None, kit: str = "00"):',
+        ("scene",),
+        "the Builder with no kit named has to wear the screen's TEX_A4; any "
+        "other default dresses every figure of the LOOKS SET screen in "
+        "somebody else's kit, textured and plausible (KITS-TASK-21)",
+    ),
+    Control(
         "scene-standing-accepts-any-order", "scene.py", "standing",
         "                    and middles[above] * UP < middles[below] * UP:",
         "                    and False:",
