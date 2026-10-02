@@ -538,7 +538,10 @@ visível"), o calção do goleiro (64×18 contra 32×18, uma perna só no mapa) 
 O controle 4 do §5 é `cli.py zones --negative`: com o mapa deslocado 1 px à
 direita, 11 primitivas do jogador e 5 do goleiro caem fora do mapa e o veredito
 reprova; o `--map --negative` faz o mesmo contra o PNG (248 pixels pintados fora
-de zona). Os dois rodam no `kits_image`.
+de zona). Os dois rodam no `kits_image`; os dois do `--map` só quando
+`WE2002_KITS_ZONES_PNG` aponta o `Zonas We2002.png` do polipoli, que é arquivo do
+usuário e não entra no repositório — sem a variável o `kits_image` diz que não os
+rodou ([CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md)).
 
 ## 5. Como se verifica
 

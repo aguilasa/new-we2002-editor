@@ -65,7 +65,7 @@ verdict: section 4.6 holds
 
 (As 16 zonas saem uma por linha na saída; cortadas aqui, estão na §4.6 do plano.)
 
-O mapa contra o PNG do polipoli, onde ele está na pasta do usuário:
+O mapa contra o PNG do polipoli, onde ele está na pasta do usuário (`<…>` é `…/Superpackv6/We2002/TEX` nesta máquina; desde a [CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md) o `kits_image` roda os dois `--map` abaixo quando `WE2002_KITS_ZONES_PNG` aponta esse arquivo):
 
 ```
 $ python tools/kits/cli.py zones --map "<…>/Zonas kits y tex - polipoli/We2002/Zonas We2002.png"      # exit 0

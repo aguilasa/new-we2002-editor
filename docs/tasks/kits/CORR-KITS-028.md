@@ -47,3 +47,60 @@ $ grep -n "\-\-map" tools/kits/selftest.py
 Hoje não sai nada; depois tem de mostrar as chamadas `--map` e `--map --negative`. Na alternativa sem gate, `grep -c "Os dois rodam no" docs/PLAN-KITS-PY.md` vai de 1 a 0.
 
 ## Log de Execução
+
+### Reprodução (`rite reproduce --all --cycle kits`, HEAD `eaeb6838`)
+
+```text
+$ grep -c "\-\-map" tools/kits/selftest.py
+0
+$ grep -n "Os dois rodam" docs/PLAN-KITS-PY.md
+541:de zona). Os dois rodam no `kits_image`.
+```
+
+REPRODUCED. O PNG existe nesta máquina, fora de onde a revisão procurou: `C:/games/we2002/Superpackv6/We2002/TEX/Zonas kits y tex - polipoli/We2002/Zonas We2002.png` (2.039 bytes). Com ele os dois números do Log se reproduzem:
+
+```text
+$ python tools/kits/cli.py zones --map ".../Zonas We2002.png" | tail -2; echo exit ${PIPESTATUS[0]}
+map: 0 pixel(s) painted and in no zone, 1 zone(s) holding the background (numbers 0-9 by design)
+verdict: every row of the map is the picture
+exit 0
+$ python tools/kits/cli.py zones --map ".../Zonas We2002.png" --negative | grep -i "pixel\|held"
+map: 248 pixel(s) painted and in no zone, 30 zone(s) holding the background
+control red, held: the moved map fails
+```
+
+### O que foi feito
+
+Primeira forma do conserto (gate, não frase):
+
+- `tools/kits/selftest.py`: `_zones_map_checks`, chamado do `_zones_checks` do `kits_image`. Com `WE2002_KITS_ZONES_PNG` definida, roda `zones --map` (exige "every row of the map is the picture") e `zones --map --negative` (exige "control red, held"); variável definida e caminho que não é arquivo é falha; sem a variável, imprime que não rodou.
+- §4.6 do plano: "Os dois rodam no `kits_image`" diz agora em que condição o `--map` roda.
+- KITS-TASK-16: o `<…>` do Log ganhou o caminho desta máquina e a variável.
+
+### Verificação
+
+```text
+$ grep -n "\-\-map" tools/kits/selftest.py
+(as chamadas "zones", "--map", png e "zones", "--map", png, "--negative" do _zones_map_checks)
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin WE2002_KITS_ZONES_PNG=".../Zonas We2002.png" python tools/kits/selftest.py --image | tail -5; echo exit $?
+  ok    section 5 control 4: the zone map moved 1 px fails section 4.6
+  ok    WE2002_KITS_ZONES_PNG points at a file
+  ok    zones --map: every row of the map is polipoli's picture
+  ok    zones --map --negative: the map moved 1 px fails against the picture
+kits_image: 0 failure(s)
+exit 0
+```
+
+O check visto falhando — a variável apontando outro mapa do polipoli (`Pes2009/Zonas Pes2009.png`), e um caminho que não existe:
+
+```text
+  FAIL  zones --map: every row of the map is polipoli's picture  exit 1
+  FAIL  zones --map --negative: the map moved 1 px fails against the picture  exit 1
+zones-map: 2 failure(s)
+---
+  FAIL  WE2002_KITS_ZONES_PNG points at a file  C:/nope/z.png
+zones-map: 1 failure(s)
+---  (sem a variável)
+  ..... zones --map: not run, WE2002_KITS_ZONES_PNG is not set (polipoli's Zonas We2002.png)
+zones-map: 0 failure(s)
+```

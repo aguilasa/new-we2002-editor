@@ -485,6 +485,35 @@ def _zones_checks(c, image_path) -> None:
                           capture_output=True, text=True)
     c.ok("section 5 control 4: the zone map moved 1 px fails section 4.6",
          proc.returncode == 0 and "red, held" in proc.stdout, "exit %d" % proc.returncode)
+    _zones_map_checks(c, cli)
+
+
+ZONES_PNG_VARIABLE = "WE2002_KITS_ZONES_PNG"
+"""polipoli's `Zonas We2002.png`, a file of the user's (never in the repo).
+Unset: the --map half is not run, and says so; set to no file: a failure."""
+
+
+def _zones_map_checks(c, cli) -> None:
+    """`cli.py zones --map`: every row of ZONES is polipoli's picture, and the
+    map moved 1 px against the same picture has to fail (CORR-KITS-028)."""
+    png = os.environ.get(ZONES_PNG_VARIABLE)
+    if not png:
+        print("  ..... zones --map: not run, %s is not set (polipoli's Zonas We2002.png)"
+              % ZONES_PNG_VARIABLE)
+        return
+    c.ok("%s points at a file" % ZONES_PNG_VARIABLE, os.path.isfile(png), png)
+    if not os.path.isfile(png):
+        return
+    proc = subprocess.run([sys.executable, cli, "zones", "--map", png],
+                          capture_output=True, text=True)
+    c.ok("zones --map: every row of the map is polipoli's picture",
+         proc.returncode == 0 and "verdict: every row of the map is the picture" in proc.stdout,
+         "exit %d" % proc.returncode)
+    proc = subprocess.run([sys.executable, cli, "zones", "--map", png, "--negative"],
+                          capture_output=True, text=True)
+    c.ok("zones --map --negative: the map moved 1 px fails against the picture",
+         proc.returncode == 0 and "control red, held" in proc.stdout,
+         "exit %d" % proc.returncode)
 
 
 CONFRONT_LINE = re.compile(r"^confront 1: (\d+) of (\d+) tags equal", re.MULTILINE)
