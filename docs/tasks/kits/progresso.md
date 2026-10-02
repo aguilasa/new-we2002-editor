@@ -92,7 +92,7 @@ graph TD
 | [KITS-TASK-12](/docs/tasks/kits/12-gerador-de-nomes.md) | Gerador de `generated/` a partir do C++, com `--check` no ctest | 2 | ferramenta | KITS-TASK-11 | done | 2026-10-01 | 2026-10-01 |
 | [KITS-TASK-13](/docs/tasks/kits/13-nomes-dos-times.md) | `teams.py` e `cli.py teams`: nome da ROM ou tabela inglesa, decidido pelo disco | 2 | implementação | KITS-TASK-12 | done | 2026-10-01 | 2026-10-01 |
 | [KITS-TASK-14](/docs/tasks/kits/14-fechamento-fase-2.md) | Fechamento da fase 2 — núcleo, lado ROM | 2 | closing | KITS-TASK-12, KITS-TASK-13 | done | 2026-10-01 | 2026-10-02 |
-| [KITS-TASK-15](/docs/tasks/kits/15-flat.md) | `flat.py`: imagem + paleta em RGBA, o bitmap de trabalho e a grade 16×16 | 3 | implementação | KITS-TASK-11 | done | 2026-10-02 | pending |
+| [KITS-TASK-15](/docs/tasks/kits/15-flat.md) | `flat.py`: imagem + paleta em RGBA, o bitmap de trabalho e a grade 16×16 | 3 | implementação | KITS-TASK-11 | done | 2026-10-02 | 2026-10-02 |
 | [KITS-TASK-16](/docs/tasks/kits/16-zonas.md) | `zones.py` com proveniência, e a §4.6 fechada contra a geometria | 3 | verificação | KITS-TASK-15, KITS-TASK-04 | pending | — | — |
 | [KITS-TASK-17](/docs/tasks/kits/17-fechamento-fase-3.md) | Fechamento da fase 3 — plano e zonas, sem janela | 3 | closing | KITS-TASK-15, KITS-TASK-16 | pending | — | — |
 | [KITS-TASK-18](/docs/tasks/kits/18-janela-minima.md) | Janela mínima: Abrir, combobox de tags, aba Plano, estilo Fusion fixo | 4 | implementação | KITS-TASK-14, KITS-TASK-17 | pending | — | — |

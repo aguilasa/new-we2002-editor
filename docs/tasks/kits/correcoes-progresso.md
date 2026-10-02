@@ -29,4 +29,5 @@
 | [CORR-KITS-024](/docs/tasks/kits/CORR-KITS-024.md) | Keep cross-task notes out of the task's commit or declare them | KITS-TASK-10 | low | done | 2026-10-01 |
 | [CORR-KITS-025](/docs/tasks/kits/CORR-KITS-025.md) | Correct the club 63 empty in both fields claim in the task Notes | KITS-TASK-13 | medium | done | 2026-10-01 |
 | [CORR-KITS-026](/docs/tasks/kits/CORR-KITS-026.md) | Correct why golden_tool exits 127 under Git Bash | KITS-TASK-13 | low | done | 2026-10-01 |
+| [CORR-KITS-027](/docs/tasks/kits/CORR-KITS-027.md) | Give the index-past-palette count a red control or drop it | KITS-TASK-15 | medium | pending | — |
 <!-- rite:end -->

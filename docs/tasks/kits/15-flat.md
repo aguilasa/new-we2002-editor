@@ -106,3 +106,4 @@ kits_selftest: 0 failure(s)
     - `M tools/kits/core/api.py`
     - `A tools/kits/core/flat.py`
     - `M tools/kits/core/tex.py`
+- **Reviewed** (2026-10-02) at `a9bddf9c`: CORR-KITS-027
