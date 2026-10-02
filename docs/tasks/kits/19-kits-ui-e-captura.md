@@ -161,3 +161,8 @@ A planta nova não foi rodada no Windows: lá a corrida de `19a3e733` viu a anti
 
 - **blocked** (2026-10-02): criterion 3 needs the Linux machine (:98): criteria 1-2 done in 19a3e733 (kits_ui passes, 77 without venv/image, the Fusion and QPalette plants red); the Windows capture is work/kits-ui-windows.png (sha256 e973a8aa5991a7ff..). Unblock on Linux, from the repo root, with that PNG copied to work/: DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png && python3 tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-linux.png
 - **pending** (2026-10-02): Linux machine at hand: :98 up, venv-looks present, Windows capture readable at /media/ingmar/win (sha256 e973a8aa5991a7ff..)
+- **Closed** — commit `f85aa85` (2026-10-02): test(kits): Linux half of KITS-TASK-19 -- the Windows/Linux capture compared, and a Fusion plant that bites on Linux
+  - Files (`git show --name-status f85aa85`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/19-kits-ui-e-captura.md`
+    - `M tools/kits/ui_check.py`

@@ -304,10 +304,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#3.4",
       "files": ["tools/kits/ui_check.py", "tests/CMakeLists.txt"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-02",
+      "done_commit": "f85aa85",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
