@@ -469,6 +469,32 @@
       "depends_on": [],
       "done_on": "2026-10-02",
       "done_commit": "7544e13"
+    },
+    {
+      "id": "CORR-KITS-037",
+      "file": "CORR-KITS-037.md",
+      "title": "Cobrir no gate o kit que Builder.walk_build passa ao build()",
+      "origin": "KITS-TASK-21",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-038",
+      "file": "CORR-KITS-038.md",
+      "title": "Trocar a linha narrativa \"$ (a mesma troca...)\" do Log por um comando",
+      "origin": "KITS-TASK-21",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

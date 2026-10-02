@@ -151,7 +151,7 @@ graph TD
 | [KITS-TASK-18](/docs/tasks/kits/18-janela-minima.md) | Janela mínima: Abrir, combobox de tags, aba Plano, estilo Fusion fixo | 4 | implementação | KITS-TASK-14, KITS-TASK-17 | done | 2026-10-02 | 2026-10-02 |
 | [KITS-TASK-19](/docs/tasks/kits/19-kits-ui-e-captura.md) | Gate `kits_ui` e a mesma captura no Windows e no Linux | 4 | verificação | KITS-TASK-18 | done | 2026-10-02 | 2026-10-02 |
 | [KITS-TASK-20](/docs/tasks/kits/20-fechamento-fase-4.md) | Fechamento da fase 4 — a janela mínima | 4 | closing | KITS-TASK-18, KITS-TASK-19 | done | 2026-10-02 | 2026-10-02 |
-| [KITS-TASK-21](/docs/tasks/kits/21-looks-builder-kit.md) | `scene.Builder(kit=...)` no `looks`, com `TEX_A4` de default | 5 | implementação | — | done | 2026-10-02 | pending |
+| [KITS-TASK-21](/docs/tasks/kits/21-looks-builder-kit.md) | `scene.Builder(kit=...)` no `looks`, com `TEX_A4` de default | 5 | implementação | — | done | 2026-10-02 | 2026-10-02 |
 | [KITS-TASK-22](/docs/tasks/kits/22-looks-kit-set.md) | Parâmetro `kit_set`: o banco do TEX entrega o 2º par de registros | 5 | implementação | KITS-TASK-21 | pending | — | — |
 | [KITS-TASK-23](/docs/tasks/kits/23-fechamento-fase-5.md) | Fechamento da fase 5 — as duas mudanças no `looks` | 5 | closing | KITS-TASK-21, KITS-TASK-22 | pending | — | — |
 | [KITS-TASK-24](/docs/tasks/kits/24-figura.md) | `figure.py` e `api.figure`: a única ponte com o `looks` | 6 | implementação | KITS-TASK-20, KITS-TASK-23 | pending | — | — |

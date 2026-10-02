@@ -93,3 +93,4 @@ O `selftest.py` não precisou mudar: ele já planta o catálogo inteiro, e o con
     - `M docs/tasks/kits/21-looks-builder-kit.md`
     - `M tools/looks/controls.py`
     - `M tools/looks/scene.py`
+- **Reviewed** (2026-10-02) at `a417961`: CORR-KITS-037, CORR-KITS-038
