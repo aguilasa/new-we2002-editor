@@ -73,3 +73,7 @@ $ python tools/kits/cli.py zones roms/japanese-shift-jis.bin | sed -n '/15 zone(
 $ sed -n 468,476p docs/PLAN-KITS-PY.md | grep -c "números"
 1
 ```
+- **Closed** — commit `9638e231` (2026-10-02): docs(kits): state plan 4.6's rule as the two reasons the zone check accepts
+  - Files (`git show --name-status 9638e231`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-029.md`

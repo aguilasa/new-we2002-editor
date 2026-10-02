@@ -31,7 +31,7 @@
 | [CORR-KITS-026](/docs/tasks/kits/CORR-KITS-026.md) | Correct why golden_tool exits 127 under Git Bash | KITS-TASK-13 | low | done | 2026-10-01 |
 | [CORR-KITS-027](/docs/tasks/kits/CORR-KITS-027.md) | Give the index-past-palette count a red control or drop it | KITS-TASK-15 | medium | done | 2026-10-02 |
 | [CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md) | Gate the zone-map-vs-PNG check, or stop saying kits_image runs it | KITS-TASK-16 | medium | done | 2026-10-02 |
-| [CORR-KITS-029](/docs/tasks/kits/CORR-KITS-029.md) | Reconcile the 4.6 unsampled-zone rule with the verdict | KITS-TASK-16 | medium | pending | — |
+| [CORR-KITS-029](/docs/tasks/kits/CORR-KITS-029.md) | Reconcile the 4.6 unsampled-zone rule with the verdict | KITS-TASK-16 | medium | done | 2026-10-02 |
 | [CORR-KITS-030](/docs/tasks/kits/CORR-KITS-030.md) | Make the 4.6 gap count match the tool's six gaps | KITS-TASK-16 | low | pending | — |
 | [CORR-KITS-031](/docs/tasks/kits/CORR-KITS-031.md) | Plant controls for the three other 4.6 failure branches | KITS-TASK-16 | low | pending | — |
 <!-- rite:end -->
