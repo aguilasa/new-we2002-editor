@@ -48,6 +48,7 @@ O critério 2 — a captura do estado da KITS-TASK-19 refeita na HEAD, contra a 
 $ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin \
     --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux-head.png
   wrote work/kits-ui-linux-head.png, 980x640
+  TEX_00 · imagem bitmap de trabalho, 1º conjunto · paleta player palette, first set · /BIN/TEX_00.BIN on roms/japanese-shift-jis.bin, 29944 bytes
   window up, at -32000,-32000
 $ python3 tools/kits/ui_check.py --compare work/kits-ui-linux.png work/kits-ui-linux-head.png | tail -1
 0 of 627200 pixels differ (0.00 %)

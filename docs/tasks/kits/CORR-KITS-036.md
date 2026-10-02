@@ -42,3 +42,25 @@ grep -c '29944 bytes' docs/tasks/kits/20-fechamento-fase-4.md
 Dá 0 hoje; 1 depois do conserto (ou a linha de "…" no lugar do corte).
 
 ## Log de Execução
+
+### 2026-10-02
+
+Reproduzido na HEAD `ebb76eb`, rodando o comando exato do Log (que regrava `work/kits-ui-linux-head.png`; a cópia anterior guardada no scratchpad dá `0 of 627200 pixels differ (0.00 %)` contra a nova):
+
+```
+$ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux-head.png
+  wrote work/kits-ui-linux-head.png, 980x640
+  TEX_00 · imagem bitmap de trabalho, 1º conjunto · paleta player palette, first set · /BIN/TEX_00.BIN on roms/japanese-shift-jis.bin, 29944 bytes
+  window up, at -32000,-32000
+$ grep -c '29944 bytes' docs/tasks/kits/20-fechamento-fase-4.md
+0
+```
+
+Conserto: a linha do meio colada no Log, como a ferramenta imprime. Depois:
+
+```
+$ grep -c '29944 bytes' docs/tasks/kits/20-fechamento-fase-4.md
+1
+```
+
+O mesmo corte está no Log da KITS-TASK-19 (a captura do Linux, e a do Windows): varrido em commit próprio.
