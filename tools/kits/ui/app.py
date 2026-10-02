@@ -22,6 +22,7 @@ work/venv-looks/bin/python on Linux):
     <venv>/python tools/kits/ui/app.py <rom> --tag A4 --image work1 --palette 3 \\
         --zoom 4 --zones --screenshot out.png
     <venv>/python tools/kits/ui/app.py <rom> --walk
+    <venv>/python tools/kits/ui/app.py <rom> --tag 00 --hover 15,10
 """
 
 from __future__ import annotations
@@ -540,6 +541,32 @@ def settle(app: QtWidgets.QApplication, frames: int = FRAMES) -> None:
         app.processEvents()
 
 
+def parse_point(text: str):
+    try:
+        x, y = (int(v) for v in text.split(","))
+    except ValueError:
+        raise argparse.ArgumentTypeError("X,Y in image pixels, e.g. 15,10")
+    return x, y
+
+
+def hover(app, window, point) -> int:
+    """A real mouse move over image pixel *point*, at the zoom shown, through
+    the canvas's own event handler.  Prints the readout and the marked palette
+    index; 1 when the readout is blank (the point is off the image)."""
+    zoom = window.canvas.zoom
+    local = QtCore.QPointF(point[0] * zoom + zoom / 2, point[1] * zoom + zoom / 2)
+    event = QtGui.QMouseEvent(QtCore.QEvent.Type.MouseMove, local,
+                              QtCore.QPointF(window.canvas.mapToGlobal(local.toPoint())),
+                              QtCore.Qt.MouseButton.NoButton, QtCore.Qt.MouseButton.NoButton,
+                              QtCore.Qt.KeyboardModifier.NoModifier)
+    QtWidgets.QApplication.sendEvent(window.canvas, event)
+    settle(app, 1)
+    text = window.readout.text().strip()
+    print("  readout: %s" % (text or "(blank)"))
+    print("  marked: %d" % window.palette_grid.marked)
+    return 0 if text else 1
+
+
 def walk(app, window, plant=None) -> int:
     """Every tag x every image x every palette that goes with it, through the
     window's own selectors.  Prints the count; 1 on any exception.  *plant*
@@ -590,6 +617,8 @@ def main(argv=None) -> int:
                         help="draw every tag, image and palette, count, and exit")
     parser.add_argument("--plant", metavar="TAG",
                         help="with --walk: lose that tag's kit mid-walk, which has to be counted")
+    parser.add_argument("--hover", metavar="X,Y", type=parse_point,
+                        help="move the mouse over that image pixel, print the readout, and exit")
     parser.add_argument("--visible", action="store_true",
                         help="show the window on the desktop (not for gates)")
     args = parser.parse_args(argv)
@@ -621,6 +650,8 @@ def main(argv=None) -> int:
 
     if args.walk:
         return walk(app, window, args.plant)
+    if args.hover:
+        return hover(app, window, args.hover)
     pictures = args.export or args.screenshot
     if args.export and not window.export(args.export):
         print("could not write %s" % args.export, file=sys.stderr)

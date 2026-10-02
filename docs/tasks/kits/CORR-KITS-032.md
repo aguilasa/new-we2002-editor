@@ -47,3 +47,25 @@ $ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-ji
 Hoje dá erro do argparse; depois imprime a leitura citada e "36", com a janela fora da tela.
 
 ## Log de Execução
+
+### 2026-10-02
+
+Reprodução (`rite reproduce --all --cycle kits`, triagem inline): `app.py: error: unrecognized arguments: --hover 15,10` (exit 2) e `grep -cE 'QMouseEvent|--hover'` dá `0` — REPRODUCED.
+
+Feito: `tools/kits/ui/app.py` ganhou `--hover X,Y`, que manda um `QMouseEvent` (`MouseMove`, centro do pixel no zoom corrente) ao canvas pelo `sendEvent`, passa pelo `mouseMoveEvent` e pelo `on_pixel`, e imprime `window.readout.text()` e `palette_grid.marked`; leitura em branco sai 1. O Log da KITS-TASK-18 recita a linha a partir dele.
+
+Verificação, e o vermelho (ponto fora da imagem):
+
+```
+$ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --hover 15,10      # exit 0
+  readout: x 15, y 10 · zona: shirt front · índice 36 · BGR555 0x29e8 · RGB 66,123,82
+  marked: 36
+$ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --hover 15,10 --zoom 8      # exit 0
+  readout: x 15, y 10 · zona: shirt front · índice 36 · BGR555 0x29e8 · RGB 66,123,82
+  marked: 36
+$ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --hover 9999,0      # exit 1
+  readout: (blank)
+  marked: -1
+```
+
+A asserção sobre esta linha num gate é da KITS-TASK-19 (`kits_ui`).

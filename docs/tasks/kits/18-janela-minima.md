@@ -81,7 +81,16 @@ walked 105 tag(s): 1352 picture(s) drawn, 0 kit(s) refused, 1 exception(s)
 
 1365 = 105 × 13 (dois bitmaps de trabalho × duas paletas, quatro imagens de conjunto × duas, a bandeira × uma).
 
-A leitura sob o mouse, por um `QMouseEvent` sintético sobre (15,10) do `TEX_00`: `x 15, y 10 · zona: shirt front · índice 36 · BGR555 0x29e8 · RGB 66,123,82`, e a grade marca o 36.
+A leitura sob o mouse, por um `QMouseEvent` de verdade mandado ao canvas sobre o pixel (15,10) do `TEX_00` (a opção `--hover`, desde a [CORR-KITS-032](/docs/tasks/kits/CORR-KITS-032.md)); fora da imagem a leitura fica em branco e a saída é 1:
+
+```
+$ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --hover 15,10      # exit 0
+  readout: x 15, y 10 · zona: shirt front · índice 36 · BGR555 0x29e8 · RGB 66,123,82
+  marked: 36
+$ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --hover 9999,0      # exit 1
+  readout: (blank)
+  marked: -1
+```
 
 O gate `kits_ui` e a captura igual no Linux são a KITS-TASK-19.
 - **Closed** — commit `45ebcd04` (2026-10-02): feat(kits): the minimal window: open ROM or TEX, tag combobox, Plan tab, fixed Fusion look
