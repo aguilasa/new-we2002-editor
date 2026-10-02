@@ -465,10 +465,10 @@
       "severity": "low",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-02",
+      "done_commit": "7544e13"
     }
   ]
 }

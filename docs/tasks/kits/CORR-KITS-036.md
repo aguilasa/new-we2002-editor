@@ -64,3 +64,7 @@ $ grep -c '29944 bytes' docs/tasks/kits/20-fechamento-fase-4.md
 ```
 
 O mesmo corte está no Log da KITS-TASK-19 (a captura do Linux, e a do Windows): varrido em commit próprio.
+- **Closed** — commit `7544e13` (2026-10-02): docs(kits): restore the app.py output line cut from the KITS-TASK-20 log
+  - Files (`git show --name-status 7544e13`):
+    - `M docs/tasks/kits/20-fechamento-fase-4.md`
+    - `M docs/tasks/kits/CORR-KITS-036.md`
