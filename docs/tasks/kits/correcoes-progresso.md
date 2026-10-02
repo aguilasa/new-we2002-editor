@@ -37,4 +37,6 @@
 | [CORR-KITS-032](/docs/tasks/kits/CORR-KITS-032.md) | Version the mouse-readout probe behind the Log's readout line | KITS-TASK-18 | medium | done | 2026-10-02 |
 | [CORR-KITS-033](/docs/tasks/kits/CORR-KITS-033.md) | Levar a troca da planta "no Fusion" à docstring, ao comentário do ctest e às Notas | KITS-TASK-19 | medium | done | 2026-10-02 |
 | [CORR-KITS-034](/docs/tasks/kits/CORR-KITS-034.md) | Desinverter a afirmação de caminho relativo/absoluto nas Notas da task | KITS-TASK-19 | low | done | 2026-10-02 |
+| [CORR-KITS-035](/docs/tasks/kits/CORR-KITS-035.md) | Reconciliar o "captura igual" da §0 e da §7 do plano com a diferença medida de 1,95 % | KITS-TASK-20 | medium | pending | — |
+| [CORR-KITS-036](/docs/tasks/kits/CORR-KITS-036.md) | Repor no Log a linha de saída do app.py cortada sem marca | KITS-TASK-20 | low | pending | — |
 <!-- rite:end -->

@@ -443,6 +443,32 @@
       "depends_on": [],
       "done_on": "2026-10-02",
       "done_commit": "5ea909c"
+    },
+    {
+      "id": "CORR-KITS-035",
+      "file": "CORR-KITS-035.md",
+      "title": "Reconciliar o \"captura igual\" da §0 e da §7 do plano com a diferença medida de 1,95 %",
+      "origin": "KITS-TASK-20",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-036",
+      "file": "CORR-KITS-036.md",
+      "title": "Repor no Log a linha de saída do app.py cortada sem marca",
+      "origin": "KITS-TASK-20",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
