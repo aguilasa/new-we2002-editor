@@ -99,3 +99,9 @@ control FAILED
 $ env -u WE2002_LOOKS_IMAGE python tools/kits/selftest.py --no-plant --quiet | tail -1
 kits_selftest: 0 failure(s)
 ```
+- **Closed** — commit `20bed465` (2026-10-02): fix(kits): give flat's index-past-palette count a planted red
+  - Files (`git show --name-status 20bed465`):
+    - `M docs/tasks/kits/15-flat.md`
+    - `M docs/tasks/kits/CORR-KITS-027.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
