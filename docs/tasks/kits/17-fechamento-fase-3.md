@@ -61,3 +61,8 @@ b3517648a88e779b *TEX_00_set1_keeper.png
 ```
 
 Mapa medido passa, deslocado 1 px reprova; `TEX_A4` titular = suplente, `TEX_00` difere. Fase 3 fechada sem janela.
+- **Closed** — commit `d208afca` (2026-10-02): chore(kits): close phase 3 -- gates, controls and phase checks at HEAD
+  - Files (`git show --name-status d208afca`):
+    - `M docs/tasks/kits/17-fechamento-fase-3.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
