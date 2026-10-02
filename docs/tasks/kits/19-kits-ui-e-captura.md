@@ -45,7 +45,9 @@ $ python tools/kits/ui_check.py; echo $?
 kits_ui: skipped -- WE2002_LOOKS_IMAGE is not set (the Japanese data track .bin)
 77
 $ cp tools/kits/ui_check.py $TEMP/nouv/ && WE2002_LOOKS_IMAGE=x python $TEMP/nouv/ui_check.py; echo $?
-kits_ui: skipped -- no venv at workenv-looks (python -m venv workenv-looks; pip install PySide6)
+kits_ui: skipped -- no venv at work
+env-looks (python -m venv work
+env-looks; pip install PySide6)
 77
 ```
 
@@ -104,3 +106,4 @@ $ python tools/kits/ui_check.py --compare work/kits-ui-windows.png <o mesmo com 
 DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin   --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png
 python3 tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-linux.png
 ```
+- **blocked** (2026-10-02): criterion 3 needs the Linux machine (:98): criteria 1-2 done in 19a3e733 (kits_ui passes, 77 without venv/image, the Fusion and QPalette plants red); the Windows capture is work/kits-ui-windows.png (sha256 e973a8aa5991a7ff..). Unblock on Linux, from the repo root, with that PNG copied to work/: DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png && python3 tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-linux.png
