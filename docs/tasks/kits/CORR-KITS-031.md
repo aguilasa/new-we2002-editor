@@ -86,3 +86,8 @@ controls: 16 of 16 red
 $ python tools/kits/cli.py zones roms/japanese-shift-jis.bin | tail -1
 verdict: section 4.6 holds
 ```
+- **Closed** — commit `b029c04b` (2026-10-02): test(kits): plant a red for each way section 4.6 fails besides outside
+  - Files (`git show --name-status b029c04b`):
+    - `M docs/tasks/kits/CORR-KITS-031.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
