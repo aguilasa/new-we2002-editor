@@ -322,8 +322,9 @@ if(Python3_FOUND)
 
     # The window (section 3.4), judged from its PNGs by a decoder that is not
     # the window's: it comes up off the desktop, draws, keeps the fixed look
-    # (Fusion and the fixed palette, each planted out in a copy and required to
-    # fail), repeats itself and tells two kits apart.  77 without the venv,
+    # (Fusion and the fixed palette, each planted away in a copy -- Fusion
+    # swapped for the Windows style, the palette line removed -- and required
+    # to fail), repeats itself and tells two kits apart.  77 without the venv,
     # WE2002_LOOKS_IMAGE or, on Linux, the :98 display.
     add_test(NAME kits_ui
         COMMAND ${Python3_EXECUTABLE}

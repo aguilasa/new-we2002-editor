@@ -46,3 +46,30 @@ grep -nE 'white without Fusion|0 when its line is removed|native style paints it
 Imprime 5 linhas hoje; vazio depois do conserto. E `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits_ui` continua verde.
 
 ## Log de Execução
+
+### 2026-10-02
+
+Reproduzido (grep da Evidência, antes do conserto):
+
+```
+tools/kits/ui_check.py:26:      pane is gone (the native style paints it white);
+tools/kits/ui_check.py:85:state's picture; white without Fusion)."""
+tools/kits/ui_check.py:88:22.8 % and 18.8 %; 0 when its line is removed)."""
+tests/CMakeLists.txt:325:    # (Fusion and the fixed palette, each planted out in a copy and required to
+docs/tasks/kits/19-kits-ui-e-captura.md:29:- **Os dois controles moram no próprio gate:** o `ui_check.py` copia `tools/{kits,looks,pes2}` para um temporário, tira uma das duas linhas do `app.py` e exige que o juiz de estilo reprove a cópia. [...]
+```
+
+Aviso: o primeiro comando da Evidência, executado pelo `rite reproduce`, falhou no marcador `cópia` e o `sed -i` seguinte rodou **na árvore viva**, trocando `app.setStyle("Fusion")` por `pass` no `tools/kits/ui/app.py`. Com isso a primeira corrida do `kits_ui` deu `ok ... palette window colour 22.2 %, Fusion pane 18.7 %` sem a linha do Fusion — a medição da Evidência, de graça — e `FAIL plant 'no Fusion'` (a planta casou 0 vez). Restaurado com `git checkout -- tools/kits/ui/app.py`; nada disso foi commitado.
+
+Conserto: docstring do módulo, de `FUSION_PANE` e de `STYLE_SHARE` qualificam o branco como Windows e citam o estilo `Windows` como planta; números do gate por sistema (22,8/18,8 Windows, 22,2/18,7 Linux, caminho absoluto); comentário do `kits_ui` em `tests/CMakeLists.txt` diz como cada planta é feita; as duas Notas da task idem.
+
+```
+$ grep -nE 'white without Fusion|0 when its line is removed|native style paints it white|planted out in a copy|tira uma das duas linhas' tools/kits/ui_check.py tests/CMakeLists.txt docs/tasks/kits/19-kits-ui-e-captura.md
+(vazio, exit 1)
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits_ui -V
+   ok    the look is the fixed one: palette window colour 22.2 %, Fusion pane 18.7 %
+   ok    plant 'no Fusion' fails the style judge
+   ok    plant 'no fixed palette' fails the style judge
+   ok    plant 'readout one pixel right' fails the hover judge
+100% tests passed, 0 tests failed out of 1
+```

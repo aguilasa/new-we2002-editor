@@ -22,8 +22,10 @@ WHAT IT JUDGES:
   **the look is the fixed one**: the window colour of the fixed palette and
       the tab pane Fusion paints from it each cover a share of the picture.
       Both were measured on 2026-10-02: without `setPalette` the window colour
-      is gone (the system's comes instead), without `setStyle("Fusion")` the
-      pane is gone (the native style paints it white);
+      is gone (the system's comes instead), and with the `Windows` style in
+      place of Fusion the pane is gone.  On Windows removing the
+      `setStyle("Fusion")` line alone already loses it (the native style
+      paints it white); on Linux it does not, see the plants below;
   the same state twice is the same picture, and another kit is another one;
   a tag the disc does not have exits 2 and writes no file;
   **the reading under the mouse** -- `app.py --hover X,Y`, a real mouse move
@@ -82,10 +84,11 @@ WINDOW_COLOUR = (0xEC, 0xEC, 0xEC)
 """`QPalette.Window` of the fixed palette."""
 FUSION_PANE = (0xEB, 0xEB, 0xEB)
 """The tab pane Fusion paints from that window colour (measured: 18.8 % of the
-state's picture; white without Fusion)."""
+state's picture on Windows, 18.7 % on Linux; gone under the `Windows` style)."""
 STYLE_SHARE = 10.0
-"""Each of the two covers at least this percentage of the picture (measured:
-22.8 % and 18.8 %; 0 when its line is removed)."""
+"""Each of the two covers at least this percentage of the picture (measured by
+the gate, which opens the disc by absolute path: 22.8 % and 18.8 % on Windows,
+22.2 % and 18.7 % on Linux; 0 when its plant is in)."""
 MIN_COLOURS = 50
 MAX_SHARE = 60.0
 """Not blank: at least this many colours, and none above this percentage."""
