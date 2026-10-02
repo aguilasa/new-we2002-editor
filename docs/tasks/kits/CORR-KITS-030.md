@@ -62,3 +62,7 @@ REPRODUCED.
 $ grep -c "quatro lacunas" docs/PLAN-KITS-PY.md
 0
 ```
+- **Closed** — commit `6779dafd` (2026-10-02): docs(kits): six declared gaps in plan 4.6, as cli.py zones counts them
+  - Files (`git show --name-status 6779dafd`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-030.md`
