@@ -84,3 +84,12 @@ walked 105 tag(s): 1352 picture(s) drawn, 0 kit(s) refused, 1 exception(s)
 A leitura sob o mouse, por um `QMouseEvent` sintético sobre (15,10) do `TEX_00`: `x 15, y 10 · zona: shirt front · índice 36 · BGR555 0x29e8 · RGB 66,123,82`, e a grade marca o 36.
 
 O gate `kits_ui` e a captura igual no Linux são a KITS-TASK-19.
+- **Closed** — commit `45ebcd04` (2026-10-02): feat(kits): the minimal window: open ROM or TEX, tag combobox, Plan tab, fixed Fusion look
+  - Files (`git show --name-status 45ebcd04`):
+    - `M docs/tasks/kits/18-janela-minima.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/selftest.py`
+    - `A tools/kits/ui/app.py`
