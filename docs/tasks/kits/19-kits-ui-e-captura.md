@@ -100,10 +100,14 @@ $ python tools/kits/ui_check.py --compare work/kits-ui-windows.png <o mesmo com 
 300308 of 627200 pixels differ (47.88 %)
 ```
 
-**Falta o Linux**, que é outra máquina: a captura do mesmo estado no `:98`, e o `--compare` das duas. A task fica bloqueada com o comando que a destrava (no Linux, a partir da raiz do repositório, com `work/kits-ui-windows.png` levado para lá):
+**Falta o Linux**, que é outra máquina: a captura do mesmo estado no `:98`, e o `--compare` das duas. A task fica bloqueada com o comando que a destrava. A captura do Windows não entra no git (`work/` é ignorado), e não precisa ser copiada: o `C:\` desta máquina aparece no Linux em `/media/ingmar/win/` ([LOOKS-AMBIENTE.md](/docs/LOOKS-AMBIENTE.md)), então `C:\github\new-we2002-editor\work\kits-ui-windows.png` é, lá, `/media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png` (sha256 `e973a8aa5991a7ff…`). No Linux, a partir da raiz do repositório:
 
 ```
-DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin   --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png
-python3 tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-linux.png
+DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin \
+  --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png
+python3 tools/kits/ui_check.py --compare \
+  /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png
 ```
+
+O disco tem de ser aberto pelo mesmo caminho relativo `roms/japanese-shift-jis.bin`: ele aparece na barra de cima da janela, e um caminho diferente muda pixels que não são de plataforma.
 - **blocked** (2026-10-02): criterion 3 needs the Linux machine (:98): criteria 1-2 done in 19a3e733 (kits_ui passes, 77 without venv/image, the Fusion and QPalette plants red); the Windows capture is work/kits-ui-windows.png (sha256 e973a8aa5991a7ff..). Unblock on Linux, from the repo root, with that PNG copied to work/: DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png && python3 tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-linux.png
