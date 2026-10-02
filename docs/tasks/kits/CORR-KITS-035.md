@@ -84,3 +84,8 @@ $ grep -n 'captura igual\|sai igual' docs/PLAN-KITS-PY.md
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
 100% tests passed, 0 tests failed out of 4
 ```
+- **Closed** — commit `fc1879b` (2026-10-02): test(kits): make ui_check --compare assert a declared cross-platform limit
+  - Files (`git show --name-status fc1879b`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-035.md`
+    - `M tools/kits/ui_check.py`
