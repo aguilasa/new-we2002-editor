@@ -93,3 +93,4 @@ O gate `kits_ui` e a captura igual no Linux são a KITS-TASK-19.
     - `M tools/kits/core/api.py`
     - `M tools/kits/selftest.py`
     - `A tools/kits/ui/app.py`
+- **Reviewed** (2026-10-02) at `63876c0f`: CORR-KITS-032

@@ -404,6 +404,19 @@
       "depends_on": [],
       "done_on": "2026-10-02",
       "done_commit": "b029c04b"
+    },
+    {
+      "id": "CORR-KITS-032",
+      "file": "CORR-KITS-032.md",
+      "title": "Version the mouse-readout probe behind the Log's readout line",
+      "origin": "KITS-TASK-18",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
