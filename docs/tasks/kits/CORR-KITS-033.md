@@ -73,3 +73,9 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ct
    ok    plant 'readout one pixel right' fails the hover judge
 100% tests passed, 0 tests failed out of 1
 ```
+- **Closed** — commit `f51ec4f` (2026-10-02): docs(kits): carry the "no Fusion" plant swap to the docstrings, the ctest comment and the task notes
+  - Files (`git show --name-status f51ec4f`):
+    - `M docs/tasks/kits/19-kits-ui-e-captura.md`
+    - `M docs/tasks/kits/CORR-KITS-033.md`
+    - `M tests/CMakeLists.txt`
+    - `M tools/kits/ui_check.py`

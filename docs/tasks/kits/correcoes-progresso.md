@@ -35,6 +35,6 @@
 | [CORR-KITS-030](/docs/tasks/kits/CORR-KITS-030.md) | Make the 4.6 gap count match the tool's six gaps | KITS-TASK-16 | low | done | 2026-10-02 |
 | [CORR-KITS-031](/docs/tasks/kits/CORR-KITS-031.md) | Plant controls for the three other 4.6 failure branches | KITS-TASK-16 | low | done | 2026-10-02 |
 | [CORR-KITS-032](/docs/tasks/kits/CORR-KITS-032.md) | Version the mouse-readout probe behind the Log's readout line | KITS-TASK-18 | medium | done | 2026-10-02 |
-| [CORR-KITS-033](/docs/tasks/kits/CORR-KITS-033.md) | Levar a troca da planta "no Fusion" à docstring, ao comentário do ctest e às Notas | KITS-TASK-19 | medium | pending | — |
+| [CORR-KITS-033](/docs/tasks/kits/CORR-KITS-033.md) | Levar a troca da planta "no Fusion" à docstring, ao comentário do ctest e às Notas | KITS-TASK-19 | medium | done | 2026-10-02 |
 | [CORR-KITS-034](/docs/tasks/kits/CORR-KITS-034.md) | Desinverter a afirmação de caminho relativo/absoluto nas Notas da task | KITS-TASK-19 | low | pending | — |
 <!-- rite:end -->
