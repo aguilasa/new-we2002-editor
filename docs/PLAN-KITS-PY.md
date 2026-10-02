@@ -45,7 +45,9 @@ imagem do jogo, ou um TEX avulso feito com WETex — e os mostra de duas formas:
    que o boneco amostra cai dentro de uma zona do mapa, e o que sobra está
    listado.
 5. A CLI faz tudo o que a janela faz sem importar nada além da fachada do
-   núcleo, e a janela sai igual no Windows e no Linux.
+   núcleo, e a janela sai com a mesma paleta e o mesmo painel Fusion no
+   Windows e no Linux — a diferença entre as capturas fica na rasterização de
+   texto, abaixo do limite que o `ui_check.py --compare` afirma (§3.4).
 
 ## 1. O que já se sabe
 
@@ -357,7 +359,12 @@ duas plataformas:
   Windows (150 % nesta máquina) não mudar o layout;
 - layouts do Qt, não geometria absoluta: esta janela não reproduz tela nenhuma.
 
-A conferência é visual e barata: a mesma captura nos dois sistemas, lado a lado.
+A conferência é barata: o mesmo estado capturado nos dois sistemas e comparado
+por `ui_check.py --compare A B`, que reprova acima de 5 % de pixels diferentes
+(`CROSS_LIMIT`) ou se uma das capturas perde a aparência fixa. Medido em
+2026-10-02: 1,95 % entre Windows e Linux, todo em rasterização de texto; outro
+kit no lugar do mesmo estado passa de 47 % e reprova (KITS-TASK-19,
+CORR-KITS-035).
 
 ### 3.5 Idioma e ambiente
 
@@ -605,7 +612,7 @@ rodou ([CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md)).
 | 1 | **núcleo, lado TEX**: `api.py` (a fachada), `source.py`, `tex.py`, guarda de forma, `cli.py info/export`; confrontos 1 e 2 do §5 | 0 |
 | 2 | **núcleo, lado ROM**: o gerador do §3.3 com `--check` no `ctest`, `teams.py`, `cli.py teams`; a regra japonês → tabela conferida nas duas imagens de `roms/` | 1 |
 | 3 | `flat.py` + `zones.py`; §4.6 fechada — ainda sem janela | 1 |
-| 4 | **a janela mínima**: Abrir… (ROM ou TEX), combobox, aba "Plano", estilo Fusion fixo; captura igual no Windows e no Linux | 2, 3 |
+| 4 | **a janela mínima**: Abrir… (ROM ou TEX), combobox, aba "Plano", estilo Fusion fixo; capturas do Windows e do Linux com a mesma aparência, diferindo só no texto e abaixo do limite do `--compare` | 2, 3 |
 | 5 | as duas mudanças do §2 em `tools/looks/`, feitas por este ciclo; gates do `looks` verdes antes e depois | — |
 | 6 | `figure.py` e a aba "3D": titular/suplente, jogador/goleiro | 4, 5 |
 | 7 | §4.1 no emulador e o confronto 3 do §5 | 6 |

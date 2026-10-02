@@ -42,7 +42,9 @@ WHAT IT JUDGES:
       other style Qt draws itself on both systems.
 
 `--compare A.png B.png` is the cross-platform half (KITS-TASK-19): the same
-state captured on Windows and on Linux, compared here, pixel by pixel.
+state captured on Windows and on Linux, compared here, pixel by pixel.  It
+FAILS above `CROSS_LIMIT` of the picture, or when either capture loses the
+fixed look; the control is another kit in place of the same state.
 
 Usage:
     python tools/kits/ui_check.py
@@ -94,6 +96,13 @@ MAX_SHARE = 60.0
 """Not blank: at least this many colours, and none above this percentage."""
 OTHER_FLOOR = 1.0
 """Another kit changes at least this percentage of the picture."""
+CROSS_LIMIT = 5.0
+"""`--compare` fails above this percentage of differing pixels.  Measured on
+2026-10-02, the gate's state captured on Windows and on Linux: 12224 of 627200
+px (1.95 %), all of it text rasterisation -- same palette, same Fusion pane,
+bitmap, grid and zones untouched.  Another kit against the same state: 47.9 %
+to 49.5 %.  The limit sits between the two, with room for fonts that differ
+a little more."""
 
 HOVER_TAG = "00"
 HOVER_POINTS = ((15, 10), (100, 40), (40, 70), (5, 90))
@@ -451,14 +460,24 @@ def compare(a: str, b: str) -> int:
         print("different sizes: %dx%d against %dx%d" % (one[0], one[1], two[0], two[1]))
         return 1
     n = differing(one, two)
-    print("%d of %d pixels differ (%.2f %%)" % (n, one[0] * one[1], 100.0 * n / (one[0] * one[1])))
-    return 0
+    pct = 100.0 * n / (one[0] * one[1])
+    print("%d of %d pixels differ (%.2f %%)" % (n, one[0] * one[1], pct))
+    red = ["%s loses the fixed look: %s" % (os.path.basename(name), "; ".join(why))
+           for name, shot in ((a, one), (b, two)) for why in [judge_style(shot)] if why]
+    if pct > CROSS_LIMIT:
+        red.append("%.2f %% differ, above the %.1f %% limit" % (pct, CROSS_LIMIT))
+    for line in red:
+        print("FAIL  %s" % line)
+    if not red:
+        print("ok    within %.1f %%, both with the fixed look" % CROSS_LIMIT)
+    return 1 if red else 0
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--compare", nargs=2, metavar="PNG",
-                        help="count the pixels that differ between two captures")
+                        help="count the pixels that differ between two captures; "
+                             "fails above %.1f %%%%" % CROSS_LIMIT)
     args = parser.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")

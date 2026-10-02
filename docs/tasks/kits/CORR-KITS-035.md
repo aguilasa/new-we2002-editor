@@ -44,3 +44,43 @@ grep -n 'captura igual\|sai igual' docs/PLAN-KITS-PY.md
 Acha as duas linhas hoje; depois do conserto, vazio ou qualificado.
 
 ## Log de Execução
+
+### 2026-10-02
+
+Reproduzido na HEAD `ebb9e67`, com `$S` o scratchpad da sessão e a captura do Windows lida pelo `/media/ingmar/win`:
+
+```
+$ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot $S/head.png
+$ python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png $S/head.png
+kits-ui-windows.png: 980x640, window colour 23.1 %, Fusion pane 18.8 %
+head.png: 980x640, window colour 22.9 %, Fusion pane 18.7 %
+12224 of 627200 pixels differ (1.95 %)
+$ grep -n -i 'captura igual\|sai igual' docs/PLAN-KITS-PY.md
+48:   núcleo, e a janela sai igual no Windows e no Linux.
+608:| 4 | **a janela mínima**: [...] captura igual no Windows e no Linux | 2, 3 |
+```
+
+Conserto, a alternativa mais forte: `--compare` agora **afirma**. Reprova acima de `CROSS_LIMIT = 5.0` % de pixels diferentes, ou quando uma das capturas perde a aparência fixa (o mesmo `judge_style` do gate), e sai 1. O plano cita o limite no item 5 da §0, no fim da §3.4 e na linha da fase 4 da §7.
+
+Verde e os dois vermelhos, na mesma corrida (`nofusion.png` sai de uma cópia `git archive HEAD tools` com `setStyle("Windows")` no lugar do Fusion, rodada da cópia — a árvore viva não foi tocada):
+
+```
+$ python3 tools/kits/ui_check.py --compare $W $S/head.png
+12224 of 627200 pixels differ (1.95 %)
+ok    within 5.0 %, both with the fixed look
+exit 0
+$ python3 tools/kits/ui_check.py --compare $W $S/a4.png        # --tag A4
+310271 of 627200 pixels differ (49.47 %)
+FAIL  49.47 % differ, above the 5.0 % limit
+exit 1
+$ python3 tools/kits/ui_check.py --compare $W $S/nofusion.png
+nofusion.png: 980x640, window colour 41.7 %, Fusion pane 0.0 %
+249122 of 627200 pixels differ (39.72 %)
+FAIL  nofusion.png loses the fixed look: Fusion's tab pane #ebebeb covers 0.0 %, under 10 %
+FAIL  39.72 % differ, above the 5.0 % limit
+exit 1
+$ grep -n 'captura igual\|sai igual' docs/PLAN-KITS-PY.md
+(vazio, exit 1)
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+```
