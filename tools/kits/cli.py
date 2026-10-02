@@ -542,6 +542,34 @@ def flat_negative(source, tags) -> int:
     held = single == wearing
     print("control %s" % ("held: exactly the %d pairing(s) wearing it are single-coloured"
                           % len(wearing) if held else "FAILED"))
+    return max(0 if held else 1, _flat_short_palette(name, kit))
+
+
+FLAT_SHORT_COLOURS = 128
+"""How many colours the second control keeps of a 256-colour palette.  The
+guard of form only passes 256x1 CLUTs, so a short palette cannot come from
+a kit that passed it: it is planted straight into `paint` (CORR-KITS-027)."""
+
+
+def _flat_short_palette(name, kit) -> int:
+    """The index-past-palette check, seen red: the uniform image painted with
+    the first FLAT_SHORT_COLOURS colours of its palette has to be refused."""
+    image, palette = api.GAME_PAIRS[0]
+    im = next(i for i in kit.images if i.record == image)
+    pal = next(p for p in kit.palettes if p.record == palette)
+    colours = api.palette_rgba(pal.raw[:2 * FLAT_SHORT_COLOURS])
+    past = sum(1 for i in im.indices if i >= len(colours))
+    print("control: %s, %s painted with the first %d colours of %s (%d pixel(s) index past them)"
+          % (name, api.RECORD_NAMES[image], len(colours), api.RECORD_NAMES[palette], past))
+    try:
+        api.paint(im.width, im.height, im.indices, colours)
+    except api.KitRefused as exc:
+        print("  OUTSIDE %s %s / %s: %s" % (name, api.RECORD_NAMES[image],
+                                           api.RECORD_NAMES[palette], exc))
+        held = past > 0
+    else:
+        held = False
+    print("control %s" % ("held: the short palette is refused" if held else "FAILED"))
     return 0 if held else 1
 
 

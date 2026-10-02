@@ -34,7 +34,7 @@ from .tex import stream_control as _stream_control
 from .tex import decompress_stream as _decompress_stream
 from .teams import ORIGIN_ROM, ORIGIN_TABLE, TeamEntry  # noqa: F401
 from .flat import (FIGURES, GAME_PAIRS, KIT_SETS, WORK_H, WORK_W,  # noqa: F401
-                   FlatImage, PaletteEntry, palette_rgba)
+                   FlatImage, PaletteEntry, paint, palette_rgba)
 from .source import DiscControl  # noqa: F401
 from .source import disc_controls as _disc_controls
 from . import survey as measure  # noqa: F401  (the phase-0 probes, below)
@@ -52,7 +52,7 @@ __all__ = (
     "IMAGE_RECORDS", "PALETTE_RECORDS", "IMAGE_COUNT", "PALETTE_COUNT",
     "decompress_stream", "StreamError",
     "TeamEntry", "ORIGIN_TABLE", "ORIGIN_ROM",
-    "FlatImage", "PaletteEntry", "palette_rgba", "GAME_PAIRS", "KIT_SETS", "FIGURES",
+    "FlatImage", "PaletteEntry", "paint", "palette_rgba", "GAME_PAIRS", "KIT_SETS", "FIGURES",
     "WORK_W", "WORK_H",
 )
 

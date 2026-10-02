@@ -62,6 +62,19 @@ control: TEX_00, player palette, first set (bytes 9468..9979) set to its first c
 control held: exactly the 2 pairing(s) wearing it are single-coloured
 ```
 
+O "0 with an index past its palette" não tinha vermelho: a guarda de forma só passa CLUT de 256×1, e índice de 8 bits não passa de 255, então nenhum kit lido pode dar diferente. Desde a [CORR-KITS-027](/docs/tasks/kits/CORR-KITS-027.md) o `--negative` planta a paleta curta direto no `paint` — o uniforme do primeiro conjunto com as 128 primeiras cores — e exige a recusa:
+
+```
+$ python tools/kits/cli.py flat --negative roms/japanese-shift-jis.bin      # exit 0
+control: TEX_00, player palette, first set (bytes 9468..9979) set to its first colour, as a lone TEX
+  SINGLE  uniform, first set / player palette, first set
+  SINGLE  sleeves, first set / player palette, first set
+control held: exactly the 2 pairing(s) wearing it are single-coloured
+control: TEX_00, uniform, first set painted with the first 128 colours of player palette, first set (454 pixel(s) index past them)
+  OUTSIDE TEX_00 uniform, first set / player palette, first set: an index of the image is past the 128 colours of its palette
+control held: the short palette is refused
+```
+
 O critério 2 — os quatro bitmaps de trabalho do `TEX_00` (titular e suplente diferem, §1.1) e do `TEX_A4`:
 
 ```
