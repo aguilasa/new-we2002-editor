@@ -114,3 +114,16 @@ kits_selftest: 0 failure(s)
 $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir $TEMP/build-kits08 -R kits
 100% tests passed out of 3
 ```
+- **Closed** — commit `d8f46392` (2026-10-02): feat(kits): zone map with provenance, and section 4.6 closed against the geometry
+  - Files (`git show --name-status d8f46392`):
+    - `M NOTICE.md`
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/SUPERPACK-UNIFORMES.md`
+    - `M docs/tasks/kits/16-zonas.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `A tools/kits/core/zones.py`
+    - `M tools/kits/selftest.py`

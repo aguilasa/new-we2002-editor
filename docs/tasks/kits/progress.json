@@ -256,10 +256,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.6",
       "files": ["tools/kits/core/zones.py", "tools/kits/core/api.py", "tools/kits/controls.py", "docs/PLAN-KITS-PY.md", "NOTICE.md", "tools/kits/cli.py", "tools/kits/selftest.py", "docs/SUPERPACK-UNIFORMES.md"],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-02",
+      "done_commit": "d8f46392",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
