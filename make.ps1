@@ -13,6 +13,7 @@
       .\make.ps1 run-obocaman         o we-team-editor.exe do Obocaman
       .\make.ps1 run-lazarus          o WE2002 - Lazarus Editor
       .\make.ps1 looks                a tela `LOOKS SET` do jogo, na janela
+      .\make.ps1 kits                 o visualizador de uniformes (TEX_*.BIN)
       .\make.ps1 fresh                descarta as copias de trabalho
 
   `-Image <caminho>` troca a imagem de origem, `-Work <dir>` o diretorio das
@@ -52,7 +53,7 @@ param(
         'we2002-ptbr-play', 'we2002-ptbr-play-fresh',
         'we2002-japao-play', 'we2002-japao-play-fresh',
         'we2002-cards', 'we2002-card-snap', 'we2002-card-list',
-        'looks', 'looks-venv',
+        'looks', 'looks-venv', 'kits',
         # Recusados com explicacao -- ver Invoke-Recusa. Eles estao NESTA
         # lista de proposito: quem vem do Makefile digita o nome que conhece,
         # e a recusa do ValidateSet e uma parede de alternativas sem motivo
@@ -128,6 +129,19 @@ param(
     [ValidateSet(0, 1)]
     [int]$Figure = 0,
 
+    # O que o `kits` abre: imagem de disco (.bin/.cue) ou um TEX solto,
+    # reconhecido pelo conteudo. Nasce nula: o default e o do `looks`
+    # (Get-ImagemLooks) -- so leitura, o kits nao grava (PLAN-KITS-PY.md
+    # secao 0), entao a imagem de roms\ serve sem copia.
+    [string]$KitsImage,
+
+    # O kit que o `kits` mostra (so com disco), ex. A4. O TAG= do Makefile.
+    [string]$Tag,
+
+    # `kits` abre a janela sem nada; o Abrir... escolhe. O KITS_IMAGE= vazio
+    # do Makefile, que aqui nao tem como se distinguir de "nao passou".
+    [switch]$Vazio,
+
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Resto
 )
@@ -143,6 +157,7 @@ $LAZ_BIN  = Join-Path $WTE 'build\wte.exe'
 $LOOKS_VENV = Join-Path $ROOT 'work\venv-looks'
 $LOOKS_PY   = Join-Path $LOOKS_VENV 'Scripts\python.exe'
 $LOOKS_APP  = Join-Path $ROOT 'tools\looks\ui\app.py'
+$KITS_APP   = Join-Path $ROOT 'tools\kits\ui\app.py'
 
 function Resolve-Absoluto([string]$p) {
     if ([System.IO.Path]::IsPathRooted($p)) { return $p }
@@ -597,6 +612,13 @@ function Invoke-Help {
     Write-Host '                prateleira, e calar seria abrir outra coisa'
     Write-Host '  looks-venv    cria work\venv-looks com PySide6 (~246 MB)'
     Write-Host ''
+    Write-Host 'Visualizador de uniformes (TEX_*.BIN) -- so le, nao grava:'
+    Write-Host '  kits          abre a janela do kits (o venv e o do looks)'
+    Write-Host '                -Tag A4 escolhe o kit; -KitsImage <bin|cue|TEX>'
+    Write-Host '                o que abrir (default: a imagem do looks);'
+    Write-Host '                -Vazio abre sem nada. O resto vai ao app.py'
+    Write-Host '                (--zoom 3 --zones --image work1 --palette 2 ...)'
+    Write-Host ''
     Write-Host 'PES2 -- outro jogo, outro projeto, e nao tem editor:'
     Write-Host '  pes2          abre o JOGO sob o fork do DuckStation (com MCP)'
     Write-Host '  pes2-copy     so a copia da release (~571 MB, 8 trilhas)'
@@ -876,6 +898,38 @@ Para o visualizador: .\make.ps1 looks -Tuple A-A1-A-A-A $($presentes -join ' ')
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
+function Invoke-Kits {
+    <#
+      O visualizador de uniformes (docs/PLAN-KITS-PY.md), no venv do `looks`,
+      de que ele importa o nucleo. O par do `make kits` do Linux.
+    #>
+    if (-not (Test-Path $LOOKS_PY)) {
+        throw @"
+nao ha venv em $LOOKS_VENV.
+Crie uma vez com: .\make.ps1 looks-venv
+"@
+    }
+    $argumentos = @($KITS_APP)
+    if (-not $Vazio) {
+        $img = if ($KitsImage) { Resolve-Absoluto $KitsImage } else { Get-ImagemLooks }
+        if (-not (Test-Path -LiteralPath $img)) {
+            throw @"
+arquivo ausente: $img
+Aponte com -KitsImage <bin|cue|TEX>, ou use -Vazio para abrir sem nada.
+"@
+        }
+        $argumentos += $img
+    }
+    if ($Tag) { $argumentos += @('--tag', $Tag) }
+    # --visible e o ponto do alvo, como no `looks`: o app estaciona a janela
+    # em -32000 por default, porque e o que o kits_ui roda.
+    $argumentos += '--visible'
+    if ($Resto) { $argumentos += $Resto }
+    Write-Host ">> $LOOKS_PY $($argumentos -join ' ')"
+    & $LOOKS_PY @argumentos
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
+
 # --------------------------------------------------- alvos do emulador ----
 
 function Invoke-Pes2Copy { New-CopiaPes2 | Out-Null }
@@ -1106,6 +1160,7 @@ switch ($Alvo) {
 
     'looks'                  { Invoke-Looks }
     'looks-venv'             { Invoke-LooksVenv }
+    'kits'                   { Invoke-Kits }
 
     'pes2'                   { Invoke-Pes2 }
     'pes2-copy'              { Invoke-Pes2Copy }
