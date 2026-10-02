@@ -320,10 +320,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#7",
       "files": [],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-02",
+      "done_commit": "0a4c299",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

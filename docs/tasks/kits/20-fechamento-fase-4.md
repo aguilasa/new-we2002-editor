@@ -73,4 +73,6 @@ $ rite check --cycle kits --json | tail -4
 ```
 
 As verificações da fase 4 no perfil: `tools/kits/ui/` importa só `argparse`, `os`, `sys`, `__future__`, `core.api` e `PySide6` (`grep -hn '^\s*\(import\|from\)' tools/kits/ui/*.py`); `kits_ui` verde e com os dois controles de estilo vermelhos dentro dele (corrida da KITS-TASK-19, na HEAD dela); a janela sobe em `-32000,-32000` no `:98`.
-
+- **Closed** — commit `0a4c299` (2026-10-02): docs(kits): close phase 4 -- kits ctest, the capture and rite check at HEAD
+  - Files (`git show --name-status 0a4c299`):
+    - `M docs/tasks/kits/20-fechamento-fase-4.md`
