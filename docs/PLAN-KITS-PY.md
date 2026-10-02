@@ -346,8 +346,11 @@ devolve.
 O `looks` imita a tela do jogo; esta é uma ferramenta comum. Para sair igual nas
 duas plataformas:
 
-- `QApplication.setStyle("Fusion")` — o único estilo que o Qt desenha ele mesmo
-  nas duas; os nativos mudam de plataforma para plataforma;
+- `QApplication.setStyle("Fusion")` — um dos dois estilos que o Qt desenha ele
+  mesmo nas duas (o outro é o `Windows`, datado); os nativos mudam de
+  plataforma para plataforma. No Linux o Fusion já é o default do Qt, então
+  tirar a linha não muda nada lá — o controle do `kits_ui` troca por `Windows`
+  em vez de tirar (KITS-TASK-19);
 - uma `QPalette` fixa, definida no código, sem herdar tema do sistema (claro ou
   escuro do Windows, GTK do Linux);
 - fonte com família e tamanho **em pixels** fixados, para o DPI escalado do

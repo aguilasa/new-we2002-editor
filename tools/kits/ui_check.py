@@ -33,7 +33,11 @@ WHAT IT JUDGES:
   and the plants, each in a copy of the tree: the window without Fusion and
       without the fixed palette (section 3.4) FAIL the style judge, and the
       readout reading the pixel to the right FAILS the hover judge.  A plant
-      that passes is a red gate.
+      that passes is a red gate.  "Without Fusion" is planted as
+      `setStyle("Windows")`, not as the line taken out: on Linux Qt's default
+      style already is Fusion (measured on :98, 2026-10-02), so removing the
+      line changed nothing there and the plant passed.  "Windows" is the one
+      other style Qt draws itself on both systems.
 
 `--compare A.png B.png` is the cross-platform half (KITS-TASK-19): the same
 state captured on Windows and on Linux, compared here, pixel by pixel.
@@ -99,7 +103,8 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 
 STYLE, HOVER = "style", "hover"
 PLANTS = (
-    ("no Fusion", STYLE, '    app.setStyle("Fusion")\n', "    pass  # planted: no Fusion\n"),
+    ("no Fusion", STYLE, '    app.setStyle("Fusion")\n',
+     '    app.setStyle("Windows")  # planted: no Fusion\n'),
     ("no fixed palette", STYLE, "    app.setPalette(fixed_palette())\n",
      "    pass  # planted: no fixed palette\n"),
     ("readout one pixel right", HOVER,

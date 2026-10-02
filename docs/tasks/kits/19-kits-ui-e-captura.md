@@ -17,7 +17,7 @@ id: KITS-TASK-19
 
 - [x] `ctest -R kits_ui` passa com venv e tela, e sai 77 sem eles
 - [x] Controle: tirar o `setStyle("Fusion")` (ou a `QPalette` fixa) numa cópia derruba o `kits_ui`
-- [ ] Captura do mesmo estado no Windows e no Linux (`:98`), comparadas por comando versionado; diferença em pixels colada no Log
+- [x] Captura do mesmo estado no Windows e no Linux (`:98`), comparadas por comando versionado; diferença em pixels colada no Log
 
 ## Notes
 
@@ -110,5 +110,54 @@ python3 tools/kits/ui_check.py --compare \
 ```
 
 O disco tem de ser aberto pelo mesmo caminho relativo `roms/japanese-shift-jis.bin`: ele aparece na barra de cima da janela, e um caminho diferente muda pixels que não são de plataforma.
+### 2026-10-02 (Linux)
+
+A metade do Linux do critério 3, na máquina Linux, com o Xvfb `:98` subido sem `-auth` e a captura do Windows lida pelo `/media/ingmar/win`:
+
+```
+$ sha256sum /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png
+e973a8aa5991a7ff258ae482ea199b054ad7f0d4338c918a79ca38830f80d288
+$ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin \
+    --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png
+  wrote work/kits-ui-linux.png, 980x640
+  window up, at -32000,-32000
+$ python3 tools/kits/ui_check.py --compare \
+    /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png
+kits-ui-windows.png: 980x640, window colour 23.1 %, Fusion pane 18.8 %
+kits-ui-linux.png: 980x640, window colour 22.9 %, Fusion pane 18.7 %
+12224 of 627200 pixels differ (1.95 %)
+$ python3 tools/kits/ui_check.py --compare work/kits-ui-linux.png work/kits-ui-linux.png | tail -1
+0 of 627200 pixels differ (0.00 %)
+```
+
+Mesmo tamanho, mesma paleta e mesmo painel do Fusion nas duas. Onde estão os 12.224 pixels, visto no diff do ImageMagick (`compare A B -compose src diff.png`): só em texto — rótulos, botões, combos e a barra de baixo —, com o desenho do bitmap, a grade, as zonas e o painel de paleta sem diferença. A família é a mesma nos dois (`Arial`, que o `fc-match Arial` acha aqui), em 13 px; o que muda é a rasterização da fonte, que desloca a largura de cada rótulo e empurra o que vem depois na linha (o combo de times, os checkboxes). Não é estilo nem paleta.
+
+O `kits_ui` rodado no Linux achou um controle cego. Na versão de `19a3e733`:
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/ui_check.py
+        plant 'no Fusion': judge passed
+  FAIL  plant 'no Fusion' fails the style judge
+kits_ui: 1 failure(s)
+$ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python -c "from PySide6 import QtWidgets as W; a=W.QApplication([]); print(W.QStyleFactory.keys(), a.style().name())"
+['Windows', 'Fusion'] fusion
+```
+
+O juiz não é cego: no Linux o estilo default do Qt **já é** Fusion, então tirar o `setStyle("Fusion")` não muda a janela, e a planta não planta nada. A planta passou a trocar a linha por `app.setStyle("Windows")` — o outro estilo que o Qt desenha ele mesmo nas duas plataformas — em vez de tirá-la. Depois disso, no Linux:
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/ui_check.py
+        plant 'no Fusion': Fusion's tab pane #ebebeb covers 0.0 %, under 10 %
+  ok    plant 'no Fusion' fails the style judge
+  ok    plant 'no fixed palette' fails the style judge
+kits_ui: 0 failure(s)
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits_ui
+1/1 Test #21: kits_ui ..........................   Passed    8.03 sec
+$ env -u WE2002_LOOKS_IMAGE ctest --test-dir build -R kits_ui
+1/1 Test #21: kits_ui ..........................***Skipped   0.09 sec
+```
+
+A planta nova não foi rodada no Windows: lá a corrida de `19a3e733` viu a antiga ficar vermelha, e a nova troca o estilo nativo por um que o próprio Qt desenha, que é o mesmo código nas duas. Fica para a próxima corrida do gate no Windows conferir.
+
 - **blocked** (2026-10-02): criterion 3 needs the Linux machine (:98): criteria 1-2 done in 19a3e733 (kits_ui passes, 77 without venv/image, the Fusion and QPalette plants red); the Windows capture is work/kits-ui-windows.png (sha256 e973a8aa5991a7ff..). Unblock on Linux, from the repo root, with that PNG copied to work/: DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png && python3 tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-linux.png
 - **pending** (2026-10-02): Linux machine at hand: :98 up, venv-looks present, Windows capture readable at /media/ingmar/win (sha256 e973a8aa5991a7ff..)
