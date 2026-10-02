@@ -98,7 +98,7 @@ O mapa de zonas em pixels, a ordem das faces, as medidas de cada peça, a regra 
 que o índice 0 preto é transparente e a grade de 16 rampas dos TEX originais
 estão no [SUPERPACK-UNIFORMES.md](/docs/SUPERPACK-UNIFORMES.md) §1.3 e §2. É a
 fonte do mapa de zonas deste projeto, com a proveniência dita: **comunidade,
-medido no PNG do polipoli**, até a fase 3 conferi-lo contra a geometria.
+medido no PNG do polipoli**, e conferido contra a geometria na fase 3 (§4.6).
 
 **A transparência é a regra do console, pela cor** — a entrada `0x0000` com o
 bit STP limpo —, e o `flat.py` a aplica assim. "Índice 0 transparente" é essa
@@ -418,10 +418,11 @@ agrupamento se parte em 104 e 1
 ([CORR-KITS-005](/docs/tasks/kits/CORR-KITS-005.md)). Fica aberta a outra metade: se a
 manga longa e a braçadeira são outra geometria, fora do `EDT_MOD.BIN` — a
 imagem existe e o jogo a envia à VRAM, mas quem a desenha não está nesta tela.
-E fica aberta a pergunta do mapa de zonas: em que retângulo do mapa de zonas cai
-cada primitiva não foi medido aqui — é o cruzamento do §4.6, feito pela
-[KITS-TASK-16](/docs/tasks/kits/16-zonas.md) sobre a lista de retângulos UV
-([CORR-KITS-007](/docs/tasks/kits/CORR-KITS-007.md)).
+Em que retângulo do mapa de zonas cai cada primitiva não foi medido aqui — é o
+cruzamento do §4.6, que a
+[KITS-TASK-16](/docs/tasks/kits/16-zonas.md) fechou sobre a lista de retângulos UV
+([CORR-KITS-007](/docs/tasks/kits/CORR-KITS-007.md)): nenhuma fora do mapa, e as
+15 zonas da imagem de mangas sem primitiva, pelo motivo acima.
 
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 
@@ -489,6 +490,55 @@ triângulos.
 Toda primitiva cai dentro do bitmap, e toda na metade do uniforme — nenhuma na
 das mangas (§4.3). As duas figuras dividem a imagem de uniforme e se sobrepõem
 em x 48–63. A fase 3 cruza essa lista com o mapa de zonas.
+
+**Veredito, medido em 2026-10-02 ([KITS-TASK-16](/docs/tasks/kits/16-zonas.md)): a
+§4.6 vale, com quatro lacunas declaradas.** O mapa é o `ZONES` do
+`tools/kits/core/zones.py` — cada linha remedida do `Zonas We2002.png` do
+polipoli, e `cli.py zones --map <Zonas We2002.png>` confere: nenhum pixel pintado
+fora de zona, e só a zona dos números guarda fundo dentro, porque os dígitos são
+desenhados sobre ele. A frente da camisa **não é retângulo**: a gola sobe entre
+os ombros, e o mapa a guarda em quatro linhas. `python tools/kits/cli.py zones
+roms/japanese-shift-jis.bin`:
+
+| figura | primitivas | numa zona | entre zonas vizinhas | em lacuna declarada | fora do mapa |
+|---|---|---|---|---|---|
+| 0, linha | 237 | 201 | 7 | 29 | **0** |
+| 1, goleiro | 429 | 377 | 23 | 29 | **0** |
+
+As lacunas são o que o jogo amostra e o mapa deixa sem zona — o `GAPS`, medido
+aqui, não da comunidade:
+
+- **o torso abaixo do mapa** — 28 primitivas da seção de torso de cada figura
+  amostram (0,80) 20×24 no jogador e (100,104) 20×24 no goleiro, com a paleta do
+  kit, onde o mapa diz "não usado". Ali o índice é 0 em todo pixel nos 210
+  bitmaps de trabalho (105 kits × 2 conjuntos), transparente em 190: nos 10 kits
+  cujo índice 0 não é `0x0000` (§1.3) essas primitivas saem opacas;
+- **a gola entre os ombros** — o quad da gola, (19,5)..(24,7), cobre o recorte
+  que o mapa deixa vazio entre os ombros: (20,5) 4×1 e (21,6) 2×1, e o mesmo
+  64 px à direita no goleiro. Índice 0 em 190 dos 210, transparente em 210 no
+  jogador e 207 no goleiro. É o retângulo envolvente do quad, não rasterização.
+
+**As zonas que nenhuma primitiva amostra são 16 das 49**, cada uma com o motivo:
+
+- **os números** (64,68) 60×12 — nenhuma primitiva da `LOOKS SET` os amostra; quem
+  desenha o número de camisa não está nesta tela;
+- **as 15 da imagem de mangas** (x 160–191): o antebraço esquerdo e o direito, a
+  manga longa esquerda e a direita, as três faixas de capitão com a braçadeira
+  (manga longa, manga curta do jogador, manga curta do goleiro) e os dois
+  cotovelos — a imagem de mangas não é amostrada na `LOOKS SET` (§4.3).
+
+Do lado do jogador e do goleiro na imagem de uniforme, toda zona é amostrada.
+
+As medidas do ramonpsx (`Medidas TEX we2002.txt`) ficam ao lado do mapa como
+`MEASURES`: 14 das 21 batem com ele. As que não batem são a frente (22×22 contra
+20×22), as costas (20×25 contra 20×30; o SUPERPACK-UNIFORMES §2.4 já dizia "20×25
+visível"), o calção do goleiro (64×18 contra 32×18, uma perna só no mapa) e a
+"playera metida" 20×5, que o mapa não tem como zona própria.
+
+O controle 4 do §5 é `cli.py zones --negative`: com o mapa deslocado 1 px à
+direita, 11 primitivas do jogador e 5 do goleiro caem fora do mapa e o veredito
+reprova; o `--map --negative` faz o mesmo contra o PNG (248 pixels pintados fora
+de zona). Os dois rodam no `kits_image`.
 
 ## 5. Como se verifica
 

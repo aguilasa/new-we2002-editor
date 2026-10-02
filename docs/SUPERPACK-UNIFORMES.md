@@ -149,6 +149,13 @@ Jogador em x 0–63, goleiro em x 64–127, no topo.
 
 O resto da metade esquerda (y ≥ 80) não é usado.
 
+O jogo discorda em dois pontos, medidos contra a geometria em 2026-10-02
+([PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md) §4.6): a seção de torso amostra
+(0,80) 20×24 no jogador e (100,104) 20×24 no goleiro — índice 0 em todo kit do
+disco —, e o quad da gola cobre o recorte que o mapa deixa vazio entre os
+ombros. A frente, aliás, não é o retângulo (12, 6) 20×24 inteiro: a gola sobe
+entre os ombros e o resto das duas linhas de cima é dos ombros.
+
 **A manga do goleiro do cotovelo ao pulso é espelhada** em relação à parte do
 ombro ao cotovelo: uma listra à esquerda em cima vai à direita embaixo (Xylon).
 

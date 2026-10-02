@@ -46,7 +46,7 @@ CORE_DIR = os.path.join(KITS_DIR, "core")
 sys.path.insert(0, KITS_DIR)
 
 from core import api  # noqa: E402
-from core import source, tex  # noqa: E402  (internals under test; tex puts pes2/looks on the path)
+from core import source, tex, zones  # noqa: E402  (internals under test; tex puts pes2/looks on the path)
 
 import harness  # noqa: E402  (tools/looks)
 import iso  # noqa: E402  (tools/pes2)
@@ -275,6 +275,25 @@ def _core_checks(c) -> None:
     ok("a file starting at the ISO end stops the read there",
        len(got) == short and not notes, "%d bytes, %s" % (len(got), notes))
 
+    # The zone map (section 4.6): its invariants, and where built rects fall.
+    bad = zones.self_check()
+    ok("zones.self_check() reports no failure", not bad, "; ".join(bad))
+    front = api.zone_at(15, 10)
+    ok("zone_at names the shirt front at (15,10) and nothing at (50,60)",
+       front is not None and front.name == "shirt front" and api.zone_at(50, 60) is None)
+    m = api.measure
+
+    def placed(rect):
+        r = m.UvRect(file="f", section=0, primitive=0, role="uniform", rect=rect, outside="")
+        rep = m.UvReport(source="", kit="", tuple_text="",
+                         figures=(m.FigureUv(figure=0, rects=(r,)),))
+        return api.confront_zones(rep).placed[0].klass
+
+    got = (placed((13, 9, 14, 10)), placed((10, 9, 13, 10)), placed((2, 81, 4, 83)),
+           placed((48, 57, 49, 58)))
+    ok("a rect falls in one zone, across two, in a gap, or outside the map",
+       got == zones.CLASSES, got)
+
 
 # -- 3. the rules of section 3.1 on the core -------------------------------
 
@@ -450,6 +469,22 @@ def _image_checks(c, image_path) -> None:
              opened and all(o.ok for o in opened),
              "%s" % [o.name for o in opened if not o.ok])
     _confront_checks(c, image_path, len(kits))
+    _zones_checks(c, image_path)
+
+
+def _zones_checks(c, image_path) -> None:
+    """Section 4.6 through `cli.py zones`, and section 5 control 4: the map
+    moved 1 px has to fail."""
+    cli = os.path.join(KITS_DIR, "cli.py")
+    proc = subprocess.run([sys.executable, cli, "zones", image_path],
+                          capture_output=True, text=True)
+    c.ok("section 4.6: every UV rect in a zone or a declared gap, every quiet zone explained",
+         proc.returncode == 0 and "verdict: section 4.6 holds" in proc.stdout,
+         "exit %d" % proc.returncode)
+    proc = subprocess.run([sys.executable, cli, "zones", "--negative", image_path],
+                          capture_output=True, text=True)
+    c.ok("section 5 control 4: the zone map moved 1 px fails section 4.6",
+         proc.returncode == 0 and "red, held" in proc.stdout, "exit %d" % proc.returncode)
 
 
 CONFRONT_LINE = re.compile(r"^confront 1: (\d+) of (\d+) tags equal", re.MULTILINE)

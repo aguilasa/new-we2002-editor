@@ -147,6 +147,15 @@ CONTROLS = (
         "section 5, confront 2: an oracle whose comparison cannot fail says "
         "nothing about the decoder",
     ),
+    Control(
+        "zones-front-moved", "kits/core/zones.py", "ZONES",
+        '    _z("shirt front", PLAYER, 12, 8, 20, 22),',
+        '    _z("shirt front", PLAYER, 13, 8, 20, 22),',
+        "FAIL  zones.self_check() reports no failure",
+        "the map is a partition of polipoli's picture; one row moved 1 px has to "
+        "overlap its neighbour (section 5, control 4 on the disc is `cli.py zones "
+        "--negative`)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

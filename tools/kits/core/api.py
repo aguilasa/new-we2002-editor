@@ -17,6 +17,8 @@ build it.
     kit.flat(image, palette)         # FlatImage(width, height, indices, palette, rgba)
     kit.work_bitmap(kit_set, figure) # the 256x128 uniform | sleeves (set 1/2, figure 0/1)
     kit.palette_grid(palette)        # 256 PaletteEntry(index, bgr555, rgba)
+    api.zone_at(x, y)                # the map's Zone at a work-bitmap pixel, or None
+    api.confront_zones(uv_report)    # section 4.6: Confrontation, `ok` the verdict
 """
 
 from __future__ import annotations
@@ -35,6 +37,10 @@ from .tex import decompress_stream as _decompress_stream
 from .teams import ORIGIN_ROM, ORIGIN_TABLE, TeamEntry  # noqa: F401
 from .flat import (FIGURES, GAME_PAIRS, KIT_SETS, WORK_H, WORK_W,  # noqa: F401
                    FlatImage, PaletteEntry, paint, palette_rgba)
+from .zones import (CLASSES as ZONE_CLASSES, GAPS, GLYPH_ZONES,  # noqa: F401
+                    MAP_BACKGROUND, MEASURES, ZONES, Confrontation, Gap, MapCheck,
+                    Measure, Placed, Zone)
+from . import zones as _zones
 from .source import DiscControl  # noqa: F401
 from .source import disc_controls as _disc_controls
 from . import survey as measure  # noqa: F401  (the phase-0 probes, below)
@@ -54,6 +60,9 @@ __all__ = (
     "TeamEntry", "ORIGIN_TABLE", "ORIGIN_ROM",
     "FlatImage", "PaletteEntry", "paint", "palette_rgba", "GAME_PAIRS", "KIT_SETS", "FIGURES",
     "WORK_W", "WORK_H",
+    "zone_at", "Zone", "ZONES", "Gap", "GAPS", "Measure", "MEASURES", "ZONE_CLASSES",
+    "confront_zones", "Confrontation", "Placed", "shifted_zones", "zone_agreement",
+    "map_check", "MapCheck", "MAP_BACKGROUND", "GLYPH_ZONES", "zones_self_check",
 )
 
 IMAGE_COUNT = len(IMAGE_RECORDS)
@@ -112,3 +121,34 @@ def decompress_stream(data, label="the stream"):
     """The plain bytes of a lone LZSS stream (a WEZip `.bin`), decoded by the
     same decoder as the kit records; `StreamError` with the sentence to show."""
     return _decompress_stream(data, label)
+
+
+def zone_at(x, y, zones=None):
+    """The zone of the map (section 1.3) at work-bitmap pixel (x, y), or None."""
+    return _zones.zone_at(x, y, ZONES if zones is None else zones)
+
+
+def confront_zones(uv_report, zones=None):
+    """Section 4.6 on a `measure.UvReport` (`measure.uv_image`): where each UV
+    rect falls in the map, which zones nobody samples; `ok` is the verdict."""
+    return _zones.confront(uv_report, ZONES if zones is None else zones)
+
+
+def shifted_zones(dx=1, dy=0):
+    """The map moved by (dx, dy): section 5, control 4."""
+    return _zones.shifted(ZONES, dx, dy)
+
+
+def zone_agreement():
+    """ramonpsx's piece sizes against the map's: ((Measure, (w, h) or None), ...)."""
+    return _zones.agreement()
+
+
+def map_check(width, height, pixels, zones=None):
+    """The polipoli rows against the picture they were measured on: a `MapCheck`."""
+    return _zones.map_check(width, height, pixels, ZONES if zones is None else zones)
+
+
+def zones_self_check():
+    """The map's own invariants, as failure sentences (empty when sound)."""
+    return _zones.self_check()

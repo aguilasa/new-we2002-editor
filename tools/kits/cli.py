@@ -18,6 +18,8 @@ Usage:
     python tools/kits/cli.py export --out DIR [--tag TAG ...] [--palette K | --work-bitmap] <path>
     python tools/kits/cli.py flat [--tag TAG ...] [--negative] <path>
     python tools/kits/cli.py export --confront [--negative] [--tag TAG ...] <image.bin>
+    python tools/kits/cli.py zones [--negative] <image.bin>
+    python tools/kits/cli.py zones --map <Zonas We2002.png> [--negative]
 """
 
 from __future__ import annotations
@@ -325,6 +327,176 @@ def cmd_uv(args) -> int:
     else:
         print_uv(result)
     return 0
+
+
+def _zone_name(z) -> str:
+    who = {0: "figure 0", 1: "figure 1", None: "shared"}[z.figure]
+    return "%-9s (%d,%d) %dx%d  %s" % (who, z.x, z.y, z.w, z.h, z.name)
+
+
+def _gap_index0(image_path, gaps) -> dict:
+    """{gap: (work bitmaps, all index 0, all transparent)} over every sound
+    kit of the disc, both sets, in the gap figure's palette."""
+    out = {g: [0, 0, 0] for g in gaps}
+    for kit in api.open_source(image_path).kits():
+        if not kit.ok:
+            continue
+        for kit_set in api.KIT_SETS:
+            for figure in api.FIGURES:
+                mine = [g for g in gaps if g.figure == figure]
+                if not mine:
+                    continue
+                wb = kit.work_bitmap(kit_set, figure)
+                for g in mine:
+                    at = [y * wb.width + x for y in range(g.y, g.y + g.h)
+                          for x in range(g.x, g.x + g.w)]
+                    out[g][0] += 1
+                    out[g][1] += all(wb.indices[i] == 0 for i in at)
+                    out[g][2] += all(wb.rgba[4 * i + 3] == 0 for i in at)
+    return out
+
+
+def print_zones(report, c, index0) -> None:
+    print("section 4.6: the zone map against the UV rects of %s" % report.source)
+    print("  kit TEX_%s, tuple %s, sha256 of the UV list %s"
+          % (report.kit, report.tuple_text, report.digest))
+    for f in report.figures:
+        print("figure %d: %d primitive(s) -- %s" % (f.figure, len(f.rects), ", ".join(
+            "%d %s" % (c.count(f.figure, k), k) for k in api.ZONE_CLASSES)))
+    for p in c.outside:
+        print("  OUTSIDE  figure %d %s section %d primitive %d  rect %s  zones %s"
+              % (p.figure, p.file, p.section, p.primitive, _rect(p.rect),
+                 ", ".join(p.zones) or "none"))
+    print("gaps: what the game samples and the map leaves without a zone (%d)" % len(c.gaps))
+    for g in c.gaps:
+        n = sum(1 for p in c.placed if (g.name, g.figure) in p.gaps)
+        total, zero, clear = index0[g]
+        print("  %s: %d primitive(s); index 0 in every pixel in %d of %d work bitmaps, "
+              "transparent in %d" % (_zone_name(g), n, zero, total, clear))
+    quiet = [z for z, n in c.sampled if not n]
+    print("zones no primitive samples: %d of %d" % (len(quiet), len(c.sampled)))
+    for why in sorted({z.unsampled for z in quiet}):
+        group = [z for z in quiet if z.unsampled == why]
+        print("  %d zone(s): %s" % (len(group), why or "NO REASON GIVEN"))
+        for z in group:
+            print("    %s" % _zone_name(z))
+    for z in c.sampled_but_excused:
+        print("  EXCUSED BUT SAMPLED  %s" % _zone_name(z))
+    for g in c.gaps_unused:
+        print("  GAP NOBODY SAMPLES  %s" % _zone_name(g))
+    agree = api.zone_agreement()
+    same = [m for m, size in agree if size == (m.w, m.h)]
+    print("ramonpsx against the map: %d of %d sizes agree" % (len(same), len(agree)))
+    for m, size in agree:
+        if size != (m.w, m.h):
+            print("  figure %d %-38s ramonpsx %dx%d, map %s"
+                  % (m.figure, m.piece, m.w, m.h, "%dx%d" % size if size else "has no zone"))
+    print("verdict: section 4.6 %s" % ("holds" if c.ok else "FAILS"))
+
+
+def read_png_rgb(path: str) -> tuple:
+    """(width, height, [(r, g, b), ...]) of an 8-bit PNG, indexed, RGB or
+    RGBA, any row filter: the picture the community map was drawn in."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    p, chunks = 8, {}
+    while p < len(data):
+        n = struct.unpack_from(">I", data, p)[0]
+        tag = data[p + 4:p + 8]
+        chunks[tag] = chunks.get(tag, b"") + data[p + 8:p + 8 + n]
+        p += 12 + n
+    width, height, depth, kind, _, _, interlace = struct.unpack_from(">IIBBBBB", chunks[b"IHDR"])
+    bpp = {3: 1, 2: 3, 6: 4}.get(kind)
+    if depth != 8 or bpp is None or interlace:
+        raise ValueError("%s: not an 8-bit indexed, RGB or RGBA PNG without interlace" % path)
+    raw = zlib.decompress(chunks[b"IDAT"])
+    stride = width * bpp
+    prev = bytearray(stride)
+    pixels = []
+    plte = chunks.get(b"PLTE", b"")
+    for r in range(height):
+        f = raw[r * (stride + 1)]
+        row = bytearray(raw[r * (stride + 1) + 1:(r + 1) * (stride + 1)])
+        for i in range(stride):
+            a = row[i - bpp] if i >= bpp else 0
+            b = prev[i]
+            c = prev[i - bpp] if i >= bpp else 0
+            if f == 1:
+                row[i] = (row[i] + a) & 0xFF
+            elif f == 2:
+                row[i] = (row[i] + b) & 0xFF
+            elif f == 3:
+                row[i] = (row[i] + (a + b) // 2) & 0xFF
+            elif f == 4:
+                pa, pb, pc = abs(b - c), abs(a - c), abs(a + b - 2 * c)
+                row[i] = (row[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 0xFF
+        prev = row
+        for x in range(width):
+            if kind == 3:
+                k = row[x]
+                pixels.append(tuple(plte[3 * k:3 * k + 3]))
+            else:
+                pixels.append(tuple(row[x * bpp:x * bpp + 3]))
+    return width, height, pixels
+
+
+def cmd_zones_map(args) -> int:
+    """The polipoli rows of the map against his picture, and its control."""
+    try:
+        width, height, pixels = read_png_rgb(args.map)
+    except (OSError, ValueError, KeyError, zlib.error) as exc:
+        print("zones: %s" % exc, file=sys.stderr)
+        return 1
+    zones = api.shifted_zones() if args.negative else None
+    m = api.map_check(width, height, pixels, zones)
+    if args.negative:
+        print("control: the map moved 1 px right, against %s" % os.path.basename(args.map))
+    print("map: %d pixel(s) painted and in no zone, %d zone(s) holding the background %s"
+          % (len(m.loose), len(m.background), "(%s by design)" % ", ".join(
+              z.name for z, _ in m.background if z.name in api.GLYPH_ZONES)
+             if m.background and not m.unexpected_background else ""))
+    for x, y in m.loose[:SHORT_LIST]:
+        print("  LOOSE  (%d,%d)" % (x, y))
+    for z, n in m.unexpected_background[:SHORT_LIST]:
+        print("  BACKGROUND  %s: %d px" % (_zone_name(z), n))
+    if len(m.unexpected_background) > SHORT_LIST:
+        print("  ... and %d zone(s) more" % (len(m.unexpected_background) - SHORT_LIST))
+    if args.negative:
+        print("control %s" % ("red, held: the moved map fails" if not m.ok else "FAILED: it passed"))
+        return 0 if not m.ok else 1
+    print("verdict: every row of the map %s" % ("is the picture" if m.ok else "does NOT match it"))
+    return 0 if m.ok else 1
+
+
+def cmd_zones(args) -> int:
+    """Section 4.6: the zone map against the geometry, and its control."""
+    if args.map:
+        return cmd_zones_map(args)
+    if not args.image:
+        print("zones: give the disc image, or --map", file=sys.stderr)
+        return 2
+    bad = api.zones_self_check()
+    if bad:
+        for b in bad:
+            print("  MAP  %s" % b)
+        return 1
+    try:
+        report = survey_mod.uv_image(args.image)
+    except (survey_mod.SurveyError, api.KitsError) as exc:
+        print("zones: %s" % exc, file=sys.stderr)
+        return 1
+    if args.negative:
+        c = api.confront_zones(report, api.shifted_zones())
+        print("control: the map moved 1 px right")
+        for f in report.figures:
+            print("figure %d: %s" % (f.figure, ", ".join(
+                "%d %s" % (c.count(f.figure, k), k) for k in api.ZONE_CLASSES)))
+        print("control %s" % ("red, held: section 4.6 fails on the moved map" if not c.ok
+                              else "FAILED: the moved map passed"))
+        return 0 if not c.ok else 1
+    c = api.confront_zones(report)
+    print_zones(report, c, _gap_index0(args.image, api.GAPS))
+    return 0 if c.ok else 1
 
 
 def _open_negative(paths) -> int:
@@ -953,6 +1125,13 @@ def main(argv=None) -> int:
     p.add_argument("--negative", action="store_true",
                    help="flatten one palette of a kit to one colour and require it counted")
     p.set_defaults(fn=cmd_flat)
+    p = sub.add_parser("zones", help="section 4.6: the zone map against the UV rects of the figure")
+    p.add_argument("image", nargs="?", help="the Japanese data track (.bin)")
+    p.add_argument("--map", metavar="PNG",
+                   help="check the map's rows against polipoli's Zonas We2002.png instead")
+    p.add_argument("--negative", action="store_true",
+                   help="move the map 1 px right, which has to fail (section 5, control 4)")
+    p.set_defaults(fn=cmd_zones)
     args = parser.parse_args(argv)
     if args.command == "export" and not args.confront and not args.out:
         parser.error("export needs --out (or --confront)")
