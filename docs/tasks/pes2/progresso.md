@@ -39,6 +39,103 @@ os dois discos, e o mesmo cabeçalho VAB nos `.RA`. A evidência está na §1.14
 do plano. Ela **corre em paralelo** com as Fases 3 a 5 e trava só a
 PES2-TASK-22.
 
+## Dependency graph
+
+<!-- rite:begin graph -->
+```mermaid
+graph TD
+  subgraph phase_0["Fase 0"]
+    PES2_TASK_01["PES2-TASK-01<br/>Ferramental das fases 3 e 4 — numpy e desmontador MIPS"]
+    PES2_TASK_32["PES2-TASK-32<br/>Prova de conceito do MCP do DuckStation"]
+    PES2_TASK_33["PES2-TASK-33<br/>Compilar o fork e validar o MCP de fato"]
+    PES2_TASK_34["PES2-TASK-34<br/>Rotas MCP no lugar do `drive.py`"]
+  end
+  subgraph phase_2["Fase 2"]
+    PES2_TASK_02["PES2-TASK-02<br/>`tools/pes2/poke.py` — gravação pelo conjunto de cópias"]
+    PES2_TASK_03["PES2-TASK-03<br/>Direção do DuckStation — navegar até a tela e capturar"]
+    PES2_TASK_04["PES2-TASK-04<br/>O `poke` de validação — PIEMONTE em todas as telas"]
+  end
+  subgraph phase_3["Fase 3"]
+    PES2_TASK_05["PES2-TASK-05<br/>Harness de diferencial de memory card"]
+    PES2_TASK_06["PES2-TASK-06<br/>Estrutura do registro de jogador, pelo cartão"]
+    PES2_TASK_07["PES2-TASK-07<br/>Dump de RAM e casamento com o bloco do disco"]
+    PES2_TASK_08["PES2-TASK-08<br/>Os 624 candidatos de 16 bits — existe índice para o bloco de nomes?"]
+    PES2_TASK_09["PES2-TASK-09<br/>Os 25 blocos de nome depois do pool, em `SELECTC.BIN`"]
+    PES2_TASK_10["PES2-TASK-10<br/>Fechamento da Fase 3 — o registro de jogador"]
+  end
+  subgraph phase_4["Fase 4"]
+    PES2_TASK_11["PES2-TASK-11<br/>Elenco por time — que jogador pertence a que clube"]
+    PES2_TASK_12["PES2-TASK-12<br/>Formações — a tabela tática por time"]
+    PES2_TASK_13["PES2-TASK-13<br/>Uniforme e cores de time"]
+    PES2_TASK_14["PES2-TASK-14<br/>Bandeiras — forma e cores"]
+    PES2_TASK_15["PES2-TASK-15<br/>Master League — custos, slots e elencos"]
+    PES2_TASK_16["PES2-TASK-16<br/>Fechamento da Fase 4 — o resto do banco"]
+    PES2_TASK_35["PES2-TASK-35<br/>Desbloqueio de times secretos e da lista de Master League, pelo disco"]
+  end
+  subgraph phase_5["Fase 5"]
+    PES2_TASK_17["PES2-TASK-17<br/>O formato do `pes2_map.json`"]
+    PES2_TASK_18["PES2-TASK-18<br/>`pes2_map.json` — o mapa consolidado"]
+    PES2_TASK_19["PES2-TASK-19<br/>O gerador — do mapa ao código, com `--check`"]
+    PES2_TASK_20["PES2-TASK-20<br/>Round-trip headless pelo mapa"]
+    PES2_TASK_21["PES2-TASK-21<br/>Fechamento da Fase 5 — o portão da Fase 6"]
+  end
+  subgraph phase_6["Fase 6"]
+    PES2_TASK_22["PES2-TASK-22<br/>Decisão de linguagem e UI do editor"]
+    PES2_TASK_23["PES2-TASK-23<br/>O editor — leitura e exibição"]
+    PES2_TASK_24["PES2-TASK-24<br/>O editor — gravação"]
+    PES2_TASK_25["PES2-TASK-25<br/>Verificação final — o projeto contra a definição de pronto"]
+  end
+  subgraph phase_7["Fase 7"]
+    PES2_TASK_26["PES2-TASK-26<br/>O codec LZSS dos contêineres `BIN/*.BIN`"]
+    PES2_TASK_27["PES2-TASK-27<br/>Cabeçalho de contêiner e entradas TIM — 4 e 8 bpp com CLUT"]
+    PES2_TASK_28["PES2-TASK-28<br/>`T_NAME_I` e `T_NAME_S` — o conjunto de cópias por idioma"]
+    PES2_TASK_29["PES2-TASK-29<br/>Gravação de asset — fit-or-fail, recompressão só do editado"]
+    PES2_TASK_30["PES2-TASK-30<br/>Fechamento da Fase 7 — o que o editor precisa mostrar"]
+    PES2_TASK_31["PES2-TASK-31<br/>Áudio — o banco `.RA` (VAB) e os VAG"]
+  end
+  PES2_TASK_02 --> PES2_TASK_04
+  PES2_TASK_03 --> PES2_TASK_04
+  PES2_TASK_03 --> PES2_TASK_05
+  PES2_TASK_05 --> PES2_TASK_06
+  PES2_TASK_06 --> PES2_TASK_07
+  PES2_TASK_06 --> PES2_TASK_10
+  PES2_TASK_07 --> PES2_TASK_10
+  PES2_TASK_08 --> PES2_TASK_10
+  PES2_TASK_09 --> PES2_TASK_10
+  PES2_TASK_10 --> PES2_TASK_11
+  PES2_TASK_11 --> PES2_TASK_12
+  PES2_TASK_11 --> PES2_TASK_13
+  PES2_TASK_13 --> PES2_TASK_14
+  PES2_TASK_11 --> PES2_TASK_15
+  PES2_TASK_11 --> PES2_TASK_16
+  PES2_TASK_12 --> PES2_TASK_16
+  PES2_TASK_13 --> PES2_TASK_16
+  PES2_TASK_14 --> PES2_TASK_16
+  PES2_TASK_15 --> PES2_TASK_16
+  PES2_TASK_10 --> PES2_TASK_17
+  PES2_TASK_16 --> PES2_TASK_18
+  PES2_TASK_17 --> PES2_TASK_18
+  PES2_TASK_18 --> PES2_TASK_19
+  PES2_TASK_19 --> PES2_TASK_20
+  PES2_TASK_04 --> PES2_TASK_21
+  PES2_TASK_18 --> PES2_TASK_21
+  PES2_TASK_20 --> PES2_TASK_21
+  PES2_TASK_21 --> PES2_TASK_22
+  PES2_TASK_30 --> PES2_TASK_22
+  PES2_TASK_22 --> PES2_TASK_23
+  PES2_TASK_23 --> PES2_TASK_24
+  PES2_TASK_24 --> PES2_TASK_25
+  PES2_TASK_26 --> PES2_TASK_27
+  PES2_TASK_27 --> PES2_TASK_28
+  PES2_TASK_27 --> PES2_TASK_29
+  PES2_TASK_27 --> PES2_TASK_30
+  PES2_TASK_28 --> PES2_TASK_30
+  PES2_TASK_29 --> PES2_TASK_30
+  PES2_TASK_32 --> PES2_TASK_33
+  PES2_TASK_33 --> PES2_TASK_34
+```
+<!-- rite:end -->
+
 ## Resumo
 
 <!-- rite:begin tasks -->

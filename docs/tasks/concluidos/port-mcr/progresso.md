@@ -30,6 +30,62 @@ do dono do repositório, tomada com o aviso de licença na mesa; a §2 do plano
 registra a diferença de método para o ciclo `wte/`, onde se recusou transcrição
 por princípio.
 
+## Dependency graph
+
+<!-- rite:begin graph -->
+```mermaid
+graph TD
+  subgraph phase_0["Fase 0"]
+    MCR_TASK_01["MCR-TASK-01<br/>O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers"]
+    MCR_TASK_02["MCR-TASK-02<br/>Base legal, linhagem e o SHA fixado do upstream"]
+    MCR_TASK_03["MCR-TASK-03<br/>A fixture nomeada, o venv e o binding Qt"]
+  end
+  subgraph phase_1["Fase 1"]
+    MCR_TASK_04["MCR-TASK-04<br/>`card.py` — diretório, blocos, quadros, checksum e as recusas"]
+    MCR_TASK_05["MCR-TASK-05<br/>`layout.py` e o cross-check dos 17 destinos"]
+    MCR_TASK_06["MCR-TASK-06<br/>`attributes.py` — o codec de 12 bytes, contra `Player::Decode/Encode`"]
+    MCR_TASK_07["MCR-TASK-07<br/>`numbers.py` e `text.py` — os 5 bits e o cp932"]
+    MCR_TASK_08["MCR-TASK-08<br/>`formation.py` e `domains.py` — X/Y, papéis, cobradores e presets"]
+    MCR_TASK_09["MCR-TASK-09<br/>`model.py`, `mcrio.py` e o round-trip byte-idêntico"]
+  end
+  subgraph phase_2["Fase 2"]
+    MCR_TASK_10["MCR-TASK-10<br/>`selftest.py`, o CLI e os três alvos de `ctest` — fecha a Fase 1"]
+  end
+  subgraph phase_3["Fase 3"]
+    MCR_TASK_11["MCR-TASK-11<br/>A casca Qt: janela, elenco e ficha em leitura"]
+    MCR_TASK_12["MCR-TASK-12<br/>Gravação pela UI: ficha, formação e dorsais"]
+    MCR_TASK_13["MCR-TASK-13<br/>O oráculo do Obocaman: o `0x6500`, o nome cheio e o veredito do console"]
+  end
+  subgraph phase_4["Fase 4"]
+    MCR_TASK_14["MCR-TASK-14<br/>Verificação final contra a definição de pronto"]
+  end
+  subgraph phase_5["Fase 5"]
+    MCR_TASK_15["MCR-TASK-15<br/>Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível"]
+    MCR_TASK_16["MCR-TASK-16<br/>Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos"]
+    MCR_TASK_17["MCR-TASK-17<br/>Onde o option file guarda os times secretos e a opção de Master League no modo exibição"]
+  end
+  MCR_TASK_01 --> MCR_TASK_02
+  MCR_TASK_01 --> MCR_TASK_03
+  MCR_TASK_03 --> MCR_TASK_04
+  MCR_TASK_04 --> MCR_TASK_05
+  MCR_TASK_05 --> MCR_TASK_06
+  MCR_TASK_05 --> MCR_TASK_07
+  MCR_TASK_05 --> MCR_TASK_08
+  MCR_TASK_06 --> MCR_TASK_09
+  MCR_TASK_07 --> MCR_TASK_09
+  MCR_TASK_08 --> MCR_TASK_09
+  MCR_TASK_09 --> MCR_TASK_10
+  MCR_TASK_10 --> MCR_TASK_11
+  MCR_TASK_11 --> MCR_TASK_12
+  MCR_TASK_09 --> MCR_TASK_13
+  MCR_TASK_12 --> MCR_TASK_14
+  MCR_TASK_13 --> MCR_TASK_14
+  MCR_TASK_12 --> MCR_TASK_15
+  MCR_TASK_15 --> MCR_TASK_16
+  MCR_TASK_09 --> MCR_TASK_17
+```
+<!-- rite:end -->
+
 ## Resumo
 
 <!-- rite:begin tasks -->

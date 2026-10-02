@@ -37,6 +37,132 @@ os save states dos slots 1 e 2 a mostram — com o boneco **montado**,
 mostra. As tasks 21 a 40 são as Fases 8 a 11, e a fonte de verdade delas é a
 §10 do plano.
 
+## Dependency graph
+
+<!-- rite:begin graph -->
+```mermaid
+graph TD
+  subgraph phase_0["Fase 0"]
+    LOOKS_TASK_01["LOOKS-TASK-01<br/>Base legal e linhagem — `we3d` (MIT), Superpack e o fonte `en_we2000edit`"]
+    LOOKS_TASK_02["LOOKS-TASK-02<br/>Ambiente — o venv, os dois discos e seus papéis, e a armadilha do MSYS"]
+  end
+  subgraph phase_1["Fase 1"]
+    LOOKS_TASK_03["LOOKS-TASK-03<br/>`iso_source.py` e `layout.py` — a fachada de disco e o monopólio de endereço"]
+    LOOKS_TASK_04["LOOKS-TASK-04<br/>`section.py` — primitiva de 24 B, vértice de 8 B e o separador de zeros"]
+    LOOKS_TASK_05["LOOKS-TASK-05<br/>`modelfile.py` — as 106 seções do `MODEL.BIN` e as 20 do `EDT_MOD.BIN`"]
+    LOOKS_TASK_06["LOOKS-TASK-06<br/>`harness.py`, `controls.py` e `selftest.py` — o gate e os primeiros casos vermelhos"]
+  end
+  subgraph phase_2["Fase 2"]
+    LOOKS_TASK_07["LOOKS-TASK-07<br/>`oracle.py` — o emulador por MCP e a rota até a tela `LOOKS SET`"]
+    LOOKS_TASK_08["LOOKS-TASK-08<br/>Incógnita (a) — de onde vem o boneco: `EDT_MOD.BIN` ou os TMDs de `0x00168xxx`"]
+    LOOKS_TASK_09["LOOKS-TASK-09<br/>Incógnita (b) — nomear as onze peças pelo emulador, não pelo tamanho"]
+  end
+  subgraph phase_3["Fase 3"]
+    LOOKS_TASK_10["LOOKS-TASK-10<br/>A lista de CLUTs do `DAT2D.BIN` que o `bin_archive.py` não acha"]
+    LOOKS_TASK_11["LOOKS-TASK-11<br/>A contradição 8 × 3.568 — qual imagem do `DAT2D.BIN` é o cabelo"]
+    LOOKS_TASK_12["LOOKS-TASK-12<br/>Incógnita (d) — pele é troca de paleta ou de cor de vértice?"]
+  end
+  subgraph phase_4["Fase 4"]
+    LOOKS_TASK_13["LOOKS-TASK-13<br/>`looks.py` — os doze campos, seus domínios e os rótulos"]
+    LOOKS_TASK_14["LOOKS-TASK-14<br/>`assembly.py` — campo de LOOKS → peça + paleta"]
+  end
+  subgraph phase_5["Fase 5"]
+    LOOKS_TASK_15["LOOKS-TASK-15<br/>`ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela"]
+    LOOKS_TASK_16["LOOKS-TASK-16<br/>`ui_check.py` — a UI julgada de fora, e o alvo `looks_ui`"]
+  end
+  subgraph phase_6["Fase 6"]
+    LOOKS_TASK_17["LOOKS-TASK-17<br/>Confronto — nosso quadro contra o quadro do emulador, na mesma tupla"]
+    LOOKS_TASK_18["LOOKS-TASK-18<br/>Os 50 renders do Superpack como corpus independente"]
+  end
+  subgraph phase_7["Fase 7"]
+    LOOKS_TASK_19["LOOKS-TASK-19<br/>`cli.py` e os quatro alvos de `ctest`"]
+    LOOKS_TASK_20["LOOKS-TASK-20<br/>Reconciliação do plano, `perfil-looks.md` e os entregáveis"]
+  end
+  subgraph phase_8["Fase 8"]
+    LOOKS_TASK_21["LOOKS-TASK-21<br/>Incógnita (q) — a tela `LOOKS SET` medida no jogo: texto de cada valor, ajuda, cursor e valores iniciais"]
+    LOOKS_TASK_22["LOOKS-TASK-22<br/>A tela `LOOKS SET` na janela — doze linhas trocáveis, e o boneco redesenhado a cada troca"]
+    LOOKS_TASK_23["LOOKS-TASK-23<br/>Incógnita (r) — `DEFAUL` e `NAT`: a nação escolhida e o default que ela aplica"]
+  end
+  subgraph phase_9["Fase 9"]
+    LOOKS_TASK_24["LOOKS-TASK-24<br/>Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tabela"]
+    LOOKS_TASK_25["LOOKS-TASK-25<br/>A pose de referência — as matrizes de cada peça num quadro contado, e a hierarquia"]
+    LOOKS_TASK_26["LOOKS-TASK-26<br/>`anime.py` — o formato do `ANIME.BIN`, medido contra a pose capturada"]
+    LOOKS_TASK_27["LOOKS-TASK-27<br/>As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado"]
+    LOOKS_TASK_28["LOOKS-TASK-28<br/>A câmera do jogo — projeção medida, e a silhueta como testemunha de forma"]
+    LOOKS_TASK_29["LOOKS-TASK-29<br/>Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose"]
+  end
+  subgraph phase_10["Fase 10"]
+    LOOKS_TASK_30["LOOKS-TASK-30<br/>Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas"]
+    LOOKS_TASK_31["LOOKS-TASK-31<br/>Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU"]
+    LOOKS_TASK_36["LOOKS-TASK-36<br/>Os sprites estáticos da tela — placa, caixas, ícone, barra, título e setas, lidos do disco"]
+    LOOKS_TASK_37["LOOKS-TASK-37<br/>A tabela de glifos — o texto da tela desenhado com a fonte do `EDT_2D.BIN`"]
+    LOOKS_TASK_38["LOOKS-TASK-38<br/>O alinhamento dos valores — a caixa do objeto de texto no `screen.json`, e o valor à direita"]
+    LOOKS_TASK_39["LOOKS-TASK-39<br/>O texto da ajuda — quem escreve a página (832,256) na VRAM, e de onde"]
+    LOOKS_TASK_40["LOOKS-TASK-40<br/>A câmera do close-up — o painel aproxima nas seis linhas em que o jogo aproxima"]
+  end
+  subgraph phase_11["Fase 11"]
+    LOOKS_TASK_32["LOOKS-TASK-32<br/>Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço"]
+    LOOKS_TASK_33["LOOKS-TASK-33<br/>A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo"]
+    LOOKS_TASK_34["LOOKS-TASK-34<br/>O goleiro — figura 1 montada e andando na tela, conferida no slot 1"]
+    LOOKS_TASK_35["LOOKS-TASK-35<br/>Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano"]
+  end
+  LOOKS_TASK_01 --> LOOKS_TASK_02
+  LOOKS_TASK_02 --> LOOKS_TASK_03
+  LOOKS_TASK_03 --> LOOKS_TASK_04
+  LOOKS_TASK_04 --> LOOKS_TASK_05
+  LOOKS_TASK_05 --> LOOKS_TASK_06
+  LOOKS_TASK_06 --> LOOKS_TASK_07
+  LOOKS_TASK_07 --> LOOKS_TASK_08
+  LOOKS_TASK_08 --> LOOKS_TASK_09
+  LOOKS_TASK_08 --> LOOKS_TASK_10
+  LOOKS_TASK_10 --> LOOKS_TASK_11
+  LOOKS_TASK_11 --> LOOKS_TASK_12
+  LOOKS_TASK_09 --> LOOKS_TASK_13
+  LOOKS_TASK_12 --> LOOKS_TASK_14
+  LOOKS_TASK_13 --> LOOKS_TASK_14
+  LOOKS_TASK_14 --> LOOKS_TASK_15
+  LOOKS_TASK_15 --> LOOKS_TASK_16
+  LOOKS_TASK_16 --> LOOKS_TASK_17
+  LOOKS_TASK_17 --> LOOKS_TASK_18
+  LOOKS_TASK_18 --> LOOKS_TASK_19
+  LOOKS_TASK_19 --> LOOKS_TASK_20
+  LOOKS_TASK_20 --> LOOKS_TASK_21
+  LOOKS_TASK_21 --> LOOKS_TASK_22
+  LOOKS_TASK_22 --> LOOKS_TASK_23
+  LOOKS_TASK_20 --> LOOKS_TASK_24
+  LOOKS_TASK_24 --> LOOKS_TASK_25
+  LOOKS_TASK_25 --> LOOKS_TASK_26
+  LOOKS_TASK_22 --> LOOKS_TASK_27
+  LOOKS_TASK_26 --> LOOKS_TASK_27
+  LOOKS_TASK_27 --> LOOKS_TASK_28
+  LOOKS_TASK_22 --> LOOKS_TASK_29
+  LOOKS_TASK_28 --> LOOKS_TASK_29
+  LOOKS_TASK_20 --> LOOKS_TASK_30
+  LOOKS_TASK_22 --> LOOKS_TASK_31
+  LOOKS_TASK_28 --> LOOKS_TASK_31
+  LOOKS_TASK_31 --> LOOKS_TASK_36
+  LOOKS_TASK_31 --> LOOKS_TASK_37
+  LOOKS_TASK_37 --> LOOKS_TASK_38
+  LOOKS_TASK_37 --> LOOKS_TASK_39
+  LOOKS_TASK_28 --> LOOKS_TASK_40
+  LOOKS_TASK_26 --> LOOKS_TASK_32
+  LOOKS_TASK_28 --> LOOKS_TASK_33
+  LOOKS_TASK_32 --> LOOKS_TASK_33
+  LOOKS_TASK_40 --> LOOKS_TASK_33
+  LOOKS_TASK_33 --> LOOKS_TASK_34
+  LOOKS_TASK_23 --> LOOKS_TASK_35
+  LOOKS_TASK_29 --> LOOKS_TASK_35
+  LOOKS_TASK_30 --> LOOKS_TASK_35
+  LOOKS_TASK_31 --> LOOKS_TASK_35
+  LOOKS_TASK_34 --> LOOKS_TASK_35
+  LOOKS_TASK_36 --> LOOKS_TASK_35
+  LOOKS_TASK_37 --> LOOKS_TASK_35
+  LOOKS_TASK_38 --> LOOKS_TASK_35
+  LOOKS_TASK_39 --> LOOKS_TASK_35
+  LOOKS_TASK_40 --> LOOKS_TASK_35
+```
+<!-- rite:end -->
+
 ## Resumo
 
 <!-- rite:begin tasks -->

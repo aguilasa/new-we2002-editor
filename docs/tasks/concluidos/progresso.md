@@ -16,6 +16,168 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 > `WTE-TASK` depende delas, e vice-versa.** A fonte de verdade delas é o
 > `PARIDADE-FUNCIONAL.md`, não o `PLAN-WTE-LAZARUS.md`.
 
+## Dependency graph
+
+<!-- rite:begin graph -->
+```mermaid
+graph TD
+  subgraph phase_0["Fase 0"]
+    WTE_TASK_01["WTE-TASK-01<br/>Instalar e verificar o ferramental (Lazarus, FPC, Ghidra)"]
+    WTE_TASK_02["WTE-TASK-02<br/>Esqueleto de wte/ e build por linha de comando"]
+  end
+  subgraph phase_1["Fase 1"]
+    WTE_TASK_03["WTE-TASK-03<br/>tools/dfm_extract.py — os 18 formulários, completos"]
+    WTE_TASK_04["WTE-TASK-04<br/>published_methods.tsv — os 96 handlers, com dono"]
+    WTE_TASK_05["WTE-TASK-05<br/>re/strings.tsv — strings com endereço e quem as usa"]
+    WTE_TASK_06["WTE-TASK-06<br/>re/offsets.md — a tabela em .data cruzada com Offsets.hpp"]
+    WTE_TASK_07["WTE-TASK-07<br/>Veredito sobre Registry, Printers, Comobj e Winhelpviewer"]
+    WTE_TASK_08["WTE-TASK-08<br/>Convenção de nome dos 198 bitmaps e do dat.bin"]
+    WTE_TASK_09["WTE-TASK-09<br/>Fechamento da fase 1 — a extração estática está completa?"]
+  end
+  subgraph phase_2["Fase 2"]
+    WTE_TASK_10["WTE-TASK-10<br/>tools/dfm2lfm.py — gerador dos .lfm e do esqueleto das units"]
+    WTE_TASK_11["WTE-TASK-11<br/>App Lazarus abrindo os 18 formulários, com os 96 stubs logando"]
+    WTE_TASK_12["WTE-TASK-12<br/>Comparação visual dos 18 formulários contra o original"]
+    WTE_TASK_13["WTE-TASK-13<br/>Trace de eventos — a ordem de disparo dos dois lados"]
+    WTE_TASK_14["WTE-TASK-14<br/>Fechamento da fase 2 — a casca está fiel?"]
+  end
+  subgraph phase_3["Fase 3"]
+    WTE_TASK_15["WTE-TASK-15<br/>Decidir o mapeamento de tipo C++ → Pascal"]
+    WTE_TASK_16["WTE-TASK-16<br/>tools/gen_tables_pas.py — offsets e tabelas estáticas"]
+    WTE_TASK_17["WTE-TASK-17<br/>tools/port_database_pas.py — transpilar o we2002_core"]
+    WTE_TASK_18["WTE-TASK-18<br/>Gerar a camada de dados e fazê-la compilar"]
+    WTE_TASK_19["WTE-TASK-19<br/>Descobrir os offsets que o Obocaman tem e nós não"]
+    WTE_TASK_20["WTE-TASK-20<br/>Round-trip headless contra o we2002_core, nas duas ROMs"]
+    WTE_TASK_21["WTE-TASK-21<br/>Fechamento da fase 3 — a camada de dados é 100% gerada?"]
+  end
+  subgraph phase_4["Fase 4"]
+    WTE_TASK_22["WTE-TASK-22<br/>golden_check.sh — o gate: wte.exe contra o app Lazarus"]
+    WTE_TASK_23["WTE-TASK-23<br/>Decidir o formato de re/spec/ e o vocabulário de veredito"]
+    WTE_TASK_24["WTE-TASK-24<br/>Ghidra com a convenção Borland — e os VMTs da VCL"]
+    WTE_TASK_25["WTE-TASK-25<br/>Handlers de carga — abrir a imagem e popular as telas"]
+    WTE_TASK_26["WTE-TASK-26<br/>Handlers de edição — nomes, números, atributos, mover jogador"]
+    WTE_TASK_27["WTE-TASK-27<br/>Handlers de gravação — escrever na imagem de CD"]
+    WTE_TASK_28["WTE-TASK-28<br/>Import e export de .mcr — memory card do PSX"]
+    WTE_TASK_29["WTE-TASK-29<br/>Camisa e bandeira 2D em tempo real, com colar-cores"]
+    WTE_TASK_30["WTE-TASK-30<br/>Handlers dos 13 diálogos auxiliares"]
+    WTE_TASK_31["WTE-TASK-31<br/>Fechamento da fase 4 — os 96 têm veredito?"]
+  end
+  subgraph phase_5["Fase 5"]
+    WTE_TASK_32["WTE-TASK-32<br/>Preço derivado dos atributos — jogador e time inteiro"]
+    WTE_TASK_33["WTE-TASK-33<br/>Contador de slots livres de Master League"]
+  end
+  subgraph phase_6["Fase 6"]
+    WTE_TASK_34["WTE-TASK-34<br/>Bateria golden completa — toda gravação, nas duas ROMs"]
+    WTE_TASK_35["WTE-TASK-35<br/>Registro das divergências deliberadas"]
+    WTE_TASK_36["WTE-TASK-36<br/>Buffers de tamanho fixo e comportamento de truncamento"]
+    WTE_TASK_37["WTE-TASK-37<br/>Reconferência dos 18 formulários, com a lógica ligada"]
+  end
+  subgraph phase_7["Fase 7"]
+    WTE_TASK_38["WTE-TASK-38<br/>Decidir o nome do produto e registrar a linhagem"]
+    WTE_TASK_39["WTE-TASK-39<br/>Ícone, .desktop, AppStream e regras de instalação"]
+    WTE_TASK_40["WTE-TASK-40<br/>Verificação final — as três condições da definição de pronto"]
+  end
+  PAR_TASK_01["PAR-TASK-01<br/>Nomes e abreviações de time, pela tela"]
+  PAR_TASK_02["PAR-TASK-02<br/>Números de camisa e o clamp em 32"]
+  PAR_TASK_03["PAR-TASK-03<br/>Cobradores, capitão e o foco de combo"]
+  PAR_TASK_04["PAR-TASK-04<br/>Atributos do jogador e os clamps"]
+  PAR_TASK_05["PAR-TASK-05<br/>Troca de jogador nos quatro tipos de slot"]
+  PAR_TASK_06["PAR-TASK-06<br/>Táticas, presets e o formato `.t2002`"]
+  PAR_TASK_07["PAR-TASK-07<br/>Bandeira, uniformes e os times sem bandeira própria"]
+  PAR_TASK_08["PAR-TASK-08<br/>Operações em massa"]
+  PAR_TASK_09["PAR-TASK-09<br/>Ciclo de vida da janela"]
+  PAR_TASK_10["PAR-TASK-10<br/>O item aberto do Windows: nome de time pela janela Qt"]
+  PAR_TASK_11["PAR-TASK-11<br/>SoFIFA: o que dá para conferir sem rede"]
+  WTE_TASK_01 --> WTE_TASK_02
+  WTE_TASK_02 --> WTE_TASK_03
+  WTE_TASK_02 --> WTE_TASK_04
+  WTE_TASK_02 --> WTE_TASK_05
+  WTE_TASK_02 --> WTE_TASK_06
+  WTE_TASK_02 --> WTE_TASK_07
+  WTE_TASK_05 --> WTE_TASK_08
+  WTE_TASK_03 --> WTE_TASK_09
+  WTE_TASK_04 --> WTE_TASK_09
+  WTE_TASK_05 --> WTE_TASK_09
+  WTE_TASK_06 --> WTE_TASK_09
+  WTE_TASK_07 --> WTE_TASK_09
+  WTE_TASK_08 --> WTE_TASK_09
+  WTE_TASK_03 --> WTE_TASK_10
+  WTE_TASK_04 --> WTE_TASK_10
+  WTE_TASK_07 --> WTE_TASK_10
+  WTE_TASK_10 --> WTE_TASK_11
+  WTE_TASK_11 --> WTE_TASK_12
+  WTE_TASK_11 --> WTE_TASK_13
+  WTE_TASK_12 --> WTE_TASK_14
+  WTE_TASK_13 --> WTE_TASK_14
+  WTE_TASK_02 --> WTE_TASK_15
+  WTE_TASK_15 --> WTE_TASK_16
+  WTE_TASK_15 --> WTE_TASK_17
+  WTE_TASK_16 --> WTE_TASK_17
+  WTE_TASK_17 --> WTE_TASK_18
+  WTE_TASK_06 --> WTE_TASK_19
+  WTE_TASK_18 --> WTE_TASK_19
+  WTE_TASK_18 --> WTE_TASK_20
+  WTE_TASK_19 --> WTE_TASK_20
+  WTE_TASK_20 --> WTE_TASK_21
+  WTE_TASK_11 --> WTE_TASK_22
+  WTE_TASK_21 --> WTE_TASK_22
+  WTE_TASK_09 --> WTE_TASK_23
+  WTE_TASK_04 --> WTE_TASK_24
+  WTE_TASK_06 --> WTE_TASK_24
+  WTE_TASK_22 --> WTE_TASK_25
+  WTE_TASK_23 --> WTE_TASK_25
+  WTE_TASK_24 --> WTE_TASK_25
+  WTE_TASK_25 --> WTE_TASK_26
+  WTE_TASK_26 --> WTE_TASK_27
+  WTE_TASK_08 --> WTE_TASK_28
+  WTE_TASK_24 --> WTE_TASK_28
+  WTE_TASK_27 --> WTE_TASK_28
+  WTE_TASK_08 --> WTE_TASK_29
+  WTE_TASK_24 --> WTE_TASK_29
+  WTE_TASK_27 --> WTE_TASK_29
+  WTE_TASK_25 --> WTE_TASK_30
+  WTE_TASK_25 --> WTE_TASK_31
+  WTE_TASK_26 --> WTE_TASK_31
+  WTE_TASK_27 --> WTE_TASK_31
+  WTE_TASK_28 --> WTE_TASK_31
+  WTE_TASK_29 --> WTE_TASK_31
+  WTE_TASK_30 --> WTE_TASK_31
+  WTE_TASK_24 --> WTE_TASK_32
+  WTE_TASK_25 --> WTE_TASK_32
+  WTE_TASK_20 --> WTE_TASK_33
+  WTE_TASK_31 --> WTE_TASK_34
+  WTE_TASK_32 --> WTE_TASK_34
+  WTE_TASK_33 --> WTE_TASK_34
+  WTE_TASK_34 --> WTE_TASK_35
+  WTE_TASK_26 --> WTE_TASK_36
+  WTE_TASK_34 --> WTE_TASK_36
+  WTE_TASK_34 --> WTE_TASK_37
+  WTE_TASK_35 --> WTE_TASK_38
+  WTE_TASK_38 --> WTE_TASK_39
+  WTE_TASK_36 --> WTE_TASK_40
+  WTE_TASK_37 --> WTE_TASK_40
+  WTE_TASK_39 --> WTE_TASK_40
+  PAR_TASK_01 --> PAR_TASK_02
+  PAR_TASK_01 --> PAR_TASK_03
+  PAR_TASK_01 --> PAR_TASK_04
+  PAR_TASK_04 --> PAR_TASK_05
+  PAR_TASK_03 --> PAR_TASK_06
+  PAR_TASK_01 --> PAR_TASK_07
+  PAR_TASK_04 --> PAR_TASK_08
+  PAR_TASK_07 --> PAR_TASK_08
+  PAR_TASK_01 --> PAR_TASK_10
+  PAR_TASK_01 --> PAR_TASK_11
+  PAR_TASK_02 --> PAR_TASK_11
+  PAR_TASK_03 --> PAR_TASK_11
+  PAR_TASK_04 --> PAR_TASK_11
+  PAR_TASK_05 --> PAR_TASK_11
+  PAR_TASK_06 --> PAR_TASK_11
+  PAR_TASK_07 --> PAR_TASK_11
+  PAR_TASK_08 --> PAR_TASK_11
+  PAR_TASK_09 --> PAR_TASK_11
+```
+<!-- rite:end -->
+
 ## Resumo
 
 <!-- rite:begin tasks -->

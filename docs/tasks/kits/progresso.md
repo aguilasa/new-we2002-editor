@@ -6,72 +6,125 @@ Visualizador de uniformes (os 105 `TEX_<tag>.BIN` ou um TEX avulso) em 2D e 3D, 
 
 ## Dependency graph
 
+<!-- rite:begin graph -->
 ```mermaid
 graph TD
-    T01
-    T02
-    T03
-    T03 --> T04
-    T01 --> T05
-    T02 --> T05
-    T03 --> T05
-    T04 --> T05
-    T05 --> T06
-    T06 --> T07
-    T07 --> T08
-    T08 --> T09
-    T08 --> T10
-    T06 --> T11
-    T07 --> T11
-    T08 --> T11
-    T09 --> T11
-    T10 --> T11
-    T11 --> T12
-    T12 --> T13
-    T12 --> T14
-    T13 --> T14
-    T11 --> T15
-    T15 --> T16
-    T04 --> T16
-    T15 --> T17
-    T16 --> T17
-    T14 --> T18
-    T17 --> T18
-    T18 --> T19
-    T18 --> T20
-    T19 --> T20
-    T21
-    T21 --> T22
-    T21 --> T23
-    T22 --> T23
-    T20 --> T24
-    T23 --> T24
-    T24 --> T25
-    T24 --> T26
-    T25 --> T26
-    T26 --> T27
-    T27 --> T28
-    T27 --> T29
-    T28 --> T29
-    T14 --> T30
-    T30 --> T31
-    T20 --> T31
-    T30 --> T32
-    T31 --> T32
-    T20 --> T33
-    T05 --> T34
-    T11 --> T34
-    T14 --> T34
-    T17 --> T34
-    T20 --> T34
-    T23 --> T34
-    T26 --> T34
-    T29 --> T34
-    T32 --> T34
-    T33 --> T34
-    T33 --> T35
-    T34 --> T35
+  subgraph phase_0["Fase 0"]
+    KITS_TASK_01["KITS-TASK-01<br/>Promover o levantamento do §1.1 a ferramenta versionada"]
+    KITS_TASK_02["KITS-TASK-02<br/>Medir o que são os retângulos (608,256) e (704,256)"]
+    KITS_TASK_03["KITS-TASK-03<br/>Contar primitivas de cada figura por retângulo do TEX"]
+    KITS_TASK_04["KITS-TASK-04<br/>Levantar as UV que o boneco amostra no bitmap de 256×128"]
+    KITS_TASK_05["KITS-TASK-05<br/>Fechamento da fase 0 — medições no disco"]
+  end
+  subgraph phase_1["Fase 1"]
+    KITS_TASK_06["KITS-TASK-06<br/>Criar a fachada `api.py` e o `source.py` que reconhece ROM ou TEX pelo conteúdo"]
+    KITS_TASK_07["KITS-TASK-07<br/>Ler o TEX com guarda de forma e a cauda marcada Form 2 no leiaute Form 1"]
+    KITS_TASK_08["KITS-TASK-08<br/>Criar selftest, controles negativos e os alvos `kits_selftest` e `kits_image`"]
+    KITS_TASK_09["KITS-TASK-09<br/>`cli.py info/export` e o confronto 1: `tex.py` contra `bin_archive.py export`"]
+    KITS_TASK_10["KITS-TASK-10<br/>Confronto 2: os pares `_BND.bin`/`_BND.tim` do Superpack"]
+    KITS_TASK_11["KITS-TASK-11<br/>Fechamento da fase 1 — núcleo, lado TEX"]
+  end
+  subgraph phase_2["Fase 2"]
+    KITS_TASK_12["KITS-TASK-12<br/>Gerador de `generated/` a partir do C++, com `--check` no ctest"]
+    KITS_TASK_13["KITS-TASK-13<br/>`teams.py` e `cli.py teams`: nome da ROM ou tabela inglesa, decidido pelo disco"]
+    KITS_TASK_14["KITS-TASK-14<br/>Fechamento da fase 2 — núcleo, lado ROM"]
+  end
+  subgraph phase_3["Fase 3"]
+    KITS_TASK_15["KITS-TASK-15<br/>`flat.py`: imagem + paleta em RGBA, o bitmap de trabalho e a grade 16×16"]
+    KITS_TASK_16["KITS-TASK-16<br/>`zones.py` com proveniência, e a §4.6 fechada contra a geometria"]
+    KITS_TASK_17["KITS-TASK-17<br/>Fechamento da fase 3 — plano e zonas, sem janela"]
+  end
+  subgraph phase_4["Fase 4"]
+    KITS_TASK_18["KITS-TASK-18<br/>Janela mínima: Abrir, combobox de tags, aba Plano, estilo Fusion fixo"]
+    KITS_TASK_19["KITS-TASK-19<br/>Gate `kits_ui` e a mesma captura no Windows e no Linux"]
+    KITS_TASK_20["KITS-TASK-20<br/>Fechamento da fase 4 — a janela mínima"]
+  end
+  subgraph phase_5["Fase 5"]
+    KITS_TASK_21["KITS-TASK-21<br/>`scene.Builder(kit=...)` no `looks`, com `TEX_A4` de default"]
+    KITS_TASK_22["KITS-TASK-22<br/>Parâmetro `kit_set`: o banco do TEX entrega o 2º par de registros"]
+    KITS_TASK_23["KITS-TASK-23<br/>Fechamento da fase 5 — as duas mudanças no `looks`"]
+  end
+  subgraph phase_6["Fase 6"]
+    KITS_TASK_24["KITS-TASK-24<br/>`figure.py` e `api.figure`: a única ponte com o `looks`"]
+    KITS_TASK_25["KITS-TASK-25<br/>Aba 3D: titular/suplente, jogador/goleiro, giro livre"]
+    KITS_TASK_26["KITS-TASK-26<br/>Fechamento da fase 6 — o 3D"]
+  end
+  subgraph phase_7["Fase 7"]
+    KITS_TASK_27["KITS-TASK-27<br/>§4.1 no emulador: suplente em campo e a VRAM lida"]
+    KITS_TASK_28["KITS-TASK-28<br/>Confronto 3: `confront.py --score` com um uniforme que não é o `A4`"]
+    KITS_TASK_29["KITS-TASK-29<br/>Fechamento da fase 7 — o emulador julga o 3D"]
+  end
+  subgraph phase_8["Fase 8"]
+    KITS_TASK_30["KITS-TASK-30<br/>§4.2: qual TEX cada time veste"]
+    KITS_TASK_31["KITS-TASK-31<br/>O combobox passa a listar times, na ordem do jogo"]
+    KITS_TASK_32["KITS-TASK-32<br/>Fechamento da fase 8 — times em vez de tags"]
+  end
+  subgraph phase_9["Fase 9"]
+    KITS_TASK_33["KITS-TASK-33<br/>Aba Diagnóstico: a lista de `kit.problems`"]
+    KITS_TASK_34["KITS-TASK-34<br/>Conferir a Definição de pronto do §0, item por item"]
+    KITS_TASK_35["KITS-TASK-35<br/>Fechamento da fase 9"]
+  end
+  KITS_TASK_03 --> KITS_TASK_04
+  KITS_TASK_01 --> KITS_TASK_05
+  KITS_TASK_02 --> KITS_TASK_05
+  KITS_TASK_03 --> KITS_TASK_05
+  KITS_TASK_04 --> KITS_TASK_05
+  KITS_TASK_05 --> KITS_TASK_06
+  KITS_TASK_06 --> KITS_TASK_07
+  KITS_TASK_07 --> KITS_TASK_08
+  KITS_TASK_08 --> KITS_TASK_09
+  KITS_TASK_08 --> KITS_TASK_10
+  KITS_TASK_06 --> KITS_TASK_11
+  KITS_TASK_07 --> KITS_TASK_11
+  KITS_TASK_08 --> KITS_TASK_11
+  KITS_TASK_09 --> KITS_TASK_11
+  KITS_TASK_10 --> KITS_TASK_11
+  KITS_TASK_11 --> KITS_TASK_12
+  KITS_TASK_12 --> KITS_TASK_13
+  KITS_TASK_12 --> KITS_TASK_14
+  KITS_TASK_13 --> KITS_TASK_14
+  KITS_TASK_11 --> KITS_TASK_15
+  KITS_TASK_15 --> KITS_TASK_16
+  KITS_TASK_04 --> KITS_TASK_16
+  KITS_TASK_15 --> KITS_TASK_17
+  KITS_TASK_16 --> KITS_TASK_17
+  KITS_TASK_14 --> KITS_TASK_18
+  KITS_TASK_17 --> KITS_TASK_18
+  KITS_TASK_18 --> KITS_TASK_19
+  KITS_TASK_18 --> KITS_TASK_20
+  KITS_TASK_19 --> KITS_TASK_20
+  KITS_TASK_21 --> KITS_TASK_22
+  KITS_TASK_21 --> KITS_TASK_23
+  KITS_TASK_22 --> KITS_TASK_23
+  KITS_TASK_20 --> KITS_TASK_24
+  KITS_TASK_23 --> KITS_TASK_24
+  KITS_TASK_24 --> KITS_TASK_25
+  KITS_TASK_24 --> KITS_TASK_26
+  KITS_TASK_25 --> KITS_TASK_26
+  KITS_TASK_26 --> KITS_TASK_27
+  KITS_TASK_27 --> KITS_TASK_28
+  KITS_TASK_27 --> KITS_TASK_29
+  KITS_TASK_28 --> KITS_TASK_29
+  KITS_TASK_14 --> KITS_TASK_30
+  KITS_TASK_30 --> KITS_TASK_31
+  KITS_TASK_20 --> KITS_TASK_31
+  KITS_TASK_30 --> KITS_TASK_32
+  KITS_TASK_31 --> KITS_TASK_32
+  KITS_TASK_20 --> KITS_TASK_33
+  KITS_TASK_05 --> KITS_TASK_34
+  KITS_TASK_11 --> KITS_TASK_34
+  KITS_TASK_14 --> KITS_TASK_34
+  KITS_TASK_17 --> KITS_TASK_34
+  KITS_TASK_20 --> KITS_TASK_34
+  KITS_TASK_23 --> KITS_TASK_34
+  KITS_TASK_26 --> KITS_TASK_34
+  KITS_TASK_29 --> KITS_TASK_34
+  KITS_TASK_32 --> KITS_TASK_34
+  KITS_TASK_33 --> KITS_TASK_34
+  KITS_TASK_33 --> KITS_TASK_35
+  KITS_TASK_34 --> KITS_TASK_35
 ```
+<!-- rite:end -->
 
 ## Tasks
 
