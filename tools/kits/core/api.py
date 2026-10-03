@@ -19,13 +19,17 @@ build it.
     kit.palette_grid(palette)        # 256 PaletteEntry(index, bgr555, rgba)
     api.zone_at(x, y)                # the map's Zone at a work-bitmap pixel, or None
     api.confront_zones(uv_report)    # section 4.6: Confrontation, `ok` the verdict
+    api.figure(kit, kit_set, figure, geometry_path=None, frame=None)
+                                     # the looks Scene of the figure in the kit;
+                                     # geometry from WE2002_LOOKS_IMAGE when no path
 """
 
 from __future__ import annotations
 
 from .errors import (KitError, KitMissing, KitRefused, KitsError,  # noqa: F401
                      KitUnreadable, NotASource, SourceEmpty, SourceError,
-                     SourceMissing, SourceUnreadable, StreamError)
+                     SourceMissing, SourceUnreadable, StreamError,
+                     FigureError, NoGeometry, GeometryRefused)
 from .source import KIND_ROM, KIND_TEX, OpenControl, RomSource, TexSource  # noqa: F401
 from .source import open_controls as _open_controls
 from .source import open_source as _open_source
@@ -47,6 +51,8 @@ from . import zones as _zones
 from .source import DiscControl  # noqa: F401
 from .source import disc_controls as _disc_controls
 from . import survey as measure  # noqa: F401  (the phase-0 probes, below)
+from . import figure as _figure
+from .figure import SwapControl  # noqa: F401
 
 __all__ = (
     "open_source", "open_controls", "OpenControl",
@@ -66,7 +72,28 @@ __all__ = (
     "zone_at", "Zone", "ZONES", "Gap", "GAPS", "Measure", "MEASURES", "ZONE_CLASSES",
     "confront_zones", "Confrontation", "Placed", "shifted_zones", "zone_agreement",
     "map_check", "MapCheck", "MAP_BACKGROUND", "GLYPH_ZONES", "zones_self_check",
+    "figure", "read_geometry", "palette_swap", "SwapControl", "GEOMETRY_ENV",
+    "FigureError", "NoGeometry", "GeometryRefused",
 )
+
+GEOMETRY_ENV = _figure.GEOMETRY_ENV
+
+
+def figure(kit, kit_set=1, figure=0, geometry_path=None, frame=None, geometry=None):
+    """The looks `Scene` of *figure* (0 player, 1 goalkeeper) in set *kit_set*
+    of *kit*.  The geometry comes from *geometry_path*, else from
+    `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry` (section 3.1)."""
+    return _figure.scene_of(kit, kit_set, figure, geometry_path, frame, geometry)
+
+
+def read_geometry(geometry_path=None):
+    """The figure's files off the disc, read once for several `figure` calls."""
+    return _figure.read_geometry(_figure.geometry_path_for(geometry_path))
+
+
+def palette_swap(kit, kit_set, figure, geometry):
+    """Section 5, control 4: the kit with 486 and 488 swapped, checked."""
+    return _figure.palette_swap(kit, kit_set, figure, geometry)
 
 IMAGE_COUNT = len(IMAGE_RECORDS)
 """How many image records a kit container has (6), from `EXPECTED_SHAPE`."""

@@ -103,7 +103,7 @@ este perfil e o plano divergirem, o plano ganha.
 ### Fase 6 — 3D
 
 - Texto novo da janela entra no catálogo (`ui/i18n.py`), nas duas línguas (§3.4).
-- Só `core/figure.py` importa o `looks` (§3.1).
+- Só `core/figure.py` importa o `scene` do `looks` (§3.1); o resto do núcleo alcança o `layout` para endereço e o `survey.py` as sondas da fase 0, e nenhum pede cena — `kits_selftest` afirma (`only core/figure.py imports the looks scene`).
 - Trocar as paletas 486 e 488 troca jogador e goleiro (§5.4).
 - Sem `WE2002_LOOKS_IMAGE`, aba 3D desligada com a frase e o 2D igual (§3.2).
 

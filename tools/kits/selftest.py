@@ -230,6 +230,32 @@ def _core_checks(c) -> None:
     def problems(d):
         return tex.read_kit(d, "fixture").problems
 
+    # api.figure (KITS-TASK-24): no geometry is a sentence, not a traceback, and
+    # the 486/488 swap of control 4 moves exactly the two palettes of the set.
+    saved = os.environ.pop(IMAGE_VARIABLE, None)
+    try:
+        c.refuses("with no geometry disc, api.figure says why",
+                  lambda: api.figure(kit, 1, 0), "needs the Japanese disc", kind=api.NoGeometry)
+    finally:
+        if saved is not None:
+            os.environ[IMAGE_VARIABLE] = saved
+    from core import figure as _figure
+    import texture as _texture
+    for kit_set in (1, 2):
+        held = _texture.in_set_order(_texture.palettes(data), kit_set)
+        player = next(r for r in held if r.y == _figure.PLAYER_ROW)
+        keeper = next(r for r in held if r.y == _figure.KEEPER_ROW)
+        size = player.colours * 2
+        swapped = _figure.swapped_palettes(data, kit_set)
+        moved = [i for i in range(len(data)) if data[i] != swapped[i]]
+        ok("set %d: the swap puts 488 where 486 was and 486 where 488 was, and touches "
+           "nothing else" % kit_set,
+           swapped[player.offset:player.offset + size] == data[keeper.offset:keeper.offset + size]
+           and swapped[keeper.offset:keeper.offset + size] == data[player.offset:player.offset + size]
+           and all(player.offset <= i < player.offset + size
+                   or keeper.offset <= i < keeper.offset + size for i in moved)
+           and bool(moved), "%d byte(s) moved" % len(moved))
+
     p = problems(build_container(short_by=1))
     ok("a missing record is refused by count",
        len(p) == 1 and "has 10 image/palette records" in p[0], p)
@@ -497,7 +523,26 @@ def _language_checks(c) -> None:
          "%s" % planted)
 
 
+SCENE_BRIDGE = "figure.py"
+SCENE_MODULES = ("scene",)
+"""The looks modules that draw the figure.  Only `core/figure.py` may import
+them (section 3.1): the rest of the core reaches `layout` for addresses and
+`survey.py` runs the phase-0 probes, but none of them asks for a scene."""
+
+
+def scene_importers(folder: str = CORE_DIR) -> list:
+    """Files of *folder* that import a module of `SCENE_MODULES`."""
+    out = []
+    for name in sorted(os.listdir(folder)):
+        if name.endswith(".py") and _imported_names(os.path.join(folder, name)) & set(SCENE_MODULES):
+            out.append(name)
+    return out
+
+
 def _rule_checks(c) -> None:
+    importers = c.attempt("sweep core/ for the scene", scene_importers, default=None)
+    c.ok("only core/figure.py imports the looks scene (section 3.1)",
+         importers == [SCENE_BRIDGE], "%s" % importers)
     breaks = c.attempt("sweep tools/kits/core", core_rule_breaks, default=None)
     c.ok("core/ has no print, exit, input or Qt (section 3.1)", breaks == [],
          "%s" % breaks)
@@ -694,6 +739,27 @@ def _confront_checks(c, image_path, n_kits) -> None:
                  "exit %d, %s" % (proc.returncode, got))
 
 
+def _figure_checks(c, image_path) -> None:
+    """Section 5, control 4, on the disc: swapping 486 and 488 swaps the
+    player's and the goalkeeper's colours on the figure, every kit surface."""
+    src = c.attempt("open %s" % image_path, lambda: api.open_source(image_path))
+    geometry = c.attempt("read the figure's geometry", lambda: api.read_geometry(image_path))
+    if src is None or geometry is None:
+        return
+    for tag in ("A4", "00"):
+        kit = src.kit(tag)
+        for figure in (0, 1):
+            for kit_set in (1, 2):
+                swap = c.attempt("swap TEX_%s set %d figure %d" % (tag, kit_set, figure),
+                                 lambda: api.palette_swap(kit, kit_set, figure, geometry))
+                if swap is None:
+                    continue
+                print("  ..... TEX_%s set %d figure %d: rows %s, %d kit surface(s), %d wrong"
+                      % (tag, kit_set, figure, swap.rows, swap.surfaces, len(swap.wrong)))
+                c.ok("TEX_%s set %d figure %d: 486/488 swapped draws the other figure's colours"
+                     % (tag, kit_set, figure), swap.ok, "; ".join(swap.wrong[:3]))
+
+
 def run_image(verbose: bool = True) -> int:
     """`kits_image`: 77 when the variable is not set, else the failure count
     (as 0 or 1).  Set and pointing at no file is a failure, not a skip: the
@@ -708,6 +774,7 @@ def run_image(verbose: bool = True) -> int:
         print("kits_image: 1 failure(s)")
         return 1
     total = harness.run("kits_image", _image_checks, verbose, image_path=image_path)
+    total += harness.run("figure", _figure_checks, verbose, image_path=image_path)
     return 1 if total else 0
 
 

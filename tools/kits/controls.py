@@ -188,6 +188,24 @@ CONTROLS = (
         "nobody samples is stale (CORR-KITS-031)",
     ),
     Control(
+        "figure-swap-noop", "kits/core/figure.py", "swapped_palettes",
+        "    return bytes(out)\n",
+        "    return bytes(data)\n",
+        "FAIL  set 1: the swap puts 488 where 486 was",
+        "control 4 of section 5 has to swap something: a swap that returns the "
+        "kit untouched passes TEX_A4 on the disc, whose two palettes are equal "
+        "(KITS-TASK-24)",
+    ),
+    Control(
+        "scene-outside-figure", "kits/core/teams.py", "module imports",
+        "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n",
+        "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n"
+        "import scene  # noqa: E402,F401\n",
+        "FAIL  only core/figure.py imports the looks scene",
+        "a second module asking the looks for a scene is a second bridge, which "
+        "section 3.1 forbids (KITS-TASK-24)",
+    ),
+    Control(
         "i18n-key-missing", "kits/ui/i18n.py", "CATALOG",
         '        "zone_none": "nenhuma",\n',
         "",

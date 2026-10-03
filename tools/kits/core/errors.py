@@ -50,3 +50,17 @@ class KitRefused(KitError):
 
 class StreamError(KitsError):
     """A lone LZSS stream (a WEZip `.bin`) does not decode."""
+
+
+class FigureError(KitsError):
+    """The 3D figure cannot be drawn (section 3.1, `api.figure`)."""
+
+
+class NoGeometry(FigureError):
+    """No disc to take the figure's geometry from: none given and
+    `WE2002_LOOKS_IMAGE` unset."""
+
+
+class GeometryRefused(FigureError):
+    """The geometry disc cannot be read, or the looks guard refuses it (the
+    figure's files are trusted only from the Japanese disc)."""
