@@ -95,3 +95,8 @@ kits_selftest: 0 failure(s)
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
 100% tests passed, 0 tests failed out of 4
 ```
+- **Closed** — commit `9ca3330` (2026-10-03): test(kits): cover the lone TEX that takes its geometry from the variable
+  - Files (`git show --name-status 9ca3330`):
+    - `M docs/tasks/kits/CORR-KITS-044.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
