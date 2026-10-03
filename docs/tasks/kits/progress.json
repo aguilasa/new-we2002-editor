@@ -17,10 +17,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#idioma-da-interface",
       "files": ["tools/kits/ui/i18n.py", "tools/kits/ui/app.py", "tools/kits/ui_check.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-03",
+      "done_commit": "64e3cb8",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
