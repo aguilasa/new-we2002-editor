@@ -350,12 +350,12 @@
       "phase": 5,
       "depends_on": ["KITS-TASK-21"],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#2",
-      "files": ["tools/looks/scene.py", "tools/looks/assembly.py", "tools/looks/atlas.py", "tools/looks/texture.py", "tools/looks/selftest.py"],
+      "files": ["tools/looks/scene.py", "tools/looks/assembly.py", "tools/looks/texture.py", "tools/looks/controls.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-02",
+      "done_commit": "b94af6f",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

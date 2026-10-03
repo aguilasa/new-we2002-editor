@@ -119,4 +119,11 @@ $ ctest --test-dir build -R 'kits_selftest|kits_image'
 ```
 
 (Os dois do `kits` porque o `kits/core/survey.py` chama o `draw_list`; com o `kit_set` de default ele não mudou.)
-
+- **Closed** — commit `b94af6f` (2026-10-02): feat(looks): kit_set picks the kit's second set by search order
+  - Files (`git show --name-status b94af6f`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/22-looks-kit-set.md`
+    - `M tools/looks/assembly.py`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/scene.py`
+    - `M tools/looks/texture.py`
