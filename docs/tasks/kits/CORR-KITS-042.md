@@ -48,3 +48,18 @@ Em `docs/tasks/kits/24-figura.md`: pôr o script AST inteiro dentro do heredoc; 
 `grep -c '…' docs/tasks/kits/24-figura.md` dá 0 (hoje 4), e as linhas `$` do Log, rodadas como estão, reproduzem cada bloco colado.
 
 ## Log de Execução
+
+### 2026-10-03
+
+Reproduzido na HEAD `ea8e6e0`: `grep -c '…' docs/tasks/kits/24-figura.md` dá `4`; o heredoc AST sem corpo, o vermelho em disco sem passos e o grep de `TEX_00` sem quatro das linhas que ele casa, como a Evidência diz.
+
+Conserto, só no Log (o `controls.py` não muda — o vermelho em disco ficou escrito como passos):
+
+- (a) o script AST inteiro dentro do heredoc, rodado numa cópia `git archive 3cfb2c4 tools` (a base "antes desta task"). A saída lista os nove arquivos; os dois com import do `looks` são os que o Log já dizia (`survey.py`, `teams.py`), os outros sete `[]`.
+- (b) o vermelho em disco como três comandos a partir da HEAD (`git archive` + `sed` em `return bytes(out)` + `selftest.py --image`), rodados aqui: 4 `FAIL`, `figure: 4 failure(s)`, linha a linha a saída colada.
+- (c) o grep de `TEX_00` colado sem edição (dez linhas, com a de `section 5 control 4` e as três `ok` que faltavam); as duas linhas do critério 2 como comandos inteiros com `2>&1 | tail -1`, que imprimem a exceção qualificada (`core.errors.NoGeometry`, `core.errors.GeometryRefused`) e a mensagem inteira, sem `…`.
+
+```
+$ grep -c '…' docs/tasks/kits/24-figura.md
+0
+```

@@ -37,11 +37,31 @@ Na máquina Linux; base `3cfb2c4`.
 **O critério 1, e por que ele mudou de forma.** O `grep -rn 'looks' tools/kits/core/ -l` literal não lista só o `figure.py`, e não pode: o `teams.py` importa o `layout` do `looks` porque a §3.1 manda endereço morar lá, o `survey.py` são as sondas da fase 0 que a própria §3.1 lista, e a palavra aparece em comentário de `flat.py`, `tex.py`, `zones.py` e `source.py`. Medido por AST, antes desta task:
 
 ```
+$ S=$(mktemp -d); git archive 3cfb2c4 tools | tar -x -C $S; cd $S
 $ python3 - <<'X'   # módulos de tools/looks importados por cada arquivo de tools/kits/core
+import ast, os
+looks = {f[:-3] for f in os.listdir("tools/looks") if f.endswith(".py")}
+for f in sorted(os.listdir("tools/kits/core")):
+    if not f.endswith(".py"):
+        continue
+    tree = ast.parse(open(os.path.join("tools/kits/core", f)).read())
+    names = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names |= {a.name.split(".")[0] for a in node.names}
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            names.add(node.module.split(".")[0])
+    print(f, sorted(names & looks))
+X
+__init__.py []
+api.py []
+errors.py []
+flat.py []
+source.py []
 survey.py ['assembly', 'atlas', 'iso_source', 'layout', 'looks', 'section', 'texture']
 teams.py ['layout']
-(os outros sete: [])
-X
+tex.py []
+zones.py []
 ```
 
 A fonte de verdade ganha: o que a §3.1 diz é que o `figure.py` é a única ponte **que pede a cena**. O critério foi reescrito assim, e é o `kits_selftest` quem afirma, com controle (`scene-outside-figure` põe `import scene` no `teams.py`):
@@ -58,10 +78,11 @@ O critério 2:
 
 ```
 $ env -u WE2002_LOOKS_IMAGE python3 -c 'import sys; sys.path.insert(0,"tools/kits"); from core import api
-  kit = api.open_source("roms/japanese-shift-jis.bin").kit("00"); api.figure(kit, 1, 0)'
-NoGeometry: The 3D figure needs the Japanese disc for its geometry: set WE2002_LOOKS_IMAGE to its data track (.bin).
-$ (o mesmo com geometry_path="roms/golden-european-deluxe.bin")
-GeometryRefused: roms/golden-european-deluxe.bin cannot give the figure's geometry: /BIN/DAT2D.BIN: read d0ff5ac291e1818c… from ro…
+  kit = api.open_source("roms/japanese-shift-jis.bin").kit("00"); api.figure(kit, 1, 0)' 2>&1 | tail -1
+core.errors.NoGeometry: The 3D figure needs the Japanese disc for its geometry: set WE2002_LOOKS_IMAGE to its data track (.bin).
+$ env -u WE2002_LOOKS_IMAGE python3 -c 'import sys; sys.path.insert(0,"tools/kits"); from core import api
+  kit = api.open_source("roms/japanese-shift-jis.bin").kit("00"); api.figure(kit, 1, 0, geometry_path="roms/golden-european-deluxe.bin")' 2>&1 | tail -1
+core.errors.GeometryRefused: roms/golden-european-deluxe.bin cannot give the figure's geometry: /BIN/DAT2D.BIN: read d0ff5ac291e1818c10c925dd273f07fddd9e5b2bfef32ce25faec5589996d974 from roms/golden-european-deluxe.bin, expected 0e914e584c889635f0c3a7a64d87ed5c773541c76b35455b6475c19c9f50de7b.  /BIN/DAT2D.BIN differs between the Japanese original and the English translation patch, and textures and palettes may only be read from the Japanese one.  Point WE2002_LOOKS_IMAGE at it; WE2002_LOOKS_DRIVE_IMAGE is the disc you drive, not the disc you read.
 $ python3 tools/kits/selftest.py --no-plant | grep geometry
   ok    with no geometry disc, api.figure says why
 ```
@@ -70,21 +91,28 @@ O critério 3 — o controle 4 do §5 (`api.palette_swap`): o kit com as paletas
 
 ```
 $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/selftest.py --image | grep -E 'TEX_00|figure:'
+  ok    section 5 control 4 on /BIN/TEX_00.BIN on /home/ingmar/desenvolvimento/github/new-we2002-editor/roms/japanese-shift-jis.bin
   ..... TEX_00 set 1 figure 0: rows (486,), 1 kit surface(s), 0 wrong
   ok    TEX_00 set 1 figure 0: 486/488 swapped draws the other figure's colours
   ..... TEX_00 set 2 figure 0: rows (486,), 1 kit surface(s), 0 wrong
+  ok    TEX_00 set 2 figure 0: 486/488 swapped draws the other figure's colours
   ..... TEX_00 set 1 figure 1: rows (488,), 1 kit surface(s), 0 wrong
+  ok    TEX_00 set 1 figure 1: 486/488 swapped draws the other figure's colours
   ..... TEX_00 set 2 figure 1: rows (488,), 1 kit surface(s), 0 wrong
+  ok    TEX_00 set 2 figure 1: 486/488 swapped draws the other figure's colours
 figure: 0 failure(s)
 ```
 
 O vermelho, numa cópia da árvore com `swapped_palettes` devolvendo o kit intacto:
 
 ```
+$ R=$PWD; S=$(mktemp -d); git archive HEAD tools | tar -x -C $S; cd $S
+$ sed -i 's/^    return bytes(out)$/    return bytes(data)/' tools/kits/core/figure.py
+$ WE2002_LOOKS_IMAGE=$R/roms/japanese-shift-jis.bin python3 tools/kits/selftest.py --image | grep -E 'FAIL|figure:'
   FAIL  TEX_00 set 1 figure 0: 486/488 swapped draws the other figure's colours  record 48, row 486: not the row 488 colours
-  FAIL  TEX_00 set 2 figure 0: …  record 10556, row 486: not the row 488 colours
-  FAIL  TEX_00 set 1 figure 1: …  record 48, row 488: not the row 486 colours
-  FAIL  TEX_00 set 2 figure 1: …  record 10556, row 488: not the row 486 colours
+  FAIL  TEX_00 set 2 figure 0: 486/488 swapped draws the other figure's colours  record 10556, row 486: not the row 488 colours
+  FAIL  TEX_00 set 1 figure 1: 486/488 swapped draws the other figure's colours  record 48, row 488: not the row 486 colours
+  FAIL  TEX_00 set 2 figure 1: 486/488 swapped draws the other figure's colours  record 10556, row 488: not the row 486 colours
 figure: 4 failure(s)
 ```
 
