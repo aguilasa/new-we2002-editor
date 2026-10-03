@@ -43,3 +43,24 @@ grep -c '^\$ (o mesmo estado' docs/tasks/kits/36-ui-i18n.md
 Dá 1 hoje; 0 depois do conserto.
 
 ## Log de Execução
+
+### 2026-10-03
+
+Reproduzido na HEAD `b5f4730`: `grep -c '^\$ (o mesmo estado' docs/tasks/kits/36-ui-i18n.md` dá `1`.
+
+Conserto: a linha de lugar trocada pelo laço literal, rodado aqui com os mesmos caminhos do Log (regravou `work/kits-ui-golden-*.png`), e a saída colada inteira — três linhas por captura, com a nota de Form 2 do núcleo. Logo abaixo do bloco, a frase de que a golden foi só olhada, com a medida:
+
+```
+$ export DISPLAY=:98 XAUTHORITY=; for L in en-US pt-BR; do work/venv-looks/bin/python tools/kits/ui/app.py roms/golden-european-deluxe.bin --lang $L --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-golden-$L.png; done
+  wrote work/kits-ui-golden-en-US.png, 980x640
+  TEX_00 · image work bitmap, 1st set · [...] read as Form 1.
+  window up, at -32000,-32000
+  wrote work/kits-ui-golden-pt-BR.png, 980x640
+  TEX_00 · image bitmap de trabalho, 1º conjunto · [...] read as Form 1.
+  window up, at -32000,-32000
+$ python3 tools/kits/ui_check.py --compare work/kits-ui-linux.png work/kits-ui-golden-en-US.png | tail -2
+382703 of 627200 pixels differ (61.02 %)
+FAIL  61.02 % differ, above the 5.0 % limit
+$ grep -c '^\$ (o mesmo estado' docs/tasks/kits/36-ui-i18n.md
+0
+```
