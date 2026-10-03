@@ -39,6 +39,6 @@
 | [CORR-KITS-034](/docs/tasks/kits/CORR-KITS-034.md) | Desinverter a afirmação de caminho relativo/absoluto nas Notas da task | KITS-TASK-19 | low | done | 2026-10-02 |
 | [CORR-KITS-035](/docs/tasks/kits/CORR-KITS-035.md) | Reconciliar o "captura igual" da §0 e da §7 do plano com a diferença medida de 1,95 % | KITS-TASK-20 | medium | done | 2026-10-02 |
 | [CORR-KITS-036](/docs/tasks/kits/CORR-KITS-036.md) | Repor no Log a linha de saída do app.py cortada sem marca | KITS-TASK-20 | low | done | 2026-10-02 |
-| [CORR-KITS-037](/docs/tasks/kits/CORR-KITS-037.md) | Cobrir no gate o kit que Builder.walk_build passa ao build() | KITS-TASK-21 | medium | pending | — |
+| [CORR-KITS-037](/docs/tasks/kits/CORR-KITS-037.md) | Cobrir no gate o kit que Builder.walk_build passa ao build() | KITS-TASK-21 | medium | done | 2026-10-02 |
 | [CORR-KITS-038](/docs/tasks/kits/CORR-KITS-038.md) | Trocar a linha narrativa "$ (a mesma troca...)" do Log por um comando | KITS-TASK-21 | low | pending | — |
 <!-- rite:end -->

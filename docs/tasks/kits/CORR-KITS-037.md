@@ -81,3 +81,8 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ct
 4/8 Test #17: looks_live .......................***Skipped   0.10 sec
 100% tests passed, 0 tests failed out of 8
 ```
+- **Closed** — commit `59691da` (2026-10-02): test(looks): cover the kit Builder.walk_build passes to build()
+  - Files (`git show --name-status 59691da`):
+    - `M docs/tasks/kits/CORR-KITS-037.md`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/scene.py`
