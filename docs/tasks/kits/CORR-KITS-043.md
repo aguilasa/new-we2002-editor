@@ -58,3 +58,7 @@ Conserto: `docs/prompts/perfil-kits.md` entra na lista de Escopo da KITS-TASK-24
 $ sed -n '/^## Arquivos/,/^## Done/p' docs/tasks/kits/24-figura.md | grep -c perfil-kits
 1
 ```
+- **Closed** — commit `91fbd57` (2026-10-03): docs(kits): list the phase-6 profile rewrite in the KITS-TASK-24 scope
+  - Files (`git show --name-status 91fbd57`):
+    - `M docs/tasks/kits/24-figura.md`
+    - `M docs/tasks/kits/CORR-KITS-043.md`
