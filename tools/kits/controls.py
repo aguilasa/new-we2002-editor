@@ -197,6 +197,15 @@ CONTROLS = (
         "(KITS-TASK-24)",
     ),
     Control(
+        "geometry-env-ignored", "kits/core/figure.py", "geometry_path_for",
+        "    path = path or os.environ.get(GEOMETRY_ENV)\n",
+        "    path = path\n",
+        "FAIL  lone TEX: with no geometry path, the figure takes",
+        "a lone TEX has no disc of its own, and the figure's geometry has to "
+        "come from WE2002_LOOKS_IMAGE; ignoring it leaves every TEX opened "
+        "outside the disc without a 3D figure (CORR-KITS-044)",
+    ),
+    Control(
         "scene-outside-figure", "kits/core/teams.py", "module imports",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n"

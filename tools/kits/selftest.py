@@ -240,6 +240,24 @@ def _core_checks(c) -> None:
         if saved is not None:
             os.environ[IMAGE_VARIABLE] = saved
     from core import figure as _figure
+
+    # A lone TEX has no disc of its own: the figure's geometry comes from the
+    # variable, unless a path is given (CORR-KITS-044).
+    os.environ[IMAGE_VARIABLE] = "made-up-geometry.bin"
+    try:
+        try:
+            taken = _figure.geometry_path_for()
+        except api.NoGeometry as exc:
+            taken = "NoGeometry: %s" % exc
+        ok("lone TEX: with no geometry path, the figure takes %s" % IMAGE_VARIABLE,
+           taken == "made-up-geometry.bin", "%r" % taken)
+        ok("and a path given wins over it",
+           _figure.geometry_path_for("given.bin") == "given.bin")
+    finally:
+        if saved is None:
+            del os.environ[IMAGE_VARIABLE]
+        else:
+            os.environ[IMAGE_VARIABLE] = saved
     import texture as _texture
     for kit_set in (1, 2):
         held = _texture.in_set_order(_texture.palettes(data), kit_set)
@@ -746,6 +764,22 @@ def _figure_checks(c, image_path) -> None:
     geometry = c.attempt("read the figure's geometry", lambda: api.read_geometry(image_path))
     if src is None or geometry is None:
         return
+    # The lone TEX: the kit's bytes out of the disc into a file of their own,
+    # opened as a TEX, and its figure built with no geometry path -- the
+    # variable is the disc (CORR-KITS-044).
+    from core import figure as _figure
+    with tempfile.TemporaryDirectory() as tmp:
+        lone_path = os.path.join(tmp, "TEX_00.BIN")
+        with open(lone_path, "wb") as out:
+            out.write(src.kit("00").data)
+        lone = c.attempt("open the lone TEX_00.BIN", lambda: api.open_source(lone_path))
+        drawn = None if lone is None else c.attempt(
+            "build the lone TEX's figure", lambda: api.figure(lone.kit(None), 1, 0))
+    worn = 0 if drawn is None else sum(1 for key in drawn.surfaces if key[0] == _figure.SLOT)
+    c.ok("lone TEX: opened as a TEX, its figure built from %s, %d kit surface(s)"
+         % (IMAGE_VARIABLE, worn),
+         lone is not None and lone.kind == "tex" and worn > 0,
+         "kind %r" % (lone and lone.kind))
     for tag in ("A4", "00"):
         kit = src.kit(tag)
         for figure in (0, 1):

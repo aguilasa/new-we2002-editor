@@ -48,3 +48,50 @@ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/selftest.
 Dá 0 hoje; pelo menos 1 depois do conserto, e o controle novo fica RED.
 
 ## Log de Execução
+
+### 2026-10-03
+
+Reproduzido na HEAD `7efd399`:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/selftest.py --image | grep -c 'lone TEX'
+0
+```
+
+Conserto, dos dois lados:
+
+- **Sem disco** (`kits_selftest`): com `WE2002_LOOKS_IMAGE` num nome inventado e nenhum caminho, `figure.geometry_path_for()` tem de devolver a variável, e um caminho dado tem de ganhar dela. A chamada é protegida, para a planta dar a linha `FAIL` e não um traceback.
+- **Com disco** (`kits_image`, em `_figure_checks`): os bytes do `TEX_00` gravados num `TEX_00.BIN` temporário, aberto por `api.open_source` (tem de dar `kind == "tex"`) e desenhado por `api.figure(kit, 1, 0)` sem caminho de geometria; tem de sair uma `Scene` com superfície de kit.
+- **Controle** `geometry-env-ignored` em `tools/kits/controls.py`: `path = path or os.environ.get(GEOMETRY_ENV)` vira `path = path`.
+
+```
+$ python3 tools/kits/selftest.py --no-plant | grep -E 'lone TEX|path given'
+  ok    lone TEX: with no geometry path, the figure takes WE2002_LOOKS_IMAGE
+  ok    and a path given wins over it
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/selftest.py --image | grep -E 'lone TEX|figure:'
+  ok    lone TEX: opened as a TEX, its figure built from WE2002_LOOKS_IMAGE, 1 kit surface(s)
+figure: 0 failure(s)
+$ python3 tools/kits/controls.py --only geometry-env-ignored | tail -2
+  RED    geometry-env-ignored         kits/core/figure.py :: geometry_path_for
+controls: 1 of 1 red
+```
+
+A mesma planta numa cópia `git archive HEAD tools` com o `selftest.py` novo, do lado do disco:
+
+```
+  FAIL  build the lone TEX's figure: raised NoGeometry: The 3D figure needs the Japanese disc for its geometry: set WE2002_LOOKS_IMAGE to its data track (.bin).
+  FAIL  lone TEX: opened as a TEX, its figure built from WE2002_LOOKS_IMAGE, 0 kit surface(s)  kind 'tex'
+figure: 2 failure(s)
+```
+
+O primeiro controle escrito saiu `GREEN ... red, but not on 'FAIL  lone TEX: ...'`: sem a proteção, a planta fazia `geometry_path_for()` levantar dentro do argumento do `ok`, e o selftest caía antes de imprimir a linha. Daí a proteção.
+
+Gates:
+
+```
+$ python3 tools/kits/selftest.py | grep -E 'controls red|kits_selftest:'
+  ..... 23 of 23 controls red
+kits_selftest: 0 failure(s)
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+```
