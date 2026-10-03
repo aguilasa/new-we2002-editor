@@ -133,7 +133,7 @@ graph TD
 <!-- rite:begin tasks -->
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [KITS-TASK-36](/docs/tasks/kits/36-ui-i18n.md) | UI em inglês dos EUA por default, com catálogo i18n e seletor de idioma | 4 | implementação | KITS-TASK-20 | done | 2026-10-03 | pending |
+| [KITS-TASK-36](/docs/tasks/kits/36-ui-i18n.md) | UI em inglês dos EUA por default, com catálogo i18n e seletor de idioma | 4 | implementação | KITS-TASK-20 | done | 2026-10-03 | 2026-10-03 |
 | [KITS-TASK-01](/docs/tasks/kits/01-levantamento-do-tex.md) | Promover o levantamento do §1.1 a ferramenta versionada | 0 | ferramenta | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md) | Medir o que são os retângulos (608,256) e (704,256) | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md) | Contar primitivas de cada figura por retângulo do TEX | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |

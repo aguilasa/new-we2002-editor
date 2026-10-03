@@ -521,6 +521,19 @@
       "depends_on": [],
       "done_on": "2026-10-03",
       "done_commit": "d33fece"
+    },
+    {
+      "id": "CORR-KITS-041",
+      "file": "CORR-KITS-041.md",
+      "title": "Escrever no Log como comando a captura sobre a ROM golden",
+      "origin": "KITS-TASK-36",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
