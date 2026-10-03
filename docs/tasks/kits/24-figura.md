@@ -121,3 +121,4 @@ Cada figura amostra **uma** superfície do kit (a de linha 486 no jogador, 488 n
     - `M tools/kits/core/errors.py`
     - `A tools/kits/core/figure.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-03) at `1c516ff`: CORR-KITS-042, CORR-KITS-043, CORR-KITS-044
