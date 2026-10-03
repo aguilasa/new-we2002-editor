@@ -12,6 +12,10 @@ Subcommands:
     pieces [image]          the eleven pieces of each figure, and how each
                             name was known
     texture [image]         DAT2D.BIN: its record tables and the palette list
+    texture --records TAG [image]
+                            a kit's TEX_<TAG>.BIN instead: every image and
+                            palette record, offset and VRAM rectangle, in
+                            file order (KITS-TASK-22, CORR-KITS-040)
     looks [tuple]           the twelve rows of LOOKS SET; with a tuple, what it
                             spells, and -- given the image -- its draw list
     check [image]           EVERY `--check-image` of the core, in one run; exits
@@ -192,10 +196,21 @@ def cmd_pieces(image: str) -> int:
     return 0
 
 
-def cmd_texture(image: str) -> int:
+def cmd_texture(image: str, records: str | None = None) -> int:
     import iso_source
     import texture
 
+    if records is not None:
+        path = layout.kit_path(records)
+        with iso_source.open_disc(image) as disc:
+            data = disc.read(path)
+        print("  %s" % path)
+        for kind, listed in (("img", texture.images(data)),
+                             ("clut", texture.palettes(data))):
+            for r in listed:
+                print("  %-4s %6d (%d, %d, %d, %d)"
+                      % (kind, r.offset, r.x, r.y, r.w, r.h))
+        return 0
     with iso_source.open_disc(image) as disc:
         data = disc.read(layout.DAT2D)
     texture._report(data, layout.DAT2D)
@@ -284,7 +299,8 @@ def _checks(c) -> None:
               layout.ENV_IMAGE, Unavailable)
 
     parser = build_parser()
-    for words in (["sections"], ["pieces"], ["texture"], ["looks"],
+    for words in (["sections"], ["pieces"], ["texture"],
+                  ["texture", "--records", "00"], ["looks"],
                   ["looks", "A-A1-A-A-A"], ["check"], ["check", "x.bin"]):
         ok("the command line takes %s" % " ".join(words),
            parser.parse_args(words).command == words[0])
@@ -302,6 +318,9 @@ def build_parser() -> argparse.ArgumentParser:
                        ("check", "every --check-image; 77 with no image")):
         one = sub.add_parser(name, help=what)
         one.add_argument("image", nargs="?")
+        if name == "texture":
+            one.add_argument("--records", metavar="TAG",
+                             help="a kit's TEX records instead of DAT2D's")
     one = sub.add_parser("looks", help="the twelve rows, and a tuple")
     one.add_argument("tuple", nargs="?")
     one.add_argument("--image")
@@ -325,7 +344,7 @@ def main(argv: list[str]) -> int:
         if args.command == "pieces":
             return cmd_pieces(image)
         if args.command == "texture":
-            return cmd_texture(image)
+            return cmd_texture(image, args.records)
         return cmd_check(image)
     except Unavailable as exc:
         print("cli %s: skipped -- %s" % (args.command, exc))

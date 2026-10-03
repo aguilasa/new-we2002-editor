@@ -52,3 +52,33 @@ grep -c "python3 - <<'X'" docs/tasks/kits/22-looks-kit-set.md
 Imprime 1 hoje; 0 depois do conserto, e o comando novo reproduz os 11 registros.
 
 ## Log de Execução
+
+### 2026-10-03
+
+Reproduzido: `grep -c "python3 - <<'X'" docs/tasks/kits/22-looks-kit-set.md` dá `1`, e o heredoc da Evidência imprime os 11 registros.
+
+Conserto: `cli.py texture --records TAG [image]` lista as imagens e as paletas de um `TEX_<TAG>.BIN` (offset e retângulo), pela leitura do `texture.py`; tag não medida é recusada (`exit 2`). O bloco do Log da KITS-TASK-22 agora mostra esse comando e a saída dele, que bate registro a registro com o heredoc:
+
+```
+$ python3 tools/looks/cli.py texture --records 00 roms/japanese-shift-jis.bin
+  /BIN/TEX_00.BIN
+  img      48 (576, 256, 64, 128)
+  img    5088 (576, 384, 64, 128)
+  img   10556 (576, 256, 64, 128)
+  img   15908 (576, 384, 64, 128)
+  img   21420 (704, 256, 64, 64)
+  img   24392 (768, 384, 64, 128)
+  clut   9468 (0, 486, 256, 1)
+  clut  10012 (0, 488, 256, 1)
+  clut  20332 (0, 486, 256, 1)
+  clut  20876 (0, 488, 256, 1)
+  clut  23848 (256, 480, 256, 1)
+$ python3 tools/looks/cli.py texture --records ZZ roms/japanese-shift-jis.bin
+cli texture: refused -- 'ZZ' is not one of the 105 kit tags measured on this disc
+$ python3 tools/looks/cli.py --check | tail -1
+cli.py: 0 failure(s)
+$ grep -c "python3 - <<'X'" docs/tasks/kits/22-looks-kit-set.md
+0
+```
+
+Uma diferença de forma: o Log antigo arrumava os registros em duas colunas (pares do mesmo retângulo lado a lado); a ferramenta imprime em ordem de arquivo, uma por linha.

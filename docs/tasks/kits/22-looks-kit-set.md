@@ -50,14 +50,19 @@ $ ctest --test-dir build -R looks
 **O banco, medido antes de mexer.** Os registros do `TEX_00`, pela leitura do próprio `texture.py`, confirmam o §1.1: duas imagens e duas paletas repetidas no mesmo retângulo, e a bandeira e o árbitro uma vez só.
 
 ```
-$ python3 - <<'X'   # texture.images/palettes sobre /BIN/TEX_00.BIN
-img 48 (576, 256, 64, 128)       img 10556 (576, 256, 64, 128)
-img 5088 (576, 384, 64, 128)     img 15908 (576, 384, 64, 128)
-img 21420 (704, 256, 64, 64)     img 24392 (768, 384, 64, 128)
-clut 9468 (0, 486, 256, 1)       clut 20332 (0, 486, 256, 1)
-clut 10012 (0, 488, 256, 1)      clut 20876 (0, 488, 256, 1)
-clut 23848 (256, 480, 256, 1)
-X
+$ python3 tools/looks/cli.py texture --records 00 roms/japanese-shift-jis.bin
+  /BIN/TEX_00.BIN
+  img      48 (576, 256, 64, 128)
+  img    5088 (576, 384, 64, 128)
+  img   10556 (576, 256, 64, 128)
+  img   15908 (576, 384, 64, 128)
+  img   21420 (704, 256, 64, 64)
+  img   24392 (768, 384, 64, 128)
+  clut   9468 (0, 486, 256, 1)
+  clut  10012 (0, 488, 256, 1)
+  clut  20332 (0, 486, 256, 1)
+  clut  20876 (0, 488, 256, 1)
+  clut  23848 (256, 480, 256, 1)
 ```
 
 **O que mudou.** `texture.in_set_order(records, kit_set)`: em cada grupo de registros com o mesmo retângulo, o `kit_set`-ésimo vai para o lugar do primeiro; conjunto 1 é a lista intacta, e conjunto que não seja 1 ou 2 levanta `NoSuchSet`. O `assembly.draw_list` busca as imagens e as paletas do TEX nessa ordem — o `DAT2D` não é tocado —, e o `scene.build` ordena as paletas do kit do mesmo jeito, para que uma imagem de um conjunto nunca seja pintada com a paleta do outro. `kit_set=1` de default em `draw_list`, `build`, `from_image` e `Builder`; o `Builder` recusa o conjunto antes de abrir o disco, como recusa a tag.
