@@ -41,4 +41,6 @@
 | [CORR-KITS-036](/docs/tasks/kits/CORR-KITS-036.md) | Repor no Log a linha de saída do app.py cortada sem marca | KITS-TASK-20 | low | done | 2026-10-02 |
 | [CORR-KITS-037](/docs/tasks/kits/CORR-KITS-037.md) | Cobrir no gate o kit que Builder.walk_build passa ao build() | KITS-TASK-21 | medium | done | 2026-10-02 |
 | [CORR-KITS-038](/docs/tasks/kits/CORR-KITS-038.md) | Trocar a linha narrativa "$ (a mesma troca...)" do Log por um comando | KITS-TASK-21 | low | done | 2026-10-02 |
+| [CORR-KITS-039](/docs/tasks/kits/CORR-KITS-039.md) | Controle para scene.build ignorar o kit_set nas paletas | KITS-TASK-22 | medium | pending | — |
+| [CORR-KITS-040](/docs/tasks/kits/CORR-KITS-040.md) | Versionar a sonda dos registros do TEX_00 no lugar do heredoc elidido | KITS-TASK-22 | medium | pending | — |
 <!-- rite:end -->

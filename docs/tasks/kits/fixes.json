@@ -495,6 +495,32 @@
       "depends_on": [],
       "done_on": "2026-10-02",
       "done_commit": "5cccc21"
+    },
+    {
+      "id": "CORR-KITS-039",
+      "file": "CORR-KITS-039.md",
+      "title": "Controle para scene.build ignorar o kit_set nas paletas",
+      "origin": "KITS-TASK-22",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-040",
+      "file": "CORR-KITS-040.md",
+      "title": "Versionar a sonda dos registros do TEX_00 no lugar do heredoc elidido",
+      "origin": "KITS-TASK-22",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

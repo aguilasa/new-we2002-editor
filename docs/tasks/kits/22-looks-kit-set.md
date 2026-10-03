@@ -127,3 +127,4 @@ $ ctest --test-dir build -R 'kits_selftest|kits_image'
     - `M tools/looks/controls.py`
     - `M tools/looks/scene.py`
     - `M tools/looks/texture.py`
+- **Reviewed** (2026-10-03) at `f59c557`: CORR-KITS-039, CORR-KITS-040
