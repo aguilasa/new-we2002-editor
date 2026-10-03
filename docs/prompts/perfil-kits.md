@@ -89,7 +89,7 @@ este perfil e o plano divergirem, o plano ganha.
 
 ### Fase 4 — janela mínima
 
-- `tools/kits/ui/` só importa PySide6, stdlib e `core.api` (§3.1).
+- `tools/kits/ui/` só importa PySide6, stdlib, `core.api` e os próprios módulos de `ui/` (o `i18n.py`) (§3.1).
 - `ctest -R kits_ui` verde, e sem Fusion/`QPalette` fixa ele reprova (§3.4).
 - Nenhuma janela visível: `:98` no Linux, `-32000` no Windows.
 - Nenhum literal de texto visível em `tools/kits/ui/` fora do `i18n.py`; `en-US` e `pt-BR` com as mesmas chaves e campos, e o selftest reprova se não (§3.4).

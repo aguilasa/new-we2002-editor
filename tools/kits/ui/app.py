@@ -23,6 +23,13 @@ work/venv-looks/bin/python on Linux):
         --zoom 4 --zones --screenshot out.png
     <venv>/python tools/kits/ui/app.py <rom> --walk
     <venv>/python tools/kits/ui/app.py <rom> --tag 00 --hover 15,10
+    <venv>/python tools/kits/ui/app.py <rom> --lang pt-BR
+
+**Every text of the window comes from `i18n.py`**, US English by default:
+`--lang`, then `WE2002_KITS_LANG`, then en-US; the selector at the top
+switches without reopening, and `--switch-to` does what a click there does.
+The core's sentences (status notes, refusals, record and zone names) stay
+English (section 3.4, KITS-TASK-36).
 
 On Linux `make kits` (`make kits-98` for the Xvfb) runs it with `--visible`:
 TAG=, KITS_IMAGE=, ARGS=.
@@ -37,6 +44,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core import api  # noqa: E402
+import i18n  # noqa: E402
+from i18n import tr  # noqa: E402
 from PySide6 import QtCore, QtGui, QtWidgets  # noqa: E402
 
 OFF_THE_DESKTOP = -32000  # not-an-address: the parking spot CLAUDE.md names
@@ -67,6 +76,10 @@ COLOURS = {
 }
 """The fixed palette, by QPalette role: a light one, set the same everywhere."""
 DISABLED_TEXT = "#9a9a9a"
+DISABLED_ROLES = ("WindowText", "Text", "ButtonText")
+CORE_TEXT = "text"
+"""The field of a status line that is the core's own sentence, not a catalog
+entry: the core speaks English only (section 3.4)."""
 CHECKER = ("#cfcfcf", "#f2f2f2")
 BACKDROP = "#8c8c8c"
 ZONE_PEN = "#e0157a"
@@ -77,7 +90,7 @@ def fixed_palette() -> QtGui.QPalette:
     pal = QtGui.QPalette()
     for role, colour in COLOURS.items():
         pal.setColor(getattr(QtGui.QPalette.ColorRole, role), QtGui.QColor(colour))
-    for role in ("WindowText", "Text", "ButtonText"):
+    for role in DISABLED_ROLES:
         pal.setColor(QtGui.QPalette.ColorGroup.Disabled,
                      getattr(QtGui.QPalette.ColorRole, role), QtGui.QColor(DISABLED_TEXT))
     return pal
@@ -101,9 +114,9 @@ def apply_style(app: QtWidgets.QApplication) -> None:
 
 def image_choices() -> list:
     """[(label, key)] of the image selector: the two work bitmaps, then every
-    image the game pairs with a palette (`api.GAME_PAIRS`)."""
-    out = [("bitmap de trabalho, 1º conjunto", WORK[0]),
-           ("bitmap de trabalho, 2º conjunto", WORK[1])]
+    image the game pairs with a palette (`api.GAME_PAIRS`).  The work bitmaps'
+    labels are in the language in force; record names are the core's."""
+    out = [(tr("work_set_1"), WORK[0]), (tr("work_set_2"), WORK[1])]
     for image, _ in api.GAME_PAIRS:
         if all(key != image for _, key in out):
             out.append((api.RECORD_NAMES[image], image))
@@ -262,25 +275,30 @@ class PaletteGrid(QtWidgets.QWidget):
 
 def describe(entry) -> str:
     r, g, b, a = entry.rgba
-    return "índice %d · BGR555 0x%04x · RGB %d,%d,%d%s" % (
-        entry.index, entry.bgr555, r, g, b, " · transparente" if not a else "")
+    return tr("readout_entry", index=entry.index, bgr555=entry.bgr555, r=r, g=g, b=b) + (
+        tr("readout_transparent") if not a else "")
 
 
 class Window(QtWidgets.QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("kits")
         self.source = None
         self.kit = None
         self.picture = None              # the FlatImage on the canvas
         self.grid = ()                   # its palette as PaletteEntry
         self.left = None                 # zone_left() of the image shown
+        self.path = None                 # what is open, or None
+        self.said = (None, {})           # the status line: (catalog key or None, fields)
 
         top = QtWidgets.QHBoxLayout()
-        self.open_button = QtWidgets.QPushButton("Abrir…")
+        self.open_button = QtWidgets.QPushButton()
         self.open_button.clicked.connect(self.ask_open)
-        self.path_label = QtWidgets.QLabel("nada aberto")
+        self.path_label = QtWidgets.QLabel()
         self.path_label.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.TextSelectableByMouse)
+        # A long path is cut, not obeyed: the window's width is the layout's,
+        # whatever was opened and from where.
+        self.path_label.setSizePolicy(QtWidgets.QSizePolicy.Policy.Ignored,
+                                      QtWidgets.QSizePolicy.Policy.Preferred)
         self.tag_box = QtWidgets.QComboBox()
         self.tag_box.setMinimumContentsLength(18)
         self.tag_box.currentIndexChanged.connect(self.load_kit)
@@ -288,8 +306,20 @@ class Window(QtWidgets.QMainWindow):
         top.addWidget(self.open_button)
         top.addWidget(self.path_label, 1)
         top.addWidget(self.tag_box)
+        self.language_label = QtWidgets.QLabel()
+        self.language_box = QtWidgets.QComboBox()
+        for code in i18n.LANGUAGES:
+            self.language_box.addItem(i18n.NAMES[code], code)
+        self.language_box.setCurrentIndex(i18n.LANGUAGES.index(i18n.language()))
+        self.language_box.currentIndexChanged.connect(self.language_changed)
+        top.addWidget(self.language_label)
+        top.addWidget(self.language_box)
 
         self.image_box = QtWidgets.QComboBox()
+        # Its labels change with the language, and the default policy sizes a
+        # combo once, on first show: pt-BR picked live kept the en-US width.
+        self.image_box.setSizeAdjustPolicy(
+            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents)
         for label, key in image_choices():
             self.image_box.addItem(label, key)
         self.image_box.currentIndexChanged.connect(self.image_changed)
@@ -297,23 +327,25 @@ class Window(QtWidgets.QMainWindow):
         self.palette_box.currentIndexChanged.connect(self.redraw)
         self.zoom_box = QtWidgets.QComboBox()
         for z in ZOOMS:
-            self.zoom_box.addItem("%d×" % z, z)
+            self.zoom_box.addItem(tr("zoom_item", zoom=z), z)
         self.zoom_box.setCurrentIndex(ZOOMS.index(DEFAULT_ZOOM))
         self.zoom_box.currentIndexChanged.connect(self.zoom_changed)
-        self.checker_box = QtWidgets.QCheckBox("Xadrez")
+        self.checker_box = QtWidgets.QCheckBox()
         self.checker_box.setChecked(True)
         self.checker_box.toggled.connect(self.checker_changed)
-        self.grid_box = QtWidgets.QCheckBox("Grade 16×16")
+        self.grid_box = QtWidgets.QCheckBox()
         self.grid_box.setChecked(True)
-        self.zones_box = QtWidgets.QCheckBox("Zonas")
+        self.zones_box = QtWidgets.QCheckBox()
         self.zones_box.toggled.connect(self.zones_changed)
-        self.export_button = QtWidgets.QPushButton("Exportar PNG")
+        self.export_button = QtWidgets.QPushButton()
         self.export_button.clicked.connect(self.ask_export)
 
         controls = QtWidgets.QHBoxLayout()
-        for text, widget in (("Imagem", self.image_box), ("Paleta", self.palette_box),
-                             ("Zoom", self.zoom_box)):
-            controls.addWidget(QtWidgets.QLabel(text))
+        # catalog key -> the QLabel beside its selector
+        self.labels = {"image": QtWidgets.QLabel(), "palette": QtWidgets.QLabel(),
+                       "zoom": QtWidgets.QLabel()}
+        for key, widget in zip(self.labels, (self.image_box, self.palette_box, self.zoom_box)):
+            controls.addWidget(self.labels[key])
             controls.addWidget(widget)
         for widget in (self.checker_box, self.grid_box, self.zones_box):
             controls.addWidget(widget)
@@ -339,7 +371,7 @@ class Window(QtWidgets.QMainWindow):
         plan_layout.addLayout(body, 1)
         plan_layout.addWidget(self.readout)
         self.tabs = QtWidgets.QTabWidget()
-        self.tabs.addTab(plan, "Plano")
+        self.tabs.addTab(plan, "")
 
         self.status = QtWidgets.QLabel(" ")
         self.status.setWordWrap(True)
@@ -349,14 +381,48 @@ class Window(QtWidgets.QMainWindow):
         layout.addWidget(self.tabs, 1)
         layout.addWidget(self.status)
         self.setCentralWidget(central)
+        self.retranslate()
         self.image_changed()
+
+    # -- language ---------------------------------------------------------------
+
+    def retranslate(self) -> None:
+        """Every text of the window again, in the language in force."""
+        self.setWindowTitle(tr("window_title"))
+        self.open_button.setText(tr("open"))
+        if self.path is None:
+            self.path_label.setText(tr("nothing_open"))
+        self.language_label.setText(tr("language"))
+        for key, label in self.labels.items():
+            label.setText(tr(key))
+        for i, (label, _) in enumerate(image_choices()):
+            self.image_box.setItemText(i, label)
+        for i, z in enumerate(ZOOMS):
+            self.zoom_box.setItemText(i, tr("zoom_item", zoom=z))
+        self.checker_box.setText(tr("checker"))
+        self.grid_box.setText(tr("grid"))
+        self.zones_box.setText(tr("zones"))
+        self.export_button.setText(tr("export_png"))
+        self.tabs.setTabText(0, tr("tab_plan"))
+        self.relabel_tags()
+        self.say(*self.said)
+        self.readout.setText(" ")
+
+    def language_changed(self) -> None:
+        i18n.set_language(self.language_box.currentData())
+        self.retranslate()
+
+    def say(self, key, fields) -> None:
+        """The status line: a catalog key and its fields, or None and the core's
+        own sentence (which stays English)."""
+        self.said = (key, fields)
+        self.status.setText(tr(key, **fields) if key else fields.get(CORE_TEXT, " "))
 
     # -- opening ----------------------------------------------------------------
 
     def ask_open(self) -> None:
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Abrir imagem de CD ou TEX", "",
-            "Imagem de CD ou TEX (*.bin *.iso *.cue *.BIN);;Todos (*)")
+            self, tr("open_title"), "", tr("open_filter"))
         if path:
             self.open_path(path)
 
@@ -364,28 +430,36 @@ class Window(QtWidgets.QMainWindow):
         try:
             source = api.open_source(path)
         except api.KitsError as exc:
-            self.status.setText(str(exc))
+            self.say(None, {CORE_TEXT: str(exc)})
             return False
         self.source = source
+        self.path = path
         self.path_label.setText(path)
         blocker = QtCore.QSignalBlocker(self.tag_box)
         self.tag_box.clear()
         if source.kind == api.KIND_ROM:
-            names = {}
-            for team in source.teams():
-                if team.tag is not None:
-                    names.setdefault(team.tag, []).append(team.name)
             for tag in source.kit_tags():
-                label = "TEX_%s" % tag
-                if tag in names:
-                    label += " — " + ", ".join(names[tag])
-                self.tag_box.addItem(label, tag)
+                self.tag_box.addItem("", tag)
+            self.relabel_tags()
             self.tag_box.show()
         else:
             self.tag_box.hide()
         del blocker
         self.load_kit()
         return True
+
+    def relabel_tags(self) -> None:
+        """The kit selector's labels: the tag, and the teams the disc gives it."""
+        if self.source is None or self.source.kind != api.KIND_ROM:
+            return
+        names = {}
+        for team in self.source.teams():
+            if team.tag is not None:
+                names.setdefault(team.tag, []).append(team.name)
+        for i in range(self.tag_box.count()):
+            tag = self.tag_box.itemData(i)
+            self.tag_box.setItemText(i, tr("kit_tag_teams", tag=tag, teams=", ".join(names[tag]))
+                                     if tag in names else tr("kit_tag", tag=tag))
 
     def tags(self) -> list:
         return [self.tag_box.itemData(i) for i in range(self.tag_box.count())]
@@ -412,15 +486,18 @@ class Window(QtWidgets.QMainWindow):
             else:
                 kit = self.source.kit()
         except api.KitsError as exc:
-            self.status.setText(str(exc))
+            self.say(None, {CORE_TEXT: str(exc)})
             self.redraw()
             return
         if not kit.ok:
-            self.status.setText("%s recusado: %s" % (kit.label, "; ".join(kit.problems)))
+            self.say("status_refused", {"label": kit.label, "problems": "; ".join(kit.problems)})
         else:
             notes = "; ".join(n.text for n in kit.notes)
-            self.status.setText("%s, %d bytes%s" % (kit.label, kit.size,
-                                                   " — " + notes if notes else ""))
+            if notes:
+                self.say("status_kit_notes", {"label": kit.label, "size": kit.size,
+                                              "notes": notes})
+            else:
+                self.say("status_kit", {"label": kit.label, "size": kit.size})
             self.kit = kit
         self.redraw()
 
@@ -495,10 +572,11 @@ class Window(QtWidgets.QMainWindow):
             self.palette_grid.mark(-1)
             return
         index = self.picture.indices[y * self.picture.width + x]
-        parts = ["x %d, y %d" % (x, y)]
+        parts = [tr("readout_xy", x=x, y=y)]
         if self.left is not None:
             zone = api.zone_at(x + self.left, y)
-            parts.append("zona: %s" % (zone.name if zone is not None else "nenhuma"))
+            parts.append(tr("readout_zone",
+                            zone=zone.name if zone is not None else tr("zone_none")))
         parts.append(describe(self.grid[index]))
         self.readout.setText(" · ".join(parts))
         self.palette_grid.mark(index)
@@ -514,7 +592,8 @@ class Window(QtWidgets.QMainWindow):
     def ask_export(self) -> None:
         if self.picture is None:
             return
-        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Exportar PNG", "", "PNG (*.png)")
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, tr("export_title"), "",
+                                                        tr("export_filter"))
         if path:
             self.export(path)
 
@@ -522,7 +601,7 @@ class Window(QtWidgets.QMainWindow):
         """The image as drawn, at 1x, in RGBA."""
         image = self.canvas.image
         ok = image is not None and image.save(path, "PNG")
-        self.status.setText(("exportado: %s" if ok else "não gravou %s") % path)
+        self.say("status_exported" if ok else "status_not_written", {"path": path})
         return ok
 
 
@@ -624,7 +703,18 @@ def main(argv=None) -> int:
                         help="move the mouse over that image pixel, print the readout, and exit")
     parser.add_argument("--visible", action="store_true",
                         help="show the window on the desktop (not for gates)")
+    parser.add_argument("--lang", choices=i18n.LANGUAGES,
+                        help="the window's language (default: $%s, else %s)"
+                        % (i18n.ENV, i18n.DEFAULT))
+    parser.add_argument("--switch-to", choices=i18n.LANGUAGES, metavar="LANG",
+                        help="once everything is set, pick LANG in the window's own "
+                        "language selector, as a click would")
     args = parser.parse_args(argv)
+    try:
+        i18n.set_language(i18n.chosen(args.lang))
+    except i18n.UnknownLanguage as exc:
+        print("%s: %s" % (i18n.ENV, exc), file=sys.stderr)
+        return 2
 
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication(sys.argv[:1])
     apply_style(app)
@@ -649,6 +739,8 @@ def main(argv=None) -> int:
         window.zoom_box.setCurrentIndex(ZOOMS.index(args.zoom))
     window.zones_box.setChecked(args.zones)
     window.checker_box.setChecked(not args.no_checker)
+    if args.switch_to:
+        window.language_box.setCurrentIndex(i18n.LANGUAGES.index(args.switch_to))
     settle(app)
 
     if args.walk:
@@ -666,8 +758,8 @@ def main(argv=None) -> int:
             return 1
         print("  wrote %s, %dx%d" % (args.screenshot, picture.width(), picture.height()))
     if pictures:
-        print("  %s · imagem %s · paleta %s · %s"
-              % (window.tag_box.currentText() or "TEX avulso", window.image_box.currentText(),
+        print("  %s · image %s · palette %s · %s"
+              % (window.tag_box.currentText() or "lone TEX", window.image_box.currentText(),
                  window.palette_box.currentText(), window.status.text()))
         print("  window %s, at %d,%d" % ("up" if window.isVisible() else "NOT up",
                                          window.x(), window.y()))

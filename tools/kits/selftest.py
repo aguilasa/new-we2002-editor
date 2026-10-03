@@ -385,6 +385,118 @@ def facade_breaks(clients=FACADE_CLIENTS, allowed=()) -> list:
     return out
 
 
+UI_APP = UI_DIR + "/app.py"
+UI_CATALOG = UI_DIR + "/i18n.py"
+NOT_SHOWN_CALLS = ("tr", "print", "add_argument", "ArgumentParser", "ArgumentTypeError",
+                   "RuntimeError", "setStyle", "save", "getattr", "QColor")
+"""Calls whose string arguments are not window text: the catalog lookup itself,
+the headless stdout and argparse messages, the style's name, the PNG format,
+QPalette role names and colours (section 3.4, KITS-TASK-36)."""
+NOT_SHOWN_CONSTANTS = ("WORK", "COLOURS", "DISABLED_TEXT", "DISABLED_ROLES", "CHECKER",
+                       "BACKDROP", "ZONE_PEN", "GAP_PEN", "FONT_FAMILIES", "CORE_TEXT")
+"""Module constants of ui/app.py that hold keys, colours and font families."""
+_FORMAT_SPEC = re.compile(r"%[-#0 +]*\d*(?:\.\d+)?[a-zA-Z%]|\{[^{}]*\}")
+
+
+def _shows_words(text: str) -> bool:
+    return any(ch.isalpha() for ch in _FORMAT_SPEC.sub("", text))
+
+
+def visible_literals(source: str, name: str = UI_APP) -> list:
+    """(line, text) of every string literal in *source* that reaches the screen
+    without passing through `tr(...)`.  Not window text: a bare string statement
+    (a docstring), a dunder name, a dict key (a field name), the catalog key a
+    `say(...)` names, the arguments of `NOT_SHOWN_CALLS`, and the module
+    constants in `NOT_SHOWN_CONSTANTS`.  Anything else with a letter in it,
+    format specifiers aside, is."""
+    import ast
+
+    tree = ast.parse(source, name)
+    skip = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+            skip.add(id(node.value))
+        if isinstance(node, ast.Dict):
+            skip.update(id(k) for k in node.keys if k is not None)
+        if isinstance(node, ast.Call):
+            func = node.func
+            called = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", "")
+            if called in NOT_SHOWN_CALLS:
+                for arg in list(node.args) + [k.value for k in node.keywords]:
+                    skip.update(id(n) for n in ast.walk(arg))
+            if called == "say" and node.args:
+                skip.update(id(n) for n in ast.walk(node.args[0]))
+    for node in tree.body:
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            if all(isinstance(t, ast.Name) and t.id in NOT_SHOWN_CONSTANTS for t in targets):
+                skip.update(id(n) for n in ast.walk(node))
+    out = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str) \
+                and id(node) not in skip and _shows_words(node.value) \
+                and not re.fullmatch(r"__\w+__", node.value):
+            out.append((node.lineno, node.value))
+    return sorted(out)
+
+
+def catalog_keys_used(source: str) -> set:
+    """The literal keys `tr(...)` and `say(...)` are called with, and the keys
+    of the `labels` dict the window fills its selector labels from."""
+    import ast
+
+    out = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Call) and node.args:
+            func = node.func
+            called = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", "")
+            if called in ("tr", "say"):
+                out.update(n.value for n in ast.walk(node.args[0])
+                           if isinstance(n, ast.Constant) and isinstance(n.value, str))
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Attribute) and t.attr == "labels"
+                                                for t in node.targets) \
+                and isinstance(node.value, ast.Dict):
+            out.update(k.value for k in node.value.keys if isinstance(k, ast.Constant))
+    return out
+
+
+def _catalog():
+    """ui/i18n.py, by path: standard library only, so no venv is needed."""
+    spec = importlib.util.spec_from_file_location("kits_ui_i18n",
+                                                  os.path.join(KITS_DIR, UI_CATALOG))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _language_checks(c) -> None:
+    catalog = c.attempt("import ui/i18n.py", _catalog)
+    if catalog is not None:
+        c.ok("the window speaks %s by default" % catalog.DEFAULT, catalog.DEFAULT == "en-US")
+        bad = catalog.problems()
+        c.ok("en-US and pt-BR have the same keys and the same fields", bad == [], "%s" % bad)
+        print("  ..... %d language(s), %d key(s) each: %s"
+              % (len(catalog.LANGUAGES), len(catalog.CATALOG[catalog.DEFAULT]),
+                 ", ".join(catalog.LANGUAGES)))
+        bad = catalog.self_check()
+        c.ok("ui/i18n.py's own self-check", bad == [], "%s" % bad)
+    with open(os.path.join(KITS_DIR, UI_APP), encoding="utf-8") as fh:
+        found = c.attempt("sweep ui/app.py for window text", lambda: visible_literals(fh.read()),
+                          default=None)
+    c.ok("ui/app.py shows no text outside tr()", found == [], "%s" % found)
+    if catalog is not None:
+        with open(os.path.join(KITS_DIR, UI_APP), encoding="utf-8") as fh:
+            keys = catalog_keys_used(fh.read())
+        missing = sorted(k for k in keys if k not in catalog.CATALOG[catalog.DEFAULT])
+        c.ok("every key ui/app.py asks for is in the catalog (%d used)" % len(keys),
+             bool(keys) and missing == [], "%s" % missing)
+    planted = visible_literals(
+        'def f(w):\n    """A docstring."""\n    w.setText("Abrir")\n'
+        '    w.setText(tr("open"))\n    print("headless")\n    w.setText("%d×" % 3)\n')
+    c.ok("and the sweep finds a planted literal, and only it", planted == [(3, "Abrir")],
+         "%s" % planted)
+
+
 def _rule_checks(c) -> None:
     breaks = c.attempt("sweep tools/kits/core", core_rule_breaks, default=None)
     c.ok("core/ has no print, exit, input or Qt (section 3.1)", breaks == [],
@@ -394,9 +506,11 @@ def _rule_checks(c) -> None:
          "(section 3.1)",
          breaks == [], "%s" % breaks)
     clients = ui_clients()
+    own = tuple(n.split("/")[-1][:-3] for n in clients)
     breaks = c.attempt("sweep the window",
-                       lambda: facade_breaks(clients, (UI_TOOLKIT,)), default=None)
-    c.ok("ui/ imports only PySide6, core.api and the standard library (section 3.1)",
+                       lambda: facade_breaks(clients, (UI_TOOLKIT,) + own), default=None)
+    c.ok("ui/ imports only PySide6, core.api, its own modules and the standard library "
+         "(section 3.1)",
          bool(clients) and breaks == [], "%s in %s" % (breaks, clients))
 
 
@@ -469,6 +583,7 @@ def run(verbose: bool = True, plant: bool = True) -> int:
         total = harness.run("looks modules", _looks_checks, verbose)
         total += harness.run("core", _core_checks, verbose)
         total += harness.run("rules", _rule_checks, verbose)
+        total += harness.run("language", _language_checks, verbose)
         total += harness.run("confront 2", _confront2_checks, verbose)
         if plant:
             total += harness.run("controls", _negative, verbose)

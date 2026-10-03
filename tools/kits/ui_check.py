@@ -203,8 +203,16 @@ def expected_readout(shot: tuple, point) -> tuple:
     return shot[3][i], shot[2][i]
 
 
-def judge_hover(output: str, code, point, want) -> list:
-    """Failures of one `--hover` run against the index and colour expected."""
+INDEX_WORD = {"en-US": "index", "pt-BR": "índice"}
+"""How the readout names a palette index, by language: written here and not
+read from ui/i18n.py, so the window is judged from outside its own catalog
+(KITS-TASK-36)."""
+DEFAULT_LANG = "en-US"
+
+
+def judge_hover(output: str, code, point, want, lang: str = DEFAULT_LANG) -> list:
+    """Failures of one `--hover` run against the index and colour expected, in
+    *lang*: its word for the index has to be there, every other language's not."""
     index, rgb = want
     readout = next((ln.split("readout:", 1)[1].strip() for ln in output.splitlines()
                     if "readout:" in ln), "")
@@ -213,9 +221,13 @@ def judge_hover(output: str, code, point, want) -> list:
     bad = []
     if code != 0:
         bad.append("exit %s" % code)
-    for piece in ("x %d, y %d" % point, "índice %d " % index, "RGB %d,%d,%d" % rgb):
+    for piece in ("x %d, y %d" % point, "%s %d " % (INDEX_WORD[lang], index),
+                  "RGB %d,%d,%d" % rgb):
         if piece not in readout + " ":
             bad.append("%r not in the readout %r" % (piece.strip(), readout))
+    for other, word in INDEX_WORD.items():
+        if other != lang and word + " " in readout:
+            bad.append("%r, the %s word, in the %s readout %r" % (word, other, lang, readout))
     if marked != str(index):
         bad.append("the grid marks %r, not %d" % (marked, index))
     return bad
@@ -325,13 +337,18 @@ def capture(python, app, image, args, out, env) -> tuple:
         return None, bad + ["the picture does not read: %s" % exc], output
 
 
-def hover_judge(python, app, image, env, want) -> list:
-    """Every HOVER_POINT through --hover, judged against *want* {point: (index, rgb)}."""
+def hover_judge(python, app, image, env, want, lang=None, points=HOVER_POINTS) -> list:
+    """Every one of *points* through --hover, judged against *want*
+    {point: (index, rgb)}; with *lang*, the run passes `--lang` and the
+    readout is judged in it, without it the default language is."""
     bad = []
-    for point in HOVER_POINTS:
-        code, output = run_app(python, app, [image, "--tag", HOVER_TAG, "--hover",
-                                             "%d,%d" % point], env)
-        bad += ["%s: %s" % (point, b) for b in judge_hover(output, code, point, want[point])]
+    for point in points:
+        args = [image, "--tag", HOVER_TAG, "--hover", "%d,%d" % point]
+        if lang:
+            args += ["--lang", lang]
+        code, output = run_app(python, app, args, env)
+        bad += ["%s: %s" % (point, b)
+                for b in judge_hover(output, code, point, want[point], lang or DEFAULT_LANG)]
     return bad
 
 
@@ -398,6 +415,18 @@ def run(python: str, image: str) -> int:
         t.ok("the same state twice is the same picture (%d px differ)" % n,
              bad + ([] if n == 0 else ["%d pixel(s) differ" % n]))
 
+        told, bad, _ = capture(python, APP, image, STATE + ["--lang", "pt-BR"],
+                               os.path.join(tmp, "pt.png"), env)
+        switched, more, _ = capture(python, APP, image, STATE + ["--switch-to", "pt-BR"],
+                                    os.path.join(tmp, "sw.png"), env)
+        bad += more
+        n = differing(told, switched) if told and switched and told[:2] == switched[:2] else -1
+        m = differing(first, told) if told and told[:2] == first[:2] else -1
+        t.ok("pt-BR picked in the window's selector is the window opened in pt-BR "
+             "(%d px differ), and another picture than en-US (%d px)" % (n, m),
+             bad + ([] if n == 0 else ["%d pixel(s) differ" % n])
+             + ([] if m > 0 else ["pt-BR draws the same as en-US"]))
+
         other, bad, _ = capture(python, APP, image, OTHER, os.path.join(tmp, "c.png"), env)
         n = differing(first, other) if other is not None and other[:2] == first[:2] else -1
         pct = 100.0 * n / (first[0] * first[1]) if n >= 0 else -1.0
@@ -420,6 +449,15 @@ def run(python: str, image: str) -> int:
         t.ok("the reading under the mouse names the index and colour cli.py export writes, "
              "at %d point(s): %s" % (len(HOVER_POINTS), ", ".join(
                  "%s=%d" % (p, want[p][0]) for p in HOVER_POINTS) if want else "-"), bad)
+        if want:
+            bad = hover_judge(python, APP, image, env, want, "pt-BR", HOVER_POINTS[:1])
+            wrong = judge_hover("  readout: x %d, y %d · index %d · RGB %d,%d,%d\n  marked: %d\n"
+                                % (HOVER_POINTS[0] + (want[HOVER_POINTS[0]][0],)
+                                   + want[HOVER_POINTS[0]][1] + (want[HOVER_POINTS[0]][0],)),
+                                0, HOVER_POINTS[0], want[HOVER_POINTS[0]], "pt-BR")
+            t.ok("with --lang pt-BR the readout says 'índice', and the judge refuses an "
+                 "English one (%s)" % "; ".join(wrong)[:120],
+                 bad + ([] if wrong else ["the judge took 'index' for pt-BR"]))
         code, output = run_app(python, APP, [image, "--tag", HOVER_TAG, "--hover",
                                              "%d,%d" % OFF_IMAGE], env)
         t.ok("a point off the image reads blank and exits 1 (exit %s)" % code,

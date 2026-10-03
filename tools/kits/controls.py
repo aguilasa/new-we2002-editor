@@ -151,7 +151,7 @@ CONTROLS = (
         "ui-imports-core", "kits/ui/app.py", "module imports",
         "from core import api  # noqa: E402",
         "from core import api, zones  # noqa: E402",
-        "FAIL  ui/ imports only PySide6, core.api and the standard library",
+        "FAIL  ui/ imports only PySide6, core.api, its own modules and the standard library",
         "section 3.1: the window draws what the facade returns; reaching past it "
         "is the coupling the facade exists to stop",
     ),
@@ -186,6 +186,30 @@ CONTROLS = (
         "FAIL  a declared gap nobody samples fails section 4.6",
         "section 4.6: a gap is declared because the game samples it; one that "
         "nobody samples is stale (CORR-KITS-031)",
+    ),
+    Control(
+        "i18n-key-missing", "kits/ui/i18n.py", "CATALOG",
+        '        "zone_none": "nenhuma",\n',
+        "",
+        "FAIL  en-US and pt-BR have the same keys",
+        "a key one language lacks shows a KeyError the day someone picks that "
+        "language, and no gate in English sees it (KITS-TASK-36)",
+    ),
+    Control(
+        "i18n-field-renamed", "kits/ui/i18n.py", "CATALOG",
+        '        "status_exported": "exportado: {path}",',
+        '        "status_exported": "exportado: {caminho}",',
+        "FAIL  en-US and pt-BR have the same keys and the same fields",
+        "a field renamed in one translation raises KeyError on format, only in "
+        "that language (KITS-TASK-36)",
+    ),
+    Control(
+        "ui-literal-text", "kits/ui/app.py", "Window.retranslate",
+        '        self.export_button.setText(tr("export_png"))',
+        '        self.export_button.setText("Exportar PNG")',
+        "FAIL  ui/app.py shows no text outside tr()",
+        "a literal in a setText is window text that no language switch reaches: "
+        "the AST sweep is the only thing that says so (KITS-TASK-36)",
     ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
