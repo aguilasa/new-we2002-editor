@@ -45,3 +45,36 @@ python3 tools/looks/controls.py --only scene-kit-set-palettes-ignored
 Hoje o controle não existe; depois do conserto tem de imprimir RED. A planta acima tem de deixar `python3 tools/looks/scene.py --check` vermelho.
 
 ## Log de Execução
+
+### 2026-10-03
+
+Reproduzido na HEAD `4da9add`, numa cópia `git archive HEAD tools` (a planta casa uma vez):
+
+```
+$ sed -i 's/            palettes = texture.in_set_order(palettes, kit_set)/            palettes = texture.in_set_order(palettes, 1)/' $S/tools/looks/scene.py
+$ (cd $S && python3 tools/looks/scene.py --check | tail -1)
+scene.py: 0 failure(s)
+```
+
+Conserto: `_kit_set_reaches_the_bank` ganha a terceira perna — `build()` com um `draw_list` falso que nomeia o container do kit vestido, e `in_set_order` anotando o conjunto pedido e parando —, e afirma `[1, 2]`. Controle novo `scene-kit-set-palettes-ignored` em `tools/looks/controls.py`.
+
+```
+$ python3 tools/looks/scene.py --check | grep -E 'palettes in|failure'
+  ok    and build() searches the kit's palettes in that set's order too
+scene.py: 0 failure(s)
+$ (cópia com o scene.py novo e a planta) python3 tools/looks/scene.py --check | grep -E 'FAIL|failure'
+  FAIL  and build() searches the kit's palettes in that set's order too  [1, 1]
+scene.py: 1 failure(s)
+$ python3 tools/looks/controls.py --only scene-kit-set-palettes-ignored
+  RED    scene-kit-set-palettes-ignored scene.py :: build
+controls: 1 of 1 red (1 substitution)
+$ python3 tools/looks/selftest.py | tail -3
+  ..... 114 of 114 controls red
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R 'looks|kits'
+4/8 Test #17: looks_live .......................***Skipped   0.10 sec
+100% tests passed, 0 tests failed out of 8
+```
+
+A observação da causa raiz — a reordenação de paleta do `draw_list` (`assembly.py:720`) não muda saída — fica como estava: não é o que esta CORR pede.

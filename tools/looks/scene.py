@@ -2693,9 +2693,12 @@ def _kit_set_reaches_the_bank(c) -> None:
 
     No disc: build() is followed into draw_list with the draw list stubbed,
     and draw_list into the bank with the containers empty and
-    `texture.in_set_order` recording who called it with which set.
+    `texture.in_set_order` recording who called it with which set.  The third
+    leg is build()'s own palette bank: the stubbed draw list names the worn
+    kit's container, and the palettes are searched in the set asked
+    (CORR-KITS-039).
     """
-    reached, ordered = [], []
+    reached, ordered, banked = [], [], []
 
     class _Stop(Exception):
         """Raised once the kit bank is ordered: the draw list is not needed."""
@@ -2733,6 +2736,28 @@ def _kit_set_reaches_the_bank(c) -> None:
          "%r" % reached)
     c.ok("and the draw list searches the kit in that set's order",
          ordered == [1, 2], "%r" % ordered)
+
+    def _worn_list(disc, values, figure, kit=None, kit_set=1):
+        return [{"container": layout.kit_path(kit)}]
+
+    def _banked(records, kit_set=1):
+        banked.append(kit_set)
+        raise _Stop
+
+    assembly.draw_list, texture.in_set_order = _worn_list, _banked
+    texture.images = texture.palettes = lambda body: []
+    try:
+        for kit_set in (1, 2):
+            try:
+                build({layout.kit_path("00"): b""}, {}, assembly.HEAD_FIGURE,
+                      None, "00", kit_set)
+            except _Stop:
+                pass
+    finally:
+        assembly.draw_list, texture.in_set_order = drawn, order
+        texture.images, texture.palettes = images, palettes
+    c.ok("and build() searches the kit's palettes in that set's order too",
+         banked == [1, 2], "%r" % banked)
 
 
 # ---- the disc ------------------------------------------------------------

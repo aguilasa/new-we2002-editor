@@ -884,6 +884,15 @@ CONTROLS = (
         "(KITS-TASK-22)",
     ),
     Control(
+        "scene-kit-set-palettes-ignored", "scene.py", "build",
+        "            palettes = texture.in_set_order(palettes, kit_set)",
+        "            palettes = texture.in_set_order(palettes, 1)",
+        ("scene",),
+        "build() has to search the worn kit's palettes in the set asked; in "
+        "set 1's order a second-set image is coloured through the first "
+        "set's palette, and only TEX_98 on the disc shows it (CORR-KITS-039)",
+    ),
+    Control(
         "assembly-kit-set-ignored", "assembly.py", "draw_list",
         "                      texture.in_set_order(texture.images(body), kit_set),",
         "                      texture.in_set_order(texture.images(body), 1),",
