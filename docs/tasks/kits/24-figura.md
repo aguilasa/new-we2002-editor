@@ -111,4 +111,13 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ct
 ```
 
 Cada figura amostra **uma** superfície do kit (a de linha 486 no jogador, 488 no goleiro) — o resto vem do `DAT2D`.
-
+- **Closed** — commit `3747272` (2026-10-03): feat(kits): api.figure, the core's one bridge to the looks scene
+  - Files (`git show --name-status 3747272`):
+    - `M NOTICE.md`
+    - `M docs/prompts/perfil-kits.md`
+    - `M docs/tasks/kits/24-figura.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/errors.py`
+    - `A tools/kits/core/figure.py`
+    - `M tools/kits/selftest.py`

@@ -399,12 +399,12 @@
       "phase": 6,
       "depends_on": ["KITS-TASK-20", "KITS-TASK-23"],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#3.1",
-      "files": ["tools/kits/core/figure.py", "tools/kits/core/api.py"],
+      "files": ["tools/kits/core/figure.py", "tools/kits/core/api.py", "tools/kits/core/errors.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-03",
+      "done_commit": "3747272",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
