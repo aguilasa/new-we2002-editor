@@ -64,3 +64,7 @@ scene.py: 2 failure(s)
 $ grep -n 'a mesma troca' docs/tasks/kits/21-looks-builder-kit.md
 (vazio, exit 1)
 ```
+- **Closed** — commit `5cccc21` (2026-10-02): docs(kits): replace the narrative log line in KITS-TASK-21 with the commands
+  - Files (`git show --name-status 5cccc21`):
+    - `M docs/tasks/kits/21-looks-builder-kit.md`
+    - `M docs/tasks/kits/CORR-KITS-038.md`
