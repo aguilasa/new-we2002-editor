@@ -40,3 +40,21 @@ sed -n '/^## Arquivos/,/^## Done/p' docs/tasks/kits/24-figura.md | grep -c perfi
 Dá 0 hoje; 1 depois do conserto.
 
 ## Log de Execução
+
+### 2026-10-03
+
+Reproduzido na HEAD `c9ca511`:
+
+```
+$ git show --stat 3747272 | grep perfil
+ docs/prompts/perfil-kits.md  |   2 +-
+$ sed -n '/^## Arquivos/,/^## Done/p' docs/tasks/kits/24-figura.md | grep -c perfil-kits
+0
+```
+
+Conserto: `docs/prompts/perfil-kits.md` entra na lista de Escopo da KITS-TASK-24, com a razão do estreitamento (a §3.1 põe endereço no `layout` do `looks` e lista as sondas do `survey.py`; o que ela reserva ao `figure.py` é pedir a cena). O perfil não muda.
+
+```
+$ sed -n '/^## Arquivos/,/^## Done/p' docs/tasks/kits/24-figura.md | grep -c perfil-kits
+1
+```

@@ -15,6 +15,7 @@ id: KITS-TASK-24
 - `tools/kits/core/errors.py` — `FigureError`, `NoGeometry`, `GeometryRefused`
 - `tools/kits/selftest.py`, `tools/kits/controls.py` — as asserções e os dois controles
 - `NOTICE.md` — o `we3d` passa a alcançar o `kits` também pelo `figure.py`
+- `docs/prompts/perfil-kits.md` — a verificação da fase 6 estreitada de "só `core/figure.py` importa o `looks`" para "só ele importa o `scene`": a §3.1 manda endereço morar no `layout` do `looks` (o `teams.py` o importa) e lista as sondas da fase 0 do `survey.py`, então a forma antiga não valia nem antes desta task (medido por AST no Log); o que a §3.1 reserva ao `figure.py` é pedir a cena
 
 ## Done criteria
 
