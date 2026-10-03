@@ -289,6 +289,42 @@ def palettes(data: bytes) -> list:
     return [r for t in tables(data) for r in t.records if r.is_clut]
 
 
+KIT_SETS = (1, 2)
+"""The two sets a kit container carries: 1 the first team's, 2 the second's."""
+
+
+class NoSuchSet(ValueError):
+    """A kit set the container does not carry."""
+
+
+def in_set_order(records, kit_set: int = 1) -> list:
+    """*records* with set *kit_set* first wherever two cover the same rect.
+
+    A kit container holds the first team's pair of images and palettes and
+    then the second team's, on the SAME VRAM rectangles (PLAN-KITS-PY.md
+    section 1.1), and every reader here takes the first record that covers a
+    texel -- so the first set always wins.  Choosing the second is a question
+    of search order and nothing else: within each group of records sharing a
+    rect, the *kit_set*-th moves to the slot the first held, and the rest keep
+    their order after it.  A rect the container carries once (the flag, the
+    referee) is the same in both sets.  Set 1 is the list unchanged.
+    """
+    if kit_set not in KIT_SETS:
+        raise NoSuchSet("kit set %r is not one of %s" % (kit_set, KIT_SETS))
+    out = list(records)
+    groups: dict = {}
+    for at, rec in enumerate(out):
+        groups.setdefault((rec.kind, rec.x, rec.y, rec.w, rec.h), []).append(at)
+    for slots in groups.values():
+        if len(slots) < kit_set:
+            continue
+        held = [out[at] for at in slots]
+        chosen = held.pop(kit_set - 1)
+        for at, rec in zip(slots, [chosen] + held):
+            out[at] = rec
+    return out
+
+
 def widths(records) -> dict:
     """{entries: how many records} -- the count criterion 2 of the task asks for."""
     out: dict = {}
@@ -463,6 +499,32 @@ def _checks(c) -> None:
     ok, attempt = c.ok, c.attempt
     refuses = c.refusing(NoPalette)
     bad = c.refusing(BadTable)
+
+    # The set order (KITS-TASK-22), on the shape a kit container has: two
+    # images and two palettes on the same rects, then a flag and its palette
+    # that the container carries once.
+    import types
+
+    def _rec(name, kind, x, y, w, h):
+        return types.SimpleNamespace(name=name, kind=kind, x=x, y=y, w=w, h=h)
+
+    kit = [_rec("shirt 1", KIND_IMAGE, 576, 256, 64, 128),   # not-an-address: VRAM rect
+           _rec("sleeve 1", KIND_IMAGE, 576, 384, 64, 128),  # not-an-address: VRAM rect
+           _rec("shirt 2", KIND_IMAGE, 576, 256, 64, 128),   # not-an-address: VRAM rect
+           _rec("sleeve 2", KIND_IMAGE, 576, 384, 64, 128),  # not-an-address: VRAM rect
+           _rec("flag", KIND_IMAGE, 704, 256, 64, 64),       # not-an-address: VRAM rect
+           _rec("player 1", KIND_CLUT, 0, 486, 256, 1),      # not-an-address: VRAM rect
+           _rec("player 2", KIND_CLUT, 0, 486, 256, 1)]      # not-an-address: VRAM rect
+    names = lambda records: [r.name for r in records]  # noqa: E731
+    ok("set 1 is the container's own order",
+       names(in_set_order(kit, 1)) == names(kit))
+    ok("set 2 puts the second of each shared rect where the first was",
+       names(in_set_order(kit, 2)) == ["shirt 2", "sleeve 2", "shirt 1",
+                                       "sleeve 1", "flag", "player 2",
+                                       "player 1"],
+       "%s" % names(in_set_order(kit, 2)))
+    c.refusing(NoSuchSet)("a third set", lambda: in_set_order(kit, 3),
+                          "is not one of")
 
     # Two palettes, one wide and one narrow, on two VRAM rows, laid out one
     # bank in -- the shape DAT2D.BIN really has, at a size a gate can hold.

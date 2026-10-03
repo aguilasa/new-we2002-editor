@@ -682,7 +682,8 @@ def combine(primitive, byname: dict, at: int) -> tuple:
     return (clut, band)
 
 
-def draw_list(disc, values: dict, figure: int, kit: str = None) -> list:
+def draw_list(disc, values: dict, figure: int, kit: str = None,
+              kit_set: int = 1) -> list:
     """Every primitive to draw for one tuple, with its image and its palette.
 
     Returns a list of dicts, one per primitive: the file and section it lives
@@ -696,6 +697,11 @@ def draw_list(disc, values: dict, figure: int, kit: str = None) -> list:
     primitives grey, which is what this drew until LOOKS-TASK-30: the pages
     the body samples are in no common file, and `DAT2D.BIN` cannot answer for
     a uniform that is per team (section 1.8).
+
+    *kit_set* is which of the kit's two sets the figure wears, 1 the first
+    team's and 2 the second's (PLAN-KITS-PY.md section 2, KITS-TASK-22): the
+    kit's records are searched in `texture.in_set_order`, and the common file
+    is not touched.
     """
     import atlas
     import modelfile
@@ -709,7 +715,9 @@ def draw_list(disc, values: dict, figure: int, kit: str = None) -> list:
     if kit is not None:
         path = layout.kit_path(kit)
         body = disc[path]
-        banks.append((path, texture.images(body), texture.palettes(body)))
+        banks.append((path,
+                      texture.in_set_order(texture.images(body), kit_set),
+                      texture.in_set_order(texture.palettes(body), kit_set)))
 
     out = []
     dropped: dict = {}

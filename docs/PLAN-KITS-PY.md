@@ -82,12 +82,16 @@ outro. A pergunta "casa e fora" do [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)
 
 - `scene.from_image(..., kit=<tag>)` já aceita **qualquer** das 105 tags, e o
   `ui/app.py --looks <tupla> --kit <tag>` desenha com ela. O `scene.Builder`,
-  que alimenta a tela, tem o `TEX_A4` fixo.
+  que alimenta a tela, tinha o `TEX_A4` fixo; desde a KITS-TASK-21 aceita
+  `kit=`, com o `TEX_A4` de default.
 - Não existe uma VRAM simulada. `assembly.draw_list` monta bancos na ordem
   `[DAT2D, TEX]`, e cada primitiva pede ao `atlas.image_at` o **primeiro**
   registro que cobre o texel; a paleta vem do `texture.covering`, que também
-  fica com o primeiro. **Resultado: o titular sempre ganha**, e não há parâmetro
-  para o suplente.
+  fica com o primeiro. **Resultado: o titular sempre ganhava**, e não havia
+  parâmetro para o suplente. Desde a KITS-TASK-22 há o `kit_set`: o banco do
+  TEX é buscado em `texture.in_set_order`, que põe o 2º registro de cada
+  retângulo repetido no lugar do 1º, e o `scene.build` ordena as paletas do
+  mesmo jeito.
 - A paleta de jogador ou de goleiro **não é escolhida em código**: é o CLUT id
   que a própria primitiva carrega. A figura 0 é o jogador de linha, a 1 o
   goleiro.
@@ -144,7 +148,7 @@ igual ao de hoje, e os gates do `looks` (`looks_selftest`, `looks_image`,
 2. **Escolha do conjunto.** Um parâmetro `kit_set` (1 = titular, 2 = suplente)
    que faça o banco do TEX entregar o 2º par de registros em vez do 1º. A
    pergunta é de ordem de busca, e a resposta cabe no banco — o resto do
-   `looks` não muda.
+   `looks` não muda. Feito na KITS-TASK-22.
 
 ### 2.1 Dois discos, e o TEX de fora
 

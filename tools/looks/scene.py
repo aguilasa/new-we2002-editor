@@ -317,15 +317,21 @@ def part_for(primitive, vertices, record, surface, clut: int, band: int,
 # ---- the scene -----------------------------------------------------------
 
 def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE,
-          frame: int = None, kit: str = None) -> Scene:
+          frame: int = None, kit: str = None, kit_set: int = 1) -> Scene:
     """Everything the tuple draws, out of the disc's own bytes.
 
     The draw list is `assembly`'s and is not recomputed here: which primitive
     a field owns, which head a style picks and which band it samples are all
     measurements, and a second copy of them would be a second thing to keep
     right.
+
+    *kit_set* picks the first team's set of the kit (1) or the second's (2);
+    the draw list and the palettes below search the kit's records in the same
+    `texture.in_set_order`, so an image of one set is never coloured through
+    the other's palette.
     """
-    parts = assembly.draw_list(disc, values, figure, kit)
+    parts = assembly.draw_list(disc, values, figure, kit, kit_set)
+    worn = None if kit is None else layout.kit_path(kit)
     # One container per primitive, and the draw list says which: the body's
     # pages are in the kit container and the head's are in the common file,
     # and reading a record out of the wrong bytes decodes perfectly into
@@ -333,7 +339,10 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE,
     banks = {}
     for path in {entry["container"] for entry in parts} - {None}:
         body = disc[path]
-        banks[path] = (body, texture.images(body), texture.palettes(body))
+        palettes = texture.palettes(body)
+        if path == worn:
+            palettes = texture.in_set_order(palettes, kit_set)
+        banks[path] = (body, texture.images(body), palettes)
 
     scans: dict = {}
     surfaces: dict = {}
@@ -409,7 +418,8 @@ def place_for(places: dict, where: tuple, head: tuple):
 
 def from_image(image_path: str, text: str,
                figure: int = assembly.HEAD_FIGURE,
-               frame: int = None, kit: str = layout.KIT_ON_SCREEN) -> Scene:
+               frame: int = None, kit: str = layout.KIT_ON_SCREEN,
+               kit_set: int = 1) -> Scene:
     """The whole path, from a disc on disc to a scene -- what `ui/app.py` calls.
 
     It lives here and not in the window because the window is forbidden the
@@ -430,7 +440,7 @@ def from_image(image_path: str, text: str,
     # it is -- three hair styles and one beard value are exactly that.
     try:
         values = looks.parse_tuple(text)
-        return build(data, values, figure, frame, kit)
+        return build(data, values, figure, frame, kit, kit_set)
     except (looks.BadLooks, assembly.BadAssembly) as exc:
         raise BadScene(str(exc)) from exc
 
@@ -452,17 +462,26 @@ class Builder:
     screen wears, which is what this class drew before the argument existed.
     A tag nobody measured is refused by `layout.kit_path` before the disc is
     opened.
+
+    *kit_set* is which of the kit's two sets the figure wears: 1, the first
+    team's and the default, or 2, the second's (KITS-TASK-22).  A set the
+    container does not carry is refused there too.
     """
 
-    __slots__ = ("image_path", "figure", "frame", "kit", "_data", "_art",
+    __slots__ = ("image_path", "figure", "frame", "kit", "kit_set", "_data",
+                 "_art",
                  "_font", "walking", "_names", "_anchor", "_unposed",
                  "_posed")
 
     def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE,
-                 frame: int = None, kit: str = layout.KIT_ON_SCREEN):
+                 frame: int = None, kit: str = layout.KIT_ON_SCREEN,
+                 kit_set: int = 1):
         import iso_source
 
         container = layout.kit_path(kit)
+        # Refused here, before the disc is opened, like a tag nobody measured.
+        texture.in_set_order((), kit_set)
+        self.kit_set = kit_set
         self.image_path = image_path
         self.figure = figure
         # The frame every `build` poses in unless one is named.  The screen
@@ -492,7 +511,8 @@ class Builder:
         try:
             values = looks.parse_tuple(text)
             return build(self._data, values, self.figure,
-                         self.frame if frame is None else frame, self.kit)
+                         self.frame if frame is None else frame, self.kit,
+                         self.kit_set)
         except (looks.BadLooks, assembly.BadAssembly) as exc:
             raise BadScene(str(exc)) from exc
 
@@ -503,7 +523,7 @@ class Builder:
             try:
                 values = looks.parse_tuple(text)
                 self._unposed = {text: build(self._data, values, self.figure,
-                                             None, self.kit)}
+                                             None, self.kit, self.kit_set)}
             except (looks.BadLooks, assembly.BadAssembly) as exc:
                 raise BadScene(str(exc)) from exc
             self._posed = {}
@@ -2051,6 +2071,27 @@ def summary(scene: Scene) -> dict:
     }
 
 
+def picture_digest(scene: Scene) -> str:
+    """A digest of what the scene DRAWS: every part's points, its (u, v) and
+    the colours of the surface it samples.
+
+    By content and not by key: the second set of `TEX_A4` is the first one's
+    bytes at other offsets, so a digest of record offsets would call two
+    identical pictures different (PLAN-KITS-PY.md section 5, KITS-TASK-22).
+    """
+    import hashlib
+
+    digest = hashlib.sha256()
+    for part in scene.parts:
+        digest.update(repr((part.file, part.section, part.primitive,
+                            part.points, part.uvs)).encode("ascii"))
+        if part.surface is not None:
+            digest.update(repr((part.surface.width, part.surface.height))
+                          .encode("ascii"))
+            digest.update(part.surface.rgba)
+    return digest.hexdigest()
+
+
 # ---- the gate ------------------------------------------------------------
 
 class _FakePrimitive:
@@ -2593,12 +2634,17 @@ def _builder_kit(c) -> None:
         """Raised once walk_build has called build(): what comes after it
         poses a figure, and this disc has none."""
 
-    def _capture(data, values, figure=None, frame=None, kit=None):
+    sets, walked_sets = [], []
+
+    def _capture(data, values, figure=None, frame=None, kit=None, kit_set=1):
         passed.append(kit)
+        sets.append(kit_set)
         return kit
 
-    def _capture_walk(data, values, figure=None, frame=None, kit=None):
+    def _capture_walk(data, values, figure=None, frame=None, kit=None,
+                      kit_set=1):
         walked.append(kit)
+        walked_sets.append(kit_set)
         raise _Stop
 
     opened, built = iso_source.open_disc, globals()["build"]
@@ -2607,10 +2653,12 @@ def _builder_kit(c) -> None:
     try:
         default = Builder("made-up.bin")
         other = Builder("made-up.bin", kit="00")
+        second = Builder("made-up.bin", kit="00", kit_set=2)
         default.build(assembly.CORPUS_REFERENCE)
         other.build(assembly.CORPUS_REFERENCE)
+        second.build(assembly.CORPUS_REFERENCE)
         globals()["build"] = _capture_walk
-        for builder in (default, other):
+        for builder in (default, other, second):
             try:
                 builder.walk_build(assembly.CORPUS_REFERENCE, 0, 0)
             except _Stop:
@@ -2624,13 +2672,67 @@ def _builder_kit(c) -> None:
          other._data.get(layout.kit_path("00")) == layout.kit_path("00").encode("ascii")
          and layout.kit_path("A4") not in other._data,
          "%s" % sorted(k for k in other._data if "TEX_" in k))
-    c.ok("and builds with the tag it was given", passed == ["A4", "00"],
+    c.ok("and builds with the tag it was given", passed == ["A4", "00", "00"],
          "%r" % passed)
     c.ok("and walks with it too, the path the LOOKS SET window draws by",
-         walked == ["A4", "00"], "%r" % walked)
+         walked == ["A4", "00", "00"], "%r" % walked)
+    c.ok("with no set named the Builder wears the first, and set 2 when asked",
+         sets == [1, 1, 2] and walked_sets == [1, 1, 2],
+         "build %r, walk %r" % (sets, walked_sets))
     c.refusing(layout.WrongDisc)(
         "a tag nobody measured, before the disc is opened",
         lambda: Builder("no-such.bin", kit="ZZ"), "kit tags measured")
+    c.refusing(texture.NoSuchSet)(
+        "a third set, before the disc is opened",
+        lambda: Builder("no-such.bin", kit="00", kit_set=3), "is not one of")
+    _kit_set_reaches_the_bank(c)
+
+
+def _kit_set_reaches_the_bank(c) -> None:
+    """The set asked of build() is the order the kit's records are searched in.
+
+    No disc: build() is followed into draw_list with the draw list stubbed,
+    and draw_list into the bank with the containers empty and
+    `texture.in_set_order` recording who called it with which set.
+    """
+    reached, ordered = [], []
+
+    class _Stop(Exception):
+        """Raised once the kit bank is ordered: the draw list is not needed."""
+
+    def _draw_list(disc, values, figure, kit=None, kit_set=1):
+        reached.append(kit_set)
+        return []
+
+    def _ordered(records, kit_set=1):
+        ordered.append(kit_set)
+        raise _Stop
+
+    drawn, order = assembly.draw_list, texture.in_set_order
+    images, palettes = texture.images, texture.palettes
+    assembly.draw_list = _draw_list
+    try:
+        for kit_set in (1, 2):
+            build({}, {}, assembly.HEAD_FIGURE, None, "00", kit_set)
+    finally:
+        assembly.draw_list = drawn
+    texture.in_set_order = _ordered
+    texture.images = texture.palettes = lambda body: []
+    try:
+        for kit_set in (1, 2):
+            try:
+                assembly.draw_list({layout.DAT2D: b"",
+                                    layout.kit_path("00"): b""},
+                                   {}, assembly.HEAD_FIGURE, "00", kit_set)
+            except _Stop:
+                pass
+    finally:
+        texture.in_set_order, texture.images = order, images
+        texture.palettes = palettes
+    c.ok("build() hands the set to the draw list", reached == [1, 2],
+         "%r" % reached)
+    c.ok("and the draw list searches the kit in that set's order",
+         ordered == [1, 2], "%r" % ordered)
 
 
 # ---- the disc ------------------------------------------------------------
@@ -2681,6 +2783,50 @@ def _check_image(image_path: str) -> int:
     if layout.kit_path(layout.KIT_ON_SCREEN) in containers:
         problems.append("Builder(kit=%r) still sampled %s"
                         % (other_tag, layout.kit_path(layout.KIT_ON_SCREEN)))
+
+    # The two sets (KITS-TASK-22, section 5 of PLAN-KITS-PY.md): TEX_A4 is the
+    # one kit whose second set is its first, so asking for it has to give the
+    # same picture; a kit whose sets differ in the images (TEX_00) or in the
+    # palettes only (TEX_98) has to give another.
+    #
+    # A different picture is not enough on its own: with the draw list still
+    # on set 1 and the palettes on set 2, TEX_00 comes out different too --
+    # the first set's images in the second set's colours.  So every surface
+    # the second set samples out of the kit has to be a record the first set
+    # does not use where the two share a rect.
+    for tag, same in ((layout.KIT_ON_SCREEN, True), ("00", False),
+                      ("98", False)):
+        scenes = [Builder(image_path, kit=tag, kit_set=one)
+                  .build(assembly.CORPUS_REFERENCE) for one in (1, 2)]
+        first, second = (picture_digest(one) for one in scenes)
+        path = layout.kit_path(tag)
+        with __import__("iso_source").open_disc(image_path) as disc:
+            body = disc.read(path)
+        records = texture.images(body)
+        shared = {}
+        for rec in records:
+            shared.setdefault((rec.x, rec.y, rec.w, rec.h), []).append(rec.offset)
+        firsts = {offsets[0] for offsets in shared.values() if len(offsets) > 1}
+        seconds = {offsets[1] for offsets in shared.values() if len(offsets) > 1}
+        used = [{key[1] for key in one.surfaces if key[0] == path}
+                for one in scenes]
+        print("      TEX_%s set 1 samples %s, set 2 samples %s"
+              % (tag, sorted(used[0]), sorted(used[1])))
+        if not used[0] & firsts or used[0] & seconds:
+            problems.append("TEX_%s set 1 sampled %s, not the first set %s"
+                            % (tag, sorted(used[0]), sorted(firsts)))
+        if not used[1] & seconds or used[1] & firsts:
+            problems.append("TEX_%s set 2 sampled %s, not the second set %s"
+                            % (tag, sorted(used[1]), sorted(seconds)))
+        print("      TEX_%s set 1 %s, set 2 %s: %s"
+              % (tag, first[:16], second[:16],
+                 "the same picture" if first == second else "another picture"))
+        if (first == second) != same:
+            problems.append("TEX_%s: set 2 gave %s picture, and section 1.1 "
+                            "says %s" % (tag, "the same" if first == second
+                                         else "another",
+                                         "the sets are equal" if same
+                                         else "they differ"))
 
     # And the red case beside it, so the line above is a measurement and not a
     # description: with no kit, the body is grey.

@@ -858,8 +858,8 @@ CONTROLS = (
     ),
     Control(
         "scene-builder-walk-kit", "scene.py", "Builder.walk_build",
-        "                                             None, self.kit)}",
-        "                                             None, layout.KIT_ON_SCREEN)}",
+        "                                             None, self.kit, self.kit_set)}",
+        "                                             None, layout.KIT_ON_SCREEN, self.kit_set)}",
         ("scene",),
         "walk_build has to pass the Builder's kit to build(), as build does; "
         "it is the path the LOOKS SET window draws by, and dropping the kit "
@@ -867,12 +867,30 @@ CONTROLS = (
     ),
     Control(
         "scene-builder-default-kit", "scene.py", "Builder.__init__",
-        "                 frame: int = None, kit: str = layout.KIT_ON_SCREEN):",
-        '                 frame: int = None, kit: str = "00"):',
+        "                 frame: int = None, kit: str = layout.KIT_ON_SCREEN,\n",
+        '                 frame: int = None, kit: str = "00",\n',
         ("scene",),
         "the Builder with no kit named has to wear the screen's TEX_A4; any "
         "other default dresses every figure of the LOOKS SET screen in "
         "somebody else's kit, textured and plausible (KITS-TASK-21)",
+    ),
+    Control(
+        "scene-kit-set-ignored", "scene.py", "build",
+        "    parts = assembly.draw_list(disc, values, figure, kit, kit_set)",
+        "    parts = assembly.draw_list(disc, values, figure, kit, 1)",
+        ("scene",),
+        "build() dropping the set it was asked for draws the first team's kit "
+        "whatever the caller wanted -- textured and plausible on every tag "
+        "(KITS-TASK-22)",
+    ),
+    Control(
+        "assembly-kit-set-ignored", "assembly.py", "draw_list",
+        "                      texture.in_set_order(texture.images(body), kit_set),",
+        "                      texture.in_set_order(texture.images(body), 1),",
+        ("scene",),
+        "the draw list searching the kit in the container's own order: the "
+        "first set wins every texel, which is the bug section 1.2 of "
+        "PLAN-KITS-PY.md describes (KITS-TASK-22)",
     ),
     Control(
         "scene-standing-accepts-any-order", "scene.py", "standing",
