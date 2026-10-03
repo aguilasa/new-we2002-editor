@@ -64,7 +64,9 @@ O critério 3 — o controle `scene-builder-default-kit` no catálogo do `contro
 $ python3 tools/looks/controls.py --only scene-builder-default-kit
   RED    scene-builder-default-kit  scene.py :: Builder.__init__
 controls: 1 of 1 red (1 substitution)
-$ (a mesma troca numa cópia da árvore, e o self-check do scene nela)
+$ S=$(mktemp -d); git archive e6bf293 | tar -x -C $S; cd $S
+$ sed -i 's/frame: int = None, kit: str = layout.KIT_ON_SCREEN):/frame: int = None, kit: str = "00"):/' tools/looks/scene.py
+$ python3 tools/looks/scene.py --check | grep -E 'FAIL|failure'
   FAIL  with no kit named, the Builder wears TEX_A4, the screen's kit  '00'
   FAIL  and builds with the tag it was given  ['00', '00']
 scene.py: 2 failure(s)

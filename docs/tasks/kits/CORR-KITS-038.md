@@ -42,3 +42,25 @@ grep -n 'a mesma troca' docs/tasks/kits/21-looks-builder-kit.md
 Imprime a linha 67 hoje; vazio depois do conserto.
 
 ## Log de Execução
+
+### 2026-10-02
+
+Reproduzido na HEAD `fd4cefb`:
+
+```
+$ grep -n 'a mesma troca' docs/tasks/kits/21-looks-builder-kit.md
+67:$ (a mesma troca numa cópia da árvore, e o self-check do scene nela)
+```
+
+Conserto: a linha narrativa trocada pelos três comandos, contra `e6bf293` — o commit de trabalho da KITS-TASK-21, para a saída colada continuar sendo a daquela entrega (na HEAD a mesma planta derruba também a asserção do `walk_build` da CORR-KITS-037, e daria 3 falhas). Rodados aqui, a saída é a do Log, linha a linha:
+
+```
+$ S=$(mktemp -d); git archive e6bf293 | tar -x -C $S; cd $S
+$ sed -i 's/frame: int = None, kit: str = layout.KIT_ON_SCREEN):/frame: int = None, kit: str = "00"):/' tools/looks/scene.py
+$ python3 tools/looks/scene.py --check | grep -E 'FAIL|failure'
+  FAIL  with no kit named, the Builder wears TEX_A4, the screen's kit  '00'
+  FAIL  and builds with the tag it was given  ['00', '00']
+scene.py: 2 failure(s)
+$ grep -n 'a mesma troca' docs/tasks/kits/21-looks-builder-kit.md
+(vazio, exit 1)
+```
