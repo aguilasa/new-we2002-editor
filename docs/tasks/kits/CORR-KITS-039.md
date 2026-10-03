@@ -78,3 +78,8 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ct
 ```
 
 A observação da causa raiz — a reordenação de paleta do `draw_list` (`assembly.py:720`) não muda saída — fica como estava: não é o que esta CORR pede.
+- **Closed** — commit `e36c6f7` (2026-10-03): test(looks): cover build() searching the kit's palettes in the set asked
+  - Files (`git show --name-status e36c6f7`):
+    - `M docs/tasks/kits/CORR-KITS-039.md`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/scene.py`
