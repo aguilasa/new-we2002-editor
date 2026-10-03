@@ -5,7 +5,24 @@
   "plan": "/docs/PLAN-KITS-PY.md",
   "ticket": null,
   "local": false,
+  "order": ["KITS-TASK-36"],
   "tasks": [
+    {
+      "id": "KITS-TASK-36",
+      "file": "36-ui-i18n.md",
+      "title": "UI em inglês dos EUA por default, com catálogo i18n e seletor de idioma",
+      "type": "implementação",
+      "phase": 4,
+      "depends_on": ["KITS-TASK-20"],
+      "source_of_truth": "/docs/PLAN-KITS-PY.md#idioma-da-interface",
+      "files": ["tools/kits/ui/i18n.py", "tools/kits/ui/app.py", "tools/kits/ui_check.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
+      "resources": ["tela"],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
+    },
     {
       "id": "KITS-TASK-01",
       "file": "01-levantamento-do-tex.md",

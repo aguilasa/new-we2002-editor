@@ -35,6 +35,7 @@ graph TD
     KITS_TASK_17["KITS-TASK-17<br/>Fechamento da fase 3 — plano e zonas, sem janela"]
   end
   subgraph phase_4["Fase 4"]
+    KITS_TASK_36["KITS-TASK-36<br/>UI em inglês dos EUA por default, com catálogo i18n e seletor de idioma"]
     KITS_TASK_18["KITS-TASK-18<br/>Janela mínima: Abrir, combobox de tags, aba Plano, estilo Fusion fixo"]
     KITS_TASK_19["KITS-TASK-19<br/>Gate `kits_ui` e a mesma captura no Windows e no Linux"]
     KITS_TASK_20["KITS-TASK-20<br/>Fechamento da fase 4 — a janela mínima"]
@@ -64,6 +65,7 @@ graph TD
     KITS_TASK_34["KITS-TASK-34<br/>Conferir a Definição de pronto do §0, item por item"]
     KITS_TASK_35["KITS-TASK-35<br/>Fechamento da fase 9"]
   end
+  KITS_TASK_20 --> KITS_TASK_36
   KITS_TASK_03 --> KITS_TASK_04
   KITS_TASK_01 --> KITS_TASK_05
   KITS_TASK_02 --> KITS_TASK_05
@@ -131,6 +133,7 @@ graph TD
 <!-- rite:begin tasks -->
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| [KITS-TASK-36](/docs/tasks/kits/36-ui-i18n.md) | UI em inglês dos EUA por default, com catálogo i18n e seletor de idioma | 4 | implementação | KITS-TASK-20 | pending | — | — |
 | [KITS-TASK-01](/docs/tasks/kits/01-levantamento-do-tex.md) | Promover o levantamento do §1.1 a ferramenta versionada | 0 | ferramenta | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md) | Medir o que são os retângulos (608,256) e (704,256) | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md) | Contar primitivas de cada figura por retângulo do TEX | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
