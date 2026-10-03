@@ -64,3 +64,7 @@ FAIL  61.02 % differ, above the 5.0 % limit
 $ grep -c '^\$ (o mesmo estado' docs/tasks/kits/36-ui-i18n.md
 0
 ```
+- **Closed** — commit `997a217` (2026-10-03): docs(kits): write the golden-ROM capture as a command in the KITS-TASK-36 log
+  - Files (`git show --name-status 997a217`):
+    - `M docs/tasks/kits/36-ui-i18n.md`
+    - `M docs/tasks/kits/CORR-KITS-041.md`
