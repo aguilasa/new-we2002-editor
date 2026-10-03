@@ -63,3 +63,7 @@ Conserto, só no Log (o `controls.py` não muda — o vermelho em disco ficou es
 $ grep -c '…' docs/tasks/kits/24-figura.md
 0
 ```
+- **Closed** — commit `5d9f2a3` (2026-10-03): docs(kits): make the KITS-TASK-24 log evidence reproducible from HEAD
+  - Files (`git show --name-status 5d9f2a3`):
+    - `M docs/tasks/kits/24-figura.md`
+    - `M docs/tasks/kits/CORR-KITS-042.md`
