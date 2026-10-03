@@ -48,3 +48,36 @@ Em `_builder_kit` (`tools/looks/scene.py`), chamar também `other.walk_build(ass
 A planta acima no `walk_build` tem de deixar `python3 tools/looks/scene.py --check` vermelho, e `python3 tools/looks/controls.py --only <controle novo>` tem de imprimir RED. `ctest -R looks` continua verde.
 
 ## Log de Execução
+
+### 2026-10-02
+
+Reproduzido na HEAD `37a934d`, numa cópia `git archive HEAD`. O `old` da Evidência tem indentação a mais e não casa (`AssertionError`); a planta na linha real (`scene.py:506`) casa uma vez:
+
+```
+$ sed -i 's/^                                             None, self.kit)}$/                                             None, layout.KIT_ON_SCREEN)}/' tools/looks/scene.py
+$ python3 tools/looks/scene.py --check | tail -1
+scene.py: 0 failure(s)
+$ WE2002_LOOKS_IMAGE=<repo>/roms/japanese-shift-jis.bin python3 tools/looks/scene.py --check-image | tail -1
+scene --check-image: ok
+```
+
+Conserto: `_builder_kit` chama também `walk_build` nos dois `Builder`, com um `build` capturado que anota o kit e para com uma exceção sentinela (depois da chamada vem a pose, que o disco de nomes não tem), e afirma `['A4', '00']`. Controle novo `scene-builder-walk-kit` em `tools/looks/controls.py`, com a planta acima.
+
+```
+$ python3 tools/looks/scene.py --check | grep -E 'walks with|failure'
+  ok    and walks with it too, the path the LOOKS SET window draws by
+scene.py: 0 failure(s)
+$ (cópia com o scene.py novo e a planta) python3 tools/looks/scene.py --check | grep -E 'FAIL|failure'
+  FAIL  and walks with it too, the path the LOOKS SET window draws by  ['A4', 'A4']
+scene.py: 1 failure(s)
+$ python3 tools/looks/controls.py --only scene-builder-walk-kit
+  RED    scene-builder-walk-kit     scene.py :: Builder.walk_build
+controls: 1 of 1 red (1 substitution)
+$ python3 tools/looks/selftest.py | tail -3
+  ..... 111 of 111 controls red
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R 'looks|kits'
+4/8 Test #17: looks_live .......................***Skipped   0.10 sec
+100% tests passed, 0 tests failed out of 8
+```

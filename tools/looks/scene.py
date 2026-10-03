@@ -2587,11 +2587,19 @@ def _builder_kit(c) -> None:
         def read(self, name):
             return name.encode("ascii")
 
-    passed = []
+    passed, walked = [], []
+
+    class _Stop(Exception):
+        """Raised once walk_build has called build(): what comes after it
+        poses a figure, and this disc has none."""
 
     def _capture(data, values, figure=None, frame=None, kit=None):
         passed.append(kit)
         return kit
+
+    def _capture_walk(data, values, figure=None, frame=None, kit=None):
+        walked.append(kit)
+        raise _Stop
 
     opened, built = iso_source.open_disc, globals()["build"]
     iso_source.open_disc = lambda path: _NameDisc()
@@ -2601,6 +2609,12 @@ def _builder_kit(c) -> None:
         other = Builder("made-up.bin", kit="00")
         default.build(assembly.CORPUS_REFERENCE)
         other.build(assembly.CORPUS_REFERENCE)
+        globals()["build"] = _capture_walk
+        for builder in (default, other):
+            try:
+                builder.walk_build(assembly.CORPUS_REFERENCE, 0, 0)
+            except _Stop:
+                pass
     finally:
         iso_source.open_disc, globals()["build"] = opened, built
     c.ok("with no kit named, the Builder wears TEX_A4, the screen's kit",
@@ -2612,6 +2626,8 @@ def _builder_kit(c) -> None:
          "%s" % sorted(k for k in other._data if "TEX_" in k))
     c.ok("and builds with the tag it was given", passed == ["A4", "00"],
          "%r" % passed)
+    c.ok("and walks with it too, the path the LOOKS SET window draws by",
+         walked == ["A4", "00"], "%r" % walked)
     c.refusing(layout.WrongDisc)(
         "a tag nobody measured, before the disc is opened",
         lambda: Builder("no-such.bin", kit="ZZ"), "kit tags measured")

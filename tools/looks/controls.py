@@ -857,6 +857,15 @@ CONTROLS = (
         "loaded at 210 cm is what says no (LOOKS-TASK-29)",
     ),
     Control(
+        "scene-builder-walk-kit", "scene.py", "Builder.walk_build",
+        "                                             None, self.kit)}",
+        "                                             None, layout.KIT_ON_SCREEN)}",
+        ("scene",),
+        "walk_build has to pass the Builder's kit to build(), as build does; "
+        "it is the path the LOOKS SET window draws by, and dropping the kit "
+        "there leaves every other check green (CORR-KITS-037)",
+    ),
+    Control(
         "scene-builder-default-kit", "scene.py", "Builder.__init__",
         "                 frame: int = None, kit: str = layout.KIT_ON_SCREEN):",
         '                 frame: int = None, kit: str = "00"):',
