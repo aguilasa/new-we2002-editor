@@ -82,3 +82,8 @@ $ grep -c "python3 - <<'X'" docs/tasks/kits/22-looks-kit-set.md
 ```
 
 Uma diferença de forma: o Log antigo arrumava os registros em duas colunas (pares do mesmo retângulo lado a lado); a ferramenta imprime em ordem de arquivo, uma por linha.
+- **Closed** — commit `d33fece` (2026-10-03): feat(looks): cli.py texture --records lists a kit's TEX records
+  - Files (`git show --name-status d33fece`):
+    - `M docs/tasks/kits/22-looks-kit-set.md`
+    - `M docs/tasks/kits/CORR-KITS-040.md`
+    - `M tools/looks/cli.py`
