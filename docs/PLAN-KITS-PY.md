@@ -47,7 +47,9 @@ imagem do jogo, ou um TEX avulso feito com WETex — e os mostra de duas formas:
 5. A CLI faz tudo o que a janela faz sem importar nada além da fachada do
    núcleo, e a janela sai com a mesma paleta e o mesmo painel Fusion no
    Windows e no Linux — a diferença entre as capturas fica na rasterização de
-   texto, abaixo do limite que o `ui_check.py --compare` afirma (§3.4).
+   texto, abaixo do limite que o `ui_check.py --compare` afirma (§3.4). Todo
+   texto da janela sai do catálogo de idioma: **inglês dos EUA por default**, e o
+   português do Brasil escolhível sem reabrir (§3.4, *Idioma da interface*).
 
 ## 1. O que já se sabe
 
@@ -370,9 +372,38 @@ por `ui_check.py --compare A B`, que reprova acima de 5 % de pixels diferentes
 kit no lugar do mesmo estado passa de 47 % e reprova (KITS-TASK-19,
 CORR-KITS-035).
 
+#### Idioma da interface
+
+Decisão do usuário, 2026-10-03: **todo texto e mensagem da janela é em inglês
+dos EUA por default**, com i18n que deixe escolher o idioma. Executado pela
+KITS-TASK-36, antes de qualquer outra task aberta.
+
+- **Catálogo em Python puro**, `tools/kits/ui/i18n.py`: um dicionário por
+  idioma (`en-US`, `pt-BR`), `tr(chave, **campos)` com `str.format`. Não o
+  `.ts`/`.qm` do Qt — sem binário gerado nem `lrelease`, e o selftest importa o
+  catálogo sem venv.
+- **Quem escolhe**, em ordem: `--lang <código>` no `ui/app.py`, a variável
+  `WE2002_KITS_LANG`, e por fim `en-US`. Código desconhecido é **recusado**
+  (saída 2, com os códigos aceitos), não trocado pelo default em silêncio.
+- **Seletor na janela**: combobox de idioma na barra de cima; trocar reescreve
+  rótulos, itens de combo, abas e a linha de status e de leitura sem reabrir.
+  Nada persiste entre corridas — estado guardado mudaria a aparência fixa que o
+  `kits_ui` compara.
+- **O que não se traduz**: o núcleo e a CLI falam só inglês (`kit.problems`,
+  notas, erros, nomes de registro e de zona), e com `pt-BR` escolhido essas
+  frases aparecem em inglês — limite assumido, não defeito. Nome de time também
+  não, porque vem da ROM ou da tabela inglesa (§3.3).
+- **A regra vale para o que vier**: a aba 3D (KITS-TASK-25), o combobox de
+  times (KITS-TASK-31) e a aba Diagnóstico (KITS-TASK-33) põem todo texto novo
+  no catálogo, nas duas línguas. O selftest afirma que as duas línguas têm as
+  mesmas chaves e os mesmos campos, e que `ui/app.py` não tem literal de texto
+  visível fora de `tr(...)`.
+
 ### 3.5 Idioma e ambiente
 
-Como o `looks`: código e docstrings em inglês, documentos em português. O venv é
+Como o `looks`: código e docstrings em inglês, documentos em português. O
+texto da **interface** é em inglês dos EUA por default, com o português
+escolhível (§3.4, *Idioma da interface*). O venv é
 o `work/venv-looks/`, que já tem PySide6; o núcleo não precisa dele. `ctest`
 ganha `kits_selftest` (sem nada, nunca pula), `kits_image` (com uma ROM),
 `kits_ui` (venv e tela) e o `--check` do gerador do §3.3, com a convenção de
@@ -616,7 +647,7 @@ rodou ([CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md)).
 | 1 | **núcleo, lado TEX**: `api.py` (a fachada), `source.py`, `tex.py`, guarda de forma, `cli.py info/export`; confrontos 1 e 2 do §5 | 0 |
 | 2 | **núcleo, lado ROM**: o gerador do §3.3 com `--check` no `ctest`, `teams.py`, `cli.py teams`; a regra japonês → tabela conferida nas duas imagens de `roms/` | 1 |
 | 3 | `flat.py` + `zones.py`; §4.6 fechada — ainda sem janela | 1 |
-| 4 | **a janela mínima**: Abrir… (ROM ou TEX), combobox, aba "Plano", estilo Fusion fixo; capturas do Windows e do Linux com a mesma aparência, diferindo só no texto e abaixo do limite do `--compare` | 2, 3 |
+| 4 | **a janela mínima**: Abrir… (ROM ou TEX), combobox, aba "Plano", estilo Fusion fixo; texto em inglês dos EUA por default, com catálogo de idioma (KITS-TASK-36); capturas do Windows e do Linux com a mesma aparência, diferindo só no texto e abaixo do limite do `--compare` | 2, 3 |
 | 5 | as duas mudanças do §2 em `tools/looks/`, feitas por este ciclo; gates do `looks` verdes antes e depois | — |
 | 6 | `figure.py` e a aba "3D": titular/suplente, jogador/goleiro | 4, 5 |
 | 7 | §4.1 no emulador e o confronto 3 do §5 | 6 |

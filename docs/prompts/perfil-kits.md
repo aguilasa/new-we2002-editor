@@ -27,6 +27,7 @@ este perfil e o plano divergirem, o plano ganha.
 - **Código e docstrings em inglês, documentos em português; venv `work/venv-looks/`** — §3.5.
 - **Nada do Superpack entra no git**; pares de bandeira por `WE2002_KITS_CORPUS` — §6.
 - **Crédito é de autor, não de compilação.** O Superpack não se cita; cita-se quem aparece dentro dele (polipoli, ramonpsx, Lagarto, Obocaman…). **Todo código de terceiro que o `kits` alcança**, inclusive por import (CARP via `tools/pes2/`, `we3d` via `tools/looks/`), tem linha no `NOTICE.md`, no mesmo commit que o traz — usuário, 2026-09-30.
+- **Texto da UI em inglês dos EUA por default, por catálogo i18n (`ui/i18n.py`) com `pt-BR` escolhível; núcleo e CLI só inglês** — usuário, 2026-10-03, §3.4 (*Idioma da interface*).
 - **Fases 1 a 3 sem janela; a fase 7 (emulador) não pode ser pulada; manga longa/braçadeira/árbitro esperam §4.3 e §4.5** — §7.
 
 ## Sources of truth
@@ -91,6 +92,7 @@ este perfil e o plano divergirem, o plano ganha.
 - `tools/kits/ui/` só importa PySide6, stdlib e `core.api` (§3.1).
 - `ctest -R kits_ui` verde, e sem Fusion/`QPalette` fixa ele reprova (§3.4).
 - Nenhuma janela visível: `:98` no Linux, `-32000` no Windows.
+- Nenhum literal de texto visível em `tools/kits/ui/` fora do `i18n.py`; `en-US` e `pt-BR` com as mesmas chaves e campos, e o selftest reprova se não (§3.4).
 
 ### Fase 5 — mudanças no `looks`
 
@@ -100,6 +102,7 @@ este perfil e o plano divergirem, o plano ganha.
 
 ### Fase 6 — 3D
 
+- Texto novo da janela entra no catálogo (`ui/i18n.py`), nas duas línguas (§3.4).
 - Só `core/figure.py` importa o `looks` (§3.1).
 - Trocar as paletas 486 e 488 troca jogador e goleiro (§5.4).
 - Sem `WE2002_LOOKS_IMAGE`, aba 3D desligada com a frase e o 2D igual (§3.2).
@@ -111,10 +114,12 @@ este perfil e o plano divergirem, o plano ganha.
 
 ### Fase 8 — times em vez de tags
 
+- Texto novo da janela entra no catálogo (`ui/i18n.py`), nas duas línguas (§3.4).
 - Cada linha da tabela time → tag tem proveniência; três conferidas no emulador (§4.2).
 - Nada do `we-team-editor.exe` no git.
 
 ### Fase 9 — diagnóstico e pronto
 
+- Texto novo da janela entra no catálogo (`ui/i18n.py`), nas duas línguas (§3.4).
 - `TEX_48` e `TEX_70` aparecem na aba com o motivo, e o `TEX_13` com a nota de leitura além do tamanho ISO (§0, item 3; §2.1).
 - Os cinco itens da Definição de pronto conferidos com comando (§0).
