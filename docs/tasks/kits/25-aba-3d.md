@@ -108,3 +108,4 @@ A primeira corrida do selftest acusou `ui/app.py shows no text outside tr()  [(8
     - `A tools/kits/ui/figure_view.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-04) at `8c017b1`: CORR-KITS-045, CORR-KITS-046

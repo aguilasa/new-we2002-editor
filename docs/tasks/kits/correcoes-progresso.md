@@ -47,4 +47,6 @@
 | [CORR-KITS-042](/docs/tasks/kits/CORR-KITS-042.md) | Tornar a evidência do Log reproduzível a partir da HEAD | KITS-TASK-24 | medium | done | 2026-10-03 |
 | [CORR-KITS-043](/docs/tasks/kits/CORR-KITS-043.md) | Registrar no Escopo a reescrita da verificação da fase 6 no perfil | KITS-TASK-24 | low | done | 2026-10-03 |
 | [CORR-KITS-044](/docs/tasks/kits/CORR-KITS-044.md) | Cobrir no gate o TEX avulso que tira a geometria da variável de ambiente | KITS-TASK-24 | low | done | 2026-10-03 |
+| [CORR-KITS-045](/docs/tasks/kits/CORR-KITS-045.md) | Consertar o TypeError de formatação no ramo "Plan mudou" do off_judge | KITS-TASK-25 | medium | pending | — |
+| [CORR-KITS-046](/docs/tasks/kits/CORR-KITS-046.md) | Declarar a edição do PLAN-KITS-PY.md na lista de arquivos da task | KITS-TASK-25 | low | pending | — |
 <!-- rite:end -->

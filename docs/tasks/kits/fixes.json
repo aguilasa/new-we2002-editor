@@ -573,6 +573,32 @@
       "depends_on": [],
       "done_on": "2026-10-03",
       "done_commit": "9ca3330"
+    },
+    {
+      "id": "CORR-KITS-045",
+      "file": "CORR-KITS-045.md",
+      "title": "Consertar o TypeError de formatação no ramo \"Plan mudou\" do off_judge",
+      "origin": "KITS-TASK-25",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-046",
+      "file": "CORR-KITS-046.md",
+      "title": "Declarar a edição do PLAN-KITS-PY.md na lista de arquivos da task",
+      "origin": "KITS-TASK-25",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
