@@ -347,7 +347,9 @@ devolve.
   usa), zoom de vizinho mais próximo, xadrez no transparente, grade 16×16,
   mapa de zonas ligável, e o mouse dizendo zona, índice e cor. Botão "Exportar
   PNG".
-- **Aba "3D"**: titular/suplente, jogador/goleiro, giro livre.
+- **Aba "3D"**: titular/suplente, jogador/goleiro, giro livre. Desenhada por
+  `QPainter` em software (`ui/figure_view.py`), não OpenGL: o mesmo quadro no
+  Windows e no Xvfb, que é o que o `kits_ui` compara (KITS-TASK-25).
 - **Aba "Diagnóstico"**: a lista do `kit.problems`.
 
 **Estilo visual próprio, idêntico no Windows e no Linux, e não o do `looks`.**

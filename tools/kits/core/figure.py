@@ -37,6 +37,11 @@ GEOMETRY_ENV = "WE2002_LOOKS_IMAGE"
 GEOMETRY_FILES = (layout.EDT_MOD, layout.MODEL, layout.DAT2D, layout.ANIME)
 TUPLE = assembly.CORPUS_REFERENCE
 """The looks the figure wears: the reference tuple of the looks corpus."""
+POSE_FRAME = scene.REFERENCE_FRAME
+"""The frame a figure is posed in for viewing: the screen's own reference pose
+(`None` would be the looks shelf, every piece at its file's origin)."""
+TRIANGLES = scene.TRIANGLES
+"""How a part's four corners become two triangles, as the looks draws them."""
 FIGURES = (0, 1)
 """0: the outfield player, 1: the goalkeeper (the figure numbers of `looks`)."""
 KIT_SETS = texture.KIT_SETS

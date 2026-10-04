@@ -81,6 +81,20 @@ STATE = ["--tag", "00", "--image", "work1", "--palette", "2", "--zoom", "3", "--
 """The state the gate captures, and the one KITS-TASK-19 compares across systems."""
 OTHER = ["--tag", "A4", "--image", "work1", "--palette", "2", "--zoom", "3", "--zones"]
 MISSING_TAG = ["--tag", "ZZ"]
+FIGURE_TAG = "00"
+"""The 3D tag: one of the 103 whose two sets differ in their images (section 1.1)."""
+FIGURE_COMBOS = ((1, 0), (2, 0), (1, 1), (2, 1))
+"""(set, figure) of the four 3D captures: first and second set, player and goalkeeper."""
+BACKDROP_3D = (0x8C, 0x8C, 0x8C)
+"""The 3D view's backdrop, `figure_view.BACKDROP`; written here, not read from it."""
+FIGURE_FLOOR = 5.0
+"""The figure covers at least this percentage of a 3D capture."""
+NOTE_ROWS = 60
+"""Bottom rows of a capture that hold the status and the 3D note."""
+TAB_LABEL = (40, 20, 80)
+"""(width, height, lowest row) the greyed 3D tab label fits in.  The geometry
+variable may change the Plan capture in the note rows and in that label, and
+nowhere else; measured 2026-10-03, the label is x 71-87, y 48-56."""
 
 WINDOW_COLOUR = (0xEC, 0xEC, 0xEC)
 """`QPalette.Window` of the fixed palette."""
@@ -113,7 +127,7 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER = "style", "hover"
+STYLE, HOVER, FIGURE, OFF = "style", "hover", "3D", "3D off"
 PLANTS = (
     ("no Fusion", STYLE, '    app.setStyle("Fusion")\n',
      '    app.setStyle("Windows")  # planted: no Fusion\n'),
@@ -122,6 +136,13 @@ PLANTS = (
     ("readout one pixel right", HOVER,
      "        index = self.picture.indices[y * self.picture.width + x]\n",
      "        index = self.picture.indices[y * self.picture.width + x + 1]\n"),
+    ("3D set ignored", FIGURE,
+     "            scene = api.figure(self.kit, self.set_box.currentData(), "
+     "self.figure_box.currentData(),\n",
+     "            scene = api.figure(self.kit, 1, self.figure_box.currentData(),\n"),
+    ("3D tab never off", OFF,
+     "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
+     "        self.tabs.setTabEnabled(1, True)\n"),
 )
 
 
@@ -381,6 +402,96 @@ def sandbox(tmp: str, old: str, new: str) -> str:
     return app
 
 
+def view_box(shot: tuple):
+    """(left, top, right, bottom) of the 3D view: the box of its backdrop colour."""
+    w = shot[0]
+    at = [i for i, p in enumerate(shot[2]) if p == BACKDROP_3D]
+    if not at:
+        return None
+    xs, ys = [i % w for i in at], [i // w for i in at]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def differing_in_view(one: tuple, two: tuple) -> int:
+    """Pixels that differ inside the 3D view of *one*: the selectors above it
+    name the set, so the whole capture differs even when the figure does not."""
+    box = view_box(one)
+    if box is None or one[:2] != two[:2]:
+        return -1
+    w = one[0]
+    return sum(1 for y in range(box[1], box[3] + 1) for x in range(box[0], box[2] + 1)
+               if one[2][y * w + x] != two[2][y * w + x])
+
+
+def figure_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, {(set, figure): sha256 of the capture}) of the four 3D captures."""
+    import hashlib
+
+    bad, shots, digests = [], {}, {}
+    for kit_set, figure in FIGURE_COMBOS:
+        out = os.path.join(tmp, "3d-%d-%d.png" % (kit_set, figure))
+        shot, more, _ = capture(python, app, image, ["--tag", FIGURE_TAG, "--tab", "3d",
+                                                     "--kit-set", str(kit_set),
+                                                     "--figure", str(figure)], out, env)
+        bad += ["set %d figure %d: %s" % (kit_set, figure, m) for m in more]
+        if shot is None:
+            continue
+        with open(out, "rb") as fh:
+            digests[(kit_set, figure)] = hashlib.sha256(fh.read()).hexdigest()
+        cover = 100.0 - share(shot, BACKDROP_3D) - share(shot, WINDOW_COLOUR) \
+            - share(shot, FUSION_PANE)
+        if share(shot, BACKDROP_3D) < 10.0 or cover < FIGURE_FLOOR:
+            bad.append("set %d figure %d: backdrop %.1f %%, the rest %.1f %%: no 3D view"
+                       % (kit_set, figure, share(shot, BACKDROP_3D), cover))
+        shots[(kit_set, figure)] = shot
+    for figure in (0, 1):
+        one, two = shots.get((1, figure)), shots.get((2, figure))
+        if one is not None and two is not None and differing_in_view(one, two) <= 0:
+            bad.append("figure %d: set 2 draws the same figure as set 1" % figure)
+    return bad, digests
+
+
+def off_judge(python, image, env, tmp, app=APP) -> list:
+    """A lone TEX with WE2002_LOOKS_IMAGE unset: the 3D tab refuses with the
+    sentence, and the Plan capture differs from the one with the variable only
+    in the note rows at the bottom and in the 3D tab's label, which greys."""
+    lone = os.path.join(tmp, "TEX_%s.BIN" % FIGURE_TAG)
+    done = subprocess.run([sys.executable, os.path.join(TOOLS_DIR, "pes2", "iso.py"), "extract",
+                           image, "/BIN/TEX_%s.BIN" % FIGURE_TAG, "-o", lone],
+                          capture_output=True, text=True)
+    if done.returncode:
+        return ["iso.py extract exited %d: %s" % (done.returncode, done.stderr.strip())]
+    bare = dict(env)
+    bare.pop(IMAGE_VARIABLE, None)
+    bad = []
+    code, output = run_app(python, app, [lone, "--tab", "3d", "--screenshot",
+                                         os.path.join(tmp, "off.png")], bare)
+    if code != 3 or "WE2002_LOOKS_IMAGE" not in output or os.path.exists(os.path.join(tmp, "off.png")):
+        bad.append("--tab 3d with no geometry: exit %s, %r" % (code, output.strip()[-200:]))
+    without, more, _ = capture(python, app, lone, [], os.path.join(tmp, "plan-off.png"), bare)
+    with_, more2, _ = capture(python, app, lone, [], os.path.join(tmp, "plan-on.png"), env)
+    bad += more + more2
+    if without is not None and with_ is not None:
+        if without[:2] != with_[:2]:
+            bad.append("the Plan tab changes size: %dx%d against %dx%d"
+                       % (without[0], without[1], with_[0], with_[1]))
+        else:
+            w, h = without[0], without[1]
+            above = [(i % w, i // w) for i, (a, b) in enumerate(zip(without[2], with_[2]))
+                     if a != b and i // w < h - NOTE_ROWS]
+            if not above:
+                bad.append("the 3D tab's label does not grey")
+            else:
+                xs, ys = [p[0] for p in above], [p[1] for p in above]
+                box = (max(xs) - min(xs) + 1, max(ys) - min(ys) + 1, max(ys))
+                if box[0] > TAB_LABEL[0] or box[1] > TAB_LABEL[1] or box[2] > TAB_LABEL[2]:
+                    bad.append("%d pixel(s) differ above the note rows, in a %dx%d box down to "
+                               "row %d: more than the tab label" % (len(above),) + box)
+            if differing(without, with_) == 0:
+                bad.append("the note does not change with the geometry: the sentence is not shown")
+    return bad
+
+
 class Tally:
     def __init__(self) -> None:
         self.failures = 0
@@ -463,6 +574,14 @@ def run(python: str, image: str) -> int:
         t.ok("a point off the image reads blank and exits 1 (exit %s)" % code,
              [] if code == 1 and "(blank)" in output else [output.strip()[-200:]])
 
+        bad, digests = figure_judge(python, image, env, tmp)
+        t.ok("3D TEX_%s: the four combinations draw a figure, and set 1 is not set 2 for "
+             "either figure (%s)" % (FIGURE_TAG, ", ".join(
+                 "set %d fig %d %s" % (k[0], k[1], v[:12]) for k, v in sorted(digests.items()))),
+             bad)
+        t.ok("with no geometry disc the 3D tab is off with the sentence, and Plan is the same",
+             off_judge(python, image, env, tmp))
+
         for name, judge, old, new in PLANTS:
             with tempfile.TemporaryDirectory(prefix="kits-ui-plant-") as box:
                 try:
@@ -474,6 +593,11 @@ def run(python: str, image: str) -> int:
                     shot, bad, _ = capture(python, app, image, STATE,
                                            os.path.join(box, "p.png"), env)
                     red = judge_style(shot) if shot is not None else ["no picture"]
+                elif judge == FIGURE:
+                    red, _ = figure_judge(python, image, env, box, app)
+                    bad = []
+                elif judge == OFF:
+                    red, bad = off_judge(python, image, env, box, app), []
                 else:
                     bad, red = [], hover_judge(python, app, image, env, want) if want else []
                 print("        plant '%s': %s" % (name, "; ".join(red)[:300] or "judge passed"))

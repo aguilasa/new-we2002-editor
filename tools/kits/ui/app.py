@@ -47,6 +47,7 @@ from core import api  # noqa: E402
 import i18n  # noqa: E402
 from i18n import tr  # noqa: E402
 from PySide6 import QtCore, QtGui, QtWidgets  # noqa: E402
+from figure_view import FigureView  # noqa: E402
 
 OFF_THE_DESKTOP = -32000  # not-an-address: the parking spot CLAUDE.md names
 FRAMES = 5
@@ -62,6 +63,8 @@ CHECKER_PX = 8
 CELL_PX = 14
 """One colour of the 16x16 palette grid, on screen."""
 
+TAB_NAMES = ("plan", "3d")
+"""--tab names of the two tabs, in tab order."""
 WORK = ("work1", "work2")
 """--image names of the two work bitmaps (first and second set); any other
 --image is an image record number."""
@@ -373,6 +376,39 @@ class Window(QtWidgets.QMainWindow):
         self.tabs = QtWidgets.QTabWidget()
         self.tabs.addTab(plan, "")
 
+        # The 3D tab (KITS-TASK-25): the figure the facade draws, in the set and
+        # the figure chosen here.  Off, with the core's sentence, when no disc
+        # gives the geometry (section 3.2).
+        self.geometries = {}             # disc path -> the files api.read_geometry gave
+        self.geometry = None             # the files the figure is drawn from, or None
+        self.geometry_path = None
+        self.geometry_reason = ""        # the core's sentence when there is none
+        self.set_box = QtWidgets.QComboBox()
+        self.set_box.addItem("", 1)
+        self.set_box.addItem("", 2)
+        self.figure_box = QtWidgets.QComboBox()
+        self.figure_box.addItem("", 0)
+        self.figure_box.addItem("", 1)
+        self.set_box.currentIndexChanged.connect(self.draw_figure)
+        self.figure_box.currentIndexChanged.connect(self.draw_figure)
+        self.figure_view = FigureView(api.FIGURE_TRIANGLES)
+        self.figure_hint = QtWidgets.QLabel()
+        self.figure_labels = {"kit_set": QtWidgets.QLabel(), "figure": QtWidgets.QLabel()}
+        row = QtWidgets.QHBoxLayout()
+        for key, widget in zip(self.figure_labels, (self.set_box, self.figure_box)):
+            row.addWidget(self.figure_labels[key])
+            row.addWidget(widget)
+        row.addStretch(1)
+        row.addWidget(self.figure_hint)
+        three = QtWidgets.QWidget()
+        three_layout = QtWidgets.QVBoxLayout(three)
+        three_layout.addLayout(row)
+        three_layout.addWidget(self.figure_view, 1)
+        self.tabs.addTab(three, "")
+        self.tabs.currentChanged.connect(self.draw_figure)
+        self.figure_note = QtWidgets.QLabel(" ")
+        self.figure_note.setWordWrap(True)
+
         self.status = QtWidgets.QLabel(" ")
         self.status.setWordWrap(True)
         central = QtWidgets.QWidget()
@@ -380,6 +416,7 @@ class Window(QtWidgets.QMainWindow):
         layout.addLayout(top)
         layout.addWidget(self.tabs, 1)
         layout.addWidget(self.status)
+        layout.addWidget(self.figure_note)
         self.setCentralWidget(central)
         self.retranslate()
         self.image_changed()
@@ -404,6 +441,15 @@ class Window(QtWidgets.QMainWindow):
         self.zones_box.setText(tr("zones"))
         self.export_button.setText(tr("export_png"))
         self.tabs.setTabText(0, tr("tab_plan"))
+        self.tabs.setTabText(1, tr("tab_3d"))
+        for key, label in self.figure_labels.items():
+            label.setText(tr(key))
+        self.set_box.setItemText(0, tr("set_first"))
+        self.set_box.setItemText(1, tr("set_second"))
+        self.figure_box.setItemText(0, tr("figure_player"))
+        self.figure_box.setItemText(1, tr("figure_keeper"))
+        self.figure_hint.setText(tr("figure_hint"))
+        self.show_geometry()
         self.relabel_tags()
         self.say(*self.said)
         self.readout.setText(" ")
@@ -435,6 +481,7 @@ class Window(QtWidgets.QMainWindow):
         self.source = source
         self.path = path
         self.path_label.setText(path)
+        self.find_geometry()
         blocker = QtCore.QSignalBlocker(self.tag_box)
         self.tag_box.clear()
         if source.kind == api.KIND_ROM:
@@ -447,6 +494,53 @@ class Window(QtWidgets.QMainWindow):
         del blocker
         self.load_kit()
         return True
+
+    # -- the figure's geometry (section 3.2) ----------------------------------------
+
+    def find_geometry(self) -> None:
+        """The disc the 3D figure is drawn from: the open disc when the looks
+        guard trusts it, else WE2002_LOOKS_IMAGE; with neither, the 3D tab
+        goes off and the core's sentence says why."""
+        self.geometry, self.geometry_path, self.geometry_reason = None, None, ""
+        tries = []
+        if self.source is not None and self.source.kind == api.KIND_ROM:
+            tries.append(self.path)
+        tries.append(None)               # api.read_geometry falls back to the variable
+        for path in tries:
+            try:
+                key = path or os.environ.get(api.GEOMETRY_ENV, "")
+                if key not in self.geometries:
+                    self.geometries[key] = api.read_geometry(path)
+                self.geometry, self.geometry_path = self.geometries[key], key
+                break
+            except api.FigureError as exc:
+                self.geometry_reason = str(exc)
+        self.show_geometry()
+
+    def show_geometry(self) -> None:
+        self.tabs.setTabEnabled(1, self.geometry is not None)
+        if self.geometry is not None:
+            self.figure_note.setText(tr("figure_geometry", path=self.geometry_path))
+        elif self.geometry_reason:
+            self.figure_note.setText(tr("figure_off", reason=self.geometry_reason))
+        else:
+            self.figure_note.setText(" ")
+
+    def draw_figure(self) -> None:
+        """The figure in the chosen set, drawn only while its tab is shown."""
+        if self.tabs.currentIndex() != 1:
+            return
+        if self.geometry is None or self.kit is None:
+            self.figure_view.set_scene(None)
+            return
+        try:
+            scene = api.figure(self.kit, self.set_box.currentData(), self.figure_box.currentData(),
+                               frame=api.FIGURE_POSE, geometry=self.geometry)
+        except api.FigureError as exc:
+            self.figure_view.set_scene(None)
+            self.say(None, {CORE_TEXT: str(exc)})
+            return
+        self.figure_view.set_scene(scene)
 
     def relabel_tags(self) -> None:
         """The kit selector's labels: the tag, and the teams the disc gives it."""
@@ -500,6 +594,7 @@ class Window(QtWidgets.QMainWindow):
                 self.say("status_kit", {"label": kit.label, "size": kit.size})
             self.kit = kit
         self.redraw()
+        self.draw_figure()
 
     # -- drawing ------------------------------------------------------------------
 
@@ -706,6 +801,15 @@ def main(argv=None) -> int:
     parser.add_argument("--lang", choices=i18n.LANGUAGES,
                         help="the window's language (default: $%s, else %s)"
                         % (i18n.ENV, i18n.DEFAULT))
+    parser.add_argument("--tab", choices=TAB_NAMES, default=TAB_NAMES[0],
+                        help="the tab shown")
+    parser.add_argument("--kit-set", type=int, choices=(1, 2), default=1,
+                        help="3D: the first or the second set")
+    parser.add_argument("--figure", type=int, choices=(0, 1), default=0,
+                        help="3D: 0 the player, 1 the goalkeeper")
+    parser.add_argument("--yaw", type=float, help="3D: turn about the vertical, degrees "
+                        "(default: facing the viewer)")
+    parser.add_argument("--pitch", type=float, help="3D: tilt, degrees")
     parser.add_argument("--switch-to", choices=i18n.LANGUAGES, metavar="LANG",
                         help="once everything is set, pick LANG in the window's own "
                         "language selector, as a click would")
@@ -739,6 +843,15 @@ def main(argv=None) -> int:
         window.zoom_box.setCurrentIndex(ZOOMS.index(args.zoom))
     window.zones_box.setChecked(args.zones)
     window.checker_box.setChecked(not args.no_checker)
+    window.set_box.setCurrentIndex(args.kit_set - 1)
+    window.figure_box.setCurrentIndex(args.figure)
+    window.figure_view.turn_to(window.figure_view.yaw if args.yaw is None else args.yaw,
+                               window.figure_view.pitch if args.pitch is None else args.pitch)
+    if TAB_NAMES.index(args.tab) == 1:
+        if not window.tabs.isTabEnabled(1):
+            print("the 3D tab is off: %s" % window.figure_note.text(), file=sys.stderr)
+            return 3
+        window.tabs.setCurrentIndex(1)
     if args.switch_to:
         window.language_box.setCurrentIndex(i18n.LANGUAGES.index(args.switch_to))
     settle(app)

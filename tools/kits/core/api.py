@@ -73,10 +73,12 @@ __all__ = (
     "confront_zones", "Confrontation", "Placed", "shifted_zones", "zone_agreement",
     "map_check", "MapCheck", "MAP_BACKGROUND", "GLYPH_ZONES", "zones_self_check",
     "figure", "read_geometry", "palette_swap", "SwapControl", "GEOMETRY_ENV",
-    "FigureError", "NoGeometry", "GeometryRefused",
+    "FigureError", "NoGeometry", "GeometryRefused", "FIGURE_POSE", "FIGURE_TRIANGLES",
 )
 
 GEOMETRY_ENV = _figure.GEOMETRY_ENV
+FIGURE_POSE = _figure.POSE_FRAME
+FIGURE_TRIANGLES = _figure.TRIANGLES
 
 
 def figure(kit, kit_set=1, figure=0, geometry_path=None, frame=None, geometry=None):

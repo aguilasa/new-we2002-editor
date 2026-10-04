@@ -437,7 +437,8 @@ NOT_SHOWN_CALLS = ("tr", "print", "add_argument", "ArgumentParser", "ArgumentTyp
 the headless stdout and argparse messages, the style's name, the PNG format,
 QPalette role names and colours (section 3.4, KITS-TASK-36)."""
 NOT_SHOWN_CONSTANTS = ("WORK", "COLOURS", "DISABLED_TEXT", "DISABLED_ROLES", "CHECKER",
-                       "BACKDROP", "ZONE_PEN", "GAP_PEN", "FONT_FAMILIES", "CORE_TEXT")
+                       "BACKDROP", "ZONE_PEN", "GAP_PEN", "FONT_FAMILIES", "CORE_TEXT",
+                       "TAB_NAMES")
 """Module constants of ui/app.py that hold keys, colours and font families."""
 _FORMAT_SPEC = re.compile(r"%[-#0 +]*\d*(?:\.\d+)?[a-zA-Z%]|\{[^{}]*\}")
 
