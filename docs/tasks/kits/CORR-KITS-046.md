@@ -58,3 +58,7 @@ Conserto: `docs/PLAN-KITS-PY.md` entra na lista de arquivos da KITS-TASK-25, com
 $ sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/25-aba-3d.md | grep -c PLAN-KITS
 1
 ```
+- **Closed** — commit `ae68e02` (2026-10-04): docs(kits): list the PLAN-KITS-PY.md edit in the KITS-TASK-25 files
+  - Files (`git show --name-status ae68e02`):
+    - `M docs/tasks/kits/25-aba-3d.md`
+    - `M docs/tasks/kits/CORR-KITS-046.md`
