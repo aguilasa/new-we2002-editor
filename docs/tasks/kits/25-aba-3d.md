@@ -14,6 +14,7 @@ A aba 3D desenha a figura pela fachada; sem geometria fica desligada com a frase
 - `tools/kits/ui_check.py`
 - `tools/kits/core/figure.py`, `tools/kits/core/api.py` — `api.FIGURE_POSE` e `api.FIGURE_TRIANGLES`, para a janela não importar o `looks`
 - `tools/kits/selftest.py` — `TAB_NAMES` entre as constantes que não são texto de tela
+- `docs/PLAN-KITS-PY.md` — §3.4: a aba 3D desenhada por `QPainter` em software, não OpenGL, porque o `kits_ui` compara o quadro do Windows com o do Xvfb, e OpenGL não dá o mesmo quadro nos dois
 
 ## Done criteria
 

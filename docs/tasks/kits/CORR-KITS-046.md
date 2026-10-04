@@ -40,3 +40,21 @@ sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/25-aba-3d.md | grep -c PLAN-KITS
 Dá 0 hoje; 1 depois do conserto. (A grep sobre o arquivo inteiro já casa a linha 102, do Log, e por isso não serve de verificação.)
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `2cf47a5`:
+
+```
+$ git show --stat a47275a | grep PLAN
+ docs/PLAN-KITS-PY.md         |   4 +-
+$ sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/25-aba-3d.md | grep -c PLAN-KITS
+0
+```
+
+Conserto: `docs/PLAN-KITS-PY.md` entra na lista de arquivos da KITS-TASK-25, com o motivo da decisão de renderização (§3.4). O plano não muda.
+
+```
+$ sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/25-aba-3d.md | grep -c PLAN-KITS
+1
+```
