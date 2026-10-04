@@ -57,4 +57,4 @@ Então, da raiz do repositório:
 ```
 python3 tools/kits/oracle.py --slot 3
 ```
-
+- **blocked** (2026-10-04): no save state of a match exists (only LOOKS SET, title and memory-card screens: savestate.py shot); the comparator is in 43ba7df. Unblock: save a match state with a team of differing pairs playing in its second kit (home team in its first as control) into a free slot, e.g. 3, then: python3 tools/kits/oracle.py --slot 3

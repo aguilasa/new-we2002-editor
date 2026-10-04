@@ -449,7 +449,7 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.1",
       "files": ["tools/kits/oracle.py", "docs/PLAN-KITS-PY.md"],
       "resources": ["emulador", "save-states"],
-      "status": "pending",
+      "status": "blocked",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,
