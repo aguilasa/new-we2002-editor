@@ -84,3 +84,7 @@ kits_ui: 0 failure(s)
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
 100% tests passed, 0 tests failed out of 4
 ```
+- **Closed** — commit `7a2e94a` (2026-10-04): fix(kits): the off judge's "Plan changed" branch reported a TypeError
+  - Files (`git show --name-status 7a2e94a`):
+    - `M docs/tasks/kits/CORR-KITS-045.md`
+    - `M tools/kits/ui_check.py`
