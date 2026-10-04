@@ -69,3 +69,4 @@ Texto novo da aba 3D no catálogo nas duas línguas: o `kits_selftest` afirma ch
 - **Closed** — commit `7355894` (2026-10-04): docs(kits): close phase 6 -- kits ctest, controls and rite check at HEAD
   - Files (`git show --name-status 7355894`):
     - `M docs/tasks/kits/26-fechamento-fase-6.md`
+- **Reviewed** (2026-10-04) at `4856994`: no finding
