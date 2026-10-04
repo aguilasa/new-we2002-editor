@@ -34,8 +34,10 @@ WHAT IT JUDGES:
       another process whose file is read here; a point off the image exits 1;
   and the plants, each in a copy of the tree: the window without Fusion and
       without the fixed palette (section 3.4) FAIL the style judge, and the
-      readout reading the pixel to the right FAILS the hover judge.  A plant
-      that passes is a red gate.  "Without Fusion" is planted as
+      readout reading the pixel to the right FAILS the hover judge; the 3D
+      tab drawing set 1 for both sets FAILS the 3D judge, and the tab left on
+      with no geometry, or a Plan widget that changes with no geometry, FAIL
+      the 3D off judge.  A plant that passes is a red gate.  "Without Fusion" is planted as
       `setStyle("Windows")`, not as the line taken out: on Linux Qt's default
       style already is Fusion (measured on :98, 2026-10-02), so removing the
       line changed nothing there and the plant passed.  "Windows" is the one
@@ -143,6 +145,10 @@ PLANTS = (
     ("3D tab never off", OFF,
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
      "        self.tabs.setTabEnabled(1, True)\n"),
+    ("Plan changes without geometry", OFF,
+     "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
+     "        self.tabs.setTabEnabled(1, self.geometry is not None)\n"
+     "        self.zones_box.setEnabled(self.geometry is not None)  # planted: Plan changes\n"),
 )
 
 
@@ -486,7 +492,7 @@ def off_judge(python, image, env, tmp, app=APP) -> list:
                 box = (max(xs) - min(xs) + 1, max(ys) - min(ys) + 1, max(ys))
                 if box[0] > TAB_LABEL[0] or box[1] > TAB_LABEL[1] or box[2] > TAB_LABEL[2]:
                     bad.append("%d pixel(s) differ above the note rows, in a %dx%d box down to "
-                               "row %d: more than the tab label" % (len(above),) + box)
+                               "row %d: more than the tab label" % ((len(above),) + box))
             if differing(without, with_) == 0:
                 bad.append("the note does not change with the geometry: the sentence is not shown")
     return bad

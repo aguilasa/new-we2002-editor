@@ -58,3 +58,29 @@ No `off_judge` de `tools/kits/ui_check.py`, escrever `% ((len(above),) + box)`. 
 O heredoc da caixa de areia acima imprime `CRASH TypeError…` hoje; depois do conserto tem de imprimir `judge: ['N pixel(s) differ above the note rows, … more than the tab label']`, e `python3 tools/kits/ui_check.py` tem de mostrar a planta nova como `ok plant '…' fails the 3D off judge`.
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `3df5557`: o heredoc da caixa de areia da Evidência imprime `CRASH TypeError not enough arguments for format string`.
+
+Conserto: `% ((len(above),) + box)` no `off_judge`, e uma terceira planta 3D em `PLANTS`, `Plan changes without geometry` (a do `zones_box` da Evidência), julgada pelo juiz OFF. A docstring do módulo passa a nomear as três plantas 3D, que ela não listava.
+
+O heredoc da Evidência, sem mudança, rodado na árvore consertada:
+
+```
+judge: ['368 pixel(s) differ above the note rows, in a 711x42 box down to row 89: more than the tab label']
+```
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/ui_check.py | grep -E "Plan changes|3D tab never|kits_ui:"
+        plant '3D tab never off': --tab 3d with no geometry: exit 0, [...]
+  ok    plant '3D tab never off' fails the 3D off judge
+        plant 'Plan changes without geometry': 368 pixel(s) differ above the note rows, in a 711x42 box down to row 89: more than the tab label
+  ok    plant 'Plan changes without geometry' fails the 3D off judge
+kits_ui: 0 failure(s)
+```
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+```
