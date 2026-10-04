@@ -97,4 +97,14 @@ $ env -u WE2002_LOOKS_IMAGE ctest --test-dir build -R kits_ui
 A primeira corrida do selftest acusou `ui/app.py shows no text outside tr()  [(848, '3d')]` — o nome da aba numa comparação; virou a constante `TAB_NAMES`, posta entre as que não são texto de tela.
 
 **Não medido:** se a orientação esquerda/direita da figura é a do jogo. A projeção não espelha x, e o confronto com o emulador é a fase 7 (KITS-TASK-27/28).
-
+- **Closed** — commit `a47275a` (2026-10-03): feat(kits): the 3D tab -- set, figure, free turn, off with the core's sentence
+  - Files (`git show --name-status a47275a`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/25-aba-3d.md`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `A tools/kits/ui/figure_view.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`

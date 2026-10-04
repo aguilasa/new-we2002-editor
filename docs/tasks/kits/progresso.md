@@ -158,7 +158,7 @@ graph TD
 | [KITS-TASK-22](/docs/tasks/kits/22-looks-kit-set.md) | Parâmetro `kit_set`: o banco do TEX entrega o 2º par de registros | 5 | implementação | KITS-TASK-21 | done | 2026-10-02 | 2026-10-03 |
 | [KITS-TASK-23](/docs/tasks/kits/23-fechamento-fase-5.md) | Fechamento da fase 5 — as duas mudanças no `looks` | 5 | closing | KITS-TASK-21, KITS-TASK-22 | done | 2026-10-03 | 2026-10-03 |
 | [KITS-TASK-24](/docs/tasks/kits/24-figura.md) | `figure.py` e `api.figure`: a única ponte com o `looks` | 6 | implementação | KITS-TASK-20, KITS-TASK-23 | done | 2026-10-03 | 2026-10-03 |
-| [KITS-TASK-25](/docs/tasks/kits/25-aba-3d.md) | Aba 3D: titular/suplente, jogador/goleiro, giro livre | 6 | implementação | KITS-TASK-24 | pending | — | — |
+| [KITS-TASK-25](/docs/tasks/kits/25-aba-3d.md) | Aba 3D: titular/suplente, jogador/goleiro, giro livre | 6 | implementação | KITS-TASK-24 | done | 2026-10-03 | pending |
 | [KITS-TASK-26](/docs/tasks/kits/26-fechamento-fase-6.md) | Fechamento da fase 6 — o 3D | 6 | closing | KITS-TASK-24, KITS-TASK-25 | pending | — | — |
 | [KITS-TASK-27](/docs/tasks/kits/27-titular-e-suplente-no-jogo.md) | §4.1 no emulador: suplente em campo e a VRAM lida | 7 | investigação | KITS-TASK-26 | pending | — | — |
 | [KITS-TASK-28](/docs/tasks/kits/28-confronto-3.md) | Confronto 3: `confront.py --score` com um uniforme que não é o `A4` | 7 | verificação | KITS-TASK-27 | pending | — | — |

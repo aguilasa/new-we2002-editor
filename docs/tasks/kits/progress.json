@@ -415,12 +415,12 @@
       "phase": 6,
       "depends_on": ["KITS-TASK-24"],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#3.2",
-      "files": ["tools/kits/ui/*.py", "tools/kits/ui_check.py"],
+      "files": ["tools/kits/ui/*.py", "tools/kits/ui_check.py", "tools/kits/core/figure.py", "tools/kits/core/api.py", "tools/kits/selftest.py"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-03",
+      "done_commit": "a47275a",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
