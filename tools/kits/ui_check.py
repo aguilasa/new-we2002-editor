@@ -138,7 +138,8 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET = (
     "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset")
 RESET_TURN = ("--yaw", "0", "--pitch", "30")
-"""A turn away from the opening one, which --reset has to undo (KITS-TASK-37)."""
+"""A turn away from the opening one, which --reset and --double-click have to undo
+(KITS-TASK-37, CORR-KITS-064)."""
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -163,6 +164,9 @@ PLANTS = (
     ("reset to the wrong yaw", RESET,
      "        self.turn_to(DEFAULT_YAW, DEFAULT_PITCH)\n",
      "        self.turn_to(DEFAULT_YAW + 90, DEFAULT_PITCH)  # planted\n", "figure_view.py"),
+    ("double-click does nothing", RESET,
+     "        self.drag = None\n        self.reset()\n",
+     "        self.drag = None  # planted: the double click does nothing\n", "figure_view.py"),
     ("diagnosis rows never added", DIAG,
      '            self.diag_list.addItem(tr("diag_problem", text=text))\n',
      "            pass  # planted: no problem row\n"),
@@ -523,13 +527,16 @@ def diag_judge(python, image, env, tmp, app=APP) -> tuple:
 
 
 def reset_judge(python, image, env, tmp, app=APP) -> tuple:
-    """(failures, digests): the 3D turned away and reset is the 3D as it opens,
-    and the same turn without --reset is not (the control)."""
+    """(failures, digests): the 3D turned away and reset -- by the button
+    (--reset) or by a double click on the view (--double-click,
+    CORR-KITS-064) -- is the 3D as it opens, and the same turn without
+    either is not (the control)."""
     import hashlib
 
     base = ["--tag", FIGURE_TAG, "--tab", "3d"]
     runs = {"reset": base + list(RESET_TURN) + ["--reset"], "opened": base,
-            "turned": base + list(RESET_TURN)}
+            "turned": base + list(RESET_TURN),
+            "double-click": base + list(RESET_TURN) + ["--double-click"]}
     bad, digests = [], {}
     for name, args in runs.items():
         out = os.path.join(tmp, "reset-%s.png" % name)
@@ -542,6 +549,9 @@ def reset_judge(python, image, env, tmp, app=APP) -> tuple:
     if digests["reset"] != digests["opened"]:
         bad.append("reset gives %s, the opened view %s"
                    % (digests["reset"][:12], digests["opened"][:12]))
+    if digests["double-click"] != digests["opened"]:
+        bad.append("the double click gives %s, the opened view %s"
+                   % (digests["double-click"][:12], digests["opened"][:12]))
     if digests["turned"] == digests["opened"]:
         bad.append("the turn without reset draws the opened view: the control measures nothing")
     return bad, digests
@@ -764,7 +774,8 @@ def run(python: str, image: str) -> int:
         t.ok("with no geometry disc the 3D tab is off with the sentence, and Plan is the same",
              off_judge(python, image, env, tmp))
         bad, digests = reset_judge(python, image, env, tmp)
-        t.ok("Reset view after %s is the 3D as it opens, and the turn alone is not (%s)"
+        t.ok("Reset view and a double click after %s are the 3D as it opens, and the "
+             "turn alone is not (%s)"
              % (" ".join(RESET_TURN), ", ".join("%s %s" % (k, v[:12])
                                                 for k, v in sorted(digests.items()))), bad)
         bad, seen = diag_judge(python, image, env, tmp)

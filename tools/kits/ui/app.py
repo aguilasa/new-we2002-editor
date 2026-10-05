@@ -869,6 +869,8 @@ def main(argv=None) -> int:
     parser.add_argument("--pitch", type=float, help="3D: tilt, degrees")
     parser.add_argument("--reset", action="store_true",
                         help="3D: after --yaw/--pitch, press Reset view")
+    parser.add_argument("--double-click", action="store_true",
+                        help="3D: after --yaw/--pitch, double-click the figure's view")
     parser.add_argument("--list-diagnosis", action="store_true",
                         help="print the Diagnosis tab of the kit shown (summary and rows) and exit")
     parser.add_argument("--list-kits", action="store_true",
@@ -921,6 +923,9 @@ def main(argv=None) -> int:
                                window.figure_view.pitch if args.pitch is None else args.pitch)
     if args.reset:
         window.reset_button.click()
+    if args.double_click:
+        from PySide6 import QtTest
+        QtTest.QTest.mouseDClick(window.figure_view, QtCore.Qt.MouseButton.LeftButton)
     if TAB_NAMES.index(args.tab) == 1:
         if not window.tabs.isTabEnabled(1):
             print("the 3D tab is off: %s" % window.figure_note.text(), file=sys.stderr)
