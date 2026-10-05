@@ -61,4 +61,5 @@
 | [CORR-KITS-056](/docs/tasks/kits/CORR-KITS-056.md) | Registrar pelo rite set os quatro arquivos fora do escopo da task 31 | KITS-TASK-31 | medium | done | 2026-10-04 |
 | [CORR-KITS-057](/docs/tasks/kits/CORR-KITS-057.md) | Desinverter os sha256 das duas capturas no Log da task 31 | KITS-TASK-31 | medium | done | 2026-10-04 |
 | [CORR-KITS-058](/docs/tasks/kits/CORR-KITS-058.md) | Fazer o kits_ui conferir que o seletor de kit mostra os times | KITS-TASK-31 | low | done | 2026-10-04 |
+| [CORR-KITS-059](/docs/tasks/kits/CORR-KITS-059.md) | Dizer no Log que as linhas do emulador não foram refeitas, ou colar a corrida | KITS-TASK-32 | low | pending | — |
 <!-- rite:end -->

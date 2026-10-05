@@ -165,7 +165,7 @@ graph TD
 | [KITS-TASK-29](/docs/tasks/kits/29-fechamento-fase-7.md) | Fechamento da fase 7 — o emulador julga o 3D | 7 | closing | KITS-TASK-27, KITS-TASK-28 | done | 2026-10-04 | 2026-10-04 |
 | [KITS-TASK-30](/docs/tasks/kits/30-tabela-time-tag.md) | §4.2: qual TEX cada time veste | 8 | investigação | KITS-TASK-14 | done | 2026-10-04 | 2026-10-04 |
 | [KITS-TASK-31](/docs/tasks/kits/31-combobox-de-times.md) | O combobox passa a listar times, na ordem do jogo | 8 | implementação | KITS-TASK-30, KITS-TASK-20 | done | 2026-10-04 | 2026-10-04 |
-| [KITS-TASK-32](/docs/tasks/kits/32-fechamento-fase-8.md) | Fechamento da fase 8 — times em vez de tags | 8 | closing | KITS-TASK-30, KITS-TASK-31 | done | 2026-10-04 | pending |
+| [KITS-TASK-32](/docs/tasks/kits/32-fechamento-fase-8.md) | Fechamento da fase 8 — times em vez de tags | 8 | closing | KITS-TASK-30, KITS-TASK-31 | done | 2026-10-04 | 2026-10-04 |
 | [KITS-TASK-33](/docs/tasks/kits/33-aba-diagnostico.md) | Aba Diagnóstico: a lista de `kit.problems` | 9 | implementação | KITS-TASK-20 | pending | — | — |
 | [KITS-TASK-34](/docs/tasks/kits/34-definicao-de-pronto.md) | Conferir a Definição de pronto do §0, item por item | 9 | verificação | KITS-TASK-05, KITS-TASK-11, KITS-TASK-14, KITS-TASK-17, KITS-TASK-20, KITS-TASK-23, KITS-TASK-26, KITS-TASK-29, KITS-TASK-32, KITS-TASK-33 | pending | — | — |
 | [KITS-TASK-35](/docs/tasks/kits/35-fechamento-fase-9.md) | Fechamento da fase 9 | 9 | closing | KITS-TASK-33, KITS-TASK-34 | pending | — | — |

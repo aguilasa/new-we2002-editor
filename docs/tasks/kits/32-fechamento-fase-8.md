@@ -56,3 +56,4 @@ As verificações da fase 8 do perfil, refeitas:
 - **Closed** — commit `7c66cdd` (2026-10-04): docs(kits): phase 8 re-measured at HEAD
   - Files (`git show --name-status 7c66cdd`):
     - `M docs/tasks/kits/32-fechamento-fase-8.md`
+- **Reviewed** (2026-10-04) at `0c25b75`: CORR-KITS-059

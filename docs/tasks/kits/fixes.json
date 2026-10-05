@@ -755,6 +755,19 @@
       "depends_on": [],
       "done_on": "2026-10-04",
       "done_commit": "e9f8fbf"
+    },
+    {
+      "id": "CORR-KITS-059",
+      "file": "CORR-KITS-059.md",
+      "title": "Dizer no Log que as linhas do emulador não foram refeitas, ou colar a corrida",
+      "origin": "KITS-TASK-32",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
