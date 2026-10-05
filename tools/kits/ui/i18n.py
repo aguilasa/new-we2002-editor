@@ -75,7 +75,10 @@ CATALOG = {
         "figure": "Figure",
         "figure_player": "player",
         "figure_keeper": "goalkeeper",
-        "figure_hint": "drag to turn",
+        "figure_hint": "Drag to turn, double-click to reset. The back shows through: "
+                       "the area the torso samples is empty in the TEX, and the game's "
+                       "back and number are not measured yet.",
+        "reset_view": "Reset view",
         "figure_geometry": "3D geometry: {path}",
         "figure_off": "3D off: {reason}",
         "tab_diag": "Diagnosis",
@@ -125,7 +128,10 @@ CATALOG = {
         "figure": "Figura",
         "figure_player": "jogador",
         "figure_keeper": "goleiro",
-        "figure_hint": "arraste para girar",
+        "figure_hint": "Arraste para girar, duplo clique para restaurar. As costas saem "
+                       "vazadas: a área que o torso amostra está vazia no TEX, e as costas "
+                       "e o número do jogo ainda não foram medidos.",
+        "reset_view": "Restaurar vista",
         "figure_geometry": "geometria do 3D: {path}",
         "figure_off": "3D desligado: {reason}",
         "tab_diag": "Diagnóstico",

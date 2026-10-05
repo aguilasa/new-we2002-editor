@@ -135,8 +135,10 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE = (
-    "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note")
+STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET = (
+    "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset")
+RESET_TURN = ("--yaw", "0", "--pitch", "30")
+"""A turn away from the opening one, which --reset has to undo (KITS-TASK-37)."""
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -158,6 +160,9 @@ KIT_ITEM_WANT = {0: "Ireland — TEX_00", 95: "Master League default — TEX_A4"
 CORR-KITS-058): the first team in game order, the ML default after the teams,
 and the last of the tags no team wears."""
 PLANTS = (
+    ("reset to the wrong yaw", RESET,
+     "        self.turn_to(DEFAULT_YAW, DEFAULT_PITCH)\n",
+     "        self.turn_to(DEFAULT_YAW + 90, DEFAULT_PITCH)  # planted\n", "figure_view.py"),
     ("diagnosis rows never added", DIAG,
      '            self.diag_list.addItem(tr("diag_problem", text=text))\n',
      "            pass  # planted: no problem row\n"),
@@ -517,6 +522,31 @@ def diag_judge(python, image, env, tmp, app=APP) -> tuple:
     return bad, seen
 
 
+def reset_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, digests): the 3D turned away and reset is the 3D as it opens,
+    and the same turn without --reset is not (the control)."""
+    import hashlib
+
+    base = ["--tag", FIGURE_TAG, "--tab", "3d"]
+    runs = {"reset": base + list(RESET_TURN) + ["--reset"], "opened": base,
+            "turned": base + list(RESET_TURN)}
+    bad, digests = [], {}
+    for name, args in runs.items():
+        out = os.path.join(tmp, "reset-%s.png" % name)
+        shot, more, _ = capture(python, app, image, args, out, env)
+        bad += ["%s: %s" % (name, m) for m in more]
+        if shot is None:
+            return bad + ["%s: no picture" % name], digests
+        with open(out, "rb") as fh:
+            digests[name] = hashlib.sha256(fh.read()).hexdigest()
+    if digests["reset"] != digests["opened"]:
+        bad.append("reset gives %s, the opened view %s"
+                   % (digests["reset"][:12], digests["opened"][:12]))
+    if digests["turned"] == digests["opened"]:
+        bad.append("the turn without reset draws the opened view: the control measures nothing")
+    return bad, digests
+
+
 def cli_export(image: str, out: str) -> tuple:
     """The work bitmap HOVER_TAG as the CLI writes it, decoded here."""
     done = subprocess.run([sys.executable, os.path.join(KITS_DIR, "cli.py"), "export",
@@ -530,18 +560,21 @@ def cli_export(image: str, out: str) -> tuple:
     return shot
 
 
-def sandbox(tmp: str, old: str, new: str) -> str:
-    """A copy of tools/{kits,looks,pes2} with *old* replaced once in the app."""
+def sandbox(tmp: str, old: str, new: str, target: str = "app.py") -> str:
+    """A copy of tools/{kits,looks,pes2} with *old* replaced once in
+    tools/kits/ui/*target*; returns the copied app."""
     ignore = shutil.ignore_patterns("__pycache__", "*.pyc")
     for sub in COPIED:
         shutil.copytree(os.path.join(TOOLS_DIR, sub), os.path.join(tmp, "tools", sub),
                         ignore=ignore)
     app = os.path.join(tmp, "tools", "kits", "ui", "app.py")
-    with open(app, encoding="utf-8") as fh:
+    path = os.path.join(tmp, "tools", "kits", "ui", target)
+    with open(path, encoding="utf-8") as fh:
         text = fh.read()
     if text.count(old) != 1:
-        raise BadPicture("the plant %r matches %d time(s), not once" % (old.strip(), text.count(old)))
-    with open(app, "w", encoding="utf-8", newline="\n") as fh:
+        raise BadPicture("the plant %r matches %d time(s) in %s, not once"
+                         % (old.strip(), text.count(old), target))
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(text.replace(old, new))
     return app
 
@@ -730,6 +763,10 @@ def run(python: str, image: str) -> int:
              bad)
         t.ok("with no geometry disc the 3D tab is off with the sentence, and Plan is the same",
              off_judge(python, image, env, tmp))
+        bad, digests = reset_judge(python, image, env, tmp)
+        t.ok("Reset view after %s is the 3D as it opens, and the turn alone is not (%s)"
+             % (" ".join(RESET_TURN), ", ".join("%s %s" % (k, v[:12])
+                                                for k, v in sorted(digests.items()))), bad)
         bad, seen = diag_judge(python, image, env, tmp)
         t.ok("the Diagnosis tab lists the guard's refusal and the reading notes, and "
              "nothing for a sound kit (%s)" % ", ".join(seen), bad)
@@ -737,14 +774,14 @@ def run(python: str, image: str) -> int:
             print("        note: %s is not set, so TEX_48, TEX_70 and TEX_13 of the "
                   "European Deluxe were not judged" % ED_VARIABLE)
 
-        for name, judge, old, new in PLANTS:
+        for name, judge, old, new, *target in PLANTS:
             if judge == DIAG_NOTE and os.environ.get(ED_VARIABLE) is None:
                 print("        plant '%s': not judged, %s is not set and only its TEX_13 "
                       "has a note row" % (name, ED_VARIABLE))
                 continue
             with tempfile.TemporaryDirectory(prefix="kits-ui-plant-") as box:
                 try:
-                    app = sandbox(box, old, new)
+                    app = sandbox(box, old, new, *target)
                 except BadPicture as exc:
                     t.ok("plant '%s'" % name, [str(exc)])
                     continue
@@ -759,6 +796,8 @@ def run(python: str, image: str) -> int:
                     red, bad = off_judge(python, image, env, box, app), []
                 elif judge == SELECTOR:
                     red, bad = selector_judge(python, app, image, env)[0], []
+                elif judge == RESET:
+                    red, bad = reset_judge(python, image, env, box, app)[0], []
                 elif judge in (DIAG, DIAG_NOTE):
                     red, bad = diag_judge(python, image, env, box, app)[0], []
                 else:

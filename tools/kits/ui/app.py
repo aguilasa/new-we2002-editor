@@ -393,16 +393,20 @@ class Window(QtWidgets.QMainWindow):
         self.figure_box.currentIndexChanged.connect(self.draw_figure)
         self.figure_view = FigureView(api.FIGURE_TRIANGLES)
         self.figure_hint = QtWidgets.QLabel()
+        self.figure_hint.setWordWrap(True)
+        self.reset_button = QtWidgets.QPushButton()
+        self.reset_button.clicked.connect(self.figure_view.reset)
         self.figure_labels = {"kit_set": QtWidgets.QLabel(), "figure": QtWidgets.QLabel()}
         row = QtWidgets.QHBoxLayout()
         for key, widget in zip(self.figure_labels, (self.set_box, self.figure_box)):
             row.addWidget(self.figure_labels[key])
             row.addWidget(widget)
         row.addStretch(1)
-        row.addWidget(self.figure_hint)
+        row.addWidget(self.reset_button)
         three = QtWidgets.QWidget()
         three_layout = QtWidgets.QVBoxLayout(three)
         three_layout.addLayout(row)
+        three_layout.addWidget(self.figure_hint)
         three_layout.addWidget(self.figure_view, 1)
         self.tabs.addTab(three, "")
         self.tabs.currentChanged.connect(self.draw_figure)
@@ -462,6 +466,7 @@ class Window(QtWidgets.QMainWindow):
         self.figure_box.setItemText(0, tr("figure_player"))
         self.figure_box.setItemText(1, tr("figure_keeper"))
         self.figure_hint.setText(tr("figure_hint"))
+        self.reset_button.setText(tr("reset_view"))
         self.show_geometry()
         self.relabel_tags()
         self.show_diagnosis()
@@ -862,6 +867,8 @@ def main(argv=None) -> int:
     parser.add_argument("--yaw", type=float, help="3D: turn about the vertical, degrees "
                         "(default: facing the viewer)")
     parser.add_argument("--pitch", type=float, help="3D: tilt, degrees")
+    parser.add_argument("--reset", action="store_true",
+                        help="3D: after --yaw/--pitch, press Reset view")
     parser.add_argument("--list-diagnosis", action="store_true",
                         help="print the Diagnosis tab of the kit shown (summary and rows) and exit")
     parser.add_argument("--list-kits", action="store_true",
@@ -912,6 +919,8 @@ def main(argv=None) -> int:
     window.figure_box.setCurrentIndex(args.figure)
     window.figure_view.turn_to(window.figure_view.yaw if args.yaw is None else args.yaw,
                                window.figure_view.pitch if args.pitch is None else args.pitch)
+    if args.reset:
+        window.reset_button.click()
     if TAB_NAMES.index(args.tab) == 1:
         if not window.tabs.isTabEnabled(1):
             print("the 3D tab is off: %s" % window.figure_note.text(), file=sys.stderr)

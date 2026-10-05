@@ -61,6 +61,10 @@ class FigureView(QtWidgets.QWidget):
                                                 QtGui.QImage.Format.Format_RGBA8888).copy()
         self.update()
 
+    def reset(self) -> None:
+        """Back to the turn the view opens with (KITS-TASK-37)."""
+        self.turn_to(DEFAULT_YAW, DEFAULT_PITCH)
+
     def turn_to(self, yaw: float, pitch: float) -> None:
         self.yaw = yaw % 360.0
         self.pitch = max(-PITCH_LIMIT, min(PITCH_LIMIT, pitch))
@@ -149,3 +153,7 @@ class FigureView(QtWidgets.QWidget):
 
     def mouseReleaseEvent(self, _event) -> None:
         self.drag = None
+
+    def mouseDoubleClickEvent(self, _event) -> None:
+        self.drag = None
+        self.reset()
