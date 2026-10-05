@@ -69,3 +69,8 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin py
   ok    plant 'double-click does nothing' fails the reset judge
 kits_ui: 0 failure(s)
 ```
+- **Closed** — commit `759d871` (2026-10-05): test(kits): judge the double-click reset, and plant it away
+  - Files (`git show --name-status 759d871`):
+    - `M docs/tasks/kits/CORR-KITS-064.md`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui_check.py`
