@@ -81,3 +81,4 @@ e o juiz imprime a nota de que os três não foram julgados.
     - `M tools/kits/ui/app.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-05) at `8901c5d`: CORR-KITS-060, CORR-KITS-061
