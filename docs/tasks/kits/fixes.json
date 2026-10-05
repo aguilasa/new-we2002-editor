@@ -846,6 +846,32 @@
       "depends_on": [],
       "done_on": "2026-10-05",
       "done_commit": "6ee6dc4"
+    },
+    {
+      "id": "CORR-KITS-066",
+      "file": "CORR-KITS-066.md",
+      "title": "Atualizar figure_hint: as costas agora são medidas",
+      "origin": "KITS-TASK-38",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-067",
+      "file": "CORR-KITS-067.md",
+      "title": "Versionar como controle o vermelho do pixel_index",
+      "origin": "KITS-TASK-38",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

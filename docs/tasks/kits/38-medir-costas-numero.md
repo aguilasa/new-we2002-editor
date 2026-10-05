@@ -78,3 +78,4 @@ KITS-TASK-40.
     - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-05) at `5c8e03f`: CORR-KITS-066, CORR-KITS-067
