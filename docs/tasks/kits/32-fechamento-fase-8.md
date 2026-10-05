@@ -53,3 +53,6 @@ As verificações da fase 8 do perfil, refeitas:
   "we-team-editor/\|\.exe$"` → `0`.
 
 **`rite check --cycle kits`:** `check: 0 error(s), 0 warning(s) in 1 cycle(s)`.
+- **Closed** — commit `7c66cdd` (2026-10-04): docs(kits): phase 8 re-measured at HEAD
+  - Files (`git show --name-status 7c66cdd`):
+    - `M docs/tasks/kits/32-fechamento-fase-8.md`
