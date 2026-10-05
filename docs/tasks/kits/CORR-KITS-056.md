@@ -40,3 +40,15 @@ sh /home/ingmar/.claude/plugins/cache/rite/rite/0.15.0/bin/rite context KITS-TAS
 Falha hoje; passa depois do conserto.
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `45d9fef`: `rite context KITS-TASK-31 --json` dava `item.files` = `['tools/kits/core/teams.py', 'tools/kits/ui/*.py']`, e a verificação da CORR falhava; `git show --stat 6484655` lista os quatro arquivos (`docs/PLAN-KITS-PY.md`, `tools/kits/cli.py`, `tools/kits/core/api.py`, `tools/kits/selftest.py`). A lista "Arquivos" do corpo da task já os tinha.
+
+Conserto, pelo CLI:
+
+```
+$ rite set KITS-TASK-31 --files 'tools/kits/core/teams.py,tools/kits/ui/*.py,tools/kits/core/api.py,tools/kits/cli.py,tools/kits/selftest.py,docs/PLAN-KITS-PY.md'
+$ rite context KITS-TASK-31 --json | python3 -c "import json,sys;f=json.load(sys.stdin)['item']['files'];assert all(p in f for p in ['tools/kits/core/api.py','tools/kits/cli.py','tools/kits/selftest.py','docs/PLAN-KITS-PY.md']),f;print('ok',f)"
+ok ['tools/kits/core/teams.py', 'tools/kits/ui/*.py', 'tools/kits/core/api.py', 'tools/kits/cli.py', 'tools/kits/selftest.py', 'docs/PLAN-KITS-PY.md']
+```

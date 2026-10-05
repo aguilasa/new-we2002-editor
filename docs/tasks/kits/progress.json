@@ -511,7 +511,7 @@
       "phase": 8,
       "depends_on": ["KITS-TASK-30", "KITS-TASK-20"],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.2",
-      "files": ["tools/kits/core/teams.py", "tools/kits/ui/*.py"],
+      "files": ["tools/kits/core/teams.py", "tools/kits/ui/*.py", "tools/kits/core/api.py", "tools/kits/cli.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md"],
       "resources": ["tela"],
       "status": "done",
       "done_on": "2026-10-04",
