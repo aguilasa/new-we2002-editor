@@ -111,3 +111,10 @@ figure: 0 failure(s)
 Verificação: `grep -c 'api.figure' tools/kits/cli.py` dá `2`, e `info`, `teams`, `export` e
 `figure` saem 0 com `--help`. `ctest --test-dir build -R kits` dá `100% tests passed, 0 tests
 failed out of 4`, e `python3 tools/kits/controls.py` dá `controls: 24 of 24 red`.
+- **Closed** — commit `f363279` (2026-10-05): feat(kits): cli.py figure draws the window's 3D scene
+  - Files (`git show --name-status f363279`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/34-definicao-de-pronto.md`
+    - `M docs/tasks/kits/CORR-KITS-062.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/selftest.py`
