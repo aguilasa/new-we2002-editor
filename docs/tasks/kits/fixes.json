@@ -716,6 +716,45 @@
       "depends_on": [],
       "done_on": "2026-10-04",
       "done_commit": "acc9e90"
+    },
+    {
+      "id": "CORR-KITS-056",
+      "file": "CORR-KITS-056.md",
+      "title": "Registrar pelo rite set os quatro arquivos fora do escopo da task 31",
+      "origin": "KITS-TASK-31",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-057",
+      "file": "CORR-KITS-057.md",
+      "title": "Desinverter os sha256 das duas capturas no Log da task 31",
+      "origin": "KITS-TASK-31",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-058",
+      "file": "CORR-KITS-058.md",
+      "title": "Fazer o kits_ui conferir que o seletor de kit mostra os times",
+      "origin": "KITS-TASK-31",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

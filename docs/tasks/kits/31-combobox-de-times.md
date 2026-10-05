@@ -83,3 +83,4 @@ whose tag is not on the disc out`, `kits_selftest: 5 failure(s)`; restaurado,
     - `M tools/kits/selftest.py`
     - `M tools/kits/ui/app.py`
     - `M tools/kits/ui/i18n.py`
+- **Reviewed** (2026-10-04) at `1e827ec`: CORR-KITS-056, CORR-KITS-057, CORR-KITS-058

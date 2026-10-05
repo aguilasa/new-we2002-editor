@@ -58,4 +58,7 @@
 | [CORR-KITS-053](/docs/tasks/kits/CORR-KITS-053.md) | Controles negativos versionados para EMULATOR_ROWS e para team_kits.py desatualizado | KITS-TASK-30 | medium | done | 2026-10-04 |
 | [CORR-KITS-054](/docs/tasks/kits/CORR-KITS-054.md) | Resolver EDITOR_EXE a partir de REPO_DIR, não do diretório de trabalho | KITS-TASK-30 | low | done | 2026-10-04 |
 | [CORR-KITS-055](/docs/tasks/kits/CORR-KITS-055.md) | Declarar no escopo da task as edições do perfil e da task 31 | KITS-TASK-30 | low | done | 2026-10-04 |
+| [CORR-KITS-056](/docs/tasks/kits/CORR-KITS-056.md) | Registrar pelo rite set os quatro arquivos fora do escopo da task 31 | KITS-TASK-31 | medium | pending | — |
+| [CORR-KITS-057](/docs/tasks/kits/CORR-KITS-057.md) | Desinverter os sha256 das duas capturas no Log da task 31 | KITS-TASK-31 | medium | pending | — |
+| [CORR-KITS-058](/docs/tasks/kits/CORR-KITS-058.md) | Fazer o kits_ui conferir que o seletor de kit mostra os times | KITS-TASK-31 | low | pending | — |
 <!-- rite:end -->
