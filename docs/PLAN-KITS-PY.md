@@ -373,8 +373,9 @@ devolve.
   Windows e no Xvfb, que é o que o `kits_ui` compara (KITS-TASK-25). Um botão
   **Reset view** (e o duplo clique na vista) volta ao giro de abertura; a dica
   da aba diz que as costas saem vazadas porque a área que o torso amostra está
-  vazia no TEX (§4.7) — o desenho segue os dados (decisão do usuário,
-  2026-10-05; KITS-TASK-37).
+  vazia no TEX, que o jogo copia as costas da camisa para ela (medido, §4.7) e
+  que o número não foi medido — o desenho segue os dados (decisão do usuário,
+  2026-10-05; KITS-TASK-37, CORR-KITS-066).
 - **Aba "Diagnóstico"**: a lista do `kit.problems`, uma linha por problema da
   guarda ("Refused: …") e uma por nota de leitura ("Note: …"), nas palavras do
   núcleo, com um resumo em cima; TEX sadio lido sem nota deixa a lista vazia

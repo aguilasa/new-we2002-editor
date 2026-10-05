@@ -43,3 +43,20 @@ grep -n "back and number are not measured" tools/kits/ui/i18n.py
 Casa a linha 80 hoje; nada depois do conserto. O selftest de idioma (`language: 0 failure(s)`) continua verde.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-05 sobre `2886711`: `grep -n "back and number are not measured"
+tools/kits/ui/i18n.py` casa a linha 80.
+
+Conserto: `figure_hint`, nas duas línguas, diz que a área do torso está vazia no TEX, que o jogo
+copia as costas da camisa para ela (medido) e que o número não foi medido. A §3.4 do
+`PLAN-KITS-PY.md` dá o mesmo motivo. A KITS-TASK-40 ainda não tinha feito isso.
+
+```text
+$ grep -n "back and number are not measured" tools/kits/ui/i18n.py
+(sem saída)
+$ python3 tools/kits/selftest.py | grep -E "language:|kits_selftest:"
+language: 0 failure(s)
+kits_selftest: 0 failure(s)
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+```
