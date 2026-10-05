@@ -48,3 +48,47 @@ Em `tools/kits/gen_tables.py`, um controle `--negative-kits` (ou estender o `--n
 `python3 tools/kits/gen_tables.py --negative-kits` falha hoje com `unrecognized arguments`; depois do conserto sai 0 com os dois vermelhos segurados.
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `e6c5882`: `python3 tools/kits/gen_tables.py --negative-kits` dá `error: unrecognized arguments: --negative-kits`, e o `--negative` só planta em `TEAM_NAMES`.
+
+Conserto: `--negative-kits` em `tools/kits/gen_tables.py`.
+
+- (a) acrescenta `(2, "05", "planted")` às `EMULATOR_ROWS` e exige o `GenError` com `team 2 TEX_02`;
+- (b) troca uma vez `'41'` por `'14'` no `TEAM_KIT` de uma cópia do `team_kits.py` e exige que o `--check` saia 1 sobre ela (o `check` ganhou `outputs=` para isso).
+
+Nomeado na linha do `team_kits.py` em "artefatos gerados" do perfil, e a saída colada no Log da KITS-TASK-30 no lugar dos vermelhos remendados à mão.
+
+```
+$ python3 tools/kits/gen_tables.py --negative-kits
+control: EMULATOR_ROWS + (2, '05', 'planted') -- the rule gives team 2 TEX_02, and the game wore TEX_05 (planted)
+control: a row the rule contradicts -- red, held
+control: '41' -> '14' once in TEAM_KIT of a copy of tools/kits/core/generated/team_kits.py
+gen_tables: ../../../../../tmp/kits-gen-7onb1rgs/team_kits.py is stale -- rerun python tools/kits/gen_tables.py
+  --- committed
+  +++ regenerated
+  @@ -15,3 +15,3 @@
+       '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31',
+  -    '32', '33', '34', '35', '36', '37', '38', '39', '40', '14', '42', '43', '44', '45', '46', '47',
+  +    '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47',
+       '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63',
+control: --check <copy> exit 1 -- red, held
+(exit 0)
+```
+
+Controle do controle: numa cópia da árvore com a guarda de `render_kits` desligada (`if tags[index] != tag:` → `if False:`), o `--negative-kits` reprova:
+
+```
+control: a row the rule contradicts -- FAILED
+control: --check <copy> exit 1 -- red, held
+rc=1
+```
+
+```
+$ python3 tools/kits/gen_tables.py --check
+gen_tables: tools/kits/core/generated/team_names.py is up to date
+gen_tables: tools/kits/core/generated/team_kits.py is up to date
+$ ctest --test-dir build -R kits_gen
+100% tests passed, 0 tests failed out of 1
+```

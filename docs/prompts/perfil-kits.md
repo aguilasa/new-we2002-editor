@@ -41,7 +41,7 @@ este perfil e o plano divergirem, o plano ganha.
 <!-- Output -> generator -> check command. Never edit the output. -->
 
 - `tools/kits/core/generated/team_names.py` → `python tools/kits/gen_tables.py` (de `Offsets.hpp`, `Types.hpp`, `Tables.cpp`) → `python tools/kits/gen_tables.py --check` (`ctest -R kits_gen`); `--negative` planta o vermelho.
-- `tools/kits/core/generated/team_kits.py` → o mesmo `python tools/kits/gen_tables.py` (da `EDITOR_RULE` e das `EMULATOR_ROWS` dele) → o mesmo `--check`; `--editor` relê a regra do `we-team-editor.exe` (pula sem o exe) e `--negative-editor` planta o vermelho.
+- `tools/kits/core/generated/team_kits.py` → o mesmo `python tools/kits/gen_tables.py` (da `EDITOR_RULE` e das `EMULATOR_ROWS` dele) → o mesmo `--check`; `--editor` relê a regra do `we-team-editor.exe` (pula sem o exe) e `--negative-editor` planta o vermelho; `--negative-kits` planta os dois vermelhos do `team_kits.py` — uma linha de `EMULATOR_ROWS` que a regra contradiz e uma tag trocada numa cópia do arquivo gerado.
 
 ## Gates deste ciclo
 

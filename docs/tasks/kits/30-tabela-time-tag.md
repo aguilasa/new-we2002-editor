@@ -62,10 +62,19 @@ team_kits: 95 teams with a TEX, from the editor's rule; 4 of them confirmed in t
 Cada linha diz de onde veio: todas da regra do editor (cabeçalho do
 `generated/team_kits.py`), e as quatro conferidas no jogo têm o comando e o
 state em `TEAM_KIT_EMULATOR`. O gerador recusa uma linha medida que a regra
-contradiga — plantada `(2, '05')` em `EMULATOR_ROWS`: `red: the rule gives team
-2 TEX_02, and the game wore TEX_05 (planted)`. O `--check` cobre os dois
-arquivos gerados (`team_kits.py is up to date`), e com `'41'` trocado por
-`'14'` no arquivo commitado: `team_kits.py is stale`.
+contradiga, e o `--check` cobre os dois arquivos gerados (`team_kits.py is up
+to date`). Os dois vermelhos saem de um comando versionado desde a
+CORR-KITS-053 (o diff do `--check` cortado aqui em `[…]`):
+
+```
+$ python3 tools/kits/gen_tables.py --negative-kits
+control: EMULATOR_ROWS + (2, '05', 'planted') -- the rule gives team 2 TEX_02, and the game wore TEX_05 (planted)
+control: a row the rule contradicts -- red, held
+control: '41' -> '14' once in TEAM_KIT of a copy of tools/kits/core/generated/team_kits.py
+gen_tables: ../../../../../tmp/kits-gen-7onb1rgs/team_kits.py is stale -- rerun python tools/kits/gen_tables.py
+[…]
+control: --check <copy> exit 1 -- red, held
+```
 
 **Critério 2** — a terceira conferência no emulador é uma partida nova,
 dirigida pelo MCP a partir do slot 3: pausa → `EXIT MATCH` → `MATCH` →

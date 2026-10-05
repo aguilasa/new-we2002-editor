@@ -403,11 +403,57 @@ def negative() -> int:
         return 0 if held else 1
 
 
-def check(src: str) -> int:
+NEGATIVE_KIT_ROW = (2, "05", "planted")
+"""The EMULATOR_ROWS line --negative-kits adds: team 2 is TEX_02 by the rule."""
+NEGATIVE_KIT_SWAP = ("'41'", "'14'")
+"""The tag --negative-kits swaps in a copy of team_kits.py (Brazil's TEX)."""
+
+
+def negative_kits() -> int:
+    """The two guards of team_kits.py, each seen red (CORR-KITS-053):
+    (a) an EMULATOR_ROWS line the rule contradicts has to stop the generator,
+    (b) a copy of team_kits.py with one tag swapped has to fail --check."""
+    import shutil
+    import tempfile
+
+    global EMULATOR_ROWS
+    saved = EMULATOR_ROWS
+    EMULATOR_ROWS = saved + (NEGATIVE_KIT_ROW,)
+    try:
+        render_kits(REPO_DIR)
+        refused = None
+    except GenError as exc:
+        refused = str(exc)
+    finally:
+        EMULATOR_ROWS = saved
+    print("control: EMULATOR_ROWS + %r -- %s" % (NEGATIVE_KIT_ROW, refused or "accepted"))
+    held_rows = refused is not None and "team 2 TEX_02" in refused
+    print("control: a row the rule contradicts -- %s"
+          % ("red, held" if held_rows else "FAILED"))
+
+    with tempfile.TemporaryDirectory(prefix="kits-gen-") as tmp:
+        copy = os.path.join(tmp, "team_kits.py")
+        shutil.copyfile(KITS_OUTPUT, copy)
+        with open(copy, encoding="utf-8") as fh:
+            text = fh.read()
+        old, new = NEGATIVE_KIT_SWAP
+        start = text.index("TEAM_KIT = ")
+        at = text.index(old, start)
+        with open(copy, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(text[:at] + new + text[at + len(old):])
+        print("control: %s -> %s once in TEAM_KIT of a copy of %s"
+              % (old, new, os.path.relpath(KITS_OUTPUT, REPO_DIR)))
+        code = check(REPO_DIR, outputs=((copy, render_kits),))
+    held_file = code == 1
+    print("control: --check <copy> exit %d -- %s" % (code, "red, held" if held_file else "FAILED"))
+    return 0 if held_rows and held_file else 1
+
+
+def check(src: str, outputs=None) -> int:
     """0 when every committed file is what *src* generates, 1 (with the diff)
-    otherwise."""
+    otherwise.  *outputs* replaces the (file, generator) pairs, for a control."""
     bad = 0
-    for output, make in OUTPUTS:
+    for output, make in outputs or OUTPUTS:
         try:
             text = make(src)
         except (GenError, OSError) as exc:
@@ -445,6 +491,9 @@ def main(argv=None) -> int:
                              "it with EDITOR_RULE")
     parser.add_argument("--negative-editor", nargs="?", const=EDITOR_EXE, metavar="EXE",
                         help="change the divisor in a copy of the exe: --editor must fail")
+    parser.add_argument("--negative-kits", action="store_true",
+                        help="plant a contradicted EMULATOR_ROWS line and a stale team_kits.py: "
+                             "both have to be red")
     parser.add_argument("--report", action="store_true",
                         help="count the team -> TEX table: rows, confirmed rows, unreached tags")
     args = parser.parse_args(argv)
@@ -456,6 +505,8 @@ def main(argv=None) -> int:
         return negative_editor(args.negative_editor)
     if args.negative:
         return negative()
+    if args.negative_kits:
+        return negative_kits()
     if args.check:
         return check(args.src)
     for output, make in OUTPUTS:
