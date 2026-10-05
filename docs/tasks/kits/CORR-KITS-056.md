@@ -52,3 +52,7 @@ $ rite set KITS-TASK-31 --files 'tools/kits/core/teams.py,tools/kits/ui/*.py,too
 $ rite context KITS-TASK-31 --json | python3 -c "import json,sys;f=json.load(sys.stdin)['item']['files'];assert all(p in f for p in ['tools/kits/core/api.py','tools/kits/cli.py','tools/kits/selftest.py','docs/PLAN-KITS-PY.md']),f;print('ok',f)"
 ok ['tools/kits/core/teams.py', 'tools/kits/ui/*.py', 'tools/kits/core/api.py', 'tools/kits/cli.py', 'tools/kits/selftest.py', 'docs/PLAN-KITS-PY.md']
 ```
+- **Closed** — commit `11e78cb` (2026-10-04): chore(kits): record the four out-of-scope KITS-TASK-31 files in its state
+  - Files (`git show --name-status 11e78cb`):
+    - `M docs/tasks/kits/CORR-KITS-056.md`
+    - `M docs/tasks/kits/progress.json`
