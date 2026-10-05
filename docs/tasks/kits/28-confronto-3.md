@@ -79,3 +79,8 @@ confront 3 --negative: the swapped renders give 2 failure(s) of 2 -- the control
 
 Limite assumido: um quadro, uma partida, seis jogadores; a frase diz este
 confronto, não toda partida.
+- **Closed** — commit `165495d` (2026-10-04): feat(kits): confront.py --score judges the 3D against the match frame
+  - Files (`git show --name-status 165495d`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/28-confronto-3.md`
+    - `M tools/kits/confront.py`

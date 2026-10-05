@@ -465,10 +465,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#5",
       "files": ["tools/kits/confront.py", "docs/PLAN-KITS-PY.md"],
       "resources": ["emulador", "save-states"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-04",
+      "done_commit": "165495d",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
