@@ -206,6 +206,14 @@ CONTROLS = (
         "outside the disc without a 3D figure (CORR-KITS-044)",
     ),
     Control(
+        "oracle-sets-swapped", "kits/oracle.py", "SETS",
+        "SETS = {0: 1, 1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 2, 7: 2}\n",
+        "SETS = {0: 2, 1: 2, 2: 2, 3: 2, 4: 1, 5: 1, 6: 1, 7: 1}\n",
+        "FAIL  oracle --expect: set 1 written, 00=1 holds",
+        "oracle.py has to assert the set it reports: with the record-to-set "
+        "map swapped it named Scotland's set 2 and exited 0 (CORR-KITS-047)",
+    ),
+    Control(
         "scene-outside-figure", "kits/core/teams.py", "module imports",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n"

@@ -627,6 +627,33 @@ def _confront2_checks(c) -> None:
          "%s %s" % (r.status, r.detail))
 
 
+def _oracle_checks(c) -> None:
+    """oracle.py --expect on a VRAM built here (CORR-KITS-047): the fixture
+    kit's set-1 player palette and pages written where the match puts them,
+    and the verdict asked for both sets."""
+    oracle = c.attempt("import tools/kits/oracle.py", lambda: _kits_module("oracle"))
+    if oracle is None:
+        return
+    body = build_container()
+    vram = [bytearray(oracle.VRAM_W * 2) for _ in range(oracle.VRAM_H)]
+    records = oracle.records_of(body)
+    for index in (0, 1, 2):
+        r = records[index]
+        words = oracle.payload(body, r)
+        for k in range(r.h):
+            line = words[k * r.w:(k + 1) * r.w]
+            vram[r.y + k][2 * r.x:2 * (r.x + r.w)] = struct.pack(
+                "<%dH" % r.w, *(oracle.five(v) for v in line))
+    vram = [bytes(row) for row in vram]
+    bodies = {"00": body}
+    hits = oracle.search(vram, bodies)
+    right = oracle.expectation_failures(vram, bodies, hits, {"00": 1})
+    wrong = oracle.expectation_failures(vram, bodies, hits, {"00": 2})
+    c.ok("oracle --expect: set 1 written, 00=1 holds", right == [], "; ".join(right))
+    c.ok("oracle --expect: and 00=2 fails on the palette and both pages", len(wrong) == 3,
+         "; ".join(wrong))
+
+
 def _negative(c) -> None:
     controls = c.attempt("import tools/kits/controls.py", _kits_controls)
     if controls is None:
@@ -649,6 +676,7 @@ def run(verbose: bool = True, plant: bool = True) -> int:
         total += harness.run("rules", _rule_checks, verbose)
         total += harness.run("language", _language_checks, verbose)
         total += harness.run("confront 2", _confront2_checks, verbose)
+        total += harness.run("oracle", _oracle_checks, verbose)
         if plant:
             total += harness.run("controls", _negative, verbose)
         else:

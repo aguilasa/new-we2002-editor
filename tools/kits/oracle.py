@@ -21,9 +21,16 @@ The controls, before an answer counts:
   **a record that matches everywhere** (a page of one colour) names nothing,
       and is reported as such instead of being counted.
 
+**The answer is asserted, not only printed** (CORR-KITS-047): `--expect
+TAG=SET` says which set a kit is worn in, and the run exits 1 unless the exact
+player palette found is that set's alone and both pages come out nearer to it.
+The goalkeeper palette is left out on purpose: in the match measured the
+first team's goalkeeper wears the second set's (section 4.1).
+
 Usage:
     python tools/kits/oracle.py --png <vram dump.png>        # offline, no emulator
     python tools/kits/oracle.py --slot N [--cue <disc.cue>]  # load slot N in the fork
+    python tools/kits/oracle.py --png <dump> --expect 01=1 --expect 13=2
 
 The kit containers are read from `WE2002_LOOKS_IMAGE` (the Japanese track; the
 105 are byte-identical on the English disc).  The cue is
@@ -208,6 +215,52 @@ def report(hits: list) -> dict:
     return {tag: sorted(sets) for tag, sets in worn.items()}
 
 
+def expectation_failures(vram: list, bodies: dict, hits: list, expect: dict) -> list:
+    """Why the dump does not show kit *tag* in set *expect[tag]*, for every
+    tag: the exact player palette found has to be that set's and no other,
+    and the uniform and the sleeves have to come out nearer to it."""
+    out = []
+    for tag, want in sorted(expect.items()):
+        if tag not in bodies:
+            out.append("TEX_%s: not a kit container on this disc" % tag)
+            continue
+        found = sorted({SETS[index] for t, index, _at, flat, shared in hits
+                        if t == tag and NAMES[index] == "player palette"
+                        and not flat and not shared})
+        if found != [want]:
+            out.append("TEX_%s: exact player palette of set %s, expected set %d"
+                       % (tag, " and ".join(map(str, found)) or "none", want))
+        for name, _at, one, two in closest_sets(vram, bodies[tag]):
+            nearer = 1 if one < two else 2 if two < one else None
+            if nearer != want:
+                out.append("TEX_%s: the %s page is nearer to %s, expected set %d"
+                           % (tag, name, "set %d" % nearer if nearer else "neither", want))
+    return out
+
+
+def parse_expect(values) -> dict:
+    """['01=1', '13=2'] -> {'01': 1, '13': 2}; anything else raises ValueError."""
+    out = {}
+    for value in values or ():
+        tag, _, kit_set = value.partition("=")
+        if not tag or kit_set not in ("1", "2"):
+            raise ValueError("--expect wants TAG=1 or TAG=2, not %r" % value)
+        out[tag.upper()] = int(kit_set)
+    return out
+
+
+def judge(vram: list, bodies: dict, hits: list, expect: dict) -> int:
+    """Prints the verdict of --expect; 0 when it holds, 1 when it does not."""
+    if not expect:
+        return 0
+    bad = expectation_failures(vram, bodies, hits, expect)
+    for line in bad:
+        print("  FAIL  %s" % line)
+    if not bad:
+        print("  ok    %s" % ", ".join("TEX_%s in set %d" % kv for kv in sorted(expect.items())))
+    return 1 if bad else 0
+
+
 def report_pages(vram: list, bodies: dict, tags) -> dict:
     """The pages of each kit in *tags*, set against set; {tag: {name: set}}."""
     out = {}
@@ -262,7 +315,13 @@ def main(argv=None) -> int:
                         % DRIVE_VARIABLE)
     parser.add_argument("--out", default=os.path.join("work", "kits-oracle"),
                         help="where the dumps go")
+    parser.add_argument("--expect", action="append", metavar="TAG=SET",
+                        help="the set kit TAG has to be worn in; exits 1 if not (repeatable)")
     args = parser.parse_args(argv)
+    try:
+        expect = parse_expect(args.expect)
+    except ValueError as exc:
+        parser.error(str(exc))
     image = os.environ.get(IMAGE_VARIABLE)
     if not image:
         print("oracle: skipped -- %s is not set (the Japanese data track .bin)"
@@ -275,7 +334,7 @@ def main(argv=None) -> int:
         hits = search(vram, bodies)
         report(hits)
         report_pages(vram, bodies, {tag for tag, *_ in hits})
-        return 0
+        return judge(vram, bodies, hits, expect)
     cue = args.cue or os.environ.get(DRIVE_VARIABLE)
     if not cue:
         print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
@@ -290,8 +349,9 @@ def main(argv=None) -> int:
         return 1
     print("  control: two dumps a frame apart give the same %d match(es)" % len(first))
     report(first)
-    report_pages(vram_rows(paths[0]), bodies, {tag for tag, *_ in first})
-    return 0
+    vram = vram_rows(paths[0])
+    report_pages(vram, bodies, {tag for tag, *_ in first})
+    return judge(vram, bodies, first, expect)
 
 
 if __name__ == "__main__":
