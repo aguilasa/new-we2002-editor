@@ -38,7 +38,9 @@ línguas, o limite da §3.4). Seis chaves novas no catálogo, nas duas línguas.
 o que o `kits_ui` lê. Recusado não é desenhado: o plano fica vazio e a aba diz
 o motivo.
 
-**Critério 1** — `work/venv-looks/bin/python tools/kits/ui/app.py roms/golden-european-deluxe.bin --tag <T> --tab diag --screenshot work/kits-diag-ed-<T>.png`
+**Critério 1** — `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin work/venv-looks/bin/python tools/kits/ui/app.py roms/golden-european-deluxe.bin --tag <T> --tab diag --screenshot work/kits-diag-ed-<T>.png`
+(a variável entra no hash: sem ela a aba 3D sai cinza e a última linha diz "3D off", e com
+caminho relativo o texto da linha muda; CORR-KITS-060)
 (sha256 `9c1ec4f0a88a…` o 48, `fdde711d5d1c…` o 70, `cf7f3c54141e…` o 13), e
 o mesmo com `--list-diagnosis`:
 

@@ -38,3 +38,18 @@ No Log de `docs/tasks/kits/33-aba-diagnostico.md`, prefixar o comando do critér
 O comando exatamente como citado no Log, seguido de `sha256sum`, imprime `9c1ec4f0a88a` / `fdde711d5d1c` / `cf7f3c54141e`.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-05 sobre `cb7ccfc`, capturas no scratchpad: o comando do critério 1 como
+estava (sem a variável) dá `a3e2e0563e9f` / `b4ae922b5ce8` / `00736764d501` para 48 / 70 / 13.
+
+```text
+$ for t in 48 70 13; do DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin work/venv-looks/bin/python tools/kits/ui/app.py roms/golden-european-deluxe.bin --tag $t --tab diag --screenshot $S/y$t.png >/dev/null 2>&1; sha256sum $S/y$t.png | cut -c1-12; done
+9c1ec4f0a88a
+fdde711d5d1c
+cf7f3c54141e
+```
+
+Com `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin` (relativo) os três saem `72b9c6b74d20` /
+`17b5088d7381` / `514b0a0f91e1`: o caminho é texto da última linha da aba. Por isso o Log da task
+33 passa a citar o comando com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/...` e diz por
+quê. O critério 2 não muda: `--tag 00` no disco japonês dá `93b4f55112d6` com e sem a variável.
