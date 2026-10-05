@@ -561,10 +561,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#definição-de-pronto",
       "files": ["docs/PLAN-KITS-PY.md"],
       "resources": ["tela", "emulador"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-05",
+      "done_commit": "789dfc8",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

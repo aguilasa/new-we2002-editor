@@ -226,3 +226,7 @@ determinística no `:98`. Controle: o mesmo estado com `--tag A4` contra a
 captura do Windows reprova — `313502 of 627200 pixels differ (49.98 %)`,
 `FAIL  49.98 % differ, above the 5.0 % limit`. A fachada e o catálogo, já
 colados acima, completam o item.
+- **Closed** — commit `789dfc8` (2026-10-05): docs(kits): definition of done item 5 checked across Windows and Linux
+  - Files (`git show --name-status 789dfc8`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/34-definicao-de-pronto.md`
