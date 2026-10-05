@@ -92,3 +92,9 @@ gen_tables: tools/kits/core/generated/team_kits.py is up to date
 $ ctest --test-dir build -R kits_gen
 100% tests passed, 0 tests failed out of 1
 ```
+- **Closed** — commit `9e1a6d8` (2026-10-04): test(kits): gen_tables --negative-kits plants both team_kits.py guards
+  - Files (`git show --name-status 9e1a6d8`):
+    - `M docs/prompts/perfil-kits.md`
+    - `M docs/tasks/kits/30-tabela-time-tag.md`
+    - `M docs/tasks/kits/CORR-KITS-053.md`
+    - `M tools/kits/gen_tables.py`
