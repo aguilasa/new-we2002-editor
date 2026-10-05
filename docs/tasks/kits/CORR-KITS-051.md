@@ -40,3 +40,33 @@ Em `score()` de `tools/kits/confront.py`, imprimir a vantagem de cada time tamb�
 `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python3 tools/kits/confront.py --score | grep -c "lead"` dá 0 hoje; 2 depois do conserto, e o valor no Log é igual ao impresso (`grep -c "0,341" docs/tasks/kits/28-confronto-3.md` dá 0).
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `e8e7a3f`:
+
+```
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python3 tools/kits/confront.py --score | grep -c lead
+0
+$ grep -n "0,341" docs/tasks/kits/28-confronto-3.md
+69:0,341 e 0,410.
+```
+
+Conserto: `leads()` em `tools/kits/confront.py` calcula a vantagem de cada time, e o `score_verdict` passa a usá-la; a corrida positiva imprime as duas. O Log da KITS-TASK-28 troca o "0,341 e 0,410" pelo comando e a saída dele. A mensagem do commit 165495d continua dizendo 0.341 — commit não se reescreve.
+
+```
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python3 tools/kits/confront.py --score
+  frame: work/kits-oracle/match-3/screen.png
+  players on the pitch         ours TEX_01 set 1  ours TEX_13 set 2
+  TEX_01 Scotland, first kit  0.770 (33.0 % kept)  0.429 (10.8 % kept)
+  TEX_13 Denmark, second kit  0.349 (14.9 % kept)  0.759 (29.8 % kept)
+  TEX_01 players: our TEX_01 leads our TEX_13 by 0.342
+  TEX_13 players: our TEX_13 leads our TEX_01 by 0.410
+confront 3: 2 of 2 team(s) score their own kit 0.05 over the other's
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python3 tools/kits/confront.py --score --negative | tail -1
+confront 3 --negative: the swapped renders give 2 failure(s) of 2 -- the control holds
+$ grep -c "0,341" docs/tasks/kits/28-confronto-3.md
+0
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+```

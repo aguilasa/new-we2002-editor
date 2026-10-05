@@ -65,8 +65,14 @@ Critério 1 — `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python3 tools/ki
 confront 3: 2 of 2 team(s) score their own kit 0.05 over the other's
 ```
 
-O limiar é o `KIT_CONTROL_MARGIN` do `looks`, 0,05; as vantagens medidas são
-0,341 e 0,410.
+O limiar é o `KIT_CONTROL_MARGIN` do `looks`, 0,05. As vantagens, que a
+corrida positiva imprime desde a CORR-KITS-051:
+
+```
+$ WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin python3 tools/kits/confront.py --score | grep lead
+  TEX_01 players: our TEX_01 leads our TEX_13 by 0.342
+  TEX_13 players: our TEX_13 leads our TEX_01 by 0.410
+```
 
 Critério 2 — `python3 tools/kits/confront.py --score --negative` troca os
 renders, e os dois times reprovam (exit 0 só quando reprovam):

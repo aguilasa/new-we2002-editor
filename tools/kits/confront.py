@@ -413,15 +413,23 @@ def score_matrix(frame: tuple, ours: dict) -> dict:
     return out
 
 
-def score_verdict(matrix: dict, swapped: bool = False) -> list:
-    """Failures: a team whose own render does not lead the other's by MARGIN.
-    *swapped* hands each team the other team's render -- the control."""
+def leads(matrix: dict, swapped: bool = False) -> list:
+    """[(team, right, wrong, lead)]: how far each team's players score the
+    render they should match over the other one.  *swapped* hands each team
+    the other team's render -- the control."""
     tags = [t for t, _, _ in TEAMS]
-    bad = []
+    out = []
     for team in tags:
         other = [t for t in tags if t != team][0]
         right, wrong = (other, team) if swapped else (team, other)
-        lead = matrix[(team, right)][0] - matrix[(team, wrong)][0]
+        out.append((team, right, wrong, matrix[(team, right)][0] - matrix[(team, wrong)][0]))
+    return out
+
+
+def score_verdict(matrix: dict, swapped: bool = False) -> list:
+    """Failures: a team whose own render does not lead the other's by MARGIN."""
+    bad = []
+    for team, right, wrong, lead in leads(matrix, swapped):
         if lead < MARGIN:
             bad.append("the TEX_%s players score our TEX_%s %.3f, TEX_%s %.3f: a lead of "
                        "%.3f, under %.2f" % (team, right, matrix[(team, right)][0], wrong,
@@ -463,6 +471,9 @@ def score(game_path: str, negative_run: bool) -> int:
         print("  TEX_%s %-20s %s" % (team, who, "  ".join(
             "%.3f (%4.1f %% kept)" % (matrix[(team, t)][0], 100 * matrix[(team, t)][1])
             for t, _, _ in TEAMS)))
+    if not negative_run:
+        for team, right, wrong, lead in leads(matrix):
+            print("  TEX_%s players: our TEX_%s leads our TEX_%s by %.3f" % (team, right, wrong, lead))
     bad = score_verdict(matrix, swapped=negative_run)
     for line in bad:
         print("  %s  %s" % ("red " if negative_run else "FAIL", line))
