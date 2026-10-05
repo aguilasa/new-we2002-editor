@@ -75,3 +75,7 @@ Saída 0 nas duas. Verificação:
 $ grep -c "oracle.py --slot" docs/tasks/kits/32-fechamento-fase-8.md
 2
 ```
+- **Closed** — commit `864cb9d` (2026-10-04): docs(kits): task 32 log reruns the two emulator checks
+  - Files (`git show --name-status 864cb9d`):
+    - `M docs/tasks/kits/32-fechamento-fase-8.md`
+    - `M docs/tasks/kits/CORR-KITS-059.md`
