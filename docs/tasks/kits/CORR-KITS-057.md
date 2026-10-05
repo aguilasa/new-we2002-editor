@@ -44,3 +44,23 @@ grep -n 'sha256 `461f0cbede9cf201' docs/tasks/kits/31-combobox-de-times.md
 Hoje casa a linha 58 (a captura do topo); depois do conserto casa só a frase da captura do fim, e `9dbc0595bf0ff484` passa para a do topo.
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `17125e3`:
+
+```
+$ sha256sum work/kits-combo-teams-*.png
+461f0cbede9cf201c110a7b31488be7843a6d5f2ea7b163985aa4ed26cea2188  work/kits-combo-teams-end.png
+9dbc0595bf0ff484a2a458f57bf7553f129b65b2f230384e69c98ef61f4aa8f5  work/kits-combo-teams-top.png
+```
+
+e o Log punha `461f0cbede9cf201…` na captura do topo. Olhada a `work/kits-combo-teams-top.png`: é a lista aberta de "Ireland — TEX_00" a "Chile — TEX_43", então o conteúdo descrito estava certo e só os hashes trocados.
+
+Conserto: os dois hashes trocados entre si no parágrafo do critério 2.
+
+```
+$ grep -n 'sha256 `461f0cbede9cf201\|sha256 `9dbc0595bf0ff484' docs/tasks/kits/31-combobox-de-times.md
+58:sha256 `9dbc0595bf0ff484…`) e, com `End`, `work/kits-combo-teams-end.png`
+60:default — TEX_A4" e `TEX_95` … `TEX_A3`; sha256 `461f0cbede9cf201…`). Fechado,
+```

@@ -55,9 +55,9 @@ N = 95, o da KITS-TASK-30.
 tools/kits/ui/app.py roms/japanese-shift-jis.bin --visible`), o combo aberto
 por clique e capturado com `import -window root`:
 `work/kits-combo-teams-top.png` (do "Ireland — TEX_00" ao "Chile — TEX_43",
-sha256 `461f0cbede9cf201…`) e, com `End`, `work/kits-combo-teams-end.png`
+sha256 `9dbc0595bf0ff484…`) e, com `End`, `work/kits-combo-teams-end.png`
 (do "Clas. Brazil — TEX_61" ao "Basilea — TEX_94", depois "Master League
-default — TEX_A4" e `TEX_95` … `TEX_A3`; sha256 `9dbc0595bf0ff484…`). Fechado,
+default — TEX_A4" e `TEX_95` … `TEX_A3`; sha256 `461f0cbede9cf201…`). Fechado,
 o combo mostra "Ireland — TEX_00" e o plano verde da Irlanda.
 
 **Critério 3** — `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
