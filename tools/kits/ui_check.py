@@ -28,6 +28,8 @@ WHAT IT JUDGES:
       paints it white); on Linux it does not, see the plants below;
   the same state twice is the same picture, and another kit is another one;
   a tag the disc does not have exits 2 and writes no file;
+  **the kit selector** -- `app.py --list-kits` -- lists the 105 items in game
+      order: Ireland first, the ML default after the 95 teams, TEX_A3 last;
   **the reading under the mouse** -- `app.py --hover X,Y`, a real mouse move
       through the canvas -- names the index and the colour that
       `cli.py export --work-bitmap` writes for that pixel in its indexed PNG,
@@ -37,7 +39,8 @@ WHAT IT JUDGES:
       readout reading the pixel to the right FAILS the hover judge; the 3D
       tab drawing set 1 for both sets FAILS the 3D judge, and the tab left on
       with no geometry, or a Plan widget that changes with no geometry, FAIL
-      the 3D off judge.  A plant that passes is a red gate.  "Without Fusion" is planted as
+      the 3D off judge; the kit selector labelled with bare tags FAILS the
+      selector judge.  A plant that passes is a red gate.  "Without Fusion" is planted as
       `setStyle("Windows")`, not as the line taken out: on Linux Qt's default
       style already is Fusion (measured on :98, 2026-10-02), so removing the
       line changed nothing there and the plant passed.  "Windows" is the one
@@ -129,7 +132,15 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER, FIGURE, OFF = "style", "hover", "3D", "3D off"
+STYLE, HOVER, FIGURE, OFF, SELECTOR = "style", "hover", "3D", "3D off", "selector"
+
+KIT_ITEMS = 105
+"""Items of the kit selector on the disc: the 95 teams, the ML default, the 9 unreached."""
+KIT_ITEM_WANT = {0: "Ireland — TEX_00", 95: "Master League default — TEX_A4",
+                 KIT_ITEMS - 1: "TEX_A3"}
+"""What `app.py --list-kits` has to print at those items, in en-US (KITS-TASK-31,
+CORR-KITS-058): the first team in game order, the ML default after the teams,
+and the last of the tags no team wears."""
 PLANTS = (
     ("no Fusion", STYLE, '    app.setStyle("Fusion")\n',
      '    app.setStyle("Windows")  # planted: no Fusion\n'),
@@ -145,6 +156,9 @@ PLANTS = (
     ("3D tab never off", OFF,
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
      "        self.tabs.setTabEnabled(1, True)\n"),
+    ("kit labels bare tags", SELECTOR,
+     '                labels[tag] = tr("kit_team", team=team.name, tag=tag)\n',
+     '                labels[tag] = tr("kit_tag", tag=tag)  # planted: bare tags\n'),
     ("Plan changes without geometry", OFF,
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n"
@@ -379,6 +393,23 @@ def hover_judge(python, app, image, env, want, lang=None, points=HOVER_POINTS) -
     return bad
 
 
+def selector_judge(python, app, image, env) -> tuple:
+    """(failures, items) of `app.py --list-kits`: KIT_ITEMS items, and
+    KIT_ITEM_WANT at its indices."""
+    code, output = run_app(python, app, [image, "--list-kits"], env)
+    items = {}
+    for line in output.splitlines():
+        head, sep, text = line.strip().partition(": ")
+        if sep and head.startswith("kit ") and head[4:].isdigit():
+            items[int(head[4:])] = text
+    bad = [] if code == 0 else ["--list-kits exited %s: %s" % (code, output.strip()[-200:])]
+    if len(items) != KIT_ITEMS:
+        bad.append("%d item(s), not %d" % (len(items), KIT_ITEMS))
+    bad += ["item %d is %r, not %r" % (i, items.get(i), want)
+            for i, want in sorted(KIT_ITEM_WANT.items()) if items.get(i) != want]
+    return bad, items
+
+
 def cli_export(image: str, out: str) -> tuple:
     """The work bitmap HOVER_TAG as the CLI writes it, decoded here."""
     done = subprocess.run([sys.executable, os.path.join(KITS_DIR, "cli.py"), "export",
@@ -580,6 +611,11 @@ def run(python: str, image: str) -> int:
         t.ok("a point off the image reads blank and exits 1 (exit %s)" % code,
              [] if code == 1 and "(blank)" in output else [output.strip()[-200:]])
 
+        bad, items = selector_judge(python, APP, image, env)
+        t.ok("the kit selector lists teams in game order: %d items, %s"
+             % (len(items), "; ".join("%d %r" % (i, items.get(i)) for i in sorted(KIT_ITEM_WANT))),
+             bad)
+
         bad, digests = figure_judge(python, image, env, tmp)
         t.ok("3D TEX_%s: the four combinations draw a figure, and set 1 is not set 2 for "
              "either figure (%s)" % (FIGURE_TAG, ", ".join(
@@ -604,6 +640,8 @@ def run(python: str, image: str) -> int:
                     bad = []
                 elif judge == OFF:
                     red, bad = off_judge(python, image, env, box, app), []
+                elif judge == SELECTOR:
+                    red, bad = selector_judge(python, app, image, env)[0], []
                 else:
                     bad, red = [], hover_judge(python, app, image, env, want) if want else []
                 print("        plant '%s': %s" % (name, "; ".join(red)[:300] or "judge passed"))

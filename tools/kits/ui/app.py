@@ -824,6 +824,8 @@ def main(argv=None) -> int:
     parser.add_argument("--yaw", type=float, help="3D: turn about the vertical, degrees "
                         "(default: facing the viewer)")
     parser.add_argument("--pitch", type=float, help="3D: tilt, degrees")
+    parser.add_argument("--list-kits", action="store_true",
+                        help="print the kit selector's items, one per line, and exit")
     parser.add_argument("--switch-to", choices=i18n.LANGUAGES, metavar="LANG",
                         help="once everything is set, pick LANG in the window's own "
                         "language selector, as a click would")
@@ -842,6 +844,10 @@ def main(argv=None) -> int:
     if args.path and not window.open_path(args.path):
         print("could not open %s: %s" % (args.path, window.status.text()), file=sys.stderr)
         return 1
+    if args.list_kits:
+        for i in range(window.tag_box.count()):
+            print("  kit %d: %s" % (i, window.tag_box.itemText(i)))
+        return 0
     if args.tag and not window.select_tag(args.tag):
         print("no kit %s in %s" % (args.tag, args.path), file=sys.stderr)
         return 2
