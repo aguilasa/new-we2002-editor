@@ -65,3 +65,7 @@ controls: 25 of 25 red
 
 Nenhum documento repete o total de controles (`grep -rn "24 of 24"` no plano, no perfil e em
 `tools/kits/` dá vazio). Quem o imprime é o próprio `controls.py`.
+- **Closed** — commit `a58bebb` (2026-10-05): test(kits): control plants the pixel_index byte order away
+  - Files (`git show --name-status a58bebb`):
+    - `M docs/tasks/kits/CORR-KITS-067.md`
+    - `M tools/kits/controls.py`
