@@ -41,12 +41,26 @@ As verificações da fase 8 do perfil, refeitas:
 
 - texto novo no catálogo nas duas línguas: o `kits_selftest` acima inclui a
   checagem do catálogo (`language: 0 failure(s)`);
-- proveniência e as conferências no emulador —
-  `python3 tools/kits/gen_tables.py --report`: `team_kits: 95 teams with a TEX,
+- proveniência — `python3 tools/kits/gen_tables.py --report`, que só conta as
+  linhas de `TEAM_KIT_EMULATOR` registradas pelas KITS-TASK-30/31 e não sobe o
+  emulador: `team_kits: 95 teams with a TEX,
   from the editor's rule; 4 of them confirmed in the game (0 -> TEX_00, 1 ->
   TEX_01, 13 -> TEX_13, 41 -> TEX_41); the editor's ML default item -> TEX_A4; 9
   tags no item reaches (95 96 97 98 99 A0 A1 A2 A3)`; `--editor`: `the exe
   computes EDITOR_RULE`; `--check`: os dois gerados `up to date`;
+- as conferências no emulador, refeitas no fork em 2026-10-04 sobre `6e0fd6f`
+  (CORR-KITS-059), com
+  `WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin` e
+  `WE2002_LOOKS_DRIVE_IMAGE=$PWD/work/looks-disc/we2002-english.cue`:
+
+  ```
+  $ python3 tools/kits/oracle.py --slot 4 --expect 00=1 --expect 41=1
+    ok    TEX_00 in set 1, TEX_41 in set 1
+  $ python3 tools/kits/oracle.py --slot 3 --expect 01=1 --expect 13=2
+    ok    TEX_01 in set 1, TEX_13 in set 2
+  ```
+
+  as duas com saída 0;
 - `python3 tools/kits/cli.py teams roms/japanese-shift-jis.bin`: `95 teams: 95
   table; 0 empty name(s); 95 with a kit tag`;
 - nada do `we-team-editor.exe` no git: `git ls-files | grep -ci
