@@ -50,3 +50,7 @@ Conserto: aceito como passagem deliberada. As duas notas ficam onde estão — s
 $ sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/27-titular-e-suplente-no-jogo.md | grep -cE '28-confronto-3|30-tabela-time-tag'
 2
 ```
+- **Closed** — commit `34df781` (2026-10-04): docs(kits): declare the hand-off notes in the KITS-TASK-27 files
+  - Files (`git show --name-status 34df781`):
+    - `M docs/tasks/kits/27-titular-e-suplente-no-jogo.md`
+    - `M docs/tasks/kits/CORR-KITS-049.md`
