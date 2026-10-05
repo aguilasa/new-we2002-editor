@@ -701,6 +701,31 @@ O número só entra na aba 3D com essa regra medida, e nunca por remapeamento de
 UV feito à mão (§0). Sem a regra, o checkbox de número fica desligado com a
 frase de que não foi medido (KITS-TASK-40).
 
+**Medido em 2026-10-05 ([KITS-TASK-38](/docs/tasks/kits/38-medir-costas-numero.md)),
+na `LOOKS SET`, nos dois states e com o `TEX_A4` que a tela veste:** o jogo
+**escreve** nas duas lacunas, e o que escreve são **as costas, sem número**.
+
+- Fora das lacunas, a página de uniforme em VRAM é a do disco, halfword por
+  halfword (0 de 8.192 diferem); dentro delas, os 480 pixels de cada uma têm
+  índice diferente de 0, contra 0 no disco.
+- A origem é uma **cópia reta da própria página**: o retângulo 20×24 em (44,6)
+  vai para (0,80) no jogador, e o em (108,6) vai para (100,104) no goleiro —
+  as linhas 6 a 29 da zona "shirt back" de cada figura, pixel por pixel, sem
+  espelhar.
+- Como a cópia é idêntica à origem, **nenhum dígito é desenhado ali nesta
+  tela**. A zona "numbers 0-9" não aparece na lacuna.
+
+Comando: `python tools/kits/oracle.py --back 1|2 --expect-back written`, com
+`WE2002_LOOKS_IMAGE` e `WE2002_LOOKS_DRIVE_IMAGE`. O controle é
+`--plant-back numbers` (a zona dos números lida no lugar da lacuna) e
+`--plant-back tex` (o `TEX_00` como lado do disco); os dois saem 1.
+
+Duas ressalvas do instrumento e da amostra. A VRAM volta como PNG, que perde o
+bit STP de cada halfword: o pixel ímpar guarda 7 dos 8 bits do índice, e a
+comparação é feita nesses 7. E é **um** kit numa tela: a regra da cópia vale
+para o `TEX_A4` na `LOOKS SET`. O número numa partida continua sem medida, e
+medi-lo pede um save state de partida, decisão do usuário (passo 2 acima).
+
 ## 5. Como se verifica
 
 1. **Dois decodificadores concordam.** `tex.py` e `bin_archive.py export` sobre

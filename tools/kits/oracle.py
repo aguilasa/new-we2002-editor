@@ -32,6 +32,7 @@ Usage:
     python tools/kits/oracle.py --slot N [--cue <disc.cue>]  # load slot N in the fork
     python tools/kits/oracle.py --png <dump> --expect 01=1 --expect 13=2
     python tools/kits/oracle.py --png <dump> --lines --flags
+    python tools/kits/oracle.py --back 2 [--expect-back untouched] [--plant-back numbers]
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
 the page that are not flat (more than one distinct 15-bit value) and how many
@@ -44,6 +45,19 @@ byte for byte their set-2 twin (CORR-KITS-048).
 The kit containers are read from `WE2002_LOOKS_IMAGE` (the Japanese track; the
 105 are byte-identical on the English disc).  The cue is
 `WE2002_LOOKS_DRIVE_IMAGE` unless given: the disc the state was saved on.
+
+`--back SLOT` asks section 4.7 (KITS-TASK-38): does the LOOKS SET fill the
+torso gap -- (0,80) 20x24 of the player, (100,104) 20x24 of the goalkeeper,
+index 0 on the disc -- with the back and the shirt number before it draws?
+The state is loaded in the fork through `tools/looks/oracle.py`, the uniform
+page at (576,256) is read back from VRAM twice, and each gap is compared pixel
+for pixel with the same rectangle of the TEX the screen wears
+(`layout.KIT_ON_SCREEN`).  The VRAM comes back as a PNG, so the STP bit of
+each halfword is lost: an odd pixel keeps seven of its eight index bits, and
+both sides are compared at those bits.  `--expect-back untouched|written`
+asserts the verdict; `--plant-back numbers|tex` is the control -- the
+numbers zone read in place of the gap, or another TEX as the disc side -- and
+has to come out red.
 """
 
 from __future__ import annotations
@@ -370,11 +384,231 @@ def dump_slot(slot: int, cue: str, out_dir: str) -> list:
     return paths
 
 
+# --- section 4.7: the back and the number ---------------------------------
+
+UNIFORM_RECORD = 0
+"""The set-1 uniform page, (576,256) 64x128 halfwords = 128x128 pixels."""
+BACK_PLANTS = ("numbers", "tex")
+BACK_VERDICTS = ("untouched", "written")
+BACK_SOURCE = "shirt back"
+"""The zone the measured copy comes from (section 4.7)."""
+PLANT_TAG = "00"
+"""The TEX the `tex` plant compares against instead of the one on screen."""
+
+
+def back_rects() -> list:
+    """(name, x, y, w, h, figure) of each torso gap, in work-bitmap pixels, from the
+    zones module -- the one place the rectangles live."""
+    if KITS_DIR not in sys.path:
+        sys.path.insert(0, KITS_DIR)
+    from core import api
+
+    out = []
+    for gap in api.GAPS:
+        if gap.name.startswith("torso"):
+            who = "player" if gap.figure == 0 else "goalkeeper"
+            out.append((who, gap.x, gap.y, gap.w, gap.h, gap.figure))
+    return out
+
+
+def numbers_rect() -> tuple:
+    """(x, y, w, h) of the "numbers 0-9" zone, the candidate source."""
+    if KITS_DIR not in sys.path:
+        sys.path.insert(0, KITS_DIR)
+    from core import api
+
+    zone = next(z for z in api.ZONES if z.name == "numbers 0-9")
+    return (zone.x, zone.y, zone.w, zone.h)
+
+
+def pixel_index(words, width: int, x: int, y: int) -> int:
+    """The 8-bit index of pixel (x, y) of an 8 bpp page held as 15-bit
+    halfwords, *width* halfwords a row: the low byte for an even pixel, the
+    high byte -- seven bits, the STP bit lost -- for an odd one."""
+    word = words[y * width + x // 2] & 0x7FFF
+    return word & 0xFF if x % 2 == 0 else word >> 8
+
+
+def back_count(vram_words, disc_words, width: int, rect, disc_rect=None) -> dict:
+    """One gap: pixels whose index is not 0 in VRAM and on the disc, and
+    pixels where the two differ.  *disc_rect* reads the disc elsewhere, which
+    only the plant does."""
+    x0, y0, w, h = rect
+    dx, dy = (disc_rect or rect)[:2]
+    vram_set = disc_set = differ = 0
+    for y in range(h):
+        for x in range(w):
+            v = pixel_index(vram_words, width, x0 + x, y0 + y)
+            d = pixel_index(disc_words, width, dx + x, dy + y)
+            vram_set += v != 0
+            disc_set += d != 0
+            differ += v != d
+    return {"pixels": w * h, "vram": vram_set, "disc": disc_set, "differ": differ}
+
+
+def back_indices(words, width: int, rect) -> list:
+    """The rows of indices of one rectangle of an 8 bpp page."""
+    x0, y0, w, h = rect
+    return [[pixel_index(words, width, x0 + x, y0 + y) for x in range(w)] for y in range(h)]
+
+
+def back_sources(words, width: int, height: int, rect) -> list:
+    """Every other place of the page whose pixels equal *rect*'s, straight
+    or mirrored left to right: (x, y, "straight"|"mirrored").  Compared at
+    seven bits a pixel, the most both parities keep."""
+    x0, y0, w, h = rect
+    want = [[v & 0x7F for v in row] for row in back_indices(words, width, rect)]
+    mirrored = [row[::-1] for row in want]
+    out = []
+    for y in range(height - h + 1):
+        for x in range(2 * width - w + 1):
+            if (x, y) == (x0, y0):
+                continue
+            got = [[v & 0x7F for v in row] for row in back_indices(words, width, (x, y, w, h))]
+            if got == want:
+                out.append((x, y, "straight"))
+            elif got == mirrored:
+                out.append((x, y, "mirrored"))
+    return out
+
+
+def source_zone(found, w: int, h: int, figure: int):
+    """The name of the zone of *figure* that wholly holds the first straight
+    copy in *found*, or None."""
+    if KITS_DIR not in sys.path:
+        sys.path.insert(0, KITS_DIR)
+    from core import api
+
+    for x, y, how in found:
+        if how != "straight":
+            continue
+        for z in api.ZONES:
+            if (z.figure == figure and z.x <= x and x + w <= z.x + z.w
+                    and z.y <= y and y + h <= z.y + z.h):
+                return z.name
+    return None
+
+
+def back_judge(counts: dict, whole_differ: int, expect=None) -> list:
+    """Failures of one slot's reading: the disc side has to be the page the
+    console holds outside the gaps, and the verdict, when asked, has to hold
+    -- `written` meaning a straight copy of the figure's own shirt back."""
+    out = []
+    if whole_differ:
+        out.append("the disc page differs from VRAM in %d halfword(s) outside the gaps, "
+                   "so it is not the page the screen holds" % whole_differ)
+    for name, c in counts.items():
+        verdict = "written" if c["differ"] else "untouched"
+        if expect and verdict != expect:
+            out.append("%s gap: %s, not %s (%d of %d pixels differ from the disc)"
+                       % (name, verdict, expect, c["differ"], c["pixels"]))
+        elif expect == "written" and c.get("source") != BACK_SOURCE:
+            out.append("%s gap: written, but not a copy of the %s (the copy found sits in %s)"
+                       % (name, BACK_SOURCE, c.get("source") or "no zone of its figure"))
+    return out
+
+
+def outside_differ(vram_words, disc_words, width: int, height: int, rects) -> int:
+    """Halfwords outside every gap where VRAM and the disc page differ."""
+    inside = set()
+    for _name, x0, y0, w, h, _figure in rects:
+        for y in range(y0, y0 + h):
+            for x in range(x0 // 2, (x0 + w + 1) // 2):
+                inside.add((x, y))
+    return sum(1 for y in range(height) for x in range(width)
+               if (x, y) not in inside
+               and (vram_words[y * width + x] & 0x7FFF) != (disc_words[y * width + x] & 0x7FFF))
+
+
+def read_back(slot: int, cue: str) -> list:
+    """The uniform page's VRAM rectangle as 15-bit halfwords, read twice --
+    each after its own `load_state` -- from the LOOKS SET of *slot*."""
+    import oracle as looks_oracle  # tools/looks
+
+    record = records_of(_screen_body())[UNIFORM_RECORD]
+    reads = []
+    with looks_oracle.Oracle(cue) as game:
+        for n in range(2):
+            looks_oracle.restore_state(slot, verbose=False)
+            game.load_looks(slot, label="back-%d-%d" % (slot, n))
+            rows = looks_oracle.vram_region(game, record.x, record.y, record.w, record.h)
+            reads.append([(p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10
+                          for row in rows for p in row])
+    return reads
+
+
+_BODIES = {}
+
+
+def _body(tag: str) -> bytes:
+    if tag not in _BODIES:
+        _BODIES.update(read_kits(os.environ[IMAGE_VARIABLE]))
+    return _BODIES[tag]
+
+
+def _screen_body() -> bytes:
+    return _body(layout.KIT_ON_SCREEN)
+
+
+def run_back(slot: int, cue: str, expect=None, plant=None, grid=False) -> int:
+    """`--back SLOT`: section 4.7, measured on the LOOKS SET."""
+    tag = PLANT_TAG if plant == "tex" else layout.KIT_ON_SCREEN
+    record = records_of(_screen_body())[UNIFORM_RECORD]
+    disc = [five(v) for v in payload(_body(tag), records_of(_body(tag))[UNIFORM_RECORD])]
+    first, second = read_back(slot, cue)
+    if first != second:
+        print("  FAIL  the uniform page read twice, each after its own load_state, "
+              "differs: nothing below is measured")
+        return 1
+    print("  control: the uniform page (%d,%d) %dx%d read twice, identical"
+          % (record.x, record.y, record.w, record.h))
+    rects = back_rects()
+    whole = outside_differ(first, disc, record.w, record.h, rects)
+    print("  disc side TEX_%s: %d halfword(s) of %d differ from VRAM outside the gaps"
+          % (tag, whole, record.w * record.h))
+    counts = {}
+    numbers = numbers_rect()
+    for name, x, y, w, h, figure in rects:
+        at = (numbers[0], numbers[1], w, min(h, numbers[3])) if plant == "numbers" else (x, y, w, h)
+        disc_at = (x, y) if plant == "numbers" else None
+        c = back_count(first, disc, record.w, at, disc_at)
+        counts[name] = c
+        verdict = "written" if c["differ"] else "untouched"
+        print("  %-10s gap (%d,%d) %dx%d%s: index != 0 in %d of %d pixel(s) in VRAM, %d on "
+              "the disc; %d differ -- %s"
+              % (name, x, y, w, h,
+                 " [read at the numbers zone (%d,%d)]" % at[:2] if plant == "numbers" else "",
+                 c["vram"], c["pixels"], c["disc"], c["differ"], verdict))
+        rows = back_indices(first, record.w, at)
+        tally = {}
+        for row in rows:
+            for v in row:
+                tally[v] = tally.get(v, 0) + 1
+        print("             VRAM indices: %s" % ", ".join(
+            "%d x%d" % (v, n) for v, n in sorted(tally.items(), key=lambda t: -t[1])[:8]))
+        found = back_sources(first, record.w, record.h, at)
+        c["source"] = source_zone(found, at[2], at[3], figure)
+        print("             the same pixels elsewhere in the page: %s -- %s"
+              % (", ".join("(%d,%d) %s" % f for f in found) or "nowhere",
+                 "inside the %s" % c["source"] if c["source"] else "inside no zone of its figure"))
+        if grid:
+            for row in rows:
+                print("             " + " ".join("%3d" % v for v in row))
+    failures = back_judge(counts, whole, expect)
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if not failures:
+        print("  ok    %s" % ("every gap %s" % expect if expect else "read, no verdict asked"))
+    return 1 if failures else 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--png", help="a VRAM dump (1024x512 PNG) to search, no emulator")
     source.add_argument("--slot", type=int, help="load this save-state slot in the fork")
+    source.add_argument("--back", type=int, metavar="SLOT",
+                        help="section 4.7: does the LOOKS SET of this slot fill the torso gaps")
     parser.add_argument("--cue", help="the disc the state was saved on (default $%s)"
                         % DRIVE_VARIABLE)
     parser.add_argument("--out", default=os.path.join("work", "kits-oracle"),
@@ -385,6 +619,12 @@ def main(argv=None) -> int:
                         help="each kit found: its flag colours and which records both sets share")
     parser.add_argument("--expect", action="append", metavar="TAG=SET",
                         help="the set kit TAG has to be worn in; exits 1 if not (repeatable)")
+    parser.add_argument("--expect-back", choices=BACK_VERDICTS,
+                        help="with --back: the verdict every gap has to give; exits 1 if not")
+    parser.add_argument("--plant-back", choices=BACK_PLANTS,
+                        help="with --back: the control -- read the numbers zone, or another TEX")
+    parser.add_argument("--grid", action="store_true",
+                        help="with --back: print each gap's indices, row by row")
     args = parser.parse_args(argv)
     try:
         expect = parse_expect(args.expect)
@@ -395,6 +635,12 @@ def main(argv=None) -> int:
         print("oracle: skipped -- %s is not set (the Japanese data track .bin)"
               % IMAGE_VARIABLE)
         return SKIP
+    if args.back is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_back(args.back, cue, args.expect_back, args.plant_back, args.grid)
     bodies = read_kits(image)
     print("  %d kit container(s) read from %s" % (len(bodies), image))
     if args.png:

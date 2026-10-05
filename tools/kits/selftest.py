@@ -668,6 +668,44 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --expect: and 00=2 fails on the palette and both pages", len(wrong) == 3,
          "; ".join(wrong))
 
+    # --back (KITS-TASK-38): a page whose player shirt back, rows 6-29, is
+    # copied into the torso gap, as the LOOKS SET was measured doing.
+    width, height = 64, 128
+    page = [0] * (width * height)
+
+    def put(x, y, value):
+        at = y * width + x // 2
+        page[at] = (page[at] & 0xFF00) | value if x % 2 == 0 else (page[at] & 0x00FF) | value << 8
+
+    for y in range(30):
+        for x in range(20):
+            put(44 + x, y, 1 + (3 * x + 5 * y) % 100)
+    disc = list(page)
+    for y in range(24):
+        for x in range(20):
+            put(x, 80 + y, oracle.pixel_index(page, width, 44 + x, 6 + y))
+    gap = (0, 80, 20, 24)
+    count = oracle.back_count(page, disc, width, gap)
+    c.ok("oracle --back: a filled gap counts 480 written pixels against a zero disc",
+         count == {"pixels": 480, "vram": 480, "disc": 0, "differ": 480}, "%s" % count)
+    found = oracle.back_sources(page, width, height, gap)
+    count["source"] = oracle.source_zone(found, 20, 24, 0)
+    c.ok("oracle --back: the copy is found at (44,6), inside the shirt back",
+         (44, 6, "straight") in found and count["source"] == oracle.BACK_SOURCE,
+         "%s %s" % (found, count["source"]))
+    c.ok("oracle --back: --expect-back written holds",
+         oracle.back_judge({"player": count}, 0, "written") == [])
+    c.ok("oracle --back: --expect-back untouched fails",
+         len(oracle.back_judge({"player": count}, 0, "untouched")) == 1)
+    numbers = oracle.numbers_rect()
+    planted = oracle.back_count(page, disc, width, numbers[:2] + (20, 12), gap[:2])
+    planted["source"] = oracle.source_zone(
+        oracle.back_sources(page, width, height, numbers[:2] + (20, 12)), 20, 12, 0)
+    c.ok("oracle --back: the numbers zone read in place of the gap is no copy of the shirt back",
+         len(oracle.back_judge({"player": planted}, 0, "written")) == 1, "%s" % planted)
+    c.ok("oracle --back: a disc page that differs outside the gaps fails",
+         len(oracle.back_judge({"player": count}, 7, "written")) == 1)
+
 
 def _negative(c) -> None:
     controls = c.attempt("import tools/kits/controls.py", _kits_controls)
