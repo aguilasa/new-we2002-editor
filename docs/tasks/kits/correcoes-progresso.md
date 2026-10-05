@@ -68,6 +68,6 @@
 | [CORR-KITS-063](/docs/tasks/kits/CORR-KITS-063.md) | Escrever caminhos absolutos de imagem na receita de ctest do Log | KITS-TASK-35 | medium | done | 2026-10-05 |
 | [CORR-KITS-064](/docs/tasks/kits/CORR-KITS-064.md) | Cobrir o reset por duplo clique com juiz e planta | KITS-TASK-37 | low | done | 2026-10-05 |
 | [CORR-KITS-065](/docs/tasks/kits/CORR-KITS-065.md) | Mover RESET_TURN para que a docstring de DIAG_NOTE fique sob a constante dela | KITS-TASK-37 | low | done | 2026-10-05 |
-| [CORR-KITS-066](/docs/tasks/kits/CORR-KITS-066.md) | Atualizar figure_hint: as costas agora são medidas | KITS-TASK-38 | low | pending | — |
+| [CORR-KITS-066](/docs/tasks/kits/CORR-KITS-066.md) | Atualizar figure_hint: as costas agora são medidas | KITS-TASK-38 | low | done | 2026-10-05 |
 | [CORR-KITS-067](/docs/tasks/kits/CORR-KITS-067.md) | Versionar como controle o vermelho do pixel_index | KITS-TASK-38 | low | done | 2026-10-05 |
 <!-- rite:end -->

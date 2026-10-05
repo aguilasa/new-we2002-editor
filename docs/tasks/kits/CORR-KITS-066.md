@@ -60,3 +60,8 @@ kits_selftest: 0 failure(s)
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
 100% tests passed, 0 tests failed out of 4
 ```
+- **Closed** — commit `a6d1807` (2026-10-05): fix(kits): the 3D hint says the back is measured, the number is not
+  - Files (`git show --name-status a6d1807`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-066.md`
+    - `M tools/kits/ui/i18n.py`
