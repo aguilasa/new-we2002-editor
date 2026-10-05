@@ -32,6 +32,6 @@ O título no estado diz "número e braçadeira". A manga longa entrou depois, pe
 
 Se as 38 e 39 terminarem as duas blocked, por falta do save state de partida, esta task também espera. Entregar só os checkboxes desligados é decisão do usuário.
 
-Da KITS-TASK-38 (2026-10-05, §4.7): na `LOOKS SET` o jogo **preenche** a lacuna do torso com uma cópia reta da zona "shirt back" — (44,6) 20×24 para (0,80) no jogador, (108,6) para (100,104) no goleiro — e **não desenha número** ali. Duas consequências aqui. As costas têm regra medida, e o 3D pode copiar esse bloco antes de desenhar; a dica da aba (`figure_hint` em `ui/i18n.py`, da KITS-TASK-37) diz que as costas "not measured yet" e passa a estar errada. E o número continua sem regra: o checkbox **Number** fica desligado com a frase, a menos que o usuário dê um save state de partida.
+Da KITS-TASK-38 (2026-10-05, §4.7): na `LOOKS SET` o jogo **preenche** a lacuna do torso com uma cópia reta da zona "shirt back" — (44,6) 20×24 para (0,80) no jogador, (108,6) para (100,104) no goleiro — e **não desenha número** ali. Duas consequências aqui. As costas têm regra medida, e o 3D pode copiar esse bloco antes de desenhar; a dica da aba (`figure_hint` em `ui/i18n.py`, da KITS-TASK-37) dizia que as costas "not measured yet" — a [CORR-KITS-066](/docs/tasks/kits/CORR-KITS-066.md) já a acertou. E o número continua sem regra: o checkbox **Number** fica desligado com a frase, a menos que o usuário dê um save state de partida.
 
 ## Log de Execução
