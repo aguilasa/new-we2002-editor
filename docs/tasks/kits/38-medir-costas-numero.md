@@ -71,3 +71,10 @@ pedia a posição do dígito, e ela não existe nesta tela: a cópia é idêntic
 origem e a zona "numbers 0-9" não aparece na lacuna. Medir o número numa
 partida pede save state de partida, decisão do usuário. A nota disso ficou na
 KITS-TASK-40.
+- **Closed** — commit `71cd597` (2026-10-05): feat(kits): oracle.py --back measures the torso gap on LOOKS SET
+  - Files (`git show --name-status 71cd597`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/38-medir-costas-numero.md`
+    - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
