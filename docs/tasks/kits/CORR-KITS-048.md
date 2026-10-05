@@ -94,3 +94,8 @@ $ grep -c "as 79 linhas" docs/tasks/kits/27-titular-e-suplente-no-jogo.md
 ```
 
 Os números batem com a sonda da Evidência (80/12 e 80/80) e com as cores que o Log já citava.
+- **Closed** — commit `45f008d` (2026-10-04): feat(kits): oracle.py --lines and --flags replace the KITS-TASK-27 probes
+  - Files (`git show --name-status 45f008d`):
+    - `M docs/tasks/kits/27-titular-e-suplente-no-jogo.md`
+    - `M docs/tasks/kits/CORR-KITS-048.md`
+    - `M tools/kits/oracle.py`

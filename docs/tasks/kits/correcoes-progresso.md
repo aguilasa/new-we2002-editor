@@ -50,7 +50,7 @@
 | [CORR-KITS-045](/docs/tasks/kits/CORR-KITS-045.md) | Consertar o TypeError de formatação no ramo "Plan mudou" do off_judge | KITS-TASK-25 | medium | done | 2026-10-04 |
 | [CORR-KITS-046](/docs/tasks/kits/CORR-KITS-046.md) | Declarar a edição do PLAN-KITS-PY.md na lista de arquivos da task | KITS-TASK-25 | low | done | 2026-10-04 |
 | [CORR-KITS-047](/docs/tasks/kits/CORR-KITS-047.md) | Fazer o oracle.py afirmar o conjunto que reporta, não só imprimir | KITS-TASK-27 | medium | done | 2026-10-04 |
-| [CORR-KITS-048](/docs/tasks/kits/CORR-KITS-048.md) | Levar os números de sondas descartáveis do Log para opção versionada do oracle.py | KITS-TASK-27 | medium | pending | — |
+| [CORR-KITS-048](/docs/tasks/kits/CORR-KITS-048.md) | Levar os números de sondas descartáveis do Log para opção versionada do oracle.py | KITS-TASK-27 | medium | done | 2026-10-04 |
 | [CORR-KITS-049](/docs/tasks/kits/CORR-KITS-049.md) | Manter as notas das tasks 28 e 30 fora do commit da task 27, ou declará-las | KITS-TASK-27 | low | pending | — |
 | [CORR-KITS-050](/docs/tasks/kits/CORR-KITS-050.md) | Corrigir a docstring do report() que promete filtro de conjunto compartilhado | KITS-TASK-27 | low | done | 2026-10-04 |
 <!-- rite:end -->
