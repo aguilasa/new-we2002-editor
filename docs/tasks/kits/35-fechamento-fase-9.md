@@ -24,8 +24,9 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#7).
 ## Log de Execução
 
 2026-10-05, HEAD `9cb6777`, `DISPLAY=:98`, `XAUTHORITY` vazio,
-`WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin`,
-`WE2002_KITS_ED_IMAGE=roms/golden-european-deluxe.bin`.
+`WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`,
+`WE2002_KITS_ED_IMAGE=$PWD/roms/golden-european-deluxe.bin`, da raiz do repositório
+(absolutos: o `ctest` roda de `build/tests`, e caminho relativo não resolve lá — CORR-KITS-063).
 
 - `ctest --test-dir build -R kits` → `100% tests passed, 0 tests failed out of 4`
   (`kits_selftest`, `kits_image`, `kits_gen`, `kits_ui`; nenhum *skipped*).

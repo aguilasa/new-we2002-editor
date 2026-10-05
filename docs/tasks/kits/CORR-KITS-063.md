@@ -40,3 +40,23 @@ No cabeçalho do Log de `docs/tasks/kits/35-fechamento-fase-9.md`, escrever as v
 A linha de ambiente do Log, colada num shell na raiz do repositório, seguida de `ctest --test-dir build -R kits`, imprime `100% tests passed, 0 tests failed out of 4`. Hoje falha 2 de 4, e `grep -c 'WE2002_LOOKS_IMAGE=roms' docs/tasks/kits/35-fechamento-fase-9.md` dá 1 (0 depois do conserto).
 
 ## Log de Execução
+
+Reproduzido em 2026-10-05 sobre `e976571`: com o caminho relativo do Log, o `kits_image` falha:
+
+```text
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin ctest --test-dir build -R kits_image
+0% tests passed, 1 tests failed out of 1
+$ grep -n "is not one" build/Testing/Temporary/LastTest.log
+10:  FAIL  WE2002_LOOKS_IMAGE points at a file  roms/japanese-shift-jis.bin is not one
+```
+
+Conserto: o cabeçalho do Log da task 35 escreve as duas variáveis como `$PWD/roms/...`, rodadas da
+raiz, e diz por quê. A parte opcional (as ferramentas explicarem o caminho relativo) ficou de
+fora, porque alargaria o escopo.
+
+```text
+$ grep -c 'WE2002_LOOKS_IMAGE=roms' docs/tasks/kits/35-fechamento-fase-9.md
+0
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE2002_KITS_ED_IMAGE=$PWD/roms/golden-european-deluxe.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+```
