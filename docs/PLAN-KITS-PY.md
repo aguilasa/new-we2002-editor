@@ -450,13 +450,28 @@ uma cópia quatro linhas abaixo —, e não os retângulos que o TEX declara.
 
 ### 4.2 (b) Que time usa qual tag
 
-Nada no repositório sabe. O Wetigre dá a ordem de
+Nada no repositório sabia, até a KITS-TASK-30. O Wetigre dá a ordem de
 cabeça do WE2000 (`TEX_00` Irlanda, `01` Irlanda do Norte, `02` Escócia…); o
 editor do Obocaman em `we-team-editor/` insere TEX por time e portanto contém a
 tabela; o emulador responde time a time pelo `--kit`. **É ela que decide o
 combobox do §3.2**: sem ela o combobox lista tags, com nome só onde já se sabe.
 Os nomes (§3.3) e o mapeamento são coisas separadas — o nome sai da ROM por
 índice de time, e o índice de time não diz qual TEX o time veste.
+
+**Veredito (KITS-TASK-30): o time de índice `i` (0 a 94) veste o `TEX` de
+número `i` na ordem do disco** — `TEX_00` a `TEX_94` —, e o item seguinte do
+editor do Obocaman ("95 Master L." / "95 Default ML") vai para o `TEX_A4`. A
+regra é a que o próprio `we-team-editor.exe` calcula no diálogo de textura,
+`índice + 9 × (índice div 95)` como número do TEX, lida das instruções do exe
+em dois lugares (`python tools/kits/gen_tables.py --editor`; com o divisor
+trocado numa cópia, `--negative-editor` reprova). A ordem de cabeça do WE2000
+do Wetigre **não** vale para o WE2002: lá o `TEX_01` seria a Irlanda do Norte,
+e aqui é a Escócia, medida. A tabela é gerada em
+`tools/kits/core/generated/team_kits.py`, e `gen_tables.py --report` a conta:
+95 times, quatro conferidos no jogo pela VRAM (`oracle.py --expect`) —
+Irlanda → `TEX_00` e Brasil → `TEX_41` no slot 4, Escócia → `TEX_01` e
+Dinamarca → `TEX_13` no slot 3 —, e **nove tags que nenhum item alcança**,
+`TEX_95` a `TEX_A3`: o que elas vestem continua sem resposta.
 
 ### 4.3 (c) Manga longa e braçadeira no 3D
 
