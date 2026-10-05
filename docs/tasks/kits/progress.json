@@ -628,8 +628,8 @@
       "status": "done",
       "done_on": "2026-10-05",
       "done_commit": "ffdfb0c",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-05",
+      "review_commit": "b1ec2ec"
     },
     {
       "id": "KITS-TASK-40",

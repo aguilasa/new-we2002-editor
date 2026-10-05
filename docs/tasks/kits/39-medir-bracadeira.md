@@ -126,3 +126,4 @@ longa são as seções 95 a 102, separadas pelas zonas do `core/zones.py`.
     - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-05) at `b1ec2ec`: CORR-KITS-068
