@@ -73,3 +73,13 @@ visto: com o filtro das tags já listadas tirado do `kit_order`, `FAIL kit_order
 lists every tag of the disc once  201 items` e `FAIL kit_order leaves a team
 whose tag is not on the disc out`, `kits_selftest: 5 failure(s)`; restaurado,
 `kits_selftest: 0 failure(s)`.
+- **Closed** — commit `6484655` (2026-10-04): feat(kits): the kit selector lists teams in game order
+  - Files (`git show --name-status 6484655`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/31-combobox-de-times.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/teams.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/i18n.py`
