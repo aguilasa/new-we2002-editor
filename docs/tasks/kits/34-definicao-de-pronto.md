@@ -24,4 +24,6 @@ Os cinco itens da Definição de pronto do §0 conferidos na HEAD, cada um com o
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#definição-de-pronto).
 
+Da KITS-TASK-33: o `kits_ui` julga a aba Diagnóstico nos `TEX_48`, `TEX_70` e `TEX_13` da European Deluxe só com `WE2002_KITS_ED_IMAGE` apontando o `roms/golden-european-deluxe.bin`; sem ela ele passa e imprime `note: WE2002_KITS_ED_IMAGE is not set`. Corrida desta task leva a variável.
+
 ## Log de Execução

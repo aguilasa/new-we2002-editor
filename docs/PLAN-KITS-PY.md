@@ -354,7 +354,13 @@ devolve.
 - **Aba "3D"**: titular/suplente, jogador/goleiro, giro livre. Desenhada por
   `QPainter` em software (`ui/figure_view.py`), não OpenGL: o mesmo quadro no
   Windows e no Xvfb, que é o que o `kits_ui` compara (KITS-TASK-25).
-- **Aba "Diagnóstico"**: a lista do `kit.problems`.
+- **Aba "Diagnóstico"**: a lista do `kit.problems`, uma linha por problema da
+  guarda ("Refused: …") e uma por nota de leitura ("Note: …"), nas palavras do
+  núcleo, com um resumo em cima; TEX sadio lido sem nota deixa a lista vazia
+  (KITS-TASK-33). O `kits_ui` julga a aba num `TEX_00` avulso, sadio e com o
+  byte do `cli.py tex --negative`, e, com `WE2002_KITS_ED_IMAGE` apontando a
+  European Deluxe, nos `TEX_48`, `TEX_70` e `TEX_13` dela; sem a variável ele
+  diz que não os julgou.
 
 **Estilo visual próprio, idêntico no Windows e no Linux, e não o do `looks`.**
 O `looks` imita a tela do jogo; esta é uma ferramenta comum. Para sair igual nas

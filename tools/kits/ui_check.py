@@ -132,7 +132,17 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER, FIGURE, OFF, SELECTOR = "style", "hover", "3D", "3D off", "selector"
+STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG = ("style", "hover", "3D", "3D off", "selector",
+                                             "diagnosis")
+ED_VARIABLE = "WE2002_KITS_ED_IMAGE"
+"""The European Deluxe disc, whose TEX_48 and TEX_70 the guard refuses and
+whose TEX_13 is read past its ISO size (section 2.1); the Diagnosis judge
+runs those three only when it is set, and says so when it is not."""
+ED_DIAG = (("48", "Refused: record 0 ("), ("70", "Refused: record 4 ("),
+           ("13", "Note: its ISO size is"))
+"""(tag, the start of a row its Diagnosis tab has to show) on that disc."""
+LIST_TEXT = (0x60, 0x60, 0x60)
+"""A pixel this dark or darker inside the Diagnosis list is text."""
 
 KIT_ITEMS = 105
 """Items of the kit selector on the disc: the 95 teams, the ML default, the 9 unreached."""
@@ -142,6 +152,9 @@ KIT_ITEM_WANT = {0: "Ireland — TEX_00", 95: "Master League default — TEX_A4"
 CORR-KITS-058): the first team in game order, the ML default after the teams,
 and the last of the tags no team wears."""
 PLANTS = (
+    ("diagnosis rows never added", DIAG,
+     '            self.diag_list.addItem(tr("diag_problem", text=text))\n',
+     "            pass  # planted: no problem row\n"),
     ("no Fusion", STYLE, '    app.setStyle("Fusion")\n',
      '    app.setStyle("Windows")  # planted: no Fusion\n'),
     ("no fixed palette", STYLE, "    app.setPalette(fixed_palette())\n",
@@ -410,6 +423,91 @@ def selector_judge(python, app, image, env) -> tuple:
     return bad, items
 
 
+def diagnosis(python, app, path, args, env) -> tuple:
+    """(exit, summary, [rows]) of `app.py <path> <args> --list-diagnosis`."""
+    code, output = run_app(python, app, [path] + args + ["--list-diagnosis"], env)
+    summary, rows = None, []
+    for line in output.splitlines():
+        head, sep, text = line.strip().partition(": ")
+        if sep and head == "diagnosis":
+            summary = text
+        elif sep and head.startswith("row ") and head[4:].isdigit():
+            rows.append(text)
+    return code, summary, rows
+
+
+def text_in_list(shot: tuple) -> int:
+    """Dark pixels inside the Diagnosis list: the biggest white box of the capture."""
+    w, h, pixels = shot[0], shot[1], shot[2]
+    white = [i for i, p in enumerate(pixels) if p == (255, 255, 255)]
+    if not white:
+        return -1
+    xs, ys = [i % w for i in white], [i // w for i in white]
+    return sum(1 for y in range(min(ys), max(ys) + 1) for x in range(min(xs), max(xs) + 1)
+               if all(c <= d for c, d in zip(pixels[y * w + x], LIST_TEXT)))
+
+
+def diag_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, what was seen) of the Diagnosis tab: a sound lone TEX lists
+    nothing, its copy with the byte `cli.py tex --negative` plants lists the
+    refusal of record 0, and on the European Deluxe (ED_VARIABLE) TEX_48,
+    TEX_70 and TEX_13 show their own row."""
+    sound = os.path.join(tmp, "TEX_%s.BIN" % FIGURE_TAG)
+    if not os.path.isfile(sound):
+        done = subprocess.run([sys.executable, os.path.join(TOOLS_DIR, "pes2", "iso.py"),
+                               "extract", image, "/BIN/TEX_%s.BIN" % FIGURE_TAG, "-o", sound],
+                              capture_output=True, text=True)
+        if done.returncode:
+            return ["iso.py extract exited %d: %s" % (done.returncode, done.stderr.strip())], []
+    bad, seen = [], []
+    code, summary, rows = diagnosis(python, app, sound, [], env)
+    seen.append("sound %d row(s)" % len(rows))
+    if code != 0 or summary is None or rows:
+        bad.append("the sound TEX_%s: exit %s, %r, rows %s" % (FIGURE_TAG, code, summary, rows))
+    shot, more, _ = capture(python, app, sound, ["--tab", "diag"],
+                            os.path.join(tmp, "diag-sound.png"), env)
+    bad += more
+    if shot is not None:
+        dark = text_in_list(shot)
+        seen.append("%d text px in its list" % dark)
+        if dark != 0:
+            bad.append("the sound TEX's list has %d text pixel(s)" % dark)
+    done = subprocess.run([sys.executable, os.path.join(KITS_DIR, "cli.py"), "tex",
+                           "--negative", sound], capture_output=True, text=True)
+    first = done.stdout.splitlines()[0] if done.stdout else ""
+    try:
+        at = int(first.split("byte ", 1)[1].split()[0])
+        after = int(first.split("-> ", 1)[1].split()[0], 16)
+    except (IndexError, ValueError):
+        return bad + ["cli.py tex --negative said %r" % first], seen
+    with open(sound, "rb") as fh:
+        data = bytearray(fh.read())
+    data[at] = after
+    planted = os.path.join(tmp, "TEX_%s_planted.BIN" % FIGURE_TAG)
+    with open(planted, "wb") as fh:
+        fh.write(bytes(data))
+    code, summary, rows = diagnosis(python, app, planted, [], env)
+    seen.append("planted %d row(s)" % len(rows))
+    if code != 0 or not any(r.startswith("Refused: record 0 (") for r in rows):
+        bad.append("byte %d planted: exit %s, %r, rows %s" % (at, code, summary, rows))
+    shot, more, _ = capture(python, app, planted, ["--tab", "diag"],
+                            os.path.join(tmp, "diag-planted.png"), env)
+    bad += more
+    if shot is not None and text_in_list(shot) <= 0:
+        bad.append("the refused TEX's list draws no text")
+    ed = os.environ.get(ED_VARIABLE)
+    if ed:
+        for tag, want in ED_DIAG:
+            code, summary, rows = diagnosis(python, app, ed, ["--tag", tag], env)
+            seen.append("ED TEX_%s %d row(s)" % (tag, len(rows)))
+            if code != 0 or not any(r.startswith(want) for r in rows):
+                bad.append("ED TEX_%s: exit %s, no row starting %r in %s"
+                           % (tag, code, want, rows))
+    else:
+        seen.append("ED not checked, %s unset" % ED_VARIABLE)
+    return bad, seen
+
+
 def cli_export(image: str, out: str) -> tuple:
     """The work bitmap HOVER_TAG as the CLI writes it, decoded here."""
     done = subprocess.run([sys.executable, os.path.join(KITS_DIR, "cli.py"), "export",
@@ -623,6 +721,12 @@ def run(python: str, image: str) -> int:
              bad)
         t.ok("with no geometry disc the 3D tab is off with the sentence, and Plan is the same",
              off_judge(python, image, env, tmp))
+        bad, seen = diag_judge(python, image, env, tmp)
+        t.ok("the Diagnosis tab lists the guard's refusal and the reading notes, and "
+             "nothing for a sound kit (%s)" % ", ".join(seen), bad)
+        if os.environ.get(ED_VARIABLE) is None:
+            print("        note: %s is not set, so TEX_48, TEX_70 and TEX_13 of the "
+                  "European Deluxe were not judged" % ED_VARIABLE)
 
         for name, judge, old, new in PLANTS:
             with tempfile.TemporaryDirectory(prefix="kits-ui-plant-") as box:
@@ -642,6 +746,8 @@ def run(python: str, image: str) -> int:
                     red, bad = off_judge(python, image, env, box, app), []
                 elif judge == SELECTOR:
                     red, bad = selector_judge(python, app, image, env)[0], []
+                elif judge == DIAG:
+                    red, bad = diag_judge(python, image, env, box, app)[0], []
                 else:
                     bad, red = [], hover_judge(python, app, image, env, want) if want else []
                 print("        plant '%s': %s" % (name, "; ".join(red)[:300] or "judge passed"))

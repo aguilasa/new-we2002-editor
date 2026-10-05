@@ -78,6 +78,12 @@ CATALOG = {
         "figure_hint": "drag to turn",
         "figure_geometry": "3D geometry: {path}",
         "figure_off": "3D off: {reason}",
+        "tab_diag": "Diagnosis",
+        "diag_refused": "{label}: refused by the guard, {count} problem(s)",
+        "diag_notes": "{label}: read, with {count} note(s)",
+        "diag_clean": "{label}: read, nothing to report",
+        "diag_problem": "Refused: {text}",
+        "diag_note": "Note: {text}",
     },
     "pt-BR": {
         "window_title": "kits",
@@ -122,6 +128,12 @@ CATALOG = {
         "figure_hint": "arraste para girar",
         "figure_geometry": "geometria do 3D: {path}",
         "figure_off": "3D desligado: {reason}",
+        "tab_diag": "Diagnóstico",
+        "diag_refused": "{label}: recusado pela guarda, {count} problema(s)",
+        "diag_notes": "{label}: lido, com {count} nota(s)",
+        "diag_clean": "{label}: lido, nada a relatar",
+        "diag_problem": "Recusado: {text}",
+        "diag_note": "Nota: {text}",
     },
 }
 

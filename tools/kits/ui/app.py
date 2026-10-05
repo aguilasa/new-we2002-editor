@@ -63,8 +63,8 @@ CHECKER_PX = 8
 CELL_PX = 14
 """One colour of the 16x16 palette grid, on screen."""
 
-TAB_NAMES = ("plan", "3d")
-"""--tab names of the two tabs, in tab order."""
+TAB_NAMES = ("plan", "3d", "diag")
+"""--tab names of the three tabs, in tab order."""
 WORK = ("work1", "work2")
 """--image names of the two work bitmaps (first and second set); any other
 --image is an image record number."""
@@ -406,6 +406,18 @@ class Window(QtWidgets.QMainWindow):
         three_layout.addWidget(self.figure_view, 1)
         self.tabs.addTab(three, "")
         self.tabs.currentChanged.connect(self.draw_figure)
+        # The Diagnosis tab (section 3.4, KITS-TASK-33): the guard's problems
+        # and the reading notes of the kit, record by record, in the core's words.
+        self.diag_kit = None              # (label, problems, notes) shown
+        self.diag_summary = QtWidgets.QLabel(" ")
+        self.diag_summary.setWordWrap(True)
+        self.diag_list = QtWidgets.QListWidget()
+        self.diag_list.setWordWrap(True)
+        diag = QtWidgets.QWidget()
+        diag_layout = QtWidgets.QVBoxLayout(diag)
+        diag_layout.addWidget(self.diag_summary)
+        diag_layout.addWidget(self.diag_list, 1)
+        self.tabs.addTab(diag, "")
         self.figure_note = QtWidgets.QLabel(" ")
         self.figure_note.setWordWrap(True)
 
@@ -442,6 +454,7 @@ class Window(QtWidgets.QMainWindow):
         self.export_button.setText(tr("export_png"))
         self.tabs.setTabText(0, tr("tab_plan"))
         self.tabs.setTabText(1, tr("tab_3d"))
+        self.tabs.setTabText(2, tr("tab_diag"))
         for key, label in self.figure_labels.items():
             label.setText(tr(key))
         self.set_box.setItemText(0, tr("set_first"))
@@ -451,6 +464,7 @@ class Window(QtWidgets.QMainWindow):
         self.figure_hint.setText(tr("figure_hint"))
         self.show_geometry()
         self.relabel_tags()
+        self.show_diagnosis()
         self.say(*self.said)
         self.readout.setText(" ")
 
@@ -595,8 +609,10 @@ class Window(QtWidgets.QMainWindow):
                 kit = self.source.kit()
         except api.KitsError as exc:
             self.say(None, {CORE_TEXT: str(exc)})
+            self.show_diagnosis(("", (str(exc),), ()))
             self.redraw()
             return
+        self.show_diagnosis((kit.label, tuple(kit.problems), tuple(n.text for n in kit.notes)))
         if not kit.ok:
             self.say("status_refused", {"label": kit.label, "problems": "; ".join(kit.problems)})
         else:
@@ -609,6 +625,28 @@ class Window(QtWidgets.QMainWindow):
             self.kit = kit
         self.redraw()
         self.draw_figure()
+
+    def show_diagnosis(self, diag=None) -> None:
+        """The Diagnosis tab for *diag* = (label, problems, notes), or again for
+        the last one: one row per problem of the guard and per reading note;
+        a sound kit read without notes leaves the list empty."""
+        if diag is not None:
+            self.diag_kit = diag
+        self.diag_list.clear()
+        if self.diag_kit is None:
+            self.diag_summary.setText(" ")
+            return
+        label, problems, notes = self.diag_kit
+        for text in problems:
+            self.diag_list.addItem(tr("diag_problem", text=text))
+        for text in notes:
+            self.diag_list.addItem(tr("diag_note", text=text))
+        if problems:
+            self.diag_summary.setText(tr("diag_refused", label=label, count=len(problems)))
+        elif notes:
+            self.diag_summary.setText(tr("diag_notes", label=label, count=len(notes)))
+        else:
+            self.diag_summary.setText(tr("diag_clean", label=label))
 
     # -- drawing ------------------------------------------------------------------
 
@@ -824,6 +862,8 @@ def main(argv=None) -> int:
     parser.add_argument("--yaw", type=float, help="3D: turn about the vertical, degrees "
                         "(default: facing the viewer)")
     parser.add_argument("--pitch", type=float, help="3D: tilt, degrees")
+    parser.add_argument("--list-diagnosis", action="store_true",
+                        help="print the Diagnosis tab of the kit shown (summary and rows) and exit")
     parser.add_argument("--list-kits", action="store_true",
                         help="print the kit selector's items, one per line, and exit")
     parser.add_argument("--switch-to", choices=i18n.LANGUAGES, metavar="LANG",
@@ -851,6 +891,11 @@ def main(argv=None) -> int:
     if args.tag and not window.select_tag(args.tag):
         print("no kit %s in %s" % (args.tag, args.path), file=sys.stderr)
         return 2
+    if args.list_diagnosis:
+        print("  diagnosis: %s" % window.diag_summary.text())
+        for i in range(window.diag_list.count()):
+            print("  row %d: %s" % (i, window.diag_list.item(i).text()))
+        return 0
     if not window.select(image=args.image):
         print("no image %r" % args.image, file=sys.stderr)
         return 2
@@ -872,6 +917,8 @@ def main(argv=None) -> int:
             print("the 3D tab is off: %s" % window.figure_note.text(), file=sys.stderr)
             return 3
         window.tabs.setCurrentIndex(1)
+    elif TAB_NAMES.index(args.tab) == 2:
+        window.tabs.setCurrentIndex(2)
     if args.switch_to:
         window.language_box.setCurrentIndex(i18n.LANGUAGES.index(args.switch_to))
     settle(app)
