@@ -70,3 +70,10 @@ kits_ui: 0 failure(s)
 `kits_selftest: 0 failure(s)`.
 
 **Critério 4** — `ctest --test-dir build -R kits`: `100% tests passed, 0 tests failed out of 4`.
+- **Closed** — commit `cdf41c5` (2026-10-05): feat(kits): Reset view in the 3D tab, and the hint says why the back shows through
+  - Files (`git show --name-status cdf41c5`):
+    - `M docs/tasks/kits/37-reset-e-dica-das-costas.md`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/figure_view.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`
