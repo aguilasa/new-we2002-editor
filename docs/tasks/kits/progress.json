@@ -593,7 +593,7 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#3.4",
       "files": ["tools/kits/ui/figure_view.py", "tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py"],
       "resources": ["tela"],
-      "status": "pending",
+      "status": "in-progress",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,

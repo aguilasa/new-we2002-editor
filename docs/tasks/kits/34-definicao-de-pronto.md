@@ -196,3 +196,4 @@ e o `--compare` contra
 acima).
 
 - **blocked** (2026-10-05): Item 5: python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png -> FAIL 47.56 % differ, above the 5.0 % limit; the only Windows capture (sha256 e973a8aa5991a7ff) predates the 3D/Diagnosis tabs and en-US default. Needs a new capture on Windows at HEAD (app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png). Items 1-4 checked in 24beba1.
+- **blocked** (2026-10-05): Item 5: Windows half done (work/kits-ui-windows.png at 71c65f3, sha256 82cc3da37793, 0 % vs itself, see Log). Remaining: on Linux, redo work/kits-ui-linux.png on :98 and run python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png, must be under 5 %.
