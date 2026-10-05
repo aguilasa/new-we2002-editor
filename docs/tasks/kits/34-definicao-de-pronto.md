@@ -18,7 +18,7 @@ Os cinco itens da Definição de pronto do §0 conferidos na HEAD, cada um com o
 - [x] Item 2: 3D veste jogador e goleiro, titular e suplente de um time que difere, e o confronto 3 concorda
 - [x] Item 3: TEX do WETex abre; TEX quebrado recusado com motivo
 - [x] Item 4: §4.6 fechada com a lista do que sobra
-- [x] Item 5: CLI importa só a fachada; captura igual no Windows e no Linux
+- [x] Item 5: CLI importa só a fachada; captura igual no Windows e no Linux. A metade "a CLI faz tudo o que a janela faz" ficou de fora e fechou na [CORR-KITS-062](/docs/tasks/kits/CORR-KITS-062.md), com o `cli.py figure`
 
 ## Notes
 

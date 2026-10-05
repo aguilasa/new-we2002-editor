@@ -20,11 +20,14 @@ Usage:
     python tools/kits/cli.py export --confront [--negative] [--tag TAG ...] <image.bin>
     python tools/kits/cli.py zones [--negative] <image.bin>
     python tools/kits/cli.py zones --map <Zonas We2002.png> [--negative]
+    python tools/kits/cli.py figure [--tag TAG] [--set 1|2] [--figure 0|1] [--geometry BIN] <path>
+    python tools/kits/cli.py figure --negative [--tag TAG] [--geometry BIN] <path>
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import struct
@@ -1047,6 +1050,89 @@ def confront(image_path: str, tags, negative: bool) -> int:
     return 0 if not differ and kits else 1
 
 
+def _scene_digest(scene) -> str:
+    """sha256 of what the window draws of *scene*: every part's points, UVs
+    and the RGBA of its surface, in draw-list order."""
+    h = hashlib.sha256()
+    for part in scene.parts:
+        h.update(repr((part.points, part.uvs)).encode())
+        h.update(part.surface.rgba if part.surface is not None else b"untextured")
+    return h.hexdigest()
+
+
+def cmd_figure(args) -> int:
+    """The 3D figure the window's 3D tab draws (`api.figure`, in the pose it
+    opens with), one line per set and figure: parts, textured parts,
+    surfaces, bounds and the digest of the scene; with both sets, whether
+    they differ.  --negative draws set 2 as set 1 -- the set ignored -- and
+    passes only if that verdict flips (CORR-KITS-062)."""
+    try:
+        source = api.open_source(args.path)
+    except api.KitsError as exc:
+        print("figure: %s" % exc, file=sys.stderr)
+        return 1
+    if source.kind == api.KIND_ROM and not args.tag:
+        print("figure: a disc needs --tag", file=sys.stderr)
+        return 2
+    try:
+        kit = source.kit(args.tag) if source.kind == api.KIND_ROM else source.kit()
+    except api.KitError as exc:
+        print("figure: %s" % exc, file=sys.stderr)
+        return 1
+    if not kit.ok:
+        print("figure: %s is refused by the guard: %s" % (kit.label, "; ".join(kit.problems)),
+              file=sys.stderr)
+        return 1
+    try:
+        geometry = api.read_geometry(args.geometry)
+    except api.FigureError as exc:
+        print("figure: %s" % exc, file=sys.stderr)
+        return 1
+    sets = (1, 2) if args.negative else tuple(args.set or (1, 2))
+    figures = tuple(args.figure or (0, 1))
+
+    def draw(drawn_as) -> tuple:
+        digests, bad = {}, 0
+        for kit_set in sets:
+            for figure in figures:
+                try:
+                    scene = api.figure(kit, drawn_as(kit_set), figure, frame=api.FIGURE_POSE,
+                                       geometry=geometry)
+                except api.FigureError as exc:
+                    bad += 1
+                    print("set %d figure %d: %s" % (kit_set, figure, exc))
+                    continue
+                low, high = scene.bounds()
+                digests[kit_set, figure] = _scene_digest(scene)
+                print("set %d figure %d  %d parts, %d textured, %d surfaces, "
+                      "bounds (%d,%d,%d)..(%d,%d,%d)  %s"
+                      % (kit_set, figure, len(scene.parts),
+                         sum(1 for p in scene.parts if p.textured), len(scene.surfaces),
+                         low[0], low[1], low[2], high[0], high[1], high[2],
+                         digests[kit_set, figure]))
+        verdicts = {}
+        if sets == (1, 2):
+            for figure in figures:
+                if (1, figure) in digests and (2, figure) in digests:
+                    verdicts[figure] = digests[1, figure] != digests[2, figure]
+                    print("figure %d: set 1 and set 2 %s" % (
+                        figure, "differ" if verdicts[figure] else "are the same"))
+        return bad, verdicts
+
+    bad, clean = draw(lambda kit_set: kit_set)
+    if not args.negative:
+        return 1 if bad else 0
+    print("planted: set 2 drawn as set 1")
+    bad_planted, planted = draw(lambda kit_set: 1)
+    flipped = [f for f in clean if clean[f] and not planted.get(f, True)]
+    print("negative: %d of %d figure(s) whose sets differ come out the same with the set "
+          "ignored -- %s" % (len(flipped), sum(clean.values()),
+                             "ok" if flipped and len(flipped) == sum(clean.values())
+                             else "FAIL"))
+    return 0 if (not bad and not bad_planted and flipped
+                 and len(flipped) == sum(clean.values())) else 1
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1134,6 +1220,17 @@ def main(argv=None) -> int:
     p.add_argument("--negative", action="store_true",
                    help="move the map 1 px right, which has to fail (section 5, control 4)")
     p.set_defaults(fn=cmd_zones)
+    p = sub.add_parser("figure", help="the 3D figure the window draws, as parts and a digest")
+    p.add_argument("path", help="a disc image, its cue sheet, or a lone TEX")
+    p.add_argument("--tag", help="the kit, on a disc (e.g. 00)")
+    p.add_argument("--set", type=int, choices=(1, 2), action="append",
+                   help="first or second set (default both; repeatable)")
+    p.add_argument("--figure", type=int, choices=(0, 1), action="append",
+                   help="0 player, 1 goalkeeper (default both; repeatable)")
+    p.add_argument("--geometry", help="the Japanese data track (default $WE2002_LOOKS_IMAGE)")
+    p.add_argument("--negative", action="store_true",
+                   help="draw set 2 as set 1 and require the set-1-vs-set-2 verdict to flip")
+    p.set_defaults(fn=cmd_figure)
     args = parser.parse_args(argv)
     if args.command == "export" and not args.confront and not args.out:
         parser.error("export needs --out (or --confront)")

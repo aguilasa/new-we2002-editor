@@ -59,6 +59,9 @@ passa a guarda com as mesmas imagens nas cinco paletas. O item 5 fechou com
 uma captura nova do Windows na HEAD: contra a do Linux, 2,37 % de pixels
 diferentes (limite 5 %), com outro kit no lugar dando 49,98 %. A captura velha
 da KITS-TASK-19, de antes do 3D e do inglês por default, dava 47,56 %.
+A metade "a CLI faz tudo o que a janela faz" ficou de fora dessa conferência
+— a CLI não desenhava a figura 3D — e fechou com o `cli.py figure`
+([CORR-KITS-062](/docs/tasks/kits/CORR-KITS-062.md)).
 
 ## 1. O que já se sabe
 
@@ -290,9 +293,14 @@ Os módulos atrás da fachada:
 | `figure.py` | a única ponte com o `looks`: pede a cena ao `scene` |
 | `generated/` | as tabelas copiadas do C++ por gerador (§3.3), nunca editadas à mão |
 
-A **CLI** (`tools/kits/cli.py`: `info`, `teams`, `export`, `check`) é o segundo
+A **CLI** (`tools/kits/cli.py`: `info`, `teams`, `export`, `figure`) é o segundo
 cliente da fachada e a prova de que ela basta: se a CLI precisar importar algo
-além de `api`, a fachada está incompleta. Ao lado desses quatro ela tem `open`,
+além de `api`, a fachada está incompleta. O `figure` é a aba 3D sem janela: a
+mesma chamada `api.figure`, na pose de abertura, impressa como peças e digest
+por conjunto e figura; o `kits_image` confere que o digest é o da janela e o
+`--negative` (conjunto ignorado) fica vermelho
+([CORR-KITS-062](/docs/tasks/kits/CORR-KITS-062.md); o `check` que esta
+lista dava nunca existiu). Ao lado desses quatro ela tem `open`,
 o que a fachada faz de cada arquivo (§3.2; `open --negative` monta as fixtures e
 confere cada recusa), entrado na KITS-TASK-06 para a evidência sair de comando
 versionado, `tex`, a guarda de forma sobre cada TEX de uma origem (§2.1;

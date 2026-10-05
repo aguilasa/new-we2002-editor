@@ -824,6 +824,7 @@ def _figure_checks(c, image_path) -> None:
          % (IMAGE_VARIABLE, worn),
          lone is not None and lone.kind == "tex" and worn > 0,
          "kind %r" % (lone and lone.kind))
+    _figure_cli_checks(c, image_path, src.kit("00"), geometry)
     for tag in ("A4", "00"):
         kit = src.kit(tag)
         for figure in (0, 1):
@@ -836,6 +837,47 @@ def _figure_checks(c, image_path) -> None:
                       % (tag, kit_set, figure, swap.rows, swap.surfaces, len(swap.wrong)))
                 c.ok("TEX_%s set %d figure %d: 486/488 swapped draws the other figure's colours"
                      % (tag, kit_set, figure), swap.ok, "; ".join(swap.wrong[:3]))
+
+
+def _figure_cli_checks(c, image_path, kit, geometry) -> None:
+    """Item 5 of section 0 for the 3D tab (CORR-KITS-062): `cli.py figure`
+    draws the scene the window draws -- the same `api.figure` call, the same
+    digest -- tells set 1 from set 2, and its --negative (set 2 drawn as
+    set 1) is seen red."""
+    cli = os.path.join(KITS_DIR, "cli.py")
+    env = dict(os.environ, **{IMAGE_VARIABLE: image_path})
+    proc = subprocess.run([sys.executable, cli, "figure", image_path, "--tag", "00"],
+                          capture_output=True, text=True, env=env)
+    rows = {}
+    for line in proc.stdout.splitlines():
+        words = line.split()
+        if len(words) > 4 and words[0] == "set" and words[2] == "figure":
+            rows[int(words[1]), int(words[3])] = words[-1]
+    scene = c.attempt("draw TEX_00 set 1 figure 0 as the window does",
+                      lambda: api.figure(kit, 1, 0, frame=api.FIGURE_POSE, geometry=geometry))
+    want = None
+    if scene is not None:
+        import hashlib
+        h = hashlib.sha256()
+        for part in scene.parts:
+            h.update(repr((part.points, part.uvs)).encode())
+            h.update(part.surface.rgba if part.surface is not None else b"untextured")
+        want = h.hexdigest()
+    differ = sum(1 for line in proc.stdout.splitlines()
+                 if line.startswith("figure ") and line.endswith("set 1 and set 2 differ"))
+    print("  ..... cli.py figure TEX_00: exit %d, %d row(s), %d figure(s) whose sets differ"
+          % (proc.returncode, len(rows), differ))
+    c.ok("cli.py figure draws the window's scene: TEX_00 set 1 figure 0 digest %s"
+         % (want or "?")[:16],
+         proc.returncode == 0 and want is not None and rows.get((1, 0)) == want,
+         "cli %s, window %s" % (rows.get((1, 0)), want))
+    c.ok("cli.py figure tells set 1 from set 2 on TEX_00, for both figures",
+         len(rows) == 4 and differ == 2, proc.stdout[-300:])
+    proc = subprocess.run([sys.executable, cli, "figure", "--negative", image_path,
+                           "--tag", "00"], capture_output=True, text=True, env=env)
+    last = proc.stdout.strip().splitlines()[-1] if proc.stdout.strip() else proc.stderr
+    print("  ..... %s" % last)
+    c.ok("cli.py figure --negative: the set ignored is seen red", proc.returncode == 0, last)
 
 
 def run_image(verbose: bool = True) -> int:

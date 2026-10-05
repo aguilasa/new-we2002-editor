@@ -52,3 +52,62 @@ Uma de duas — **decisão do dono do repositório**:
 - Nos dois casos, todo subcomando que a §3.1 lista é aceito por `python3 tools/kits/cli.py <cmd> --help`; hoje o `check` falha.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-05 sobre `5299494`: `grep -c 'api.figure' tools/kits/cli.py` dá `0`, e
+`cli.py check --help` sai com `invalid choice: 'check'`.
+
+Decisão do dono do repositório, nesta sessão: **opção (a)**, a CLI ganha a figura 3D.
+
+Conserto:
+
+- `tools/kits/cli.py figure <origem> [--tag T] [--set 1|2] [--figure 0|1] [--geometry BIN]`
+  chama `api.figure` como a janela (`frame=api.FIGURE_POSE`, geometria lida uma vez). Imprime
+  uma linha por conjunto e figura (peças, peças texturizadas, superfícies, limites, sha256 da
+  cena) e, com os dois conjuntos, se eles diferem.
+- O `--negative` desenha o conjunto 2 como o 1 e só passa se o veredito virar.
+- `selftest.py --image` (alvo `kits_image`) ganhou `_figure_cli_checks`, com três afirmações:
+  - o digest do `cli.py figure` para `TEX_00`, conjunto 1, figura 0, é o da chamada da janela;
+  - os conjuntos diferem nas duas figuras;
+  - o `--negative` sai 0.
+- `docs/PLAN-KITS-PY.md`:
+  - §3.1: lista `info`, `teams`, `export`, `figure` e diz que o `check` nunca existiu;
+  - Conferência do §0: registra a metade do item 5 que faltava.
+- `docs/tasks/kits/34-definicao-de-pronto.md`: o critério do item 5 remete a esta CORR.
+
+```text
+$ python3 tools/kits/cli.py figure roms/japanese-shift-jis.bin --tag 00 | cut -c1-90
+set 1 figure 0  593 parts, 593 textured, 6 surfaces, bounds (-113,-33,-281)..(65,419,27)
+set 1 figure 1  629 parts, 629 textured, 6 surfaces, bounds (-113,-33,-281)..(60,419,27)
+set 2 figure 0  593 parts, 593 textured, 6 surfaces, bounds (-113,-33,-281)..(65,419,27)
+set 2 figure 1  629 parts, 629 textured, 6 surfaces, bounds (-113,-33,-281)..(60,419,27)
+figure 0: set 1 and set 2 differ
+figure 1: set 1 and set 2 differ
+$ python3 tools/kits/cli.py figure --negative roms/japanese-shift-jis.bin --tag 00 | tail -1
+negative: 2 of 2 figure(s) whose sets differ come out the same with the set ignored -- ok
+```
+
+`TEX_A4`, cujo suplente é igual ao titular, dá `0 of 0 ... -- FAIL` no `--negative`, com saída
+1: o controle não passa onde não há o que virar.
+
+Vermelho visto: numa cópia da árvore no scratchpad, a chamada do `cmd_figure` foi trocada para
+`api.figure(kit, 1, figure, …)`, isto é, o conjunto ignorado.
+
+```text
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 $S/tools/kits/selftest.py --image | grep -E "cli.py figure|failure"
+  FAIL  cli.py figure tells set 1 from set 2 on TEX_00, for both figures    ab81491bd0f654d0…
+  FAIL  cli.py figure --negative: the set ignored is seen red  negative: 0 of 0 figure(s) whose sets differ come out the same with the set ignored -- FAIL
+figure: 2 failure(s)
+```
+
+Na árvore real, o mesmo comando dá:
+
+```text
+  ok    cli.py figure draws the window's scene: TEX_00 set 1 figure 0 digest ab81491bd0f654d0
+  ok    cli.py figure tells set 1 from set 2 on TEX_00, for both figures
+  ok    cli.py figure --negative: the set ignored is seen red
+figure: 0 failure(s)
+```
+
+Verificação: `grep -c 'api.figure' tools/kits/cli.py` dá `2`, e `info`, `teams`, `export` e
+`figure` saem 0 com `--help`. `ctest --test-dir build -R kits` dá `100% tests passed, 0 tests
+failed out of 4`, e `python3 tools/kits/controls.py` dá `controls: 24 of 24 red`.
