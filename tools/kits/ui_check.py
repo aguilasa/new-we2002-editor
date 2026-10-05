@@ -40,7 +40,10 @@ WHAT IT JUDGES:
       tab drawing set 1 for both sets FAILS the 3D judge, and the tab left on
       with no geometry, or a Plan widget that changes with no geometry, FAIL
       the 3D off judge; the kit selector labelled with bare tags FAILS the
-      selector judge.  A plant that passes is a red gate.  "Without Fusion" is planted as
+      selector judge; the Diagnosis tab without its problem rows FAILS the
+      Diagnosis judge, and without its note rows FAILS it only with
+      WE2002_KITS_ED_IMAGE set -- without it that plant prints "not judged",
+      because only the European Deluxe TEX_13 has a note row.  A plant that passes is a red gate.  "Without Fusion" is planted as
       `setStyle("Windows")`, not as the line taken out: on Linux Qt's default
       style already is Fusion (measured on :98, 2026-10-02), so removing the
       line changed nothing there and the plant passed.  "Windows" is the one
@@ -132,8 +135,11 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG = ("style", "hover", "3D", "3D off", "selector",
-                                             "diagnosis")
+STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE = (
+    "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note")
+"""DIAG_NOTE is the Diagnosis judge on the note rows: only the European
+Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
+and says it was not judged otherwise (CORR-KITS-061)."""
 ED_VARIABLE = "WE2002_KITS_ED_IMAGE"
 """The European Deluxe disc, whose TEX_48 and TEX_70 the guard refuses and
 whose TEX_13 is read past its ISO size (section 2.1); the Diagnosis judge
@@ -155,6 +161,9 @@ PLANTS = (
     ("diagnosis rows never added", DIAG,
      '            self.diag_list.addItem(tr("diag_problem", text=text))\n',
      "            pass  # planted: no problem row\n"),
+    ("diagnosis note rows never added", DIAG_NOTE,
+     '            self.diag_list.addItem(tr("diag_note", text=text))\n',
+     "            pass  # planted: no note row\n"),
     ("no Fusion", STYLE, '    app.setStyle("Fusion")\n',
      '    app.setStyle("Windows")  # planted: no Fusion\n'),
     ("no fixed palette", STYLE, "    app.setPalette(fixed_palette())\n",
@@ -729,6 +738,10 @@ def run(python: str, image: str) -> int:
                   "European Deluxe were not judged" % ED_VARIABLE)
 
         for name, judge, old, new in PLANTS:
+            if judge == DIAG_NOTE and os.environ.get(ED_VARIABLE) is None:
+                print("        plant '%s': not judged, %s is not set and only its TEX_13 "
+                      "has a note row" % (name, ED_VARIABLE))
+                continue
             with tempfile.TemporaryDirectory(prefix="kits-ui-plant-") as box:
                 try:
                     app = sandbox(box, old, new)
@@ -746,7 +759,7 @@ def run(python: str, image: str) -> int:
                     red, bad = off_judge(python, image, env, box, app), []
                 elif judge == SELECTOR:
                     red, bad = selector_judge(python, app, image, env)[0], []
-                elif judge == DIAG:
+                elif judge in (DIAG, DIAG_NOTE):
                     red, bad = diag_judge(python, image, env, box, app)[0], []
                 else:
                     bad, red = [], hover_judge(python, app, image, env, want) if want else []
