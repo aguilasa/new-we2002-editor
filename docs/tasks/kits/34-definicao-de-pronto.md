@@ -166,4 +166,33 @@ da raiz do repositório,
 `work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png`;
 aqui, `python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png`
 com o `work/kits-ui-linux.png` refeito pelo mesmo comando no `:98`.
+### 2026-10-05, no Windows — a metade do Windows feita
+
+Na HEAD `71c65f3`, Windows 11, `WE2002_KITS_LANG` vazia. A captura antiga da
+KITS-TASK-19 ficou guardada como `work/kits-ui-windows-task19.png` (fora do git)
+e a nova tomou o lugar dela:
+
+```
+$ work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png
+  wrote work/kits-ui-windows.png, 980x640
+  window up, at -32000,-32000
+$ sha256sum work/kits-ui-windows.png
+82cc3da377931656e2aeee2a0c90097e993b39aabe0eb1d69289d9254d7f2d7c
+$ python tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-windows.png
+kits-ui-windows.png: 980x640, window colour 22.6 %, Fusion pane 18.2 %
+0 of 627200 pixels differ (0.00 %)
+ok    within 5.0 %, both with the fixed look
+$ python tools/kits/ui_check.py --compare work/kits-ui-windows-task19.png work/kits-ui-windows.png
+295615 of 627200 pixels differ (47.13 %)
+FAIL  47.13 % differ, above the 5.0 % limit
+```
+
+A captura sai em inglês, com as abas Plan, 3D e Diagnosis e o seletor de
+idioma (olhada). O último comando é o controle: a captura velha contra a nova
+reprova, e com a mesma cifra da corrida do Linux, então era a captura que
+estava velha. Falta a metade do Linux: refazer `work/kits-ui-linux.png` no `:98`
+e o `--compare` contra
+`/media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png` (sha256
+acima).
+
 - **blocked** (2026-10-05): Item 5: python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png -> FAIL 47.56 % differ, above the 5.0 % limit; the only Windows capture (sha256 e973a8aa5991a7ff) predates the 3D/Diagnosis tabs and en-US default. Needs a new capture on Windows at HEAD (app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png). Items 1-4 checked in 24beba1.
