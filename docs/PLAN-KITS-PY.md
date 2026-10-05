@@ -353,7 +353,11 @@ devolve.
   PNG".
 - **Aba "3D"**: titular/suplente, jogador/goleiro, giro livre. Desenhada por
   `QPainter` em software (`ui/figure_view.py`), não OpenGL: o mesmo quadro no
-  Windows e no Xvfb, que é o que o `kits_ui` compara (KITS-TASK-25).
+  Windows e no Xvfb, que é o que o `kits_ui` compara (KITS-TASK-25). Um botão
+  **Reset view** (e o duplo clique na vista) volta ao giro de abertura; a dica
+  da aba diz que as costas saem vazadas porque a área que o torso amostra está
+  vazia no TEX (§4.7) — o desenho segue os dados (decisão do usuário,
+  2026-10-05; KITS-TASK-37).
 - **Aba "Diagnóstico"**: a lista do `kit.problems`, uma linha por problema da
   guarda ("Refused: …") e uma por nota de leitura ("Note: …"), nas palavras do
   núcleo, com um resumo em cima; TEX sadio lido sem nota deixa a lista vazia
@@ -523,6 +527,10 @@ cruzamento do §4.6, que a
 ([CORR-KITS-007](/docs/tasks/kits/CORR-KITS-007.md)): nenhuma fora do mapa, e as
 15 zonas da imagem de mangas sem primitiva, pelo motivo acima.
 
+A metade aberta — quem amostra a imagem de mangas, e portanto quem desenha a
+braçadeira — é a [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md), na
+fase 10. A braçadeira só entra na aba 3D com essa geometria medida.
+
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 
 O [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)
@@ -648,6 +656,32 @@ de zona). Os dois rodam no `kits_image`; os dois do `--map` só quando
 usuário e não entra no repositório — sem a variável o `kits_image` diz que não os
 rodou ([CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md)).
 
+### 4.7 (g) As costas e o número
+
+Pedido do usuário em 2026-10-05: o boneco de costas sai vazado e sem número, e
+ele quer ligar número e braçadeira na aba 3D. O vazado é a lacuna do torso do
+§4.6: 28 primitivas da seção de torso de cada figura amostram (0,80) 20×24 no
+jogador e (100,104) 20×24 no goleiro, área de índice 0 em todo pixel dos 210
+bitmaps e transparente em 190. O desenho está fiel ao disco; o que não se sabe
+é se o jogo **preenche** essa área em tempo de execução — com as costas e o
+número de camisa — antes de desenhar.
+
+O que medir, nessa ordem
+([KITS-TASK-38](/docs/tasks/kits/38-medir-costas-numero.md)):
+
+1. a VRAM da imagem de uniforme em (576,256) + (0,80) 20×24 e + (100,104)
+   20×24 com a `LOOKS SET` na tela, pelos dois states: o jogo escreveu ali ou
+   continua índice 0;
+2. se não escreveu, o mesmo numa partida — o que pede um save state novo,
+   decisão do usuário;
+3. se escreveu, de onde vêm os texels: a zona "numbers 0-9" (64,68) 60×12, que
+   nenhuma primitiva da `LOOKS SET` amostra, é a candidata, e a regra diz onde
+   cada dígito cai.
+
+O número só entra na aba 3D com essa regra medida, e nunca por remapeamento de
+UV feito à mão (§0). Sem a regra, o checkbox de número fica desligado com a
+frase de que não foi medido (KITS-TASK-40).
+
 ## 5. Como se verifica
 
 1. **Dois decodificadores concordam.** `tex.py` e `bin_archive.py export` sobre
@@ -718,7 +752,8 @@ rodou ([CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md)).
 | 7 | §4.1 no emulador e o confronto 3 do §5 | 6 |
 | 8 | §4.2: o combobox passa a listar times em vez de tags | 2 |
 | 9 | aba "Diagnóstico" | 1 |
-| — | manga longa, braçadeira e árbitro com a paleta do jogo: só depois das §4.3 e §4.5 | 0 |
+| 10 | aba 3D: reset do giro e a dica das costas; costas, número (§4.7) e braçadeira (§4.3) medidos no jogo, e os checkboxes de número e braçadeira com o que se mediu | 6, 7 |
+| — | manga longa e árbitro com a paleta do jogo: só depois das §4.3 e §4.5 | 0 |
 
 As fases 1 a 3 não têm janela nenhuma, de propósito: o núcleo fica pronto e
 testado pela CLI antes de existir interface, e é assim que ele chega inteiro à
