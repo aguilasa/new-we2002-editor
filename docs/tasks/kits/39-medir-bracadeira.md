@@ -67,3 +67,4 @@ Recursos: emulador e save-states. A braçadeira e a manga longa ficam na imagem 
 manga longa ou de capitão na tela, e esse state é decisão do usuário. A §4.3
 traz a tabela.
 - **blocked** (2026-10-05): oracle.py --sleeves 1|2 on LOOKS SET: 'sleeves image 0' (0 of 418, 0 of 430). Armband and long sleeves are drawn only in a match: needs a match save state with a long-sleeved or captain outfield player on screen, user's decision. Unblocked when 'python tools/kits/oracle.py --sleeves <match slot>' reports a sleeves image count above 0. Partial work b88d9c1.
+- **pending** (2026-10-05): user saved match state slot 5 (Norway x Ecuador, long sleeves, Norway's no. 10 captain on the ball); oracle.py --sleeves 5 reports sleeves image 96
