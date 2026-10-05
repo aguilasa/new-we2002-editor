@@ -61,3 +61,7 @@ RESET_TURN = ("--yaw", "0", "--pitch", "30")
 
 Só muda a ordem de declaração. O módulo continua compilando (`ast.parse` ok) e o `kits_ui` passa
 (ver o commit da correção).
+- **Closed** — commit `6ee6dc4` (2026-10-05): style(kits): RESET_TURN below the DIAG_NOTE docstring it had split off
+  - Files (`git show --name-status 6ee6dc4`):
+    - `M docs/tasks/kits/CORR-KITS-065.md`
+    - `M tools/kits/ui_check.py`
