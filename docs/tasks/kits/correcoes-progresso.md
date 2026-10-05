@@ -57,5 +57,5 @@
 | [CORR-KITS-052](/docs/tasks/kits/CORR-KITS-052.md) | Colar inteira a saída do controle de conjuntos trocados, ou marcar o corte | KITS-TASK-29 | low | done | 2026-10-04 |
 | [CORR-KITS-053](/docs/tasks/kits/CORR-KITS-053.md) | Controles negativos versionados para EMULATOR_ROWS e para team_kits.py desatualizado | KITS-TASK-30 | medium | done | 2026-10-04 |
 | [CORR-KITS-054](/docs/tasks/kits/CORR-KITS-054.md) | Resolver EDITOR_EXE a partir de REPO_DIR, não do diretório de trabalho | KITS-TASK-30 | low | done | 2026-10-04 |
-| [CORR-KITS-055](/docs/tasks/kits/CORR-KITS-055.md) | Declarar no escopo da task as edições do perfil e da task 31 | KITS-TASK-30 | low | pending | — |
+| [CORR-KITS-055](/docs/tasks/kits/CORR-KITS-055.md) | Declarar no escopo da task as edições do perfil e da task 31 | KITS-TASK-30 | low | done | 2026-10-04 |
 <!-- rite:end -->

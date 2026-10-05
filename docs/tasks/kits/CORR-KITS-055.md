@@ -48,3 +48,8 @@ Conserto: as duas edições aceitas — a do perfil é a varredura que o gerador
 $ rite context KITS-TASK-30 --json | python3 -c "import json,sys;print(json.load(sys.stdin)['item']['files'])"
 ['tools/kits/core/generated/', 'tools/kits/gen_tables.py', 'docs/PLAN-KITS-PY.md', 'NOTICE.md', 'docs/prompts/perfil-kits.md', 'docs/tasks/kits/31-combobox-de-times.md']
 ```
+- **Closed** — commit `acc9e90` (2026-10-04): docs(kits): declare the profile and task-31 edits in the KITS-TASK-30 scope
+  - Files (`git show --name-status acc9e90`):
+    - `M docs/tasks/kits/30-tabela-time-tag.md`
+    - `M docs/tasks/kits/CORR-KITS-055.md`
+    - `M docs/tasks/kits/progress.json`
