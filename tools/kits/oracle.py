@@ -495,11 +495,21 @@ def sample_zones(sample) -> set:
             if z.x <= x1 and x0 < z.x + z.w and z.y <= y1 and y0 < z.y + z.h}
 
 
+def sleeves_kind(names) -> str:
+    """One primitive on the sleeves image, by the zones it touches, armband
+    first: a quad of the armband also touches the captain's long-sleeve rows
+    around it, and counts once (CORR-KITS-068)."""
+    return ("armband" if any(n.startswith("armband") for n in names)
+            else "long sleeve" if any(n.startswith("long sleeve") for n in names)
+            else "other sleeves")
+
+
 def sleeves_tally(samples) -> dict:
-    """{"uniform", "sleeves", "both", "long sleeve", "armband", "other page"}
-    counts over the textured primitives of one frame."""
+    """{"uniform", "sleeves", "both", "long sleeve", "armband", "other sleeves",
+    "other page"} counts over the textured primitives of one frame; the three
+    of the sleeves image are a partition of "sleeves" + "both"."""
     out = {"uniform": 0, "sleeves": 0, "both": 0, "long sleeve": 0,
-           "armband": 0, "other page": 0}
+           "armband": 0, "other sleeves": 0, "other page": 0}
     for one in samples:
         image = kit_image_of(one)
         if image is None:
@@ -507,9 +517,7 @@ def sleeves_tally(samples) -> dict:
             continue
         out[image] += 1
         if image != "uniform":
-            names = sample_zones(one)
-            out["long sleeve"] += any(n.startswith("long sleeve") for n in names)
-            out["armband"] += any(n.startswith("armband") for n in names)
+            out[sleeves_kind(sample_zones(one))] += 1
     return out
 
 
@@ -528,6 +536,11 @@ def sleeves_judge(tally: dict, expect=None, found=None) -> list:
         out.append("no primitive samples the uniform image: the list read is not "
                    "the figure's")
     on_sleeves = tally["sleeves"] + tally["both"]
+    parts = tally["long sleeve"] + tally["armband"] + tally["other sleeves"]
+    if parts != on_sleeves:
+        out.append("long sleeve %d + armband %d + other %d = %d, not the %d on the "
+                   "sleeves image" % (tally["long sleeve"], tally["armband"],
+                                      tally["other sleeves"], parts, on_sleeves))
     if expect == "none" and on_sleeves:
         out.append("%d primitive(s) sample the sleeves image, not none" % on_sleeves)
     if expect == "drawn":
@@ -623,10 +636,8 @@ def model_sections(samples, image_path: str) -> dict:
             quads[tuple(one["uv"])] = one
     out = {}
     for uv, one in sorted(quads.items()):
-        names = sample_zones(one)
-        kind = ("armband" if any(n.startswith("armband") for n in names)
-                else "long sleeve" if any(n.startswith("long sleeve") for n in names)
-                else "other")
+        kind = sleeves_kind(sample_zones(one))
+        kind = "other" if kind == "other sleeves" else kind
         where = [i for i, sec in enumerate(sections)
                  if any(tuple(p.texcoords) == uv for p in sec.primitives)]
         for index in where or [None]:
@@ -677,8 +688,9 @@ def run_sleeves(slot: int, cue: str, expect=None, plant=False) -> int:
     for page in sorted(pages):
         print("    page (%d,%d): %s" % (page + (", ".join(
             "%s %d" % kv for kv in sorted(pages[page].items())),)))
-    print("  of those touching the sleeves image: long sleeve zones %d, armband zones %d"
-          % (tally["long sleeve"], tally["armband"]))
+    print("  of those on the sleeves image, each once (armband first): long sleeve %d, "
+          "armband %d, other %d" % (tally["long sleeve"], tally["armband"],
+                                    tally["other sleeves"]))
     zones = {}
     for one in samples:
         if kit_image_of(one) in ("sleeves", "both"):

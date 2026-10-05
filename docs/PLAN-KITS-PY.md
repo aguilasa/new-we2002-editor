@@ -557,11 +557,16 @@ pela página, pelo CLUT e pelos texels de cada uma, e só conta primitiva de 8
 bits com CLUT de kit: linhas 486 a 493, x 0. Numa partida, as páginas de kit
 também guardam gráficos de 4 bits que não são uniforme.
 
-| slot | tela | primitivas texturizadas | imagem de uniforme | imagem de mangas | zonas de manga longa | zonas de braçadeira |
-|---|---|---|---|---|---|---|
-| 2 | `LOOKS SET`, linha | 418 | 104 | **0** | 0 | 0 |
-| 1 | `LOOKS SET`, goleiro | 430 | 190 | **0** | 0 | 0 |
-| 5 | partida, Noruega × Equador, os dois de manga longa, o capitão norueguês com a bola | 789 | 154 | **96** | 88 | 8 |
+| slot | tela | primitivas texturizadas | imagem de uniforme | imagem de mangas | manga longa | braçadeira | outras (cotovelo) |
+|---|---|---|---|---|---|---|---|
+| 2 | `LOOKS SET`, linha | 418 | 104 | **0** | 0 | 0 | 0 |
+| 1 | `LOOKS SET`, goleiro | 430 | 190 | **0** | 0 | 0 | 0 |
+| 5 | partida, Noruega × Equador, os dois de manga longa, o capitão norueguês com a bola | 789 | 154 | **96** | 80 | 8 | 8 |
+
+As três últimas colunas são uma partição da imagem de mangas: cada primitiva
+conta uma vez, a braçadeira primeiro (`oracle.sleeves_kind`). A tabela dizia
+88 \| 8 até a [CORR-KITS-068](/docs/tasks/kits/CORR-KITS-068.md): os 8 quads da
+braçadeira contavam também como manga longa, e os 8 de cotovelo como nada.
 
 **Na `LOOKS SET` a imagem de mangas não é desenhada**, e o jogo confirma a
 medição do disco. **Na partida ela é desenhada, por outra geometria:** cada um
@@ -570,14 +575,18 @@ pelos quatro cantos de texel no leiaute `POLY_FT4` que o `section.py` lê. Os
 mesmos quads deslocados um texel não estão em arquivo nenhum. Dentro do
 `MODEL.BIN`, pelas seções que o `section.scan` acha:
 
-- **a braçadeira é a seção 93**: 6 quads, todos na zona "armband, long sleeve";
+- **a braçadeira é a seção 93**: 6 quads, todos na zona "armband, long sleeve"
+  e cada um tocando também uma das duas zonas de capitão acima e abaixo dela;
 - **a manga longa são as seções 95 a 102**: 8, 8, 6, 8, 3, 2, 3 e 2 quads. Dois
   deles, nas seções 96 e 98, caem no cotovelo e não numa zona de manga longa.
 
 Na lista do quadro, a Noruega fica na página (576,256) e o Equador na
 (640,256), com 45 e 51 primitivas na imagem de mangas. As zonas de capitão do
-mapa ("long sleeve, left, captain" e "…, under the armband") também são
-amostradas, por 4 primitivas cada.
+mapa ("long sleeve, left, captain" e "…, under the armband") aparecem com 4
+primitivas cada na lista por zona, que conta uma primitiva em toda zona que
+ela toca: são os próprios quads da braçadeira, não outra geometria — o total
+exclusivo de manga longa, 80, já é a soma das quatro zonas sem capitão (23 +
+22 + 21 + 14).
 
 Comando: `python tools/kits/oracle.py --sleeves 1|2 --expect-sleeves none` e
 `--sleeves 5 --expect-sleeves drawn`, com `WE2002_LOOKS_IMAGE` e

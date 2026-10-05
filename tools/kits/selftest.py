@@ -745,6 +745,18 @@ def _oracle_checks(c) -> None:
     found = {"quads": 1, "files": {"/BIN/MODEL.BIN": [tuple(samples[1]["uv"])]}}
     c.ok("oracle --sleeves: --expect-sleeves drawn needs the armband and the long sleeve",
          len(oracle.sleeves_judge(tally, "drawn", found)) == 1)
+    # A quad across the captain's long-sleeve rows and the armband (v 142-151,
+    # as the game draws it) and one on the elbow: the armband counts once, the
+    # elbow as other, and the three sum to the sleeves image (CORR-KITS-068).
+    crossing = oracle.textured_samples([quad(40, 142, 7, 9), quad(32, 213, 6, 6)])
+    split = oracle.sleeves_tally(crossing)
+    c.ok("oracle --sleeves: a quad across captain and armband is the armband, once; "
+         "the elbow is other",
+         (split["armband"], split["long sleeve"], split["other sleeves"], split["sleeves"])
+         == (1, 0, 1, 2), "%s" % split)
+    c.ok("oracle --sleeves: a tally whose parts do not sum to the sleeves image fails",
+         any("not the" in f for f in oracle.sleeves_judge(
+             dict(split, **{"long sleeve": 1}))), "%s" % split)
 
 
 def _negative(c) -> None:

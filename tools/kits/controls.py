@@ -223,6 +223,17 @@ CONTROLS = (
         "CORR-KITS-067)",
     ),
     Control(
+        "oracle-sleeves-long-first", "kits/oracle.py", "sleeves_kind",
+        '    return ("armband" if any(n.startswith("armband") for n in names)\n'
+        '            else "long sleeve" if any(n.startswith("long sleeve") for n in names)\n',
+        '    return ("long sleeve" if any(n.startswith("long sleeve") for n in names)\n'
+        '            else "armband" if any(n.startswith("armband") for n in names)\n',
+        "FAIL  oracle --sleeves: a quad across captain and armband is the armband, once",
+        "an armband quad also touches the captain's long-sleeve rows; counted "
+        "long sleeve first, the 8 armband primitives vanish into the 88 "
+        "(CORR-KITS-068)",
+    ),
+    Control(
         "scene-outside-figure", "kits/core/teams.py", "module imports",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n"

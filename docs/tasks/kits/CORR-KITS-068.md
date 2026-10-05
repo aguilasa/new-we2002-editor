@@ -71,3 +71,66 @@ Em `tools/kits/oracle.py`, fazer `sleeves_tally`/`run_sleeves` classificar cada 
 `python3 tools/kits/oracle.py --sleeves 5 --expect-sleeves drawn` imprime contagens de manga longa, braçadeira e outras que somam o total da imagem de mangas (96 = 80 + 8 + 8); hoje imprime 88 + 8 sem "outras". `python3 tools/kits/selftest.py` inclui um caso de quad atravessado que falha com o tally não exclusivo de hoje.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-05 sobre `c66ca43`. O `sleeves_tally` somava dois `any()`
+independentes:
+
+```text
+$ grep -n "def sleeves_tally" -A14 tools/kits/oracle.py | grep "any("
+511-            out["long sleeve"] += any(n.startswith("long sleeve") for n in names)
+512-            out["armband"] += any(n.startswith("armband") for n in names)
+```
+
+Conserto em `tools/kits/oracle.py`:
+
+- `sleeves_kind(names)` classifica uma primitiva uma vez só, com a braçadeira primeiro. É a regra
+  que o `model_sections` já usava, e agora ele usa a mesma função.
+- O `sleeves_tally` ganhou o balde `"other sleeves"`.
+- O `sleeves_judge` reprova quando manga longa + braçadeira + outras não somam a imagem de mangas.
+- A linha impressa diz que a contagem é exclusiva.
+
+Em `tools/kits/selftest.py` entraram dois casos:
+
+- um quad atravessado v 142–151 (zona de capitão e braçadeira) e um de cotovelo, que têm de dar
+  braçadeira 1, manga longa 0, outras 1;
+- um tally adulterado que não soma, que tem de falhar.
+
+Em `tools/kits/controls.py`, o controle `oracle-sleeves-long-first` (manga longa primeiro) tem de
+ficar vermelho.
+
+Em `docs/PLAN-KITS-PY.md` (§4.3):
+
+- a tabela ganhou a coluna "outras (cotovelo)" e o slot 5 passou a dizer 80 | 8 | 8;
+- a seção 93 diz que cada quad toca também uma zona de capitão;
+- o parágrafo das zonas de capitão diz que elas são os próprios quads da braçadeira.
+
+A transcrição da corrida antiga no Log da KITS-TASK-39 fica como está: é evidência do que a
+ferramenta imprimia naquela HEAD.
+
+```text
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE2002_LOOKS_DRIVE_IMAGE=$PWD/work/looks-disc/we2002-english.cue DISPLAY=:98 XAUTHORITY= python3 tools/kits/oracle.py --sleeves 5 --expect-sleeves drawn
+  kit pages: uniform image 154, sleeves image 96, both 0; other pages 539
+  of those on the sleeves image, each once (armband first): long sleeve 80, armband 8, other 8
+    zone long sleeve, right forearm                       23 primitive(s)
+    zone long sleeve, right                               22 primitive(s)
+    zone long sleeve, left forearm                        21 primitive(s)
+    zone long sleeve, left                                14 primitive(s)
+    zone armband, long sleeve                             8 primitive(s)
+    zone long sleeve, left, captain, under the armband    4 primitive(s)
+    zone elbow, right                                     4 primitive(s)
+    zone long sleeve, left, captain                       4 primitive(s)
+    zone elbow, left                                      4 primitive(s)
+  ok    154 primitive(s) sample the uniform image; sleeves drawn
+$ python3 tools/kits/selftest.py | grep "oracle --sleeves: a"
+  ok    oracle --sleeves: a quad across captain and armband is the armband, once; the elbow is other
+  ok    oracle --sleeves: a tally whose parts do not sum to the sleeves image fails
+$ python3 tools/kits/controls.py --only oracle-sleeves-long-first
+  RED    oracle-sleeves-long-first    kits/oracle.py :: sleeves_kind
+$ python3 tools/kits/controls.py | tail -1
+controls: 26 of 26 red
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+```
+
+96 = 80 + 8 + 8. O 80 também é a soma das quatro zonas de manga longa sem capitão: 23 + 22 + 21 +
+14.
