@@ -70,3 +70,8 @@ $ grep -c "0,341" docs/tasks/kits/28-confronto-3.md
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
 100% tests passed, 0 tests failed out of 4
 ```
+- **Closed** — commit `122b921` (2026-10-04): feat(kits): confront.py --score prints each team's lead
+  - Files (`git show --name-status 122b921`):
+    - `M docs/tasks/kits/28-confronto-3.md`
+    - `M docs/tasks/kits/CORR-KITS-051.md`
+    - `M tools/kits/confront.py`
