@@ -119,3 +119,10 @@ Os vermelhos:
 
 O resultado está na §4.3: a braçadeira é a seção 93 do `MODEL.BIN` e a manga
 longa são as seções 95 a 102, separadas pelas zonas do `core/zones.py`.
+- **Closed** — commit `ffdfb0c` (2026-10-05): feat(kits): oracle.py --sleeves reads a match: armband and long sleeves are MODEL.BIN
+  - Files (`git show --name-status ffdfb0c`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/39-medir-bracadeira.md`
+    - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`

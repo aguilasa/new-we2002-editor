@@ -185,7 +185,7 @@ graph TD
 | [KITS-TASK-35](/docs/tasks/kits/35-fechamento-fase-9.md) | Fechamento da fase 9 | 9 | closing | KITS-TASK-33, KITS-TASK-34 | done | 2026-10-05 | 2026-10-05 |
 | [KITS-TASK-37](/docs/tasks/kits/37-reset-e-dica-das-costas.md) | Botão de reset na aba 3D e a dica das costas | 10 | implementação | — | done | 2026-10-05 | 2026-10-05 |
 | [KITS-TASK-38](/docs/tasks/kits/38-medir-costas-numero.md) | Medir as costas e o número no jogo | 10 | verificação | — | done | 2026-10-05 | 2026-10-05 |
-| [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md) | Medir quem desenha a braçadeira | 10 | verificação | — | pending | — | — |
+| [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md) | Medir quem desenha a braçadeira | 10 | verificação | — | done | 2026-10-05 | pending |
 | [KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md) | Checkboxes de número e braçadeira na aba 3D | 10 | implementação | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39 | pending | — | — |
 | [KITS-TASK-41](/docs/tasks/kits/41-fechamento-fase-10.md) | Fechamento da fase 10 | 10 | closing | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39, KITS-TASK-40 | pending | — | — |
 <!-- rite:end -->
