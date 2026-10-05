@@ -15,9 +15,9 @@ A §4.1 respondida pelo jogo: com um time de pares diferentes jogando de suplent
 
 ## Done criteria
 
-- [ ] Comando versionado sobe o fork, chega à partida e compara retângulo por retângulo; saída colada
-- [ ] Controle: o mesmo comando com o time de titular mostra o 1º par
-- [ ] A §4.1 do plano tem veredito; se o par não for o 2º, uma CORR é aberta contra a fase 5
+- [x] Comando versionado sobe o fork, chega à partida e compara retângulo por retângulo; saída colada
+- [x] Controle: o mesmo comando com o time de titular mostra o 1º par
+- [x] A §4.1 do plano tem veredito; se o par não for o 2º, uma CORR é aberta contra a fase 5
 
 ## Notes
 
@@ -58,3 +58,44 @@ Então, da raiz do repositório:
 python3 tools/kits/oracle.py --slot 3
 ```
 - **blocked** (2026-10-04): no save state of a match exists (only LOOKS SET, title and memory-card screens: savestate.py shot); the comparator is in 43ba7df. Unblock: save a match state with a team of differing pairs playing in its second kit (home team in its first as control) into a free slot, e.g. 3, then: python3 tools/kits/oracle.py --slot 3
+
+### 2026-10-04 — a partida
+
+O usuário gravou o state no slot 3: **Escócia (1º uniforme) × Dinamarca (2º uniforme)**, com a bola rolando, sobre `work/we2002-english.cue` (o campo `media` do state). Cópia mestra guardada antes de qualquer corrida:
+
+```
+$ cp -p ~/.local/share/duckstation/savestates/SLPM-87056_3.sav work/kits-states/
+$ sha256sum work/kits-states/SLPM-87056_3.sav
+5f392a12f85cc8946228b4a20d3e8289435bb631ce35b14a730d3ceec8592152  work/kits-states/SLPM-87056_3.sav
+```
+
+**A primeira corrida mudou a ferramenta.** A busca exata achou paletas e bandeiras dos dois times e **nenhuma página** de uniforme ou de manga: na partida a página não sobe inteira. Linha a linha, as 79 linhas não planas do uniforme do conjunto 2 do `TEX_13` estão todas na VRAM, em (640,256), e só 12 de 80 do conjunto 1 do `TEX_01`, em (576,256). O `oracle.py` ganhou então a comparação das páginas pela mais próxima (`closest_sets`, numa grade de colunas de 64 halfwords a partir de x 512), e o veredito sai dele:
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin \
+  python3 tools/kits/oracle.py --slot 3 --cue $PWD/work/we2002-english.cue --out work/kits-oracle/match-3
+  control: two dumps a frame apart give the same 8 match(es)
+  TEX_01  record  2 player palette     set 1  at (0,486), (0,490)
+  TEX_01  record  7 goalkeeper palette set 2  at (0,488), (0,492)
+  TEX_01  record  8 flag               set -  at (704,256)
+  TEX_01  record  9 flag palette       set -  at (256,494)
+  TEX_13  record  6 player palette     set 2  at (0,487), (0,491)
+  TEX_13  record  7 goalkeeper palette set 2  at (0,489), (0,493)
+  TEX_13  record  8 flag               set -  at (704,320)
+  TEX_13  record  9 flag palette       set -  at (256,495)
+  TEX_01: exact records of set 1 and 2
+  TEX_13: exact records of set 2
+  TEX_01 uniform  at (576,256): set 1 differs in 4746 of 8192 halfwords, set 2 in 5050 -- set 1 nearer
+  TEX_01 sleeves  at (576,384): set 1 differs in 2995 of 8192 halfwords, set 2 in 4211 -- set 1 nearer
+  TEX_13 uniform  at (640,256): set 1 differs in 7198 of 8192 halfwords, set 2 in 2640 -- set 2 nearer
+  TEX_13 sleeves  at (640,384): set 1 differs in 7693 of 8192 halfwords, set 2 in 4093 -- set 2 nearer
+```
+
+Qual tag é qual time, pela bandeira (`api.flat(8, 9)`, cores dominantes fora do preto): `TEX_01` `(24, 90, 132)` e `(222, 222, 222)`, azul e branco, **Escócia**; `TEX_13` `(140, 33, 41)`, vermelho, **Dinamarca**. Nos dois kits os conjuntos diferem nas paletas de jogador e de goleiro e nas imagens (`pl1==pl2 False`, `gk1==gk2 False`, `img0==img4 False`), então nenhum achado acima vale para os dois conjuntos ao mesmo tempo.
+
+**Critério 1:** o comando acima. **Critério 2 (controle):** a Escócia, de titular, mostra o 1º par — paleta de jogador exata do conjunto 1, páginas mais próximas do conjunto 1. **Critério 3:** o par do suplente é o 2º, como a fase 5 assumiu; sem CORR. Veredito escrito na §4.1 do plano.
+
+**O achado que a pergunta não previa:** o goleiro da Escócia está na paleta de goleiro do conjunto **2**, com o time no 1. O "`TEX_01: exact records of set 1 and 2`" é isso, e não ambiguidade. O jogo escolhe o uniforme do goleiro à parte; por quê não foi verificado. Registrado na §4.1; o `kit_set` da fase 5 não reproduz essa combinação, e quem decidir se a aba 3D deve oferecê-la é outra task.
+
+As duas tags medidas foram anotadas nas Notas da KITS-TASK-30 (§4.2).
+- **pending** (2026-10-04): the match state exists: slot 3, Scotland (1st) x Denmark (2nd), copy in work/kits-states/

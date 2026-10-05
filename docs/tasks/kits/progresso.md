@@ -160,7 +160,7 @@ graph TD
 | [KITS-TASK-24](/docs/tasks/kits/24-figura.md) | `figure.py` e `api.figure`: a única ponte com o `looks` | 6 | implementação | KITS-TASK-20, KITS-TASK-23 | done | 2026-10-03 | 2026-10-03 |
 | [KITS-TASK-25](/docs/tasks/kits/25-aba-3d.md) | Aba 3D: titular/suplente, jogador/goleiro, giro livre | 6 | implementação | KITS-TASK-24 | done | 2026-10-03 | 2026-10-04 |
 | [KITS-TASK-26](/docs/tasks/kits/26-fechamento-fase-6.md) | Fechamento da fase 6 — o 3D | 6 | closing | KITS-TASK-24, KITS-TASK-25 | done | 2026-10-04 | 2026-10-04 |
-| [KITS-TASK-27](/docs/tasks/kits/27-titular-e-suplente-no-jogo.md) | §4.1 no emulador: suplente em campo e a VRAM lida | 7 | investigação | KITS-TASK-26 | blocked | — | — |
+| [KITS-TASK-27](/docs/tasks/kits/27-titular-e-suplente-no-jogo.md) | §4.1 no emulador: suplente em campo e a VRAM lida | 7 | investigação | KITS-TASK-26 | pending | — | — |
 | [KITS-TASK-28](/docs/tasks/kits/28-confronto-3.md) | Confronto 3: `confront.py --score` com um uniforme que não é o `A4` | 7 | verificação | KITS-TASK-27 | pending | — | — |
 | [KITS-TASK-29](/docs/tasks/kits/29-fechamento-fase-7.md) | Fechamento da fase 7 — o emulador julga o 3D | 7 | closing | KITS-TASK-27, KITS-TASK-28 | pending | — | — |
 | [KITS-TASK-30](/docs/tasks/kits/30-tabela-time-tag.md) | §4.2: qual TEX cada time veste | 8 | investigação | KITS-TASK-14 | pending | — | — |
