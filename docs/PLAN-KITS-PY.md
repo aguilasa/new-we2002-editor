@@ -551,6 +551,28 @@ na fase 10. As duas só entram na aba 3D com essa geometria medida; a manga
 longa, por pedido do usuário (2026-10-05), num checkbox que só aparece com o
 jogador de linha (KITS-TASK-40).
 
+**Medido no jogo em 2026-10-05 ([KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md)),
+na `LOOKS SET`, com a lista que o quadro entrega ao GPU:** nenhuma primitiva
+amostra a imagem de mangas. A conta é por primitiva texturizada, pela página,
+pelo CLUT e pelos texels de cada uma.
+
+| slot | primitivas texturizadas | imagem de uniforme | imagem de mangas | zonas de manga longa | zonas de braçadeira |
+|---|---|---|---|---|---|
+| 2, linha | 418 | 104 (CLUT (0,486), 8 bits) | **0** | 0 | 0 |
+| 1, goleiro | 430 | 190 (CLUT (0,488), 8 bits) | **0** | 0 | 0 |
+
+Comando: `python tools/kits/oracle.py --sleeves 1|2`, com `WE2002_LOOKS_IMAGE`
+e `WE2002_LOOKS_DRIVE_IMAGE`. O controle é a imagem de uniforme: o boneco sai
+dela, e o `--plant-sleeves`, que exige a imagem de mangas no lugar, sai 1.
+
+O jogo confirma o disco. A braçadeira e a manga longa não são desenhadas nesta
+tela, e quem as desenha só aparece numa partida, o que pede um save state de
+partida, decisão do usuário.
+
+As contagens de primitivas do quadro, 104 e 190, ficam abaixo das 237 e 429
+do disco. A comparação não foi feita peça a peça. A suspeita, **não medida**,
+é que as faces de costas para a câmera saem da lista.
+
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 
 O [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)

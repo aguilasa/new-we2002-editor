@@ -32,6 +32,7 @@ Usage:
     python tools/kits/oracle.py --slot N [--cue <disc.cue>]  # load slot N in the fork
     python tools/kits/oracle.py --png <dump> --expect 01=1 --expect 13=2
     python tools/kits/oracle.py --png <dump> --lines --flags
+    python tools/kits/oracle.py --sleeves 2 [--plant-sleeves]
     python tools/kits/oracle.py --back 2 [--expect-back untouched] [--plant-back numbers]
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
@@ -45,6 +46,16 @@ byte for byte their set-2 twin (CORR-KITS-048).
 The kit containers are read from `WE2002_LOOKS_IMAGE` (the Japanese track; the
 105 are byte-identical on the English disc).  The cue is
 `WE2002_LOOKS_DRIVE_IMAGE` unless given: the disc the state was saved on.
+
+`--sleeves SLOT` asks the open half of section 4.3 (KITS-TASK-39): which
+primitive of the frame samples the sleeves image (576,384), where the long
+sleeves and the captain's armband live.  The list the frame hands the GPU is
+walked (`tools/looks/oracle.py`, the `--scenery` reader), every textured
+polygon and sprite is placed in VRAM by its page, CLUT and texels, and those
+that sample the kit page are counted per image and per zone of
+`core/zones.py`.  The uniform image (576,256) is the control: the figure is
+drawn from it, so its count has to be above 0, and `--plant-sleeves` swaps the
+two targets to see the red.
 
 `--back SLOT` asks section 4.7 (KITS-TASK-38): does the LOOKS SET fill the
 torso gap -- (0,80) 20x24 of the player, (100,104) 20x24 of the goalkeeper,
@@ -384,6 +395,164 @@ def dump_slot(slot: int, cue: str, out_dir: str) -> list:
     return paths
 
 
+# --- section 4.3: who samples the sleeves image ---------------------------
+
+KIT_PAGE = (576, 256)
+"""The VRAM page both kit images sit in: the uniform at v 0-127, the sleeves
+at v 128-255 (section 1.1)."""
+IMAGE_HEIGHT = 128
+TEXTURED_POLYGON_FAMILY = 1
+
+
+def textured_samples(commands) -> list:
+    """Every textured primitive of a command list as
+    {"code", "page", "bits", "clut", "uv"}: the page and depth in VRAM, the
+    CLUT's VRAM corner and the texel corners.  A polygon carries its own page
+    and CLUT; a sprite takes the page of the draw mode in force."""
+    import oracle as looks_oracle  # tools/looks
+
+    out, mode = [], 0
+    for words in commands:
+        code = words[0] >> 24
+        if code == looks_oracle.DRAW_MODE_SET:
+            mode = words[0] & looks_oracle.DRAW_MODE_BITS
+            continue
+        if code >> 5 == TEXTURED_POLYGON_FAMILY and code & 4:
+            corners = 4 if code & 8 else 3
+            per = 3 if code & 16 else 2
+            first = 2
+            texels = [words[first + per * i] for i in range(corners)
+                      if first + per * i < len(words)]
+            if len(texels) != corners:
+                continue
+            page = (texels[1] >> 16) & looks_oracle.DRAW_MODE_BITS
+            mode = page
+            clut = texels[0] >> 16
+            uv = [(t & 0xFF, (t >> 8) & 0xFF) for t in texels]
+        elif code in looks_oracle.SPRITE_CODES:
+            _words, fixed = looks_oracle.SPRITE_CODES[code]
+            if len(words) < 3:
+                continue
+            u, v = words[2] & 0xFF, (words[2] >> 8) & 0xFF
+            if fixed is None:
+                if len(words) < 4:
+                    continue
+                w, h = words[3] & 0xFFFF, words[3] >> 16
+            else:
+                w = h = fixed
+            page, clut = mode, words[2] >> 16
+            uv = [(u, v), (u + w - 1, v), (u, v + h - 1), (u + w - 1, v + h - 1)]
+        else:
+            continue
+        x, y, bits = looks_oracle.page_vram(page)
+        out.append({"code": code, "page": (x, y), "bits": bits,
+                    "clut": looks_oracle.clut_vram(clut), "uv": uv})
+    return out
+
+
+def kit_image_of(sample) -> str:
+    """Which kit image a primitive samples: "uniform", "sleeves", "both" or
+    None when its page is not the kit's."""
+    if sample["page"] != KIT_PAGE:
+        return None
+    halves = {"uniform" if v < IMAGE_HEIGHT else "sleeves" for _u, v in sample["uv"]}
+    return halves.pop() if len(halves) == 1 else "both"
+
+
+def work_point(u: int, v: int) -> tuple:
+    """A texel of the kit page in work-bitmap pixels: the uniform on the left,
+    the sleeves image on the right (core/flat.py)."""
+    return (u, v) if v < IMAGE_HEIGHT else (IMAGE_HEIGHT + u, v - IMAGE_HEIGHT)
+
+
+def sample_zones(sample) -> set:
+    """The names of the zones the texel box of one primitive touches."""
+    if KITS_DIR not in sys.path:
+        sys.path.insert(0, KITS_DIR)
+    from core import api
+
+    points = [work_point(u, v) for u, v in sample["uv"]]
+    x0, y0 = min(p[0] for p in points), min(p[1] for p in points)
+    x1, y1 = max(p[0] for p in points), max(p[1] for p in points)
+    return {z.name for z in api.ZONES
+            if z.x <= x1 and x0 < z.x + z.w and z.y <= y1 and y0 < z.y + z.h}
+
+
+def sleeves_tally(samples) -> dict:
+    """{"uniform", "sleeves", "both", "long sleeve", "armband", "other page"}
+    counts over the textured primitives of one frame."""
+    out = {"uniform": 0, "sleeves": 0, "both": 0, "long sleeve": 0,
+           "armband": 0, "other page": 0}
+    for one in samples:
+        image = kit_image_of(one)
+        if image is None:
+            out["other page"] += 1
+            continue
+        out[image] += 1
+        if image != "uniform":
+            names = sample_zones(one)
+            out["long sleeve"] += any(n.startswith("long sleeve") for n in names)
+            out["armband"] += any(n.startswith("armband") for n in names)
+    return out
+
+
+def sleeves_judge(tally: dict, plant=False) -> list:
+    """The control: the figure is drawn from the uniform image, so a reading
+    that finds no primitive there has read nothing.  The plant swaps the
+    images, which has to fail on a frame that draws no sleeves."""
+    control = "sleeves" if plant else "uniform"
+    if tally[control] == 0:
+        return ["no primitive samples the %s image: the list read is not the "
+                "figure's" % control]
+    return []
+
+
+def read_frame(slot: int, cue: str) -> list:
+    """The textured primitives of the list one LOOKS SET frame of *slot*
+    hands the GPU, walked from the heads it submits."""
+    import oracle as looks_oracle  # tools/looks
+
+    with looks_oracle.Oracle(cue) as game:
+        looks_oracle.restore_state(slot, verbose=False)
+        game.load_looks(slot, label="sleeves-%d" % slot)
+        game.step(looks_oracle.SCENERY_SETTLE)
+        heads = looks_oracle.gpu_list_heads(game)
+        first, size, step = layout.SCENERY_SWEEP
+        ram = b"".join(game.read_ram(base, step, os.path.join(
+            game.out_dir, "sleeves-%08x.bin" % base))
+            for base in range(first, first + size, step))
+        nodes = []
+        for head in dict.fromkeys(heads[len(heads) // 2:]):
+            nodes += looks_oracle.walk_gpu_list(ram, head)
+    return textured_samples(looks_oracle.commands_of(nodes))
+
+
+def run_sleeves(slot: int, cue: str, plant=False) -> int:
+    """`--sleeves SLOT`: section 4.3, measured on the LOOKS SET."""
+    samples = read_frame(slot, cue)
+    tally = sleeves_tally(samples)
+    print("  %d textured primitive(s) in the frame's list" % len(samples))
+    print("  kit page (%d,%d): uniform image %d, sleeves image %d, both %d; "
+          "other pages %d" % (KIT_PAGE + (tally["uniform"], tally["sleeves"],
+                                          tally["both"], tally["other page"])))
+    print("  of those touching the sleeves image: long sleeve zones %d, armband zones %d"
+          % (tally["long sleeve"], tally["armband"]))
+    clut = {}
+    for one in samples:
+        if kit_image_of(one):
+            key = (one["clut"], one["bits"])
+            clut[key] = clut.get(key, 0) + 1
+    print("  on the kit page, by CLUT and depth: %s" % ", ".join(
+        "(%d,%d) %d-bit x%d" % (k[0][0], k[0][1], k[1], n) for k, n in sorted(clut.items())))
+    failures = sleeves_judge(tally, plant)
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if not failures:
+        print("  ok    the control holds: %d primitive(s) sample the uniform image"
+              % tally["uniform"])
+    return 1 if failures else 0
+
+
 # --- section 4.7: the back and the number ---------------------------------
 
 UNIFORM_RECORD = 0
@@ -607,6 +776,9 @@ def main(argv=None) -> int:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--png", help="a VRAM dump (1024x512 PNG) to search, no emulator")
     source.add_argument("--slot", type=int, help="load this save-state slot in the fork")
+    source.add_argument("--sleeves", type=int, metavar="SLOT",
+                        help="section 4.3: which primitives of this slot's frame sample "
+                             "the sleeves image")
     source.add_argument("--back", type=int, metavar="SLOT",
                         help="section 4.7: does the LOOKS SET of this slot fill the torso gaps")
     parser.add_argument("--cue", help="the disc the state was saved on (default $%s)"
@@ -623,6 +795,8 @@ def main(argv=None) -> int:
                         help="with --back: the verdict every gap has to give; exits 1 if not")
     parser.add_argument("--plant-back", choices=BACK_PLANTS,
                         help="with --back: the control -- read the numbers zone, or another TEX")
+    parser.add_argument("--plant-sleeves", action="store_true",
+                        help="with --sleeves: the control -- demand the sleeves image instead")
     parser.add_argument("--grid", action="store_true",
                         help="with --back: print each gap's indices, row by row")
     args = parser.parse_args(argv)
@@ -635,6 +809,12 @@ def main(argv=None) -> int:
         print("oracle: skipped -- %s is not set (the Japanese data track .bin)"
               % IMAGE_VARIABLE)
         return SKIP
+    if args.sleeves is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_sleeves(args.sleeves, cue, args.plant_sleeves)
     if args.back is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue:

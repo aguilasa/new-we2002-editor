@@ -706,6 +706,33 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --back: a disc page that differs outside the gaps fails",
          len(oracle.back_judge({"player": count}, 7, "written")) == 1)
 
+    # --sleeves (KITS-TASK-39): two flat textured quads on the kit page, one
+    # on the uniform image and one on the armband row of the sleeves image.
+    kit_page = 9 | 1 << 4 | 1 << 7         # (576,256), 8 bpp
+
+    def quad(u, v, w, h):
+        uv = [(u, v), (u + w, v), (u, v + h), (u + w, v + h)]
+        words = [0x2C << 24]
+        for i, (tu, tv) in enumerate(uv):
+            high = (0x7980 if i == 0 else kit_page if i == 1 else 0) << 16
+            words += [0, high | tv << 8 | tu]
+        return words
+
+    try:
+        samples = oracle.textured_samples([quad(4, 10, 8, 8), quad(32, 148, 16, 3)])
+    except Exception as exc:  # noqa: BLE001
+        samples = []
+        c.ok("oracle --sleeves: the quads parse", False, repr(exc))
+    tally = oracle.sleeves_tally(samples)
+    c.ok("oracle --sleeves: one quad on each image, the second on the armband",
+         (tally["uniform"], tally["sleeves"], tally["armband"], tally["long sleeve"])
+         == (1, 1, 1, 0), "%s" % tally)
+    only_uniform = oracle.sleeves_tally(samples[:1])
+    c.ok("oracle --sleeves: the control holds on the uniform image",
+         oracle.sleeves_judge(only_uniform) == [])
+    c.ok("oracle --sleeves: and the plant fails a frame with no sleeves primitive",
+         len(oracle.sleeves_judge(only_uniform, plant=True)) == 1)
+
 
 def _negative(c) -> None:
     controls = c.attempt("import tools/kits/controls.py", _kits_controls)
