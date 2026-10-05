@@ -163,7 +163,7 @@ graph TD
 | [KITS-TASK-27](/docs/tasks/kits/27-titular-e-suplente-no-jogo.md) | §4.1 no emulador: suplente em campo e a VRAM lida | 7 | investigação | KITS-TASK-26 | done | 2026-10-04 | 2026-10-04 |
 | [KITS-TASK-28](/docs/tasks/kits/28-confronto-3.md) | Confronto 3: `confront.py --score` com um uniforme que não é o `A4` | 7 | verificação | KITS-TASK-27 | done | 2026-10-04 | 2026-10-04 |
 | [KITS-TASK-29](/docs/tasks/kits/29-fechamento-fase-7.md) | Fechamento da fase 7 — o emulador julga o 3D | 7 | closing | KITS-TASK-27, KITS-TASK-28 | done | 2026-10-04 | 2026-10-04 |
-| [KITS-TASK-30](/docs/tasks/kits/30-tabela-time-tag.md) | §4.2: qual TEX cada time veste | 8 | investigação | KITS-TASK-14 | pending | — | — |
+| [KITS-TASK-30](/docs/tasks/kits/30-tabela-time-tag.md) | §4.2: qual TEX cada time veste | 8 | investigação | KITS-TASK-14 | done | 2026-10-04 | pending |
 | [KITS-TASK-31](/docs/tasks/kits/31-combobox-de-times.md) | O combobox passa a listar times, na ordem do jogo | 8 | implementação | KITS-TASK-30, KITS-TASK-20 | pending | — | — |
 | [KITS-TASK-32](/docs/tasks/kits/32-fechamento-fase-8.md) | Fechamento da fase 8 — times em vez de tags | 8 | closing | KITS-TASK-30, KITS-TASK-31 | pending | — | — |
 | [KITS-TASK-33](/docs/tasks/kits/33-aba-diagnostico.md) | Aba Diagnóstico: a lista de `kit.problems` | 9 | implementação | KITS-TASK-20 | pending | — | — |

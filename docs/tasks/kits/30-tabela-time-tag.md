@@ -106,3 +106,12 @@ não vale aqui: ela põe a Irlanda do Norte no `01`, e o jogo mostrou a Escócia
 **Critério 4** — linha do Obocaman na seção do `kits` do `NOTICE.md`, neste
 commit: dado (a regra, três números), não código; o exe não entra no git. O
 Wetigre não foi usado, então não ganha linha.
+- **Closed** — commit `aefc8ae` (2026-10-04): feat(kits): team -> TEX table from Obocaman's editor rule
+  - Files (`git show --name-status aefc8ae`):
+    - `M NOTICE.md`
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/prompts/perfil-kits.md`
+    - `M docs/tasks/kits/30-tabela-time-tag.md`
+    - `M docs/tasks/kits/31-combobox-de-times.md`
+    - `A tools/kits/core/generated/team_kits.py`
+    - `M tools/kits/gen_tables.py`
