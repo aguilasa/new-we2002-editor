@@ -72,3 +72,7 @@ $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.
 ```
 
 A linha 45 do Log da KITS-TASK-27 (`TEX_A4 wears set 1 and 2`) é transcrição de uma versão anterior da ferramenta, e fica.
+- **Closed** — commit `b35975a` (2026-10-04): fix(kits): oracle.py stops naming a set from records both sets share
+  - Files (`git show --name-status b35975a`):
+    - `M docs/tasks/kits/CORR-KITS-050.md`
+    - `M tools/kits/oracle.py`
