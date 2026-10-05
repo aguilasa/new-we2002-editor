@@ -94,3 +94,9 @@ $ python3 tools/kits/selftest.py | grep -E 'controls red|kits_selftest:'
   ..... 24 of 24 controls red
 kits_selftest: 0 failure(s)
 ```
+- **Closed** — commit `a6b3fbc` (2026-10-04): feat(kits): oracle.py --expect asserts the set a kit is worn in
+  - Files (`git show --name-status a6b3fbc`):
+    - `M docs/tasks/kits/CORR-KITS-047.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
