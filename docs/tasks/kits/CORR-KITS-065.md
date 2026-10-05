@@ -40,3 +40,24 @@ Em `tools/kits/ui_check.py`, mover a definição de `RESET_TURN` e a docstring d
 `sed -n 138,144p tools/kits/ui_check.py` mostra a string `"""DIAG_NOTE is …"""` logo depois da tupla.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-05 sobre `30c4fcc`: `sed -n 138,144p tools/kits/ui_check.py` mostra
+`RESET_TURN` e a docstring dela entre a tupla e a explicação de `DIAG_NOTE`.
+
+Conserto: as duas linhas de `RESET_TURN` foram movidas para baixo da docstring de `DIAG_NOTE`. A
+docstring delas já cita `--double-click` (CORR-KITS-064).
+
+```text
+$ sed -n 138,145p tools/kits/ui_check.py
+STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET = (
+    "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset")
+"""DIAG_NOTE is the Diagnosis judge on the note rows: only the European
+Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
+and says it was not judged otherwise (CORR-KITS-061)."""
+RESET_TURN = ("--yaw", "0", "--pitch", "30")
+"""A turn away from the opening one, which --reset and --double-click have to undo
+(KITS-TASK-37, CORR-KITS-064)."""
+```
+
+Só muda a ordem de declaração. O módulo continua compilando (`ast.parse` ok) e o `kits_ui` passa
+(ver o commit da correção).

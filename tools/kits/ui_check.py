@@ -137,12 +137,12 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 
 STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET = (
     "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset")
-RESET_TURN = ("--yaw", "0", "--pitch", "30")
-"""A turn away from the opening one, which --reset and --double-click have to undo
-(KITS-TASK-37, CORR-KITS-064)."""
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
+RESET_TURN = ("--yaw", "0", "--pitch", "30")
+"""A turn away from the opening one, which --reset and --double-click have to undo
+(KITS-TASK-37, CORR-KITS-064)."""
 ED_VARIABLE = "WE2002_KITS_ED_IMAGE"
 """The European Deluxe disc, whose TEX_48 and TEX_70 the guard refuses and
 whose TEX_13 is read past its ISO size (section 2.1); the Diagnosis judge
