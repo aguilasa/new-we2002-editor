@@ -66,13 +66,22 @@ graph TD
     KITS_TASK_35["KITS-TASK-35<br/>Fechamento da fase 9"]
   end
   subgraph phase_10["Fase 10"]
+    KITS_TASK_42["KITS-TASK-42<br/>Medir o número de camisa numa partida"]
+    KITS_TASK_43["KITS-TASK-43<br/>Medir o encaixe da braçadeira e da manga longa do MODEL.BIN"]
+    KITS_TASK_40["KITS-TASK-40<br/>Checkboxes de número e braçadeira na aba 3D"]
+    KITS_TASK_41["KITS-TASK-41<br/>Fechamento da fase 10"]
     KITS_TASK_37["KITS-TASK-37<br/>Botão de reset na aba 3D e a dica das costas"]
     KITS_TASK_38["KITS-TASK-38<br/>Medir as costas e o número no jogo"]
     KITS_TASK_39["KITS-TASK-39<br/>Medir quem desenha a braçadeira"]
-    KITS_TASK_40["KITS-TASK-40<br/>Checkboxes de número e braçadeira na aba 3D"]
-    KITS_TASK_41["KITS-TASK-41<br/>Fechamento da fase 10"]
   end
   KITS_TASK_20 --> KITS_TASK_36
+  KITS_TASK_37 --> KITS_TASK_40
+  KITS_TASK_38 --> KITS_TASK_40
+  KITS_TASK_39 --> KITS_TASK_40
+  KITS_TASK_37 --> KITS_TASK_41
+  KITS_TASK_38 --> KITS_TASK_41
+  KITS_TASK_39 --> KITS_TASK_41
+  KITS_TASK_40 --> KITS_TASK_41
   KITS_TASK_03 --> KITS_TASK_04
   KITS_TASK_01 --> KITS_TASK_05
   KITS_TASK_02 --> KITS_TASK_05
@@ -132,13 +141,6 @@ graph TD
   KITS_TASK_33 --> KITS_TASK_34
   KITS_TASK_33 --> KITS_TASK_35
   KITS_TASK_34 --> KITS_TASK_35
-  KITS_TASK_37 --> KITS_TASK_40
-  KITS_TASK_38 --> KITS_TASK_40
-  KITS_TASK_39 --> KITS_TASK_40
-  KITS_TASK_37 --> KITS_TASK_41
-  KITS_TASK_38 --> KITS_TASK_41
-  KITS_TASK_39 --> KITS_TASK_41
-  KITS_TASK_40 --> KITS_TASK_41
 ```
 <!-- rite:end -->
 
@@ -148,6 +150,10 @@ graph TD
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [KITS-TASK-36](/docs/tasks/kits/36-ui-i18n.md) | UI em inglês dos EUA por default, com catálogo i18n e seletor de idioma | 4 | implementação | KITS-TASK-20 | done | 2026-10-03 | 2026-10-03 |
+| [KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md) | Medir o número de camisa numa partida | 10 | verificação | — | pending | — | — |
+| [KITS-TASK-43](/docs/tasks/kits/43-medir-encaixe-mangas.md) | Medir o encaixe da braçadeira e da manga longa do MODEL.BIN | 10 | verificação | — | pending | — | — |
+| [KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md) | Checkboxes de número e braçadeira na aba 3D | 10 | implementação | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39 | in-progress | — | — |
+| [KITS-TASK-41](/docs/tasks/kits/41-fechamento-fase-10.md) | Fechamento da fase 10 | 10 | closing | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39, KITS-TASK-40 | pending | — | — |
 | [KITS-TASK-01](/docs/tasks/kits/01-levantamento-do-tex.md) | Promover o levantamento do §1.1 a ferramenta versionada | 0 | ferramenta | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md) | Medir o que são os retângulos (608,256) e (704,256) | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md) | Contar primitivas de cada figura por retângulo do TEX | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
@@ -186,8 +192,6 @@ graph TD
 | [KITS-TASK-37](/docs/tasks/kits/37-reset-e-dica-das-costas.md) | Botão de reset na aba 3D e a dica das costas | 10 | implementação | — | done | 2026-10-05 | 2026-10-05 |
 | [KITS-TASK-38](/docs/tasks/kits/38-medir-costas-numero.md) | Medir as costas e o número no jogo | 10 | verificação | — | done | 2026-10-05 | 2026-10-05 |
 | [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md) | Medir quem desenha a braçadeira | 10 | verificação | — | done | 2026-10-05 | 2026-10-05 |
-| [KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md) | Checkboxes de número e braçadeira na aba 3D | 10 | implementação | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39 | pending | — | — |
-| [KITS-TASK-41](/docs/tasks/kits/41-fechamento-fase-10.md) | Fechamento da fase 10 | 10 | closing | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39, KITS-TASK-40 | pending | — | — |
 <!-- rite:end -->
 
 ## Notes

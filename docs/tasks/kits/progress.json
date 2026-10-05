@@ -5,7 +5,7 @@
   "plan": "/docs/PLAN-KITS-PY.md",
   "ticket": null,
   "local": false,
-  "order": ["KITS-TASK-36"],
+  "order": ["KITS-TASK-36", "KITS-TASK-42", "KITS-TASK-43", "KITS-TASK-40", "KITS-TASK-41"],
   "tasks": [
     {
       "id": "KITS-TASK-36",
@@ -22,6 +22,70 @@
       "done_commit": "64e3cb8",
       "reviewed_on": "2026-10-03",
       "review_commit": "74e9941"
+    },
+    {
+      "id": "KITS-TASK-42",
+      "file": "42-medir-numero-partida.md",
+      "title": "Medir o número de camisa numa partida",
+      "type": "verificação",
+      "phase": 10,
+      "depends_on": [],
+      "source_of_truth": "/docs/PLAN-KITS-PY.md#4.7",
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md"],
+      "resources": ["emulador", "save-states"],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
+    },
+    {
+      "id": "KITS-TASK-43",
+      "file": "43-medir-encaixe-mangas.md",
+      "title": "Medir o encaixe da braçadeira e da manga longa do MODEL.BIN",
+      "type": "verificação",
+      "phase": 10,
+      "depends_on": [],
+      "source_of_truth": "/docs/PLAN-KITS-PY.md#4.3",
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md"],
+      "resources": ["emulador", "save-states"],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
+    },
+    {
+      "id": "KITS-TASK-40",
+      "file": "40-checkboxes-numero-bracadeira.md",
+      "title": "Checkboxes de número e braçadeira na aba 3D",
+      "type": "implementação",
+      "phase": 10,
+      "depends_on": ["KITS-TASK-37", "KITS-TASK-38", "KITS-TASK-39"],
+      "source_of_truth": "/docs/PLAN-KITS-PY.md#4.7",
+      "files": ["tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py", "docs/PLAN-KITS-PY.md"],
+      "resources": ["tela"],
+      "status": "in-progress",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
+    },
+    {
+      "id": "KITS-TASK-41",
+      "file": "41-fechamento-fase-10.md",
+      "title": "Fechamento da fase 10",
+      "type": "closing",
+      "phase": 10,
+      "depends_on": ["KITS-TASK-37", "KITS-TASK-38", "KITS-TASK-39", "KITS-TASK-40"],
+      "source_of_truth": "/docs/PLAN-KITS-PY.md#7",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
     },
     {
       "id": "KITS-TASK-01",
@@ -630,38 +694,6 @@
       "done_commit": "ffdfb0c",
       "reviewed_on": "2026-10-05",
       "review_commit": "b1ec2ec"
-    },
-    {
-      "id": "KITS-TASK-40",
-      "file": "40-checkboxes-numero-bracadeira.md",
-      "title": "Checkboxes de número e braçadeira na aba 3D",
-      "type": "implementação",
-      "phase": 10,
-      "depends_on": ["KITS-TASK-37", "KITS-TASK-38", "KITS-TASK-39"],
-      "source_of_truth": "/docs/PLAN-KITS-PY.md#4.7",
-      "files": ["tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py", "docs/PLAN-KITS-PY.md"],
-      "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
-    },
-    {
-      "id": "KITS-TASK-41",
-      "file": "41-fechamento-fase-10.md",
-      "title": "Fechamento da fase 10",
-      "type": "closing",
-      "phase": 10,
-      "depends_on": ["KITS-TASK-37", "KITS-TASK-38", "KITS-TASK-39", "KITS-TASK-40"],
-      "source_of_truth": "/docs/PLAN-KITS-PY.md#7",
-      "files": [],
-      "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
     }
   ]
 }
