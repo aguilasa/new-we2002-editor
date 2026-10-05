@@ -481,10 +481,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#7",
       "files": [],
       "resources": ["emulador", "save-states"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-04",
+      "done_commit": "6ed380b",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
