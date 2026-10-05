@@ -67,3 +67,8 @@ kits_ui: 0 failure(s)
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
 100% tests passed, 0 tests failed out of 4
 ```
+- **Closed** — commit `e9f8fbf` (2026-10-04): test(kits): kits_ui checks the kit selector lists teams in game order
+  - Files (`git show --name-status e9f8fbf`):
+    - `M docs/tasks/kits/CORR-KITS-058.md`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui_check.py`
