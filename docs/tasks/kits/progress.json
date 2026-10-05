@@ -561,7 +561,7 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#definição-de-pronto",
       "files": ["docs/PLAN-KITS-PY.md"],
       "resources": ["tela", "emulador"],
-      "status": "pending",
+      "status": "blocked",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,

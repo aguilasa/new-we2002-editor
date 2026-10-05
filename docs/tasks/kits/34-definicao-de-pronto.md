@@ -134,3 +134,4 @@ da raiz do repositório,
 `work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png`;
 aqui, `python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png`
 com o `work/kits-ui-linux.png` refeito pelo mesmo comando no `:98`.
+- **blocked** (2026-10-05): Item 5: python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png -> FAIL 47.56 % differ, above the 5.0 % limit; the only Windows capture (sha256 e973a8aa5991a7ff) predates the 3D/Diagnosis tabs and en-US default. Needs a new capture on Windows at HEAD (app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png). Items 1-4 checked in 24beba1.
