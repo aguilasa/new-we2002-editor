@@ -794,6 +794,19 @@
       "depends_on": [],
       "done_on": "2026-10-05",
       "done_commit": "f312104"
+    },
+    {
+      "id": "CORR-KITS-062",
+      "file": "CORR-KITS-062.md",
+      "title": "Conferir ou reescrever o item 5 da DoD: a CLI faz tudo o que a janela faz",
+      "origin": "KITS-TASK-34",
+      "severity": "high",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

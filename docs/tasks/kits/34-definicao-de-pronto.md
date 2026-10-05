@@ -230,3 +230,4 @@ colados acima, completam o item.
   - Files (`git show --name-status 789dfc8`):
     - `M docs/PLAN-KITS-PY.md`
     - `M docs/tasks/kits/34-definicao-de-pronto.md`
+- **Reviewed** (2026-10-05) at `abdc018`: CORR-KITS-062
