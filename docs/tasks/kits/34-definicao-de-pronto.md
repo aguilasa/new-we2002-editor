@@ -18,7 +18,7 @@ Os cinco itens da Definição de pronto do §0 conferidos na HEAD, cada um com o
 - [x] Item 2: 3D veste jogador e goleiro, titular e suplente de um time que difere, e o confronto 3 concorda
 - [x] Item 3: TEX do WETex abre; TEX quebrado recusado com motivo
 - [x] Item 4: §4.6 fechada com a lista do que sobra
-- [ ] Item 5: CLI importa só a fachada; captura igual no Windows e no Linux
+- [x] Item 5: CLI importa só a fachada; captura igual no Windows e no Linux
 
 ## Notes
 
@@ -201,3 +201,28 @@ acima).
 - **blocked** (2026-10-05): Item 5: python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png -> FAIL 47.56 % differ, above the 5.0 % limit; the only Windows capture (sha256 e973a8aa5991a7ff) predates the 3D/Diagnosis tabs and en-US default. Needs a new capture on Windows at HEAD (app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png). Items 1-4 checked in 24beba1.
 - **blocked** (2026-10-05): Item 5: Windows half done (work/kits-ui-windows.png at 71c65f3, sha256 82cc3da37793, 0 % vs itself, see Log). Remaining: on Linux, redo work/kits-ui-linux.png on :98 and run python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png, must be under 5 %.
 - **pending** (2026-10-05): Windows capture at HEAD now exists (sha256 82cc3da37793, commit 8d1ab8d); Linux compare runs
+
+### 2026-10-05, no Linux — item 5 fechado
+
+Na HEAD `bfa36b9`, Xvfb `:98` sem `-auth`, `WE2002_KITS_LANG` vazia. (A
+primeira tentativa achou o `:98` caído — o Qt saiu com `could not connect to
+display :98` e o `--compare` leu o PNG de ontem; o servidor foi subido de novo
+e a captura refeita do zero, com o arquivo apagado antes.)
+
+```
+$ work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-linux.png
+  wrote work/kits-ui-linux.png, 980x640
+$ sha256sum work/kits-ui-linux.png
+8f8b9dbddb7b541b1b3327a2f966fcdbdd8c82811834bfbc404841610b23a126  work/kits-ui-linux.png
+$ python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png
+kits-ui-windows.png: 980x640, window colour 22.6 %, Fusion pane 18.2 %
+kits-ui-linux.png: 980x640, window colour 22.4 %, Fusion pane 18.2 %
+14895 of 627200 pixels differ (2.37 %)
+ok    within 5.0 %, both with the fixed look
+```
+
+A captura do Linux saiu com o mesmo sha256 da de ontem: a janela é
+determinística no `:98`. Controle: o mesmo estado com `--tag A4` contra a
+captura do Windows reprova — `313502 of 627200 pixels differ (49.98 %)`,
+`FAIL  49.98 % differ, above the 5.0 % limit`. A fachada e o catálogo, já
+colados acima, completam o item.

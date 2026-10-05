@@ -55,10 +55,10 @@ imagem do jogo, ou um TEX avulso feito com WETex — e os mostra de duas formas:
 os itens 1 a 4 conferem na HEAD, cada um com o comando no Log da task. O 3 foi
 feito com um TEX montado aqui pelo próprio WETex 1.0, sob Wine, a partir dos
 registros do `TEX_00`: o arquivo sai com outros bytes (29.928 contra 29.944) e
-passa a guarda com as mesmas imagens nas cinco paletas. **O item 5 está
-aberto**: a fachada passa, mas a única captura do Windows é de antes do 3D e do
-inglês por default, e contra a janela de hoje dá 47,56 %; falta refazê-la no
-Windows.
+passa a guarda com as mesmas imagens nas cinco paletas. O item 5 fechou com
+uma captura nova do Windows na HEAD: contra a do Linux, 2,37 % de pixels
+diferentes (limite 5 %), com outro kit no lugar dando 49,98 %. A captura velha
+da KITS-TASK-19, de antes do 3D e do inglês por default, dava 47,56 %.
 
 ## 1. O que já se sabe
 
