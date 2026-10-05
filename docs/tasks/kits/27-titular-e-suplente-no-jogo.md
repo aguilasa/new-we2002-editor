@@ -69,7 +69,7 @@ $ sha256sum work/kits-states/SLPM-87056_3.sav
 5f392a12f85cc8946228b4a20d3e8289435bb631ce35b14a730d3ceec8592152  work/kits-states/SLPM-87056_3.sav
 ```
 
-**A primeira corrida mudou a ferramenta.** A busca exata achou paletas e bandeiras dos dois times e **nenhuma página** de uniforme ou de manga: na partida a página não sobe inteira. Linha a linha, as 79 linhas não planas do uniforme do conjunto 2 do `TEX_13` estão todas na VRAM, em (640,256), e só 12 de 80 do conjunto 1 do `TEX_01`, em (576,256). O `oracle.py` ganhou então a comparação das páginas pela mais próxima (`closest_sets`, numa grade de colunas de 64 halfwords a partir de x 512), e o veredito sai dele:
+**A primeira corrida mudou a ferramenta.** A busca exata achou paletas e bandeiras dos dois times e **nenhuma página** de uniforme ou de manga: na partida a página não sobe inteira. Linha a linha, as 80 linhas não planas (mais de um valor de 15 bits) do uniforme do conjunto 2 do `TEX_13` estão todas na VRAM, em (640,256), e só 12 de 80 do conjunto 1 do `TEX_01`, em (576,256) — contagem do `oracle.py --lines`, no bloco abaixo do veredito. O `oracle.py` ganhou então a comparação das páginas pela mais próxima (`closest_sets`, numa grade de colunas de 64 halfwords a partir de x 512), e o veredito sai dele:
 
 ```
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin \
@@ -91,7 +91,25 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin \
   TEX_13 sleeves  at (640,384): set 1 differs in 7693 of 8192 halfwords, set 2 in 4093 -- set 2 nearer
 ```
 
-Qual tag é qual time, pela bandeira (`api.flat(8, 9)`, cores dominantes fora do preto): `TEX_01` `(24, 90, 132)` e `(222, 222, 222)`, azul e branco, **Escócia**; `TEX_13` `(140, 33, 41)`, vermelho, **Dinamarca**. Nos dois kits os conjuntos diferem nas paletas de jogador e de goleiro e nas imagens (`pl1==pl2 False`, `gk1==gk2 False`, `img0==img4 False`), então nenhum achado acima vale para os dois conjuntos ao mesmo tempo.
+As linhas exatas por conjunto, e qual tag é qual time pela bandeira (o registro 8 pintado com o 9, cores mais comuns fora do preto) — as duas leituras saem do `oracle.py` desde a CORR-KITS-048:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --png work/kits-oracle/match-3/vram-0.png --lines --flags | sed -n '/lines not flat/,$p'
+  TEX_01 uniform  set 1 at (576,256):  80 of 128 lines not flat,  12 of them exact
+  TEX_01 uniform  set 2 at (576,256):  80 of 128 lines not flat,   0 of them exact
+  TEX_01 sleeves  set 1 at (576,384): 128 of 128 lines not flat,   0 of them exact
+  TEX_01 sleeves  set 2 at (576,384): 128 of 128 lines not flat,   0 of them exact
+  TEX_13 uniform  set 1 at (640,256):  80 of 128 lines not flat,   0 of them exact
+  TEX_13 uniform  set 2 at (640,256):  80 of 128 lines not flat,  80 of them exact
+  TEX_13 sleeves  set 1 at (640,384): 128 of 128 lines not flat,   0 of them exact
+  TEX_13 sleeves  set 2 at (640,384): 128 of 128 lines not flat,   0 of them exact
+  TEX_01 flag, black left out: (24, 90, 132) 20 %, (222, 222, 222) 18 %, (33, 90, 132) 8 %
+  TEX_01 uniform 1==2 False, sleeves 1==2 False, player palette 1==2 False, goalkeeper palette 1==2 False
+  TEX_13 flag, black left out: (140, 33, 41) 46 %, (156, 41, 41) 7 %, (165, 41, 49) 6 %
+  TEX_13 uniform 1==2 False, sleeves 1==2 False, player palette 1==2 False, goalkeeper palette 1==2 False
+```
+
+`TEX_01` azul e branco, **Escócia**; `TEX_13` vermelho, **Dinamarca**. Nos dois kits os conjuntos diferem nas paletas de jogador e de goleiro e nas imagens, então nenhum achado acima vale para os dois conjuntos ao mesmo tempo.
 
 **Critério 1:** o comando acima. **Critério 2 (controle):** a Escócia, de titular, mostra o 1º par — paleta de jogador exata do conjunto 1, páginas mais próximas do conjunto 1. **Critério 3:** o par do suplente é o 2º, como a fase 5 assumiu; sem CORR. Veredito escrito na §4.1 do plano.
 

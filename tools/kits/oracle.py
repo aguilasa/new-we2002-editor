@@ -31,6 +31,15 @@ Usage:
     python tools/kits/oracle.py --png <vram dump.png>        # offline, no emulator
     python tools/kits/oracle.py --slot N [--cue <disc.cue>]  # load slot N in the fork
     python tools/kits/oracle.py --png <dump> --expect 01=1 --expect 13=2
+    python tools/kits/oracle.py --png <dump> --lines --flags
+
+`--lines` counts, for the uniform and the sleeves of each set, the lines of
+the page that are not flat (more than one distinct 15-bit value) and how many
+of those are in VRAM halfword for halfword at the place `closest_sets` picks:
+a match uploads part of a page, and a set is worn when its lines are there.
+`--flags` names each kit by its flag -- the commonest colours of record 8
+painted with record 9, black left out -- and says which records of set 1 are
+byte for byte their set-2 twin (CORR-KITS-048).
 
 The kit containers are read from `WE2002_LOOKS_IMAGE` (the Japanese track; the
 105 are byte-identical on the English disc).  The cue is
@@ -261,6 +270,61 @@ def judge(vram: list, bodies: dict, hits: list, expect: dict) -> int:
     return 1 if bad else 0
 
 
+def is_flat_line(line) -> bool:
+    """A line of one 15-bit value: it matches flat VRAM and names nothing."""
+    return len(set(five(v) for v in line)) <= 1
+
+
+def report_lines(vram: list, bodies: dict, tags) -> dict:
+    """{(tag, record): (not flat, exact)} for the uniform and the sleeves of
+    both sets, at the place `closest_sets` picks for each page."""
+    out = {}
+    for tag in sorted(tags):
+        body = bodies[tag]
+        records = records_of(body)
+        places = {name: at for name, at, _one, _two in closest_sets(vram, body)}
+        for index in (0, 4, 1, 5):
+            r = records[index]
+            x, y = places[NAMES[index]]
+            words = payload(body, r)
+            not_flat = exact = 0
+            for k in range(r.h):
+                line = words[k * r.w:(k + 1) * r.w]
+                if is_flat_line(line):
+                    continue
+                not_flat += 1
+                there = struct.unpack("<%dH" % r.w, vram[y + k][2 * x:2 * (x + r.w)])
+                exact += all(a == five(v) for a, v in zip(there, line))
+            out[(tag, index)] = (not_flat, exact)
+            print("  TEX_%s %-8s set %d at (%d,%d): %3d of %d lines not flat, %3d of them exact"
+                  % (tag, NAMES[index], SETS[index], x, y, not_flat, r.h, exact))
+    return out
+
+
+def report_flags(image_path: str, bodies: dict, tags) -> None:
+    """Each kit's flag colours and which set-1 records equal their set-2 twin."""
+    if KITS_DIR not in sys.path:
+        sys.path.insert(0, KITS_DIR)
+    from core import api
+
+    source = api.open_source(image_path)
+    for tag in sorted(tags):
+        picture = source.kit(tag).flat(8, 9)
+        counts = {}
+        for at in range(0, len(picture.rgba), 4):
+            rgb = tuple(picture.rgba[at:at + 3])
+            if rgb != (0, 0, 0):
+                counts[rgb] = counts.get(rgb, 0) + 1
+        total = sum(counts.values()) or 1
+        top = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[:3]
+        print("  TEX_%s flag, black left out: %s"
+              % (tag, ", ".join("%s %.0f %%" % (rgb, 100.0 * n / total) for rgb, n in top)))
+        records = records_of(bodies[tag])
+        same = ["%s 1==2 %s" % (NAMES[i], payload(bodies[tag], records[i])
+                                == payload(bodies[tag], records[i + 4])) for i in range(4)]
+        print("  TEX_%s %s" % (tag, ", ".join(same)))
+
+
 def report_pages(vram: list, bodies: dict, tags) -> dict:
     """The pages of each kit in *tags*, set against set; {tag: {name: set}}."""
     out = {}
@@ -315,6 +379,10 @@ def main(argv=None) -> int:
                         % DRIVE_VARIABLE)
     parser.add_argument("--out", default=os.path.join("work", "kits-oracle"),
                         help="where the dumps go")
+    parser.add_argument("--lines", action="store_true",
+                        help="count the exact page lines of each set of each kit found")
+    parser.add_argument("--flags", action="store_true",
+                        help="each kit found: its flag colours and which records both sets share")
     parser.add_argument("--expect", action="append", metavar="TAG=SET",
                         help="the set kit TAG has to be worn in; exits 1 if not (repeatable)")
     args = parser.parse_args(argv)
@@ -333,7 +401,12 @@ def main(argv=None) -> int:
         vram = vram_rows(args.png)
         hits = search(vram, bodies)
         report(hits)
-        report_pages(vram, bodies, {tag for tag, *_ in hits})
+        tags = {tag for tag, *_ in hits}
+        report_pages(vram, bodies, tags)
+        if args.lines:
+            report_lines(vram, bodies, tags)
+        if args.flags:
+            report_flags(image, bodies, tags)
         return judge(vram, bodies, hits, expect)
     cue = args.cue or os.environ.get(DRIVE_VARIABLE)
     if not cue:
@@ -350,7 +423,12 @@ def main(argv=None) -> int:
     print("  control: two dumps a frame apart give the same %d match(es)" % len(first))
     report(first)
     vram = vram_rows(paths[0])
-    report_pages(vram, bodies, {tag for tag, *_ in first})
+    tags = {tag for tag, *_ in first}
+    report_pages(vram, bodies, tags)
+    if args.lines:
+        report_lines(vram, bodies, tags)
+    if args.flags:
+        report_flags(image, bodies, tags)
     return judge(vram, bodies, first, expect)
 
 

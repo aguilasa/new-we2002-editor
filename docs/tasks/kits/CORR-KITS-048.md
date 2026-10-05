@@ -63,3 +63,34 @@ Em `tools/kits/oracle.py`, uma opção (por exemplo `--lines` e `--flags`) que i
 `python3 tools/kits/oracle.py --png <dump da partida> --lines` imprime as contagens de linha que o Log cita (hoje: `unrecognized arguments`), e `grep -c "as 79 linhas" docs/tasks/kits/27-titular-e-suplente-no-jogo.md` dá 0.
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `516d1ab`: `oracle.py --lines` dava `unrecognized arguments`, o Log dizia `as 79 linhas` e citava `api.flat(8, 9)`, função que o `api.py` não tem; a sonda da Evidência, sobre `work/kits-oracle/match-3/vram-0.png`, dá 80 linhas não planas e exatas no conjunto 2 do `TEX_13`.
+
+Conserto: duas opções do `oracle.py`, com "plana" definida em código (`is_flat_line`: um só valor de 15 bits).
+
+- `--lines`: para uniforme e mangas dos dois conjuntos de cada kit achado, as linhas não planas e quantas estão na VRAM halfword a halfword, no lugar que o `closest_sets` escolhe.
+- `--flags`: as três cores mais comuns da bandeira (registro 8 pintado com o 9 por `kit.flat`, preto fora) e, por par, se o registro do conjunto 1 é igual ao do 2.
+
+No Log da KITS-TASK-27, o 79 virou 80 com a definição, e o parágrafo da bandeira passou a ser o comando e a saída dele; o `api.flat` e os `pl1==pl2` de sonda saíram.
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --png work/kits-oracle/match-3/vram-0.png --lines --flags | sed -n '/lines not flat/,$p'
+  TEX_01 uniform  set 1 at (576,256):  80 of 128 lines not flat,  12 of them exact
+  TEX_01 uniform  set 2 at (576,256):  80 of 128 lines not flat,   0 of them exact
+  TEX_01 sleeves  set 1 at (576,384): 128 of 128 lines not flat,   0 of them exact
+  TEX_01 sleeves  set 2 at (576,384): 128 of 128 lines not flat,   0 of them exact
+  TEX_13 uniform  set 1 at (640,256):  80 of 128 lines not flat,   0 of them exact
+  TEX_13 uniform  set 2 at (640,256):  80 of 128 lines not flat,  80 of them exact
+  TEX_13 sleeves  set 1 at (640,384): 128 of 128 lines not flat,   0 of them exact
+  TEX_13 sleeves  set 2 at (640,384): 128 of 128 lines not flat,   0 of them exact
+  TEX_01 flag, black left out: (24, 90, 132) 20 %, (222, 222, 222) 18 %, (33, 90, 132) 8 %
+  TEX_01 uniform 1==2 False, sleeves 1==2 False, player palette 1==2 False, goalkeeper palette 1==2 False
+  TEX_13 flag, black left out: (140, 33, 41) 46 %, (156, 41, 41) 7 %, (165, 41, 49) 6 %
+  TEX_13 uniform 1==2 False, sleeves 1==2 False, player palette 1==2 False, goalkeeper palette 1==2 False
+$ grep -c "as 79 linhas" docs/tasks/kits/27-titular-e-suplente-no-jogo.md
+0
+```
+
+Os números batem com a sonda da Evidência (80/12 e 80/80) e com as cores que o Log já citava.
