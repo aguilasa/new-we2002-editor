@@ -26,7 +26,10 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#definição-de-pronto)
 
 Da KITS-TASK-33: o `kits_ui` julga a aba Diagnóstico nos `TEX_48`, `TEX_70` e `TEX_13` da European Deluxe só com `WE2002_KITS_ED_IMAGE` apontando o `roms/golden-european-deluxe.bin`; sem ela ele passa e imprime `note: WE2002_KITS_ED_IMAGE is not set`. Corrida desta task leva a variável.
 
-### O que falta fazer no Windows (destrava o item 5)
+### O que falta fazer no Windows (destrava o item 5) — feito em 2026-10-05
+
+Os passos abaixo rodaram na HEAD `71c65f3`; a saída está no Log, em
+"no Windows". Sobra só o fechamento no Linux, no último parágrafo desta seção.
 
 A única captura do Windows é a da KITS-TASK-19, de antes das abas 3D e
 Diagnóstico, do seletor de idioma e do inglês por default; contra a janela de
