@@ -25,4 +25,6 @@ A tabela índice de time → tag, medida (editor do Obocaman em `we-team-editor/
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#4.2). Nada do `we-team-editor.exe` entra no git; só o dado medido.
 
+Duas linhas já medidas no emulador pela KITS-TASK-27 (§4.1), pela bandeira e pela paleta na VRAM: **Escócia → `TEX_01`**, **Dinamarca → `TEX_13`** (`python3 tools/kits/oracle.py --slot 3`, state em `work/kits-states/SLPM-87056_3.sav`). Contam para as "três conferidas no emulador" do perfil.
+
 ## Log de Execução

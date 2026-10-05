@@ -421,6 +421,33 @@ escolher um time com os dois pares diferentes, entrar numa partida com ele de
 suplente e ler a VRAM (`oracle.py --kit` já compara retângulo por retângulo).
 **Risco alto**: errar aqui troca todos os uniformes do 3D, e o 2D não percebe.
 
+**Veredito, medido em 2026-10-04 (KITS-TASK-27): sim — titular é o par 1,
+suplente é o par 2.** Partida Escócia (1º uniforme) × Dinamarca (2º), save state
+`work/kits-states/SLPM-87056_3.sav`, lida por `python3 tools/kits/oracle.py
+--slot 3`, que procura cada registro dos 105 TEX em qualquer ponto da VRAM. As
+bandeiras dizem as tags: `TEX_01` (azul e branca) é a Escócia, `TEX_13`
+(vermelha) a Dinamarca.
+
+- **Paletas, exatas:** a de jogador do `TEX_01` é a do conjunto 1 (registro 2),
+  a do `TEX_13` a do conjunto 2 (registro 6).
+- **Páginas, pela mais próxima:** na partida a página não sobe inteira — parte
+  dela guarda outra coisa —, então nenhuma bate exata. Dinamarca, em (640,256):
+  uniforme a 2.640 de 8.192 halfwords do conjunto 2 contra 7.198 do 1; mangas
+  4.093 contra 7.693. Escócia, em (576,256): uniforme 4.746 do conjunto 1 contra
+  5.050 do 2, mangas 2.995 contra 4.211 — a margem é menor porque o 1º e o 2º
+  uniforme dela se parecem mais; a paleta exata é o que decide.
+
+**E o que a pergunta não previa: o goleiro escolhe à parte.** O goleiro da
+Escócia veste a paleta de goleiro do conjunto **2** (registro 7), com o time de
+linha no conjunto 1. O jogo decide o uniforme do goleiro separado do resto do
+time, provavelmente para não repetir a cor do outro goleiro — **não verificado**.
+O `kit_set` da fase 5 troca as duas paletas juntas, o que é certo para um time
+inteiro de titular ou de suplente e não reproduz essa combinação.
+
+Também medido: numa partida cada time tem seu lugar — páginas em x 576 e x 640,
+paletas de jogador nas linhas 486 e 487, de goleiro em 488 e 489, cada uma com
+uma cópia quatro linhas abaixo —, e não os retângulos que o TEX declara.
+
 ### 4.2 (b) Que time usa qual tag
 
 Nada no repositório sabe. O Wetigre dá a ordem de

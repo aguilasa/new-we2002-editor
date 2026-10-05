@@ -116,6 +116,48 @@ def find(vram: list, record, words: tuple) -> list:
     return out
 
 
+KIT_AREA = (range(512, VRAM_W, 64), (256, 384))
+"""Where a match puts the kit pages, measured 2026-10-04: one team at
+x 576, the other at x 640, uniform at y 256 and sleeves at y 384.  Searched as
+a grid of 64-halfword columns from x 512 so a third place would be found."""
+IMAGE_SETS = ((0, 4), (1, 5))
+"""(set-1 record, set-2 record) of the uniform and of the sleeves."""
+
+
+def difference(vram: list, x: int, y: int, record, words: tuple) -> int:
+    """Halfwords of *record* that differ from VRAM at (x, y)."""
+    w, out = record.w, 0
+    for r in range(record.h):
+        row = struct.unpack("<%dH" % w, vram[y + r][2 * x:2 * (x + w)])
+        out += sum(1 for a, b in zip(row, words[r * w:(r + 1) * w]) if a != five(b))
+    return out
+
+
+def closest_sets(vram: list, body: bytes) -> list:
+    """[(name, (x, y), set-1 difference, set-2 difference)] for the uniform and
+    the sleeves: the place in KIT_AREA where either set comes closest, and
+    how far each set is from VRAM there.
+
+    In a match the page is NOT uploaded whole -- parts of it hold something
+    else -- so the exact search above finds no page; the closer set, by a
+    margin, is what names it."""
+    records = records_of(body)
+    out = []
+    for one, two in IMAGE_SETS:
+        a, b = records[one], records[two]
+        wa, wb = payload(body, a), payload(body, b)
+        best = None
+        for x in KIT_AREA[0]:
+            for y in KIT_AREA[1]:
+                if y + a.h > VRAM_H or x + a.w > VRAM_W or y != a.y:
+                    continue
+                da, db = difference(vram, x, y, a, wa), difference(vram, x, y, b, wb)
+                if best is None or min(da, db) < min(best[2], best[3]):
+                    best = (NAMES[one], (x, y), da, db)
+        out.append(best)
+    return out
+
+
 def read_kits(image_path: str) -> dict:
     import iso_source
 
@@ -152,8 +194,22 @@ def report(hits: list) -> dict:
         if not flat and index in SETS:
             worn.setdefault(tag, set()).add(SETS[index])
     for tag in sorted(worn):
-        print("  TEX_%s wears set %s" % (tag, " and ".join(str(s) for s in sorted(worn[tag]))))
+        print("  TEX_%s: exact records of set %s" % (tag, " and ".join(str(s) for s in sorted(worn[tag]))))
     return {tag: sorted(sets) for tag, sets in worn.items()}
+
+
+def report_pages(vram: list, bodies: dict, tags) -> dict:
+    """The pages of each kit in *tags*, set against set; {tag: {name: set}}."""
+    out = {}
+    for tag in sorted(tags):
+        for name, at, one, two in closest_sets(vram, bodies[tag]):
+            size = 64 * 128
+            nearer = 1 if one < two else 2 if two < one else None
+            out.setdefault(tag, {})[name] = nearer
+            print("  TEX_%s %-8s at (%d,%d): set 1 differs in %4d of %d halfwords, set 2 in "
+                  "%4d -- %s" % (tag, name, at[0], at[1], one, size, two,
+                                 "set %d nearer" % nearer if nearer else "a tie"))
+    return out
 
 
 def dump_slot(slot: int, cue: str, out_dir: str) -> list:
@@ -205,8 +261,10 @@ def main(argv=None) -> int:
     bodies = read_kits(image)
     print("  %d kit container(s) read from %s" % (len(bodies), image))
     if args.png:
-        hits = search(vram_rows(args.png), bodies)
+        vram = vram_rows(args.png)
+        hits = search(vram, bodies)
         report(hits)
+        report_pages(vram, bodies, {tag for tag, *_ in hits})
         return 0
     cue = args.cue or os.environ.get(DRIVE_VARIABLE)
     if not cue:
@@ -222,6 +280,7 @@ def main(argv=None) -> int:
         return 1
     print("  control: two dumps a frame apart give the same %d match(es)" % len(first))
     report(first)
+    report_pages(vram_rows(paths[0]), bodies, {tag for tag, *_ in first})
     return 0
 
 

@@ -24,4 +24,6 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#5).
 
 Da KITS-TASK-10: o `tools/kits/confront.py` já existe e é o confronto 2 (os pares de bandeira, `WE2002_KITS_CORPUS`), sem subcomando — rodar sem opção confronta os pares. O `--score` desta task entra como modo novo dele, sem mudar o que a corrida sem opção faz; o arquivo está na regra da fachada (`FACADE_CLIENTS` do `selftest.py`), então só importa `core.api`.
 
+Da KITS-TASK-27: o "time da §4.1" é a partida **Escócia (`TEX_01`, titular) × Dinamarca (`TEX_13`, suplente)**, no slot 3 do emulador, cópia mestra em `work/kits-states/SLPM-87056_3.sav` (sha256 `5f392a12…`), gravado sobre `work/we2002-english.cue`. O quadro do jogo é de partida, não da `LOOKS SET`: câmera de transmissão, figuras pequenas, e o goleiro da Escócia na paleta de goleiro do conjunto **2** (§4.1) — o titular "inteiro" do nosso 3D não é exatamente o que está em campo.
+
 ## Log de Execução
