@@ -60,3 +60,7 @@ $ grep -c 'WE2002_LOOKS_IMAGE=roms' docs/tasks/kits/35-fechamento-fase-9.md
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE2002_KITS_ED_IMAGE=$PWD/roms/golden-european-deluxe.bin ctest --test-dir build -R kits
 100% tests passed, 0 tests failed out of 4
 ```
+- **Closed** — commit `df15625` (2026-10-05): docs(kits): task 35 log gives the image paths ctest can resolve
+  - Files (`git show --name-status df15625`):
+    - `M docs/tasks/kits/35-fechamento-fase-9.md`
+    - `M docs/tasks/kits/CORR-KITS-063.md`
