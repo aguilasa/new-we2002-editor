@@ -40,3 +40,35 @@ Em `tools/kits/oracle.py`, implementar o filtro (pular o índice i quando `paylo
 `grep -n "shared byte for byte" tools/kits/oracle.py` não acha nada; ou, com o filtro, `--png` sobre o dump do LOOKS SET (`work/kits-oracle/looks-2`) deixa de imprimir "TEX_A4: exact records of set 1 and 2".
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `5023982`, sobre o dump gravado da tela LOOKS SET (sem emulador):
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --png work/kits-oracle/looks-2/vram-0.png | grep -v ' record '
+  105 kit container(s) read from /home/ingmar/desenvolvimento/github/new-we2002-editor/roms/japanese-shift-jis.bin
+  TEX_A4: exact records of set 1 and 2
+  TEX_A4 uniform  at (576,256): set 1 differs in  480 of 8192 halfwords, set 2 in  480 -- a tie
+  TEX_A4 sleeves  at (576,384): set 1 differs in    0 of 8192 halfwords, set 2 in    0 -- a tie
+```
+
+Conserto: o filtro implementado, não a cláusula tirada. `search` devolve um quinto campo, `shared` — o registro é byte a byte o do outro conjunto (índice ±4) —, e `report` não conta registro compartilhado para nomear conjunto: marca a linha com `the same in both sets, names neither` e, se o kit não nomeou conjunto nenhum, diz isso. Assim a docstring passa a ser verdade.
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --png work/kits-oracle/looks-2/vram-0.png | grep -v ' record '
+  105 kit container(s) read from /home/ingmar/desenvolvimento/github/new-we2002-editor/roms/japanese-shift-jis.bin
+  TEX_A4: its set records are found, but both sets are the same: no set named
+  TEX_A4 uniform  at (576,256): set 1 differs in  480 of 8192 halfwords, set 2 in  480 -- a tie
+  TEX_A4 sleeves  at (576,384): set 1 differs in    0 of 8192 halfwords, set 2 in    0 -- a tie
+```
+
+Controle de que o filtro não apaga achado verdadeiro: no dump da partida (`TEX_01` e `TEX_13`, nenhum registro compartilhado) o veredito é o mesmo de antes:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --png work/kits-oracle/match-3/vram-0.png | grep 'TEX_.*:'
+  TEX_01: exact records of set 1 and 2
+  TEX_13: exact records of set 2
+```
+
+A linha 45 do Log da KITS-TASK-27 (`TEX_A4 wears set 1 and 2`) é transcrição de uma versão anterior da ferramenta, e fica.

@@ -166,18 +166,23 @@ def read_kits(image_path: str) -> dict:
 
 
 def search(vram: list, bodies: dict) -> list:
-    """[(tag, record index, positions, flat)] for every record found at least
-    once; *flat* says the record has too few distinct halfwords to name
-    anything."""
+    """[(tag, record index, positions, flat, shared)] for every record found
+    at least once; *flat* says the record has too few distinct halfwords to
+    name anything, *shared* that it is byte for byte the same record of the
+    kit's other set (index +-4), so finding it names neither set."""
     out = []
     for tag in sorted(bodies):
         body = bodies[tag]
-        for index, record in enumerate(records_of(body)):
-            words = payload(body, record)
+        records = records_of(body)
+        words_of = [payload(body, record) for record in records]
+        for index, record in enumerate(records):
+            words = words_of[index]
             flat = len(set(five(v) for v in words)) < MIN_DISTINCT
+            twin = index + 4 if index < 4 else index - 4 if index in SETS else None
+            shared = twin is not None and words_of[twin] == words
             at = find(vram, record, words)
             if at:
-                out.append((tag, index, tuple(at), flat))
+                out.append((tag, index, tuple(at), flat, shared))
     return out
 
 
@@ -185,16 +190,21 @@ def report(hits: list) -> dict:
     """Prints the hits and returns {tag: sorted sets} of the kits that name a
     set: an image or palette record of set 1 or 2 found, not flat, and not
     shared byte for byte with the other set of the same kit."""
-    worn = {}
-    for tag, index, at, flat in hits:
+    worn, unnamed = {}, set()
+    for tag, index, at, flat, shared in hits:
         where = ", ".join("(%d,%d)" % p for p in at[:4]) + (" …" if len(at) > 4 else "")
-        mark = "flat, names nothing" if flat else ""
+        mark = ("flat, names nothing" if flat
+                else "the same in both sets, names neither" if shared else "")
         print("  TEX_%s  record %2d %-18s set %s  at %s  %s"
               % (tag, index, NAMES[index], SETS.get(index, "-"), where, mark))
-        if not flat and index in SETS:
+        if not flat and not shared and index in SETS:
             worn.setdefault(tag, set()).add(SETS[index])
+        elif shared and index in SETS:
+            unnamed.add(tag)
     for tag in sorted(worn):
         print("  TEX_%s: exact records of set %s" % (tag, " and ".join(str(s) for s in sorted(worn[tag]))))
+    for tag in sorted(unnamed - set(worn)):
+        print("  TEX_%s: its set records are found, but both sets are the same: no set named" % tag)
     return {tag: sorted(sets) for tag, sets in worn.items()}
 
 
