@@ -649,7 +649,8 @@ def _read_against(path: str) -> dict:
 
 
 def cmd_teams(args) -> int:
-    """The team list of a disc: index, where the name came from, the name.
+    """The team list of a disc: index, where the name came from, the kit tag
+    the team wears (section 4.2), the name.
     With --against, each name is compared with what we2002_core read."""
     try:
         source = api.open_source(args.path)
@@ -661,7 +662,8 @@ def cmd_teams(args) -> int:
         print("teams: %s" % exc, file=sys.stderr)
         return 1
     for t in teams:
-        print("%3d  %-8s %-5s %s" % (t.index, t.group, t.name_origin, t.name))
+        print("%3d  %-8s %-5s TEX_%-3s %s" % (t.index, t.group, t.name_origin, t.tag or "-",
+                                              t.name))
     origins = {}
     for t in teams:
         origins[t.name_origin] = origins.get(t.name_origin, 0) + 1

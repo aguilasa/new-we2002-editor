@@ -302,7 +302,11 @@ decide o que é.
 - **ROM**: aparece o **combobox de times**. Escolher um time carrega o TEX dele.
   Enquanto a §4.2 não fechar, o combobox lista as 105 tags (`TEX_00`…
   `TEX_A4`), com o nome do time ao lado só onde o mapeamento já for conhecido;
-  fechada a §4.2, ele lista times, na ordem do jogo.
+  fechada a §4.2, ele lista times, na ordem do jogo. **Fechada na KITS-TASK-31:**
+  os 95 times na ordem do jogo, cada um com a tag que veste ("Ireland —
+  TEX_00"), depois o uniforme padrão da Master League (`TEX_A4`) e por fim as
+  nove tags que nenhum time veste (`TEX_95` a `TEX_A3`), que continuam
+  escolhíveis. Quem decide a ordem é o núcleo (`api.kit_order`), não a janela.
 - **TEX avulso**: sem combobox; o arquivo é o uniforme.
 
 **O 3D precisa da geometria**, que não está no TEX e só foi medida nos discos

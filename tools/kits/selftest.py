@@ -227,6 +227,21 @@ def _core_checks(c) -> None:
        tex.declared_extent(data) == len(data),
        "%s for %d bytes" % (tex.declared_extent(data), len(data)))
 
+    # section 4.2 (KITS-TASK-31): the selector's order -- the 95 teams in game
+    # order, the ML default kit, then the unworn tags, each tag exactly once.
+    all_tags = tuple("%02d" % n for n in range(100)) + tuple("A%d" % n for n in range(5))
+    teams = tuple(api.TeamEntry(i, "team %d" % i, api.ORIGIN_TABLE, "%02d" % i)
+                  for i in range(95))
+    order = api.kit_order(teams, all_tags)
+    ok("kit_order lists every tag of the disc once",
+       sorted(t for t, _, _ in order) == sorted(all_tags), "%d items" % len(order))
+    ok("kit_order puts the 95 teams first, in game order, then the ML default kit",
+       [t.index for _, k, t in order[:95] if k == api.KIND_TEAM] == list(range(95))
+       and order[95][:2] == (api.ML_DEFAULT_KIT, api.KIND_ML_DEFAULT),
+       "%s" % [o[:2] for o in order[93:97]])
+    ok("kit_order leaves a team whose tag is not on the disc out",
+       len(api.kit_order(teams, all_tags[:10] + ("A4",))) == 11)
+
     def problems(d):
         return tex.read_kit(d, "fixture").problems
 

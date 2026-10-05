@@ -485,7 +485,7 @@ class Window(QtWidgets.QMainWindow):
         blocker = QtCore.QSignalBlocker(self.tag_box)
         self.tag_box.clear()
         if source.kind == api.KIND_ROM:
-            for tag in source.kit_tags():
+            for tag, _kind, _team in self.kit_order():
                 self.tag_box.addItem("", tag)
             self.relabel_tags()
             self.tag_box.show()
@@ -542,18 +542,32 @@ class Window(QtWidgets.QMainWindow):
             return
         self.figure_view.set_scene(scene)
 
+    def kit_order(self) -> tuple:
+        """The disc's kits as the selector lists them (section 4.2): the teams
+        in game order, the Master League default kit, the unworn tags."""
+        try:
+            teams = self.source.teams()
+        except api.KitsError as exc:
+            self.say(None, {CORE_TEXT: str(exc)})
+            teams = ()
+        return api.kit_order(teams, self.source.kit_tags())
+
     def relabel_tags(self) -> None:
-        """The kit selector's labels: the tag, and the teams the disc gives it."""
+        """The kit selector's labels: the team and its tag, the ML default
+        kit, or the bare tag."""
         if self.source is None or self.source.kind != api.KIND_ROM:
             return
-        names = {}
-        for team in self.source.teams():
-            if team.tag is not None:
-                names.setdefault(team.tag, []).append(team.name)
+        labels = {}
+        for tag, kind, team in self.kit_order():
+            if kind == api.KIND_TEAM:
+                labels[tag] = tr("kit_team", team=team.name, tag=tag)
+            elif kind == api.KIND_ML_DEFAULT:
+                labels[tag] = tr("kit_ml_default", tag=tag)
+            else:
+                labels[tag] = tr("kit_tag", tag=tag)
         for i in range(self.tag_box.count()):
             tag = self.tag_box.itemData(i)
-            self.tag_box.setItemText(i, tr("kit_tag_teams", tag=tag, teams=", ".join(names[tag]))
-                                     if tag in names else tr("kit_tag", tag=tag))
+            self.tag_box.setItemText(i, labels.get(tag, tr("kit_tag", tag=tag)))
 
     def tags(self) -> list:
         return [self.tag_box.itemData(i) for i in range(self.tag_box.count())]

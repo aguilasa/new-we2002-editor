@@ -21,8 +21,11 @@ the first NUL (the `strcpy` of the original).  Offsets and lengths come
 from `generated/team_names.py`, never typed here.
 
 The index is the original editor's combobox order: nations 0..53,
-all-stars 54..62, Master League clubs 63..94.  It is not the kit tag;
-`tag` stays None until section 4.2 links the two.
+all-stars 54..62, Master League clubs 63..94.  It is not the kit tag in
+general, but section 4.2 measured that team i wears TEX number i in disc
+order; `tag` comes from `generated/team_kits.py`, never typed here.
+`kit_order` is the order the window lists kits in: the teams, then the
+Master League default kit, then the tags no team wears.
 """
 
 from __future__ import annotations
@@ -33,6 +36,7 @@ from typing import Optional
 
 from . import tex  # noqa: F401  (puts tools/pes2 and tools/looks on sys.path)
 from .errors import SourceUnreadable
+from .generated import team_kits as kits
 from .generated import team_names as names
 
 import iso  # noqa: E402  (tools/pes2)
@@ -44,6 +48,12 @@ ORIGIN_ROM = "rom"
 GROUP_NATIONAL = "national"
 GROUP_ALLSTAR = "allstar"
 GROUP_ML = "ml"
+
+ML_DEFAULT_KIT = kits.ML_DEFAULT_KIT
+
+KIND_TEAM = "team"
+KIND_ML_DEFAULT = "ml-default"
+KIND_UNWORN = "unworn"
 
 TEAM_COUNT = names.TEAMS_NATIONAL + names.TEAMS_ALLSTAR + names.TEAMS_ML
 NATIONAL_ALLSTAR = names.TEAMS_NATIONAL + names.TEAMS_ALLSTAR
@@ -57,7 +67,7 @@ class TeamEntry:
     name: str
     name_origin: str        # ORIGIN_TABLE or ORIGIN_ROM
     tag: Optional[str] = None
-    """The kit tag (`TEX_<tag>`), None until section 4.2 is closed."""
+    """The kit tag (`TEX_<tag>`) the team wears, from `generated/team_kits.py`."""
 
     @property
     def group(self) -> str:
@@ -107,6 +117,25 @@ def _mixed_case_names(image_path: str) -> list:
 def read_teams(image_path: str, image) -> tuple:
     """The 95 `TeamEntry` of the disc at *image_path* (*image* is it opened)."""
     if is_japanese(image):
-        return tuple(TeamEntry(i, names.TEAM_NAMES[i], ORIGIN_TABLE) for i in range(TEAM_COUNT))
+        return tuple(TeamEntry(i, names.TEAM_NAMES[i], ORIGIN_TABLE, kits.TEAM_KIT[i])
+                     for i in range(TEAM_COUNT))
     rom = _mixed_case_names(image_path)
-    return tuple(TeamEntry(i, rom[i], ORIGIN_ROM) for i in range(TEAM_COUNT))
+    return tuple(TeamEntry(i, rom[i], ORIGIN_ROM, kits.TEAM_KIT[i]) for i in range(TEAM_COUNT))
+
+
+def kit_order(teams, tags) -> tuple:
+    """((tag, kind, team or None), ...) over the disc's *tags*: every team in
+    game order with the kit it wears, then the Master League default kit,
+    then each tag no team wears, in disc order.  A team whose tag is not on
+    the disc is left out; every tag on the disc is listed exactly once."""
+    on_disc = set(tags)
+    out, seen = [], set()
+    for team in teams:
+        if team.tag in on_disc and team.tag not in seen:
+            out.append((team.tag, KIND_TEAM, team))
+            seen.add(team.tag)
+    if ML_DEFAULT_KIT in on_disc and ML_DEFAULT_KIT not in seen:
+        out.append((ML_DEFAULT_KIT, KIND_ML_DEFAULT, None))
+        seen.add(ML_DEFAULT_KIT)
+    out += [(tag, KIND_UNWORN, None) for tag in tags if tag not in seen]
+    return tuple(out)

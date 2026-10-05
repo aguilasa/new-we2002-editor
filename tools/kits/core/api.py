@@ -9,6 +9,7 @@ build it.
     source.kind                      # "rom" or "tex", decided by content
     source.kit_tags()                # rom only: the TEX tags on the disc
     source.teams()                   # rom only: 95 TeamEntry(index, name, name_origin, tag)
+    kit_order(teams, tags)           # the window's kit list: teams, ML default, unworn tags
     kit = source.kit(tag)            # rom: by tag; lone TEX: the file itself
     kit.problems                     # the guard of form, one sentence per record
     kit.notes                        # how it was read, when not plainly (api.Note)
@@ -38,7 +39,8 @@ from .tex import (EXPECTED_SHAPE, IMAGE_RECORDS, NOTE_FORM2_TAIL,  # noqa: F401
                   Note, Palette, StreamControl)
 from .tex import stream_control as _stream_control
 from .tex import decompress_stream as _decompress_stream
-from .teams import ORIGIN_ROM, ORIGIN_TABLE, TeamEntry  # noqa: F401
+from .teams import (ORIGIN_ROM, ORIGIN_TABLE, TeamEntry, kit_order,  # noqa: F401
+                    KIND_TEAM, KIND_ML_DEFAULT, KIND_UNWORN, ML_DEFAULT_KIT)
 from .flat import (FIGURES, GAME_PAIRS, KIT_SETS, WORK_H, WORK_W,  # noqa: F401
                    FlatImage, PaletteEntry, paint, palette_rgba)
 from .flat import PALETTE_OF as WORK_PALETTE  # noqa: F401
@@ -67,6 +69,7 @@ __all__ = (
     "IMAGE_RECORDS", "PALETTE_RECORDS", "IMAGE_COUNT", "PALETTE_COUNT",
     "decompress_stream", "StreamError",
     "TeamEntry", "ORIGIN_TABLE", "ORIGIN_ROM",
+    "kit_order", "KIND_TEAM", "KIND_ML_DEFAULT", "KIND_UNWORN", "ML_DEFAULT_KIT",
     "FlatImage", "PaletteEntry", "paint", "palette_rgba", "GAME_PAIRS", "KIT_SETS", "FIGURES",
     "WORK_W", "WORK_H", "WORK_PALETTE", "UNIFORM_OF_SET", "SLEEVES_OF_SET",
     "zone_at", "Zone", "ZONES", "Gap", "GAPS", "Measure", "MEASURES", "ZONE_CLASSES",
