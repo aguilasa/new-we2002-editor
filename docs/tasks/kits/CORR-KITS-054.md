@@ -37,3 +37,27 @@ Em `tools/kits/gen_tables.py`, `EDITOR_EXE = os.path.join(REPO_DIR, "we-team-edi
 `cd /tmp && python3 /home/ingmar/desenvolvimento/github/new-we2002-editor/tools/kits/gen_tables.py --editor` sai 77 hoje; depois do conserto sai 0 com "the exe computes EDITOR_RULE".
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `a1b1dca`:
+
+```
+$ cd /tmp && python3 /home/ingmar/desenvolvimento/github/new-we2002-editor/tools/kits/gen_tables.py --editor; echo rc=$?
+gen_tables --editor: skipped -- no exe at we-team-editor/we-team-editor.exe (it is not in git)
+rc=77
+```
+
+Conserto: `EDITOR_EXE = os.path.join(REPO_DIR, "we-team-editor", "we-team-editor.exe")`, como os outros caminhos do gerador.
+
+```
+$ cd /tmp && python3 /home/ingmar/desenvolvimento/github/new-we2002-editor/tools/kits/gen_tables.py --editor; echo rc=$?
+gen_tables --editor: 2 site(s) at 0xd451, 0xe5db give {'divisor': 95, 'skip': 9, 'base': 19756824, 'stride': 47040}
+gen_tables --editor: the exe computes EDITOR_RULE
+rc=0
+$ cd /tmp && python3 /home/ingmar/desenvolvimento/github/new-we2002-editor/tools/kits/gen_tables.py --negative-editor | tail -1
+control: --editor <copy> exit 1 -- red, held
+$ python3 tools/kits/gen_tables.py --check
+gen_tables: tools/kits/core/generated/team_names.py is up to date
+gen_tables: tools/kits/core/generated/team_kits.py is up to date
+```

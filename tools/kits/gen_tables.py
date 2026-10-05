@@ -61,7 +61,7 @@ LENGTH_TABLES = ("TEAM_NAME_LEN_1", "TEAM_NAME_LEN_2", "TEAM_NAME_LEN_3", "TEAM_
 NAME_TABLE = "TEAM_NAMES"
 
 KITS_OUTPUT = os.path.join(KITS_DIR, "core", "generated", "team_kits.py")
-EDITOR_EXE = os.path.join("we-team-editor", "we-team-editor.exe")
+EDITOR_EXE = os.path.join(REPO_DIR, "we-team-editor", "we-team-editor.exe")
 
 EDITOR_RULE = {"divisor": 95, "skip": 9, "base": 0x12D7718, "stride": 47040}
 """What `we-team-editor.exe` does with the item index of its team combobox
