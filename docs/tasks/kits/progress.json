@@ -545,10 +545,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#3.4",
       "files": ["tools/kits/ui/*.py", "tools/kits/ui_check.py"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-04",
+      "done_commit": "84e5c6d",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

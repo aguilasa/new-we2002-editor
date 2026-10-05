@@ -73,3 +73,11 @@ kits_ui: 0 failure(s)
 
 Sem a variável da ED, a linha diz `ED not checked, WE2002_KITS_ED_IMAGE unset`
 e o juiz imprime a nota de que os três não foram julgados.
+- **Closed** — commit `84e5c6d` (2026-10-04): feat(kits): Diagnosis tab lists the guard's problems and the read notes
+  - Files (`git show --name-status 84e5c6d`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/33-aba-diagnostico.md`
+    - `M docs/tasks/kits/34-definicao-de-pronto.md`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`
