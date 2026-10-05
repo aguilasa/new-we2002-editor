@@ -77,3 +77,7 @@ kits_ui: 0 failure(s)
 A Verificação como está escrita, sem a variável ED, continua sem a linha `ok`, e isso é de
 propósito: sem o disco ED o juiz não tem o que ver. A linha `ok` sai com a variável, como mostra a
 primeira corrida acima.
+- **Closed** — commit `f312104` (2026-10-05): test(kits): plant the Diagnosis note rows away, judged with the ED disc
+  - Files (`git show --name-status f312104`):
+    - `M docs/tasks/kits/CORR-KITS-061.md`
+    - `M tools/kits/ui_check.py`
