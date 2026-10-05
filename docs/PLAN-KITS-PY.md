@@ -640,6 +640,17 @@ rodou ([CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md)).
    jogo enviou é o conjunto que a ferramenta disse, e o confronto por histograma
    de cor do `looks` (`confront.py --score`) é refeito com outro uniforme que não
    o `A4`.
+   Medido na KITS-TASK-28, sobre o quadro de partida que
+   `oracle.py --slot 3 --out work/kits-oracle/match-3` grava (Escócia `TEX_01`
+   no conjunto 1 × Dinamarca `TEX_13` no 2; duas corridas deram o mesmo
+   `screen.png`, sha256 `ee1bfba6…`): seis caixas de jogador de linha medidas
+   nesse quadro, três por time, contra o nosso 3D de frente e de costas, com o
+   limiar `KIT_CONTROL_MARGIN` do `looks` (0,05). Os jogadores da Escócia dão
+   **0,770** ao nosso `TEX_01` e 0,429 ao `TEX_13`; os da Dinamarca, **0,759**
+   ao `TEX_13` e 0,349 ao `TEX_01` (`python tools/kits/confront.py --score`).
+   O controle troca os dois renders e tem de reprovar os dois times
+   (`--score --negative`); outro quadro é recusado pelo digest, porque as caixas
+   valem só para ele.
 4. **Controles negativos**, plantados por comando como no `looks`:
    - trocar as paletas 486 e 488 tem de trocar jogador e goleiro no 3D;
    - um byte trocado no fluxo LZSS de um TEX tem de ser **recusado** pela guarda

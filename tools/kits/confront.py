@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Confront 2 of PLAN-KITS-PY.md section 5: the community as an outside oracle.
+"""Confronts 2 and 3 of PLAN-KITS-PY.md section 5: the community and the game.
+
+Confront 2, the community as an outside oracle, is the run with no option.
 
 The 3D flags the community made (`.bin` beside `.tim`, mostly `*_BND`) are a lone
 LZSS stream and the TIM it was compressed from.  Our decompression of the
@@ -16,6 +18,20 @@ Usage:
     python tools/kits/confront.py --report        # what the corpus holds, counted
     python tools/kits/confront.py --negative [--scratch DIR]
         # copies one matching .tim, changes one pixel of the copy, and needs it refused
+    python tools/kits/confront.py --score [--game PNG]
+        # confront 3: our 3D of both teams against the game's own match frame
+    python tools/kits/confront.py --score --negative
+        # the same matrix with the two teams' renders swapped, which has to fail
+
+Confront 3 is the colour histogram of the looks (`tools/looks/confront.py`,
+histogram intersection at the console's 5 bits per channel, the frame restricted
+to the colours our render draws) on the match of section 4.1: Scotland in its
+first kit (`TEX_01`, set 1) against Denmark in its second (`TEX_13`, set 2).
+The frame is the one `oracle.py --slot 3 --out work/kits-oracle/match-3`
+writes beside its VRAM dumps, and the boxes are the six outfield players
+measured on it.  Our side is the window's 3D tab, front and back, spawned with
+the venv python on the :98 like `ui_check.py` does.  Each team's boxes have to
+score its own render at least MARGIN over the other team's.
 """
 
 from __future__ import annotations
@@ -24,8 +40,10 @@ import argparse
 import os
 import shutil
 import struct
+import subprocess
 import sys
 import tempfile
+import zlib
 from dataclasses import dataclass
 from typing import Optional
 
@@ -220,6 +238,243 @@ def negative(results: list, scratch: Optional[str]) -> int:
         if own:
             shutil.rmtree(folder, ignore_errors=True)
 
+# -- confront 3: the 3D against the game -----------------------------------
+
+IMAGE_VARIABLE = "WE2002_LOOKS_IMAGE"
+MATCH_FRAME = os.path.join("work", "kits-oracle", "match-3", "screen.png")
+"""The frame `oracle.py --slot 3 --out work/kits-oracle/match-3` writes: slot 3
+loaded, 32 frames stepped, the broadcast camera of Scotland x Denmark."""
+TEAMS = (("01", 1, "Scotland, first kit"), ("13", 2, "Denmark, second kit"))
+"""(tag, set the game wears, who) -- section 4.1, measured in VRAM."""
+BOXES = {
+    "01": ((255, 295, 295, 388), (65, 350, 106, 462), (760, 472, 800, 592)),
+    "13": ((395, 328, 435, 430), (663, 208, 712, 294), (10, 510, 62, 626)),
+}
+"""(left, top, right, bottom) of each outfield player of a team in MATCH_FRAME
+(800x655), measured off a 2x zoom with a 20-pixel grid.  The goalkeepers are
+out of the frame, and Scotland's wears set 2's goalkeeper palette anyway."""
+FRAME_SIZE = (800, 655)
+FRAME_SHA256 = "ee1bfba6e7dc03af8276130f6f25d8b71493aefdd3635dc4c6069ac009e9d8a6"
+"""MATCH_FRAME as two runs of `oracle.py --slot 3` wrote it, byte for byte the
+same (2026-10-04).  BOXES hold for that picture only, so another one is refused."""
+MARGIN = 0.05
+"""The looks' KIT_CONTROL_MARGIN: how much better the right kit has to score
+than another team's, in histogram intersection."""
+RANK = 32
+"""5 bits per channel, the console's colour depth (the looks' RANK)."""
+YAWS = (180.0, 0.0)
+"""Front and back: a player on the pitch shows either."""
+BACKDROP_3D = (0x8C, 0x8C, 0x8C)
+VENV_PYTHON = os.path.join("work", "venv-looks",
+                           os.path.join("Scripts", "python.exe") if os.name == "nt"
+                           else os.path.join("bin", "python"))
+APP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ui", "app.py")
+DISPLAY = ":98"
+TIMEOUT = 180
+
+
+class ScoreError(RuntimeError):
+    """Confront 3 could not be measured."""
+
+
+def read_rgb(path: str) -> tuple:
+    """(width, height, [(r, g, b), ...]) of an 8-bit RGB or RGBA PNG without
+    interlace, any row filter: both the fork's frame and the Qt capture."""
+    with open(path, "rb") as fh:
+        data = fh.read()
+    p, chunks = 8, {}
+    while p < len(data):
+        n = struct.unpack_from(">I", data, p)[0]
+        tag = data[p + 4:p + 8]
+        chunks[tag] = chunks.get(tag, b"") + data[p + 8:p + 8 + n]
+        p += 12 + n
+    width, height, depth, kind, _, _, interlace = struct.unpack_from(">IIBBBBB", chunks[b"IHDR"])
+    bpp = {2: 3, 6: 4}.get(kind)
+    if depth != 8 or bpp is None or interlace:
+        raise ScoreError("%s: not an 8-bit RGB or RGBA PNG without interlace" % path)
+    raw = zlib.decompress(chunks[b"IDAT"])
+    stride, prev, pixels = width * bpp, bytearray(width * bpp), []
+    for r in range(height):
+        f = raw[r * (stride + 1)]
+        row = bytearray(raw[r * (stride + 1) + 1:(r + 1) * (stride + 1)])
+        for i in range(stride):
+            a = row[i - bpp] if i >= bpp else 0
+            b = prev[i]
+            c = prev[i - bpp] if i >= bpp else 0
+            if f == 1:
+                row[i] = (row[i] + a) & 0xFF
+            elif f == 2:
+                row[i] = (row[i] + b) & 0xFF
+            elif f == 3:
+                row[i] = (row[i] + (a + b) // 2) & 0xFF
+            elif f == 4:
+                pa, pb, pc = abs(b - c), abs(a - c), abs(a + b - 2 * c)
+                row[i] = (row[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 0xFF
+        prev = row
+        pixels.extend(tuple(row[x * bpp:x * bpp + 3]) for x in range(width))
+    return width, height, pixels
+
+
+def quantise(pixel) -> tuple:
+    return tuple(v // (256 // RANK) for v in pixel)
+
+
+def histogram(pixels) -> dict:
+    out: dict = {}
+    for pixel in pixels:
+        colour = quantise(pixel)
+        out[colour] = out.get(colour, 0) + 1
+    return out
+
+
+def box_pixels(shot: tuple, box: tuple) -> list:
+    width = shot[0]
+    return [shot[2][y * width + x] for y in range(box[1], box[3]) for x in range(box[0], box[2])]
+
+
+def figure_pixels(shot: tuple) -> list:
+    """The drawn pixels of a 3D capture: inside the box of the backdrop colour,
+    the backdrop left out."""
+    width, _, pixels = shot
+    at = [i for i, p in enumerate(pixels) if p == BACKDROP_3D]
+    if not at:
+        raise ScoreError("the capture has no 3D view (no backdrop pixel)")
+    xs, ys = [i % width for i in at], [i // width for i in at]
+    return [p for y in range(min(ys), max(ys) + 1) for x in range(min(xs), max(xs) + 1)
+            for p in (pixels[y * width + x],) if p != BACKDROP_3D]
+
+
+def intersection(first: dict, second: dict) -> float:
+    """Histogram intersection of two normalised histograms, 0..1 (the looks')."""
+    total_a, total_b = sum(first.values()), sum(second.values())
+    if not total_a or not total_b:
+        return 0.0
+    return sum(min(n / total_a, second.get(colour, 0) / total_b)
+               for colour, n in first.items())
+
+
+def restrict(counts: dict, palette) -> dict:
+    return {colour: n for colour, n in counts.items() if colour in palette}
+
+
+def environment() -> dict:
+    env = dict(os.environ)
+    env["PYTHONIOENCODING"] = "utf-8"
+    if os.name == "nt":
+        return env
+    env["DISPLAY"] = DISPLAY
+    try:
+        ps = subprocess.run(["ps", "-o", "args=", "-C", "Xvfb"], capture_output=True,
+                            text=True).stdout
+    except OSError:
+        ps = ""
+    auth = [line.split()[line.split().index("-auth") + 1] for line in ps.splitlines()
+            if ("Xvfb %s " % DISPLAY) in line + " " and "-auth" in line]
+    if auth:
+        env["XAUTHORITY"] = auth[0]
+    else:
+        env.pop("XAUTHORITY", None)
+    return env
+
+
+def render(image: str, tag: str, kit_set: int, out_dir: str) -> dict:
+    """The histogram of our 3D of *tag* in *kit_set*, front and back together."""
+    if not os.path.isfile(VENV_PYTHON):
+        raise ScoreError("no venv python at %s (make looks-venv)" % VENV_PYTHON)
+    counts: dict = {}
+    for yaw in YAWS:
+        out = os.path.join(out_dir, "ours-%s-set%d-yaw%d.png" % (tag, kit_set, yaw))
+        args = [VENV_PYTHON, APP, image, "--tag", tag, "--tab", "3d", "--kit-set",
+                str(kit_set), "--figure", "0", "--yaw", "%g" % yaw, "--screenshot", out]
+        try:
+            done = subprocess.run(args, env=environment(), capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace", timeout=TIMEOUT)
+        except subprocess.TimeoutExpired:
+            raise ScoreError("app.py did not exit within %d s" % TIMEOUT)
+        if done.returncode or not os.path.isfile(out):
+            raise ScoreError("app.py exited %s on TEX_%s set %d: %s"
+                             % (done.returncode, tag, kit_set,
+                                (done.stdout + done.stderr).strip()[-300:]))
+        for colour, n in histogram(figure_pixels(read_rgb(out))).items():
+            counts[colour] = counts.get(colour, 0) + n
+    return counts
+
+
+def score_matrix(frame: tuple, ours: dict) -> dict:
+    """{(team on the pitch, our render): (score, share of the boxes kept)}."""
+    out = {}
+    for team, _, _ in TEAMS:
+        pixels = [p for box in BOXES[team] for p in box_pixels(frame, box)]
+        game = histogram(pixels)
+        for mine, hist in ours.items():
+            kept = restrict(game, set(hist))
+            out[(team, mine)] = (intersection(kept, hist),
+                                 sum(kept.values()) / float(len(pixels)))
+    return out
+
+
+def score_verdict(matrix: dict, swapped: bool = False) -> list:
+    """Failures: a team whose own render does not lead the other's by MARGIN.
+    *swapped* hands each team the other team's render -- the control."""
+    tags = [t for t, _, _ in TEAMS]
+    bad = []
+    for team in tags:
+        other = [t for t in tags if t != team][0]
+        right, wrong = (other, team) if swapped else (team, other)
+        lead = matrix[(team, right)][0] - matrix[(team, wrong)][0]
+        if lead < MARGIN:
+            bad.append("the TEX_%s players score our TEX_%s %.3f, TEX_%s %.3f: a lead of "
+                       "%.3f, under %.2f" % (team, right, matrix[(team, right)][0], wrong,
+                                             matrix[(team, wrong)][0], lead, MARGIN))
+    return bad
+
+
+def score(game_path: str, negative_run: bool) -> int:
+    image = os.environ.get(IMAGE_VARIABLE)
+    if not image:
+        print("confront 3: skipped -- %s is not set (the Japanese data track .bin)"
+              % IMAGE_VARIABLE)
+        return SKIP
+    if not os.path.isfile(game_path):
+        print("confront 3: skipped -- no frame at %s; make it with "
+              "`python tools/kits/oracle.py --slot 3 --out %s`"
+              % (game_path, os.path.dirname(game_path)))
+        return SKIP
+    import hashlib
+
+    with open(game_path, "rb") as fh:
+        digest = hashlib.sha256(fh.read()).hexdigest()
+    if digest != FRAME_SHA256:
+        print("confront 3: %s has sha256 %s, not the %s… BOXES were measured on"
+              % (game_path, digest[:12], FRAME_SHA256[:12]))
+        return 1
+    frame = read_rgb(game_path)
+    if frame[:2] != FRAME_SIZE:
+        print("confront 3: %s is %dx%d, and BOXES were measured on %dx%d"
+              % ((game_path,) + frame[:2] + FRAME_SIZE))
+        return 1
+    with tempfile.TemporaryDirectory(prefix="kits-score-") as tmp:
+        ours = {tag: render(image, tag, kit_set, tmp) for tag, kit_set, _ in TEAMS}
+    matrix = score_matrix(frame, ours)
+    print("  frame: %s" % game_path)
+    print("  %-28s %s" % ("players on the pitch", "  ".join(
+        "ours TEX_%s set %d" % (t, s) for t, s, _ in TEAMS)))
+    for team, _, who in TEAMS:
+        print("  TEX_%s %-20s %s" % (team, who, "  ".join(
+            "%.3f (%4.1f %% kept)" % (matrix[(team, t)][0], 100 * matrix[(team, t)][1])
+            for t, _, _ in TEAMS)))
+    bad = score_verdict(matrix, swapped=negative_run)
+    for line in bad:
+        print("  %s  %s" % ("red " if negative_run else "FAIL", line))
+    if negative_run:
+        print("confront 3 --negative: the swapped renders give %d failure(s) of %d -- %s"
+              % (len(bad), len(TEAMS), "the control holds" if len(bad) == len(TEAMS)
+                 else "THE CONTROL DOES NOT FAIL"))
+        return 0 if len(bad) == len(TEAMS) else 1
+    print("confront 3: %d of %d team(s) score their own kit %.2f over the other's"
+          % (len(TEAMS) - len(bad), len(TEAMS), MARGIN))
+    return 1 if bad else 0
+
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -229,7 +484,13 @@ def main(argv=None) -> int:
     parser.add_argument("--report", action="store_true",
                         help="count what the corpus holds: files per folder, the unpaired, "
                              "the pair names, and each pair's TIM shape")
+    parser.add_argument("--score", action="store_true",
+                        help="confront 3: our 3D of both teams against the game's match frame")
+    parser.add_argument("--game", default=MATCH_FRAME,
+                        help="the game frame --score reads (default %(default)s)")
     args = parser.parse_args(argv)
+    if args.score:
+        return score(args.game, args.negative)
 
     folder = os.environ.get(CORPUS_VARIABLE)
     if not folder:
