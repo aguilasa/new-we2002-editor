@@ -14,10 +14,10 @@ Os cinco itens da Definição de pronto do §0 conferidos na HEAD, cada um com o
 
 ## Done criteria
 
-- [ ] Item 1: 105 TEX, 6 imagens × 5 paletas, sem imagem cinza e sem índice fora (contagem)
-- [ ] Item 2: 3D veste jogador e goleiro, titular e suplente de um time que difere, e o confronto 3 concorda
-- [ ] Item 3: TEX do WETex abre; TEX quebrado recusado com motivo
-- [ ] Item 4: §4.6 fechada com a lista do que sobra
+- [x] Item 1: 105 TEX, 6 imagens × 5 paletas, sem imagem cinza e sem índice fora (contagem)
+- [x] Item 2: 3D veste jogador e goleiro, titular e suplente de um time que difere, e o confronto 3 concorda
+- [x] Item 3: TEX do WETex abre; TEX quebrado recusado com motivo
+- [x] Item 4: §4.6 fechada com a lista do que sobra
 - [ ] Item 5: CLI importa só a fachada; captura igual no Windows e no Linux
 
 ## Notes
@@ -27,3 +27,110 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#definição-de-pronto)
 Da KITS-TASK-33: o `kits_ui` julga a aba Diagnóstico nos `TEX_48`, `TEX_70` e `TEX_13` da European Deluxe só com `WE2002_KITS_ED_IMAGE` apontando o `roms/golden-european-deluxe.bin`; sem ela ele passa e imprime `note: WE2002_KITS_ED_IMAGE is not set`. Corrida desta task leva a variável.
 
 ## Log de Execução
+
+### 2026-10-05
+
+Na HEAD `f3d3b20`, com `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin` e
+`WE2002_KITS_ED_IMAGE=roms/golden-european-deluxe.bin`.
+
+**Item 1** — `python3 tools/kits/cli.py survey roms/japanese-shift-jis.bin`:
+
+```
+  TEX_<tag>.BIN containers                       105
+  shape 6 images + 5 CLUTs, same rects/order     105 of 105
+```
+
+`python3 tools/kits/cli.py flat roms/japanese-shift-jis.bin`:
+
+```
+945 pairings painted (9 per kit): 0 with an index past its palette, 0 of a single colour; 420 of 420 work bitmaps 256x128; index 0 transparent in 397 of 525 palettes; 0 kit(s) refused
+```
+
+`cli.py teams`: `95 teams: 95 table; 0 empty name(s); 95 with a kit tag` no
+japonês e `95 teams: 95 rom; …` na European Deluxe; o combobox lista os times
+(KITS-TASK-31, juiz `selector` do `kits_ui`).
+
+**Item 2** — `ctest --test-dir build -R kits -V` (4 de 4), a linha do 3D:
+
+```
+  ok    3D TEX_00: the four combinations draw a figure, and set 1 is not set 2 for either figure (set 1 fig 0 784f604a6c19, set 1 fig 1 7fad0b56a394, set 2 fig 0 eb2833994286, set 2 fig 1 cfe1677a295b)
+```
+
+e o jogo: `python3 tools/kits/oracle.py --slot 3 --cue $PWD/work/we2002-english.cue --out <scratchpad>/dod --expect 01=1 --expect 13=2`
+→ `control: two dumps a frame apart give the same 8 match(es)` e
+`ok    TEX_01 in set 1, TEX_13 in set 2`; sobre o `screen.png` dessa corrida
+(sha256 `ee1bfba6e7dc…`, o fixado), `confront.py --score`:
+
+```
+  TEX_01 players: our TEX_01 leads our TEX_13 by 0.342
+  TEX_13 players: our TEX_13 leads our TEX_01 by 0.410
+confront 3: 2 of 2 team(s) score their own kit 0.05 over the other's
+```
+
+e `--score --negative`: `the swapped renders give 2 failure(s) of 2 -- the control holds`.
+
+**Item 3** — não havia TEX de WE2002 feito pelo WETex no Superpack (só os 105
+originais de cada jogo e dois TEX do WE4, outro formato), então um foi feito
+aqui. O WETex 1.0 (`Superpackv6/We2002/Imagen/WEZIP y WETex - Lagarto, Warlock
+y Jordinator/WETex.exe`, VB6) roda sob o Wine 32 bits do Bottles num prefix só
+dele (`work/wineprefix-wetex`), com o `msvbvm60.dll`, o `COMDLG32.OCX` e o
+`MSCOMCTL.OCX` copiados do `C:\Windows\SysWOW64` desta máquina e registrados
+— nada disso entra no git. As onze entradas saíram dos registros do `TEX_00`
+japonês (`/BIN/TEX_00.BIN` por `iso.py extract`): o fluxo LZSS cru de cada
+imagem (registros 0, 1, 4, 5, 8 e 10) como `.bin`, e cada paleta (2, 3, 6, 7,
+9) como bloco de CLUT de um TIM de 8 bits; os campos se preenchem pelos
+diálogos de arquivo (os de texto são só leitura), e "Crear Camiseta" respondeu
+`Listo` com `work/wetex/wetex00.bin`, 29.928 bytes contra os 29.944 do
+original, sha256 `de2e2d49f07b11d8…` — bytes diferentes (`cmp`: `differ: byte
+1`), o mesmo uniforme:
+
+```
+$ python3 tools/kits/cli.py tex work/wetex/wetex00.bin
+PASS   wetex00.bin (29928 bytes): 6 images, 5 palettes
+```
+
+As seis imagens exportadas por `cli.py export --palette N` dos dois arquivos
+dão o mesmo sha256 nas cinco paletas (ex.: paleta 2, `bb973416f3a4` nos dois).
+A janela o abre: `work/venv-looks/bin/python tools/kits/ui/app.py
+work/wetex/wetex00.bin --screenshot work/kits-wetex00.png` sai 0, `lone TEX ·
+… 29928 bytes`, e `--list-diagnosis` dá `read, nothing to report`.
+
+TEX quebrado recusado com o motivo: a linha do `kits_ui` acima, da KITS-TASK-33:
+
+```
+  ok    the Diagnosis tab lists the guard's refusal and the reading notes, and nothing for a sound kit (sound 0 row(s), 0 text px in its list, planted 1 row(s), ED TEX_48 2 row(s), ED TEX_70 3 row(s), ED TEX_13 2 row(s))
+```
+
+**Item 4** — `python3 tools/kits/cli.py zones roms/japanese-shift-jis.bin`:
+
+```
+figure 0: 237 primitive(s) -- 201 in one zone, 7 across zones, 29 in a declared gap, 0 outside the map
+figure 1: 429 primitive(s) -- 377 in one zone, 23 across zones, 29 in a declared gap, 0 outside the map
+gaps: what the game samples and the map leaves without a zone (6)
+zones no primitive samples: 16 of 49
+verdict: section 4.6 holds
+```
+
+**Item 5 — a metade da fachada passa, a do Windows não pôde ser medida.**
+`kits_selftest`: `ok cli.py and confront.py import only core.api and the
+standard library (section 3.1)`, `ok ui/app.py shows no text outside tr()`,
+`language: 0 failure(s)`. A comparação entre plataformas **reprova**, e não
+por defeito da janela: a única captura do Windows é a da KITS-TASK-19
+(`/media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png`, sha256
+`e973a8aa5991a7ff…`), de antes do 3D, do Diagnóstico, do seletor de idioma e do
+inglês por default — a janela de hoje tem uma linha a mais embaixo, e o plano
+inteiro desce:
+
+```
+$ python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png
+kits-ui-windows.png: 980x640, window colour 23.1 %, Fusion pane 18.8 %
+kits-ui-linux.png: 980x640, window colour 22.4 %, Fusion pane 18.2 %
+298315 of 627200 pixels differ (47.56 %)
+FAIL  47.56 % differ, above the 5.0 % limit
+```
+
+Falta uma captura do Windows na HEAD, que só sai no Windows. Destrava assim: lá,
+da raiz do repositório,
+`work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png`;
+aqui, `python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png`
+com o `work/kits-ui-linux.png` refeito pelo mesmo comando no `:98`.

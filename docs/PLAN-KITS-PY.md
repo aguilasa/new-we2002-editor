@@ -51,6 +51,15 @@ imagem do jogo, ou um TEX avulso feito com WETex — e os mostra de duas formas:
    texto da janela sai do catálogo de idioma: **inglês dos EUA por default**, e o
    português do Brasil escolhível sem reabrir (§3.4, *Idioma da interface*).
 
+**Conferência, 2026-10-05 ([KITS-TASK-34](/docs/tasks/kits/34-definicao-de-pronto.md)):**
+os itens 1 a 4 conferem na HEAD, cada um com o comando no Log da task. O 3 foi
+feito com um TEX montado aqui pelo próprio WETex 1.0, sob Wine, a partir dos
+registros do `TEX_00`: o arquivo sai com outros bytes (29.928 contra 29.944) e
+passa a guarda com as mesmas imagens nas cinco paletas. **O item 5 está
+aberto**: a fachada passa, mas a única captura do Windows é de antes do 3D e do
+inglês por default, e contra a janela de hoje dá 47,56 %; falta refazê-la no
+Windows.
+
 ## 1. O que já se sabe
 
 ### 1.1 O contêiner, medido nos 105
