@@ -71,3 +71,7 @@ Conserto: as seis linhas coladas no Log da KITS-TASK-29, no lugar das três do `
 $ grep -c 'FAIL  TEX_01' docs/tasks/kits/29-fechamento-fase-7.md
 3
 ```
+- **Closed** — commit `ea9bc76` (2026-10-04): docs(kits): paste all six lines of the swapped-sets control in the KITS-TASK-29 log
+  - Files (`git show --name-status ea9bc76`):
+    - `M docs/tasks/kits/29-fechamento-fase-7.md`
+    - `M docs/tasks/kits/CORR-KITS-052.md`

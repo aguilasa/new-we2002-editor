@@ -54,5 +54,5 @@
 | [CORR-KITS-049](/docs/tasks/kits/CORR-KITS-049.md) | Manter as notas das tasks 28 e 30 fora do commit da task 27, ou declará-las | KITS-TASK-27 | low | done | 2026-10-04 |
 | [CORR-KITS-050](/docs/tasks/kits/CORR-KITS-050.md) | Corrigir a docstring do report() que promete filtro de conjunto compartilhado | KITS-TASK-27 | low | done | 2026-10-04 |
 | [CORR-KITS-051](/docs/tasks/kits/CORR-KITS-051.md) | Colar a vantagem da Escócia da ferramenta, não de notas arredondadas | KITS-TASK-28 | low | done | 2026-10-04 |
-| [CORR-KITS-052](/docs/tasks/kits/CORR-KITS-052.md) | Colar inteira a saída do controle de conjuntos trocados, ou marcar o corte | KITS-TASK-29 | low | pending | — |
+| [CORR-KITS-052](/docs/tasks/kits/CORR-KITS-052.md) | Colar inteira a saída do controle de conjuntos trocados, ou marcar o corte | KITS-TASK-29 | low | done | 2026-10-04 |
 <!-- rite:end -->
