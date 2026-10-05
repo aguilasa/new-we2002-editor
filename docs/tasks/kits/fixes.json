@@ -820,6 +820,32 @@
       "depends_on": [],
       "done_on": null,
       "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-064",
+      "file": "CORR-KITS-064.md",
+      "title": "Cobrir o reset por duplo clique com juiz e planta",
+      "origin": "KITS-TASK-37",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-065",
+      "file": "CORR-KITS-065.md",
+      "title": "Mover RESET_TURN para que a docstring de DIAG_NOTE fique sob a constante dela",
+      "origin": "KITS-TASK-37",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

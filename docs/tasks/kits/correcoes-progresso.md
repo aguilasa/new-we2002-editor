@@ -66,4 +66,6 @@
 | [CORR-KITS-061](/docs/tasks/kits/CORR-KITS-061.md) | Plantar um controle para as linhas de nota da aba Diagnóstico | KITS-TASK-33 | medium | done | 2026-10-05 |
 | [CORR-KITS-062](/docs/tasks/kits/CORR-KITS-062.md) | Conferir ou reescrever o item 5 da DoD: a CLI faz tudo o que a janela faz | KITS-TASK-34 | high | done | 2026-10-05 |
 | [CORR-KITS-063](/docs/tasks/kits/CORR-KITS-063.md) | Escrever caminhos absolutos de imagem na receita de ctest do Log | KITS-TASK-35 | medium | pending | — |
+| [CORR-KITS-064](/docs/tasks/kits/CORR-KITS-064.md) | Cobrir o reset por duplo clique com juiz e planta | KITS-TASK-37 | low | pending | — |
+| [CORR-KITS-065](/docs/tasks/kits/CORR-KITS-065.md) | Mover RESET_TURN para que a docstring de DIAG_NOTE fique sob a constante dela | KITS-TASK-37 | low | pending | — |
 <!-- rite:end -->

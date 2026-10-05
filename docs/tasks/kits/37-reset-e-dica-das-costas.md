@@ -77,3 +77,4 @@ kits_ui: 0 failure(s)
     - `M tools/kits/ui/figure_view.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-05) at `8d3cf8d`: CORR-KITS-064, CORR-KITS-065
