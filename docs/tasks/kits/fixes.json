@@ -651,6 +651,19 @@
       "depends_on": [],
       "done_on": "2026-10-04",
       "done_commit": "b35975a"
+    },
+    {
+      "id": "CORR-KITS-051",
+      "file": "CORR-KITS-051.md",
+      "title": "Colar a vantagem da Escócia da ferramenta, não de notas arredondadas",
+      "origin": "KITS-TASK-28",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

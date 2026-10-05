@@ -84,3 +84,4 @@ confronto, não toda partida.
     - `M docs/PLAN-KITS-PY.md`
     - `M docs/tasks/kits/28-confronto-3.md`
     - `M tools/kits/confront.py`
+- **Reviewed** (2026-10-04) at `78b9ea2`: CORR-KITS-051
