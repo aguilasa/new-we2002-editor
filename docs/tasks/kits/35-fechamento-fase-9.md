@@ -39,3 +39,6 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#7).
 - Fase 9: KITS-TASK-33 e KITS-TASK-34 `done`. Os cinco itens da Definição de
   pronto já conferidos com comando no Log da KITS-TASK-34 (e a metade da CLI
   na CORR-KITS-062). Abertas no ciclo, todas da fase 10: KITS-TASK-38 a 41.
+- **Closed** — commit `756c12c` (2026-10-05): docs(kits): close phase 9 -- ctest -R kits and rite check green at HEAD
+  - Files (`git show --name-status 756c12c`):
+    - `M docs/tasks/kits/35-fechamento-fase-9.md`

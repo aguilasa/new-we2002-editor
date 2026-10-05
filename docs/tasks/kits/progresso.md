@@ -182,7 +182,7 @@ graph TD
 | [KITS-TASK-32](/docs/tasks/kits/32-fechamento-fase-8.md) | Fechamento da fase 8 — times em vez de tags | 8 | closing | KITS-TASK-30, KITS-TASK-31 | done | 2026-10-04 | 2026-10-04 |
 | [KITS-TASK-33](/docs/tasks/kits/33-aba-diagnostico.md) | Aba Diagnóstico: a lista de `kit.problems` | 9 | implementação | KITS-TASK-20 | done | 2026-10-04 | 2026-10-05 |
 | [KITS-TASK-34](/docs/tasks/kits/34-definicao-de-pronto.md) | Conferir a Definição de pronto do §0, item por item | 9 | verificação | KITS-TASK-05, KITS-TASK-11, KITS-TASK-14, KITS-TASK-17, KITS-TASK-20, KITS-TASK-23, KITS-TASK-26, KITS-TASK-29, KITS-TASK-32, KITS-TASK-33 | done | 2026-10-05 | 2026-10-05 |
-| [KITS-TASK-35](/docs/tasks/kits/35-fechamento-fase-9.md) | Fechamento da fase 9 | 9 | closing | KITS-TASK-33, KITS-TASK-34 | pending | — | — |
+| [KITS-TASK-35](/docs/tasks/kits/35-fechamento-fase-9.md) | Fechamento da fase 9 | 9 | closing | KITS-TASK-33, KITS-TASK-34 | done | 2026-10-05 | pending |
 | [KITS-TASK-37](/docs/tasks/kits/37-reset-e-dica-das-costas.md) | Botão de reset na aba 3D e a dica das costas | 10 | implementação | — | done | 2026-10-05 | pending |
 | [KITS-TASK-38](/docs/tasks/kits/38-medir-costas-numero.md) | Medir as costas e o número no jogo | 10 | verificação | — | pending | — | — |
 | [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md) | Medir quem desenha a braçadeira | 10 | verificação | — | pending | — | — |
