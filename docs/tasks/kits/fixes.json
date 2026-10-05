@@ -599,6 +599,58 @@
       "depends_on": [],
       "done_on": "2026-10-04",
       "done_commit": "ae68e02"
+    },
+    {
+      "id": "CORR-KITS-047",
+      "file": "CORR-KITS-047.md",
+      "title": "Fazer o oracle.py afirmar o conjunto que reporta, não só imprimir",
+      "origin": "KITS-TASK-27",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-048",
+      "file": "CORR-KITS-048.md",
+      "title": "Levar os números de sondas descartáveis do Log para opção versionada do oracle.py",
+      "origin": "KITS-TASK-27",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-049",
+      "file": "CORR-KITS-049.md",
+      "title": "Manter as notas das tasks 28 e 30 fora do commit da task 27, ou declará-las",
+      "origin": "KITS-TASK-27",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-050",
+      "file": "CORR-KITS-050.md",
+      "title": "Corrigir a docstring do report() que promete filtro de conjunto compartilhado",
+      "origin": "KITS-TASK-27",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

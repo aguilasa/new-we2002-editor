@@ -105,3 +105,4 @@ As duas tags medidas foram anotadas nas Notas da KITS-TASK-30 (§4.2).
     - `M docs/tasks/kits/28-confronto-3.md`
     - `M docs/tasks/kits/30-tabela-time-tag.md`
     - `M tools/kits/oracle.py`
+- **Reviewed** (2026-10-04) at `b615e7d`: CORR-KITS-047, CORR-KITS-048, CORR-KITS-049, CORR-KITS-050
