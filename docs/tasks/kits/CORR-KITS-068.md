@@ -134,3 +134,10 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ct
 
 96 = 80 + 8 + 8. O 80 também é a soma das quatro zonas de manga longa sem capitão: 23 + 22 + 21 +
 14.
+- **Closed** — commit `9aed6a4` (2026-10-05): fix(kits): --sleeves counts armband, long sleeve and other once each
+  - Files (`git show --name-status 9aed6a4`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-068.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
