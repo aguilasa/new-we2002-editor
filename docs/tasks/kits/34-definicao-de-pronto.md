@@ -26,6 +26,38 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#definição-de-pronto)
 
 Da KITS-TASK-33: o `kits_ui` julga a aba Diagnóstico nos `TEX_48`, `TEX_70` e `TEX_13` da European Deluxe só com `WE2002_KITS_ED_IMAGE` apontando o `roms/golden-european-deluxe.bin`; sem ela ele passa e imprime `note: WE2002_KITS_ED_IMAGE is not set`. Corrida desta task leva a variável.
 
+### O que falta fazer no Windows (destrava o item 5)
+
+A única captura do Windows é a da KITS-TASK-19, de antes das abas 3D e
+Diagnóstico, do seletor de idioma e do inglês por default; contra a janela de
+hoje ela dá 47,56 % e reprova. Na máquina Windows, com o repositório na HEAD e o
+venv `work/venv-looks` com PySide6:
+
+1. `git pull` na raiz do repositório.
+2. Feche qualquer janela do `kits` aberta e rode, **da raiz do repositório**
+   (o caminho relativo `roms/...` aparece na barra de cima e entra na
+   comparação):
+
+   ```
+   work/venv-looks/Scripts/python.exe tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 00 --image work1 --palette 2 --zoom 3 --zones --screenshot work/kits-ui-windows.png
+   ```
+
+   A janela sobe fora da tela (`window up, at -32000,-32000`) e o comando
+   imprime `wrote work/kits-ui-windows.png, 980x640`. Sem `--lang` e sem
+   `WE2002_KITS_LANG` definida: a captura tem de sair em inglês, como a do
+   Linux.
+3. Opcional, para ter o número já lá: o mesmo estado no Windows contra si
+   mesmo, `python tools/kits/ui_check.py --compare work/kits-ui-windows.png work/kits-ui-windows.png`, tem de dar 0 %.
+
+De volta ao Linux, a captura aparece em
+`/media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png` (o `C:`
+montado), e o fechamento da task é: refazer `work/kits-ui-linux.png` pelo mesmo
+comando no `:98` (com `work/venv-looks/bin/python`) e rodar
+`python3 tools/kits/ui_check.py --compare /media/ingmar/win/github/new-we2002-editor/work/kits-ui-windows.png work/kits-ui-linux.png`,
+que tem de ficar abaixo de 5 % (`CROSS_LIMIT`), com a cor de janela e o painel
+Fusion acima de 10 % nas duas; depois `rite mark KITS-TASK-34 pending`, o Log
+com a saída, o item 5 marcado e `rite finish`.
+
 ## Log de Execução
 
 ### 2026-10-05
