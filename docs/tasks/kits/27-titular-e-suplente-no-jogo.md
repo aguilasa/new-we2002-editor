@@ -99,3 +99,9 @@ Qual tag é qual time, pela bandeira (`api.flat(8, 9)`, cores dominantes fora do
 
 As duas tags medidas foram anotadas nas Notas da KITS-TASK-30 (§4.2).
 - **pending** (2026-10-04): the match state exists: slot 3, Scotland (1st) x Denmark (2nd), copy in work/kits-states/
+- **Closed** — commit `e331474` (2026-10-04): feat(kits): section 4.1 answered in the game -- first team is set 1, second is set 2
+  - Files (`git show --name-status e331474`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/28-confronto-3.md`
+    - `M docs/tasks/kits/30-tabela-time-tag.md`
+    - `M tools/kits/oracle.py`

@@ -449,10 +449,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.1",
       "files": ["tools/kits/oracle.py", "docs/PLAN-KITS-PY.md"],
       "resources": ["emulador", "save-states"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-04",
+      "done_commit": "e331474",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
