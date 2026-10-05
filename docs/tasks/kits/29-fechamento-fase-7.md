@@ -68,3 +68,4 @@ confront 3 --negative: the swapped renders give 2 failure(s) of 2 -- the control
 - **Closed** — commit `6ed380b` (2026-10-04): docs(kits): phase 7 re-measured at HEAD
   - Files (`git show --name-status 6ed380b`):
     - `M docs/tasks/kits/29-fechamento-fase-7.md`
+- **Reviewed** (2026-10-04) at `5010492`: CORR-KITS-052
