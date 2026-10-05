@@ -125,9 +125,10 @@ este perfil e o plano divergirem, o plano ganha.
 - `TEX_48` e `TEX_70` aparecem na aba com o motivo, e o `TEX_13` com a nota de leitura além do tamanho ISO (§0, item 3; §2.1).
 - Os cinco itens da Definição de pronto conferidos com comando (§0).
 
-### Fase 10 — reset, costas, número e braçadeira
+### Fase 10 — reset, costas, número, braçadeira e manga longa
 
 - Texto novo da janela entra no catálogo (`ui/i18n.py`), nas duas línguas (§3.4).
 - O reset devolve o quadro de abertura: a captura girada e resetada é idêntica à de `--tab 3d`, e a planta que reseta para outro giro fica vermelha (§3.4).
-- Costas, número e braçadeira só com a regra medida no jogo (§4.7, §4.3), nunca por remapeamento de UV feito à mão; sem a regra, o checkbox fica desligado com a frase (§0).
+- Costas, número, braçadeira e manga longa só com a regra medida no jogo (§4.7, §4.3), nunca por remapeamento de UV feito à mão; sem a regra, o checkbox fica desligado com a frase (§0).
 - A medição em partida pede save state novo: decisão do usuário, nunca improvisada.
+- O checkbox de manga longa só existe para o jogador de linha: escondido com o goleiro (§4.3).

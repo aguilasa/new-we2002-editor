@@ -6,7 +6,7 @@ id: KITS-TASK-40
 
 ## Goal
 
-A aba 3D ganha dois checkboxes, **Number** e **Captain armband**, que desenham na figura só o que as KITS-TASK-38 e 39 mediram. O que não foi medido fica com o checkbox desligado e a frase "not measured" no catálogo. Remapear UV à mão não vale (§0).
+A aba 3D ganha três checkboxes, **Number**, **Captain armband** e **Long sleeves**, que desenham na figura só o que as KITS-TASK-38 e 39 mediram. O de manga longa, pedido do usuário em 2026-10-05, só aparece com a figura de jogador de linha: com o goleiro ele fica escondido, e não apenas desligado. O que não foi medido fica com o checkbox desligado e a frase "not measured" no catálogo. Remapear UV à mão não vale (§0).
 
 ## Arquivos a criar ou modificar
 
@@ -15,17 +15,20 @@ A aba 3D ganha dois checkboxes, **Number** e **Captain armband**, que desenham n
   - `tools/kits/core/figure.py` e `tools/kits/core/api.py`, se a regra medida pedir composição de texels ou geometria a mais
   - `tools/kits/ui_check.py`: a verificação e a planta
   - `docs/PLAN-KITS-PY.md`: §3.4
-- Out: manga longa e árbitro (§4.3, §4.5)
+- Out: árbitro (§4.5)
 
 ## Done criteria
 
 - [ ] Para cada checkbox com regra medida: as capturas de costas (`--yaw 0`) ligado e desligado diferem dentro da vista, e a planta que ignora o checkbox fica vermelha no `kits_ui`
 - [ ] Para cada checkbox sem regra: aparece desligado com a frase, nas duas línguas, e o `kits_ui` afirma que está desligado
+- [ ] Manga longa: o checkbox está visível com a figura 0 e escondido com a figura 1. O `kits_ui` afirma pelos dois `--figure`, e a planta que o deixa sempre visível fica vermelha
 - [ ] `ctest --test-dir build -R kits`: 4/4
 
 ## Notes
 
 Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#4.7).
+
+O título no estado diz "número e braçadeira". A manga longa entrou depois, pelo corpo, porque o CLI não renomeia task.
 
 Se as 38 e 39 terminarem as duas blocked, por falta do save state de partida, esta task também espera. Entregar só os checkboxes desligados é decisão do usuário.
 

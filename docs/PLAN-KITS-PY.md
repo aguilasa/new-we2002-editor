@@ -528,8 +528,10 @@ cruzamento do §4.6, que a
 15 zonas da imagem de mangas sem primitiva, pelo motivo acima.
 
 A metade aberta — quem amostra a imagem de mangas, e portanto quem desenha a
-braçadeira — é a [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md), na
-fase 10. A braçadeira só entra na aba 3D com essa geometria medida.
+braçadeira e a manga longa — é a [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md),
+na fase 10. As duas só entram na aba 3D com essa geometria medida; a manga
+longa, por pedido do usuário (2026-10-05), num checkbox que só aparece com o
+jogador de linha (KITS-TASK-40).
 
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 
@@ -752,8 +754,8 @@ frase de que não foi medido (KITS-TASK-40).
 | 7 | §4.1 no emulador e o confronto 3 do §5 | 6 |
 | 8 | §4.2: o combobox passa a listar times em vez de tags | 2 |
 | 9 | aba "Diagnóstico" | 1 |
-| 10 | aba 3D: reset do giro e a dica das costas; costas, número (§4.7) e braçadeira (§4.3) medidos no jogo, e os checkboxes de número e braçadeira com o que se mediu | 6, 7 |
-| — | manga longa e árbitro com a paleta do jogo: só depois das §4.3 e §4.5 | 0 |
+| 10 | aba 3D: reset do giro e a dica das costas; costas, número (§4.7), braçadeira e manga longa (§4.3) medidos no jogo, e os checkboxes de número, braçadeira e manga longa (este só com o jogador de linha) com o que se mediu | 6, 7 |
+| — | árbitro com a paleta do jogo: só depois da §4.5 | 0 |
 
 As fases 1 a 3 não têm janela nenhuma, de propósito: o núcleo fica pronto e
 testado pela CLI antes de existir interface, e é assim que ele chega inteiro à
