@@ -64,3 +64,7 @@ $ grep -n 'sha256 `461f0cbede9cf201\|sha256 `9dbc0595bf0ff484' docs/tasks/kits/3
 58:sha256 `9dbc0595bf0ff484…`) e, com `End`, `work/kits-combo-teams-end.png`
 60:default — TEX_A4" e `TEX_95` … `TEX_A3`; sha256 `461f0cbede9cf201…`). Fechado,
 ```
+- **Closed** — commit `20b9063` (2026-10-04): docs(kits): un-swap the two capture hashes in the KITS-TASK-31 log
+  - Files (`git show --name-status 20b9063`):
+    - `M docs/tasks/kits/31-combobox-de-times.md`
+    - `M docs/tasks/kits/CORR-KITS-057.md`
