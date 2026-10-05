@@ -807,6 +807,19 @@
       "depends_on": [],
       "done_on": "2026-10-05",
       "done_commit": "f363279"
+    },
+    {
+      "id": "CORR-KITS-063",
+      "file": "CORR-KITS-063.md",
+      "title": "Escrever caminhos absolutos de imagem na receita de ctest do Log",
+      "origin": "KITS-TASK-35",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

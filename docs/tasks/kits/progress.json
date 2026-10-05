@@ -580,8 +580,8 @@
       "status": "done",
       "done_on": "2026-10-05",
       "done_commit": "756c12c",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-05",
+      "review_commit": "2bb39ae"
     },
     {
       "id": "KITS-TASK-37",

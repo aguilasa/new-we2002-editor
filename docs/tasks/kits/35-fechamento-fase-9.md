@@ -42,3 +42,4 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#7).
 - **Closed** — commit `756c12c` (2026-10-05): docs(kits): close phase 9 -- ctest -R kits and rite check green at HEAD
   - Files (`git show --name-status 756c12c`):
     - `M docs/tasks/kits/35-fechamento-fase-9.md`
+- **Reviewed** (2026-10-05) at `2bb39ae`: CORR-KITS-063

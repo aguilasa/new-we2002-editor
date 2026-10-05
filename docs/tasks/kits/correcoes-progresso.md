@@ -65,4 +65,5 @@
 | [CORR-KITS-060](/docs/tasks/kits/CORR-KITS-060.md) | Pôr WE2002_LOOKS_IMAGE no comando de captura do critério 1 no Log | KITS-TASK-33 | low | done | 2026-10-05 |
 | [CORR-KITS-061](/docs/tasks/kits/CORR-KITS-061.md) | Plantar um controle para as linhas de nota da aba Diagnóstico | KITS-TASK-33 | medium | done | 2026-10-05 |
 | [CORR-KITS-062](/docs/tasks/kits/CORR-KITS-062.md) | Conferir ou reescrever o item 5 da DoD: a CLI faz tudo o que a janela faz | KITS-TASK-34 | high | done | 2026-10-05 |
+| [CORR-KITS-063](/docs/tasks/kits/CORR-KITS-063.md) | Escrever caminhos absolutos de imagem na receita de ctest do Log | KITS-TASK-35 | medium | pending | — |
 <!-- rite:end -->
