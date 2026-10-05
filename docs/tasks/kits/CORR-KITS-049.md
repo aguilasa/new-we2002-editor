@@ -39,3 +39,14 @@ sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/27-titular-e-suplente-no-jogo.md
 Dá 0 hoje; 2 depois do conserto (ou os fatos movidos para o plano, com as duas notas removidas).
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `a1dca9c`: `sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/27-titular-e-suplente-no-jogo.md | grep -cE '28-confronto-3|30-tabela-time-tag'` dá `0`, e `git show --stat e331474` lista os dois arquivos.
+
+Conserto: aceito como passagem deliberada. As duas notas ficam onde estão — são os fatos de que as tasks 28 e 30 precisam, e as duas já citam a §4.1 —, e os dois arquivos entram na lista de arquivos da KITS-TASK-27, cada um com o que levou.
+
+```
+$ sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/27-titular-e-suplente-no-jogo.md | grep -cE '28-confronto-3|30-tabela-time-tag'
+2
+```

@@ -12,6 +12,8 @@ A §4.1 respondida pelo jogo: com um time de pares diferentes jogando de suplent
 
 - `tools/kits/oracle.py`
 - `docs/PLAN-KITS-PY.md`
+- `docs/tasks/kits/28-confronto-3.md` — nas Notas, a passagem da partida do slot 3 (Escócia `TEX_01` × Dinamarca `TEX_13`) que esta task mediu, para o confronto 3
+- `docs/tasks/kits/30-tabela-time-tag.md` — nas Notas, as duas linhas time→tag que esta task conferiu no emulador, para a tabela
 
 ## Done criteria
 
