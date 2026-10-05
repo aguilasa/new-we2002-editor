@@ -13,6 +13,9 @@ A tabela índice de time → tag, medida (editor do Obocaman em `we-team-editor/
 - `tools/kits/core/generated/`
 - `tools/kits/gen_tables.py`
 - `docs/PLAN-KITS-PY.md`
+- `NOTICE.md`
+- `docs/prompts/perfil-kits.md` — a entrada do `team_kits.py` em "artefatos gerados": o arquivo gerado novo pede gerador, guarda e vermelho nomeados no perfil
+- `docs/tasks/kits/31-combobox-de-times.md` — nas Notas, a passagem da tabela (`TEAM_KIT`, `ML_DEFAULT_KIT`, `UNREACHED_KITS`, o N = 95) para a task que a usa
 
 ## Done criteria
 

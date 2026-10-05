@@ -495,7 +495,7 @@
       "phase": 8,
       "depends_on": ["KITS-TASK-14"],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.2",
-      "files": ["tools/kits/core/generated/", "tools/kits/gen_tables.py", "docs/PLAN-KITS-PY.md", "NOTICE.md"],
+      "files": ["tools/kits/core/generated/", "tools/kits/gen_tables.py", "docs/PLAN-KITS-PY.md", "NOTICE.md", "docs/prompts/perfil-kits.md", "docs/tasks/kits/31-combobox-de-times.md"],
       "resources": ["emulador"],
       "status": "done",
       "done_on": "2026-10-04",

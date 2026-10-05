@@ -37,3 +37,14 @@ Acrescentar `docs/prompts/perfil-kits.md` (e, se a passagem for mantida, `docs/t
 `rite context KITS-TASK-30 --json` lista `docs/prompts/perfil-kits.md` em `item.files` (hoje não lista), ou o Log da task nomeia as duas edições.
 
 ## Log de Execução
+
+### 2026-10-04
+
+Reproduzido na HEAD `9c3cac0`: `rite context KITS-TASK-30 --json` dava `item.files` = `['tools/kits/core/generated/', 'tools/kits/gen_tables.py', 'docs/PLAN-KITS-PY.md', 'NOTICE.md']`, sem as duas edições do commit aefc8ae.
+
+Conserto: as duas edições aceitas — a do perfil é a varredura que o gerador novo pedia, a da task 31 é passagem do que ela usa — e declaradas nos dois lugares: `rite set KITS-TASK-30 --files …` (o campo de planejamento, pelo CLI) e a lista "Arquivos a criar ou modificar" da task, que também não tinha o `NOTICE.md`.
+
+```
+$ rite context KITS-TASK-30 --json | python3 -c "import json,sys;print(json.load(sys.stdin)['item']['files'])"
+['tools/kits/core/generated/', 'tools/kits/gen_tables.py', 'docs/PLAN-KITS-PY.md', 'NOTICE.md', 'docs/prompts/perfil-kits.md', 'docs/tasks/kits/31-combobox-de-times.md']
+```
