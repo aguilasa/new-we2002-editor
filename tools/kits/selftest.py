@@ -728,10 +728,23 @@ def _oracle_checks(c) -> None:
          (tally["uniform"], tally["sleeves"], tally["armband"], tally["long sleeve"])
          == (1, 1, 1, 0), "%s" % tally)
     only_uniform = oracle.sleeves_tally(samples[:1])
-    c.ok("oracle --sleeves: the control holds on the uniform image",
-         oracle.sleeves_judge(only_uniform) == [])
-    c.ok("oracle --sleeves: and the plant fails a frame with no sleeves primitive",
-         len(oracle.sleeves_judge(only_uniform, plant=True)) == 1)
+    c.ok("oracle --sleeves: --expect-sleeves none holds on a frame with no sleeves primitive",
+         oracle.sleeves_judge(only_uniform, "none") == [])
+    c.ok("oracle --sleeves: and the plant, every texel on the other image, fails it",
+         any("sample the sleeves image" in f for f in oracle.sleeves_judge(
+             oracle.sleeves_tally(oracle.planted(samples[:1])), "none")))
+    c.ok("oracle --sleeves: a frame with no primitive on the uniform image fails the control",
+         len(oracle.sleeves_judge(oracle.sleeves_tally(samples[1:]))) == 1)
+    disc = b"junk" + bytes((32, 148, 0x80, 0x79, 48, 148, 0x99, 0, 32, 151, 0, 0, 48, 151, 0, 0))
+    import re as _re
+    held = bool(_re.search(oracle.texel_pattern(samples[1]["uv"]), disc, _re.DOTALL))
+    moved = bool(_re.search(oracle.texel_pattern(oracle.planted(samples)[1]["uv"]), disc,
+                            _re.DOTALL))
+    c.ok("oracle --sleeves: a quad's texels are found in a model laid out as POLY_FT4, "
+         "and not one texel right", held and not moved, "held %s, moved %s" % (held, moved))
+    found = {"quads": 1, "files": {"/BIN/MODEL.BIN": [tuple(samples[1]["uv"])]}}
+    c.ok("oracle --sleeves: --expect-sleeves drawn needs the armband and the long sleeve",
+         len(oracle.sleeves_judge(tally, "drawn", found)) == 1)
 
 
 def _negative(c) -> None:

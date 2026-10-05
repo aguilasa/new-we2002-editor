@@ -536,7 +536,7 @@ iguais nas oito (237/429) com o total mudando só com o cabelo (603/639 em
 `A-P1-A-A-A`, 598/634 em `A-I3-A-G-A`). O controle das duas conferências é
 `--all-kits --negative`: com o uniforme do `TEX_A4` tirado do lugar o
 agrupamento se parte em 104 e 1
-([CORR-KITS-005](/docs/tasks/kits/CORR-KITS-005.md)). Fica aberta a outra metade: se a
+([CORR-KITS-005](/docs/tasks/kits/CORR-KITS-005.md)). Ficou aberta a outra metade, fechada abaixo pela KITS-TASK-39: se a
 manga longa e a braçadeira são outra geometria, fora do `EDT_MOD.BIN` — a
 imagem existe e o jogo a envia à VRAM, mas quem a desenha não está nesta tela.
 Em que retângulo do mapa de zonas cai cada primitiva não foi medido aqui — é o
@@ -545,33 +545,51 @@ cruzamento do §4.6, que a
 ([CORR-KITS-007](/docs/tasks/kits/CORR-KITS-007.md)): nenhuma fora do mapa, e as
 15 zonas da imagem de mangas sem primitiva, pelo motivo acima.
 
-A metade aberta — quem amostra a imagem de mangas, e portanto quem desenha a
-braçadeira e a manga longa — é a [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md),
-na fase 10. As duas só entram na aba 3D com essa geometria medida; a manga
-longa, por pedido do usuário (2026-10-05), num checkbox que só aparece com o
-jogador de linha (KITS-TASK-40).
+A outra metade — quem amostra a imagem de mangas, e portanto quem desenha a
+braçadeira e a manga longa — foi medida pela [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md),
+logo abaixo: seções do `MODEL.BIN`. As duas só entram na aba 3D com essa
+geometria lida. A manga longa entra por pedido do usuário (2026-10-05), num
+checkbox que só aparece com o jogador de linha (KITS-TASK-40).
 
 **Medido no jogo em 2026-10-05 ([KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md)),
-na `LOOKS SET`, com a lista que o quadro entrega ao GPU:** nenhuma primitiva
-amostra a imagem de mangas. A conta é por primitiva texturizada, pela página,
-pelo CLUT e pelos texels de cada uma.
+na lista que o quadro entrega ao GPU.** A conta é por primitiva texturizada,
+pela página, pelo CLUT e pelos texels de cada uma, e só conta primitiva de 8
+bits com CLUT de kit: linhas 486 a 493, x 0. Numa partida, as páginas de kit
+também guardam gráficos de 4 bits que não são uniforme.
 
-| slot | primitivas texturizadas | imagem de uniforme | imagem de mangas | zonas de manga longa | zonas de braçadeira |
-|---|---|---|---|---|---|
-| 2, linha | 418 | 104 (CLUT (0,486), 8 bits) | **0** | 0 | 0 |
-| 1, goleiro | 430 | 190 (CLUT (0,488), 8 bits) | **0** | 0 | 0 |
+| slot | tela | primitivas texturizadas | imagem de uniforme | imagem de mangas | zonas de manga longa | zonas de braçadeira |
+|---|---|---|---|---|---|---|
+| 2 | `LOOKS SET`, linha | 418 | 104 | **0** | 0 | 0 |
+| 1 | `LOOKS SET`, goleiro | 430 | 190 | **0** | 0 | 0 |
+| 5 | partida, Noruega × Equador, os dois de manga longa, o capitão norueguês com a bola | 789 | 154 | **96** | 88 | 8 |
 
-Comando: `python tools/kits/oracle.py --sleeves 1|2`, com `WE2002_LOOKS_IMAGE`
-e `WE2002_LOOKS_DRIVE_IMAGE`. O controle é a imagem de uniforme: o boneco sai
-dela, e o `--plant-sleeves`, que exige a imagem de mangas no lugar, sai 1.
+**Na `LOOKS SET` a imagem de mangas não é desenhada**, e o jogo confirma a
+medição do disco. **Na partida ela é desenhada, por outra geometria:** cada um
+dos 48 quads distintos que a amostram está no `/BIN/MODEL.BIN` (48 de 48),
+pelos quatro cantos de texel no leiaute `POLY_FT4` que o `section.py` lê. Os
+mesmos quads deslocados um texel não estão em arquivo nenhum. Dentro do
+`MODEL.BIN`, pelas seções que o `section.scan` acha:
 
-O jogo confirma o disco. A braçadeira e a manga longa não são desenhadas nesta
-tela, e quem as desenha só aparece numa partida, o que pede um save state de
-partida, decisão do usuário.
+- **a braçadeira é a seção 93**: 6 quads, todos na zona "armband, long sleeve";
+- **a manga longa são as seções 95 a 102**: 8, 8, 6, 8, 3, 2, 3 e 2 quads. Dois
+  deles, nas seções 96 e 98, caem no cotovelo e não numa zona de manga longa.
 
-As contagens de primitivas do quadro, 104 e 190, ficam abaixo das 237 e 429
-do disco. A comparação não foi feita peça a peça. A suspeita, **não medida**,
-é que as faces de costas para a câmera saem da lista.
+Na lista do quadro, a Noruega fica na página (576,256) e o Equador na
+(640,256), com 45 e 51 primitivas na imagem de mangas. As zonas de capitão do
+mapa ("long sleeve, left, captain" e "…, under the armband") também são
+amostradas, por 4 primitivas cada.
+
+Comando: `python tools/kits/oracle.py --sleeves 1|2 --expect-sleeves none` e
+`--sleeves 5 --expect-sleeves drawn`, com `WE2002_LOOKS_IMAGE` e
+`WE2002_LOOKS_DRIVE_IMAGE`. O slot 5 tem cópia mestra em `work/kits-states/`.
+O controle é o `--plant-sleeves`, que leva cada texel para a outra imagem e um
+texel para a direita. Ele sai 1 nos dois vereditos.
+
+Duas ressalvas. Primeira: é **uma** partida e **um** par de kits, e a regra
+diz onde a geometria mora, não que todo time a use igual. Segunda: as
+contagens da `LOOKS SET` no quadro (104 e 190) ficam abaixo das 237 e 429 do
+disco. A comparação não foi feita peça a peça, e a suspeita, **não medida**, é
+que as faces de costas para a câmera saem da lista.
 
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 

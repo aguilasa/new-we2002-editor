@@ -32,7 +32,7 @@ Usage:
     python tools/kits/oracle.py --slot N [--cue <disc.cue>]  # load slot N in the fork
     python tools/kits/oracle.py --png <dump> --expect 01=1 --expect 13=2
     python tools/kits/oracle.py --png <dump> --lines --flags
-    python tools/kits/oracle.py --sleeves 2 [--plant-sleeves]
+    python tools/kits/oracle.py --sleeves 2|5 [--expect-sleeves none|drawn] [--plant-sleeves]
     python tools/kits/oracle.py --back 2 [--expect-back untouched] [--plant-back numbers]
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
@@ -53,9 +53,14 @@ sleeves and the captain's armband live.  The list the frame hands the GPU is
 walked (`tools/looks/oracle.py`, the `--scenery` reader), every textured
 polygon and sprite is placed in VRAM by its page, CLUT and texels, and those
 that sample the kit page are counted per image and per zone of
-`core/zones.py`.  The uniform image (576,256) is the control: the figure is
-drawn from it, so its count has to be above 0, and `--plant-sleeves` swaps the
-two targets to see the red.
+`core/zones.py`.  When the sleeves image is drawn, every distinct quad of it
+is looked for on the disc by its four texels, and placed in a section of
+`MODEL.BIN`; the same quads one texel right are the search's control.  The
+uniform image is the reading's control: the figure is drawn from it, so its
+count has to be above 0.  `--expect-sleeves none|drawn` asserts the verdict
+-- `drawn` meaning sleeves and armband primitives, every quad found in one
+geometry file -- and `--plant-sleeves` moves every texel to the other image
+and one texel right, which has to turn either verdict red.
 
 `--back SLOT` asks section 4.7 (KITS-TASK-38): does the LOOKS SET fill the
 torso gap -- (0,80) 20x24 of the player, (100,104) 20x24 of the goalkeeper,
@@ -398,8 +403,19 @@ def dump_slot(slot: int, cue: str, out_dir: str) -> list:
 # --- section 4.3: who samples the sleeves image ---------------------------
 
 KIT_PAGE = (576, 256)
-"""The VRAM page both kit images sit in: the uniform at v 0-127, the sleeves
-at v 128-255 (section 1.1)."""
+"""The VRAM page both kit images sit in on the LOOKS SET: the uniform at v
+0-127, the sleeves at v 128-255 (section 1.1)."""
+KIT_PAGES = tuple((x, 256) for x in KIT_AREA[0])
+"""Every page a kit can sit in: a match puts the second team's beside the
+first's -- (640,256) in slot 5 -- so the reading takes the whole kit area."""
+KIT_CLUTS = tuple((0, y) for y in range(486, 494))
+"""The kit palettes' VRAM rows: player and goalkeeper of the first team at
+486 and 488, of the second at 487 and 489, and their set-2 twins four rows
+down (`--slot 5`, Norway against Ecuador).  A kit page in a match also holds
+4-bit graphics that are no kit, and the CLUT is what tells them apart."""
+KIT_BITS = 8
+STATES_DIR = os.path.join("work", "kits-states")
+"""The master copies of this cycle's match states (slots 3 to 5)."""
 IMAGE_HEIGHT = 128
 TEXTURED_POLYGON_FAMILY = 1
 
@@ -453,7 +469,8 @@ def textured_samples(commands) -> list:
 def kit_image_of(sample) -> str:
     """Which kit image a primitive samples: "uniform", "sleeves", "both" or
     None when its page is not the kit's."""
-    if sample["page"] != KIT_PAGE:
+    if (sample["page"] not in KIT_PAGES or sample["bits"] != KIT_BITS
+            or sample["clut"] not in KIT_CLUTS):
         return None
     halves = {"uniform" if v < IMAGE_HEIGHT else "sleeves" for _u, v in sample["uv"]}
     return halves.pop() if len(halves) == 1 else "both"
@@ -496,25 +513,139 @@ def sleeves_tally(samples) -> dict:
     return out
 
 
-def sleeves_judge(tally: dict, plant=False) -> list:
-    """The control: the figure is drawn from the uniform image, so a reading
-    that finds no primitive there has read nothing.  The plant swaps the
-    images, which has to fail on a frame that draws no sleeves."""
-    control = "sleeves" if plant else "uniform"
-    if tally[control] == 0:
-        return ["no primitive samples the %s image: the list read is not the "
-                "figure's" % control]
-    return []
+SLEEVES_VERDICTS = ("none", "drawn")
+
+
+def sleeves_judge(tally: dict, expect=None, found=None) -> list:
+    """Failures of one frame's reading.  The control first: the figure is
+    drawn from the uniform image, so a reading that finds nothing there has
+    read nothing.  Then the verdict, when asked: `none` is no primitive on
+    the sleeves image; `drawn` is long-sleeve and armband primitives, and
+    every distinct quad of them in one disc file (*found*, from
+    `geometry_sources`)."""
+    out = []
+    if tally["uniform"] == 0:
+        out.append("no primitive samples the uniform image: the list read is not "
+                   "the figure's")
+    on_sleeves = tally["sleeves"] + tally["both"]
+    if expect == "none" and on_sleeves:
+        out.append("%d primitive(s) sample the sleeves image, not none" % on_sleeves)
+    if expect == "drawn":
+        if not (tally["long sleeve"] and tally["armband"]):
+            out.append("long sleeve %d, armband %d: not both drawn"
+                       % (tally["long sleeve"], tally["armband"]))
+        files = (found or {}).get("files", {})
+        whole = [p for p, hits in files.items() if len(hits) == (found or {}).get("quads")]
+        if not whole:
+            out.append("no disc file holds every sleeves quad (%s)"
+                       % (", ".join("%s %d" % (p, len(h)) for p, h in files.items())
+                          or "none found"))
+    return out
+
+
+def planted(samples) -> list:
+    """`--plant-sleeves`: every texel moved to the other image (v + 128) and
+    one texel right -- the uniform read as sleeves, and quads no file holds."""
+    return [dict(one, uv=[(u + 1, (v + IMAGE_HEIGHT) % (2 * IMAGE_HEIGHT))
+                          for u, v in one["uv"]]) for one in samples]
+
+
+def load_slot(game, slot: int, label: str) -> None:
+    """Load *slot* in the fork: a LOOKS SET state through the `looks` oracle,
+    which proves the screen; a match state from its master copy in
+    `STATES_DIR`, restored into the emulator's slot first."""
+    import shutil
+
+    import oracle as looks_oracle  # tools/looks
+
+    if slot in looks_oracle.SLOTS:
+        looks_oracle.restore_state(slot, verbose=False)
+        game.load_looks(slot, label=label)
+        return
+    master = os.path.join(STATES_DIR, os.path.basename(looks_oracle.emulator_state(slot)))
+    if not os.path.isfile(master):
+        raise RuntimeError("slot %d has no master copy at %s" % (slot, master))
+    shutil.copyfile(master, looks_oracle.emulator_state(slot))
+    game.pause()
+    game.client.call("load_state", slot=slot)
+    game.step(looks_oracle.LOAD_FRAMES)
+    game.capture(label)
+
+
+def texel_pattern(uv) -> bytes:
+    """The regex a quad's four texel corners make in a model on the disc: the
+    texture half of a POLY_FT4, u0 v0 CLUT u1 v1 page u2 v2 0 0 u3 v3 0 0
+    (tools/looks/section.py), the CLUT and page left open because the game
+    patches them per team."""
+    import re
+
+    (u0, v0), (u1, v1), (u2, v2), (u3, v3) = uv
+    return (re.escape(bytes((u0, v0))) + b".." + re.escape(bytes((u1, v1))) + b".."
+            + re.escape(bytes((u2, v2, 0, 0, u3, v3, 0, 0))))
+
+
+def geometry_sources(samples, image_path: str) -> dict:
+    """{disc file: [distinct sleeves quads whose texels it holds]}, over every
+    Form 1 file of the disc, read raw; plus the count of distinct quads."""
+    import re
+
+    import iso_source
+
+    quads = sorted({tuple(one["uv"]) for one in samples
+                    if kit_image_of(one) in ("sleeves", "both") and len(one["uv"]) == 4})
+    out = {}
+    with iso_source.open_disc(image_path) as disc:
+        image = disc._image  # noqa: SLF001 -- the listing, which Disc does not expose
+        for path in sorted(image.files):
+            if image.status(path) != "form1":
+                continue
+            data = image.read_file(path)
+            hits = [q for q in quads
+                    if re.search(texel_pattern(q), data, re.DOTALL)]
+            if hits:
+                out[path] = hits
+    return {"quads": len(quads), "files": out}
+
+
+def model_sections(samples, image_path: str) -> dict:
+    """{section index of MODEL.BIN: {"long sleeve": n, "armband": n, "other": n}}
+    for the distinct sleeves quads of a frame, matched by their four texels
+    against the sections `tools/looks/section.py` reads."""
+    import iso_source
+    import section
+
+    with iso_source.open_disc(image_path) as disc:
+        data = disc.read(layout.MODEL)
+    sections = section.scan(data, layout.MODEL_GEOMETRY_START).sections
+    quads = {}
+    for one in samples:
+        if kit_image_of(one) in ("sleeves", "both") and len(one["uv"]) == 4:
+            quads[tuple(one["uv"])] = one
+    out = {}
+    for uv, one in sorted(quads.items()):
+        names = sample_zones(one)
+        kind = ("armband" if any(n.startswith("armband") for n in names)
+                else "long sleeve" if any(n.startswith("long sleeve") for n in names)
+                else "other")
+        where = [i for i, sec in enumerate(sections)
+                 if any(tuple(p.texcoords) == uv for p in sec.primitives)]
+        for index in where or [None]:
+            out.setdefault(index, {"long sleeve": 0, "armband": 0, "other": 0})[kind] += 1
+    return out
+
+
+def shifted(samples) -> list:
+    """The control of the disc search: every sample with u one texel right."""
+    return [dict(one, uv=[(u + 1, v) for u, v in one["uv"]]) for one in samples]
 
 
 def read_frame(slot: int, cue: str) -> list:
-    """The textured primitives of the list one LOOKS SET frame of *slot*
-    hands the GPU, walked from the heads it submits."""
+    """The textured primitives of the list one frame of *slot* hands the GPU,
+    walked from the heads it submits."""
     import oracle as looks_oracle  # tools/looks
 
     with looks_oracle.Oracle(cue) as game:
-        looks_oracle.restore_state(slot, verbose=False)
-        game.load_looks(slot, label="sleeves-%d" % slot)
+        load_slot(game, slot, "sleeves-%d" % slot)
         game.step(looks_oracle.SCENERY_SETTLE)
         heads = looks_oracle.gpu_list_heads(game)
         first, size, step = layout.SCENERY_SWEEP
@@ -527,29 +658,66 @@ def read_frame(slot: int, cue: str) -> list:
     return textured_samples(looks_oracle.commands_of(nodes))
 
 
-def run_sleeves(slot: int, cue: str, plant=False) -> int:
-    """`--sleeves SLOT`: section 4.3, measured on the LOOKS SET."""
+def run_sleeves(slot: int, cue: str, expect=None, plant=False) -> int:
+    """`--sleeves SLOT`: section 4.3, on the LOOKS SET or in a match."""
     samples = read_frame(slot, cue)
+    if plant:
+        samples = planted(samples)
+        print("  PLANT  every texel moved to the other image and one texel right")
     tally = sleeves_tally(samples)
     print("  %d textured primitive(s) in the frame's list" % len(samples))
-    print("  kit page (%d,%d): uniform image %d, sleeves image %d, both %d; "
-          "other pages %d" % (KIT_PAGE + (tally["uniform"], tally["sleeves"],
-                                          tally["both"], tally["other page"])))
+    print("  kit pages: uniform image %d, sleeves image %d, both %d; other pages %d"
+          % (tally["uniform"], tally["sleeves"], tally["both"], tally["other page"]))
+    pages = {}
+    for one in samples:
+        image = kit_image_of(one)
+        if image:
+            pages.setdefault(one["page"], {}).setdefault(image, 0)
+            pages[one["page"]][image] += 1
+    for page in sorted(pages):
+        print("    page (%d,%d): %s" % (page + (", ".join(
+            "%s %d" % kv for kv in sorted(pages[page].items())),)))
     print("  of those touching the sleeves image: long sleeve zones %d, armband zones %d"
           % (tally["long sleeve"], tally["armband"]))
+    zones = {}
+    for one in samples:
+        if kit_image_of(one) in ("sleeves", "both"):
+            for name in sample_zones(one):
+                zones[name] = zones.get(name, 0) + 1
+    for name in sorted(zones, key=lambda n: -zones[n]):
+        print("    zone %-48s %d primitive(s)" % (name, zones[name]))
     clut = {}
     for one in samples:
         if kit_image_of(one):
             key = (one["clut"], one["bits"])
             clut[key] = clut.get(key, 0) + 1
-    print("  on the kit page, by CLUT and depth: %s" % ", ".join(
+    print("  on the kit pages, by CLUT and depth: %s" % ", ".join(
         "(%d,%d) %d-bit x%d" % (k[0][0], k[0][1], k[1], n) for k, n in sorted(clut.items())))
-    failures = sleeves_judge(tally, plant)
+    found = None
+    if tally["sleeves"] or tally["both"]:
+        found = geometry_sources(samples, os.environ[IMAGE_VARIABLE])
+        print("  where the sleeves quads' texels are on the disc (%d distinct quad(s), "
+              "every Form 1 file read raw):" % found["quads"])
+        for path, hits in sorted(found["files"].items(), key=lambda kv: -len(kv[1])):
+            print("    %-28s %d of %d" % (path, len(hits), found["quads"]))
+        if not found["files"]:
+            print("    in no file")
+        control = geometry_sources(shifted(samples), os.environ[IMAGE_VARIABLE])
+        print("  control, the same quads one texel right: found in %s"
+              % (", ".join("%s %d" % (p, len(h)) for p, h in sorted(control["files"].items()))
+                 or "no file"))
+        print("  in the sections of %s (quads by zone):" % layout.MODEL)
+        for index, kinds in sorted(model_sections(samples, os.environ[IMAGE_VARIABLE]).items(),
+                                   key=lambda kv: (kv[0] is None, kv[0] or 0)):
+            print("    section %-4s long sleeve %d, armband %d, other %d"
+                  % ("none" if index is None else index, kinds["long sleeve"],
+                     kinds["armband"], kinds["other"]))
+    failures = sleeves_judge(tally, expect, found)
     for line in failures:
         print("  FAIL  %s" % line)
     if not failures:
-        print("  ok    the control holds: %d primitive(s) sample the uniform image"
-              % tally["uniform"])
+        print("  ok    %d primitive(s) sample the uniform image%s"
+              % (tally["uniform"], "; sleeves %s" % expect if expect else ", no verdict asked"))
     return 1 if failures else 0
 
 
@@ -795,8 +963,11 @@ def main(argv=None) -> int:
                         help="with --back: the verdict every gap has to give; exits 1 if not")
     parser.add_argument("--plant-back", choices=BACK_PLANTS,
                         help="with --back: the control -- read the numbers zone, or another TEX")
+    parser.add_argument("--expect-sleeves", choices=SLEEVES_VERDICTS,
+                        help="with --sleeves: the verdict the frame has to give; exits 1 if not")
     parser.add_argument("--plant-sleeves", action="store_true",
-                        help="with --sleeves: the control -- demand the sleeves image instead")
+                        help="with --sleeves: the control -- every texel to the other image, "
+                             "one texel right")
     parser.add_argument("--grid", action="store_true",
                         help="with --back: print each gap's indices, row by row")
     args = parser.parse_args(argv)
@@ -814,7 +985,7 @@ def main(argv=None) -> int:
         if not cue:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
-        return run_sleeves(args.sleeves, cue, args.plant_sleeves)
+        return run_sleeves(args.sleeves, cue, args.expect_sleeves, args.plant_sleeves)
     if args.back is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue:
