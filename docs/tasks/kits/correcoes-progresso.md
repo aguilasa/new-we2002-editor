@@ -62,6 +62,6 @@
 | [CORR-KITS-057](/docs/tasks/kits/CORR-KITS-057.md) | Desinverter os sha256 das duas capturas no Log da task 31 | KITS-TASK-31 | medium | done | 2026-10-04 |
 | [CORR-KITS-058](/docs/tasks/kits/CORR-KITS-058.md) | Fazer o kits_ui conferir que o seletor de kit mostra os times | KITS-TASK-31 | low | done | 2026-10-04 |
 | [CORR-KITS-059](/docs/tasks/kits/CORR-KITS-059.md) | Dizer no Log que as linhas do emulador não foram refeitas, ou colar a corrida | KITS-TASK-32 | low | done | 2026-10-04 |
-| [CORR-KITS-060](/docs/tasks/kits/CORR-KITS-060.md) | Pôr WE2002_LOOKS_IMAGE no comando de captura do critério 1 no Log | KITS-TASK-33 | low | pending | — |
-| [CORR-KITS-061](/docs/tasks/kits/CORR-KITS-061.md) | Plantar um controle para as linhas de nota da aba Diagnóstico | KITS-TASK-33 | medium | pending | — |
+| [CORR-KITS-060](/docs/tasks/kits/CORR-KITS-060.md) | Pôr WE2002_LOOKS_IMAGE no comando de captura do critério 1 no Log | KITS-TASK-33 | low | done | 2026-10-05 |
+| [CORR-KITS-061](/docs/tasks/kits/CORR-KITS-061.md) | Plantar um controle para as linhas de nota da aba Diagnóstico | KITS-TASK-33 | medium | in-progress | — |
 <!-- rite:end -->

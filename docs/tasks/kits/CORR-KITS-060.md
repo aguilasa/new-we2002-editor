@@ -53,3 +53,7 @@ Com `WE2002_LOOKS_IMAGE=roms/japanese-shift-jis.bin` (relativo) os três saem `7
 `17b5088d7381` / `514b0a0f91e1`: o caminho é texto da última linha da aba. Por isso o Log da task
 33 passa a citar o comando com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/...` e diz por
 quê. O critério 2 não muda: `--tag 00` no disco japonês dá `93b4f55112d6` com e sem a variável.
+- **Closed** — commit `73fe314` (2026-10-05): docs(kits): task 33 log names the env its diagnosis hashes need
+  - Files (`git show --name-status 73fe314`):
+    - `M docs/tasks/kits/33-aba-diagnostico.md`
+    - `M docs/tasks/kits/CORR-KITS-060.md`

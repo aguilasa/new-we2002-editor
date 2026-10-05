@@ -777,10 +777,10 @@
       "severity": "low",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-05",
+      "done_commit": "73fe314"
     },
     {
       "id": "CORR-KITS-061",
@@ -790,7 +790,7 @@
       "severity": "medium",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "depends_on": [],
       "done_on": null,
       "done_commit": null
