@@ -61,3 +61,7 @@ $ python3 tools/kits/gen_tables.py --check
 gen_tables: tools/kits/core/generated/team_names.py is up to date
 gen_tables: tools/kits/core/generated/team_kits.py is up to date
 ```
+- **Closed** — commit `2d123c5` (2026-10-04): fix(kits): gen_tables resolves the editor exe from the repository root
+  - Files (`git show --name-status 2d123c5`):
+    - `M docs/tasks/kits/CORR-KITS-054.md`
+    - `M tools/kits/gen_tables.py`
