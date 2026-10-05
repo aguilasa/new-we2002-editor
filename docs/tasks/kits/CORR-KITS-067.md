@@ -45,3 +45,23 @@ Em `tools/kits/controls.py`, um controle que troca a paridade em `oracle.pixel_i
 `python3 tools/kits/controls.py | tail -1` reporta um controle a mais que "24 of 24 controls red", e esse controle vermelho.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-05 sobre `2f1a3ec`: `grep -n -i "back\|pixel_index" tools/kits/controls.py`
+não dá saída. Nenhum controle refaz o vermelho do `pixel_index`.
+
+Conserto: controle `oracle-back-byte-order` em `tools/kits/controls.py`. Ele troca as duas metades
+do halfword em `oracle.pixel_index` (o par passa a ler o byte alto) e exige
+`FAIL  oracle --back: the copy is found at (44,6), inside the shirt back` no `kits_selftest` da
+cópia.
+
+```text
+$ python3 tools/kits/controls.py --only oracle-back-byte-order
+  base   unplanted sandbox            selftest exit 0
+  RED    oracle-back-byte-order       kits/oracle.py :: pixel_index
+controls: 1 of 1 red
+$ python3 tools/kits/controls.py | tail -1
+controls: 25 of 25 red
+```
+
+Nenhum documento repete o total de controles (`grep -rn "24 of 24"` no plano, no perfil e em
+`tools/kits/` dá vazio). Quem o imprime é o próprio `controls.py`.

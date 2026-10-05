@@ -214,6 +214,15 @@ CONTROLS = (
         "map swapped it named Scotland's set 2 and exited 0 (CORR-KITS-047)",
     ),
     Control(
+        "oracle-back-byte-order", "kits/oracle.py", "pixel_index",
+        "    return word & 0xFF if x % 2 == 0 else word >> 8\n",
+        "    return word >> 8 if x % 2 == 0 else word & 0xFF\n",
+        "FAIL  oracle --back: the copy is found at (44,6), inside the shirt back",
+        "the 8 bpp page packs the even pixel in the low byte; with the halves "
+        "swapped --back finds no copy and its --expect-back fails (KITS-TASK-38, "
+        "CORR-KITS-067)",
+    ),
+    Control(
         "scene-outside-figure", "kits/core/teams.py", "module imports",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n"
