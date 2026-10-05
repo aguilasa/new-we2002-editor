@@ -45,6 +45,9 @@ O `screen.png` dessa corrida tem o sha256 que o confronto 3 fixou
 corrida (`--png <scratchpad>/f7/vram-0.png --expect 01=2 --expect 13=1`), exit 1:
 
 ```
+  FAIL  TEX_01: exact player palette of set 1, expected set 2
+  FAIL  TEX_01: the uniform page is nearer to set 1, expected set 2
+  FAIL  TEX_01: the sleeves page is nearer to set 1, expected set 2
   FAIL  TEX_13: exact player palette of set 2, expected set 1
   FAIL  TEX_13: the uniform page is nearer to set 2, expected set 1
   FAIL  TEX_13: the sleeves page is nearer to set 2, expected set 1
