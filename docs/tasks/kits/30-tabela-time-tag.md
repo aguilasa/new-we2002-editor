@@ -115,3 +115,4 @@ Wetigre não foi usado, então não ganha linha.
     - `M docs/tasks/kits/31-combobox-de-times.md`
     - `A tools/kits/core/generated/team_kits.py`
     - `M tools/kits/gen_tables.py`
+- **Reviewed** (2026-10-04) at `1e5cdf7`: CORR-KITS-053, CORR-KITS-054, CORR-KITS-055

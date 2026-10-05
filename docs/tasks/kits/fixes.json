@@ -677,6 +677,45 @@
       "depends_on": [],
       "done_on": "2026-10-04",
       "done_commit": "ea9bc76"
+    },
+    {
+      "id": "CORR-KITS-053",
+      "file": "CORR-KITS-053.md",
+      "title": "Controles negativos versionados para EMULATOR_ROWS e para team_kits.py desatualizado",
+      "origin": "KITS-TASK-30",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-054",
+      "file": "CORR-KITS-054.md",
+      "title": "Resolver EDITOR_EXE a partir de REPO_DIR, não do diretório de trabalho",
+      "origin": "KITS-TASK-30",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-055",
+      "file": "CORR-KITS-055.md",
+      "title": "Declarar no escopo da task as edições do perfil e da task 31",
+      "origin": "KITS-TASK-30",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
