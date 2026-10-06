@@ -1023,6 +1023,218 @@ def run_attach(slot: int, cue: str, cache=None, plant=False) -> int:
     return 1 if failures else 0
 
 
+# --- section 4.3: the GTE matrix of each MODEL.BIN section in a match -----
+
+ROOT_SECTIONS = (2, 56)
+"""The first body piece of an outfield figure and of a goalkeeper, in the
+order the stops of slot 5 draw them."""
+FIGURE_SPREAD = 500
+"""How far, in GTE units, a piece's translation may sit from its figure's
+median: one player.  Measured on slot 5 (`--attach-matrix 5`): 119 to 210
+with the matrix given to the piece named a stop later, 878 to 4065 with it
+given to the piece named at its own stop, where a figure takes the next
+player's head."""
+MATRIX_STOPS = 600
+"""Matrix loads read per run: a match frame draws some twenty figures of
+nine sections each, so this is a few frames' worth."""
+
+
+def resident_models(game, image_path: str) -> dict:
+    """{name: bytes that differ}: each model file against RAM at the load
+    address the LOOKS SET measured (`layout.BASE`).  A match patches the CLUT
+    ids per team, so a few differing bytes are expected and a file that is
+    not there differs everywhere."""
+    import iso_source
+
+    import oracle as looks_oracle  # tools/looks
+
+    out = {}
+    with iso_source.open_disc(image_path) as disc:
+        for name, base in sorted(layout.BASE.items()):
+            data = disc.read(name)
+            got = game.read_ram(base, len(data), os.path.join(game.out_dir, "resident.bin"))
+            out[name] = sum(1 for a, b in zip(got, data) if a != b) + abs(len(got) - len(data))
+    del looks_oracle
+    return out
+
+
+def matrix_stops(game, maps, count: int = MATRIX_STOPS) -> list:
+    """*count* stops at the per-piece matrix load, each as {"named": (file,
+    section) or None, "rotation", "translation"}, in drawing order.  The name
+    is what the live pointers say, which -- the `looks` measured -- is the
+    piece drawn BEFORE the matrix (`DRAW_LAG`)."""
+    import who_writes
+
+    import oracle as looks_oracle  # tools/looks
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.POSE_PIECE_MATRIX))
+    path = os.path.join(game.out_dir, "match-matrix.bin")
+    out = []
+    try:
+        for _ in range(count):
+            client.call("continue")
+            if not looks_oracle._wait_for_hit(game, looks_oracle.WATCH_SECONDS):
+                raise RuntimeError("%s stopped %d time(s) and then stopped stopping"
+                                   % (who_writes.hx(layout.POSE_PIECE_MATRIX), len(out)))
+            registers = client.call("read_registers", group="gpr")
+            seen = {(where[0], where[1]) for _n, _v, where
+                    in looks_oracle.pointers_into_models(registers, maps)
+                    if where[1] is not None}
+            base = who_writes.register_value(registers, layout.POSE_PIECE_MATRIX_BASE)
+            rotation, translation = looks_oracle._matrix_struct(game, base, path)
+            out.append({"named": sorted(seen), "rotation": rotation,
+                        "translation": translation})
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    return out
+
+
+def matrix_pieces(stops, lag: int = 1) -> list:
+    """The stops turned into drawn pieces: the matrix of stop k belongs to the
+    section the pointers name *lag* stops later (`looks` DRAW_LAG, 1), each as
+    {"section", "matrix"}; a stop naming no section, or several, is a None
+    section."""
+    out = []
+    for k in range(len(stops) - lag):
+        named = stops[k + lag]["named"]
+        out.append({"section": named[0][1] if len(named) == 1 else None,
+                    "matrix": (tuple(stops[k]["rotation"]), tuple(stops[k]["translation"]))})
+    return out
+
+
+def matrix_passes(pieces) -> list:
+    """The pieces cut into figures: a figure opens at its root, section 2
+    (outfield) or 56 (goalkeeper), and takes the piece before it, its head."""
+    roots = [k for k, p in enumerate(pieces) if p["section"] in ROOT_SECTIONS]
+    out = []
+    for at, start in enumerate(roots):
+        end = roots[at + 1] - 1 if at + 1 < len(roots) else None
+        if start == 0 or end is None:
+            continue        # the first and the last figure are cut off
+        out.append(pieces[start - 1:end])
+    return out
+
+
+def matrix_report(passes) -> dict:
+    """For the worn sections of every whole figure, which other piece of the
+    same figure has the same matrix (None: its own), and the order each kind
+    of figure draws.  A figure with a piece no stop names -- the last of a
+    frame, whose next stop is the next frame's -- is kept for the matrices
+    and left out of the orders."""
+    figures, orders, cut = [], {}, 0
+    for number, figure in enumerate(passes):
+        sections = [p["section"] for p in figure]
+        if None in sections:
+            cut += 1
+        else:
+            orders[tuple(sections)] = orders.get(tuple(sections), 0) + 1
+        worn = []
+        for p in figure:
+            if p["section"] == ARMBAND_SECTION or p["section"] in LONG_SLEEVE_SECTIONS:
+                same = [q["section"] for q in figure
+                        if q is not p and q["matrix"] == p["matrix"]]
+                worn.append((p["section"], same or None))
+        translations = [p["matrix"][1] for p in figure]
+        median = [sorted(t[i] for t in translations)[len(translations) // 2] for i in range(3)]
+        spread = max(sum((t[i] - median[i]) ** 2 for i in range(3)) ** 0.5
+                     for t in translations)
+        figures.append({"figure": number, "head": sections[0], "worn": worn,
+                        "spread": spread})
+    return {"figures": figures, "orders": orders, "cut": cut}
+
+
+def matrix_judge(report: dict, armband_slot: int = REPLACED_SECTION) -> list:
+    """Failures of the rule the matrices give: every worn section has its own
+    matrix, and a captain draws exactly an outfield figure's order with the
+    armband where *armband_slot* is."""
+    out = ["figure %d: section %d shares its matrix with %s" % (f["figure"], section, same)
+           for f in report["figures"] for section, same in f["worn"] if same]
+    out += ["figure %d: a translation %.0f from the figure's median, over %d -- the "
+            "matrices are not this figure's" % (f["figure"], f["spread"], FIGURE_SPREAD)
+            for f in report["figures"] if f["spread"] > FIGURE_SPREAD]
+    orders = {o[1:] for o in report["orders"]}      # the head names the player, not the kind
+    captains = [o for o in orders if ARMBAND_SECTION in o]
+    if not captains:
+        out.append("no figure draws section %d" % ARMBAND_SECTION)
+    for order in captains:
+        plain = tuple(armband_slot if s == ARMBAND_SECTION else s for s in order)
+        if plain not in orders:
+            out.append("a captain draws %s, and no figure draws it with %d where %d is"
+                       % (" ".join(map(str, order)), armband_slot, ARMBAND_SECTION))
+    return out
+
+
+def run_attach_matrix(slot: int, cue: str, cache=None, plant=None) -> int:
+    """`--attach-matrix SLOT`: which matrix each MODEL.BIN section is drawn
+    with in a match."""
+    import json
+
+    import oracle as looks_oracle  # tools/looks
+
+    image = os.environ[IMAGE_VARIABLE]
+    maps = looks_oracle.model_maps(image)
+    path = cache or os.path.join(ATTACH_DIR, "matrix-%d.json" % slot)
+    if cache and os.path.isfile(cache):
+        with open(cache) as fh:
+            kept = json.load(fh)
+        print("  stops read from %s, no emulator" % cache)
+    else:
+        with looks_oracle.Oracle(cue) as game:
+            load_slot(game, slot, "matrix-%d" % slot)
+            resident = resident_models(game, image)
+            stops = matrix_stops(game, maps)
+        kept = {"resident": resident, "stops": stops}
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump(kept, fh)
+        print("  stops kept at %s (--frame-json reads them back)" % path)
+    for name, differ in sorted(kept["resident"].items()):
+        print("  %s against RAM at its LOOKS SET address: %s byte(s) differ" % (name, differ))
+    named = {}
+    for one in kept["stops"]:
+        key = " ".join("%s:%s" % (n.rsplit("/", 1)[-1], i) for n, i in one["named"]) or "none"
+        named[key] = named.get(key, 0) + 1
+    print("  %d stop(s); what the pointers name, by count:" % len(kept["stops"]))
+    for key, n in sorted(named.items(), key=lambda kv: -kv[1]):
+        print("    %-30s %d" % (key, n))
+    lag = 0 if plant == "lag" else 1
+    passes = matrix_passes(matrix_pieces(kept["stops"], lag))
+    report = matrix_report(passes)
+    print("  %d whole figure(s), %d of them with a last piece no stop names; the "
+          "matrix of a stop goes to the piece named %d stop(s) later.  The order "
+          "each figure draws, head first:" % (len(passes), report["cut"], lag))
+    for order, n in sorted(report["orders"].items(), key=lambda kv: -kv[1]):
+        print("    x%-3d %s" % (n, " ".join(str(s) for s in order)))
+    spreads = [f["spread"] for f in report["figures"]]
+    if spreads:
+        print("  every figure's translations within %.0f to %.0f of its median (limit %d)"
+              % (min(spreads), max(spreads), FIGURE_SPREAD))
+    print("  the worn sections of every figure, each against every other piece of it:")
+    for f in report["figures"]:
+        print("    figure %2d, head %-4s %s"
+              % (f["figure"], f["head"], ", ".join(
+                  "%d %s" % (section, "same as %s" % same if same else "own")
+                  for section, same in f["worn"])))
+    slot = 98 if plant == "slot" else REPLACED_SECTION
+    if plant:
+        print("  PLANT  %s" % ("matrices given to the piece named at their own stop"
+                               if plant == "lag" else "the armband expected where 98 is"))
+    failures = matrix_judge(report, slot)
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if not failures:
+        print("  ok    every worn section has its own matrix, and section %d is drawn "
+              "where %d is" % (ARMBAND_SECTION, slot))
+    return 1 if failures else 0
+
+
 # --- section 4.7: the back and the number ---------------------------------
 
 UNIFORM_RECORD = 0
@@ -1505,6 +1717,9 @@ def main(argv=None) -> int:
     source.add_argument("--attach", type=int, metavar="SLOT",
                         help="section 4.3: where MODEL.BIN's armband and long sleeves sit "
                              "on the figure in this match slot")
+    source.add_argument("--attach-matrix", type=int, metavar="SLOT",
+                        help="section 4.3: the GTE matrix each MODEL.BIN section is "
+                             "drawn with in this match slot")
     source.add_argument("--back", type=int, metavar="SLOT",
                         help="section 4.7: does the LOOKS SET of this slot fill the torso gaps")
     parser.add_argument("--cue", help="the disc the state was saved on (default $%s)"
@@ -1538,6 +1753,9 @@ def main(argv=None) -> int:
                         help="with --back: every block of pixels that differs from the disc")
     parser.add_argument("--frame-json", metavar="JSON",
                         help="with --attach: read the frame kept by an earlier run")
+    parser.add_argument("--plant-matrix", choices=("lag", "slot"),
+                        help="with --attach-matrix: the control -- no pointer lag, or the "
+                             "armband expected where section 98 is")
     parser.add_argument("--plant-attach", action="store_true",
                         help="with --attach: the control -- name section %d the armband" % PLANT_ARMBAND)
     parser.add_argument("--panels", action="store_true",
@@ -1562,6 +1780,12 @@ def main(argv=None) -> int:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
         return run_sleeves(args.sleeves, cue, args.expect_sleeves, args.plant_sleeves)
+    if args.attach_matrix is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue and not args.frame_json:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_attach_matrix(args.attach_matrix, cue, args.frame_json, args.plant_matrix)
     if args.attach is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:

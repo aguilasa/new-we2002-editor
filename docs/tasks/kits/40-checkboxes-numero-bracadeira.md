@@ -40,6 +40,8 @@ Da KITS-TASK-42 (2026-10-06, §4.7): o **número tem regra medida**. Na partida,
 
 Da KITS-TASK-43 (2026-10-06, §4.3). A figura de partida é o `MODEL.BIN` inteiro: 244 de 250 primitivas de kit, e 0 do `EDT_MOD.BIN`. O capitão troca a seção 97 pela 93 (`oracle.py --attach 5`). A aba 3D desenha o `EDT_MOD.BIN`, e nele não há braçadeira nem manga longa para ligar. **Captain armband** e **Long sleeves** só desenham se a aba passar a ler a figura do `MODEL.BIN`, com uma pose que ninguém mediu. Antes de destravar esta task, o usuário decide: entregar os dois checkboxes desligados, com a frase, ou abrir esse trabalho.
 
+Da KITS-TASK-44 (2026-10-06, §4.3). Toda peça do `MODEL.BIN` tem matriz própria, e a braçadeira (93) ocupa na ordem de desenho o lugar da manga 97: é a mesma peça do corpo com outra geometria. Desenhar a braçadeira e a manga longa continua pedindo a figura de partida inteira, do `MODEL.BIN`, com uma pose, e essa decisão do usuário não mudou.
+
 ## Log de Execução
 
 2026-10-05. Ao começar, nenhum dos três checkboxes tinha regra de desenho medida. O **Number** só tinha a `LOOKS SET`, que não desenha número. A **braçadeira** e a **manga longa** têm as seções do `MODEL.BIN` identificadas, mas não o encaixe na figura. Perguntado, o usuário escolheu "criar tasks para fazer as medições". Saíram a KITS-TASK-42 (o número numa partida) e a KITS-TASK-43 (o encaixe das seções 93 e 95 a 102). Esta task fica **blocked** até as duas fecharem, e a `order` do ciclo as põe antes dela.

@@ -803,6 +803,31 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --attach: a camera fitted to its own projection gives them back",
          fitted is not None and oracle.fit_error(fitted, pairs) < 1e-3,
          "%s" % (fitted and oracle.fit_error(fitted, pairs)))
+    # --attach-matrix (KITS-TASK-44): stops laid out the way slot 5 draws, the
+    # pointer one stop behind the matrix, one player far from the next.
+    plain_order = [24, 2, 95, 96, 97, 98, 7, 9, 11, 8, 10, 12]
+    captain_order = [30, 2, 95, 96, 93, 98, 7, 9, 11, 8, 10, 12]
+    figures = [captain_order, plain_order, captain_order, plain_order]
+    stops, previous = [{"named": [], "rotation": [0] * 9, "translation": [0, 0, 0]}], None
+    for f, order in enumerate(figures):
+        for k, section in enumerate(order):
+            stops[-1]["rotation"] = [f * 100 + k] * 9
+            stops[-1]["translation"] = [3000 * f + k, 0, 0]
+            stops.append({"named": [["/BIN/MODEL.BIN", section]], "rotation": [0] * 9,
+                          "translation": [0, 0, 0]})
+    passes = oracle.matrix_passes(oracle.matrix_pieces(stops, 1))
+    report = oracle.matrix_report(passes)
+    c.ok("oracle --attach-matrix: every figure but the cut-off last comes back whole, in order",
+         [[p["section"] for p in f] for f in passes] == figures[:3],
+         "%s" % [[p["section"] for p in f] for f in passes])
+    c.ok("oracle --attach-matrix: every worn section has its own matrix, and 93 is where 97 is",
+         oracle.matrix_judge(report) == [], "; ".join(oracle.matrix_judge(report)))
+    c.ok("oracle --attach-matrix: the armband expected where 98 is fails",
+         len(oracle.matrix_judge(report, 98)) == 1)
+    lagged = oracle.matrix_report(oracle.matrix_passes(oracle.matrix_pieces(stops, 0)))
+    c.ok("oracle --attach-matrix: with no pointer lag a figure takes the next player's matrix",
+         any("not this figure's" in f for f in oracle.matrix_judge(lagged)),
+         "; ".join(oracle.matrix_judge(lagged)))
     c.ok("oracle --back --panels: read one row up, every panel fails",
          len({f.split(":")[0] for f in oracle.panels_judge(oracle.read_panels(page, width, -1))})
          == len(read))

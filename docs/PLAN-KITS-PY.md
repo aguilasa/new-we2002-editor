@@ -638,13 +638,39 @@ Com 9 ou 10 pontos por seção, contra 11 incógnitas, o ajuste é frouxo
 demais para dizer se duas peças dividem a matriz. Isso é limite da medida, e a
 resposta exigiria ler a matriz do GTE, como o `looks` faz com o `--pose`.
 
-**Aberto, desde a [CORR-KITS-071](/docs/tasks/kits/CORR-KITS-071.md) (2026-10-06):**
+**O encaixe pela matriz do GTE, medido em 2026-10-06 ([KITS-TASK-44](/docs/tasks/kits/44-matriz-gte-model-bin.md)),
+no slot 5.** A partida carrega a matriz de cada peça pela mesma instrução que
+a `LOOKS SET` (`layout.POSE_PIECE_MATRIX`, 0x8001229C), e os ponteiros vivos
+nomeiam seções do `MODEL.BIN`. Valem as duas armadilhas do `looks`: a matriz
+de uma parada é da peça que a parada **seguinte** nomeia. Em 600 paradas:
 
-- **a que peça do corpo a 93 e as 95 a 102 se prendem** — matriz compartilhada
-  ou própria. Fica para a [KITS-TASK-44](/docs/tasks/kits/44-matriz-gte-model-bin.md),
-  que lê a matriz do GTE por seção no código da partida;
-- **manga curta contra longa** — espera um save state de partida com manga
-  curta, decisão do usuário.
+- **Toda peça tem matriz própria.** As 600 matrizes são todas diferentes, e
+  nenhuma seção vestida (93, 95 a 102) divide a matriz com outra peça da mesma
+  figura, em nenhuma das 51 figuras inteiras.
+- **A braçadeira ocupa o lugar da 97 na ordem de desenho.** Os jogadores de
+  linha desenham `cabeça 2 95 96 97 98 7 9 11 8 10 12`, e os dois capitães, de
+  cabeças 30 e 34, desenham a mesma ordem com a 93 no lugar da 97. Então a 93
+  é a mesma peça do corpo que a 97, só que com outra geometria. O goleiro
+  desenha `cabeça 56 99 101 100 102 61 63 62 64`, e a manga longa dele são as
+  99 a 102.
+- **O atraso de ponteiro se confirma.** Com a matriz dada à peça nomeada uma
+  parada depois, as translações de cada figura ficam a 119 a 210 unidades da
+  mediana dela, ou seja, um jogador. Dada à peça nomeada na própria parada,
+  uma figura pega a cabeça do jogador seguinte, e o espalhamento vai a 878 a
+  4.065.
+
+Comando: `python tools/kits/oracle.py --attach-matrix 5`, com
+`WE2002_LOOKS_IMAGE` e `WE2002_LOOKS_DRIVE_IMAGE`. As paradas ficam em
+`work/kits-oracle/matrix-5.json`, e `--frame-json` relê sem emulador. Os
+controles são `--plant-matrix lag` (sem o atraso), que sai 1 nas 51 figuras,
+e `--plant-matrix slot` (a braçadeira esperada no lugar da 98), que também sai
+1.
+
+Isso fecha a pergunta que o ajuste projetivo da KITS-TASK-43 deixou aberta,
+"matriz compartilhada ou própria", e responde **própria**. A
+[CORR-KITS-071](/docs/tasks/kits/CORR-KITS-071.md) reabriu essa pergunta.
+Continua aberto só **manga curta contra longa**, que espera um save state de
+partida com manga curta, decisão do usuário.
 
 **O que isso pede da aba 3D.** Desenhar braçadeira e manga longa é desenhar a
 figura de partida: ler as seções do `MODEL.BIN` (2, 7 a 10, 95 a 98, e a 93
