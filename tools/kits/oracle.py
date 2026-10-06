@@ -74,6 +74,13 @@ both sides are compared at those bits.  `--expect-back untouched|written`
 asserts the verdict; `--plant-back numbers|tex` is the control -- the
 numbers zone read in place of the gap, or another TEX as the disc side -- and
 has to come out red.
+
+In a match the area under the map is a grid of 20x24 back panels, one per
+player on the pitch, and `--back SLOT --page X --tag TT --panels` reads it
+(KITS-TASK-42): each panel is the figure's shirt back with the digits of the
+numbers zone centred on row 7, one at x 7, two at x 3 and 11.  `--keeper-set`
+takes the goalkeeper zones from the other set, `--plant-back panels` reads
+every panel a row up, and `--blocks` / `--picture` show what differs.
 """
 
 from __future__ import annotations
@@ -736,8 +743,11 @@ def run_sleeves(slot: int, cue: str, expect=None, plant=False) -> int:
 # --- section 4.7: the back and the number ---------------------------------
 
 UNIFORM_RECORD = 0
+UNIFORM_SET2 = 4
+"""The set-2 uniform page; records 0 and 4 share the rectangle (section 1.1)."""
 """The set-1 uniform page, (576,256) 64x128 halfwords = 128x128 pixels."""
-BACK_PLANTS = ("numbers", "tex")
+BACK_PLANTS = ("numbers", "tex", "panels")
+BLOCKS_SHOWN = 24
 BACK_VERDICTS = ("untouched", "written")
 BACK_SOURCE = "shirt back"
 """The zone the measured copy comes from (section 4.7)."""
@@ -844,7 +854,7 @@ def back_judge(counts: dict, whole_differ: int, expect=None) -> list:
     -- `written` meaning a straight copy of the figure's own shirt back."""
     out = []
     if whole_differ:
-        out.append("the disc page differs from VRAM in %d halfword(s) outside the gaps, "
+        out.append("the disc page differs from VRAM in %d halfword(s) outside the rewritten rectangles, "
                    "so it is not the page the screen holds" % whole_differ)
     for name, c in counts.items():
         verdict = "written" if c["differ"] else "untouched"
@@ -869,18 +879,19 @@ def outside_differ(vram_words, disc_words, width: int, height: int, rects) -> in
                and (vram_words[y * width + x] & 0x7FFF) != (disc_words[y * width + x] & 0x7FFF))
 
 
-def read_back(slot: int, cue: str) -> list:
-    """The uniform page's VRAM rectangle as 15-bit halfwords, read twice --
-    each after its own `load_state` -- from the LOOKS SET of *slot*."""
+def read_back(slot: int, cue: str, page_x=None) -> list:
+    """The uniform image's VRAM rectangle as 15-bit halfwords, read twice --
+    each after its own `load_state` -- from *slot*, at the kit page *page_x*
+    (default: where the record declares it, (576,256))."""
     import oracle as looks_oracle  # tools/looks
 
     record = records_of(_screen_body())[UNIFORM_RECORD]
+    x = record.x if page_x is None else page_x
     reads = []
     with looks_oracle.Oracle(cue) as game:
         for n in range(2):
-            looks_oracle.restore_state(slot, verbose=False)
-            game.load_looks(slot, label="back-%d-%d" % (slot, n))
-            rows = looks_oracle.vram_region(game, record.x, record.y, record.w, record.h)
+            load_slot(game, slot, "back-%d-%d" % (slot, n))
+            rows = looks_oracle.vram_region(game, x, record.y, record.w, record.h)
             reads.append([(p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10
                           for row in rows for p in row])
     return reads
@@ -899,22 +910,232 @@ def _screen_body() -> bytes:
     return _body(layout.KIT_ON_SCREEN)
 
 
-def run_back(slot: int, cue: str, expect=None, plant=None, grid=False) -> int:
-    """`--back SLOT`: section 4.7, measured on the LOOKS SET."""
-    tag = PLANT_TAG if plant == "tex" else layout.KIT_ON_SCREEN
+def diff_blocks(vram_words, disc_words, width: int, height: int) -> list:
+    """The pixels where VRAM and the disc page differ (at seven bits a
+    pixel), grouped into 8-connected blocks: [(x0, y0, x1, y1, pixels)],
+    biggest first, in work-bitmap pixels of the uniform image."""
+    differ = {(x, y) for y in range(height) for x in range(2 * width)
+              if (pixel_index(vram_words, width, x, y) & 0x7F)
+              != (pixel_index(disc_words, width, x, y) & 0x7F)}
+    blocks = []
+    while differ:
+        todo = [differ.pop()]
+        seen = list(todo)
+        while todo:
+            x, y = todo.pop()
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    n = (x + dx, y + dy)
+                    if n in differ:
+                        differ.remove(n)
+                        todo.append(n)
+                        seen.append(n)
+        xs = [p[0] for p in seen]
+        ys = [p[1] for p in seen]
+        blocks.append((min(xs), min(ys), max(xs), max(ys), len(seen)))
+    return sorted(blocks, key=lambda b: -b[4])
+
+
+def block_zones(block) -> list:
+    """The zones of the map a block's rectangle touches."""
+    if KITS_DIR not in sys.path:
+        sys.path.insert(0, KITS_DIR)
+    from core import api
+
+    x0, y0, x1, y1, _n = block
+    return [z.name + ("" if z.figure is None else " (%s)" % ("player", "goalkeeper")[z.figure])
+            for z in api.ZONES
+            if z.x <= x1 and x0 < z.x + z.w and z.y <= y1 and y0 < z.y + z.h]
+
+
+# --- section 4.7 in a match: the back panels ------------------------------
+
+PANEL_W, PANEL_H = 20, 24
+"""A back panel: the torso gap's size, (0,80) 20x24 (core/zones.py GAPS)."""
+GLYPH_W = 6
+"""The "numbers 0-9" zone is 60x12: ten glyphs of 6x12, 0 to 9 left to right."""
+PANEL_TOP = 80
+"""The first row of the panels, which is the torso gap's (core/zones.py)."""
+DIGIT_Y = 7
+DIGIT_STEP = 8
+"""Where the digits fall in a panel, measured in slot 5: row 7, one digit at
+x 7, two at x 3 and 11 -- centred, a glyph every 8 pixels."""
+
+
+def digit_xs(count: int) -> list:
+    """The x of each of *count* digits in a panel, centred at DIGIT_STEP."""
+    first = (PANEL_W - (GLYPH_W + DIGIT_STEP * (count - 1))) // 2
+    return [first + DIGIT_STEP * i for i in range(count)]
+
+
+def panels_judge(panels: list) -> list:
+    """Failures of the back-panel rule: every panel holds a number, every
+    pixel of it is the shirt back or a digit, and the digits sit where
+    `digit_xs` puts them."""
+    out = []
+    for one in panels:
+        figure, cx, cy = one["cell"]
+        where = "panel (%d,%d)" % (cx, cy)
+        if one["number"] is None:
+            out.append("%s holds no digit" % where)
+            continue
+        if one["unexplained"]:
+            out.append("%s: %d pixel(s) are neither the shirt back nor a digit"
+                       % (where, one["unexplained"]))
+        at = [(x, y) for x, y, _d in one["digits"]]
+        want = [(x, DIGIT_Y) for x in digit_xs(len(at))]
+        if at != want:
+            out.append("%s: digits at %s, the rule puts them at %s" % (where, at, want))
+    return out
+
+
+def panel_cells() -> list:
+    """(figure, x, y) of every 20x24 cell under the map: the two torso gaps
+    start the two rows, and the rows run on to the right in steps of 20."""
+    out = []
+    for _name, x, y, w, h, figure in back_rects():
+        if figure == 0:
+            for row in range(2):
+                for k in range(5):
+                    out.append((0, x + k * w, y + row * h))
+        else:
+            out.append((1, x, y))
+    return out
+
+
+def glyphs(words, width: int) -> tuple:
+    """The ten digit glyphs of the numbers zone as rows of 7-bit indices, and
+    the zone's background index (its commonest value)."""
+    zx, zy, zw, zh = numbers_rect()
+    rows = back_indices(words, width, (zx, zy, zw, zh))
+    tally = {}
+    for row in rows:
+        for v in row:
+            tally[v & 0x7F] = tally.get(v & 0x7F, 0) + 1
+    ground = max(tally, key=tally.get)
+    out = [[[v & 0x7F for v in row[d * GLYPH_W:(d + 1) * GLYPH_W]] for row in rows]
+           for d in range(zw // GLYPH_W)]
+    return out, ground
+
+
+def read_panel(words, width: int, cell, back, glyph_set, ground) -> dict:
+    """One panel against the rule: the figure's shirt back underneath, digits
+    of the numbers zone on top.  Says which digit sits where, how many pixels
+    neither explains."""
+    _figure, cx, cy = cell
+    panel = [[v & 0x7F for v in row]
+             for row in back_indices(words, width, (cx, cy, PANEL_W, PANEL_H))]
+    found = []
+    for gy in range(PANEL_H - len(glyph_set[0]) + 1):
+        for gx in range(PANEL_W - GLYPH_W + 1):
+            for digit, glyph in enumerate(glyph_set):
+                ink = [(x, y) for y, row in enumerate(glyph) for x, v in enumerate(row)
+                       if v != ground]
+                if ink and all(panel[gy + y][gx + x] == glyph[y][x] for x, y in ink):
+                    found.append((gx, gy, digit, len(ink)))
+    # a narrow glyph (the 1) also fits inside wider ones: keep the placements
+    # whose ink no other placement covers more of
+    found.sort(key=lambda f: -f[3])
+    kept, covered = [], set()
+    for gx, gy, digit, n in found:
+        ink = {(gx + x, gy + y) for y, row in enumerate(glyph_set[digit])
+               for x, v in enumerate(row) if v != ground}
+        if ink & covered:
+            continue
+        kept.append((gx, gy, digit))
+        covered |= ink
+    kept.sort()
+    unexplained = sum(1 for y in range(PANEL_H) for x in range(PANEL_W)
+                      if (x, y) not in covered and panel[y][x] != back[y][x])
+    return {"cell": cell, "digits": kept, "unexplained": unexplained,
+            "number": int("".join(str(d) for _x, _y, d in kept)) if kept else None}
+
+
+def read_panels(words, width: int, shift: int = 0) -> list:
+    """Every back panel of a match page, read against the rule; *shift*
+    moves every cell that many rows (negative is up), which only the plant does."""
+    glyph_set, ground = glyphs(words, width)
+    out = []
+    for figure, x, y in panel_cells():
+        cell = (figure, x, y + shift)
+        sx = 44 if cell[0] == 0 else 108
+        back = [[v & 0x7F for v in row]
+                for row in back_indices(words, width, (sx, 6, PANEL_W, PANEL_H))]
+        out.append(read_panel(words, width, cell, back, glyph_set, ground))
+    return out
+
+
+PLAYER_PALETTE = {1: 2, 2: 6}
+"""Set -> the record of its player palette (section 1.1)."""
+
+
+def save_picture(path: str, words, width: int, height: int, body: bytes, kit_set: int) -> None:
+    """The 8 bpp image held in *words*, as a PNG painted with the kit's
+    player palette -- to look at, not to measure: odd pixels lose bit 7."""
+    import atlas
+
+    raw = payload(body, records_of(body)[PLAYER_PALETTE[kit_set]])
+    colours = [((v & 0x1F) << 3, (v >> 5 & 0x1F) << 3, (v >> 10 & 0x1F) << 3, 255)
+               for v in raw]
+    indices = bytes(pixel_index(words, width, x, y)
+                    for y in range(height) for x in range(2 * width))
+    atlas.write_png(path, 2 * width, height, indices, colours)
+
+
+def compose_sets(player_words, keeper_words, width: int, height: int) -> list:
+    """One page whose goalkeeper zones (core/zones.py) come from
+    *keeper_words* and every other pixel from *player_words*: a match can dress
+    the goalkeeper in the other set (section 4.1)."""
+    if KITS_DIR not in sys.path:
+        sys.path.insert(0, KITS_DIR)
+    from core import api
+
+    out = list(player_words)
+    for y in range(height):
+        for x in range(2 * width):
+            zone = api.zone_at(x, y)
+            if zone is not None and zone.figure == 1:
+                at = y * width + x // 2
+                mask = 0x00FF if x % 2 == 0 else 0xFF00
+                out[at] = (out[at] & ~mask) | (keeper_words[at] & mask)
+    return out
+
+
+def run_back(slot: int, cue: str, expect=None, plant=None, grid=False,
+             page_x=None, tag=None, kit_set=1, blocks=False, picture=None,
+             panels=False, keeper_set=None) -> int:
+    """`--back SLOT`: section 4.7, on the LOOKS SET or, with `--page`,
+    `--tag` and `--set`, at either kit page of a match."""
+    if tag is None:
+        tag = layout.KIT_ON_SCREEN
+    if plant == "tex":
+        tag = PLANT_TAG
     record = records_of(_screen_body())[UNIFORM_RECORD]
-    disc = [five(v) for v in payload(_body(tag), records_of(_body(tag))[UNIFORM_RECORD])]
-    first, second = read_back(slot, cue)
+    image = UNIFORM_RECORD if kit_set == 1 else UNIFORM_SET2
+    disc = [five(v) for v in payload(_body(tag), records_of(_body(tag))[image])]
+    if keeper_set and keeper_set != kit_set:
+        other = UNIFORM_RECORD if keeper_set == 1 else UNIFORM_SET2
+        disc = compose_sets(disc, [five(v) for v in payload(_body(tag),
+                                                             records_of(_body(tag))[other])],
+                            record.w, record.h)
+    first, second = read_back(slot, cue, page_x)
+    if page_x is not None:
+        print("  page (%d,%d) against TEX_%s set %d%s"
+              % (page_x, record.y, tag, kit_set,
+                 ", goalkeeper zones from set %d" % keeper_set
+                 if keeper_set and keeper_set != kit_set else ""))
     if first != second:
         print("  FAIL  the uniform page read twice, each after its own load_state, "
               "differs: nothing below is measured")
         return 1
     print("  control: the uniform page (%d,%d) %dx%d read twice, identical"
-          % (record.x, record.y, record.w, record.h))
+          % (record.x if page_x is None else page_x, record.y, record.w, record.h))
     rects = back_rects()
-    whole = outside_differ(first, disc, record.w, record.h, rects)
-    print("  disc side TEX_%s: %d halfword(s) of %d differ from VRAM outside the gaps"
-          % (tag, whole, record.w * record.h))
+    skip = rects + ([("panel", x, y, PANEL_W, PANEL_H, f) for f, x, y in panel_cells()]
+                    if panels else [])
+    whole = outside_differ(first, disc, record.w, record.h, skip)
+    print("  disc side TEX_%s: %d halfword(s) of %d differ from VRAM outside the %s"
+          % (tag, whole, record.w * record.h, "panels" if panels else "gaps"))
     counts = {}
     numbers = numbers_rect()
     for name, x, y, w, h, figure in rects:
@@ -943,11 +1164,50 @@ def run_back(slot: int, cue: str, expect=None, plant=None, grid=False) -> int:
         if grid:
             for row in rows:
                 print("             " + " ".join("%3d" % v for v in row))
-    failures = back_judge(counts, whole, expect)
+    if blocks:
+        both = {n: [five(v) for v in payload(_body(tag), records_of(_body(tag))[r])]
+                for n, r in ((1, UNIFORM_RECORD), (2, UNIFORM_SET2))}
+        for label, x0, x1 in (("player half", 0, 64), ("goalkeeper half", 64, 128)):
+            counts_by_set = []
+            for n in (1, 2):
+                counts_by_set.append(sum(
+                    1 for y in range(PANEL_TOP) for x in range(x0, x1)
+                    if (pixel_index(first, record.w, x, y) & 0x7F)
+                    != (pixel_index(both[n], record.w, x, y) & 0x7F)))
+            print("  %s, rows 0-%d: %d pixel(s) differ from set 1, %d from set 2"
+                  % ((label, PANEL_TOP - 1) + tuple(counts_by_set)))
+        found = diff_blocks(first, disc, record.w, record.h)
+        print("  %d block(s) of pixels differ from the disc in the whole image:" % len(found))
+        for block in found[:BLOCKS_SHOWN]:
+            print("    (%3d,%3d)-(%3d,%3d) %4d pixel(s): %s"
+                  % (block + (", ".join(block_zones(block)) or "no zone",)))
+    panel_failures = []
+    if panels:
+        print("  back panels, each against the figure's shirt back (44,6)/(108,6) 20x24 "
+              "with digits of the numbers zone on top:")
+        shift = -1 if plant == "panels" else 0
+        if shift:
+            print("  PLANT  every panel read one row up")
+        read = read_panels(first, record.w, shift)
+        for one in read:
+            figure, cx, cy = one["cell"]
+            print("    %-10s panel (%3d,%3d): number %-4s digits %s; %d pixel(s) the rule "
+                  "does not explain"
+                  % (("player", "goalkeeper")[figure], cx, cy, one["number"],
+                     " ".join("%d at (%d,%d)" % (d, x, y) for x, y, d in one["digits"]) or "none",
+                     one["unexplained"]))
+        panel_failures = panels_judge(read)
+    if picture:
+        save_picture(picture, first, record.w, record.h, _body(tag), kit_set)
+        print("  picture: %s (the VRAM image painted with TEX_%s's set-%d player palette)"
+              % (picture, tag, kit_set))
+    failures = back_judge(counts, whole, None if panels else expect) + panel_failures
     for line in failures:
         print("  FAIL  %s" % line)
     if not failures:
-        print("  ok    %s" % ("every gap %s" % expect if expect else "read, no verdict asked"))
+        print("  ok    %s" % ("every panel holds the shirt back and its centred number"
+                                if panels else "every gap %s" % expect if expect
+                                else "read, no verdict asked"))
     return 1 if failures else 0
 
 
@@ -980,6 +1240,20 @@ def main(argv=None) -> int:
     parser.add_argument("--plant-sleeves", action="store_true",
                         help="with --sleeves: the control -- every texel to the other image, "
                              "one texel right")
+    parser.add_argument("--page", type=int, metavar="X",
+                        help="with --back: the kit page's VRAM x (576 or 640 in a match)")
+    parser.add_argument("--tag", help="with --back: the TEX worn at that page (default the "
+                                      "LOOKS SET's)")
+    parser.add_argument("--set", type=int, choices=(1, 2), default=1,
+                        help="with --back: which set of the TEX the page is compared with")
+    parser.add_argument("--keeper-set", type=int, choices=(1, 2),
+                        help="with --back: the set the goalkeeper zones are compared with")
+    parser.add_argument("--blocks", action="store_true",
+                        help="with --back: every block of pixels that differs from the disc")
+    parser.add_argument("--panels", action="store_true",
+                        help="with --back: read every back panel under the map (a match)")
+    parser.add_argument("--picture", metavar="PNG",
+                        help="with --back: write the VRAM image painted with the kit's palette")
     parser.add_argument("--grid", action="store_true",
                         help="with --back: print each gap's indices, row by row")
     args = parser.parse_args(argv)
@@ -1003,7 +1277,9 @@ def main(argv=None) -> int:
         if not cue:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
-        return run_back(args.back, cue, args.expect_back, args.plant_back, args.grid)
+        return run_back(args.back, cue, args.expect_back, args.plant_back, args.grid,
+                        args.page, args.tag, args.set, args.blocks, args.picture,
+                        args.panels, args.keeper_set)
     bodies = read_kits(image)
     print("  %d kit container(s) read from %s" % (len(bodies), image))
     if args.png:

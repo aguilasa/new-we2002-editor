@@ -745,6 +745,47 @@ def _oracle_checks(c) -> None:
     found = {"quads": 1, "files": {"/BIN/MODEL.BIN": [tuple(samples[1]["uv"])]}}
     c.ok("oracle --sleeves: --expect-sleeves drawn needs the armband and the long sleeve",
          len(oracle.sleeves_judge(tally, "drawn", found)) == 1)
+
+    # --back --panels (KITS-TASK-42): a match page with the player shirt back
+    # at (44,6), the ten glyphs in the numbers zone, and every panel under the
+    # map built by the measured rule -- the "10" panel at (60,104).
+    page = [0] * (width * height)
+    for y in range(30):
+        for x in range(20):
+            put(44 + x, y, 1 + (3 * x + 5 * y) % 100)
+            put(108 + x, y, 101 + (x + y) % 20)
+    zx, zy, zw, zh = oracle.numbers_rect()
+    for d in range(10):
+        for y in range(zh):
+            for x in range(oracle.GLYPH_W):
+                ink = x in (1, 4) or (y in (0, 11) and d % 2) or (y == 5 and d % 3) \
+                    or (x == 2 and y == d)
+                put(zx + d * oracle.GLYPH_W + x, zy + y, 200 if ink else 120)
+    numbers = {}
+    for n, (figure, cx, cy) in enumerate(oracle.panel_cells()):
+        number = 10 if (cx, cy) == (60, 104) else n + 1
+        numbers[(cx, cy)] = number
+        sx = 44 if figure == 0 else 108
+        for y in range(oracle.PANEL_H):
+            for x in range(oracle.PANEL_W):
+                put(cx + x, cy + y, oracle.pixel_index(page, width, sx + x, 6 + y))
+        text = str(number)
+        for gx, ch in zip(oracle.digit_xs(len(text)), text):
+            for y in range(zh):
+                for x in range(oracle.GLYPH_W):
+                    v = oracle.pixel_index(page, width, zx + int(ch) * oracle.GLYPH_W + x, zy + y)
+                    if v != 120:
+                        put(cx + gx + x, cy + oracle.DIGIT_Y + y, v)
+    read = oracle.read_panels(page, width)
+    c.ok("oracle --back --panels: every panel reads back the number written in it",
+         {(r["cell"][1], r["cell"][2]): r["number"] for r in read} == numbers,
+         "%s" % [(r["cell"], r["number"], r["digits"]) for r in read][:4])
+    c.ok("oracle --back --panels: the measured rule holds, two digits at x 3 and 11",
+         oracle.panels_judge(read) == [] and oracle.digit_xs(2) == [3, 11]
+         and oracle.digit_xs(1) == [7], "; ".join(oracle.panels_judge(read)[:3]))
+    c.ok("oracle --back --panels: read one row up, every panel fails",
+         len({f.split(":")[0] for f in oracle.panels_judge(oracle.read_panels(page, width, -1))})
+         == len(read))
     # A quad across the captain's long-sleeve rows and the armband (v 142-151,
     # as the game draws it) and one on the elbow: the armband counts once, the
     # elbow as other, and the three sum to the sleeves image (CORR-KITS-068).

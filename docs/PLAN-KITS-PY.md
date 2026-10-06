@@ -773,8 +773,49 @@ Comando: `python tools/kits/oracle.py --back 1|2 --expect-back written`, com
 Duas ressalvas do instrumento e da amostra. A VRAM volta como PNG, que perde o
 bit STP de cada halfword: o pixel ímpar guarda 7 dos 8 bits do índice, e a
 comparação é feita nesses 7. E é **um** kit numa tela: a regra da cópia vale
-para o `TEX_A4` na `LOOKS SET`. O número numa partida continua sem medida, e
-medi-lo pede um save state de partida, decisão do usuário (passo 2 acima).
+para o `TEX_A4` na `LOOKS SET`. O número numa partida foi medido depois, logo
+abaixo.
+
+**Medido numa partida em 2026-10-05 ([KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md)),
+no slot 5 que o usuário salvou** (Noruega × Equador, `work/kits-states/`)**:**
+na partida o jogo **escreve o número**. Ele usa a área abaixo do mapa, linhas
+80 a 127, como uma **grade de painéis de costas** de 20×24, um por jogador em
+campo.
+
+- **Onde ficam os painéis.** Os dois do torso começam as fileiras: dez de
+  jogador de linha em (20k, 80) e (20k, 104), com k de 0 a 4, e o do goleiro
+  em (100,104). São 11 painéis para os 11 em campo. Fora deles, a página é a do
+  disco, halfword por halfword. O goleiro pode vestir o outro conjunto: o do
+  Equador veste o 2 (§4.1), e as zonas de goleiro saem daí.
+- **De onde vêm os texels.** O fundo de cada painel é a zona "shirt back" da
+  figura dele, as linhas 6 a 29 em (44,6), ou em (108,6) no goleiro, igual à
+  cópia que a `LOOKS SET` faz. Os dígitos vêm da zona "numbers 0-9" (64,68)
+  60×12, um glifo de 6×12 por dígito, de 0 a 9 da esquerda para a direita. Só
+  a tinta é copiada, e o fundo da zona fica de fora.
+- **Onde cai cada dígito.** Na linha 7 do painel, centrados, um glifo a cada
+  8 pixels: um dígito em x 7, dois em x 3 e 11. O camisa 10 da Noruega tem o
+  "1" em (3,7) e o "0" em (11,7) do painel (60,104).
+- **Sobra zero.** Em todos os 22 painéis das duas páginas, todo pixel é fundo
+  ou dígito.
+
+| página | TEX | números nos painéis, na ordem da grade |
+|---|---|---|
+| (576,256) | `TEX_14`, Noruega, conjunto 1 | 3 4 2 5 8 / 6 9 7 10 11 / goleiro 1 |
+| (640,256) | `TEX_47`, Equador, conjunto 1, goleiro no 2 | 17 2 3 4 5 / 16 19 10 11 9 / goleiro 1 |
+
+Comandos, com `WE2002_LOOKS_IMAGE` e `WE2002_LOOKS_DRIVE_IMAGE`:
+`python tools/kits/oracle.py --back 5 --page 576 --tag 14 --panels` e
+`--back 5 --page 640 --tag 47 --keeper-set 2 --panels`. Os controles são dois.
+O TEX trocado entre as páginas sai 1: `--page 576 --tag 47` dá 4.557 halfwords
+diferentes fora dos painéis. E `--plant-back panels`, que lê cada painel uma
+linha acima, sai 1 em todos os 11.
+
+O que **não** foi medido. A ordem da grade não é a dos números, e não se sabe
+como o jogo escolhe o painel de cada jogador. A suspeita é que ele troca o UV
+do torso de cada um, que no disco aponta para (0,80), mas isso não foi visto.
+Para a aba 3D a regra já basta: o painel do número escolhido, montado em (0,80)
+ou (100,104), é o que o jogo desenharia nas costas. Também foi uma partida só, com dois
+times e números de um e de dois dígitos.
 
 ## 5. Como se verifica
 
