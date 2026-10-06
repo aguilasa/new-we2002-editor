@@ -58,3 +58,8 @@ docs/PLAN-KITS-PY.md:…:O `oracle.py --sleeves-image SLOT --page X --tag T`, qu
 $ python3 tools/kits/selftest.py | tail -1
 kits_selftest: 0 failure(s)
 ```
+- **Closed** — commit `328528c` (2026-10-06): docs(kits): --sleeves-image is a report, and section 4.3 says so
+  - Files (`git show --name-status 328528c`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-082.md`
+    - `M tools/kits/oracle.py`
