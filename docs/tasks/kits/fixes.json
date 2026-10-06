@@ -920,10 +920,10 @@
       "severity": "high",
       "files": [],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-06",
+      "done_commit": "71bcebf"
     },
     {
       "id": "CORR-KITS-072",

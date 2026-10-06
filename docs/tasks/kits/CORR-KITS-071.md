@@ -73,3 +73,8 @@ $ grep -n "^- \[x\] A regra na §4.3" docs/tasks/kits/43-medir-encaixe-mangas.md
 $ sh rite check --cycle kits
 check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ```
+- **Closed** — commit `71bcebf` (2026-10-06): docs(kits): reopen task 43's attachment and short-sleeve criteria
+  - Files (`git show --name-status 71bcebf`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/43-medir-encaixe-mangas.md`
+    - `M docs/tasks/kits/CORR-KITS-071.md`
