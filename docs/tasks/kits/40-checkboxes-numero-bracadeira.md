@@ -56,3 +56,4 @@ aba 3D), e a `order` do ciclo as põe antes desta. A task volta a **blocked**
 até a 47 fechar. O **Number** já tem regra (KITS-TASK-42) e entra junto com os
 outros dois.
 - **blocked** (2026-10-06): The armband and long sleeves exist only in MODEL.BIN, the match figure the 3D tab does not draw. The user chose to open that work (2026-10-06): KITS-TASK-45 (pose), 46 (short sleeves, needs a user's save state) and 47 (match figure in the 3D tab), ordered before this task.
+- **pending** (2026-10-06): KITS-TASK-47 closed (c8dfdbe): the match figure is in the 3D tab, so armband and long sleeves have geometry to switch on
