@@ -54,3 +54,7 @@ $ python3 tools/kits/controls.py --only oracle-pose-texel-order
   RED    oracle-pose-texel-order      kits/oracle.py :: piece_error
 controls: 1 of 1 red
 ```
+- **Closed** — commit `41b0be2` (2026-10-06): test(kits): control plants the --match-pose texel order away
+  - Files (`git show --name-status 41b0be2`):
+    - `M docs/tasks/kits/CORR-KITS-084.md`
+    - `M tools/kits/controls.py`

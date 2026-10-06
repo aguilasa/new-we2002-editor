@@ -1089,10 +1089,10 @@
       "severity": "medium",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-06",
+      "done_commit": "41b0be2"
     },
     {
       "id": "CORR-KITS-085",
