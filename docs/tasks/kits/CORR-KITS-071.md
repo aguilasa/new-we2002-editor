@@ -44,3 +44,32 @@ A task fechou sobre um resultado negativo. O instrumento planejado (a carga de m
 `grep -n "^- \[x\] A regra na §4.3" docs/tasks/kits/43-medir-encaixe-mangas.md` casa hoje; não pode casar até o encaixe e a manga curta serem medidos ou o critério ser reescrito formalmente.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `9aeca0e`: os critérios 1 e 2 da task 43 estavam `[x]`, mas o
+encaixe e a manga curta ficaram sem resposta. Pela saída do
+`oracle.py --attach 5 --frame-json work/kits-oracle/attach-5.json`, o melhor par conjunto (95+2
+do jogador 1, 1,28 px) cai dentro da faixa de uma seção sozinha (0,56 a 2,18 px). O ajuste não
+separa peça de peça.
+
+Decisão do dono do repositório, nesta sessão: **reabrir com trabalho de seguimento**.
+
+Conserto:
+
+- `docs/tasks/kits/43-medir-encaixe-mangas.md`: os critérios 1 e 2 voltam a `[ ]`, cada um com
+  uma linha dizendo o que está medido e o que passou adiante.
+- `docs/PLAN-KITS-PY.md` §4.3: um bloco "Aberto" com as duas perguntas. O encaixe vai para a
+  KITS-TASK-44, e a manga curta espera um save state de partida com manga curta, decisão do
+  usuário.
+- KITS-TASK-44 (`docs/tasks/kits/44-matriz-gte-model-bin.md`): aberta pelo `rite new-task` e
+  registrada no commit f2b7057. Ela lê a matriz do GTE por seção do `MODEL.BIN` no código da
+  partida, como o `looks --pose` faz.
+
+O terceiro ponto da Correção, a leitura em `tools/kits/oracle.py`, é o trabalho da própria
+KITS-TASK-44 e não foi feito aqui. O `FIT_PIXELS` fica para a CORR-KITS-073.
+
+```text
+$ grep -n "^- \[x\] A regra na §4.3" docs/tasks/kits/43-medir-encaixe-mangas.md
+(sem saída)
+$ sh rite check --cycle kits
+check: 0 error(s), 0 warning(s) in 1 cycle(s)
+```

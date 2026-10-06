@@ -19,8 +19,10 @@ Medir, na partida do slot 5, como o jogo põe na figura as seções do `/BIN/MOD
 
 ## Done criteria
 
-- [x] `oracle.py --attach 5` colado no Log, com duas contagens. A primeira diz quantas primitivas da figura no quadro saem do `MODEL.BIN` e quantas do `EDT_MOD.BIN`, por seção. A segunda diz, para a seção 93 e para as 95 a 102, a seção do corpo cuja matriz elas compartilham, ou a matriz própria que recebem
-- [x] A regra na §4.3: qual seção do `MODEL.BIN` substitui ou acompanha qual peça da figura, e se a manga curta e a longa são seções alternativas da mesma peça. O comando que mede vai junto
+- [ ] `oracle.py --attach 5` colado no Log, com duas contagens. A primeira diz quantas primitivas da figura no quadro saem do `MODEL.BIN` e quantas do `EDT_MOD.BIN`, por seção. A segunda diz, para a seção 93 e para as 95 a 102, a seção do corpo cuja matriz elas compartilham, ou a matriz própria que recebem
+  - Reaberto em 2026-10-06 pela [CORR-KITS-071](/docs/tasks/kits/CORR-KITS-071.md), por decisão do usuário. A primeira contagem está no Log. A segunda (matriz compartilhada ou própria) o ajuste projetivo não decide, e passou à [KITS-TASK-44](/docs/tasks/kits/44-matriz-gte-model-bin.md), que lê a matriz do GTE
+- [ ] A regra na §4.3: qual seção do `MODEL.BIN` substitui ou acompanha qual peça da figura, e se a manga curta e a longa são seções alternativas da mesma peça. O comando que mede vai junto
+  - Reaberto em 2026-10-06 pela [CORR-KITS-071](/docs/tasks/kits/CORR-KITS-071.md). A regra de troca (a 93 no lugar da 97) está medida. A que peça a seção se prende passa à KITS-TASK-44. Manga curta contra longa espera um save state de partida com manga curta, decisão do usuário
 - [x] Um vermelho visto: a seção trocada (a 94, ou uma do tronco) e a ferramenta acusando
 - [x] Se a figura de partida não for a do `EDT_MOD.BIN`, a §4.3 diz isso e diz o que a aba 3D precisaria ler para desenhar a braçadeira e a manga longa. Essa leitura é trabalho novo, decisão do usuário
 

@@ -638,6 +638,14 @@ Com 9 ou 10 pontos por seção, contra 11 incógnitas, o ajuste é frouxo
 demais para dizer se duas peças dividem a matriz. Isso é limite da medida, e a
 resposta exigiria ler a matriz do GTE, como o `looks` faz com o `--pose`.
 
+**Aberto, desde a [CORR-KITS-071](/docs/tasks/kits/CORR-KITS-071.md) (2026-10-06):**
+
+- **a que peça do corpo a 93 e as 95 a 102 se prendem** — matriz compartilhada
+  ou própria. Fica para a [KITS-TASK-44](/docs/tasks/kits/44-matriz-gte-model-bin.md),
+  que lê a matriz do GTE por seção no código da partida;
+- **manga curta contra longa** — espera um save state de partida com manga
+  curta, decisão do usuário.
+
 **O que isso pede da aba 3D.** Desenhar braçadeira e manga longa é desenhar a
 figura de partida: ler as seções do `MODEL.BIN` (2, 7 a 10, 95 a 98, e a 93
 no lugar da 97) e uma pose para elas, que nenhuma task mediu. É trabalho novo,
