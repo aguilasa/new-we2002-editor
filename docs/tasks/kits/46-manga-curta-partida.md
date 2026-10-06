@@ -63,4 +63,4 @@ regra da task, o save state é decisão do usuário e não se improvisa. A task
 fica **blocked** até o usuário dizer como a manga curta aparece no jogo. Pode
 ser opção de tempo ou estação, pode ser uniforme de outro time, e pode ser que
 o state tenha sido salvo antes de a escolha valer.
-
+- **blocked** (2026-10-06): Slot 6 (saved as short sleeves) measures and shows long sleeves: --attach-matrix 6 gives slot 5's orders, --sleeves-image 6 equals slot 5, and the screenshot shows Norway in long sleeves. Needs the user to say how short sleeves appear in the game and a state that shows them. Partial work: the oracle commit before this one.
