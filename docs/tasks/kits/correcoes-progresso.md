@@ -85,4 +85,7 @@
 | [CORR-KITS-080](/docs/tasks/kits/CORR-KITS-080.md) | Tirar da §4.3 o 'espera um save state' da task 46 | KITS-TASK-46 | low | pending | — |
 | [CORR-KITS-081](/docs/tasks/kits/CORR-KITS-081.md) | Declarar selftest.py e a nota da task 47 nos arquivos da task | KITS-TASK-46 | low | pending | — |
 | [CORR-KITS-082](/docs/tasks/kits/CORR-KITS-082.md) | Dar veredito ao --sleeves-image ou marcá-lo como só relatório | KITS-TASK-46 | low | pending | — |
+| [CORR-KITS-083](/docs/tasks/kits/CORR-KITS-083.md) | Corrigir ou remedir a afirmação de que o pareamento por corners erra 2 a 4 px | KITS-TASK-45 | medium | pending | — |
+| [CORR-KITS-084](/docs/tasks/kits/CORR-KITS-084.md) | Catalogar um controle para a ordem de texel do --match-pose | KITS-TASK-45 | medium | pending | — |
+| [CORR-KITS-085](/docs/tasks/kits/CORR-KITS-085.md) | Tirar a nota da KITS-TASK-47 do commit da KITS-TASK-45, ou declará-la | KITS-TASK-45 | low | pending | — |
 <!-- rite:end -->

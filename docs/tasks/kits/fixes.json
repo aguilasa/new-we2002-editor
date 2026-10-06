@@ -1067,6 +1067,45 @@
       "depends_on": [],
       "done_on": null,
       "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-083",
+      "file": "CORR-KITS-083.md",
+      "title": "Corrigir ou remedir a afirmação de que o pareamento por corners erra 2 a 4 px",
+      "origin": "KITS-TASK-45",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-084",
+      "file": "CORR-KITS-084.md",
+      "title": "Catalogar um controle para a ordem de texel do --match-pose",
+      "origin": "KITS-TASK-45",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-085",
+      "file": "CORR-KITS-085.md",
+      "title": "Tirar a nota da KITS-TASK-47 do commit da KITS-TASK-45, ou declará-la",
+      "origin": "KITS-TASK-45",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

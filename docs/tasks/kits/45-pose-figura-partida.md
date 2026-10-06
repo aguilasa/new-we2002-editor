@@ -100,3 +100,4 @@ Selftest: cinco checagens novas. O vermelho plantado foi o pareamento por `corne
     - `M docs/tasks/kits/progresso.md`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-06) at `7622f99`: CORR-KITS-083, CORR-KITS-084, CORR-KITS-085
