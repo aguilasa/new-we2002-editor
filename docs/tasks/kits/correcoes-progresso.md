@@ -80,5 +80,5 @@
 | [CORR-KITS-075](/docs/tasks/kits/CORR-KITS-075.md) | Declarar a task 40 nos arquivos, ou tirar a nota do commit | KITS-TASK-43 | low | done | 2026-10-06 |
 | [CORR-KITS-076](/docs/tasks/kits/CORR-KITS-076.md) | Dar vermelho plantado à verificação de matriz compartilhada | KITS-TASK-44 | medium | done | 2026-10-06 |
 | [CORR-KITS-077](/docs/tasks/kits/CORR-KITS-077.md) | Imprimir pelo --attach-matrix a contagem de matrizes distintas | KITS-TASK-44 | medium | done | 2026-10-06 |
-| [CORR-KITS-078](/docs/tasks/kits/CORR-KITS-078.md) | Declarar ou tirar a edição da task 40, e o import morto | KITS-TASK-44 | low | pending | — |
+| [CORR-KITS-078](/docs/tasks/kits/CORR-KITS-078.md) | Declarar ou tirar a edição da task 40, e o import morto | KITS-TASK-44 | low | done | 2026-10-06 |
 <!-- rite:end -->

@@ -69,3 +69,9 @@ controls: 27 of 27 red
 
 O `rite check` avisa que a Evidência desta CORR roda `git show --stat ddf3d00`, uma revisão fixa
 que documenta e não verifica. A verificação sobre a árvore é o `git grep` acima.
+- **Closed** — commit `52837eb` (2026-10-06): refactor(kits): drop resident_models' dead import; task 44 declares its task 40 note
+  - Files (`git show --name-status 52837eb`):
+    - `M docs/tasks/kits/44-matriz-gte-model-bin.md`
+    - `M docs/tasks/kits/CORR-KITS-078.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M tools/kits/oracle.py`
