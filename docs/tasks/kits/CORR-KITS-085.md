@@ -37,3 +37,15 @@ Declarar o arquivo nos arquivos da KITS-TASK-45 pelo `rite set` (ou no Escopo), 
 `rite context KITS-TASK-45 --json | grep -c 47-figura` é pelo menos 1, ou a nota sai da task 47 e passa a viver na §4.3.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `01f8aca`. O campo `files` da KITS-TASK-45 era `oracle.py`,
+`selftest.py` e `PLAN-KITS-PY.md`, e `git show --stat d1c64a3` mostra também
+`47-figura-partida-aba-3d.md`.
+
+Conserto: o arquivo entra nos arquivos da task, por `rite set KITS-TASK-45 --files …`. O número
+errado da nota ("2 a 4 px") é corrigido junto com a CORR-KITS-083.
+
+```text
+$ python3 -c "…print(files da KITS-TASK-45)…"
+['tools/kits/oracle.py', 'tools/kits/selftest.py', 'docs/PLAN-KITS-PY.md', 'docs/tasks/kits/47-figura-partida-aba-3d.md']
+```

@@ -63,7 +63,7 @@
       "phase": 10,
       "depends_on": [],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.3",
-      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md"],
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md", "docs/tasks/kits/47-figura-partida-aba-3d.md"],
       "resources": ["emulador", "save-states"],
       "status": "done",
       "done_on": "2026-10-06",
