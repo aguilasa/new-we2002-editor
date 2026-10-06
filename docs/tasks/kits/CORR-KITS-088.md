@@ -37,3 +37,16 @@ Em `tools/kits/ui/app.py`, mover `MATCH_FIGURE` e a docstring dela para baixo da
 `sed -n 66,68p tools/kits/ui/app.py | sed -n 2p | grep -q '^"""--tab names'` falha hoje; passa depois.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `4d99303`: `sed -n 66,69p tools/kits/ui/app.py` mostra
+`MATCH_FIGURE` entre `TAB_NAMES` e a docstring dela, e a Verificação sai 1.
+
+Conserto: `MATCH_FIGURE` e a docstring dela desceram para baixo da docstring de `TAB_NAMES`. Só
+muda a ordem.
+
+```text
+$ sed -n 66,68p tools/kits/ui/app.py | sed -n 2p | grep -q '^"""--tab names'; echo $?
+0
+$ python3 tools/kits/selftest.py | tail -1
+kits_selftest: 0 failure(s)
+```

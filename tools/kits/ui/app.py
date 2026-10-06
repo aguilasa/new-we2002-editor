@@ -64,9 +64,9 @@ CELL_PX = 14
 """One colour of the 16x16 palette grid, on screen."""
 
 TAB_NAMES = ("plan", "3d", "diag")
+"""--tab names of the three tabs, in tab order."""
 MATCH_FIGURE = 2
 """The 3D figure selector's third item: the match player of section 4.3."""
-"""--tab names of the three tabs, in tab order."""
 WORK = ("work1", "work2")
 """--image names of the two work bitmaps (first and second set); any other
 --image is an image record number."""
