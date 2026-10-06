@@ -783,6 +783,26 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --back --panels: the measured rule holds, two digits at x 3 and 11",
          oracle.panels_judge(read) == [] and oracle.digit_xs(2) == [3, 11]
          and oracle.digit_xs(1) == [7], "; ".join(oracle.panels_judge(read)[:3]))
+    # --attach (KITS-TASK-43): the rule on a report shaped like slot 5's, and
+    # a camera fitted to points it projected itself.
+    plain = [2, 7, 8, 9, 10, 95, 96, 97, 98]
+    captain = [2, 7, 8, 9, 10, 93, 95, 96, 98]
+    report = {"origin": {"MODEL.BIN only": 244, "EDT_MOD.BIN only": 0, "both": 0,
+                         "neither": 6},
+              "sets": [{"sections": plain}, {"sections": captain}]}
+    c.ok("oracle --attach: 93 in place of 97 holds", oracle.attach_judge(report) == [])
+    c.ok("oracle --attach: section 94 named the armband fails",
+         len(oracle.attach_judge(report, oracle.PLANT_ARMBAND)) == 1)
+    lone = dict(report, sets=[{"sections": captain}])
+    c.ok("oracle --attach: a captain with no armless twin fails",
+         len(oracle.attach_judge(lone)) == 1)
+    camera = [2.0, 0.1, 0.3, 160, 0.2, -1.9, 0.4, 120, 0.001, 0.002, 0.004, 1.0]
+    model = [(x, y, z) for x in (-40, 0, 37) for y in (-30, 25) for z in (-20, 15)]
+    pairs = [(m, oracle.project(camera, m)) for m in model]
+    fitted = oracle.fit_camera(pairs)
+    c.ok("oracle --attach: a camera fitted to its own projection gives them back",
+         fitted is not None and oracle.fit_error(fitted, pairs) < 1e-3,
+         "%s" % (fitted and oracle.fit_error(fitted, pairs)))
     c.ok("oracle --back --panels: read one row up, every panel fails",
          len({f.split(":")[0] for f in oracle.panels_judge(oracle.read_panels(page, width, -1))})
          == len(read))

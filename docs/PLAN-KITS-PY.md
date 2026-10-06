@@ -600,6 +600,47 @@ contagens da `LOOKS SET` no quadro (104 e 190) ficam abaixo das 237 e 429 do
 disco. A comparação não foi feita peça a peça, e a suspeita, **não medida**, é
 que as faces de costas para a câmera saem da lista.
 
+**O encaixe, medido em 2026-10-06 ([KITS-TASK-43](/docs/tasks/kits/43-medir-encaixe-mangas.md)),
+no mesmo slot 5.** Cada primitiva de kit do quadro foi casada com a primitiva
+de modelo que tem os mesmos quatro cantos de texel, e só contou o casamento
+com uma seção única. Os jogadores na tela foram separados por contato das
+caixas de tela.
+
+- **A figura de partida é o `MODEL.BIN`, não o `EDT_MOD.BIN`.** Das 250
+  primitivas de kit, 244 casam só com o `MODEL.BIN`, 0 com o `EDT_MOD.BIN` e 6
+  com nenhum dos dois. A aba 3D desenha o `EDT_MOD.BIN`, o modelo da `LOOKS
+  SET`.
+- **A braçadeira substitui uma peça.** Os jogadores de linha comuns desenham
+  as seções `2 7 8 9 10 95 96 97 98`. Os dois capitães, um de cada time,
+  desenham `2 7 8 9 10 93 95 96 98`: **a 93 entra no lugar da 97**, a peça de
+  manga longa que ela veste. As duas estão num grupo de seis seções (59, 91, 93, 94,
+  97 e 100) que guardam o mesmo quad de texels, e esse quad fica de fora da
+  conta.
+- **O goleiro usa outro conjunto**, `56 61 62 63 64 99 100 101 102`, e as
+  mangas longas dele são as 99 a 102.
+- **Manga curta contra longa não foi medida.** Os dois times desta partida
+  estão de manga longa, então a pergunta "a curta é seção alternativa da mesma
+  peça?" fica sem resposta. As seções 91 e 94, do mesmo grupo de quad
+  compartilhado, são as candidatas, sem medida.
+
+Comando: `python tools/kits/oracle.py --attach 5`, com `WE2002_LOOKS_IMAGE` e
+`WE2002_LOOKS_DRIVE_IMAGE`. O quadro fica em `work/kits-oracle/attach-5.json`,
+e `--frame-json` relê o arquivo sem emulador. O controle é o
+`--plant-attach`, que dá o nome de braçadeira à seção 94 e sai 1 com `no
+player draws section 94`.
+
+**Negativa medida: a mesma câmera não separa peça de peça aqui.** Uma câmera
+projetiva geral ajustada a cada seção sozinha erra cerca de 1 px. Ajustada a
+duas seções juntas, erra de 2 a 7 px, sem um par que caia no erro de uma seção
+só. Com 9 ou 10 pontos por seção, contra 11 incógnitas, o ajuste é frouxo
+demais para dizer se duas peças dividem a matriz. Isso é limite da medida, e a
+resposta exigiria ler a matriz do GTE, como o `looks` faz com o `--pose`.
+
+**O que isso pede da aba 3D.** Desenhar braçadeira e manga longa é desenhar a
+figura de partida: ler as seções do `MODEL.BIN` (2, 7 a 10, 95 a 98, e a 93
+no lugar da 97) e uma pose para elas, que nenhuma task mediu. É trabalho novo,
+e decisão do usuário.
+
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 
 O [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)

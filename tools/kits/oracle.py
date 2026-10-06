@@ -452,6 +452,7 @@ def textured_samples(commands) -> list:
             mode = page
             clut = texels[0] >> 16
             uv = [(t & 0xFF, (t >> 8) & 0xFF) for t in texels]
+            xy = [looks_oracle._signed_vertex(words[1 + per * i]) for i in range(corners)]
         elif code in looks_oracle.SPRITE_CODES:
             _words, fixed = looks_oracle.SPRITE_CODES[code]
             if len(words) < 3:
@@ -465,11 +466,13 @@ def textured_samples(commands) -> list:
                 w = h = fixed
             page, clut = mode, words[2] >> 16
             uv = [(u, v), (u + w - 1, v), (u, v + h - 1), (u + w - 1, v + h - 1)]
+            sx, sy = looks_oracle._signed_vertex(words[1])
+            xy = [(sx, sy), (sx + w - 1, sy), (sx, sy + h - 1), (sx + w - 1, sy + h - 1)]
         else:
             continue
         x, y, bits = looks_oracle.page_vram(page)
         out.append({"code": code, "page": (x, y), "bits": bits,
-                    "clut": looks_oracle.clut_vram(clut), "uv": uv})
+                    "clut": looks_oracle.clut_vram(clut), "uv": uv, "xy": xy})
     return out
 
 
@@ -737,6 +740,289 @@ def run_sleeves(slot: int, cue: str, expect=None, plant=False) -> int:
     if not failures:
         print("  ok    %d primitive(s) sample the uniform image%s"
               % (tally["uniform"], "; sleeves %s" % expect if expect else ", no verdict asked"))
+    return 1 if failures else 0
+
+
+# --- section 4.3: where MODEL.BIN's sleeves and armband attach -------------
+
+ATTACH_DIR = os.path.join("work", "kits-oracle")
+ARMBAND_SECTION = 93
+LONG_SLEEVE_SECTIONS = tuple(range(95, 103))
+"""The MODEL.BIN sections `--sleeves 5` found (KITS-TASK-39)."""
+MIN_FIT_POINTS = 6
+"""A projective camera has 11 unknowns, two equations a point."""
+REPLACED_SECTION = 97
+"""The long-sleeve section the armband takes the place of: in slot 5 both
+captains draw 2 7 8 9 10 93 95 96 98 and every other outfield player
+2 7 8 9 10 95 96 97 98."""
+PLANT_ARMBAND = 94
+"""`--plant-attach` names this section the armband instead of 93."""
+FIT_PIXELS = 2.0
+"""A projection fits a section when its mean error is under this many screen
+pixels: the GPU rounds every vertex to a whole pixel."""
+
+
+def model_index(image_path: str) -> dict:
+    """{(file, section): Section} and {texel corners: [(file, section, prim)]}
+    over EDT_MOD.BIN and MODEL.BIN, read by `tools/looks/section.py`."""
+    import iso_source
+    import section
+
+    sections, by_uv = {}, {}
+    with iso_source.open_disc(image_path) as disc:
+        for name in (layout.EDT_MOD, layout.MODEL):
+            data = disc.read(name)
+            start = (layout.MODEL_GEOMETRY_START if name == layout.MODEL
+                     else layout.geometry_start(data))
+            for i, sec in enumerate(section.scan(data, start).sections):
+                sections[(name, i)] = sec
+                for k, prim in enumerate(sec.primitives):
+                    by_uv.setdefault(tuple(tuple(t) for t in prim.texcoords), []).append(
+                        (name, i, k))
+    return {"sections": sections, "by_uv": by_uv}
+
+
+def is_figure(sample) -> bool:
+    """A primitive of a kit: 8 bits, a kit CLUT, a kit page."""
+    return kit_image_of(sample) is not None
+
+
+def players(samples, gap: int = 2) -> list:
+    """The figure primitives grouped into players: two primitives are one
+    player's when their screen boxes come within *gap* pixels, transitively.
+    Players far apart on the pitch never touch; two that overlap merge, and
+    the fit below says so instead of hiding it."""
+    figure = [one for one in samples if is_figure(one)]
+    boxes = []
+    for one in figure:
+        xs = [p[0] for p in one["xy"]]
+        ys = [p[1] for p in one["xy"]]
+        boxes.append((min(xs), min(ys), max(xs), max(ys)))
+    parent = list(range(len(figure)))
+
+    def root(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    for i, a in enumerate(boxes):
+        for j in range(i + 1, len(boxes)):
+            b = boxes[j]
+            if a[0] - gap <= b[2] and b[0] - gap <= a[2] and a[1] - gap <= b[3] and b[1] - gap <= a[3]:
+                parent[root(i)] = root(j)
+    groups = {}
+    for i, one in enumerate(figure):
+        groups.setdefault(root(i), []).append(one)
+    return sorted(groups.values(), key=len, reverse=True)
+
+
+def solve(matrix, vector):
+    """Least squares by the normal equations and Gauss-Jordan; None when the
+    system is singular."""
+    n = len(matrix[0])
+    ata = [[sum(row[i] * row[j] for row in matrix) for j in range(n)] for i in range(n)]
+    atb = [sum(row[i] * b for row, b in zip(matrix, vector)) for i in range(n)]
+    m = [ata[i] + [atb[i]] for i in range(n)]
+    for col in range(n):
+        pivot = max(range(col, n), key=lambda r: abs(m[r][col]))
+        if abs(m[pivot][col]) < 1e-9:
+            return None
+        m[col], m[pivot] = m[pivot], m[col]
+        div = m[col][col]
+        m[col] = [v / div for v in m[col]]
+        for r in range(n):
+            if r != col and m[r][col]:
+                f = m[r][col]
+                m[r] = [a - f * b for a, b in zip(m[r], m[col])]
+    return [m[i][n] for i in range(n)]
+
+
+def fit_camera(pairs):
+    """The 3x4 projective camera, last entry 1, that best sends the model
+    points of *pairs* [((x, y, z), (sx, sy))] to their screen points; None
+    under MIN_FIT_POINTS distinct points or when they do not pin it."""
+    points = {}
+    for model, screen in pairs:
+        points[model] = screen
+    if len(points) < MIN_FIT_POINTS:
+        return None
+    rows, rhs = [], []
+    for (x, y, z), (u, v) in points.items():
+        rows.append([x, y, z, 1, 0, 0, 0, 0, -u * x, -u * y, -u * z])
+        rhs.append(u)
+        rows.append([0, 0, 0, 0, x, y, z, 1, -v * x, -v * y, -v * z])
+        rhs.append(v)
+    p = solve(rows, rhs)
+    return None if p is None else p + [1.0]
+
+
+def project(camera, point):
+    """*point* through *camera*, or None behind it."""
+    x, y, z = point
+    w = camera[8] * x + camera[9] * y + camera[10] * z + camera[11]
+    if abs(w) < 1e-9:
+        return None
+    return ((camera[0] * x + camera[1] * y + camera[2] * z + camera[3]) / w,
+            (camera[4] * x + camera[5] * y + camera[6] * z + camera[7]) / w)
+
+
+def fit_error(camera, pairs) -> float:
+    """Mean distance in screen pixels between *pairs*' screen points and the
+    model points sent through *camera*."""
+    total = 0.0
+    for model, screen in pairs:
+        got = project(camera, model)
+        if got is None:
+            return float("inf")
+        total += ((got[0] - screen[0]) ** 2 + (got[1] - screen[1]) ** 2) ** 0.5
+    return total / len(pairs)
+
+
+def section_pairs(player, index, file_name=None) -> dict:
+    """{(file, section): [(model point, screen point)]} of one player: every
+    figure primitive matched to a model primitive by its texels, and its four
+    corners paired in the order `section.Primitive.corners` gives.  A
+    primitive whose texels more than one section holds is left out: in slot 5
+    six sections (59, 91, 93, 94, 97, 100) share one quad and three (57, 95,
+    99) another."""
+    out = {}
+    for one in player:
+        if len(one["uv"]) != 4:
+            continue
+        candidates = [c for c in index["by_uv"].get(tuple(tuple(t) for t in one["uv"]), ())
+                      if not file_name or c[0] == file_name]
+        if len({(name, i) for name, i, _k in candidates}) != 1:
+            continue        # texels several sections share name no section
+        for name, i, k in candidates[:1]:
+            sec = index["sections"][(name, i)]
+            prim = sec.primitives[k]
+            corners = prim.corners
+            pairs = []
+            for vi, screen in zip(corners, one["xy"]):
+                vert = sec.vertices[vi]
+                pairs.append(((vert.x, vert.y, vert.z), tuple(screen)))
+            out.setdefault((name, i), []).extend(pairs)
+    return out
+
+
+def attach_report(samples, image_path: str) -> dict:
+    """What `--attach` measures, from a frame's samples: which file each
+    figure primitive comes from, and for each player that wears the armband
+    or the long sleeves, which body section's projection carries them."""
+    index = model_index(image_path)
+    figure = [one for one in samples if is_figure(one)]
+    origin = {"MODEL.BIN only": 0, "EDT_MOD.BIN only": 0, "both": 0, "neither": 0}
+    for one in figure:
+        files = {name for name, _i, _k in index["by_uv"].get(tuple(tuple(t) for t in one["uv"]), ())}
+        key = ("both" if len(files) == 2 else "MODEL.BIN only" if layout.MODEL in files
+               else "EDT_MOD.BIN only" if files else "neither")
+        origin[key] += 1
+    shared = {}
+    for one in figure:
+        held = {i for name, i, _k in index["by_uv"].get(tuple(tuple(t) for t in one["uv"]), ())
+                if name == layout.MODEL}
+        if len(held) > 1:
+            key = tuple(sorted(held))
+            shared[key] = shared.get(key, 0) + 1
+    rows, sets = [], []
+    for number, player in enumerate(players(samples)):
+        pairs = section_pairs(player, index, layout.MODEL)
+        drawn = sorted(i for (_n, i) in pairs)
+        sets.append({"player": number, "primitives": len(player), "sections": drawn,
+                     "team": sorted({one["clut"] for one in player})})
+        worn = [i for (_n, i) in pairs if i == ARMBAND_SECTION or i in LONG_SLEEVE_SECTIONS]
+        if not worn:
+            continue
+        own = {}
+        for (_n, i), these in pairs.items():
+            camera = fit_camera(these)
+            if camera is not None:
+                own[i] = fit_error(camera, these)
+        for i in sorted(set(worn)):
+            if i not in own:
+                continue
+            these = pairs[(layout.MODEL, i)]
+            joint = []
+            for (_n, j), others in pairs.items():
+                if j == i or j not in own:
+                    continue
+                camera = fit_camera(these + others)
+                if camera is not None:
+                    joint.append((fit_error(camera, these + others), j))
+            joint.sort()
+            rows.append({"player": number, "primitives": len(player), "section": i,
+                         "points": len({m for m, _s in these}), "own": own[i],
+                         "joint": joint[:3]})
+    return {"origin": origin, "figure": len(figure), "rows": rows, "sets": sets,
+            "shared": shared}
+
+
+def attach_judge(report: dict, armband: int = ARMBAND_SECTION) -> list:
+    """Failures of the attachment rule: the figure's texels are MODEL.BIN's,
+    some player draws *armband*, and every such player draws exactly what an
+    armless player of the frame draws, REPLACED_SECTION swapped for it."""
+    out = []
+    origin = report["origin"]
+    if origin["EDT_MOD.BIN only"] or not origin["MODEL.BIN only"]:
+        out.append("the figure is not MODEL.BIN's: %s" % origin)
+    sets = [tuple(one["sections"]) for one in report["sets"]]
+    captains = [one for one in sets if armband in one]
+    if not captains:
+        out.append("no player draws section %d" % armband)
+    for one in captains:
+        swapped = tuple(sorted((set(one) - {armband}) | {REPLACED_SECTION}))
+        if swapped not in sets:
+            out.append("a player draws %s, and no player draws it with %d in place of %d"
+                       % (" ".join(map(str, one)), REPLACED_SECTION, armband))
+    return out
+
+
+def run_attach(slot: int, cue: str, cache=None, plant=False) -> int:
+    """`--attach SLOT`: section 4.3, where the armband and the long sleeves
+    of MODEL.BIN sit on a match figure."""
+    import json
+
+    path = cache or os.path.join(ATTACH_DIR, "attach-%d.json" % slot)
+    if cache and os.path.isfile(cache):
+        with open(cache) as fh:
+            samples = [dict(one, page=tuple(one["page"]), clut=tuple(one["clut"]),
+                            uv=[tuple(t) for t in one["uv"]], xy=[tuple(t) for t in one["xy"]])
+                       for one in json.load(fh)]
+        print("  frame read from %s, no emulator" % cache)
+    else:
+        samples = read_frame(slot, cue)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump(samples, fh)
+        print("  frame kept at %s (--frame-json reads it back)" % path)
+    report = attach_report(samples, os.environ[IMAGE_VARIABLE])
+    print("  %d figure primitive(s); by the file their texels are in: %s"
+          % (report["figure"], ", ".join("%s %d" % kv for kv in report["origin"].items())))
+    for key, n in sorted(report["shared"].items(), key=lambda kv: -kv[1]):
+        print("  %d primitive(s) whose texels sections %s all hold: left out"
+              % (n, " ".join(map(str, key))))
+    print("  MODEL.BIN sections each player draws (texels one section holds only):")
+    for one in report["sets"]:
+        print("    player %2d (%3d prims, CLUT %s): %s"
+              % (one["player"], one["primitives"],
+                 " ".join("(%d,%d)" % c for c in one["team"]),
+                 " ".join(str(i) for i in one["sections"])))
+    print("  one camera fitted to a worn section alone, and to it with each other section:")
+    for row in report["rows"]:
+        print("    player %2d (%3d prims) section %3d, %2d point(s): alone %.2f px; one "
+              "camera with section %s"
+              % (row["player"], row["primitives"], row["section"], row["points"], row["own"],
+                 ", ".join("%d %.2f px" % (j, err) for err, j in row["joint"])))
+    armband = PLANT_ARMBAND if plant else ARMBAND_SECTION
+    if plant:
+        print("  PLANT  section %d named the armband" % armband)
+    failures = attach_judge(report, armband)
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if not failures:
+        print("  ok    the figure is MODEL.BIN's, and section %d takes the place of %d"
+              % (armband, REPLACED_SECTION))
     return 1 if failures else 0
 
 
@@ -1219,6 +1505,9 @@ def main(argv=None) -> int:
     source.add_argument("--sleeves", type=int, metavar="SLOT",
                         help="section 4.3: which primitives of this slot's frame sample "
                              "the sleeves image")
+    source.add_argument("--attach", type=int, metavar="SLOT",
+                        help="section 4.3: where MODEL.BIN's armband and long sleeves sit "
+                             "on the figure in this match slot")
     source.add_argument("--back", type=int, metavar="SLOT",
                         help="section 4.7: does the LOOKS SET of this slot fill the torso gaps")
     parser.add_argument("--cue", help="the disc the state was saved on (default $%s)"
@@ -1250,6 +1539,10 @@ def main(argv=None) -> int:
                         help="with --back: the set the goalkeeper zones are compared with")
     parser.add_argument("--blocks", action="store_true",
                         help="with --back: every block of pixels that differs from the disc")
+    parser.add_argument("--frame-json", metavar="JSON",
+                        help="with --attach: read the frame kept by an earlier run")
+    parser.add_argument("--plant-attach", action="store_true",
+                        help="with --attach: the control -- name section %d the armband" % PLANT_ARMBAND)
     parser.add_argument("--panels", action="store_true",
                         help="with --back: read every back panel under the map (a match)")
     parser.add_argument("--picture", metavar="PNG",
@@ -1272,6 +1565,12 @@ def main(argv=None) -> int:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
         return run_sleeves(args.sleeves, cue, args.expect_sleeves, args.plant_sleeves)
+    if args.attach is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue and not args.frame_json:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_attach(args.attach, cue, args.frame_json, args.plant_attach)
     if args.back is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue:

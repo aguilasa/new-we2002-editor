@@ -38,6 +38,8 @@ Da KITS-TASK-39 (2026-10-05, §4.3). Na `LOOKS SET` nenhuma primitiva amostra a 
 
 Da KITS-TASK-42 (2026-10-06, §4.7): o **número tem regra medida**. Na partida, cada jogador tem um painel de costas 20×24: a "shirt back" da figura com os glifos 6×12 da zona "numbers 0-9", só a tinta, centrados na linha 7 — um dígito em x 7, dois em x 3 e 11. O checkbox **Number** pode desenhar montando esse painel em (0,80), ou em (100,104) no goleiro, e para isso precisa de um campo de número na janela. Não foi medido como o jogo escolhe o painel de cada jogador.
 
+Da KITS-TASK-43 (2026-10-06, §4.3). A figura de partida é o `MODEL.BIN` inteiro: 244 de 250 primitivas de kit, e 0 do `EDT_MOD.BIN`. O capitão troca a seção 97 pela 93 (`oracle.py --attach 5`). A aba 3D desenha o `EDT_MOD.BIN`, e nele não há braçadeira nem manga longa para ligar. **Captain armband** e **Long sleeves** só desenham se a aba passar a ler a figura do `MODEL.BIN`, com uma pose que ninguém mediu. Antes de destravar esta task, o usuário decide: entregar os dois checkboxes desligados, com a frase, ou abrir esse trabalho.
+
 ## Log de Execução
 
 2026-10-05. Ao começar, nenhum dos três checkboxes tinha regra de desenho medida. O **Number** só tinha a `LOOKS SET`, que não desenha número. A **braçadeira** e a **manga longa** têm as seções do `MODEL.BIN` identificadas, mas não o encaixe na figura. Perguntado, o usuário escolheu "criar tasks para fazer as medições". Saíram a KITS-TASK-42 (o número numa partida) e a KITS-TASK-43 (o encaixe das seções 93 e 95 a 102). Esta task fica **blocked** até as duas fecharem, e a `order` do ciclo as põe antes dela.
