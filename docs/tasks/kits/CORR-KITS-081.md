@@ -50,3 +50,7 @@ tools/kits/oracle.py,tools/kits/selftest.py,docs/PLAN-KITS-PY.md,docs/tasks/kits
 $ python3 -c "…print(files da KITS-TASK-46)…"
 ['tools/kits/oracle.py', 'tools/kits/selftest.py', 'docs/PLAN-KITS-PY.md', 'docs/tasks/kits/47-figura-partida-aba-3d.md']
 ```
+- **Closed** — commit `a28da61` (2026-10-06): chore(kits): task 46 declares selftest.py and its task 47 note
+  - Files (`git show --name-status a28da61`):
+    - `M docs/tasks/kits/CORR-KITS-081.md`
+    - `M docs/tasks/kits/progress.json`
