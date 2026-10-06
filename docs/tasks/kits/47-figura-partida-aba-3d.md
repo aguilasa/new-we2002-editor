@@ -80,3 +80,19 @@ Outros vermelhos vistos:
 
 
 `ctest --test-dir build -R kits` (com `WE2002_LOOKS_IMAGE`, `WE2002_LOOKS_DRIVE_IMAGE`, `WE2002_KITS_ED_IMAGE`, `:98`): `100% tests passed, 0 tests failed out of 4`.
+- **Closed** — commit `f060945` (2026-10-06): feat(kits): draw the match figure in the 3D tab, from the measured pose
+  - Files (`git show --name-status f060945`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/prompts/perfil-kits.md`
+    - `M docs/tasks/kits/47-figura-partida-aba-3d.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
+    - `A tools/kits/core/match_pose.json`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`
