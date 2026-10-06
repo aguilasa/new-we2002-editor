@@ -41,7 +41,9 @@ WHAT IT JUDGES:
       drawn with section 97 when the armband is asked FAILS the match judge
       (KITS-TASK-47: with TEX_14 the armband changes 337 px in a 25x18 box,
       and the judge wants something changed, in at most ARMBAND_BOX px each
-      way and ARMBAND_SHARE % of the figure), and the tab left on
+      way and ARMBAND_SHARE % of the figure, inside ARM_SIDE and ARM_ROWS
+      of the figure's box -- the armband drawn on the head FAILS it too,
+      CORR-KITS-087), and the tab left on
       with no geometry, or a Plan widget that changes with no geometry, FAIL
       the 3D off judge; the kit selector labelled with bare tags FAILS the
       selector judge; the Diagnosis tab without its problem rows FAILS the
@@ -111,6 +113,12 @@ ARMBAND_BOX = 40
 ARMBAND_SHARE = 5.0
 """The most, in percent of the figure's pixels, the armband may change
 (measured 1.3 %: 337 of 26427)."""
+ARM_SIDE = 0.35
+"""The armband's change lies in the outer ARM_SIDE of the figure's box, on
+either side: measured at x 0.01-0.20 of it (KITS-TASK-47, CORR-KITS-087)."""
+ARM_ROWS = (0.15, 0.55)
+"""...and between these fractions of its height, shoulder to waist: measured
+at y 0.28-0.33."""
 NOTE_ROWS = 60
 """Bottom rows of a capture that hold the status and the 3D note."""
 TAB_LABEL = (40, 20, 80)
@@ -201,6 +209,10 @@ PLANTS = (
     ("armband drawn as section 97", MATCH,
      "                                         armband=self.armband, geometry=self.geometry)\n",
      "                                         armband=False, geometry=self.geometry)  # planted\n"),
+    ("armband drawn on the head", MATCH,
+     '        if armband and section == rule["replaced"]:\n',
+     "        if armband and piece is pieces[0]:  # planted: the head\n",
+     "../core/figure.py"),
     ("3D tab never off", OFF,
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
      "        self.tabs.setTabEnabled(1, True)\n"),
@@ -658,7 +670,8 @@ def figure_judge(python, image, env, tmp, app=APP) -> tuple:
 def match_judge(python, image, env, tmp, app=APP) -> tuple:
     """(failures, what was seen) of the match player in the 3D tab, without
     and with the captain's armband: both draw a figure, and the armband
-    changes a small box of it and nothing else."""
+    changes a small box of it, on an arm (ARM_SIDE, ARM_ROWS), and nothing
+    else."""
     shots, bad = {}, []
     for armband in (False, True):
         out = os.path.join(tmp, "match-%d.png" % armband)
@@ -689,9 +702,21 @@ def match_judge(python, image, env, tmp, app=APP) -> tuple:
     xs, ys = [x for x, _y in changed], [y for _x, y in changed]
     span = (max(xs) - min(xs) + 1, max(ys) - min(ys) + 1)
     pct = 100.0 * len(changed) / max(figure, 1)
-    seen = "%d px (%.1f %% of the figure) in a %dx%d box" % ((len(changed), pct) + span)
+    drawn = [(x, y) for x, y in inside if one[2][y * w + x] != BACKDROP_3D]
+    fx0, fy0 = min(x for x, _y in drawn), min(y for _x, y in drawn)
+    fx1, fy1 = max(x for x, _y in drawn), max(y for _x, y in drawn)
+    fw, fh = fx1 - fx0 + 1.0, fy1 - fy0 + 1.0
+    left, right = (min(xs) - fx0) / fw, (max(xs) - fx0 + 1) / fw
+    top, bottom = (min(ys) - fy0) / fh, (max(ys) - fy0 + 1) / fh
+    seen = ("%d px (%.1f %% of the figure) in a %dx%d box, x %.2f-%.2f y %.2f-%.2f of the "
+            "figure's box" % ((len(changed), pct) + span + (left, right, top, bottom)))
     if max(span) > ARMBAND_BOX:
         bad.append("the armband's change spans %dx%d, over %d" % (span + (ARMBAND_BOX,)))
+    if not (right <= ARM_SIDE or left >= 1.0 - ARM_SIDE) \
+            or top < ARM_ROWS[0] or bottom > ARM_ROWS[1]:
+        bad.append("the armband's change is at x %.2f-%.2f y %.2f-%.2f of the figure's box, "
+                   "not on an arm (outer %.2f, rows %.2f-%.2f)"
+                   % ((left, right, top, bottom, ARM_SIDE) + ARM_ROWS))
     if pct > ARMBAND_SHARE:
         bad.append("the armband changes %.1f %% of the figure, over %.1f" % (pct, ARMBAND_SHARE))
     return bad, seen
