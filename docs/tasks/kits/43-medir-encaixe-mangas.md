@@ -103,3 +103,10 @@ candidatas 91 e 94.
 **A figura de partida não é a do `EDT_MOD.BIN`.** A §4.3 diz isso e diz o que
 a aba 3D precisaria: as seções do `MODEL.BIN` e uma pose para elas. Isso é
 trabalho novo, decisão do usuário. A nota foi para a KITS-TASK-40.
+- **Closed** — commit `da80383` (2026-10-06): feat(kits): oracle.py --attach: the match figure is MODEL.BIN, the armband replaces section 97
+  - Files (`git show --name-status da80383`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
+    - `M docs/tasks/kits/43-medir-encaixe-mangas.md`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
