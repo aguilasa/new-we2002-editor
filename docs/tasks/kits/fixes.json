@@ -885,6 +885,32 @@
       "depends_on": [],
       "done_on": "2026-10-05",
       "done_commit": "9aed6a4"
+    },
+    {
+      "id": "CORR-KITS-069",
+      "file": "CORR-KITS-069.md",
+      "title": "Corrigir a data da medição na partida na §4.7",
+      "origin": "KITS-TASK-42",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-070",
+      "file": "CORR-KITS-070.md",
+      "title": "Devolver a docstring de UNIFORM_RECORD para baixo da constante",
+      "origin": "KITS-TASK-42",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

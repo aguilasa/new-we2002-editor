@@ -71,4 +71,6 @@
 | [CORR-KITS-066](/docs/tasks/kits/CORR-KITS-066.md) | Atualizar figure_hint: as costas agora são medidas | KITS-TASK-38 | low | done | 2026-10-05 |
 | [CORR-KITS-067](/docs/tasks/kits/CORR-KITS-067.md) | Versionar como controle o vermelho do pixel_index | KITS-TASK-38 | low | done | 2026-10-05 |
 | [CORR-KITS-068](/docs/tasks/kits/CORR-KITS-068.md) | Contar braçadeira e manga longa de forma exclusiva no --sleeves | KITS-TASK-39 | medium | done | 2026-10-05 |
+| [CORR-KITS-069](/docs/tasks/kits/CORR-KITS-069.md) | Corrigir a data da medição na partida na §4.7 | KITS-TASK-42 | low | pending | — |
+| [CORR-KITS-070](/docs/tasks/kits/CORR-KITS-070.md) | Devolver a docstring de UNIFORM_RECORD para baixo da constante | KITS-TASK-42 | low | pending | — |
 <!-- rite:end -->

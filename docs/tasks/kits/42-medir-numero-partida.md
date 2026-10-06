@@ -94,3 +94,4 @@ side TEX_A4: 0 halfword(s) of 8192 differ from VRAM outside the gaps`.
     - `M docs/tasks/kits/42-medir-numero-partida.md`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-06) at `c6b52ff`: CORR-KITS-069, CORR-KITS-070
