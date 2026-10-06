@@ -730,7 +730,10 @@ pior a 264,70, e a corrida sai 1.
 
 Uma descoberta de leitura: **o texel de cada canto segue a ordem gravada dos
 índices** (`Primitive.indices`), não a ordem `corners` que o `section.py`
-oferece como desembaraçada. Pareado por `corners`, cada peça erra de 2 a 4 px.
+oferece como desembaraçada. Pareado por `corners`
+(`oracle.py --match-pose 5 --pair-by corners`), as peças erram de 1,48 a
+4,05 px, 21 das 24 acima do limite de 2,00; pela ordem gravada, o pior é
+1,01 px ([CORR-KITS-083](/docs/tasks/kits/CORR-KITS-083.md)).
 
 A pose mora em `work/kits-pose/slot5-<cabeça>.json`, fora do git: a projeção
 e, por peça, a seção, a rotação e a translação, na ordem de desenho. Comando

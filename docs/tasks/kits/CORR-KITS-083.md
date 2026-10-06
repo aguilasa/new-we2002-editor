@@ -47,3 +47,44 @@ Uma opção versionada, por exemplo `--pair-by corners`, no `oracle.py --match-p
 `python tools/kits/oracle.py --match-pose 5 --frame-json work/kits-oracle/pose-5.json --pair-by corners` existe e imprime a faixa que a §4.3 cita; e `grep -rn "2 a 4 px\|2 to 4 px" docs/PLAN-KITS-PY.md docs/tasks/kits/4[57]*.md tools/kits/oracle.py` não acha nada. Hoje a opção não existe e a grep acha 4 linhas.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `7be3178`. A frase aparecia em quatro lugares e nenhuma opção a
+media:
+
+```text
+$ grep -rn "2 a 4 px\|2 to 4 px" docs/PLAN-KITS-PY.md docs/tasks/kits/4[57]*.md tools/kits/oracle.py | cut -c1-60
+docs/tasks/kits/47-figura-partida-aba-3d.md:37:Da KITS-TASK-45 (2026-10-06, §4.3): a pose
+docs/tasks/kits/45-pose-figura-partida.md:91:O texel de cada canto segue `Primitive.indice
+docs/PLAN-KITS-PY.md:733:oferece como desembaraçada. Pareado por `corners`, cada peça er
+tools/kits/oracle.py:1389:        # `corners` every piece is off by 2 to 4 px, by `indices
+```
+
+Conserto:
+
+- `tools/kits/oracle.py`: `--pair-by indices|corners` no `--match-pose`. O `piece_error` recebe o
+  pareamento; `PAIRINGS` documenta os dois. Com `corners` a corrida é relatório: imprime a tabela
+  e o julgamento e não grava pose.
+- O comentário do `piece_error` não cita mais número.
+- A §4.3, o Log da task 45 e a nota da task 47 citam a faixa medida.
+- O controle `oracle-pose-texel-order` (CORR-KITS-084) passou a plantar a linha nova,
+  `order = prim.corners`.
+
+```text
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --match-pose 5 --frame-json work/kits-oracle/pose-5.json --pair-by corners
+  PAIR   texels paired with the vertices in `corners` order, not the stored one
+      section 96     1.86 px over 7 primitive(s)
+      section 98     1.48 px over 7 primitive(s)
+      section 98     1.63 px over 7 primitive(s)
+      (… 24 linhas por peça, as outras 21 acima de 2,00 …)
+  worst piece 4.05 px, limit 2.00
+  (--pair-by corners is a report: nothing is written)
+$ … --match-pose 5 --frame-json work/kits-oracle/pose-5.json
+  worst piece 1.01 px, limit 2.00
+  ok    every piece of both figures lands within 2.00 px of its frame
+$ grep -rn "2 a 4 px\|2 to 4 px" docs/PLAN-KITS-PY.md docs/tasks/kits/4[57]*.md tools/kits/oracle.py
+(sem saída)
+$ python3 tools/kits/controls.py --only oracle-pose-texel-order
+  RED    oracle-pose-texel-order      kits/oracle.py :: piece_error
+$ python3 tools/kits/selftest.py | tail -1
+kits_selftest: 0 failure(s)
+```

@@ -35,6 +35,7 @@ Usage:
     python tools/kits/oracle.py --sleeves 2|5 [--expect-sleeves none|drawn] [--plant-sleeves]
     python tools/kits/oracle.py --back 2 [--expect-back untouched] [--plant-back numbers]
     python tools/kits/oracle.py --match-pose 5 [--frame-json <capture>] [--plant-pose]
+                                [--pair-by indices|corners]
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
 the page that are not flat (more than one distinct 15-bit value) and how many
@@ -1370,10 +1371,17 @@ def pose_project(rotation, translation, projection, vertex):
     return (projection["OFX"] + h * cx / cz, projection["OFY"] + h * cy / cz)
 
 
-def piece_error(piece, projection, sec, group) -> tuple:
+PAIRINGS = ("indices", "corners")
+"""How a primitive's texels are paired with its vertices: `indices`, the
+stored order, is the one the game uses; `corners` is what `--pair-by
+corners` shows it is not (CORR-KITS-083)."""
+
+
+def piece_error(piece, projection, sec, group, pair: str = "indices") -> tuple:
     """(mean pixel distance, primitives matched) of one piece: each primitive
     of its section projected with the piece's matrix and matched, by its four
-    texels, to the nearest primitive of *group* that carries them."""
+    texels, to the nearest primitive of *group* that carries them.  *pair*
+    says which vertex each texel goes with (`PAIRINGS`)."""
     by_uv = {}
     for one in group:
         if len(one["uv"]) == 4:
@@ -1385,9 +1393,10 @@ def piece_error(piece, projection, sec, group) -> tuple:
         if not drawn:
             continue        # culled, or a texel quad the frame does not draw
         points = {}
-        # texcoords follow the STORED order, not `corners`: paired by
-        # `corners` every piece is off by 2 to 4 px, by `indices` under 1
-        for vi, texel in zip(prim.indices, prim.texcoords):
+        # texcoords follow the STORED order, not `corners`: `--pair-by
+        # corners` prints what the other pairing gives
+        order = prim.indices if pair == "indices" else prim.corners
+        for vi, texel in zip(order, prim.texcoords):
             v = sec.vertices[vi]
             points[tuple(texel)] = pose_project(rotation, translation, projection,
                                                 (v.x, v.y, v.z))
@@ -1420,7 +1429,7 @@ def pose_groups(samples, margin: int = POSE_MARGIN) -> list:
     return out
 
 
-def pose_figure(figure, projection, index, groups) -> dict:
+def pose_figure(figure, projection, index, groups, pair: str = "indices") -> dict:
     """One figure against the frame: the player group whose primitives its
     pieces land on best, and each piece's error there."""
     best = None
@@ -1428,7 +1437,7 @@ def pose_figure(figure, projection, index, groups) -> dict:
         rows = []
         for piece in figure:
             sec = index["sections"].get((layout.MODEL, piece["section"]))
-            error, matched = (piece_error(piece, projection, sec, group) if sec
+            error, matched = (piece_error(piece, projection, sec, group, pair) if sec
                               else (None, 0))
             rows.append({"section": piece["section"], "error": error, "matched": matched})
         errors = [r["error"] for r in rows if r["error"] is not None]
@@ -1453,7 +1462,7 @@ def pose_choose(passes) -> dict:
     return out
 
 
-def pose_report(frame: dict, index, lag: int = 1) -> dict:
+def pose_report(frame: dict, index, lag: int = 1, pair: str = "indices") -> dict:
     """The chosen figures of one frame, measured against its list."""
     stops = frame["stops"]
     pieces = matrix_pieces(stops, lag)
@@ -1461,7 +1470,7 @@ def pose_report(frame: dict, index, lag: int = 1) -> dict:
         piece["projection"] = stop["projection"]
     chosen = pose_choose(matrix_passes(pieces))
     return {kind: {"figure": figure, "fit": pose_figure(
-        figure, figure[0]["projection"], index, frame["groups"])}
+        figure, figure[0]["projection"], index, frame["groups"], pair)}
         for kind, figure in sorted(chosen.items())}
 
 
@@ -1484,7 +1493,7 @@ def pose_judge(report: dict, limit: float) -> list:
     return out
 
 
-def run_match_pose(slot: int, cue: str, cache=None, plant=False) -> int:
+def run_match_pose(slot: int, cue: str, cache=None, plant=False, pair="indices") -> int:
     """`--match-pose SLOT`: section 4.3, the pose of a match figure -- each
     MODEL.BIN piece's matrix, proved on the frame it was drawn in."""
     import json
@@ -1530,7 +1539,9 @@ def run_match_pose(slot: int, cue: str, cache=None, plant=False) -> int:
     lag = 0 if plant else 1
     if plant:
         print("  PLANT  each matrix given to the piece named at its own stop (no lag)")
-    report = pose_report(frame, index, lag)
+    if pair != "indices":
+        print("  PAIR   texels paired with the vertices in `%s` order, not the stored one" % pair)
+    report = pose_report(frame, index, lag, pair)
     for kind, one in sorted(report.items()):
         fit = one["fit"]
         print("  %s, head %s, order %s:" % (kind, one["figure"][0]["section"], " ".join(
@@ -1550,6 +1561,9 @@ def run_match_pose(slot: int, cue: str, cache=None, plant=False) -> int:
     failures = pose_judge(report, POSE_LIMIT)
     for line in failures:
         print("  FAIL  %s" % line)
+    if pair != "indices":
+        print("  (--pair-by %s is a report: nothing is written)" % pair)
+        return 1 if failures else 0
     if failures:
         return 1
     if plant:
@@ -2151,6 +2165,9 @@ def main(argv=None) -> int:
     parser.add_argument("--plant-pose", action="store_true",
                         help="with --match-pose: the control -- each matrix given to the "
                              "piece named at its own stop")
+    parser.add_argument("--pair-by", choices=PAIRINGS, default="indices",
+                        help="with --match-pose: pair texels with vertices in this order "
+                             "(corners is a report of the pairing the game does not use)")
     parser.add_argument("--sleeve-length", choices=sorted(SLEEVE_LENGTHS), default="long",
                         help="with --attach-matrix: the sleeves the slot wears")
     parser.add_argument("--plant-attach", action="store_true",
@@ -2196,7 +2213,8 @@ def main(argv=None) -> int:
         if not cue and not args.frame_json:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
-        return run_match_pose(args.match_pose, cue, args.frame_json, args.plant_pose)
+        return run_match_pose(args.match_pose, cue, args.frame_json, args.plant_pose,
+                              args.pair_by)
     if args.attach is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:

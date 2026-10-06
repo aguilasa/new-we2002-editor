@@ -224,8 +224,8 @@ CONTROLS = (
     ),
     Control(
         "oracle-pose-texel-order", "kits/oracle.py", "piece_error",
-        "        for vi, texel in zip(prim.indices, prim.texcoords):\n",
-        "        for vi, texel in zip(prim.corners, prim.texcoords):\n",
+        '        order = prim.indices if pair == "indices" else prim.corners\n',
+        "        order = prim.corners\n",
         "FAIL  oracle --match-pose: a piece's own matrix lands within the limit, paired by texel",
         "a texel belongs to the vertex Primitive.indices names, not to the corner "
         "order; paired by corners the measured pose misses (KITS-TASK-45, "
