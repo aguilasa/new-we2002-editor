@@ -96,3 +96,4 @@ Outros vermelhos vistos:
     - `M tools/kits/ui/app.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-06) at `c8dfdbe`: CORR-KITS-086, CORR-KITS-087, CORR-KITS-088

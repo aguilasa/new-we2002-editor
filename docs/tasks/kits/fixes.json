@@ -1106,6 +1106,45 @@
       "depends_on": [],
       "done_on": "2026-10-06",
       "done_commit": "1b26d74"
+    },
+    {
+      "id": "CORR-KITS-086",
+      "file": "CORR-KITS-086.md",
+      "title": "Declarar os quatro arquivos a mais no escopo da KITS-TASK-47",
+      "origin": "KITS-TASK-47",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-087",
+      "file": "CORR-KITS-087.md",
+      "title": "Fazer o juiz de partida afirmar que a mudança da braçadeira fica no braço",
+      "origin": "KITS-TASK-47",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-088",
+      "file": "CORR-KITS-088.md",
+      "title": "Devolver a docstring de TAB_NAMES para baixo da constante em ui/app.py",
+      "origin": "KITS-TASK-47",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
