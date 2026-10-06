@@ -920,7 +920,7 @@
       "severity": "high",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "depends_on": [],
       "done_on": null,
       "done_commit": null

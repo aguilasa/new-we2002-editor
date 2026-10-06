@@ -694,6 +694,22 @@
       "done_commit": "ffdfb0c",
       "reviewed_on": "2026-10-05",
       "review_commit": "b1ec2ec"
+    },
+    {
+      "id": "KITS-TASK-44",
+      "file": "44-matriz-gte-model-bin.md",
+      "title": "Ler a matriz do GTE por seção do MODEL.BIN na partida",
+      "type": "verificação",
+      "phase": 10,
+      "depends_on": ["KITS-TASK-43"],
+      "source_of_truth": "/docs/PLAN-KITS-PY.md#4.3",
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md"],
+      "resources": ["emulador", "save-states"],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
     }
   ]
 }
