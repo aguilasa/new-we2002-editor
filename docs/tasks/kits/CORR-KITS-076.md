@@ -71,3 +71,8 @@ $ python3 $S/tools/kits/selftest.py --no-plant      (cópia da árvore consertad
   FAIL  oracle --attach-matrix: a long sleeve given section 7's matrix shares it
 kits_selftest: 1 failure(s)
 ```
+- **Closed** — commit `a190f34` (2026-10-06): test(kits): see the shared-matrix verdict red
+  - Files (`git show --name-status a190f34`):
+    - `M docs/tasks/kits/CORR-KITS-076.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
