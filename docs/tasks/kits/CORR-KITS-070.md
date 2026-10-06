@@ -56,3 +56,7 @@ kits_selftest: 0 failure(s)
 $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
 100% tests passed, 0 tests failed out of 4
 ```
+- **Closed** — commit `2b308c9` (2026-10-06): refactor(kits): UNIFORM_RECORD gets its docstring back
+  - Files (`git show --name-status 2b308c9`):
+    - `M docs/tasks/kits/CORR-KITS-070.md`
+    - `M tools/kits/oracle.py`
