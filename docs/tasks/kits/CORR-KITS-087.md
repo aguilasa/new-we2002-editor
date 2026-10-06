@@ -75,3 +75,7 @@ controls: 28 of 28 red
 Limite: a asserção de lugar não foi vista vermelha **sozinha**. Na planta da cabeça ela falha
 junto com a de tamanho e a de fração. Achar uma braçadeira fora do braço que não mude o contorno
 da figura pediria uma geometria que o jogo não desenha.
+- **Closed** — commit `2d99631` (2026-10-06): test(kits): the match judge asserts the armband's change is on an arm
+  - Files (`git show --name-status 2d99631`):
+    - `M docs/tasks/kits/CORR-KITS-087.md`
+    - `M tools/kits/ui_check.py`
