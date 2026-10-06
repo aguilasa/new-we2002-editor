@@ -1015,6 +1015,58 @@
       "depends_on": [],
       "done_on": "2026-10-06",
       "done_commit": "52837eb"
+    },
+    {
+      "id": "CORR-KITS-079",
+      "file": "CORR-KITS-079.md",
+      "title": "Rodar o --attach no slot de manga curta e sustentar a frase da imagem de uniforme",
+      "origin": "KITS-TASK-46",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-080",
+      "file": "CORR-KITS-080.md",
+      "title": "Tirar da §4.3 o 'espera um save state' da task 46",
+      "origin": "KITS-TASK-46",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-081",
+      "file": "CORR-KITS-081.md",
+      "title": "Declarar selftest.py e a nota da task 47 nos arquivos da task",
+      "origin": "KITS-TASK-46",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-082",
+      "file": "CORR-KITS-082.md",
+      "title": "Dar veredito ao --sleeves-image ou marcá-lo como só relatório",
+      "origin": "KITS-TASK-46",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

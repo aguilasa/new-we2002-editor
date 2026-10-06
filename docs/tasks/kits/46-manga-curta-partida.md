@@ -163,3 +163,4 @@ section has its own matrix, and section 93 is drawn where 97 is`.
     - `M docs/tasks/kits/47-figura-partida-aba-3d.md`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-06) at `cbba1f8`: CORR-KITS-079, CORR-KITS-080, CORR-KITS-081, CORR-KITS-082
