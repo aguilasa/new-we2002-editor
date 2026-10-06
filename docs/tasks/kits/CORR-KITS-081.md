@@ -37,3 +37,16 @@ Acrescentar os dois caminhos aos arquivos da KITS-TASK-46 pelo `rite set KITS-TA
 `sh /home/ingmar/.claude/plugins/cache/rite/rite/0.15.0/bin/rite context KITS-TASK-46 --json | grep -c selftest.py` é pelo menos 1 (hoje 0).
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `01f8aca`. O campo `files` da KITS-TASK-46 no estado era
+`['tools/kits/oracle.py', 'docs/PLAN-KITS-PY.md']`, e `git show --stat c1adc98` mostra também
+`tools/kits/selftest.py` e `docs/tasks/kits/47-figura-partida-aba-3d.md`. O `grep -c selftest.py`
+da Verificação já casava 1, mas por texto do Log no `rite context`, não pelo campo.
+
+Conserto: `rite set KITS-TASK-46 --files
+tools/kits/oracle.py,tools/kits/selftest.py,docs/PLAN-KITS-PY.md,docs/tasks/kits/47-figura-partida-aba-3d.md`.
+
+```text
+$ python3 -c "…print(files da KITS-TASK-46)…"
+['tools/kits/oracle.py', 'tools/kits/selftest.py', 'docs/PLAN-KITS-PY.md', 'docs/tasks/kits/47-figura-partida-aba-3d.md']
+```
