@@ -743,9 +743,9 @@ def run_sleeves(slot: int, cue: str, expect=None, plant=False) -> int:
 # --- section 4.7: the back and the number ---------------------------------
 
 UNIFORM_RECORD = 0
+"""The set-1 uniform page, (576,256) 64x128 halfwords = 128x128 pixels."""
 UNIFORM_SET2 = 4
 """The set-2 uniform page; records 0 and 4 share the rectangle (section 1.1)."""
-"""The set-1 uniform page, (576,256) 64x128 halfwords = 128x128 pixels."""
 BACK_PLANTS = ("numbers", "tex", "panels")
 BLOCKS_SHOWN = 24
 BACK_VERDICTS = ("untouched", "written")

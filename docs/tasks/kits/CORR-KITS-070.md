@@ -40,3 +40,19 @@ Em `tools/kits/oracle.py`, mover `UNIFORM_SET2 = 4` e a docstring dela para baix
 A mesma linha `python3 -c` acima imprime `UNIFORM_RECORD -> 'The set-1 uniform page` (hoje imprime `no docstring`).
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `72effec`: a linha `python3 -c` da Evidência imprime
+`UNIFORM_RECORD -> no docstring`.
+
+Conserto: `UNIFORM_SET2 = 4` e a docstring dela desceram para baixo da docstring do conjunto 1.
+Só muda a ordem das declarações.
+
+```text
+$ python3 -c "<a linha da Evidência>"
+UNIFORM_RECORD -> 'The set-1 uniform page, (576,256) 64x12
+UNIFORM_SET2 -> 'The set-2 uniform page; records 0 and 4
+$ python3 tools/kits/selftest.py | tail -1
+kits_selftest: 0 failure(s)
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+```
