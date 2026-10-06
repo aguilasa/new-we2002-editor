@@ -42,3 +42,15 @@ Em `tools/kits/controls.py`, um `Control("oracle-pose-texel-order", "kits/oracle
 `python tools/kits/controls.py --only oracle-pose-texel-order` sai 0 e mostra o controle vermelho. Hoje o controle não existe.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `8910f8d`: `grep -c "match-pose\|pose-texel" tools/kits/controls.py`
+dá `0`.
+
+Conserto: o controle `oracle-pose-texel-order` em `tools/kits/controls.py`, com a planta e o FAIL
+esperado que a Correção dá.
+
+```text
+$ python3 tools/kits/controls.py --only oracle-pose-texel-order
+  RED    oracle-pose-texel-order      kits/oracle.py :: piece_error
+controls: 1 of 1 red
+```

@@ -223,6 +223,15 @@ CONTROLS = (
         "CORR-KITS-067)",
     ),
     Control(
+        "oracle-pose-texel-order", "kits/oracle.py", "piece_error",
+        "        for vi, texel in zip(prim.indices, prim.texcoords):\n",
+        "        for vi, texel in zip(prim.corners, prim.texcoords):\n",
+        "FAIL  oracle --match-pose: a piece's own matrix lands within the limit, paired by texel",
+        "a texel belongs to the vertex Primitive.indices names, not to the corner "
+        "order; paired by corners the measured pose misses (KITS-TASK-45, "
+        "CORR-KITS-084)",
+    ),
+    Control(
         "oracle-matrix-share-blind", "kits/oracle.py", "matrix_report",
         '                        if q is not p and q["matrix"] == p["matrix"]]\n',
         '                        if False]\n',
