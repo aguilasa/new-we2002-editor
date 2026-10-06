@@ -98,4 +98,17 @@ kits_ui: 0 failure(s)
 - **Controle `figure-swap-noop`:** deixou de ficar vermelho, porque o `numbered_indices` também terminava em `return bytes(out)`, o texto que a planta procura. A variável virou `panel`, e o controle voltou a ficar vermelho.
 
 `ctest --test-dir build -R kits`: `100% tests passed, 0 tests failed out of 4`.
-
+- **Closed** — commit `05d54ec` (2026-10-06): feat(kits): Number, Captain armband and Long sleeves boxes in the 3D tab
+  - Files (`git show --name-status 05d54ec`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/figure_view.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`
