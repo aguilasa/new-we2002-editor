@@ -91,4 +91,12 @@ $ python tools/kits/oracle.py --match-pose 5 --frame-json work/kits-oracle/pose-
 O texel de cada canto segue `Primitive.indices`, a ordem gravada, e não `corners`. Pareado por `corners`, o erro vai a 2 a 4 px por peça (primeira corrida, worst 3.96 px).
 
 Selftest: cinco checagens novas. O vermelho plantado foi o pareamento por `corners` em `piece_error`, com `FAIL  oracle --match-pose: a piece's own matrix lands within the limit, paired by texel  14.015451651872144 over 1`. O código foi restaurado: `kits_selftest: 0 failure(s)`.
-
+- **Closed** — commit `d1c64a3` (2026-10-06): feat(kits): capture the match figure's pose and prove it on its own frame
+  - Files (`git show --name-status d1c64a3`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/45-pose-figura-partida.md`
+    - `M docs/tasks/kits/47-figura-partida-aba-3d.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
