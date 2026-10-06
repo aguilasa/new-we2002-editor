@@ -711,11 +711,11 @@ da manga não foi medido.
 
 **O que isso pede da aba 3D.** Desenhar a braçadeira e a manga longa é
 desenhar a figura de partida: as seções do `MODEL.BIN` na ordem medida, com a
-93 no lugar da 97, e uma pose para elas. Em 2026-10-06 o usuário decidiu abrir
-esse trabalho:
+93 no lugar da 97 de manga longa, ou a 90 no lugar da 4 de manga curta, e uma
+pose para elas. Em 2026-10-06 o usuário decidiu abrir esse trabalho:
 [KITS-TASK-45](/docs/tasks/kits/45-pose-figura-partida.md) captura a pose,
-[KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md) mede a manga curta,
-que espera um save state dele, e
+[KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md) mediu a manga curta
+no slot 6 (a tabela acima), e
 [KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md) desenha a figura
 na aba. Os checkboxes da KITS-TASK-40 vêm depois.
 

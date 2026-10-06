@@ -39,3 +39,16 @@ No parágrafo "O que isso pede da aba 3D" da §4.3 de `docs/PLAN-KITS-PY.md`, di
 `grep -n 'que espera um save state dele' docs/PLAN-KITS-PY.md` casa a linha 708 hoje; nada depois.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `ff9c8e4`: `grep -n 'que espera um save state dele'
+docs/PLAN-KITS-PY.md` casa a linha 718 (a 708 da Evidência, deslocada por edições anteriores da
+§4.3).
+
+Conserto: o parágrafo "O que isso pede da aba 3D" diz que a KITS-TASK-46 mediu a manga curta no
+slot 6, e a figura de partida passa a ter as duas trocas, a 93 no lugar da 97 (manga longa) e a
+90 no lugar da 4 (manga curta).
+
+```text
+$ grep -n 'que espera um save state dele' docs/PLAN-KITS-PY.md
+(sem saída)
+```
