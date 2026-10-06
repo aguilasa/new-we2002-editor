@@ -1145,6 +1145,32 @@
       "depends_on": [],
       "done_on": "2026-10-06",
       "done_commit": "3cc1902"
+    },
+    {
+      "id": "CORR-KITS-089",
+      "file": "CORR-KITS-089.md",
+      "title": "Declarar os cinco arquivos que a task 40 mudou fora do escopo",
+      "origin": "KITS-TASK-40",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-090",
+      "file": "CORR-KITS-090.md",
+      "title": "Atualizar a dica do plano e a nota de ARM_SIDE que a task 40 deixou velhas",
+      "origin": "KITS-TASK-40",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

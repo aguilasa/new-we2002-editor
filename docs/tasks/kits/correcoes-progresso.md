@@ -91,4 +91,6 @@
 | [CORR-KITS-086](/docs/tasks/kits/CORR-KITS-086.md) | Declarar os quatro arquivos a mais no escopo da KITS-TASK-47 | KITS-TASK-47 | medium | done | 2026-10-06 |
 | [CORR-KITS-087](/docs/tasks/kits/CORR-KITS-087.md) | Fazer o juiz de partida afirmar que a mudança da braçadeira fica no braço | KITS-TASK-47 | medium | done | 2026-10-06 |
 | [CORR-KITS-088](/docs/tasks/kits/CORR-KITS-088.md) | Devolver a docstring de TAB_NAMES para baixo da constante em ui/app.py | KITS-TASK-47 | low | done | 2026-10-06 |
+| [CORR-KITS-089](/docs/tasks/kits/CORR-KITS-089.md) | Declarar os cinco arquivos que a task 40 mudou fora do escopo | KITS-TASK-40 | medium | pending | — |
+| [CORR-KITS-090](/docs/tasks/kits/CORR-KITS-090.md) | Atualizar a dica do plano e a nota de ARM_SIDE que a task 40 deixou velhas | KITS-TASK-40 | medium | pending | — |
 <!-- rite:end -->
