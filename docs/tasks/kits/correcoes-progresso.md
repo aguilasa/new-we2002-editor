@@ -81,7 +81,7 @@
 | [CORR-KITS-076](/docs/tasks/kits/CORR-KITS-076.md) | Dar vermelho plantado à verificação de matriz compartilhada | KITS-TASK-44 | medium | done | 2026-10-06 |
 | [CORR-KITS-077](/docs/tasks/kits/CORR-KITS-077.md) | Imprimir pelo --attach-matrix a contagem de matrizes distintas | KITS-TASK-44 | medium | done | 2026-10-06 |
 | [CORR-KITS-078](/docs/tasks/kits/CORR-KITS-078.md) | Declarar ou tirar a edição da task 40, e o import morto | KITS-TASK-44 | low | done | 2026-10-06 |
-| [CORR-KITS-079](/docs/tasks/kits/CORR-KITS-079.md) | Rodar o --attach no slot de manga curta e sustentar a frase da imagem de uniforme | KITS-TASK-46 | medium | pending | — |
+| [CORR-KITS-079](/docs/tasks/kits/CORR-KITS-079.md) | Rodar o --attach no slot de manga curta e sustentar a frase da imagem de uniforme | KITS-TASK-46 | medium | done | 2026-10-06 |
 | [CORR-KITS-080](/docs/tasks/kits/CORR-KITS-080.md) | Tirar da §4.3 o 'espera um save state' da task 46 | KITS-TASK-46 | low | pending | — |
 | [CORR-KITS-081](/docs/tasks/kits/CORR-KITS-081.md) | Declarar selftest.py e a nota da task 47 nos arquivos da task | KITS-TASK-46 | low | done | 2026-10-06 |
 | [CORR-KITS-082](/docs/tasks/kits/CORR-KITS-082.md) | Dar veredito ao --sleeves-image ou marcá-lo como só relatório | KITS-TASK-46 | low | pending | — |

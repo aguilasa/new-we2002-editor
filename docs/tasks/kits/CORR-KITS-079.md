@@ -113,3 +113,9 @@ controls: 28 of 28 red
 
 O `work/kits-oracle/attach-6.json` antigo era o quadro de manga longa de antes da regravação.
 Ficou copiado no scratchpad, e a corrida ao vivo acima o substituiu pelo quadro de manga curta.
+- **Closed** — commit `bf6401d` (2026-10-06): fix(kits): --attach takes --sleeve-length and judges what the texels decide
+  - Files (`git show --name-status bf6401d`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-079.md`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
