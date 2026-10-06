@@ -38,3 +38,23 @@ Em `tools/kits/oracle.py`, dar ao `--sleeves-image` um `--expect` e uma planta q
 `grep -n 'sleeves-image' docs/PLAN-KITS-PY.md tools/kits/selftest.py` devolve pelo menos uma linha (hoje nenhuma).
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `f4fa94c`: o `run_sleeves_image` sempre devolve 0, e
+`grep -c 'sleeves-image\|sleeves_image' tools/kits/selftest.py docs/PLAN-KITS-PY.md` dá 0 nos dois.
+
+Conserto, pela segunda opção da Correção: o `--sleeves-image` fica como sonda só de relatório,
+e isso está dito em três lugares.
+
+- A docstring do `run_sleeves_image` diz que ele não afirma nada e sai sempre 0.
+- O help da opção diz "a report, always exits 0".
+- A §4.3 diz que os números dele são pista, não veredito, e que nenhuma regra da seção se apoia
+  neles.
+
+Não ganhou `--expect` nem planta: nenhuma regra medida depende dele.
+
+```text
+$ grep -n 'sleeves-image' docs/PLAN-KITS-PY.md tools/kits/selftest.py
+docs/PLAN-KITS-PY.md:…:O `oracle.py --sleeves-image SLOT --page X --tag T`, que compara a imagem de
+$ python3 tools/kits/selftest.py | tail -1
+kits_selftest: 0 failure(s)
+```

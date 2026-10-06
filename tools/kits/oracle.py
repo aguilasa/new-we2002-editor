@@ -1656,7 +1656,9 @@ def run_sleeves_image(slot: int, cue: str, page_x: int, tag: str, kit_set: int =
                       picture=None) -> int:
     """`--sleeves-image SLOT`: the sleeves image the match holds in VRAM at
     page *page_x*, against TEX_*tag*'s on the disc -- which blocks differ, and
-    which zones of the map they cover."""
+    which zones of the map they cover.  A report only: it asserts nothing and
+    always exits 0, so its numbers are leads, never a verdict (CORR-KITS-082,
+    section 4.3)."""
     body = _body(tag)
     record = records_of(body)[SLEEVES_SET[kit_set]]
     disc = [five(v) for v in payload(body, record)]
@@ -2168,7 +2170,7 @@ def main(argv=None) -> int:
                              "slot, proved on the frame's own list")
     source.add_argument("--sleeves-image", type=int, metavar="SLOT",
                         help="section 4.3: the sleeves image this slot holds in VRAM, "
-                             "against the disc (with --page, --tag, --set)")
+                             "against the disc (with --page, --tag, --set); a report, always exits 0")
     source.add_argument("--back", type=int, metavar="SLOT",
                         help="section 4.7: does the LOOKS SET of this slot fill the torso gaps")
     parser.add_argument("--cue", help="the disc the state was saved on (default $%s)"

@@ -709,6 +709,12 @@ dos dois comprimentos mora em `oracle.SLEEVE_LENGTHS`.
 Foi uma partida, dois times e um capitão por time. O que decide o comprimento
 da manga não foi medido.
 
+O `oracle.py --sleeves-image SLOT --page X --tag T`, que compara a imagem de
+mangas da VRAM com a do disco bloco a bloco, é **só relatório**: não tem valor
+esperado nem planta e sai sempre 0. Os números dele são pista, não veredito, e
+nenhuma regra desta seção se apoia neles
+([CORR-KITS-082](/docs/tasks/kits/CORR-KITS-082.md)).
+
 **O que isso pede da aba 3D.** Desenhar a braçadeira e a manga longa é
 desenhar a figura de partida: as seções do `MODEL.BIN` na ordem medida, com a
 93 no lugar da 97 de manga longa, ou a 90 no lugar da 4 de manga curta, e uma
