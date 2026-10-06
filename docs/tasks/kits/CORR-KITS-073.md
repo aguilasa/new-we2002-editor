@@ -56,3 +56,7 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ct
 $ python3 tools/kits/controls.py | tail -1
 controls: 26 of 26 red
 ```
+- **Closed** — commit `23f9866` (2026-10-06): refactor(kits): drop FIT_PIXELS, a threshold nothing judged
+  - Files (`git show --name-status 23f9866`):
+    - `M docs/tasks/kits/CORR-KITS-073.md`
+    - `M tools/kits/oracle.py`
