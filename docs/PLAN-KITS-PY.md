@@ -644,7 +644,8 @@ a `LOOKS SET` (`layout.POSE_PIECE_MATRIX`, 0x8001229C), e os ponteiros vivos
 nomeiam seções do `MODEL.BIN`. Valem as duas armadilhas do `looks`: a matriz
 de uma parada é da peça que a parada **seguinte** nomeia. Em 600 paradas:
 
-- **Toda peça tem matriz própria.** As 600 matrizes são todas diferentes, e
+- **Toda peça tem matriz própria.** As 600 matrizes são todas diferentes
+  (`600 stop(s), 600 distinct matrices (452 distinct rotations)`), e
   nenhuma seção vestida (93, 95 a 102) divide a matriz com outra peça da mesma
   figura, em nenhuma das 51 figuras inteiras.
 - **A braçadeira ocupa o lugar da 97 na ordem de desenho.** Os jogadores de

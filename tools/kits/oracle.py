@@ -1201,6 +1201,9 @@ def run_attach_matrix(slot: int, cue: str, cache=None, plant=None) -> int:
     for one in kept["stops"]:
         key = " ".join("%s:%s" % (n.rsplit("/", 1)[-1], i) for n, i in one["named"]) or "none"
         named[key] = named.get(key, 0) + 1
+    matrices = [(tuple(one["rotation"]), tuple(one["translation"])) for one in kept["stops"]]
+    print("  %d stop(s), %d distinct matrices (%d distinct rotations)"
+          % (len(matrices), len(set(matrices)), len({r for r, _ in matrices})))
     print("  %d stop(s); what the pointers name, by count:" % len(kept["stops"]))
     for key, n in sorted(named.items(), key=lambda kv: -kv[1]):
         print("    %-30s %d" % (key, n))
