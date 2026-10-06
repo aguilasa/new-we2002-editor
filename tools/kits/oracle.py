@@ -964,27 +964,54 @@ def attach_report(samples, image_path: str) -> dict:
             "shared": shared}
 
 
-def attach_judge(report: dict, armband: int = ARMBAND_SECTION) -> list:
+def own_quads(index, section: int) -> set:
+    """The texel quads of MODEL.BIN section *section* that no other section
+    holds: the only ones by which a frame primitive names it alone."""
+    sec = index["sections"].get((layout.MODEL, section))
+    out = set()
+    for prim in (sec.primitives if sec else ()):
+        uv = tuple(tuple(t) for t in prim.texcoords)
+        if {(n, i) for n, i, _k in index["by_uv"].get(uv, ())} == {(layout.MODEL, section)}:
+            out.add(uv)
+    return out
+
+
+def attach_judge(report: dict, armband: int = ARMBAND_SECTION,
+                 replaced: int = REPLACED_SECTION, own_drawn=None) -> list:
     """Failures of the attachment rule: the figure's texels are MODEL.BIN's,
     some player draws *armband*, and every such player draws exactly what an
-    armless player of the frame draws, REPLACED_SECTION swapped for it."""
+    armless player of the frame draws, *replaced* swapped for it -- 93 for 97
+    in long sleeves, 90 for 4 in short (`SLEEVE_LENGTHS`, CORR-KITS-079)."""
     out = []
     origin = report["origin"]
     if origin["EDT_MOD.BIN only"] or not origin["MODEL.BIN only"]:
         out.append("the figure is not MODEL.BIN's: %s" % origin)
     sets = [tuple(one["sections"]) for one in report["sets"]]
     captains = [one for one in sets if armband in one]
+    if not captains and own_drawn == 0:
+        # The armband's own quads are not in this frame, so no player can be
+        # named by it alone (CORR-KITS-079): what the texels still decide is
+        # that its shared quads are drawn and that some outfield players lack
+        # the piece it replaces while others draw it.
+        if not any(armband in key for key in report.get("shared", {})):
+            out.append("section %d is not in the frame, alone or shared" % armband)
+        outfield = [one for one in sets if ROOT_SECTIONS[0] in one]
+        with_it = [one for one in outfield if replaced in one]
+        if not with_it or len(with_it) == len(outfield):
+            out.append("of %d outfield player(s), %d draw section %d: no captain is seen "
+                       "by its absence" % (len(outfield), len(with_it), replaced))
+        return out
     if not captains:
         out.append("no player draws section %d" % armband)
     for one in captains:
-        swapped = tuple(sorted((set(one) - {armband}) | {REPLACED_SECTION}))
+        swapped = tuple(sorted((set(one) - {armband}) | {replaced}))
         if swapped not in sets:
             out.append("a player draws %s, and no player draws it with %d in place of %d"
-                       % (" ".join(map(str, one)), REPLACED_SECTION, armband))
+                       % (" ".join(map(str, one)), replaced, armband))
     return out
 
 
-def run_attach(slot: int, cue: str, cache=None, plant=False) -> int:
+def run_attach(slot: int, cue: str, cache=None, plant=False, length: str = "long") -> int:
     """`--attach SLOT`: section 4.3, where the armband and the long sleeves
     of MODEL.BIN sit on a match figure."""
     import json
@@ -1020,15 +1047,32 @@ def run_attach(slot: int, cue: str, cache=None, plant=False) -> int:
               "camera with section %s"
               % (row["player"], row["primitives"], row["section"], row["points"], row["own"],
                  ", ".join("%d %.2f px" % (j, err) for err, j in row["joint"])))
-    armband = PLANT_ARMBAND if plant else ARMBAND_SECTION
+    rule = SLEEVE_LENGTHS[length]
+    armband = PLANT_ARMBAND if plant else rule["armband"]
+    replaced = rule["neighbour"] if plant else rule["replaced"]
+    print("  %s sleeves: the armband is %d, in place of %d" % (length, rule["armband"],
+                                                             rule["replaced"]))
+    index = model_index(os.environ[IMAGE_VARIABLE])
+    own = own_quads(index, armband)
+    drawn = {tuple(tuple(t) for t in one["uv"]) for one in samples}
+    own_drawn = len(own & drawn)
+    print("  section %d on the disc: %d quad(s), %d of them its own; %d own quad(s) in "
+          "this frame" % (armband, len(index["sections"][(layout.MODEL, armband)].primitives),
+                          len(own), own_drawn))
+    if not own_drawn:
+        print("  no quad of its own in the frame: no player is named by it alone, and "
+              "the swap is --attach-matrix's to judge (by the pointers)")
     if plant:
-        print("  PLANT  section %d named the armband" % armband)
-    failures = attach_judge(report, armband)
+        print("  PLANT  section %d named the armband, in place of %d" % (armband, replaced))
+    failures = attach_judge(report, armband, replaced, own_drawn)
     for line in failures:
         print("  FAIL  %s" % line)
-    if not failures:
+    if not failures and own_drawn:
         print("  ok    the figure is MODEL.BIN's, and section %d takes the place of %d"
-              % (armband, REPLACED_SECTION))
+              % (armband, replaced))
+    elif not failures:
+        print("  ok    the figure is MODEL.BIN's; section %d is drawn in shared quads, and "
+              "the outfield players without %d are the captains" % (armband, replaced))
     return 1 if failures else 0
 
 
@@ -2169,9 +2213,10 @@ def main(argv=None) -> int:
                         help="with --match-pose: pair texels with vertices in this order "
                              "(corners is a report of the pairing the game does not use)")
     parser.add_argument("--sleeve-length", choices=sorted(SLEEVE_LENGTHS), default="long",
-                        help="with --attach-matrix: the sleeves the slot wears")
+                        help="with --attach or --attach-matrix: the sleeves the slot wears")
     parser.add_argument("--plant-attach", action="store_true",
-                        help="with --attach: the control -- name section %d the armband" % PLANT_ARMBAND)
+                        help="with --attach: the control -- name section %d the armband, "
+                             "in place of the length's neighbour" % PLANT_ARMBAND)
     parser.add_argument("--panels", action="store_true",
                         help="with --back: read every back panel under the map (a match)")
     parser.add_argument("--picture", metavar="PNG",
@@ -2220,7 +2265,8 @@ def main(argv=None) -> int:
         if not cue and not args.frame_json:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
-        return run_attach(args.attach, cue, args.frame_json, args.plant_attach)
+        return run_attach(args.attach, cue, args.frame_json, args.plant_attach,
+                          args.sleeve_length)
     if args.back is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue:

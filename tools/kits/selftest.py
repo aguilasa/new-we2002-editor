@@ -796,6 +796,22 @@ def _oracle_checks(c) -> None:
     lone = dict(report, sets=[{"sections": captain}])
     c.ok("oracle --attach: a captain with no armless twin fails",
          len(oracle.attach_judge(lone)) == 1)
+    # Short sleeves (CORR-KITS-079), shaped like slot 6: the armband 90 has no
+    # quad of its own in the frame, only shared ones, and the captains are the
+    # outfield players without 4.
+    short = {"origin": report["origin"],
+             "sets": [{"sections": [2, 3, 7, 8, 9, 10]}, {"sections": [2, 3, 4, 7, 8, 9, 10]},
+                      {"sections": [56, 57, 59, 61]}],
+             "shared": {(4, 90): 3, (90, 91): 4}}
+    c.ok("oracle --attach: short sleeves, 90 only in shared quads and a captain without 4, holds",
+         oracle.attach_judge(short, 90, 4, own_drawn=0) == [],
+         "; ".join(oracle.attach_judge(short, 90, 4, own_drawn=0)))
+    every = dict(short, sets=[{"sections": [2, 3, 4, 7]}, {"sections": [2, 3, 4, 8]}])
+    c.ok("oracle --attach: short sleeves where every outfield player draws 4 fail",
+         len(oracle.attach_judge(every, 90, 4, own_drawn=0)) == 1)
+    unseen = dict(short, shared={(4, 91): 3})
+    c.ok("oracle --attach: short sleeves with 90 nowhere in the frame fail",
+         len(oracle.attach_judge(unseen, 90, 4, own_drawn=0)) == 1)
     camera = [2.0, 0.1, 0.3, 160, 0.2, -1.9, 0.4, 120, 0.001, 0.002, 0.004, 1.0]
     model = [(x, y, z) for x in (-40, 0, 37) for y in (-30, 25) for z in (-20, 15)]
     pairs = [(m, oracle.project(camera, m)) for m in model]

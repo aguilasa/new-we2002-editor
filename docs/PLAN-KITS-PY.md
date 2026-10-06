@@ -687,11 +687,21 @@ seções alternativas das mesmas peças**, na mesma posição da ordem de desenh
 O resto da figura não muda: `cabeça 2 … 7 9 11 8 10 12` no jogador de linha e
 `cabeça 56 … 61 63 62 64` no goleiro. De manga curta, a imagem de mangas só é
 amostrada pela braçadeira, com 4 primitivas na zona "armband, short sleeve",
-das seções 90 e 91, que guardam os mesmos quads. Os braços curtos amostram a
-imagem de uniforme. Cada peça continua com matriz própria.
+das seções 90 e 91, que guardam os mesmos quads. Dos braços curtos, o
+`--attach 6 --sleeve-length short` vê pelas texturas só as seções 3 e 4 (e as
+57 e 59 do goleiro) nas páginas de kit; as 5 e 6, e as 58 e 60, não aparecem
+por texel próprio neste quadro ([CORR-KITS-079](/docs/tasks/kits/CORR-KITS-079.md)).
+Cada peça continua com matriz própria.
 
-Comando: `python tools/kits/oracle.py --attach-matrix 6 --sleeve-length short`
-e `--sleeves 6`. O controle é o `--plant-matrix slot` com `--sleeve-length
+Pelo texel a troca da braçadeira não se decide aqui: a 90 tem 5 quads no disco,
+1 só dela, e esse não é desenhado neste quadro. O `--attach` com
+`--sleeve-length short` diz isso, confere que a 90 aparece em quads
+compartilhados e que os capitães são os jogadores de linha sem a 4, e deixa a
+troca para o `--attach-matrix`, que a julga pelos ponteiros.
+
+Comando: `python tools/kits/oracle.py --attach-matrix 6 --sleeve-length short`,
+`--attach 6 --sleeve-length short` e `--sleeves 6`. O `--plant-attach` com
+`--sleeve-length short` sai 1. O controle é o `--plant-matrix slot` com `--sleeve-length
 short`, que espera a braçadeira no lugar da 6 e sai 1. A regra de manga longa
 aplicada ao slot 6 também sai 1, com `no figure draws section 93`. A tabela
 dos dois comprimentos mora em `oracle.SLEEVE_LENGTHS`.
