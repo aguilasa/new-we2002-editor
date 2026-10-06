@@ -52,3 +52,7 @@ slot 6, e a figura de partida passa a ter as duas trocas, a 93 no lugar da 97 (m
 $ grep -n 'que espera um save state dele' docs/PLAN-KITS-PY.md
 (sem saída)
 ```
+- **Closed** — commit `8c0af61` (2026-10-06): docs(kits): section 4.3 no longer says task 46 waits for a save state
+  - Files (`git show --name-status 8c0af61`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-080.md`
