@@ -56,3 +56,7 @@ um par que caia no erro de uma seção só" saiu.
 $ grep -n "2 a 7 px" docs/PLAN-KITS-PY.md
 (sem saída)
 ```
+- **Closed** — commit `fcb3e2d` (2026-10-06): docs(kits): section 4.3 quotes the --attach fit errors the tool prints
+  - Files (`git show --name-status fcb3e2d`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-072.md`
