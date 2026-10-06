@@ -42,3 +42,19 @@ grep -n "Medido numa partida em 2026-10-06" docs/PLAN-KITS-PY.md
 Sem casamento hoje; um depois do conserto.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `008ff95`:
+
+```text
+$ grep -n "Medido numa partida em" docs/PLAN-KITS-PY.md
+779:**Medido numa partida em 2026-10-05 ([KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md)),
+$ git log -1 --format='%h %ad' --date=short e1d38dc
+e1d38dc 2026-10-06
+```
+
+Conserto: a data da §4.7 passou a ser 2026-10-06, o dia da corrida.
+
+```text
+$ grep -n "Medido numa partida em 2026-10-06" docs/PLAN-KITS-PY.md
+779:**Medido numa partida em 2026-10-06 ([KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md)),
+```

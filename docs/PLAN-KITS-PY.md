@@ -776,7 +776,7 @@ comparação é feita nesses 7. E é **um** kit numa tela: a regra da cópia val
 para o `TEX_A4` na `LOOKS SET`. O número numa partida foi medido depois, logo
 abaixo.
 
-**Medido numa partida em 2026-10-05 ([KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md)),
+**Medido numa partida em 2026-10-06 ([KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md)),
 no slot 5 que o usuário salvou** (Noruega × Equador, `work/kits-states/`)**:**
 na partida o jogo **escreve o número**. Ele usa a área abaixo do mapa, linhas
 80 a 127, como uma **grade de painéis de costas** de 20×24, um por jogador em
