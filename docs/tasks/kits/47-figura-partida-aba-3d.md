@@ -32,4 +32,6 @@ Fonte de verdade: [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md#4.3).
 
 Aberta em 2026-10-06 por decisão do usuário. Depende, pela `order` do ciclo, das KITS-TASK-45 (pose) e 46 (manga curta). O CLI não grava `depends_on` depois da criação. Sem a 46, a figura de partida só tem manga longa.
 
+Da KITS-TASK-46 (2026-10-06, §4.3): a manga curta foi medida no slot 6. As peças de braço trocam por posição na ordem de desenho: 95 96 97 98 viram 3 5 4 6, a braçadeira 93 vira 90, e no goleiro 99 101 100 102 viram 57 58 59 60. A tabela está em `oracle.SLEEVE_LENGTHS`. A figura de partida pode, então, sair de manga curta ou longa.
+
 ## Log de Execução

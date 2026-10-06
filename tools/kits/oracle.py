@@ -1119,7 +1119,20 @@ def matrix_passes(pieces) -> list:
     return out
 
 
-def matrix_report(passes) -> dict:
+SLEEVE_LENGTHS = {
+    "long": {"armband": 93, "replaced": 97, "neighbour": 98,
+             "worn": (93, 95, 96, 97, 98, 99, 100, 101, 102)},
+    "short": {"armband": 90, "replaced": 4, "neighbour": 6,
+              "worn": (90, 3, 4, 5, 6, 57, 58, 59, 60)},
+}
+"""What each sleeve length draws, by position in the order (KITS-TASK-44 for
+long, slot 5; KITS-TASK-46 for short, slot 6): outfield arms 95 96 97 98 or
+3 5 4 6, the armband 93 where 97 is or 90 where 4 is, the goalkeeper's arms
+99 101 100 102 or 57 58 59 60.  `neighbour` is where `--plant-matrix slot`
+expects the armband instead."""
+
+
+def matrix_report(passes, worn_sections=SLEEVE_LENGTHS["long"]["worn"]) -> dict:
     """For the worn sections of every whole figure, which other piece of the
     same figure has the same matrix (None: its own), and the order each kind
     of figure draws.  A figure with a piece no stop names -- the last of a
@@ -1134,7 +1147,7 @@ def matrix_report(passes) -> dict:
             orders[tuple(sections)] = orders.get(tuple(sections), 0) + 1
         worn = []
         for p in figure:
-            if p["section"] == ARMBAND_SECTION or p["section"] in LONG_SLEEVE_SECTIONS:
+            if p["section"] in worn_sections:
                 same = [q["section"] for q in figure
                         if q is not p and q["matrix"] == p["matrix"]]
                 worn.append((p["section"], same or None))
@@ -1147,7 +1160,8 @@ def matrix_report(passes) -> dict:
     return {"figures": figures, "orders": orders, "cut": cut}
 
 
-def matrix_judge(report: dict, armband_slot: int = REPLACED_SECTION) -> list:
+def matrix_judge(report: dict, armband_slot: int = REPLACED_SECTION,
+                 armband: int = ARMBAND_SECTION) -> list:
     """Failures of the rule the matrices give: every worn section has its own
     matrix, and a captain draws exactly an outfield figure's order with the
     armband where *armband_slot* is."""
@@ -1157,18 +1171,18 @@ def matrix_judge(report: dict, armband_slot: int = REPLACED_SECTION) -> list:
             "matrices are not this figure's" % (f["figure"], f["spread"], FIGURE_SPREAD)
             for f in report["figures"] if f["spread"] > FIGURE_SPREAD]
     orders = {o[1:] for o in report["orders"]}      # the head names the player, not the kind
-    captains = [o for o in orders if ARMBAND_SECTION in o]
+    captains = [o for o in orders if armband in o]
     if not captains:
-        out.append("no figure draws section %d" % ARMBAND_SECTION)
+        out.append("no figure draws section %d" % armband)
     for order in captains:
-        plain = tuple(armband_slot if s == ARMBAND_SECTION else s for s in order)
+        plain = tuple(armband_slot if s == armband else s for s in order)
         if plain not in orders:
             out.append("a captain draws %s, and no figure draws it with %d where %d is"
-                       % (" ".join(map(str, order)), armband_slot, ARMBAND_SECTION))
+                       % (" ".join(map(str, order)), armband_slot, armband))
     return out
 
 
-def run_attach_matrix(slot: int, cue: str, cache=None, plant=None) -> int:
+def run_attach_matrix(slot: int, cue: str, cache=None, plant=None, length="long") -> int:
     """`--attach-matrix SLOT`: which matrix each MODEL.BIN section is drawn
     with in a match."""
     import json
@@ -1206,7 +1220,8 @@ def run_attach_matrix(slot: int, cue: str, cache=None, plant=None) -> int:
         print("    %-30s %d" % (key, n))
     lag = 0 if plant == "lag" else 1
     passes = matrix_passes(matrix_pieces(kept["stops"], lag))
-    report = matrix_report(passes)
+    rule = SLEEVE_LENGTHS[length]
+    report = matrix_report(passes, rule["worn"])
     print("  %d whole figure(s), %d of them with a last piece no stop names; the "
           "matrix of a stop goes to the piece named %d stop(s) later.  The order "
           "each figure draws, head first:" % (len(passes), report["cut"], lag))
@@ -1222,16 +1237,16 @@ def run_attach_matrix(slot: int, cue: str, cache=None, plant=None) -> int:
               % (f["figure"], f["head"], ", ".join(
                   "%d %s" % (section, "same as %s" % same if same else "own")
                   for section, same in f["worn"])))
-    slot = 98 if plant == "slot" else REPLACED_SECTION
+    slot = rule["neighbour"] if plant == "slot" else rule["replaced"]
     if plant:
         print("  PLANT  %s" % ("matrices given to the piece named at their own stop"
-                               if plant == "lag" else "the armband expected where 98 is"))
-    failures = matrix_judge(report, slot)
+                               if plant == "lag" else "the armband expected where %d is" % slot))
+    failures = matrix_judge(report, slot, rule["armband"])
     for line in failures:
         print("  FAIL  %s" % line)
     if not failures:
-        print("  ok    every worn section has its own matrix, and section %d is drawn "
-              "where %d is" % (ARMBAND_SECTION, slot))
+        print("  ok    %s sleeves: every worn section has its own matrix, and section %d is "
+              "drawn where %d is" % (length, rule["armband"], slot))
     return 1 if failures else 0
 
 
@@ -1807,7 +1822,9 @@ def main(argv=None) -> int:
                         help="with --attach: read the frame kept by an earlier run")
     parser.add_argument("--plant-matrix", choices=("lag", "slot"),
                         help="with --attach-matrix: the control -- no pointer lag, or the "
-                             "armband expected where section 98 is")
+                             "armband expected one piece over")
+    parser.add_argument("--sleeve-length", choices=sorted(SLEEVE_LENGTHS), default="long",
+                        help="with --attach-matrix: the sleeves the slot wears")
     parser.add_argument("--plant-attach", action="store_true",
                         help="with --attach: the control -- name section %d the armband" % PLANT_ARMBAND)
     parser.add_argument("--panels", action="store_true",
@@ -1844,7 +1861,8 @@ def main(argv=None) -> int:
         if not cue and not args.frame_json:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
-        return run_attach_matrix(args.attach_matrix, cue, args.frame_json, args.plant_matrix)
+        return run_attach_matrix(args.attach_matrix, cue, args.frame_json, args.plant_matrix,
+                                 args.sleeve_length)
     if args.attach is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:

@@ -836,6 +836,13 @@ def _oracle_checks(c) -> None:
     told = oracle.matrix_judge(oracle.matrix_report(shared))
     c.ok("oracle --attach-matrix: a long sleeve given section 7's matrix shares it",
          any("section 97 shares its matrix with [7]" in f for f in told), "; ".join(told))
+    short = oracle.SLEEVE_LENGTHS["short"]
+    short_report = {"figures": [], "orders": {(24, 2, 3, 5, 4, 6, 7, 9, 11, 8, 10, 12): 1,
+                                              (30, 2, 3, 5, 90, 6, 7, 9, 11, 8, 10, 12): 1}}
+    c.ok("oracle --attach-matrix --sleeve-length short: 90 is where 4 is",
+         oracle.matrix_judge(short_report, short["replaced"], short["armband"]) == [])
+    c.ok("oracle --attach-matrix --sleeve-length short: and not where 6 is",
+         len(oracle.matrix_judge(short_report, short["neighbour"], short["armband"])) == 1)
     lagged = oracle.matrix_report(oracle.matrix_passes(oracle.matrix_pieces(stops, 0)))
     c.ok("oracle --attach-matrix: with no pointer lag a figure takes the next player's matrix",
          any("not this figure's" in f for f in oracle.matrix_judge(lagged)),

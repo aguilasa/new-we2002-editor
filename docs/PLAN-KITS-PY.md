@@ -618,10 +618,11 @@ caixas de tela.
   conta.
 - **O goleiro usa outro conjunto**, `56 61 62 63 64 99 100 101 102`, e as
   mangas longas dele são as 99 a 102.
-- **Manga curta contra longa não foi medida.** Os dois times desta partida
-  estão de manga longa, então a pergunta "a curta é seção alternativa da mesma
-  peça?" fica sem resposta. As seções 91 e 94, do mesmo grupo de quad
-  compartilhado, são as candidatas, sem medida.
+- **Manga curta contra longa não foi medida aqui**, porque os dois times desta
+  partida estão de manga longa. As candidatas eram as seções 91 e 94, do mesmo
+  grupo de quad compartilhado. A KITS-TASK-46 mediu depois, logo abaixo: as
+  peças de manga curta são a 3, a 5, a 4 e a 6, e a braçadeira de manga curta é
+  a 90.
 
 Comando: `python tools/kits/oracle.py --attach 5`, com `WE2002_LOOKS_IMAGE` e
 `WE2002_LOOKS_DRIVE_IMAGE`. O quadro fica em `work/kits-oracle/attach-5.json`,
@@ -670,8 +671,33 @@ e `--plant-matrix slot` (a braçadeira esperada no lugar da 98), que também sai
 Isso fecha a pergunta que o ajuste projetivo da KITS-TASK-43 deixou aberta,
 "matriz compartilhada ou própria", e responde **própria**. A
 [CORR-KITS-071](/docs/tasks/kits/CORR-KITS-071.md) reabriu essa pergunta.
-Continua aberto só **manga curta contra longa**, que espera um save state de
-partida com manga curta, decisão do usuário.
+A manga curta foi medida depois, logo abaixo.
+
+**Manga curta, medida em 2026-10-06 ([KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md)),
+no slot 6:** a mesma partida, Noruega × Equador, com os dois times de manga
+curta e o camisa 10 da Noruega, capitão, com a bola. **Manga curta e longa são
+seções alternativas das mesmas peças**, na mesma posição da ordem de desenho:
+
+| peça, na ordem | manga longa (slot 5) | manga curta (slot 6) |
+|---|---|---|
+| jogador de linha, os quatro braços | 95 96 97 98 | 3 5 4 6 |
+| braçadeira do capitão | 93, no lugar da 97 | 90, no lugar da 4 |
+| goleiro, os quatro braços | 99 101 100 102 | 57 58 59 60 |
+
+O resto da figura não muda: `cabeça 2 … 7 9 11 8 10 12` no jogador de linha e
+`cabeça 56 … 61 63 62 64` no goleiro. De manga curta, a imagem de mangas só é
+amostrada pela braçadeira, com 4 primitivas na zona "armband, short sleeve",
+das seções 90 e 91, que guardam os mesmos quads. Os braços curtos amostram a
+imagem de uniforme. Cada peça continua com matriz própria.
+
+Comando: `python tools/kits/oracle.py --attach-matrix 6 --sleeve-length short`
+e `--sleeves 6`. O controle é o `--plant-matrix slot` com `--sleeve-length
+short`, que espera a braçadeira no lugar da 6 e sai 1. A regra de manga longa
+aplicada ao slot 6 também sai 1, com `no figure draws section 93`. A tabela
+dos dois comprimentos mora em `oracle.SLEEVE_LENGTHS`.
+
+Foi uma partida, dois times e um capitão por time. O que decide o comprimento
+da manga não foi medido.
 
 **O que isso pede da aba 3D.** Desenhar a braçadeira e a manga longa é
 desenhar a figura de partida: as seções do `MODEL.BIN` na ordem medida, com a
