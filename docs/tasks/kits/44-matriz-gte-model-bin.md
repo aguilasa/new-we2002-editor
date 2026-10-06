@@ -165,3 +165,4 @@ corrida.
     - `M docs/tasks/kits/44-matriz-gte-model-bin.md`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-06) at `cade713`: CORR-KITS-076, CORR-KITS-077, CORR-KITS-078

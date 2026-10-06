@@ -976,6 +976,45 @@
       "depends_on": [],
       "done_on": "2026-10-06",
       "done_commit": "5a3aece"
+    },
+    {
+      "id": "CORR-KITS-076",
+      "file": "CORR-KITS-076.md",
+      "title": "Dar vermelho plantado à verificação de matriz compartilhada",
+      "origin": "KITS-TASK-44",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-077",
+      "file": "CORR-KITS-077.md",
+      "title": "Imprimir pelo --attach-matrix a contagem de matrizes distintas",
+      "origin": "KITS-TASK-44",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-078",
+      "file": "CORR-KITS-078.md",
+      "title": "Declarar ou tirar a edição da task 40, e o import morto",
+      "origin": "KITS-TASK-44",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

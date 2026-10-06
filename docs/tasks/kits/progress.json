@@ -708,8 +708,8 @@
       "status": "done",
       "done_on": "2026-10-06",
       "done_commit": "ddf3d00",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-06",
+      "review_commit": "cade713"
     }
   ]
 }

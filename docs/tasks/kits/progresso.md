@@ -194,7 +194,7 @@ graph TD
 | [KITS-TASK-37](/docs/tasks/kits/37-reset-e-dica-das-costas.md) | Botão de reset na aba 3D e a dica das costas | 10 | implementação | — | done | 2026-10-05 | 2026-10-05 |
 | [KITS-TASK-38](/docs/tasks/kits/38-medir-costas-numero.md) | Medir as costas e o número no jogo | 10 | verificação | — | done | 2026-10-05 | 2026-10-05 |
 | [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md) | Medir quem desenha a braçadeira | 10 | verificação | — | done | 2026-10-05 | 2026-10-05 |
-| [KITS-TASK-44](/docs/tasks/kits/44-matriz-gte-model-bin.md) | Ler a matriz do GTE por seção do MODEL.BIN na partida | 10 | verificação | KITS-TASK-43 | done | 2026-10-06 | pending |
+| [KITS-TASK-44](/docs/tasks/kits/44-matriz-gte-model-bin.md) | Ler a matriz do GTE por seção do MODEL.BIN na partida | 10 | verificação | KITS-TASK-43 | done | 2026-10-06 | 2026-10-06 |
 <!-- rite:end -->
 
 ## Notes
