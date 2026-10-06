@@ -911,6 +911,71 @@
       "depends_on": [],
       "done_on": "2026-10-06",
       "done_commit": "2b308c9"
+    },
+    {
+      "id": "CORR-KITS-071",
+      "file": "CORR-KITS-071.md",
+      "title": "Reabrir os critérios 1b e 2: encaixe e manga curta sem resposta",
+      "origin": "KITS-TASK-43",
+      "severity": "high",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-072",
+      "file": "CORR-KITS-072.md",
+      "title": "Acertar os números do ajuste conjunto na §4.3 com o que o --attach imprime",
+      "origin": "KITS-TASK-43",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-073",
+      "file": "CORR-KITS-073.md",
+      "title": "Remover ou afirmar FIT_PIXELS: a regra documentada nunca é aplicada",
+      "origin": "KITS-TASK-43",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-074",
+      "file": "CORR-KITS-074.md",
+      "title": "Colar no Log a saída inteira do --attach, não elidida",
+      "origin": "KITS-TASK-43",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KITS-075",
+      "file": "CORR-KITS-075.md",
+      "title": "Declarar a task 40 nos arquivos, ou tirar a nota do commit",
+      "origin": "KITS-TASK-43",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

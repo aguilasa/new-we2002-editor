@@ -110,3 +110,4 @@ trabalho novo, decisão do usuário. A nota foi para a KITS-TASK-40.
     - `M docs/tasks/kits/43-medir-encaixe-mangas.md`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-06) at `6e5d99b`: CORR-KITS-071, CORR-KITS-072, CORR-KITS-073, CORR-KITS-074, CORR-KITS-075

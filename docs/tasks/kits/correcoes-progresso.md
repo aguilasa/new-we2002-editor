@@ -73,4 +73,9 @@
 | [CORR-KITS-068](/docs/tasks/kits/CORR-KITS-068.md) | Contar braçadeira e manga longa de forma exclusiva no --sleeves | KITS-TASK-39 | medium | done | 2026-10-05 |
 | [CORR-KITS-069](/docs/tasks/kits/CORR-KITS-069.md) | Corrigir a data da medição na partida na §4.7 | KITS-TASK-42 | low | done | 2026-10-06 |
 | [CORR-KITS-070](/docs/tasks/kits/CORR-KITS-070.md) | Devolver a docstring de UNIFORM_RECORD para baixo da constante | KITS-TASK-42 | low | done | 2026-10-06 |
+| [CORR-KITS-071](/docs/tasks/kits/CORR-KITS-071.md) | Reabrir os critérios 1b e 2: encaixe e manga curta sem resposta | KITS-TASK-43 | high | pending | — |
+| [CORR-KITS-072](/docs/tasks/kits/CORR-KITS-072.md) | Acertar os números do ajuste conjunto na §4.3 com o que o --attach imprime | KITS-TASK-43 | medium | pending | — |
+| [CORR-KITS-073](/docs/tasks/kits/CORR-KITS-073.md) | Remover ou afirmar FIT_PIXELS: a regra documentada nunca é aplicada | KITS-TASK-43 | medium | pending | — |
+| [CORR-KITS-074](/docs/tasks/kits/CORR-KITS-074.md) | Colar no Log a saída inteira do --attach, não elidida | KITS-TASK-43 | medium | pending | — |
+| [CORR-KITS-075](/docs/tasks/kits/CORR-KITS-075.md) | Declarar a task 40 nos arquivos, ou tirar a nota do commit | KITS-TASK-43 | low | pending | — |
 <!-- rite:end -->
