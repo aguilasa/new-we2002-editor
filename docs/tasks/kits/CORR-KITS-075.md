@@ -52,3 +52,8 @@ estado da task também, por `rite set KITS-TASK-43 --files …`.
 $ sed -n '/^## Arquivos/,/^## /p' docs/tasks/kits/43-medir-encaixe-mangas.md | grep -c 40-checkboxes
 1
 ```
+- **Closed** — commit `5a3aece` (2026-10-06): docs(kits): task 43 declares the task 40 note it wrote
+  - Files (`git show --name-status 5a3aece`):
+    - `M docs/tasks/kits/43-medir-encaixe-mangas.md`
+    - `M docs/tasks/kits/CORR-KITS-075.md`
+    - `M docs/tasks/kits/progress.json`
