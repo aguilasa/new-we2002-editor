@@ -63,15 +63,41 @@ pontos de tela.
     player  4 ( 43 prims, CLUT (0,487)): 2 7 8 9 10 93 95 96 98
     player  5 ( 28 prims, CLUT (0,486)): 56 61 62 63 64 99 100 101 102
   one camera fitted to a worn section alone, and to it with each other section:
+    player  0 ( 47 prims) section  95,  9 point(s): alone 1.41 px; one camera with section 2 2.02 px, 96 2.53 px, 97 2.76 px
+    player  0 ( 47 prims) section  96, 10 point(s): alone 1.26 px; one camera with section 95 2.53 px, 97 2.77 px, 2 3.70 px
+    player  0 ( 47 prims) section  97,  9 point(s): alone 1.49 px; one camera with section 95 2.76 px, 96 2.77 px, 7 3.79 px
+    player  0 ( 47 prims) section  98, 10 point(s): alone 0.74 px; one camera with section 8 2.34 px, 95 3.64 px, 2 4.18 px
     player  1 ( 44 prims) section  93,  9 point(s): alone 1.28 px; one camera with section 2 2.13 px, 98 2.67 px, 95 4.54 px
+    player  1 ( 44 prims) section  95,  9 point(s): alone 1.09 px; one camera with section 2 1.28 px, 96 3.80 px, 7 4.20 px
+    player  1 ( 44 prims) section  96,  9 point(s): alone 1.19 px; one camera with section 7 3.09 px, 8 3.50 px, 95 3.80 px
+    player  1 ( 44 prims) section  98, 10 point(s): alone 0.94 px; one camera with section 93 2.67 px, 2 4.84 px, 95 5.01 px
+    player  2 ( 44 prims) section  95,  9 point(s): alone 1.79 px; one camera with section 2 4.05 px, 96 4.31 px, 97 4.49 px
+    player  2 ( 44 prims) section  96, 10 point(s): alone 0.91 px; one camera with section 2 3.80 px, 95 4.31 px, 8 4.65 px
+    player  2 ( 44 prims) section  97,  9 point(s): alone 1.36 px; one camera with section 98 4.02 px, 95 4.49 px, 96 4.97 px
+    player  2 ( 44 prims) section  98, 10 point(s): alone 0.93 px; one camera with section 97 4.02 px, 2 5.17 px, 7 5.70 px
+    player  3 ( 44 prims) section  95,  9 point(s): alone 1.35 px; one camera with section 2 4.76 px, 96 5.06 px, 8 5.93 px
+    player  3 ( 44 prims) section  96, 10 point(s): alone 2.18 px; one camera with section 95 5.06 px, 7 6.38 px, 97 6.53 px
+    player  3 ( 44 prims) section  97,  9 point(s): alone 1.18 px; one camera with section 96 6.53 px, 95 6.81 px, 8 7.21 px
+    player  3 ( 44 prims) section  98,  9 point(s): alone 1.90 px; one camera with section 95 6.38 px, 8 7.06 px, 96 9.00 px
     player  4 ( 43 prims) section  93,  9 point(s): alone 0.92 px; one camera with section 2 1.99 px, 98 2.31 px, 8 3.96 px
-    ...
+    player  4 ( 43 prims) section  95,  8 point(s): alone 1.21 px; one camera with section 2 2.85 px, 7 4.95 px, 96 5.35 px
+    player  4 ( 43 prims) section  96, 10 point(s): alone 1.28 px; one camera with section 95 5.35 px, 93 5.55 px, 7 5.94 px
+    player  4 ( 43 prims) section  98,  9 point(s): alone 0.95 px; one camera with section 93 2.31 px, 8 3.94 px, 10 5.24 px
+    player  5 ( 28 prims) section  99,  8 point(s): alone 16.69 px; one camera with section 56 2.89 px, 100 3.62 px, 102 3.79 px
+    player  5 ( 28 prims) section 100,  6 point(s): alone 0.75 px; one camera with section 56 2.76 px, 99 3.62 px, 102 3.69 px
+    player  5 ( 28 prims) section 101,  8 point(s): alone 0.74 px; one camera with section 99 3.91 px, 61 4.67 px, 100 4.84 px
+    player  5 ( 28 prims) section 102,  6 point(s): alone 0.56 px; one camera with section 101 2.71 px, 100 3.69 px, 99 3.79 px
   ok    the figure is MODEL.BIN's, and section 93 takes the place of 97
 ```
 
 As linhas de grupo compartilhado vêm da mesma corrida relida com
 `--frame-json work/kits-oracle/attach-5.json`, depois que essa contagem entrou
 na ferramenta. A linha de origem dá o mesmo.
+
+A saída acima está inteira desde a CORR-KITS-074: antes ela mostrava 2 das 24
+linhas de ajuste e um `...`. Foi colada de `python3 tools/kits/oracle.py
+--attach 5 --frame-json work/kits-oracle/attach-5.json`, que relê o quadro sem
+emulador e imprime antes a linha `frame read from …`, omitida aqui.
 
 **As duas contagens do primeiro critério.**
 

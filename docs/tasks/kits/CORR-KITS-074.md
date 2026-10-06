@@ -38,3 +38,21 @@ No Log de `docs/tasks/kits/43-medir-encaixe-mangas.md`, colar a saída inteira. 
 `test "$(grep -c 'point(s): alone' docs/tasks/kits/43-medir-encaixe-mangas.md)" -eq 24` falha hoje (2); passa depois.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `71343ab`. O Log mostrava 2 linhas `point(s): alone` e um `...`,
+e a ferramenta imprime 24:
+
+```text
+$ grep -c "point(s): alone" docs/tasks/kits/43-medir-encaixe-mangas.md
+2
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --attach 5 --frame-json work/kits-oracle/attach-5.json | grep -c "point(s): alone"
+24
+```
+
+Conserto: o bloco do Log da task 43 recebeu a saída inteira desse comando, menos a primeira
+linha, `frame read from …`. Uma frase depois do bloco diz isso.
+
+```text
+$ test "$(grep -c 'point(s): alone' docs/tasks/kits/43-medir-encaixe-mangas.md)" -eq 24 && echo ok
+ok
+```
