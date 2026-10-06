@@ -56,3 +56,7 @@ linha, `frame read from …`. Uma frase depois do bloco diz isso.
 $ test "$(grep -c 'point(s): alone' docs/tasks/kits/43-medir-encaixe-mangas.md)" -eq 24 && echo ok
 ok
 ```
+- **Closed** — commit `d6c871e` (2026-10-06): docs(kits): task 43 log pastes the whole --attach output
+  - Files (`git show --name-status d6c871e`):
+    - `M docs/tasks/kits/43-medir-encaixe-mangas.md`
+    - `M docs/tasks/kits/CORR-KITS-074.md`
