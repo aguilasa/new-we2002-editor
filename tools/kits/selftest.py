@@ -824,6 +824,18 @@ def _oracle_checks(c) -> None:
          oracle.matrix_judge(report) == [], "; ".join(oracle.matrix_judge(report)))
     c.ok("oracle --attach-matrix: the armband expected where 98 is fails",
          len(oracle.matrix_judge(report, 98)) == 1)
+    # The verdict the task exists for (CORR-KITS-076): a worn section given
+    # the same rotation and translation as the body piece 7 of its figure has
+    # to be reported as sharing it.
+    import copy as _copy
+    shared = _copy.deepcopy(passes)
+    body = next(p["matrix"] for p in shared[1] if p["section"] == 7)
+    for p in shared[1]:
+        if p["section"] == 97:
+            p["matrix"] = _copy.deepcopy(body)
+    told = oracle.matrix_judge(oracle.matrix_report(shared))
+    c.ok("oracle --attach-matrix: a long sleeve given section 7's matrix shares it",
+         any("section 97 shares its matrix with [7]" in f for f in told), "; ".join(told))
     lagged = oracle.matrix_report(oracle.matrix_passes(oracle.matrix_pieces(stops, 0)))
     c.ok("oracle --attach-matrix: with no pointer lag a figure takes the next player's matrix",
          any("not this figure's" in f for f in oracle.matrix_judge(lagged)),

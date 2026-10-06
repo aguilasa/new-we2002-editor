@@ -223,6 +223,14 @@ CONTROLS = (
         "CORR-KITS-067)",
     ),
     Control(
+        "oracle-matrix-share-blind", "kits/oracle.py", "matrix_report",
+        '                        if q is not p and q["matrix"] == p["matrix"]]\n',
+        '                        if False]\n',
+        "FAIL  oracle --attach-matrix: a long sleeve given section 7's matrix shares it",
+        "the whole answer of KITS-TASK-44 is 'own matrix'; a comparison that "
+        "never finds a share prints the same verdict (CORR-KITS-076)",
+    ),
+    Control(
         "oracle-sleeves-long-first", "kits/oracle.py", "sleeves_kind",
         '    return ("armband" if any(n.startswith("armband") for n in names)\n'
         '            else "long sleeve" if any(n.startswith("long sleeve") for n in names)\n',

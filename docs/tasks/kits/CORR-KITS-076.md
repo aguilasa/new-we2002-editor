@@ -42,3 +42,32 @@ Em `tools/kits/selftest.py`, uma verificação que dá a uma seção vestida (po
 Com a planta `if False` acima aplicada, `python3 tools/kits/selftest.py` tem de sair diferente de zero. Hoje sai 0.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `3b5c603`, numa cópia `git archive HEAD tools docs src data
+CMakeLists.txt` no scratchpad, com a comparação do `matrix_report` trocada por `if False]`:
+
+```text
+$ python3 $S/tools/kits/selftest.py --no-plant | grep -E "own matrix|FAIL|kits_selftest:"
+  ok    oracle --attach-matrix: every worn section has its own matrix, and 93 is where 97 is
+kits_selftest: 0 failure(s)
+```
+
+Conserto:
+
+- `tools/kits/selftest.py`: um caso que dá à seção 97 da segunda figura a matriz da seção 7 da
+  mesma figura e exige que o `matrix_judge` diga `section 97 shares its matrix with [7]`.
+- `tools/kits/controls.py`: o controle `oracle-matrix-share-blind`, que planta exatamente o
+  `if False]` da Evidência.
+- O `--plant-matrix share` opcional ficou de fora: o controle versionado já cobre o caminho.
+
+```text
+$ python3 tools/kits/selftest.py | grep -E "shares it|kits_selftest:"
+  ok    oracle --attach-matrix: a long sleeve given section 7's matrix shares it
+kits_selftest: 0 failure(s)
+$ python3 tools/kits/controls.py --only oracle-matrix-share-blind
+  RED    oracle-matrix-share-blind    kits/oracle.py :: matrix_report
+controls: 1 of 1 red
+$ python3 $S/tools/kits/selftest.py --no-plant      (cópia da árvore consertada, com o if False plantado)
+  FAIL  oracle --attach-matrix: a long sleeve given section 7's matrix shares it
+kits_selftest: 1 failure(s)
+```
