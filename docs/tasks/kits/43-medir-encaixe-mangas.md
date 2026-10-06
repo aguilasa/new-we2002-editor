@@ -14,6 +14,7 @@ Medir, na partida do slot 5, como o jogo põe na figura as seções do `/BIN/MOD
   - `tools/kits/oracle.py`: uma opção nova, `--attach SLOT`. Ela casa cada primitiva da lista do GPU com a seção do `MODEL.BIN` de que sai, pelos texels, como a `--sleeves` já faz. Depois lê, como o `tools/looks/oracle.py --pose` faz na `LOOKS SET`, a matriz que o GTE carrega antes de cada seção
   - `tools/kits/selftest.py`, para a parte pura nova
   - `docs/PLAN-KITS-PY.md`: §4.3 com o resultado
+  - `docs/tasks/kits/40-checkboxes-numero-bracadeira.md`: a nota de passagem do critério 4 (entrou no commit da80383; declarada pela CORR-KITS-075)
 - Out: desenhar a braçadeira e a manga longa na janela (KITS-TASK-40)
 
 ## Done criteria
