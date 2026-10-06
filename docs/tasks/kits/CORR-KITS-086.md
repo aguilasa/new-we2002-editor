@@ -43,3 +43,18 @@ Acrescentar os quatro arquivos aos arquivos da KITS-TASK-47 pelo `rite set KITS-
 O `comm` acima imprime 4 caminhos hoje; nada depois do conserto. (O `LC_ALL=C` nos dois `sort` é necessário: sem ele o `comm` reclama de ordem e acusa um quinto caminho falso.)
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `4d99303`: o `comm` da Evidência imprime os quatro caminhos
+(`docs/prompts/perfil-kits.md`, `tools/kits/core/match_pose.json`, `tools/kits/oracle.py`,
+`tools/kits/selftest.py`).
+
+Conserto:
+
+- `rite set KITS-TASK-47 --files …` acrescenta os quatro arquivos ao estado.
+- O escopo no corpo da task ganhou uma linha para cada um, e a do `oracle.py` registra a descida
+  do `SLEEVE_LENGTHS` para o core.
+
+```text
+$ LC_ALL=C comm -13 <(rite context KITS-TASK-47 … | sort) <(git show --name-only --format= f060945 | grep -v '^docs/tasks/' | sort)
+(sem saída)
+```

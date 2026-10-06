@@ -16,6 +16,10 @@ A aba 3D passa a desenhar também a figura de partida: as seções do `MODEL.BIN
   - `tools/kits/ui/app.py`, `tools/kits/ui/i18n.py`: a escolha entre a figura da `LOOKS SET` e a de partida, nas duas línguas
   - `tools/kits/ui_check.py`: a verificação e a planta
   - `docs/PLAN-KITS-PY.md`: §3.4 e §4.3
+  - `tools/kits/oracle.py`: `--match-silhouette`, `--plant-silhouette` e `--match-pose --write/--check`, o comando do critério 1; o `SLEEVE_LENGTHS` desceu daqui para o core (declarado pela CORR-KITS-086)
+  - `tools/kits/selftest.py`: as verificações puras do confronto e da pose gravada (CORR-KITS-086)
+  - `tools/kits/core/match_pose.json`: a pose medida, gerada por `oracle.py --match-pose --write` (CORR-KITS-086)
+  - `docs/prompts/perfil-kits.md`: a entrada do artefato gerado (CORR-KITS-086)
 - Out: os checkboxes (KITS-TASK-40)
 
 ## Done criteria
