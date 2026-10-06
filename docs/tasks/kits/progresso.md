@@ -68,6 +68,9 @@ graph TD
   subgraph phase_10["Fase 10"]
     KITS_TASK_42["KITS-TASK-42<br/>Medir o número de camisa numa partida"]
     KITS_TASK_43["KITS-TASK-43<br/>Medir o encaixe da braçadeira e da manga longa do MODEL.BIN"]
+    KITS_TASK_45["KITS-TASK-45<br/>Capturar a pose da figura de partida do MODEL.BIN"]
+    KITS_TASK_46["KITS-TASK-46<br/>Medir a manga curta da figura de partida"]
+    KITS_TASK_47["KITS-TASK-47<br/>Figura de partida na aba 3D"]
     KITS_TASK_40["KITS-TASK-40<br/>Checkboxes de número e braçadeira na aba 3D"]
     KITS_TASK_41["KITS-TASK-41<br/>Fechamento da fase 10"]
     KITS_TASK_37["KITS-TASK-37<br/>Botão de reset na aba 3D e a dica das costas"]
@@ -154,7 +157,10 @@ graph TD
 | [KITS-TASK-36](/docs/tasks/kits/36-ui-i18n.md) | UI em inglês dos EUA por default, com catálogo i18n e seletor de idioma | 4 | implementação | KITS-TASK-20 | done | 2026-10-03 | 2026-10-03 |
 | [KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md) | Medir o número de camisa numa partida | 10 | verificação | — | done | 2026-10-06 | 2026-10-06 |
 | [KITS-TASK-43](/docs/tasks/kits/43-medir-encaixe-mangas.md) | Medir o encaixe da braçadeira e da manga longa do MODEL.BIN | 10 | verificação | — | done | 2026-10-06 | 2026-10-06 |
-| [KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md) | Checkboxes de número e braçadeira na aba 3D | 10 | implementação | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39 | pending | — | — |
+| [KITS-TASK-45](/docs/tasks/kits/45-pose-figura-partida.md) | Capturar a pose da figura de partida do MODEL.BIN | 10 | implementação | — | pending | — | — |
+| [KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md) | Medir a manga curta da figura de partida | 10 | implementação | — | pending | — | — |
+| [KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md) | Figura de partida na aba 3D | 10 | implementação | — | pending | — | — |
+| [KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md) | Checkboxes de número e braçadeira na aba 3D | 10 | implementação | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39 | in-progress | — | — |
 | [KITS-TASK-41](/docs/tasks/kits/41-fechamento-fase-10.md) | Fechamento da fase 10 | 10 | closing | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39, KITS-TASK-40 | pending | — | — |
 | [KITS-TASK-01](/docs/tasks/kits/01-levantamento-do-tex.md) | Promover o levantamento do §1.1 a ferramenta versionada | 0 | ferramenta | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md) | Medir o que são os retângulos (608,256) e (704,256) | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
