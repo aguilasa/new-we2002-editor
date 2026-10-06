@@ -35,6 +35,8 @@ Usage:
     python tools/kits/oracle.py --sleeves 2|5 [--expect-sleeves none|drawn] [--plant-sleeves]
     python tools/kits/oracle.py --back 2 [--expect-back untouched] [--plant-back numbers]
     python tools/kits/oracle.py --match-pose 5 [--frame-json <capture>] [--plant-pose]
+    python tools/kits/oracle.py --match-pose 5 --write|--check     # core/match_pose.json
+    python tools/kits/oracle.py --match-silhouette 5 --tag 14 [--plant-silhouette]
                                 [--pair-by indices|corners]
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
@@ -83,6 +85,13 @@ they were loaded for: each MODEL.BIN vertex through its piece's matrix and the
 GTE projection lands on the frame's corner of the same texel, under
 `POSE_LIMIT`.  The pose of a captain and of an outfield player goes to
 `work/kits-pose/`; `--plant-pose` drops the pointer lag and has to fail.
+`--write` versions the pose as `core/match_pose.json`, the file the 3D tab
+draws the match figure from, and `--check` fails when that file is not what
+the run measures.  `--match-silhouette SLOT --tag TT` (KITS-TASK-47) draws
+that figure through `api.match_figure` in the game camera's view and compares
+its silhouette with the player the game drew, by intersection over union
+against `SILHOUETTE_LIMIT`; `--plant-silhouette` draws every piece with the
+body's matrix and has to fail.
 
 In a match the area under the map is a grid of 20x24 back panels, one per
 player on the pitch, and `--back SLOT --page X --tag TT --panels` reads it
@@ -1172,17 +1181,7 @@ def matrix_passes(pieces) -> list:
     return out
 
 
-SLEEVE_LENGTHS = {
-    "long": {"armband": 93, "replaced": 97, "neighbour": 98,
-             "worn": (93, 95, 96, 97, 98, 99, 100, 101, 102)},
-    "short": {"armband": 90, "replaced": 4, "neighbour": 6,
-              "worn": (90, 3, 4, 5, 6, 57, 58, 59, 60)},
-}
-"""What each sleeve length draws, by position in the order (KITS-TASK-44 for
-long, slot 5; KITS-TASK-46 for short, slot 6): outfield arms 95 96 97 98 or
-3 5 4 6, the armband 93 where 97 is or 90 where 4 is, the goalkeeper's arms
-99 101 100 102 or 57 58 59 60.  `neighbour` is where `--plant-matrix slot`
-expects the armband instead."""
+from core.figure import SLEEVE_LENGTHS  # noqa: E402  (one table, the core's)
 
 
 def matrix_report(passes, worn_sections=SLEEVE_LENGTHS["long"]["worn"]) -> dict:
@@ -1537,21 +1536,34 @@ def pose_judge(report: dict, limit: float) -> list:
     return out
 
 
-def run_match_pose(slot: int, cue: str, cache=None, plant=False, pair="indices") -> int:
-    """`--match-pose SLOT`: section 4.3, the pose of a match figure -- each
-    MODEL.BIN piece's matrix, proved on the frame it was drawn in."""
+def pose_file(slot: int, report: dict) -> dict:
+    """What `--write` versions as `core/match_pose.json`: the projection and,
+    per figure kind, its head and each piece's section, rotation and
+    translation, in drawing order."""
+    first = next(iter(report.values()))["figure"]
+    return {"source": "python tools/kits/oracle.py --match-pose %d --write (KITS-TASK-45)"
+                      % slot,
+            "slot": slot, "projection": first[0]["projection"],
+            "figures": {kind: {"head": one["figure"][0]["section"], "pieces": [
+                {"section": p["section"], "rotation": list(p["matrix"][0]),
+                 "translation": list(p["matrix"][1])} for p in one["figure"]]}
+                for kind, one in sorted(report.items())}}
+
+
+def load_capture(slot: int, cue: str, cache=None) -> dict:
+    """The capture of `--match-pose`: read back from *cache*, or taken in the
+    fork and kept; with every sample's tuples restored."""
     import json
 
     import oracle as looks_oracle  # tools/looks
 
-    image = os.environ[IMAGE_VARIABLE]
     path = cache or os.path.join(ATTACH_DIR, "pose-%d.json" % slot)
     if cache and os.path.isfile(cache):
         with open(cache) as fh:
             capture = json.load(fh)
         print("  capture read from %s, no emulator" % cache)
     else:
-        maps = looks_oracle.model_maps(image)
+        maps = looks_oracle.model_maps(os.environ[IMAGE_VARIABLE])
         with looks_oracle.Oracle(cue) as game:
             load_slot(game, slot, "pose-%d" % slot)
             capture = pose_capture(game, maps)
@@ -1563,6 +1575,144 @@ def run_match_pose(slot: int, cue: str, cache=None, plant=False, pair="indices")
         for s in one:
             s.update(page=tuple(s["page"]), clut=tuple(s["clut"]),
                      uv=[tuple(t) for t in s["uv"]], xy=[tuple(t) for t in s["xy"]])
+    return capture
+
+
+# --- section 4.3: the match figure drawn, against the game's frame ---------
+
+SILHOUETTE_SCALE = 4
+"""Cells per screen pixel each way when a silhouette is rasterised."""
+SILHOUETTE_LIMIT = 0.70
+"""The intersection over union a drawn match figure has to reach against the
+game's.  Measured on slot 5 with TEX_14 (`--match-silhouette 5`,
+KITS-TASK-47): 0.800 for the outfield figure and 0.821 for the captain, a
+figure some forty pixels tall losing its edge cells to the GPU's whole-pixel
+corners (rounding ours to whole pixels gives 0.793 and 0.787, no better);
+with `--plant-silhouette` 0.322 and 0.284."""
+
+
+def raster(triangles, scale: int = SILHOUETTE_SCALE) -> set:
+    """The cells (x, y), at *scale* per pixel, whose centres fall inside any
+    of *triangles* [((x, y), (x, y), (x, y))] given in screen pixels."""
+    out = set()
+    for a, b, c in triangles:
+        xs, ys = (a[0], b[0], c[0]), (a[1], b[1], c[1])
+        area = (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
+        if abs(area) < 1e-12:
+            continue
+        for cy in range(int(min(ys) * scale) - 1, int(max(ys) * scale) + 2):
+            for cx in range(int(min(xs) * scale) - 1, int(max(xs) * scale) + 2):
+                px, py = (cx + 0.5) / scale, (cy + 0.5) / scale
+                w0 = (b[0] - px) * (c[1] - py) - (c[0] - px) * (b[1] - py)
+                w1 = (c[0] - px) * (a[1] - py) - (a[0] - px) * (c[1] - py)
+                w2 = (a[0] - px) * (b[1] - py) - (b[0] - px) * (a[1] - py)
+                if (w0 >= 0 and w1 >= 0 and w2 >= 0) or (w0 <= 0 and w1 <= 0 and w2 <= 0):
+                    out.add((cx, cy))
+    return out
+
+
+def quad_triangles(points) -> list:
+    """A quad's four corners as the GPU draws them: (0 1 2) and (1 2 3)."""
+    return [(points[0], points[1], points[2]), (points[1], points[2], points[3])]
+
+
+def iou(one: set, two: set) -> float:
+    return len(one & two) / float(len(one | two)) if one or two else 0.0
+
+
+def game_silhouette(group, index, sections) -> list:
+    """The triangles of a player group's primitives that a section of the
+    figure holds by its texels: what the game drew of that figure."""
+    held = {tuple(tuple(t) for t in prim.texcoords)
+            for (name, i), sec in index["sections"].items()
+            if name == layout.MODEL and i in sections for prim in sec.primitives}
+    out = []
+    for one in group:
+        if len(one["xy"]) == 4 and tuple(tuple(t) for t in one["uv"]) in held:
+            out += quad_triangles(one["xy"])
+    return out
+
+
+def drawn_silhouette(drawn) -> list:
+    """The triangles of a camera-view match scene on the game's screen."""
+    from core import api
+
+    out = []
+    for part in drawn.parts:
+        points = api.screen_points(drawn, part)
+        if None not in points:
+            out += quad_triangles(points)
+    return out
+
+
+def rigid_pose(pose: dict) -> dict:
+    """The plant: every piece of every figure given its root's matrix."""
+    import copy
+
+    out = copy.deepcopy(pose)
+    for figure in out["figures"].values():
+        root = next(p for p in figure["pieces"] if p["section"] == ROOT_SECTIONS[0])
+        for p in figure["pieces"]:
+            p["rotation"], p["translation"] = list(root["rotation"]), list(root["translation"])
+    return out
+
+
+def run_match_silhouette(slot: int, cue: str, tag: str, cache=None, plant=False) -> int:
+    """`--match-silhouette SLOT --tag TT`: the match figure the 3D tab draws
+    (`api.match_figure`, camera view), each kind against the player the game
+    drew in the frame of the capture, silhouette for silhouette."""
+    from core import api
+
+    image = os.environ[IMAGE_VARIABLE]
+    capture = load_capture(slot, cue, cache)
+    frames = pose_frames(capture)
+    if not frames:
+        print("  FAIL  no whole frame with figure primitives in the capture")
+        return 1
+    frame = frames[-1]
+    frame["groups"] = pose_groups(capture["lists"]["%d" % frame["head"]])
+    index = model_index(image)
+    report = pose_report(frame, index)
+    kit = api.open_source(image).kit(tag)
+    geometry = api.read_geometry(image)
+    pose = api.match_pose()
+    if plant:
+        pose = rigid_pose(pose)
+        print("  PLANT  every piece drawn with its figure's body matrix")
+    failures, scores = [], []
+    for kind in api.MATCH_FIGURES:
+        one = report.get(kind)
+        if one is None or one["fit"] is None:
+            failures.append("no %s figure in the frame" % kind)
+            continue
+        drawn = api.match_figure(kit, 1, armband=(kind == "captain"), figure=kind,
+                                 view="camera", geometry=geometry, pose=pose)
+        sections = {p["section"] for p in one["figure"]}
+        game = raster(game_silhouette(frame["groups"][one["fit"]["group"]], index, sections))
+        ours = raster(drawn_silhouette(drawn))
+        score = iou(game, ours)
+        scores.append(score)
+        print("  %-8s TEX_%s, order %s: game %d cell(s), ours %d, both %d; IoU %.3f"
+              % (kind, tag, " ".join(map(str, drawn.notes["order"])), len(game), len(ours),
+                 len(game & ours), score))
+        if score < SILHOUETTE_LIMIT:
+            failures.append("%s: IoU %.3f under %.3f" % (kind, score, SILHOUETTE_LIMIT))
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if not failures:
+        print("  ok    both figures within IoU %.3f of the game's (worst %.3f; cells of 1/%d px)"
+              % (SILHOUETTE_LIMIT, min(scores), SILHOUETTE_SCALE))
+    return 1 if failures else 0
+
+
+def run_match_pose(slot: int, cue: str, cache=None, plant=False, pair="indices",
+                   write=False, check=False) -> int:
+    """`--match-pose SLOT`: section 4.3, the pose of a match figure -- each
+    MODEL.BIN piece's matrix, proved on the frame it was drawn in."""
+    import json
+
+    image = os.environ[IMAGE_VARIABLE]
+    capture = load_capture(slot, cue, cache)
     matrices = sum(1 for e in capture["events"] if e["kind"] == "matrix")
     print("  %d event(s): %d matrix stop(s), %d submit(s), %d list(s) walked"
           % (len(capture["events"]), matrices, len(capture["events"]) - matrices,
@@ -1624,6 +1774,24 @@ def run_match_pose(slot: int, cue: str, cache=None, plant=False, pair="indices")
                                    "translation": list(p["matrix"][1])} for p in figure]},
                       fh, indent=1)
         print("  wrote %s" % out)
+    from core import figure as _figure
+
+    text = json.dumps(pose_file(slot, report), indent=1) + "\n"
+    if write:
+        with open(_figure.MATCH_POSE, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(text)
+        print("  wrote %s" % os.path.relpath(_figure.MATCH_POSE))
+    if check:
+        try:
+            with open(_figure.MATCH_POSE, encoding="utf-8") as fh:
+                kept = fh.read()
+        except OSError:
+            kept = None
+        if kept != text:
+            print("  FAIL  %s is not what this run measures: rerun with --write"
+                  % os.path.relpath(_figure.MATCH_POSE))
+            return 1
+        print("  ok    %s is what this run measures" % os.path.relpath(_figure.MATCH_POSE))
     print("  ok    every piece of both figures lands within %.2f px of its frame"
           % POSE_LIMIT)
     return 0
@@ -2168,6 +2336,9 @@ def main(argv=None) -> int:
     source.add_argument("--match-pose", type=int, metavar="SLOT",
                         help="section 4.3: each MODEL.BIN piece's matrix in this match "
                              "slot, proved on the frame's own list")
+    source.add_argument("--match-silhouette", type=int, metavar="SLOT",
+                        help="section 4.3: the match figure the 3D tab draws against the "
+                             "game's frame of this slot, silhouette for silhouette (--tag)")
     source.add_argument("--sleeves-image", type=int, metavar="SLOT",
                         help="section 4.3: the sleeves image this slot holds in VRAM, "
                              "against the disc (with --page, --tag, --set); a report, always exits 0")
@@ -2208,6 +2379,14 @@ def main(argv=None) -> int:
     parser.add_argument("--plant-matrix", choices=("lag", "slot"),
                         help="with --attach-matrix: the control -- no pointer lag, or the "
                              "armband expected one piece over")
+    parser.add_argument("--plant-silhouette", action="store_true",
+                        help="with --match-silhouette: the control -- every piece drawn "
+                             "with its figure's body matrix")
+    parser.add_argument("--check", action="store_true",
+                        help="with --match-pose: exit 1 unless core/match_pose.json is what "
+                             "the run measures")
+    parser.add_argument("--write", action="store_true",
+                        help="with --match-pose: version the pose as core/match_pose.json")
     parser.add_argument("--plant-pose", action="store_true",
                         help="with --match-pose: the control -- each matrix given to the "
                              "piece named at its own stop")
@@ -2261,7 +2440,14 @@ def main(argv=None) -> int:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
         return run_match_pose(args.match_pose, cue, args.frame_json, args.plant_pose,
-                              args.pair_by)
+                              args.pair_by, args.write, args.check)
+    if args.match_silhouette is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue and not args.frame_json:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_match_silhouette(args.match_silhouette, cue, args.tag or "14",
+                                    args.frame_json, args.plant_silhouette)
     if args.attach is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:

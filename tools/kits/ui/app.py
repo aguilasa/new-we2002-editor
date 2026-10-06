@@ -64,6 +64,8 @@ CELL_PX = 14
 """One colour of the 16x16 palette grid, on screen."""
 
 TAB_NAMES = ("plan", "3d", "diag")
+MATCH_FIGURE = 2
+"""The 3D figure selector's third item: the match player of section 4.3."""
 """--tab names of the three tabs, in tab order."""
 WORK = ("work1", "work2")
 """--image names of the two work bitmaps (first and second set); any other
@@ -389,6 +391,10 @@ class Window(QtWidgets.QMainWindow):
         self.figure_box = QtWidgets.QComboBox()
         self.figure_box.addItem("", 0)
         self.figure_box.addItem("", 1)
+        # The match figure (KITS-TASK-47, section 4.3): MODEL.BIN in the pose
+        # measured in the game, with the armband when `armband` is on.
+        self.figure_box.addItem("", MATCH_FIGURE)
+        self.armband = False
         self.set_box.currentIndexChanged.connect(self.draw_figure)
         self.figure_box.currentIndexChanged.connect(self.draw_figure)
         self.figure_view = FigureView(api.FIGURE_TRIANGLES)
@@ -465,6 +471,7 @@ class Window(QtWidgets.QMainWindow):
         self.set_box.setItemText(1, tr("set_second"))
         self.figure_box.setItemText(0, tr("figure_player"))
         self.figure_box.setItemText(1, tr("figure_keeper"))
+        self.figure_box.setItemText(2, tr("figure_match"))
         self.figure_hint.setText(tr("figure_hint"))
         self.reset_button.setText(tr("reset_view"))
         self.show_geometry()
@@ -553,8 +560,13 @@ class Window(QtWidgets.QMainWindow):
             self.figure_view.set_scene(None)
             return
         try:
-            scene = api.figure(self.kit, self.set_box.currentData(), self.figure_box.currentData(),
-                               frame=api.FIGURE_POSE, geometry=self.geometry)
+            if self.figure_box.currentData() == MATCH_FIGURE:
+                scene = api.match_figure(self.kit, self.set_box.currentData(),
+                                         armband=self.armband, geometry=self.geometry)
+            else:
+                scene = api.figure(self.kit, self.set_box.currentData(),
+                                   self.figure_box.currentData(),
+                                   frame=api.FIGURE_POSE, geometry=self.geometry)
         except api.FigureError as exc:
             self.figure_view.set_scene(None)
             self.say(None, {CORE_TEXT: str(exc)})
@@ -862,8 +874,11 @@ def main(argv=None) -> int:
                         help="the tab shown")
     parser.add_argument("--kit-set", type=int, choices=(1, 2), default=1,
                         help="3D: the first or the second set")
-    parser.add_argument("--figure", type=int, choices=(0, 1), default=0,
-                        help="3D: 0 the player, 1 the goalkeeper")
+    parser.add_argument("--figure", type=int, choices=(0, 1, MATCH_FIGURE), default=0,
+                        help="3D: 0 the player, 1 the goalkeeper, %d the match player"
+                        % MATCH_FIGURE)
+    parser.add_argument("--armband", action="store_true",
+                        help="3D: the match player wears the captain's armband")
     parser.add_argument("--yaw", type=float, help="3D: turn about the vertical, degrees "
                         "(default: facing the viewer)")
     parser.add_argument("--pitch", type=float, help="3D: tilt, degrees")
@@ -918,6 +933,7 @@ def main(argv=None) -> int:
     window.zones_box.setChecked(args.zones)
     window.checker_box.setChecked(not args.no_checker)
     window.set_box.setCurrentIndex(args.kit_set - 1)
+    window.armband = args.armband
     window.figure_box.setCurrentIndex(args.figure)
     window.figure_view.turn_to(window.figure_view.yaw if args.yaw is None else args.yaw,
                                window.figure_view.pitch if args.pitch is None else args.pitch)

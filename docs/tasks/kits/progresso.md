@@ -159,7 +159,7 @@ graph TD
 | [KITS-TASK-43](/docs/tasks/kits/43-medir-encaixe-mangas.md) | Medir o encaixe da braçadeira e da manga longa do MODEL.BIN | 10 | verificação | — | done | 2026-10-06 | 2026-10-06 |
 | [KITS-TASK-45](/docs/tasks/kits/45-pose-figura-partida.md) | Capturar a pose da figura de partida do MODEL.BIN | 10 | implementação | — | done | 2026-10-06 | 2026-10-06 |
 | [KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md) | Medir a manga curta da figura de partida | 10 | implementação | — | done | 2026-10-06 | 2026-10-06 |
-| [KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md) | Figura de partida na aba 3D | 10 | implementação | — | pending | — | — |
+| [KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md) | Figura de partida na aba 3D | 10 | implementação | — | in-progress | — | — |
 | [KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md) | Checkboxes de número e braçadeira na aba 3D | 10 | implementação | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39 | blocked | — | — |
 | [KITS-TASK-41](/docs/tasks/kits/41-fechamento-fase-10.md) | Fechamento da fase 10 | 10 | closing | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39, KITS-TASK-40 | pending | — | — |
 | [KITS-TASK-01](/docs/tasks/kits/01-levantamento-do-tex.md) | Promover o levantamento do §1.1 a ferramenta versionada | 0 | ferramenta | — | done | 2026-09-30 | 2026-09-30 |

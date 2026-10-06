@@ -97,7 +97,7 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.3",
       "files": ["tools/kits/core/figure.py", "tools/kits/core/api.py", "tools/kits/cli.py", "tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py", "docs/PLAN-KITS-PY.md"],
       "resources": ["tela", "emulador", "save-states"],
-      "status": "pending",
+      "status": "in-progress",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,

@@ -289,6 +289,33 @@ def _core_checks(c) -> None:
                    or keeper.offset <= i < keeper.offset + size for i in moved)
            and bool(moved), "%d byte(s) moved" % len(moved))
 
+    # The match figure (KITS-TASK-47): the versioned pose, dressed by position.
+    pose = _figure.read_match_pose()
+    outfield = pose["figures"]["outfield"]["pieces"]
+    plain = [p["section"] for p in outfield]
+    ok("the versioned match pose has both figures, the outfield one drawing 97",
+       sorted(pose["figures"]) == ["captain", "outfield"] and 97 in plain
+       and 93 not in plain, "%s" % plain)
+    for armband, sleeves, want in ((False, "long", 97), (True, "long", 93),
+                                   (False, "short", 4), (True, "short", 90)):
+        dressed = _figure.match_order(outfield, armband, sleeves)
+        at = plain.index(97)
+        ok("match order, %s sleeves, armband %s: section %d where 97 was, with 97's matrix"
+           % (sleeves, armband, want),
+           dressed[at][0] == want and dressed[at][1] == tuple(outfield[at]["rotation"])
+           and dressed[at][2] == tuple(outfield[at]["translation"])
+           and len(dressed) == len(outfield), "%s" % [d[0] for d in dressed])
+    bare = _figure.match_order(pose["figures"]["captain"]["pieces"], False, "long")
+    ok("the captain's pose without the armband draws 97 in its place",
+       93 not in [d[0] for d in bare] and 97 in [d[0] for d in bare])
+    try:
+        _figure.read_match_pose(os.path.join(tempfile.gettempdir(), "no-such-pose.json"))
+        told = "no error"
+    except api.FigureError as exc:
+        told = str(exc)
+    ok("a missing match pose says which command measures it",
+       "--match-pose 5 --write" in told, told)
+
     p = problems(build_container(short_by=1))
     ok("a missing record is refused by count",
        len(p) == 1 and "has 10 image/palette records" in p[0], p)

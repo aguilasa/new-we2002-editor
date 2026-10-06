@@ -37,7 +37,11 @@ WHAT IT JUDGES:
   and the plants, each in a copy of the tree: the window without Fusion and
       without the fixed palette (section 3.4) FAIL the style judge, and the
       readout reading the pixel to the right FAILS the hover judge; the 3D
-      tab drawing set 1 for both sets FAILS the 3D judge, and the tab left on
+      tab drawing set 1 for both sets FAILS the 3D judge, the match player
+      drawn with section 97 when the armband is asked FAILS the match judge
+      (KITS-TASK-47: with TEX_14 the armband changes 337 px in a 25x18 box,
+      and the judge wants something changed, in at most ARMBAND_BOX px each
+      way and ARMBAND_SHARE % of the figure), and the tab left on
       with no geometry, or a Plan widget that changes with no geometry, FAIL
       the 3D off judge; the kit selector labelled with bare tags FAILS the
       selector judge; the Diagnosis tab without its problem rows FAILS the
@@ -97,6 +101,16 @@ BACKDROP_3D = (0x8C, 0x8C, 0x8C)
 """The 3D view's backdrop, `figure_view.BACKDROP`; written here, not read from it."""
 FIGURE_FLOOR = 5.0
 """The figure covers at least this percentage of a 3D capture."""
+MATCH_TAG = "14"
+"""The match figure's kit: Norway, the team of the slot 5 captain (section 4.3)."""
+MATCH_ITEM = "2"
+"""`app.py --figure` of the match player."""
+ARMBAND_BOX = 40
+"""The most pixels, each way, the armband's difference may span: measured on
+:98 with TEX_14 (KITS-TASK-47), 337 pixels in a 25x18 box on the arm."""
+ARMBAND_SHARE = 5.0
+"""The most, in percent of the figure's pixels, the armband may change
+(measured 1.3 %: 337 of 26427)."""
 NOTE_ROWS = 60
 """Bottom rows of a capture that hold the status and the 3D note."""
 TAB_LABEL = (40, 20, 80)
@@ -135,8 +149,9 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET = (
-    "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset")
+STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH = (
+    "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset",
+    "match")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -181,9 +196,11 @@ PLANTS = (
      "        index = self.picture.indices[y * self.picture.width + x]\n",
      "        index = self.picture.indices[y * self.picture.width + x + 1]\n"),
     ("3D set ignored", FIGURE,
-     "            scene = api.figure(self.kit, self.set_box.currentData(), "
-     "self.figure_box.currentData(),\n",
-     "            scene = api.figure(self.kit, 1, self.figure_box.currentData(),\n"),
+     "                scene = api.figure(self.kit, self.set_box.currentData(),\n",
+     "                scene = api.figure(self.kit, 1,\n"),
+    ("armband drawn as section 97", MATCH,
+     "                                         armband=self.armband, geometry=self.geometry)\n",
+     "                                         armband=False, geometry=self.geometry)  # planted\n"),
     ("3D tab never off", OFF,
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
      "        self.tabs.setTabEnabled(1, True)\n"),
@@ -638,6 +655,48 @@ def figure_judge(python, image, env, tmp, app=APP) -> tuple:
     return bad, digests
 
 
+def match_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, what was seen) of the match player in the 3D tab, without
+    and with the captain's armband: both draw a figure, and the armband
+    changes a small box of it and nothing else."""
+    shots, bad = {}, []
+    for armband in (False, True):
+        out = os.path.join(tmp, "match-%d.png" % armband)
+        shot, more, _ = capture(python, app, image, ["--tag", MATCH_TAG, "--tab", "3d",
+                                                     "--figure", MATCH_ITEM]
+                                + (["--armband"] if armband else []), out, env)
+        bad += ["armband %s: %s" % (armband, m) for m in more]
+        if shot is None:
+            continue
+        cover = 100.0 - share(shot, BACKDROP_3D) - share(shot, WINDOW_COLOUR) \
+            - share(shot, FUSION_PANE)
+        if share(shot, BACKDROP_3D) < 10.0 or cover < FIGURE_FLOOR:
+            bad.append("armband %s: backdrop %.1f %%, the rest %.1f %%: no 3D view"
+                       % (armband, share(shot, BACKDROP_3D), cover))
+        shots[armband] = shot
+    if len(shots) != 2:
+        return bad, "no two captures"
+    one, two = shots[False], shots[True]
+    box = view_box(one)
+    if box is None or one[:2] != two[:2]:
+        return bad + ["the two captures have no common 3D view"], "-"
+    w = one[0]
+    inside = [(x, y) for y in range(box[1], box[3] + 1) for x in range(box[0], box[2] + 1)]
+    figure = sum(1 for x, y in inside if one[2][y * w + x] != BACKDROP_3D)
+    changed = [(x, y) for x, y in inside if one[2][y * w + x] != two[2][y * w + x]]
+    if not changed:
+        return bad + ["the armband changes nothing"], "0 px"
+    xs, ys = [x for x, _y in changed], [y for _x, y in changed]
+    span = (max(xs) - min(xs) + 1, max(ys) - min(ys) + 1)
+    pct = 100.0 * len(changed) / max(figure, 1)
+    seen = "%d px (%.1f %% of the figure) in a %dx%d box" % ((len(changed), pct) + span)
+    if max(span) > ARMBAND_BOX:
+        bad.append("the armband's change spans %dx%d, over %d" % (span + (ARMBAND_BOX,)))
+    if pct > ARMBAND_SHARE:
+        bad.append("the armband changes %.1f %% of the figure, over %.1f" % (pct, ARMBAND_SHARE))
+    return bad, seen
+
+
 def off_judge(python, image, env, tmp, app=APP) -> list:
     """A lone TEX with WE2002_LOOKS_IMAGE unset: the 3D tab refuses with the
     sentence, and the Plan capture differs from the one with the variable only
@@ -771,6 +830,9 @@ def run(python: str, image: str) -> int:
              "either figure (%s)" % (FIGURE_TAG, ", ".join(
                  "set %d fig %d %s" % (k[0], k[1], v[:12]) for k, v in sorted(digests.items()))),
              bad)
+        bad, seen = match_judge(python, image, env, tmp)
+        t.ok("3D TEX_%s: the match player is drawn, and the captain's armband changes "
+             "only a box on its arm (%s)" % (MATCH_TAG, seen), bad)
         t.ok("with no geometry disc the 3D tab is off with the sentence, and Plan is the same",
              off_judge(python, image, env, tmp))
         bad, digests = reset_judge(python, image, env, tmp)
@@ -803,6 +865,8 @@ def run(python: str, image: str) -> int:
                 elif judge == FIGURE:
                     red, _ = figure_judge(python, image, env, box, app)
                     bad = []
+                elif judge == MATCH:
+                    red, bad = match_judge(python, image, env, box, app)[0], []
                 elif judge == OFF:
                     red, bad = off_judge(python, image, env, box, app), []
                 elif judge == SELECTOR:

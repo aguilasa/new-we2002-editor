@@ -12,6 +12,11 @@ or out of a file is drawn on the trusted body.
 `geometry_path=None` means `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry`
 says so in a sentence.  A disc the looks guard refuses is `GeometryRefused`.
 
+`match_scene` is the match figure of section 4.3 (KITS-TASK-47): MODEL.BIN's
+sections in the order and pose the game drew them in (`match_pose.json`,
+written by `oracle.py --match-pose 5 --write`), with the captain's armband or
+not and long or short sleeves.
+
 `palette_swap` is control 4 of section 5: the kit with its player (486) and
 goalkeeper (488) palettes swapped has to draw each figure in the other one's
 colours, surface by surface.
@@ -155,3 +160,187 @@ def palette_swap(kit, kit_set: int, figure: int, geometry: dict) -> SwapControl:
             wrong.append("record %d, row %d: not the row %d colours"
                          % (surface.record, row, other[row]))
     return SwapControl(figure, kit_set, tuple(sorted(rows)), compared, tuple(wrong))
+
+
+# -- the match figure (PLAN-KITS-PY.md section 4.3, KITS-TASK-47) ---------------------
+
+MATCH_POSE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "match_pose.json")
+"""The pose of two match figures, measured in the game: written by
+`oracle.py --match-pose 5 --write` (KITS-TASK-45), never by hand."""
+MATCH_FIGURES = ("outfield", "captain")
+MATCH_SLEEVES = ("long", "short")
+MATCH_VIEWS = ("torso", "camera")
+"""`torso`: the figure in its body piece's own axes, upright, for viewing;
+`camera`: as the game's camera sees it, for confronting with its frame."""
+ROOT_SECTION = 2
+"""The body piece of an outfield match figure, the one the torso view keeps."""
+SLEEVE_LENGTHS = {
+    "long": {"armband": 93, "replaced": 97, "neighbour": 98,
+             "worn": (93, 95, 96, 97, 98, 99, 100, 101, 102)},
+    "short": {"armband": 90, "replaced": 4, "neighbour": 6,
+              "worn": (90, 3, 4, 5, 6, 57, 58, 59, 60)},
+}
+"""What each sleeve length draws, by position in the order (KITS-TASK-44 for
+long, slot 5; KITS-TASK-46 for short, slot 6): outfield arms 95 96 97 98 or
+3 5 4 6, the armband 93 where 97 is or 90 where 4 is, the goalkeeper's arms
+99 101 100 102 or 57 58 59 60.  `neighbour` is where `--plant-matrix slot`
+expects the armband instead."""
+LONG_TO_SHORT = dict(zip((95, 96, 97, 98), (3, 5, 4, 6)))
+"""The outfield arms by position: a short sleeve takes the matrix of the long
+one it stands for.  The two share a local frame on the disc: 93 and 97 have
+the same vertex box, and 3/4 against 95/97 differ by three units in x."""
+
+
+def read_match_pose(path=None) -> dict:
+    """The measured match pose, or `FigureError` with the command that makes it."""
+    import json
+
+    path = path or MATCH_POSE
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except OSError as exc:
+        raise FigureError("No match pose at %s (python tools/kits/oracle.py --match-pose 5 "
+                          "--write measures it): %s" % (path, exc.strerror or exc)) from exc
+
+
+def match_order(pieces, armband: bool, sleeves: str) -> list:
+    """[(section, rotation, translation)] of a measured figure, dressed: the
+    armband where the replaced arm is or not at all, and the arms of the asked
+    sleeve length -- each section swapped by its position in the order, so it
+    keeps the matrix the game gave that position."""
+    if sleeves not in MATCH_SLEEVES:
+        raise FigureError("Sleeves %r are not one of %s." % (sleeves, MATCH_SLEEVES))
+    long_rule, rule = SLEEVE_LENGTHS["long"], SLEEVE_LENGTHS[sleeves]
+    out = []
+    for piece in pieces:
+        section = piece["section"]
+        if section == long_rule["armband"]:
+            section = long_rule["replaced"]        # the figure as worn without it
+        if sleeves == "short":
+            section = LONG_TO_SHORT.get(section, section)
+        if armband and section == rule["replaced"]:
+            section = rule["armband"]
+        out.append((section, tuple(piece["rotation"]), tuple(piece["translation"])))
+    return out
+
+
+def _inverse(m):
+    """The inverse of a 3x3 row-major matrix."""
+    a, b, c, d, e, f, g, h, i = m
+    det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
+    if abs(det) < 1e-12:
+        raise FigureError("a piece matrix of the match pose is singular")
+    return tuple(v / det for v in (e * i - f * h, c * h - b * i, b * f - c * e,
+                                   f * g - d * i, a * i - c * g, c * d - a * f,
+                                   d * h - e * g, b * g - a * h, a * e - b * d))
+
+
+def _apply(m, v):
+    return tuple(m[3 * r] * v[0] + m[3 * r + 1] * v[1] + m[3 * r + 2] * v[2] for r in range(3))
+
+
+class _Vertex:
+    __slots__ = ("x", "y", "z")
+
+    def __init__(self, x, y, z):
+        self.x, self.y, self.z = x, y, z
+
+
+def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "long",
+                figure: str = "outfield", view: str = "torso", geometry=None,
+                geometry_path=None, pose=None):
+    """The looks `Scene` of a match figure wearing set *kit_set* of *kit*.
+
+    The pieces are MODEL.BIN's sections in the order the game drew them, each
+    through the GTE matrix it was drawn with (`read_match_pose`), and every
+    primitive textured the way `assembly.draw_list` resolves one: the page and
+    CLUT the disc gives it, looked for in `DAT2D.BIN` first and in the kit
+    second.  The texel of each corner follows the stored vertex order, as
+    `scene.part_for` reads it -- the order KITS-TASK-45 measured.  The head
+    wears the disc's own CLUTs: no LOOKS SET tuple edits it."""
+    import section
+
+    if kit_set not in KIT_SETS:
+        raise FigureError("Kit set %r is not one of %s." % (kit_set, KIT_SETS))
+    if figure not in MATCH_FIGURES:
+        raise FigureError("Match figure %r is not one of %s." % (figure, MATCH_FIGURES))
+    if view not in MATCH_VIEWS:
+        raise FigureError("View %r is not one of %s." % (view, MATCH_VIEWS))
+    pose = pose if pose is not None else read_match_pose()
+    measured = pose["figures"][figure]
+    order = match_order(measured["pieces"], armband, sleeves)
+    if geometry is None:
+        geometry = read_geometry(geometry_path_for(geometry_path))
+    kit.require()
+    data2d = geometry[layout.DAT2D]
+    banks = [(layout.DAT2D, data2d, texture.images(data2d), texture.palettes(data2d)),
+             (SLOT, kit.data, texture.in_set_order(texture.images(kit.data), kit_set),
+              texture.in_set_order(texture.palettes(kit.data), kit_set))]
+    sections = section.scan(geometry[layout.MODEL], layout.MODEL_GEOMETRY_START).sections
+    root = next(((r, t) for s, r, t in order if s == ROOT_SECTION), None)
+    if root is None:
+        raise FigureError("the match pose has no section %d" % ROOT_SECTION)
+    undo = _inverse(tuple(v / scene.ONE for v in root[0]))
+    surfaces, parts = {}, []
+    notes = {"no image": 0, "no palette": 0, "off the record": 0, "view": view,
+             "projection": dict(pose["projection"]), "order": [s for s, _r, _t in order],
+             "figure": figure, "armband": armband, "sleeves": sleeves}
+    for number, rotation, translation in order:
+        if not 0 <= number < len(sections):
+            raise FigureError("section %d is not in %s" % (number, layout.MODEL))
+        one = sections[number]
+        r = tuple(v / scene.ONE for v in rotation)
+        moved = []
+        for v in one.vertices:
+            p = _apply(r, (v.x, v.y, v.z))
+            p = (p[0] + translation[0], p[1] + translation[1], p[2] + translation[2])
+            if view == "torso":
+                p = _apply(undo, (p[0] - root[1][0], p[1] - root[1][1], p[2] - root[1][2]))
+            moved.append(_Vertex(*p))
+        for at, primitive in enumerate(one.primitives):
+            corner = atlas.texel(primitive, *primitive.texcoords[0])
+            row, column = skin.grid(primitive.clut)
+            record, surface = None, None
+            for path, body, images, palettes in banks:
+                page = atlas.image_at(images, *corner)
+                if page is None:
+                    continue
+                try:
+                    texture.covering(palettes, column * texture.NARROW, row, texture.NARROW)
+                except texture.NoPalette:
+                    continue
+                record = page
+                key = (path, record.offset, primitive.tpage_depth, primitive.clut)
+                if key not in surfaces:
+                    try:
+                        surfaces[key] = scene.surface_for(body, record, primitive.tpage_depth,
+                                                          primitive.clut, palettes, path)
+                    except texture.NoPalette:
+                        surfaces[key] = None
+                surface = surfaces[key]
+                break
+            if record is None:
+                notes["no image"] += 1
+            elif surface is None:
+                notes["no palette"] += 1
+            part = scene.part_for(primitive, moved, record, surface, primitive.clut, 0,
+                                  (layout.MODEL, number), at)
+            if surface is not None and part.surface is None:
+                notes["off the record"] += 1
+            parts.append(part)
+    return scene.Scene(parts, {k: v for k, v in surfaces.items() if v is not None},
+                       looks.parse_tuple(TUPLE), 0, notes)
+
+
+def screen_points(drawn, part) -> list:
+    """A camera-view part's corners on the game's screen: `SX = OFX + H X / Z`,
+    the y the scene flipped (`scene.UP`) flipped back."""
+    projection = drawn.notes["projection"]
+    h = projection["H"]
+    out = []
+    for x, y, z in part.points:
+        y *= scene.UP
+        out.append(None if z <= 0 else (projection["OFX"] + h * x / z,
+                                        projection["OFY"] + h * y / z))
+    return out

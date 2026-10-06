@@ -22,6 +22,7 @@ Usage:
     python tools/kits/cli.py zones --map <Zonas We2002.png> [--negative]
     python tools/kits/cli.py figure [--tag TAG] [--set 1|2] [--figure 0|1] [--geometry BIN] <path>
     python tools/kits/cli.py figure --negative [--tag TAG] [--geometry BIN] <path>
+    python tools/kits/cli.py figure --match [--armband] [--sleeves long|short] [--tag TAG] <path>
 """
 
 from __future__ import annotations
@@ -1060,6 +1061,33 @@ def _scene_digest(scene) -> str:
     return h.hexdigest()
 
 
+def _match_figure(kit, geometry, sets, armband, sleeves) -> int:
+    """`figure --match`: the match figure the 3D tab draws (section 4.3), one
+    line per set: its order of MODEL.BIN sections, parts, surfaces and the
+    digest of the scene."""
+    try:
+        pose = api.match_pose()
+    except api.FigureError as exc:
+        print("figure: %s" % exc, file=sys.stderr)
+        return 1
+    bad = 0
+    for kit_set in sets:
+        try:
+            scene = api.match_figure(kit, kit_set, armband=armband, sleeves=sleeves,
+                                     geometry=geometry, pose=pose)
+        except api.FigureError as exc:
+            bad += 1
+            print("set %d match figure: %s" % (kit_set, exc))
+            continue
+        print("set %d match figure, %s sleeves%s: order %s  %d parts, %d textured, "
+              "%d surfaces  %s"
+              % (kit_set, sleeves, ", armband" if armband else "",
+                 " ".join(map(str, scene.notes["order"])), len(scene.parts),
+                 sum(1 for p in scene.parts if p.textured), len(scene.surfaces),
+                 _scene_digest(scene)))
+    return 1 if bad else 0
+
+
 def cmd_figure(args) -> int:
     """The 3D figure the window's 3D tab draws (`api.figure`, in the pose it
     opens with), one line per set and figure: parts, textured parts,
@@ -1090,6 +1118,8 @@ def cmd_figure(args) -> int:
         return 1
     sets = (1, 2) if args.negative else tuple(args.set or (1, 2))
     figures = tuple(args.figure or (0, 1))
+    if args.match:
+        return _match_figure(kit, geometry, sets, args.armband, args.sleeves)
 
     def draw(drawn_as) -> tuple:
         digests, bad = {}, 0
@@ -1230,6 +1260,11 @@ def main(argv=None) -> int:
     p.add_argument("--geometry", help="the Japanese data track (default $WE2002_LOOKS_IMAGE)")
     p.add_argument("--negative", action="store_true",
                    help="draw set 2 as set 1 and require the set-1-vs-set-2 verdict to flip")
+    p.add_argument("--match", action="store_true",
+                   help="the match figure (MODEL.BIN, the measured pose) instead")
+    p.add_argument("--armband", action="store_true", help="with --match: the captain's armband")
+    p.add_argument("--sleeves", choices=("long", "short"), default="long",
+                   help="with --match: the sleeve length (default long)")
     p.set_defaults(fn=cmd_figure)
     args = parser.parse_args(argv)
     if args.command == "export" and not args.confront and not args.out:

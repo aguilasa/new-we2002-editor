@@ -23,6 +23,8 @@ build it.
     api.figure(kit, kit_set, figure, geometry_path=None, frame=None)
                                      # the looks Scene of the figure in the kit;
                                      # geometry from WE2002_LOOKS_IMAGE when no path
+    api.match_figure(kit, kit_set, armband=False, sleeves="long", figure="outfield",
+                     view="torso")   # the MODEL.BIN match figure, in its measured pose
 """
 
 from __future__ import annotations
@@ -77,6 +79,8 @@ __all__ = (
     "map_check", "MapCheck", "MAP_BACKGROUND", "GLYPH_ZONES", "zones_self_check",
     "figure", "read_geometry", "palette_swap", "SwapControl", "GEOMETRY_ENV",
     "FigureError", "NoGeometry", "GeometryRefused", "FIGURE_POSE", "FIGURE_TRIANGLES",
+    "match_figure", "match_pose", "screen_points", "MATCH_FIGURES", "MATCH_SLEEVES",
+    "MATCH_VIEWS",
 )
 
 GEOMETRY_ENV = _figure.GEOMETRY_ENV
@@ -89,6 +93,30 @@ def figure(kit, kit_set=1, figure=0, geometry_path=None, frame=None, geometry=No
     of *kit*.  The geometry comes from *geometry_path*, else from
     `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry` (section 3.1)."""
     return _figure.scene_of(kit, kit_set, figure, geometry_path, frame, geometry)
+
+
+MATCH_FIGURES = _figure.MATCH_FIGURES
+MATCH_SLEEVES = _figure.MATCH_SLEEVES
+MATCH_VIEWS = _figure.MATCH_VIEWS
+
+
+def match_figure(kit, kit_set=1, armband=False, sleeves="long", figure="outfield",
+                 view="torso", geometry=None, geometry_path=None, pose=None):
+    """The match figure of section 4.3: MODEL.BIN's pieces in the pose the
+    game drew them in, with the captain's armband or not and long or short
+    sleeves, wearing set *kit_set* of *kit*."""
+    return _figure.match_scene(kit, kit_set, armband, sleeves, figure, view, geometry,
+                               geometry_path, pose)
+
+
+def match_pose(path=None):
+    """The measured match pose (`oracle.py --match-pose 5 --write`)."""
+    return _figure.read_match_pose(path)
+
+
+def screen_points(drawn, part):
+    """A camera-view part's corners in the game's screen pixels."""
+    return _figure.screen_points(drawn, part)
 
 
 def read_geometry(geometry_path=None):

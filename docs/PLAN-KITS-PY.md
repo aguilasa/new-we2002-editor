@@ -375,7 +375,10 @@ devolve.
   da aba diz que as costas saem vazadas porque a área que o torso amostra está
   vazia no TEX, que o jogo copia as costas da camisa para ela (medido, §4.7) e
   que o número não foi medido — o desenho segue os dados (decisão do usuário,
-  2026-10-05; KITS-TASK-37, CORR-KITS-066).
+  2026-10-05; KITS-TASK-37, CORR-KITS-066). O seletor de figura tem um
+  terceiro item, **match player**, a figura de partida do `MODEL.BIN` na pose
+  medida no jogo (§4.3, KITS-TASK-47); `ui/app.py --figure 2 --armband` a
+  desenha com a braçadeira até o checkbox da KITS-TASK-40 existir.
 - **Aba "Diagnóstico"**: a lista do `kit.problems`, uma linha por problema da
   guarda ("Refused: …") e uma por nota de leitura ("Note: …"), nas palavras do
   núcleo, com um resumo em cima; TEX sadio lido sem nota deixa a lista vazia
@@ -704,7 +707,8 @@ Comando: `python tools/kits/oracle.py --attach-matrix 6 --sleeve-length short`,
 `--sleeve-length short` sai 1. O controle é o `--plant-matrix slot` com `--sleeve-length
 short`, que espera a braçadeira no lugar da 6 e sai 1. A regra de manga longa
 aplicada ao slot 6 também sai 1, com `no figure draws section 93`. A tabela
-dos dois comprimentos mora em `oracle.SLEEVE_LENGTHS`.
+dos dois comprimentos mora em `SLEEVE_LENGTHS`, do `core/figure.py` desde a
+KITS-TASK-47; o `oracle.py` a importa de lá.
 
 Foi uma partida, dois times e um capitão por time. O que decide o comprimento
 da manga não foi medido.
@@ -751,12 +755,42 @@ oferece como desembaraçada. Pareado por `corners`
 4,05 px, 21 das 24 acima do limite de 2,00; pela ordem gravada, o pior é
 1,01 px ([CORR-KITS-083](/docs/tasks/kits/CORR-KITS-083.md)).
 
-A pose mora em `work/kits-pose/slot5-<cabeça>.json`, fora do git: a projeção
+A pose de cada corrida mora em `work/kits-pose/slot5-<cabeça>.json`, fora do git (a
+versionada é a do parágrafo seguinte): a projeção
 e, por peça, a seção, a rotação e a translação, na ordem de desenho. Comando
 que refaz: `python tools/kits/oracle.py --match-pose 5`, com
 `WE2002_LOOKS_IMAGE` e `WE2002_LOOKS_DRIVE_IMAGE`. A captura fica em
 `work/kits-oracle/pose-5.json`, e `--frame-json` a relê sem emulador. São duas
 figuras de um quadro: a pose de um instante de corrida, não um ciclo.
+
+**A figura de partida na aba 3D, desde 2026-10-06 ([KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md)).**
+A pose que a aba lê é versionada em `tools/kits/core/match_pose.json`, escrita
+por `python tools/kits/oracle.py --match-pose 5 --write` e nunca à mão. O
+`work/kits-pose/` continua sendo a saída de cada corrida. O núcleo
+(`api.match_figure`) monta as seções do `MODEL.BIN` na ordem medida, cada uma
+pela matriz que o jogo lhe deu. Cada primitiva é texturizada como o
+`assembly.draw_list` resolve as da `LOOKS SET`: página e CLUT do disco,
+procuradas primeiro no `DAT2D.BIN` e depois no TEX aberto. A cabeça usa os
+CLUTs do disco, sem edição de tupla.
+
+A braçadeira e a manga entram por posição na ordem. A peça trocada fica com a
+matriz que o jogo deu àquela posição: a 93 no lugar da 97, e na manga curta
+3 5 4 6 no lugar de 95 96 97 98, com a 90 no lugar da 4. A troca se apoia no
+disco: a 93 e a 97 têm a mesma caixa de vértices, e as curtas diferem das
+longas em 3 unidades de x. Na aba a figura é vista no referencial do próprio
+torso (seção 2), em pé. Para o confronto ela sai na vista da câmera do jogo.
+
+O confronto é `python tools/kits/oracle.py --match-silhouette 5 --tag 14`. Ele
+desenha as duas figuras com o `TEX_14` na vista da câmera, projetadas pelo
+`H` medido. O capitão sai com a braçadeira, o jogador de linha sem. Cada
+silhueta é comparada com a do jogador que o jogo desenhou no mesmo quadro da
+captura (as primitivas do grupo cujos texels uma seção da figura guarda), em
+células de 1/4 de pixel. Medido: IoU 0,800 no jogador de linha e 0,821 no
+capitão. O limite é 0,70 (`oracle.SILHOUETTE_LIMIT`). O controle é o
+`--plant-silhouette`, que desenha toda peça com a matriz do torso, dá 0,322 e
+0,284 e sai 1. A borda de uma figura de uns quarenta pixels é o que segura o
+IoU abaixo de 1: arredondar nossos cantos ao pixel inteiro dá 0,793 e 0,787,
+sem ganho.
 
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 

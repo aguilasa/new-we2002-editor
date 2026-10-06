@@ -75,6 +75,7 @@ CATALOG = {
         "figure": "Figure",
         "figure_player": "player",
         "figure_keeper": "goalkeeper",
+        "figure_match": "match player",
         "figure_hint": "Drag to turn, double-click to reset. The back shows through: "
                        "the area the torso samples is empty in the TEX, and the game "
                        "copies the shirt back into it (measured); the number is not "
@@ -129,6 +130,7 @@ CATALOG = {
         "figure": "Figura",
         "figure_player": "jogador",
         "figure_keeper": "goleiro",
+        "figure_match": "jogador em partida",
         "figure_hint": "Arraste para girar, duplo clique para restaurar. As costas saem "
                        "vazadas: a área que o torso amostra está vazia no TEX, e o jogo "
                        "copia as costas da camisa para ela (medido); o número não foi "
