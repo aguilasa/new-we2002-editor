@@ -158,3 +158,10 @@ nomeação; a suspeita, não medida, é o patch de CLUT por time.
 **O limite de 500** do `FIGURE_SPREAD` fica entre o maior espalhamento medido
 com o atraso certo (210) e o menor com o atraso errado (878), os dois desta
 corrida.
+- **Closed** — commit `ddf3d00` (2026-10-06): feat(kits): oracle.py --attach-matrix reads each MODEL.BIN piece's GTE matrix in a match
+  - Files (`git show --name-status ddf3d00`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
+    - `M docs/tasks/kits/44-matriz-gte-model-bin.md`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`

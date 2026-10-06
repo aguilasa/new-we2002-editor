@@ -705,10 +705,10 @@
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.3",
       "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md"],
       "resources": ["emulador", "save-states"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-06",
+      "done_commit": "ddf3d00",
+      "reviewed_on": "pending",
       "review_commit": null
     }
   ]
