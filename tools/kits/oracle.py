@@ -1235,6 +1235,55 @@ def run_attach_matrix(slot: int, cue: str, cache=None, plant=None) -> int:
     return 1 if failures else 0
 
 
+# --- section 4.3: short sleeves are the sleeves image, rewritten ----------
+
+SLEEVES_SET = {1: 1, 2: 5}
+"""Set -> the record of its sleeves image, (576,384) 64x128 (section 1.1)."""
+
+
+def read_image(slot: int, cue: str, x: int, y: int, w: int, h: int) -> list:
+    """One VRAM rectangle as 15-bit halfwords, read twice, each after its own
+    `load_state` of *slot*; raises when the two differ."""
+    import oracle as looks_oracle  # tools/looks
+
+    reads = []
+    with looks_oracle.Oracle(cue) as game:
+        for n in range(2):
+            load_slot(game, slot, "image-%d-%d" % (slot, n))
+            rows = looks_oracle.vram_region(game, x, y, w, h)
+            reads.append([(p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10
+                          for row in rows for p in row])
+    if reads[0] != reads[1]:
+        raise RuntimeError("the rectangle read twice differs: nothing is measured")
+    return reads[0]
+
+
+def run_sleeves_image(slot: int, cue: str, page_x: int, tag: str, kit_set: int = 1,
+                      picture=None) -> int:
+    """`--sleeves-image SLOT`: the sleeves image the match holds in VRAM at
+    page *page_x*, against TEX_*tag*'s on the disc -- which blocks differ, and
+    which zones of the map they cover."""
+    body = _body(tag)
+    record = records_of(body)[SLEEVES_SET[kit_set]]
+    disc = [five(v) for v in payload(body, record)]
+    vram = read_image(slot, cue, page_x, record.y, record.w, record.h)
+    print("  sleeves image (%d,%d) %dx%d against TEX_%s set %d; read twice, identical"
+          % (page_x, record.y, 2 * record.w, record.h, tag, kit_set))
+    found = diff_blocks(vram, disc, record.w, record.h)
+    total = sum(b[4] for b in found)
+    print("  %d pixel(s) of %d differ from the disc, in %d block(s):"
+          % (total, 2 * record.w * record.h, len(found)))
+    for x0, y0, x1, y1, n in found[:BLOCKS_SHOWN]:
+        zones = block_zones((x0 + IMAGE_HEIGHT, y0, x1 + IMAGE_HEIGHT, y1, n))
+        print("    (%3d,%3d)-(%3d,%3d) %4d pixel(s): %s"
+              % (x0 + IMAGE_HEIGHT, y0, x1 + IMAGE_HEIGHT, y1, n,
+                 ", ".join(zones) or "no zone"))
+    if picture:
+        save_picture(picture, vram, record.w, record.h, body, kit_set)
+        print("  picture: %s" % picture)
+    return 0
+
+
 # --- section 4.7: the back and the number ---------------------------------
 
 UNIFORM_RECORD = 0
@@ -1720,6 +1769,9 @@ def main(argv=None) -> int:
     source.add_argument("--attach-matrix", type=int, metavar="SLOT",
                         help="section 4.3: the GTE matrix each MODEL.BIN section is "
                              "drawn with in this match slot")
+    source.add_argument("--sleeves-image", type=int, metavar="SLOT",
+                        help="section 4.3: the sleeves image this slot holds in VRAM, "
+                             "against the disc (with --page, --tag, --set)")
     source.add_argument("--back", type=int, metavar="SLOT",
                         help="section 4.7: does the LOOKS SET of this slot fill the torso gaps")
     parser.add_argument("--cue", help="the disc the state was saved on (default $%s)"
@@ -1780,6 +1832,13 @@ def main(argv=None) -> int:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
         return run_sleeves(args.sleeves, cue, args.expect_sleeves, args.plant_sleeves)
+    if args.sleeves_image is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_sleeves_image(args.sleeves_image, cue, args.page or 576,
+                                 args.tag or layout.KIT_ON_SCREEN, args.set, args.picture)
     if args.attach_matrix is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:
