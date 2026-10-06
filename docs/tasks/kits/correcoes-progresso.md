@@ -88,7 +88,7 @@
 | [CORR-KITS-083](/docs/tasks/kits/CORR-KITS-083.md) | Corrigir ou remedir a afirmação de que o pareamento por corners erra 2 a 4 px | KITS-TASK-45 | medium | done | 2026-10-06 |
 | [CORR-KITS-084](/docs/tasks/kits/CORR-KITS-084.md) | Catalogar um controle para a ordem de texel do --match-pose | KITS-TASK-45 | medium | done | 2026-10-06 |
 | [CORR-KITS-085](/docs/tasks/kits/CORR-KITS-085.md) | Tirar a nota da KITS-TASK-47 do commit da KITS-TASK-45, ou declará-la | KITS-TASK-45 | low | done | 2026-10-06 |
-| [CORR-KITS-086](/docs/tasks/kits/CORR-KITS-086.md) | Declarar os quatro arquivos a mais no escopo da KITS-TASK-47 | KITS-TASK-47 | medium | pending | — |
+| [CORR-KITS-086](/docs/tasks/kits/CORR-KITS-086.md) | Declarar os quatro arquivos a mais no escopo da KITS-TASK-47 | KITS-TASK-47 | medium | done | 2026-10-06 |
 | [CORR-KITS-087](/docs/tasks/kits/CORR-KITS-087.md) | Fazer o juiz de partida afirmar que a mudança da braçadeira fica no braço | KITS-TASK-47 | medium | pending | — |
 | [CORR-KITS-088](/docs/tasks/kits/CORR-KITS-088.md) | Devolver a docstring de TAB_NAMES para baixo da constante em ui/app.py | KITS-TASK-47 | low | done | 2026-10-06 |
 <!-- rite:end -->

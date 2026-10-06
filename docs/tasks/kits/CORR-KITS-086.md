@@ -58,3 +58,8 @@ Conserto:
 $ LC_ALL=C comm -13 <(rite context KITS-TASK-47 … | sort) <(git show --name-only --format= f060945 | grep -v '^docs/tasks/' | sort)
 (sem saída)
 ```
+- **Closed** — commit `b2c4f77` (2026-10-06): chore(kits): task 47 declares the four files it also changed
+  - Files (`git show --name-status b2c4f77`):
+    - `M docs/tasks/kits/47-figura-partida-aba-3d.md`
+    - `M docs/tasks/kits/CORR-KITS-086.md`
+    - `M docs/tasks/kits/progress.json`
