@@ -49,3 +49,7 @@ errado da nota ("2 a 4 px") é corrigido junto com a CORR-KITS-083.
 $ python3 -c "…print(files da KITS-TASK-45)…"
 ['tools/kits/oracle.py', 'tools/kits/selftest.py', 'docs/PLAN-KITS-PY.md', 'docs/tasks/kits/47-figura-partida-aba-3d.md']
 ```
+- **Closed** — commit `1b26d74` (2026-10-06): chore(kits): task 45 declares the task 47 note it wrote
+  - Files (`git show --name-status 1b26d74`):
+    - `M docs/tasks/kits/CORR-KITS-085.md`
+    - `M docs/tasks/kits/progress.json`
