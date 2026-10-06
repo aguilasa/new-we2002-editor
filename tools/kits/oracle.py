@@ -2060,20 +2060,16 @@ def block_zones(block) -> list:
 
 PANEL_W, PANEL_H = 20, 24
 """A back panel: the torso gap's size, (0,80) 20x24 (core/zones.py GAPS)."""
-GLYPH_W = 6
-"""The "numbers 0-9" zone is 60x12: ten glyphs of 6x12, 0 to 9 left to right."""
+from core.figure import DIGIT_STEP, DIGIT_Y, GLYPH_W  # noqa: E402,F401  (the core's rule)
+from core.figure import BACK_COPY, digit_xs as _digit_xs  # noqa: E402
 PANEL_TOP = 80
 """The first row of the panels, which is the torso gap's (core/zones.py)."""
-DIGIT_Y = 7
-DIGIT_STEP = 8
-"""Where the digits fall in a panel, measured in slot 5: row 7, one digit at
-x 7, two at x 3 and 11 -- centred, a glyph every 8 pixels."""
 
 
 def digit_xs(count: int) -> list:
-    """The x of each of *count* digits in a panel, centred at DIGIT_STEP."""
-    first = (PANEL_W - (GLYPH_W + DIGIT_STEP * (count - 1))) // 2
-    return [first + DIGIT_STEP * i for i in range(count)]
+    """The x of each of *count* digits in a panel, centred at DIGIT_STEP
+    (`core.figure.digit_xs`, the one the 3D tab paints with)."""
+    return _digit_xs(count, PANEL_W)
 
 
 def panels_judge(panels: list) -> list:
@@ -2166,9 +2162,9 @@ def read_panels(words, width: int, shift: int = 0) -> list:
     out = []
     for figure, x, y in panel_cells():
         cell = (figure, x, y + shift)
-        sx = 44 if cell[0] == 0 else 108
+        sx, sy = BACK_COPY[cell[0]]
         back = [[v & 0x7F for v in row]
-                for row in back_indices(words, width, (sx, 6, PANEL_W, PANEL_H))]
+                for row in back_indices(words, width, (sx, sy, PANEL_W, PANEL_H))]
         out.append(read_panel(words, width, cell, back, glyph_set, ground))
     return out
 

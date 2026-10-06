@@ -67,6 +67,8 @@ TAB_NAMES = ("plan", "3d", "diag")
 """--tab names of the three tabs, in tab order."""
 MATCH_FIGURE = 2
 """The 3D figure selector's third item: the match player of section 4.3."""
+DEFAULT_NUMBER = 10
+"""The number the Number field opens with: the slot 5 captain's (section 4.7)."""
 WORK = ("work1", "work2")
 """--image names of the two work bitmaps (first and second set); any other
 --image is an image record number."""
@@ -394,7 +396,20 @@ class Window(QtWidgets.QMainWindow):
         # The match figure (KITS-TASK-47, section 4.3): MODEL.BIN in the pose
         # measured in the game, with the armband when `armband` is on.
         self.figure_box.addItem("", MATCH_FIGURE)
-        self.armband = False
+        # The three dressings (KITS-TASK-40), each drawing only what was
+        # measured: the number on a LOOKS SET figure's back (section 4.7), the
+        # armband and the long sleeves on the match figure (section 4.3).  What
+        # was not measured stays off, with the sentence in the box's own text.
+        self.number_box = QtWidgets.QCheckBox()
+        self.number_spin = QtWidgets.QSpinBox()
+        self.number_spin.setRange(*api.SHIRT_NUMBERS)
+        self.number_spin.setValue(DEFAULT_NUMBER)
+        self.armband_box = QtWidgets.QCheckBox()
+        self.long_box = QtWidgets.QCheckBox()
+        for widget in (self.number_box, self.armband_box, self.long_box):
+            widget.toggled.connect(self.draw_figure)
+        self.number_spin.valueChanged.connect(self.draw_figure)
+        self.figure_box.currentIndexChanged.connect(self.dressings)
         self.set_box.currentIndexChanged.connect(self.draw_figure)
         self.figure_box.currentIndexChanged.connect(self.draw_figure)
         self.figure_view = FigureView(api.FIGURE_TRIANGLES)
@@ -412,6 +427,11 @@ class Window(QtWidgets.QMainWindow):
         three = QtWidgets.QWidget()
         three_layout = QtWidgets.QVBoxLayout(three)
         three_layout.addLayout(row)
+        dress = QtWidgets.QHBoxLayout()
+        for widget in (self.number_box, self.number_spin, self.armband_box, self.long_box):
+            dress.addWidget(widget)
+        dress.addStretch(1)
+        three_layout.addLayout(dress)
         three_layout.addWidget(self.figure_hint)
         three_layout.addWidget(self.figure_view, 1)
         self.tabs.addTab(three, "")
@@ -472,6 +492,7 @@ class Window(QtWidgets.QMainWindow):
         self.figure_box.setItemText(0, tr("figure_player"))
         self.figure_box.setItemText(1, tr("figure_keeper"))
         self.figure_box.setItemText(2, tr("figure_match"))
+        self.dressings()
         self.figure_hint.setText(tr("figure_hint"))
         self.reset_button.setText(tr("reset_view"))
         self.show_geometry()
@@ -552,6 +573,33 @@ class Window(QtWidgets.QMainWindow):
         else:
             self.figure_note.setText(" ")
 
+    def match_drawn(self) -> bool:
+        """The match figure is what the tab draws: its own item, or the player
+        with the armband or the long sleeves, which only it has."""
+        figure = self.figure_box.currentData()
+        return figure == MATCH_FIGURE or (
+            figure == 0 and (self.armband_box.isChecked() or self.long_box.isChecked()))
+
+    def dressings(self) -> None:
+        """Which dressing the chosen figure can take, and the sentence for
+        the ones it cannot: the long sleeves only exist for the player, so
+        the goalkeeper hides the box; the armband was measured on a player,
+        and the number on the LOOKS SET figures' backs."""
+        figure = self.figure_box.currentData()
+        self.long_box.setVisible(figure != 1)
+        self.long_box.setText(tr("long_sleeves"))
+        keeper = figure == 1
+        self.armband_box.setEnabled(not keeper)
+        self.armband_box.setText(tr("armband_off") if keeper else tr("armband"))
+        if keeper:
+            self.armband_box.setChecked(False)
+        match = self.match_drawn()
+        self.number_box.setEnabled(not match)
+        self.number_spin.setEnabled(not match)
+        self.number_box.setText(tr("number_off") if match else tr("number"))
+        if match:
+            self.number_box.setChecked(False)
+
     def draw_figure(self) -> None:
         """The figure in the chosen set, drawn only while its tab is shown."""
         if self.tabs.currentIndex() != 1:
@@ -559,14 +607,22 @@ class Window(QtWidgets.QMainWindow):
         if self.geometry is None or self.kit is None:
             self.figure_view.set_scene(None)
             return
+        self.dressings()
         try:
-            if self.figure_box.currentData() == MATCH_FIGURE:
+            if self.match_drawn():
                 scene = api.match_figure(self.kit, self.set_box.currentData(),
-                                         armband=self.armband, geometry=self.geometry)
+                                         armband=self.armband_box.isChecked(),
+                                         sleeves=api.MATCH_SLEEVES[
+                                             0 if self.long_box.isChecked() else 1],
+                                         geometry=self.geometry)
             else:
                 scene = api.figure(self.kit, self.set_box.currentData(),
                                    self.figure_box.currentData(),
                                    frame=api.FIGURE_POSE, geometry=self.geometry)
+                if self.number_box.isChecked():
+                    scene = api.numbered(scene, self.kit, self.set_box.currentData(),
+                                         self.figure_box.currentData(),
+                                         self.number_spin.value())
         except api.FigureError as exc:
             self.figure_view.set_scene(None)
             self.say(None, {CORE_TEXT: str(exc)})
@@ -878,7 +934,14 @@ def main(argv=None) -> int:
                         help="3D: 0 the player, 1 the goalkeeper, %d the match player"
                         % MATCH_FIGURE)
     parser.add_argument("--armband", action="store_true",
-                        help="3D: the match player wears the captain's armband")
+                        help="3D: tick Captain armband")
+    parser.add_argument("--long-sleeves", action="store_true",
+                        help="3D: tick Long sleeves")
+    parser.add_argument("--number", type=int, metavar="N",
+                        help="3D: tick Number, with N in its field")
+    parser.add_argument("--list-3d", action="store_true",
+                        help="print the 3D tab's dressing boxes (shown, enabled, ticked, "
+                        "text) and exit")
     parser.add_argument("--yaw", type=float, help="3D: turn about the vertical, degrees "
                         "(default: facing the viewer)")
     parser.add_argument("--pitch", type=float, help="3D: tilt, degrees")
@@ -933,8 +996,20 @@ def main(argv=None) -> int:
     window.zones_box.setChecked(args.zones)
     window.checker_box.setChecked(not args.no_checker)
     window.set_box.setCurrentIndex(args.kit_set - 1)
-    window.armband = args.armband
     window.figure_box.setCurrentIndex(args.figure)
+    window.armband_box.setChecked(args.armband)
+    window.long_box.setChecked(args.long_sleeves)
+    if args.number is not None:
+        window.number_spin.setValue(args.number)
+        window.number_box.setChecked(True)
+    window.dressings()
+    if args.list_3d:
+        boxes = {"number": window.number_box, "armband": window.armband_box,
+                 "long sleeves": window.long_box}
+        for name, box in boxes.items():
+            print("  box %s: shown %s, enabled %s, ticked %s, text %s"
+                  % (name, not box.isHidden(), box.isEnabled(), box.isChecked(), box.text()))
+        return 0
     window.figure_view.turn_to(window.figure_view.yaw if args.yaw is None else args.yaw,
                                window.figure_view.pitch if args.pitch is None else args.pitch)
     if args.reset:

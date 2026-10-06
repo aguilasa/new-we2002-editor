@@ -39,7 +39,8 @@ WHAT IT JUDGES:
       readout reading the pixel to the right FAILS the hover judge; the 3D
       tab drawing set 1 for both sets FAILS the 3D judge, the match player
       drawn with section 97 when the armband is asked FAILS the match judge
-      (KITS-TASK-47: with TEX_14 the armband changes 337 px in a 25x18 box,
+      (KITS-TASK-47: with TEX_14 and long sleeves the armband changes 291 px in a
+      24x17 box since KITS-TASK-40 unmirrored the view (337 px, 25x18, before),
       and the judge wants something changed, in at most ARMBAND_BOX px each
       way and ARMBAND_SHARE % of the figure, inside ARM_SIDE and ARM_ROWS
       of the figure's box -- the armband drawn on the head FAILS it too,
@@ -109,10 +110,11 @@ MATCH_ITEM = "2"
 """`app.py --figure` of the match player."""
 ARMBAND_BOX = 40
 """The most pixels, each way, the armband's difference may span: measured on
-:98 with TEX_14 (KITS-TASK-47), 337 pixels in a 25x18 box on the arm."""
+:98 with TEX_14 and long sleeves, 291 pixels in a 24x17 box on the arm (KITS-TASK-40,
+the view unmirrored; 337 in 25x18 before, KITS-TASK-47)."""
 ARMBAND_SHARE = 5.0
 """The most, in percent of the figure's pixels, the armband may change
-(measured 1.3 %: 337 of 26427)."""
+(measured 1.3 %, before and after KITS-TASK-40)."""
 ARM_SIDE = 0.35
 """The armband's change lies in the outer ARM_SIDE of the figure's box, on
 either side: measured at x 0.01-0.20 of it (KITS-TASK-47, CORR-KITS-087)."""
@@ -157,9 +159,9 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH = (
+STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES = (
     "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset",
-    "match")
+    "match", "dressing", "dressing boxes")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -207,8 +209,17 @@ PLANTS = (
      "                scene = api.figure(self.kit, self.set_box.currentData(),\n",
      "                scene = api.figure(self.kit, 1,\n"),
     ("armband drawn as section 97", MATCH,
-     "                                         armband=self.armband, geometry=self.geometry)\n",
-     "                                         armband=False, geometry=self.geometry)  # planted\n"),
+     "                                         armband=self.armband_box.isChecked(),\n",
+     "                                         armband=False,  # planted\n"),
+    ("Number ignored", DRESS,
+     "                if self.number_box.isChecked():\n",
+     "                if False:  # planted: Number ignored\n"),
+    ("Long sleeves ignored", DRESS,
+     "                                             0 if self.long_box.isChecked() else 1],\n",
+     "                                             1],  # planted: Long sleeves ignored\n"),
+    ("Long sleeves always shown", BOXES,
+     "        self.long_box.setVisible(figure != 1)\n",
+     "        self.long_box.setVisible(True)  # planted\n"),
     ("armband drawn on the head", MATCH,
      '        if armband and section == rule["replaced"]:\n',
      "        if armband and piece is pieces[0]:  # planted: the head\n",
@@ -676,7 +687,7 @@ def match_judge(python, image, env, tmp, app=APP) -> tuple:
     for armband in (False, True):
         out = os.path.join(tmp, "match-%d.png" % armband)
         shot, more, _ = capture(python, app, image, ["--tag", MATCH_TAG, "--tab", "3d",
-                                                     "--figure", MATCH_ITEM]
+                                                     "--figure", MATCH_ITEM, "--long-sleeves"]
                                 + (["--armband"] if armband else []), out, env)
         bad += ["armband %s: %s" % (armband, m) for m in more]
         if shot is None:
@@ -720,6 +731,86 @@ def match_judge(python, image, env, tmp, app=APP) -> tuple:
     if pct > ARMBAND_SHARE:
         bad.append("the armband changes %.1f %% of the figure, over %.1f" % (pct, ARMBAND_SHARE))
     return bad, seen
+
+
+DRESSINGS = (("Number", "0", ["--number", "10"]),
+             ("Captain armband", MATCH_ITEM, ["--armband"]),
+             ("Long sleeves", MATCH_ITEM, ["--long-sleeves"]))
+"""(box, --figure, what ticks it) of the three dressings whose rule was
+measured (KITS-TASK-40): each is captured from the back, on and off."""
+BOX_WANT = {
+    ("0", "en-US"): {"number": (True, True, "Number"),
+                     "armband": (True, True, "Captain armband"),
+                     "long sleeves": (True, True, "Long sleeves")},
+    ("1", "en-US"): {"number": (True, True, "Number"),
+                     "armband": (True, False, "Captain armband: not measured on the goalkeeper"),
+                     "long sleeves": (False, None, None)},
+    (MATCH_ITEM, "en-US"): {"number": (True, False, "Number: not measured on the match figure"),
+                            "armband": (True, True, "Captain armband"),
+                            "long sleeves": (True, True, "Long sleeves")},
+    ("1", "pt-BR"): {"armband": (True, False, "Braçadeira de capitão: não medida no goleiro"),
+                     "long sleeves": (False, None, None)},
+    (MATCH_ITEM, "pt-BR"): {"number": (True, False, "Número: não medido na figura de partida")},
+}
+"""What `app.py --list-3d` has to print per (figure, language): (shown,
+enabled, text) of each dressing box, None where it does not matter.  The
+long sleeves only exist for a player, so the goalkeeper HIDES the box; the
+two dressings with no measured rule there are off and say so."""
+
+
+def dress_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, what was seen): each measured dressing, ticked and not,
+    seen from the back (`--yaw 0`), changes the 3D view."""
+    bad, seen = [], []
+    for name, figure, ticks in DRESSINGS:
+        shots = []
+        for on in (False, True):
+            out = os.path.join(tmp, "dress-%s-%d.png" % (name.split()[0].lower(), on))
+            shot, more, _ = capture(python, app, image,
+                                    ["--tag", MATCH_TAG, "--tab", "3d", "--figure", figure,
+                                     "--yaw", "0"] + (ticks if on else []), out, env)
+            bad += ["%s %s: %s" % (name, on, m) for m in more]
+            shots.append(shot)
+        if None in shots:
+            continue
+        n = differing_in_view(*shots)
+        seen.append("%s %d px" % (name, n))
+        if n <= 0:
+            bad.append("%s ticked draws the same back as unticked" % name)
+    return bad, ", ".join(seen)
+
+
+def boxes_judge(python, image, env, app=APP) -> list:
+    """The dressing boxes per figure and language, against BOX_WANT."""
+    bad = []
+    for (figure, lang), want in sorted(BOX_WANT.items()):
+        code, output = run_app(python, app, [image, "--tag", MATCH_TAG, "--figure", figure,
+                                             "--lang", lang, "--list-3d"], env)
+        if code != 0:
+            bad.append("figure %s %s: exit %s" % (figure, lang, code))
+            continue
+        got = {}
+        for line in output.splitlines():
+            line = line.strip()
+            if not line.startswith("box "):
+                continue
+            name, rest = line[4:].split(": ", 1)
+            fields = dict(part.split(" ", 1) for part in rest.split(", ", 3))
+            got[name] = (fields["shown"] == "True", fields["enabled"] == "True", fields["text"])
+        for name, (shown, enabled, text) in want.items():
+            have = got.get(name)
+            if have is None:
+                bad.append("figure %s %s: no %s box" % (figure, lang, name))
+                continue
+            if have[0] != shown:
+                bad.append("figure %s %s: %s box %s" % (figure, lang, name,
+                                                         "shown" if have[0] else "hidden"))
+            if enabled is not None and have[1] != enabled:
+                bad.append("figure %s %s: %s box %s" % (figure, lang, name,
+                                                         "on" if have[1] else "off"))
+            if text is not None and have[2] != text:
+                bad.append("figure %s %s: %s box says %r" % (figure, lang, name, have[2]))
+    return bad
 
 
 def off_judge(python, image, env, tmp, app=APP) -> list:
@@ -858,6 +949,12 @@ def run(python: str, image: str) -> int:
         bad, seen = match_judge(python, image, env, tmp)
         t.ok("3D TEX_%s: the match player is drawn, and the captain's armband changes "
              "only a box on its arm (%s)" % (MATCH_TAG, seen), bad)
+        bad, seen = dress_judge(python, image, env, tmp)
+        t.ok("3D TEX_%s from the back: each measured dressing changes the view (%s)"
+             % (MATCH_TAG, seen), bad)
+        t.ok("the dressing boxes: Long sleeves hidden with the goalkeeper, and the "
+             "dressings with no rule off with the sentence, in en-US and pt-BR",
+             boxes_judge(python, image, env))
         t.ok("with no geometry disc the 3D tab is off with the sentence, and Plan is the same",
              off_judge(python, image, env, tmp))
         bad, digests = reset_judge(python, image, env, tmp)
@@ -890,6 +987,10 @@ def run(python: str, image: str) -> int:
                 elif judge == FIGURE:
                     red, _ = figure_judge(python, image, env, box, app)
                     bad = []
+                elif judge == DRESS:
+                    red, bad = dress_judge(python, image, env, box, app)[0], []
+                elif judge == BOXES:
+                    red, bad = boxes_judge(python, image, env, app), []
                 elif judge == MATCH:
                     red, bad = match_judge(python, image, env, box, app)[0], []
                 elif judge == OFF:

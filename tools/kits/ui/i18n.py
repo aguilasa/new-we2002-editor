@@ -78,8 +78,13 @@ CATALOG = {
         "figure_match": "match player",
         "figure_hint": "Drag to turn, double-click to reset. The back shows through: "
                        "the area the torso samples is empty in the TEX, and the game "
-                       "copies the shirt back into it (measured); the number is not "
-                       "measured.",
+                       "copies the shirt back into it (measured); tick Number to paint "
+                       "the back panel a match builds there.",
+        "number": "Number",
+        "number_off": "Number: not measured on the match figure",
+        "armband": "Captain armband",
+        "armband_off": "Captain armband: not measured on the goalkeeper",
+        "long_sleeves": "Long sleeves",
         "reset_view": "Reset view",
         "figure_geometry": "3D geometry: {path}",
         "figure_off": "3D off: {reason}",
@@ -133,8 +138,13 @@ CATALOG = {
         "figure_match": "jogador em partida",
         "figure_hint": "Arraste para girar, duplo clique para restaurar. As costas saem "
                        "vazadas: a área que o torso amostra está vazia no TEX, e o jogo "
-                       "copia as costas da camisa para ela (medido); o número não foi "
-                       "medido.",
+                       "copia as costas da camisa para ela (medido); marque Número para "
+                       "pintar o painel de costas que uma partida monta ali.",
+        "number": "Número",
+        "number_off": "Número: não medido na figura de partida",
+        "armband": "Braçadeira de capitão",
+        "armband_off": "Braçadeira de capitão: não medida no goleiro",
+        "long_sleeves": "Mangas longas",
         "reset_view": "Restaurar vista",
         "figure_geometry": "geometria do 3D: {path}",
         "figure_off": "3D desligado: {reason}",

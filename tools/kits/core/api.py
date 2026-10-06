@@ -25,6 +25,8 @@ build it.
                                      # geometry from WE2002_LOOKS_IMAGE when no path
     api.match_figure(kit, kit_set, armband=False, sleeves="long", figure="outfield",
                      view="torso")   # the MODEL.BIN match figure, in its measured pose
+    api.numbered(scene, kit, kit_set, figure, number)
+                                     # a LOOKS SET figure with the number on its back
 """
 
 from __future__ import annotations
@@ -80,7 +82,7 @@ __all__ = (
     "figure", "read_geometry", "palette_swap", "SwapControl", "GEOMETRY_ENV",
     "FigureError", "NoGeometry", "GeometryRefused", "FIGURE_POSE", "FIGURE_TRIANGLES",
     "match_figure", "match_pose", "screen_points", "MATCH_FIGURES", "MATCH_SLEEVES",
-    "MATCH_VIEWS",
+    "MATCH_VIEWS", "numbered", "SHIRT_NUMBERS",
 )
 
 GEOMETRY_ENV = _figure.GEOMETRY_ENV
@@ -107,6 +109,15 @@ def match_figure(kit, kit_set=1, armband=False, sleeves="long", figure="outfield
     sleeves, wearing set *kit_set* of *kit*."""
     return _figure.match_scene(kit, kit_set, armband, sleeves, figure, view, geometry,
                                geometry_path, pose)
+
+
+SHIRT_NUMBERS = _figure.NUMBERS
+
+
+def numbered(drawn, kit, kit_set, figure, number):
+    """A LOOKS SET figure of `figure()` with the shirt number on its back, as
+    the game builds a match's back panel (section 4.7)."""
+    return _figure.numbered_scene(drawn, kit, kit_set, figure, number)
 
 
 def match_pose(path=None):

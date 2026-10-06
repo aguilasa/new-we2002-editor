@@ -9,7 +9,11 @@ screen triangle.  That is the same picture on Windows and on Linux under the
 Xvfb, which a GL context does not promise, and `kits_ui` compares pictures.
 The camera is orthographic, turned by yaw and pitch, and fits the figure's
 bounds to the widget; model y is up (the scene has already applied the looks
-`UP`), screen y is down, hence the minus.  A drag turns it.
+`UP`), screen y is down, hence the minus.  Screen x is minus model x too: the
+scene is the GTE's space -- x right, y down, z away from the camera -- with y
+flipped, which leaves it left-handed, and drawn with x to the right every
+figure came out mirrored.  The shirt number showed it: "10" read "01", and
+the captain's armband sat on the right arm (KITS-TASK-40).  A drag turns it.
 """
 
 from __future__ import annotations
@@ -88,7 +92,7 @@ class FigureView(QtWidgets.QWidget):
         cx, cy = self.width() / 2.0, self.height() / 2.0
         out = []
         for part, pts in zip(parts, turned):
-            screen = [QtCore.QPointF(cx + (p[0] - mx) * scale, cy - (p[1] - my) * scale)
+            screen = [QtCore.QPointF(cx - (p[0] - mx) * scale, cy - (p[1] - my) * scale)
                       for p in pts]
             for tri in self.triangles:
                 depth = sum(pts[i][2] for i in tri) / 3.0

@@ -19,10 +19,10 @@ A aba 3D ganha três checkboxes, **Number**, **Captain armband** e **Long sleeve
 
 ## Done criteria
 
-- [ ] Para cada checkbox com regra medida: as capturas de costas (`--yaw 0`) ligado e desligado diferem dentro da vista, e a planta que ignora o checkbox fica vermelha no `kits_ui`
-- [ ] Para cada checkbox sem regra: aparece desligado com a frase, nas duas línguas, e o `kits_ui` afirma que está desligado
-- [ ] Manga longa: o checkbox está visível com a figura 0 e escondido com a figura 1. O `kits_ui` afirma pelos dois `--figure`, e a planta que o deixa sempre visível fica vermelha
-- [ ] `ctest --test-dir build -R kits`: 4/4
+- [x] Para cada checkbox com regra medida: as capturas de costas (`--yaw 0`) ligado e desligado diferem dentro da vista, e a planta que ignora o checkbox fica vermelha no `kits_ui`
+- [x] Para cada checkbox sem regra: aparece desligado com a frase, nas duas línguas, e o `kits_ui` afirma que está desligado
+- [x] Manga longa: o checkbox está visível com a figura 0 e escondido com a figura 1. O `kits_ui` afirma pelos dois `--figure`, e a planta que o deixa sempre visível fica vermelha
+- [x] `ctest --test-dir build -R kits`: 4/4
 
 ## Notes
 
@@ -57,3 +57,45 @@ até a 47 fechar. O **Number** já tem regra (KITS-TASK-42) e entra junto com os
 outros dois.
 - **blocked** (2026-10-06): The armband and long sleeves exist only in MODEL.BIN, the match figure the 3D tab does not draw. The user chose to open that work (2026-10-06): KITS-TASK-45 (pose), 46 (short sleeves, needs a user's save state) and 47 (match figure in the 3D tab), ordered before this task.
 - **pending** (2026-10-06): KITS-TASK-47 closed (c8dfdbe): the match figure is in the 3D tab, so armband and long sleeves have geometry to switch on
+
+### 2026-10-06 — execução
+
+Desbloqueada: a KITS-TASK-47 fechou (`c8dfdbe`), e a aba 3D já tinha a figura de partida.
+
+- **Number** tem regra medida (KITS-TASK-38 e 42). O `api.numbered` (`core/figure.py`) monta o painel de costas na lacuna do torso de uma figura da `LOOKS SET`: as costas copiadas de (44,6)/(108,6), e a tinta dos glifos "numbers 0-9" na linha 7, em x 7, ou em 3 e 11. Ele recolore as superfícies do kit sem regravar o TEX. O campo de número vai de 0 a 99 e abre em 10.
+- **Captain armband** e **Long sleeves** desenham a figura de partida (KITS-TASK-47). No jogador da `LOOKS SET`, marcar um dos dois troca a figura. No **match player**, a manga segue o checkbox.
+- **Sem regra:** a braçadeira no goleiro (`Captain armband: not measured on the goalkeeper` / `Braçadeira de capitão: não medida no goleiro`) e o número na figura de partida (`Number: not measured on the match figure` / `Número: não medido na figura de partida`). O **Long sleeves** fica escondido com o goleiro.
+
+**Defeito achado e corrigido no caminho: a vista espelhava.** A primeira captura de costas com o número 10 mostrou "01" espelhado. A cena é o espaço do GTE com o y invertido, um referencial de mão esquerda, e o `figure_view.py` desenhava x para a direita. Agora desenha `cx - x`. Depois da troca o "10" lê certo, a braçadeira da figura de partida passa para o braço esquerdo, e o juiz do `kits_ui` da braçadeira mede 291 px numa caixa de 24×17 px (eram 337 px em 25×18 px, espelhado). A prova é o raciocínio no docstring do `figure_view.py` e a leitura do número; nenhuma captura de costas do jogo confronta a vista.
+
+`python tools/kits/ui_check.py` (`:98`, com `WE2002_KITS_ED_IMAGE`):
+
+```
+  ok    3D TEX_14 from the back: each measured dressing changes the view (Number 5134 px, Captain armband 332 px, Long sleeves 9104 px)
+  ok    the dressing boxes: Long sleeves hidden with the goalkeeper, and the dressings with no rule off with the sentence, in en-US and pt-BR
+        plant 'armband drawn as section 97': the armband changes nothing
+  ok    plant 'armband drawn as section 97' fails the match judge
+        plant 'Number ignored': Number ticked draws the same back as unticked
+  ok    plant 'Number ignored' fails the dressing judge
+        plant 'Long sleeves ignored': Long sleeves ticked draws the same back as unticked
+  ok    plant 'Long sleeves ignored' fails the dressing judge
+        plant 'Long sleeves always shown': figure 1 en-US: long sleeves box shown; figure 1 pt-BR: long sleeves box shown
+  ok    plant 'Long sleeves always shown' fails the dressing boxes judge
+kits_ui: 0 failure(s)
+```
+
+`ui/app.py --list-3d` com `--figure 1`:
+
+```
+  box number: shown True, enabled True, ticked False, text Number
+  box armband: shown True, enabled False, ticked False, text Captain armband: not measured on the goalkeeper
+  box long sleeves: shown False, enabled True, ticked False, text Long sleeves
+```
+
+**Selftest.** O painel do núcleo é lido pelo `oracle.read_panel`, o leitor da KITS-TASK-42: 7, 10 e 23 saem nas posições medidas, escritas no próprio teste, sem pixel inexplicado, e o painel espelhado não lê 10.
+
+- **Vermelho visto:** com `DIGIT_Y = 6` no núcleo, sai `FAIL  the 3D tab's back panel for 10 reads 10 ...  'digits': [(3, 6, 1), (11, 6, 0)]`. A primeira versão do teste não falhou com essa planta: o `oracle.py` passou a importar a mesma constante e o teste só olhava o x. Restaurado, `kits_selftest: 0 failure(s)`.
+- **Controle `figure-swap-noop`:** deixou de ficar vermelho, porque o `numbered_indices` também terminava em `return bytes(out)`, o texto que a planta procura. A variável virou `panel`, e o controle voltou a ficar vermelho.
+
+`ctest --test-dir build -R kits`: `100% tests passed, 0 tests failed out of 4`.
+

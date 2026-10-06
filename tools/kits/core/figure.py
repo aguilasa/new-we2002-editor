@@ -344,3 +344,89 @@ def screen_points(drawn, part) -> list:
         out.append(None if z <= 0 else (projection["OFX"] + h * x / z,
                                         projection["OFY"] + h * y / z))
     return out
+
+
+# -- the shirt number on the back (PLAN-KITS-PY.md section 4.7, KITS-TASK-40) ---------
+
+BACK_COPY = {0: (44, 6), 1: (108, 6)}
+"""Figure -> the corner of the 20x24 block of its "shirt back" zone the game
+copies into its torso gap (KITS-TASK-38, measured on the LOOKS SET)."""
+GLYPH_W = 6
+"""The "numbers 0-9" zone is 60x12: ten glyphs of 6x12, 0 to 9 left to right."""
+DIGIT_Y = 7
+DIGIT_STEP = 8
+"""Where the digits fall in a back panel, measured in slot 5 (KITS-TASK-42):
+row 7, one digit at x 7, two at x 3 and 11 -- centred, a glyph every 8 pixels."""
+NUMBERS = (0, 99)
+"""The shirt numbers a panel holds: one or two digits."""
+
+
+def digit_xs(count: int, width: int = 20) -> list:
+    """The x of each of *count* digits in a panel *width* wide, centred at DIGIT_STEP."""
+    first = (width - (GLYPH_W + DIGIT_STEP * (count - 1))) // 2
+    return [first + DIGIT_STEP * i for i in range(count)]
+
+
+def numbered_indices(indices: bytes, width: int, figure: int, number: int) -> bytes:
+    """A uniform image's indices with *figure*'s torso gap made a back panel:
+    the shirt back block copied in (KITS-TASK-38), and the digits of *number*
+    painted over it with the ink of the "numbers 0-9" glyphs -- every pixel of
+    a glyph that is not the zone's commonest index (KITS-TASK-42)."""
+    from . import zones
+
+    if not NUMBERS[0] <= number <= NUMBERS[1]:
+        raise FigureError("Shirt number %r is not one of %d to %d." % ((number,) + NUMBERS))
+    gap = next(g for g in zones.GAPS if g.name.startswith("torso") and g.figure == figure)
+    zone = next(z for z in zones.ZONES if z.name == "numbers 0-9")
+    panel = bytearray(indices)
+    sx, sy = BACK_COPY[figure]
+    for y in range(gap.h):
+        for x in range(gap.w):
+            panel[(gap.y + y) * width + gap.x + x] = indices[(sy + y) * width + sx + x]
+    tally = {}
+    for y in range(zone.h):
+        for x in range(zone.w):
+            v = indices[(zone.y + y) * width + zone.x + x]
+            tally[v] = tally.get(v, 0) + 1
+    ground = max(tally, key=tally.get)
+    digits = [int(d) for d in str(number)]
+    for dx, digit in zip(digit_xs(len(digits), gap.w), digits):
+        for y in range(zone.h):
+            for x in range(GLYPH_W):
+                v = indices[(zone.y + y) * width + zone.x + digit * GLYPH_W + x]
+                if v != ground:
+                    panel[(gap.y + DIGIT_Y + y) * width + gap.x + dx + x] = v
+    return bytes(panel)
+
+
+def numbered_scene(drawn, kit, kit_set: int, figure: int, number: int):
+    """*drawn* (a LOOKS SET figure of `scene_of`) with the shirt number on its
+    back: every kit surface re-coloured from `numbered_indices`, through the
+    same palette window, and every part pointed at the new surface."""
+    images = {r.offset: r for r in texture.images(kit.data)}
+    palettes = texture.in_set_order(texture.palettes(kit.data), kit_set)
+    swapped = {}
+    for key, surface in drawn.surfaces.items():
+        if key[0] != SLOT:
+            continue
+        record = images[surface.record]
+        indices, width, _height = atlas.read_image(kit.data, record, surface.depth)
+        indices = numbered_indices(indices, width, figure, number)
+        colours = texture.WIDE if surface.depth else texture.NARROW
+        row, column = skin.grid(surface.clut)
+        where, first = texture.window_for(palettes, column * texture.NARROW, row, colours)
+        entries = texture.read_palette(kit.data, where, colours, first)
+        rgba = b"".join(bytes(entries[i]) for i in indices)
+        swapped[key] = scene.Surface(surface.key, surface.width, surface.height, rgba,
+                                     surface.record, surface.depth, surface.clut)
+    if not swapped:
+        raise FigureError("%s has no kit surface on this figure to number" % kit.label)
+    by_object = {id(drawn.surfaces[k]): v for k, v in swapped.items()}
+    parts = [scene.Part(p.file, p.section, p.primitive, p.points, p.uvs,
+                        by_object.get(id(p.surface), p.surface), p.why, p.clut, p.band,
+                        p.band_unmeasured) for p in drawn.parts]
+    surfaces = dict(drawn.surfaces)
+    surfaces.update(swapped)
+    notes = dict(drawn.notes)
+    notes["number"] = number
+    return scene.Scene(parts, surfaces, drawn.values, drawn.figure, notes)

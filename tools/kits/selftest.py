@@ -923,6 +923,48 @@ def _oracle_checks(c) -> None:
     told = oracle.pose_judge(over, oracle.POSE_LIMIT)
     c.ok("oracle --match-pose: a piece over the limit and a missing figure both fail",
          len(told) == 2, "; ".join(told))
+    # The 3D tab's number (KITS-TASK-40): the core paints a back panel, and the
+    # reader that measured the game's panels (KITS-TASK-42) reads it back, at
+    # the places measured in slot 5 -- written here, not taken from the core,
+    # which the reader now shares.
+    MEASURED_DIGIT_ROW = 7
+    MEASURED_DIGIT_XS = {1: [7], 2: [3, 11]}
+    side = 128
+    plain = bytearray([5]) * (side * side)
+    for y in range(24):
+        for x in range(20):
+            plain[(6 + y) * side + 44 + x] = 40 + (x + y) % 3      # the shirt back
+    for d in range(10):
+        for y in range(12):
+            for x in range(6):
+                ink = (x + d) % 6 < 2 or y in (d % 12, 11)
+                plain[(68 + y) * side + 64 + d * 6 + x] = 20 + d if ink else 3
+    from core import figure as _figure
+
+    def as_words(indices):
+        return [indices[i] | indices[i + 1] << 8 for i in range(0, len(indices), 2)]
+
+    def read_back(indices, number_cell=(0, 0, 80)):
+        words = as_words(indices)
+        glyph_set, ground = oracle.glyphs(words, side // 2)
+        back = [[v & 0x7F for v in row]
+                for row in oracle.back_indices(words, side // 2, (44, 6, 20, 24))]
+        return oracle.read_panel(words, side // 2, number_cell, back, glyph_set, ground)
+
+    for number in (7, 10, 23):
+        got = read_back(_figure.numbered_indices(bytes(plain), side, 0, number))
+        c.ok("the 3D tab's back panel for %d reads %d to the match-panel reader, at the "
+             "rule's places, nothing unexplained" % (number, number),
+             got["number"] == number and got["unexplained"] == 0
+             and [(x, y) for x, y, _d in got["digits"]]
+             == [(x, MEASURED_DIGIT_ROW) for x in MEASURED_DIGIT_XS[len(str(number))]],
+             "%s" % got)
+    flipped = bytearray(_figure.numbered_indices(bytes(plain), side, 0, 10))
+    for y in range(80, 104):
+        row = flipped[y * side:y * side + 20]
+        flipped[y * side:y * side + 20] = row[::-1]
+    got = read_back(bytes(flipped))
+    c.ok("and the same panel mirrored does not read 10", got["number"] != 10, "%s" % got)
     c.ok("oracle --back --panels: read one row up, every panel fails",
          len({f.split(":")[0] for f in oracle.panels_judge(oracle.read_panels(page, width, -1))})
          == len(read))

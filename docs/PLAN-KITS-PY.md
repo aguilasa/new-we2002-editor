@@ -377,8 +377,30 @@ devolve.
   que o número não foi medido — o desenho segue os dados (decisão do usuário,
   2026-10-05; KITS-TASK-37, CORR-KITS-066). O seletor de figura tem um
   terceiro item, **match player**, a figura de partida do `MODEL.BIN` na pose
-  medida no jogo (§4.3, KITS-TASK-47); `ui/app.py --figure 2 --armband` a
-  desenha com a braçadeira até o checkbox da KITS-TASK-40 existir.
+  medida no jogo (§4.3, KITS-TASK-47).
+- **Os três checkboxes da aba 3D** (KITS-TASK-40) desenham só o que foi
+  medido. **Number**, com o campo do número (0 a 99, abre em 10), pinta nas
+  costas de uma figura da `LOOKS SET` o painel que a partida monta (§4.7).
+  **Captain armband** e **Long sleeves** só existem no `MODEL.BIN` (§4.3). Com o
+  jogador da `LOOKS SET`, marcar um dos dois passa a desenhar a figura de
+  partida. Com **match player**, a manga segue o checkbox: longa marcada,
+  curta desmarcada. O que não foi medido fica desligado, com a frase no texto
+  do próprio checkbox: a braçadeira no goleiro e o número na figura de
+  partida. O **Long sleeves** fica **escondido** com o goleiro, que não tem
+  manga longa de jogador de linha. Na linha de comando, `ui/app.py --number N`,
+  `--armband` e `--long-sleeves` marcam cada um, e `--list-3d` imprime o estado
+  dos três. O `kits_ui` julga a mudança de cada um vista das costas, os
+  checkboxes por figura e língua, e quatro plantas: cada checkbox ignorado e o
+  de manga sempre visível.
+- **A vista não espelha mais** (KITS-TASK-40). A cena é o espaço do GTE, x à
+  direita, y para baixo e z para longe da câmera, com o y invertido pelo
+  `looks` (`UP`). Isso deixa um referencial de mão esquerda, e desenhado com x
+  para a direita toda figura saía espelhada. O número mostrou isso: "10" saía
+  "01". Na figura de partida, a braçadeira aparecia no braço direito. O
+  `ui/figure_view.py` agora desenha x com o sinal trocado. Depois da troca o
+  "10" lê certo, a braçadeira fica no braço esquerdo e o escudo no peito
+  esquerdo. A prova matemática é a do parágrafo do `figure_view.py`; nenhuma
+  captura de jogo de costas confronta a vista.
 - **Aba "Diagnóstico"**: a lista do `kit.problems`, uma linha por problema da
   guarda ("Refused: …") e uma por nota de leitura ("Note: …"), nas palavras do
   núcleo, com um resumo em cima; TEX sadio lido sem nota deixa a lista vazia
@@ -1008,6 +1030,19 @@ do torso de cada um, que no disco aponta para (0,80), mas isso não foi visto.
 Para a aba 3D a regra já basta: o painel do número escolhido, montado em (0,80)
 ou (100,104), é o que o jogo desenharia nas costas. Também foi uma partida só, com dois
 times e números de um e de dois dígitos.
+
+**Na aba 3D desde 2026-10-06 ([KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md)).**
+O `api.numbered` monta esse painel na lacuna do torso de uma figura da `LOOKS
+SET`, com as costas copiadas de (44,6) ou (108,6) e a tinta dos glifos por
+cima, e recolore as superfícies do kit pela mesma janela de paleta. O TEX não
+é regravado: a composição acontece nos índices já descomprimidos. A prova é o
+leitor que mediu os painéis da partida (`oracle.read_panel`, KITS-TASK-42),
+aplicado ao painel do núcleo no selftest. Ele lê 7, 10 e 23 nas posições
+medidas (linha 7; x 7, ou 3 e 11), sem pixel inexplicado, e o mesmo painel
+espelhado não lê 10. As constantes do painel (`GLYPH_W`, `DIGIT_Y`,
+`DIGIT_STEP`, `BACK_COPY`) moram no `core/figure.py`, e o `oracle.py` as
+importa de lá. Na figura de partida o número não entra: não foi medido qual
+painel o torso dela amostra.
 
 ## 5. Como se verifica
 
