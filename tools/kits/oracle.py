@@ -757,9 +757,6 @@ captains draw 2 7 8 9 10 93 95 96 98 and every other outfield player
 2 7 8 9 10 95 96 97 98."""
 PLANT_ARMBAND = 94
 """`--plant-attach` names this section the armband instead of 93."""
-FIT_PIXELS = 2.0
-"""A projection fits a section when its mean error is under this many screen
-pixels: the GPU rounds every vertex to a whole pixel."""
 
 
 def model_index(image_path: str) -> dict:
