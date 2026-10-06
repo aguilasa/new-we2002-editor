@@ -673,10 +673,15 @@ Isso fecha a pergunta que o ajuste projetivo da KITS-TASK-43 deixou aberta,
 Continua aberto só **manga curta contra longa**, que espera um save state de
 partida com manga curta, decisão do usuário.
 
-**O que isso pede da aba 3D.** Desenhar braçadeira e manga longa é desenhar a
-figura de partida: ler as seções do `MODEL.BIN` (2, 7 a 10, 95 a 98, e a 93
-no lugar da 97) e uma pose para elas, que nenhuma task mediu. É trabalho novo,
-e decisão do usuário.
+**O que isso pede da aba 3D.** Desenhar a braçadeira e a manga longa é
+desenhar a figura de partida: as seções do `MODEL.BIN` na ordem medida, com a
+93 no lugar da 97, e uma pose para elas. Em 2026-10-06 o usuário decidiu abrir
+esse trabalho:
+[KITS-TASK-45](/docs/tasks/kits/45-pose-figura-partida.md) captura a pose,
+[KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md) mede a manga curta,
+que espera um save state dele, e
+[KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md) desenha a figura
+na aba. Os checkboxes da KITS-TASK-40 vêm depois.
 
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 

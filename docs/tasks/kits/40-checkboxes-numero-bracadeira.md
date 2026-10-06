@@ -47,3 +47,12 @@ Da KITS-TASK-44 (2026-10-06, §4.3). Toda peça do `MODEL.BIN` tem matriz própr
 2026-10-05. Ao começar, nenhum dos três checkboxes tinha regra de desenho medida. O **Number** só tinha a `LOOKS SET`, que não desenha número. A **braçadeira** e a **manga longa** têm as seções do `MODEL.BIN` identificadas, mas não o encaixe na figura. Perguntado, o usuário escolheu "criar tasks para fazer as medições". Saíram a KITS-TASK-42 (o número numa partida) e a KITS-TASK-43 (o encaixe das seções 93 e 95 a 102). Esta task fica **blocked** até as duas fecharem, e a `order` do ciclo as põe antes dela.
 - **blocked** (2026-10-05): No drawing rule for any of the three checkboxes: the number was measured only on the LOOKS SET (no digit), and the armband/long sleeves are MODEL.BIN sections 93 and 95-102 with no measured attachment to the figure. The user chose to measure first: KITS-TASK-42 (number in a match) and KITS-TASK-43 (attachment), ordered before this task.
 - **pending** (2026-10-06): The cause is gone: KITS-TASK-42 (number rule), 43 and 44 (MODEL.BIN armband/long sleeves) are done.
+
+2026-10-06. Destravada porque as 42, 43 e 44 fecharam. O usuário foi perguntado
+o que fazer com a braçadeira e a manga longa, que só existem no `MODEL.BIN`, a
+figura de partida que a aba não desenha. Ele escolheu "abrir trabalho de figura
+de partida". Saíram as KITS-TASK-45 (pose), 46 (manga curta) e 47 (figura na
+aba 3D), e a `order` do ciclo as põe antes desta. A task volta a **blocked**
+até a 47 fechar. O **Number** já tem regra (KITS-TASK-42) e entra junto com os
+outros dois.
+
