@@ -61,3 +61,8 @@ $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.
   600 stop(s), 600 distinct matrices (452 distinct rotations)
   ok    every worn section has its own matrix, and section 93 is drawn where 97 is
 ```
+- **Closed** — commit `b2a2620` (2026-10-06): feat(kits): --attach-matrix prints how many matrices are distinct
+  - Files (`git show --name-status b2a2620`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-077.md`
+    - `M tools/kits/oracle.py`
