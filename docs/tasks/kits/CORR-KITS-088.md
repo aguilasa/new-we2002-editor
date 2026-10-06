@@ -50,3 +50,7 @@ $ sed -n 66,68p tools/kits/ui/app.py | sed -n 2p | grep -q '^"""--tab names'; ec
 $ python3 tools/kits/selftest.py | tail -1
 kits_selftest: 0 failure(s)
 ```
+- **Closed** — commit `3cc1902` (2026-10-06): refactor(kits): TAB_NAMES gets its docstring back
+  - Files (`git show --name-status 3cc1902`):
+    - `M docs/tasks/kits/CORR-KITS-088.md`
+    - `M tools/kits/ui/app.py`
