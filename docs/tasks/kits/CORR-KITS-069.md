@@ -58,3 +58,7 @@ Conserto: a data da §4.7 passou a ser 2026-10-06, o dia da corrida.
 $ grep -n "Medido numa partida em 2026-10-06" docs/PLAN-KITS-PY.md
 779:**Medido numa partida em 2026-10-06 ([KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md)),
 ```
+- **Closed** — commit `e24eba5` (2026-10-06): docs(kits): section 4.7 dates the match measurement to its run
+  - Files (`git show --name-status e24eba5`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/CORR-KITS-069.md`
