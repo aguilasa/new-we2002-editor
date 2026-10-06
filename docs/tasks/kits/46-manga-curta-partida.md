@@ -157,3 +157,9 @@ Regressão do slot 5: `--attach-matrix 5 --frame-json
 work/kits-oracle/matrix-5.json` sai 0 com `ok    long sleeves: every worn
 section has its own matrix, and section 93 is drawn where 97 is`.
 - **pending** (2026-10-06): The user re-saved slot 6 with short sleeves; --attach-matrix 6 now draws 2 3 5 4 6.
+- **Closed** — commit `c1adc98` (2026-10-06): feat(kits): short sleeves are alternative MODEL.BIN sections, measured in slot 6
+  - Files (`git show --name-status c1adc98`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/47-figura-partida-aba-3d.md`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
