@@ -150,7 +150,7 @@ graph TD
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [KITS-TASK-36](/docs/tasks/kits/36-ui-i18n.md) | UI em inglês dos EUA por default, com catálogo i18n e seletor de idioma | 4 | implementação | KITS-TASK-20 | done | 2026-10-03 | 2026-10-03 |
-| [KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md) | Medir o número de camisa numa partida | 10 | verificação | — | pending | — | — |
+| [KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md) | Medir o número de camisa numa partida | 10 | verificação | — | done | 2026-10-06 | pending |
 | [KITS-TASK-43](/docs/tasks/kits/43-medir-encaixe-mangas.md) | Medir o encaixe da braçadeira e da manga longa do MODEL.BIN | 10 | verificação | — | pending | — | — |
 | [KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md) | Checkboxes de número e braçadeira na aba 3D | 10 | implementação | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39 | blocked | — | — |
 | [KITS-TASK-41](/docs/tasks/kits/41-fechamento-fase-10.md) | Fechamento da fase 10 | 10 | closing | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39, KITS-TASK-40 | pending | — | — |

@@ -87,3 +87,10 @@ aplica, porque o número está na página de kit.
 
 Regressão da `LOOKS SET`: `--back 2 --expect-back written` sai 0, com `disc
 side TEX_A4: 0 halfword(s) of 8192 differ from VRAM outside the gaps`.
+- **Closed** — commit `e1d38dc` (2026-10-06): feat(kits): oracle.py --back --panels measures the shirt number in a match
+  - Files (`git show --name-status e1d38dc`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
+    - `M docs/tasks/kits/42-medir-numero-partida.md`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
