@@ -630,9 +630,11 @@ e `--frame-json` relê o arquivo sem emulador. O controle é o
 player draws section 94`.
 
 **Negativa medida: a mesma câmera não separa peça de peça aqui.** Uma câmera
-projetiva geral ajustada a cada seção sozinha erra cerca de 1 px. Ajustada a
-duas seções juntas, erra de 2 a 7 px, sem um par que caia no erro de uma seção
-só. Com 9 ou 10 pontos por seção, contra 11 incógnitas, o ajuste é frouxo
+projetiva geral ajustada a cada seção sozinha erra de 0,56 a 2,18 px, fora a
+seção 99 do goleiro, com 16,69 px. Ajustada a duas seções juntas, erra de 1,28
+a 9,00 px; o par mais justo (95 com 2, no jogador 1) dá 1,28 px contra 1,09 px
+da 95 sozinha, dentro da faixa de uma seção só, e mesmo assim não decide nada.
+Com 9 ou 10 pontos por seção, contra 11 incógnitas, o ajuste é frouxo
 demais para dizer se duas peças dividem a matriz. Isso é limite da medida, e a
 resposta exigiria ler a matriz do GTE, como o `looks` faz com o `--pose`.
 

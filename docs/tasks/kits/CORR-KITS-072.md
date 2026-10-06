@@ -39,3 +39,20 @@ No parágrafo "Negativa medida" da §4.3 de `docs/PLAN-KITS-PY.md`: citar 0,56�
 `grep -n "2 a 7 px" docs/PLAN-KITS-PY.md` casa a linha 634 hoje; vazio depois do conserto.
 
 ## Log de Execução
+
+Reproduzido em 2026-10-06 sobre `9aeca0e`: `grep -n "2 a 7 px\|cerca de 1 px" docs/PLAN-KITS-PY.md` casa as linhas 633 e 634.
+
+A saída de `python3 tools/kits/oracle.py --attach 5 --frame-json work/kits-oracle/attach-5.json`
+(com `WE2002_LOOKS_IMAGE` absoluto) foi relida pelas 24 linhas `point(s): alone`:
+
+- sozinho, de 0,56 a 2,18 px, mais 16,69 px na seção 99 do jogador 5;
+- conjunto, de 1,28 a 9,00 px;
+- o par 95+2 do jogador 1 dá 1,28 px contra 1,09 px da 95 sozinha.
+
+Conserto: o parágrafo "Negativa medida" da §4.3 cita essas três faixas e o par 95+2. A frase "sem
+um par que caia no erro de uma seção só" saiu.
+
+```text
+$ grep -n "2 a 7 px" docs/PLAN-KITS-PY.md
+(sem saída)
+```
