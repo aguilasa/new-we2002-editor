@@ -1046,15 +1046,12 @@ def resident_models(game, image_path: str) -> dict:
     not there differs everywhere."""
     import iso_source
 
-    import oracle as looks_oracle  # tools/looks
-
     out = {}
     with iso_source.open_disc(image_path) as disc:
         for name, base in sorted(layout.BASE.items()):
             data = disc.read(name)
             got = game.read_ram(base, len(data), os.path.join(game.out_dir, "resident.bin"))
             out[name] = sum(1 for a, b in zip(got, data) if a != b) + abs(len(got) - len(data))
-    del looks_oracle
     return out
 
 

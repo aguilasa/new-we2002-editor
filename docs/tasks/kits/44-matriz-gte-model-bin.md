@@ -14,6 +14,7 @@ Responder com a matriz que o jogo entrega ao GTE o que a KITS-TASK-43 não conse
   - `tools/kits/oracle.py`: uma opção nova (`--attach-matrix SLOT`, por exemplo) que acha no código da partida as instruções que escrevem a matriz do GTE. É o mesmo gesto do `tools/looks/oracle.py --pose` na `LOOKS SET` (`ctc2` no registrador de controle 0). Ela lê a matriz e a translação carregadas antes de cada seção do `MODEL.BIN`, e agrupa as seções por matriz idêntica
   - `tools/kits/selftest.py`, para a parte pura nova
   - `docs/PLAN-KITS-PY.md`: §4.3, o encaixe medido
+  - `docs/tasks/kits/40-checkboxes-numero-bracadeira.md`: a nota de passagem do encaixe medido (entrou no commit ddf3d00; declarada pela CORR-KITS-078)
 - Out: manga curta contra longa. Ela pede um save state de partida com manga curta, que é decisão do usuário (§4.3). Também fica fora desenhar na janela (KITS-TASK-40)
 
 ## Done criteria

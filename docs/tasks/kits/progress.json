@@ -703,7 +703,7 @@
       "phase": 10,
       "depends_on": ["KITS-TASK-43"],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.3",
-      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md"],
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "docs/PLAN-KITS-PY.md", "docs/tasks/kits/40-checkboxes-numero-bracadeira.md"],
       "resources": ["emulador", "save-states"],
       "status": "done",
       "done_on": "2026-10-06",
