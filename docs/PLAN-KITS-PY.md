@@ -709,6 +709,36 @@ que espera um save state dele, e
 [KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md) desenha a figura
 na aba. Os checkboxes da KITS-TASK-40 vêm depois.
 
+**A pose, medida em 2026-10-06 ([KITS-TASK-45](/docs/tasks/kits/45-pose-figura-partida.md)),
+no slot 5.** Numa só corrida, com dois breakpoints, o jogo para em cada carga
+de matriz por peça (`layout.POSE_PIECE_MATRIX`) e em cada envio de lista ao
+GPU (`layout.GPU_LIST_SUBMIT`). As matrizes carregadas desde o envio anterior
+são as da lista que o envio entrega: um quadro tem 70 paradas e 6 jogadores na
+tela. A projeção do GTE é a mesma nas 70: `H` 1376, `OFX` e `OFY` zero.
+
+O confronto passa os vértices do disco pela matriz de cada peça
+(`SX = OFX + H·X/Z`, rotação em 4.12) e compara cada canto com o canto da
+primitiva da lista que tem o mesmo texel. Ele se faz dentro do jogador da tela
+em que as peças caem melhor. Cada peça das duas figuras escolhidas, com as 12
+peças de cada uma, a cabeça e as chuteiras inclusive, cai a uma média de 0,62 a
+1,01 px, o arredondamento da coordenada inteira. As figuras são o capitão
+(cabeça 30, `30 2 95 96 93 98 7 9 11 8 10 12`) e um jogador de linha (cabeça
+24, a mesma ordem com a 97). O limite é 2,0 px (`oracle.POSE_LIMIT`). O
+controle é o `--plant-pose`, que dá a cada peça a matriz da parada em que ela
+é nomeada, sem o atraso de ponteiro. Com ele a melhor peça fica a 4,72 px, a
+pior a 264,70, e a corrida sai 1.
+
+Uma descoberta de leitura: **o texel de cada canto segue a ordem gravada dos
+índices** (`Primitive.indices`), não a ordem `corners` que o `section.py`
+oferece como desembaraçada. Pareado por `corners`, cada peça erra de 2 a 4 px.
+
+A pose mora em `work/kits-pose/slot5-<cabeça>.json`, fora do git: a projeção
+e, por peça, a seção, a rotação e a translação, na ordem de desenho. Comando
+que refaz: `python tools/kits/oracle.py --match-pose 5`, com
+`WE2002_LOOKS_IMAGE` e `WE2002_LOOKS_DRIVE_IMAGE`. A captura fica em
+`work/kits-oracle/pose-5.json`, e `--frame-json` a relê sem emulador. São duas
+figuras de um quadro: a pose de um instante de corrida, não um ciclo.
+
 ### 4.4 (d) O que é (608, 256) e o que é (704, 256)
 
 O [PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md)

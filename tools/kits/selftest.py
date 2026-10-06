@@ -847,6 +847,39 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --attach-matrix: with no pointer lag a figure takes the next player's matrix",
          any("not this figure's" in f for f in oracle.matrix_judge(lagged)),
          "; ".join(oracle.matrix_judge(lagged)))
+    # --match-pose (KITS-TASK-45): a quad of a section projected by its piece's
+    # matrix lands on the frame's quad, corner for corner by texel; given the
+    # neighbour piece's matrix it does not.  The corners are stored v1 v0 v3
+    # v2, so pairing by `corners` instead of the stored order would miss.
+    from types import SimpleNamespace as _ns
+    vertices = [_ns(x=x, y=y, z=0) for x, y in ((-50, -80), (50, -80), (-50, 80), (50, 80))]
+    texels = ((0, 0), (31, 0), (0, 63), (31, 63))
+    prim = _ns(indices=(0, 1, 2, 3), texcoords=texels,
+               corners=(1, 0, 3, 2))
+    sec = _ns(vertices=vertices, primitives=[prim])
+    view = {"H": 1376, "OFX": 0.0, "OFY": 0.0}
+    own = {"matrix": ((4096, 0, 0, 0, 4096, 0, 0, 0, 4096), (-68, 112, 9813))}
+    neighbour = {"matrix": ((4096, 0, 0, 0, 4096, 0, 0, 0, 4096), (-68, 52, 9813))}
+    drawn = [oracle.pose_project(*own["matrix"], view, (v.x, v.y, v.z)) for v in vertices]
+    frame = [{"uv": list(texels), "xy": [(round(x), round(y)) for x, y in drawn]}]
+    got, matched = oracle.piece_error(own, view, sec, frame)
+    c.ok("oracle --match-pose: a piece's own matrix lands within the limit, paired by texel",
+         matched == 1 and got < oracle.POSE_LIMIT, "%s over %d" % (got, matched))
+    wrong, _n = oracle.piece_error(neighbour, view, sec, frame)
+    c.ok("oracle --match-pose: the neighbour piece's matrix lands over the limit",
+         wrong > oracle.POSE_LIMIT, "%s" % wrong)
+    flipped, _n = oracle.piece_error(own, view, _ns(vertices=vertices, primitives=[
+        _ns(indices=prim.corners, texcoords=texels)]), frame)
+    c.ok("oracle --match-pose: texels paired with `corners` instead of the stored order miss",
+         flipped > oracle.POSE_LIMIT, "%s" % flipped)
+    row = {"section": 2, "error": 0.8, "matched": 3}
+    fine = {"captain": {"fit": {"rows": [row]}}, "outfield": {"fit": {"rows": [row]}}}
+    c.ok("oracle --match-pose: two figures within the limit pass",
+         oracle.pose_judge(fine, oracle.POSE_LIMIT) == [])
+    over = {"captain": {"fit": {"rows": [dict(row, error=4.72)]}}}
+    told = oracle.pose_judge(over, oracle.POSE_LIMIT)
+    c.ok("oracle --match-pose: a piece over the limit and a missing figure both fail",
+         len(told) == 2, "; ".join(told))
     c.ok("oracle --back --panels: read one row up, every panel fails",
          len({f.split(":")[0] for f in oracle.panels_judge(oracle.read_panels(page, width, -1))})
          == len(read))

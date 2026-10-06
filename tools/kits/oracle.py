@@ -34,6 +34,7 @@ Usage:
     python tools/kits/oracle.py --png <dump> --lines --flags
     python tools/kits/oracle.py --sleeves 2|5 [--expect-sleeves none|drawn] [--plant-sleeves]
     python tools/kits/oracle.py --back 2 [--expect-back untouched] [--plant-back numbers]
+    python tools/kits/oracle.py --match-pose 5 [--frame-json <capture>] [--plant-pose]
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
 the page that are not flat (more than one distinct 15-bit value) and how many
@@ -74,6 +75,13 @@ both sides are compared at those bits.  `--expect-back untouched|written`
 asserts the verdict; `--plant-back numbers|tex` is the control -- the
 numbers zone read in place of the gap, or another TEX as the disc side -- and
 has to come out red.
+
+`--match-pose SLOT` (KITS-TASK-45) stops at every per-piece matrix load and
+every list handed to the GPU in one run, and proves the matrices on the list
+they were loaded for: each MODEL.BIN vertex through its piece's matrix and the
+GTE projection lands on the frame's corner of the same texel, under
+`POSE_LIMIT`.  The pose of a captain and of an outfield player goes to
+`work/kits-pose/`; `--plant-pose` drops the pointer lag and has to fail.
 
 In a match the area under the map is a grid of 20x24 back panels, one per
 player on the pitch, and `--back SLOT --page X --tag TT --panels` reads it
@@ -1250,6 +1258,319 @@ def run_attach_matrix(slot: int, cue: str, cache=None, plant=None, length="long"
     return 1 if failures else 0
 
 
+# --- section 4.3: the pose of a match figure, against its own frame -------
+
+POSE_DIR = os.path.join("work", "kits-pose")
+POSE_SUBMITS = 7
+"""Stops at `layout.GPU_LIST_SUBMIT` a `--match-pose` run takes: three per
+frame (the `looks` measured: a one-node list twice and the ordering table
+once), so seven close two whole frames after the first, cut-off one."""
+POSE_MATRIX_LIMIT = 4000
+"""Matrix stops a run may take before it gives up on the submits."""
+POSE_LIMIT = 2.0
+"""The mean error in pixels a piece may have.  Measured on slot 5
+(`--match-pose 5`, KITS-TASK-45): 0.62 to 1.01 over the 24 pieces of the two
+figures, the integer screen coordinates' rounding; with `--plant-pose` the
+best piece is 4.72 and the worst 264.70."""
+
+
+def pose_capture(game, maps, submits: int = POSE_SUBMITS) -> dict:
+    """One run of the frame loop with two breakpoints: every per-piece matrix
+    load (as `matrix_stops` reads it, plus the GTE projection in force) and
+    every list handed to the GPU, in the order they happen.  Paused at the
+    last submit, both ordering tables are still whole in RAM, and each head
+    is walked into its textured samples."""
+    import who_writes
+
+    import oracle as looks_oracle  # tools/looks
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    for address in (layout.POSE_PIECE_MATRIX, layout.GPU_LIST_SUBMIT):
+        client.call("breakpoint", action="add", type="execute",
+                    address=who_writes.hx(address))
+    path = os.path.join(game.out_dir, "pose-matrix.bin")
+    events, seen_submits, matrices = [], 0, 0
+    try:
+        while seen_submits < submits:
+            client.call("continue")
+            if not looks_oracle._wait_for_hit(game, looks_oracle.WATCH_SECONDS):
+                raise RuntimeError("the frame loop stopped after %d event(s)" % len(events))
+            registers = client.call("read_registers", group="gpr")
+            pc = who_writes.register_value(registers, "pc")
+            if pc == layout.GPU_LIST_SUBMIT:
+                events.append({"kind": "submit", "head": who_writes.register_value(
+                    registers, layout.GPU_LIST_HEAD)})
+                seen_submits += 1
+                continue
+            matrices += 1
+            if matrices > POSE_MATRIX_LIMIT:
+                raise RuntimeError("%d matrix stops and %d submit(s)" % (matrices, seen_submits))
+            named = {(where[0], where[1]) for _n, _v, where
+                     in looks_oracle.pointers_into_models(registers, maps)
+                     if where[1] is not None}
+            base = who_writes.register_value(registers, layout.POSE_PIECE_MATRIX_BASE)
+            rotation, translation = looks_oracle._matrix_struct(game, base, path)
+            events.append({"kind": "matrix", "named": sorted(named), "rotation": rotation,
+                           "translation": translation,
+                           "projection": looks_oracle.gte_projection(
+                               client.call("get_gte_registers"))})
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    first, size, step = layout.SCENERY_SWEEP
+    ram = b"".join(game.read_ram(base, step, os.path.join(game.out_dir, "pose-%08x.bin" % base))
+                   for base in range(first, first + size, step))
+    lists = {}
+    for one in events:
+        if one["kind"] == "submit" and one["head"] not in lists:
+            try:
+                nodes = looks_oracle.walk_gpu_list(ram, one["head"])
+            except Exception:  # noqa: BLE001 -- a list the next frame overwrote
+                continue
+            lists[one["head"]] = textured_samples(looks_oracle.commands_of(nodes))
+    return {"events": events, "lists": {"%d" % k: v for k, v in lists.items()}}
+
+
+def pose_frames(capture: dict) -> list:
+    """The frames of a capture: for each submit of a list with figure
+    primitives, the matrix stops since the previous such submit.  The first
+    is left out, its stops having begun mid-frame."""
+    blocks, current, out = [], [], []
+    for one in capture["events"]:
+        if one["kind"] == "matrix":
+            current.append(one)
+            continue
+        samples = capture["lists"].get("%d" % one["head"])
+        if not samples or not any(is_figure(s) for s in samples):
+            continue
+        blocks.append((one["head"], current))
+        current = []
+    for k, (head, stops) in enumerate(blocks):
+        if k == 0:
+            continue        # its stops began mid-frame
+        out.append({"head": head, "stops": stops})
+    return out
+
+
+def pose_project(rotation, translation, projection, vertex):
+    """A model vertex through one piece's GTE matrix and the projection:
+    RTPS, `SX = OFX + H * X / Z`, rotation in 4.12."""
+    x, y, z = vertex
+    r = rotation
+    cx = (r[0] * x + r[1] * y + r[2] * z) / 4096.0 + translation[0]
+    cy = (r[3] * x + r[4] * y + r[5] * z) / 4096.0 + translation[1]
+    cz = (r[6] * x + r[7] * y + r[8] * z) / 4096.0 + translation[2]
+    if cz <= 0:
+        return None
+    h = projection["H"]
+    return (projection["OFX"] + h * cx / cz, projection["OFY"] + h * cy / cz)
+
+
+def piece_error(piece, projection, sec, group) -> tuple:
+    """(mean pixel distance, primitives matched) of one piece: each primitive
+    of its section projected with the piece's matrix and matched, by its four
+    texels, to the nearest primitive of *group* that carries them."""
+    by_uv = {}
+    for one in group:
+        if len(one["uv"]) == 4:
+            by_uv.setdefault(tuple(tuple(t) for t in one["uv"]), []).append(one)
+    total, corners, matched = 0.0, 0, 0
+    rotation, translation = piece["matrix"]
+    for prim in sec.primitives:
+        drawn = by_uv.get(tuple(tuple(t) for t in prim.texcoords))
+        if not drawn:
+            continue        # culled, or a texel quad the frame does not draw
+        points = {}
+        # texcoords follow the STORED order, not `corners`: paired by
+        # `corners` every piece is off by 2 to 4 px, by `indices` under 1
+        for vi, texel in zip(prim.indices, prim.texcoords):
+            v = sec.vertices[vi]
+            points[tuple(texel)] = pose_project(rotation, translation, projection,
+                                                (v.x, v.y, v.z))
+        if None in points.values() or len(points) != 4:
+            continue        # behind the eye, or a quad two corners of which share a texel
+        best = min(sum(((points[uv][0] - xy[0]) ** 2 + (points[uv][1] - xy[1]) ** 2) ** 0.5
+                       for uv, xy in zip(one["uv"], one["xy"])) for one in drawn)
+        total += best
+        corners += len(points)
+        matched += 1
+    return ((total / corners) if corners else None, matched)
+
+
+POSE_MARGIN = 16
+"""Pixels around a player's kit primitives within which the frame's other
+textured primitives -- head, boots, skin -- are taken as that player's."""
+
+
+def pose_groups(samples, margin: int = POSE_MARGIN) -> list:
+    """The players of a frame (`players`, kit primitives only) each widened
+    to every textured primitive whose corners all fall in its screen box
+    grown by *margin*."""
+    out = []
+    for group in players(samples):
+        xs = [p[0] for one in group for p in one["xy"]]
+        ys = [p[1] for one in group for p in one["xy"]]
+        box = (min(xs) - margin, min(ys) - margin, max(xs) + margin, max(ys) + margin)
+        out.append([one for one in samples if len(one["uv"]) == 4 and all(
+            box[0] <= x <= box[2] and box[1] <= y <= box[3] for x, y in one["xy"])])
+    return out
+
+
+def pose_figure(figure, projection, index, groups) -> dict:
+    """One figure against the frame: the player group whose primitives its
+    pieces land on best, and each piece's error there."""
+    best = None
+    for number, group in enumerate(groups):
+        rows = []
+        for piece in figure:
+            sec = index["sections"].get((layout.MODEL, piece["section"]))
+            error, matched = (piece_error(piece, projection, sec, group) if sec
+                              else (None, 0))
+            rows.append({"section": piece["section"], "error": error, "matched": matched})
+        errors = [r["error"] for r in rows if r["error"] is not None]
+        if not errors:
+            continue
+        score = sum(errors) / len(errors)
+        if best is None or score < best["score"]:
+            best = {"group": number, "score": score, "rows": rows}
+    return best
+
+
+def pose_choose(passes) -> dict:
+    """{"outfield": figure, "captain": figure}: the first whole outfield
+    figure that draws the armband, and the first that does not."""
+    out = {}
+    for figure in passes:
+        sections = [p["section"] for p in figure]
+        if None in sections or sections[1] != ROOT_SECTIONS[0]:
+            continue
+        kind = "captain" if ARMBAND_SECTION in sections else "outfield"
+        out.setdefault(kind, figure)
+    return out
+
+
+def pose_report(frame: dict, index, lag: int = 1) -> dict:
+    """The chosen figures of one frame, measured against its list."""
+    stops = frame["stops"]
+    pieces = matrix_pieces(stops, lag)
+    for piece, stop in zip(pieces, stops):
+        piece["projection"] = stop["projection"]
+    chosen = pose_choose(matrix_passes(pieces))
+    return {kind: {"figure": figure, "fit": pose_figure(
+        figure, figure[0]["projection"], index, frame["groups"])}
+        for kind, figure in sorted(chosen.items())}
+
+
+def pose_judge(report: dict, limit: float) -> list:
+    """Failures: a kind of figure missing, a piece the frame never matched,
+    or a piece whose mean error is over *limit*."""
+    out = ["no %s figure in the frame" % kind for kind in ("captain", "outfield")
+           if kind not in report]
+    for kind, one in sorted(report.items()):
+        if one["fit"] is None:
+            out.append("%s: no piece lands on any player" % kind)
+            continue
+        for row in one["fit"]["rows"]:
+            if row["error"] is None:
+                out.append("%s: section %s has no primitive in the frame"
+                           % (kind, row["section"]))
+            elif row["error"] > limit:
+                out.append("%s: section %s is %.2f px from the frame, over %.2f"
+                           % (kind, row["section"], row["error"], limit))
+    return out
+
+
+def run_match_pose(slot: int, cue: str, cache=None, plant=False) -> int:
+    """`--match-pose SLOT`: section 4.3, the pose of a match figure -- each
+    MODEL.BIN piece's matrix, proved on the frame it was drawn in."""
+    import json
+
+    import oracle as looks_oracle  # tools/looks
+
+    image = os.environ[IMAGE_VARIABLE]
+    path = cache or os.path.join(ATTACH_DIR, "pose-%d.json" % slot)
+    if cache and os.path.isfile(cache):
+        with open(cache) as fh:
+            capture = json.load(fh)
+        print("  capture read from %s, no emulator" % cache)
+    else:
+        maps = looks_oracle.model_maps(image)
+        with looks_oracle.Oracle(cue) as game:
+            load_slot(game, slot, "pose-%d" % slot)
+            capture = pose_capture(game, maps)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump(capture, fh)
+        print("  capture kept at %s (--frame-json reads it back)" % path)
+    for one in capture["lists"].values():
+        for s in one:
+            s.update(page=tuple(s["page"]), clut=tuple(s["clut"]),
+                     uv=[tuple(t) for t in s["uv"]], xy=[tuple(t) for t in s["xy"]])
+    matrices = sum(1 for e in capture["events"] if e["kind"] == "matrix")
+    print("  %d event(s): %d matrix stop(s), %d submit(s), %d list(s) walked"
+          % (len(capture["events"]), matrices, len(capture["events"]) - matrices,
+             len(capture["lists"])))
+    frames = pose_frames(capture)
+    if not frames:
+        print("  FAIL  no whole frame with figure primitives in the capture")
+        return 1
+    frame = frames[-1]
+    frame["groups"] = pose_groups(capture["lists"]["%d" % frame["head"]])
+    projections = {(p["projection"]["H"], p["projection"]["OFX"], p["projection"]["OFY"])
+                   for p in frame["stops"]}
+    print("  frame of list %#x: %d matrix stop(s) since the previous one, %d player "
+          "group(s); projection (H, OFX, OFY) %s"
+          % (frame["head"], len(frame["stops"]), len(frame["groups"]),
+             ", ".join("(%d, %.1f, %.1f)" % p for p in sorted(projections))))
+    index = model_index(image)
+    lag = 0 if plant else 1
+    if plant:
+        print("  PLANT  each matrix given to the piece named at its own stop (no lag)")
+    report = pose_report(frame, index, lag)
+    for kind, one in sorted(report.items()):
+        fit = one["fit"]
+        print("  %s, head %s, order %s:" % (kind, one["figure"][0]["section"], " ".join(
+            str(p["section"]) for p in one["figure"])))
+        if fit is None:
+            continue
+        print("    on player group %d; per piece, the mean distance in pixels between "
+              "its projected corners and the frame's:" % fit["group"])
+        for row in fit["rows"]:
+            print("      section %-4s %s over %d primitive(s)"
+                  % (row["section"], "none" if row["error"] is None
+                     else "%6.2f px" % row["error"], row["matched"]))
+    errors = [r["error"] for one in report.values() if one["fit"]
+              for r in one["fit"]["rows"] if r["error"] is not None]
+    if errors:
+        print("  worst piece %.2f px, limit %.2f" % (max(errors), POSE_LIMIT))
+    failures = pose_judge(report, POSE_LIMIT)
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if failures:
+        return 1
+    if plant:
+        print("  ok    the plant passed, so nothing is written: the limit measures nothing")
+        return 1
+    os.makedirs(POSE_DIR, exist_ok=True)
+    for kind, one in sorted(report.items()):
+        figure = one["figure"]
+        out = os.path.join(POSE_DIR, "slot%d-%d.json" % (slot, figure[0]["section"]))
+        with open(out, "w") as fh:
+            json.dump({"slot": slot, "kind": kind, "head": figure[0]["section"],
+                       "file": layout.MODEL, "projection": figure[0]["projection"],
+                       "pieces": [{"section": p["section"], "rotation": list(p["matrix"][0]),
+                                   "translation": list(p["matrix"][1])} for p in figure]},
+                      fh, indent=1)
+        print("  wrote %s" % out)
+    print("  ok    every piece of both figures lands within %.2f px of its frame"
+          % POSE_LIMIT)
+    return 0
+
+
 # --- section 4.3: short sleeves are the sleeves image, rewritten ----------
 
 SLEEVES_SET = {1: 1, 2: 5}
@@ -1784,6 +2105,9 @@ def main(argv=None) -> int:
     source.add_argument("--attach-matrix", type=int, metavar="SLOT",
                         help="section 4.3: the GTE matrix each MODEL.BIN section is "
                              "drawn with in this match slot")
+    source.add_argument("--match-pose", type=int, metavar="SLOT",
+                        help="section 4.3: each MODEL.BIN piece's matrix in this match "
+                             "slot, proved on the frame's own list")
     source.add_argument("--sleeves-image", type=int, metavar="SLOT",
                         help="section 4.3: the sleeves image this slot holds in VRAM, "
                              "against the disc (with --page, --tag, --set)")
@@ -1819,10 +2143,14 @@ def main(argv=None) -> int:
     parser.add_argument("--blocks", action="store_true",
                         help="with --back: every block of pixels that differs from the disc")
     parser.add_argument("--frame-json", metavar="JSON",
-                        help="with --attach: read the frame kept by an earlier run")
+                        help="with --attach, --attach-matrix or --match-pose: read the "
+                             "capture kept by an earlier run")
     parser.add_argument("--plant-matrix", choices=("lag", "slot"),
                         help="with --attach-matrix: the control -- no pointer lag, or the "
                              "armband expected one piece over")
+    parser.add_argument("--plant-pose", action="store_true",
+                        help="with --match-pose: the control -- each matrix given to the "
+                             "piece named at its own stop")
     parser.add_argument("--sleeve-length", choices=sorted(SLEEVE_LENGTHS), default="long",
                         help="with --attach-matrix: the sleeves the slot wears")
     parser.add_argument("--plant-attach", action="store_true",
@@ -1863,6 +2191,12 @@ def main(argv=None) -> int:
             return SKIP
         return run_attach_matrix(args.attach_matrix, cue, args.frame_json, args.plant_matrix,
                                  args.sleeve_length)
+    if args.match_pose is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue and not args.frame_json:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_match_pose(args.match_pose, cue, args.frame_json, args.plant_pose)
     if args.attach is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:
