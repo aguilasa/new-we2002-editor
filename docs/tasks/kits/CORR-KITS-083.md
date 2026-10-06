@@ -88,3 +88,11 @@ $ python3 tools/kits/controls.py --only oracle-pose-texel-order
 $ python3 tools/kits/selftest.py | tail -1
 kits_selftest: 0 failure(s)
 ```
+- **Closed** — commit `31dbbec` (2026-10-06): feat(kits): --match-pose --pair-by corners measures the wrong pairing
+  - Files (`git show --name-status 31dbbec`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits/45-pose-figura-partida.md`
+    - `M docs/tasks/kits/47-figura-partida-aba-3d.md`
+    - `M docs/tasks/kits/CORR-KITS-083.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
