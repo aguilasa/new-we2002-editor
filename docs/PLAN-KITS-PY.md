@@ -51,7 +51,7 @@ imagem do jogo, ou um TEX avulso feito com WETex — e os mostra de duas formas:
    texto da janela sai do catálogo de idioma: **inglês dos EUA por default**, e o
    português do Brasil escolhível sem reabrir (§3.4, *Idioma da interface*).
 
-**Conferência, 2026-10-05 ([KITS-TASK-34](/docs/tasks/kits/34-definicao-de-pronto.md)):**
+**Conferência, 2026-10-05 ([KITS-TASK-34](/docs/tasks/concluidos/kits/34-definicao-de-pronto.md)):**
 os itens 1 a 4 conferem na HEAD, cada um com o comando no Log da task. O 3 foi
 feito com um TEX montado aqui pelo próprio WETex 1.0, sob Wine, a partir dos
 registros do `TEX_00`: o arquivo sai com outros bytes (29.928 contra 29.944) e
@@ -61,7 +61,7 @@ diferentes (limite 5 %), com outro kit no lugar dando 49,98 %. A captura velha
 da KITS-TASK-19, de antes do 3D e do inglês por default, dava 47,56 %.
 A metade "a CLI faz tudo o que a janela faz" ficou de fora dessa conferência
 — a CLI não desenhava a figura 3D — e fechou com o `cli.py figure`
-([CORR-KITS-062](/docs/tasks/kits/CORR-KITS-062.md)).
+([CORR-KITS-062](/docs/tasks/concluidos/kits/CORR-KITS-062.md)).
 
 ## 1. O que já se sabe
 
@@ -215,7 +215,7 @@ size" abaixo é a dos que a cumpriram. Lido pelo tamanho ISO, as recusas são
 `TEX_48`, que tem os 11 e cai no LZSS, como cai na leitura nova; lido até onde o
 cabeçalho diz que o contêiner acaba, os 64 têm os 11 — sete deles caem depois,
 no LZSS ou no tamanho descomprimido, e estão entre os 8 recusados abaixo
-([CORR-KITS-013](/docs/tasks/kits/CORR-KITS-013.md)). Então o `source.py` também **não** confia no tamanho:
+([CORR-KITS-013](/docs/tasks/concluidos/kits/CORR-KITS-013.md)). Então o `source.py` também **não** confia no tamanho:
 lê até o fim que o cabeçalho declara (`tex.declared_extent`) quando ele passa
 do tamanho ISO e cabe antes do arquivo seguinte, e o diagnóstico diz que leu
 assim. Os setores que essa leitura alcança têm o mesmo bit Form 2 errado; os
@@ -299,14 +299,14 @@ além de `api`, a fachada está incompleta. O `figure` é a aba 3D sem janela: a
 mesma chamada `api.figure`, na pose de abertura, impressa como peças e digest
 por conjunto e figura; o `kits_image` confere que o digest é o da janela e o
 `--negative` (conjunto ignorado) fica vermelho
-([CORR-KITS-062](/docs/tasks/kits/CORR-KITS-062.md); o `check` que esta
+([CORR-KITS-062](/docs/tasks/concluidos/kits/CORR-KITS-062.md); o `check` que esta
 lista dava nunca existiu). Ao lado desses quatro ela tem `open`,
 o que a fachada faz de cada arquivo (§3.2; `open --negative` monta as fixtures e
 confere cada recusa), entrado na KITS-TASK-06 para a evidência sair de comando
 versionado, `tex`, a guarda de forma sobre cada TEX de uma origem (§2.1;
 `--iso-size` refaz a leitura pelo tamanho ISO, `--negative` o controle 4 do
 §5), entrado na KITS-TASK-07 pelo mesmo motivo, e as sondas de medição da fase 0 (`survey`, `rects`, `prims`, `uv`)
-([CORR-KITS-012](/docs/tasks/kits/CORR-KITS-012.md)).
+([CORR-KITS-012](/docs/tasks/concluidos/kits/CORR-KITS-012.md)).
 
 Endereço só em um módulo, como no `looks` (regra 1 dele): os offsets de nome de
 time moram no `generated/`, o resto de endereço no `layout.py` do `looks`.
@@ -541,7 +541,7 @@ retângulo do mapa de zonas. Se a manga longa e a braçadeira forem outra
 geometria (outro arquivo, outra lista de seções), elas entram só quando essa
 geometria for lida — **nunca** por remapeamento de UV feito à mão.
 
-**Primeira metade medida em 2026-09-30 ([KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md)),**
+**Primeira metade medida em 2026-09-30 ([KITS-TASK-03](/docs/tasks/concluidos/kits/03-primitivas-por-retangulo.md)),**
 com `python tools/kits/cli.py prims roms/japanese-shift-jis.bin` (tupla
 `A-A1-A-A-A`, geometria e resolução pelo `draw_list` do `looks`, e os quatro
 cantos de cada primitiva conferidos contra todo registro do TEX):
@@ -562,22 +562,22 @@ iguais nas oito (237/429) com o total mudando só com o cabelo (603/639 em
 `A-P1-A-A-A`, 598/634 em `A-I3-A-G-A`). O controle das duas conferências é
 `--all-kits --negative`: com o uniforme do `TEX_A4` tirado do lugar o
 agrupamento se parte em 104 e 1
-([CORR-KITS-005](/docs/tasks/kits/CORR-KITS-005.md)). Ficou aberta a outra metade, fechada abaixo pela KITS-TASK-39: se a
+([CORR-KITS-005](/docs/tasks/concluidos/kits/CORR-KITS-005.md)). Ficou aberta a outra metade, fechada abaixo pela KITS-TASK-39: se a
 manga longa e a braçadeira são outra geometria, fora do `EDT_MOD.BIN` — a
 imagem existe e o jogo a envia à VRAM, mas quem a desenha não está nesta tela.
 Em que retângulo do mapa de zonas cai cada primitiva não foi medido aqui — é o
 cruzamento do §4.6, que a
-[KITS-TASK-16](/docs/tasks/kits/16-zonas.md) fechou sobre a lista de retângulos UV
-([CORR-KITS-007](/docs/tasks/kits/CORR-KITS-007.md)): nenhuma fora do mapa, e as
+[KITS-TASK-16](/docs/tasks/concluidos/kits/16-zonas.md) fechou sobre a lista de retângulos UV
+([CORR-KITS-007](/docs/tasks/concluidos/kits/CORR-KITS-007.md)): nenhuma fora do mapa, e as
 15 zonas da imagem de mangas sem primitiva, pelo motivo acima.
 
 A outra metade — quem amostra a imagem de mangas, e portanto quem desenha a
-braçadeira e a manga longa — foi medida pela [KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md),
+braçadeira e a manga longa — foi medida pela [KITS-TASK-39](/docs/tasks/concluidos/kits/39-medir-bracadeira.md),
 logo abaixo: seções do `MODEL.BIN`. As duas só entram na aba 3D com essa
 geometria lida. A manga longa entra por pedido do usuário (2026-10-05), num
 checkbox que só aparece com o jogador de linha (KITS-TASK-40).
 
-**Medido no jogo em 2026-10-05 ([KITS-TASK-39](/docs/tasks/kits/39-medir-bracadeira.md)),
+**Medido no jogo em 2026-10-05 ([KITS-TASK-39](/docs/tasks/concluidos/kits/39-medir-bracadeira.md)),
 na lista que o quadro entrega ao GPU.** A conta é por primitiva texturizada,
 pela página, pelo CLUT e pelos texels de cada uma, e só conta primitiva de 8
 bits com CLUT de kit: linhas 486 a 493, x 0. Numa partida, as páginas de kit
@@ -591,7 +591,7 @@ também guardam gráficos de 4 bits que não são uniforme.
 
 As três últimas colunas são uma partição da imagem de mangas: cada primitiva
 conta uma vez, a braçadeira primeiro (`oracle.sleeves_kind`). A tabela dizia
-88 \| 8 até a [CORR-KITS-068](/docs/tasks/kits/CORR-KITS-068.md): os 8 quads da
+88 \| 8 até a [CORR-KITS-068](/docs/tasks/concluidos/kits/CORR-KITS-068.md): os 8 quads da
 braçadeira contavam também como manga longa, e os 8 de cotovelo como nada.
 
 **Na `LOOKS SET` a imagem de mangas não é desenhada**, e o jogo confirma a
@@ -626,7 +626,7 @@ contagens da `LOOKS SET` no quadro (104 e 190) ficam abaixo das 237 e 429 do
 disco. A comparação não foi feita peça a peça, e a suspeita, **não medida**, é
 que as faces de costas para a câmera saem da lista.
 
-**O encaixe, medido em 2026-10-06 ([KITS-TASK-43](/docs/tasks/kits/43-medir-encaixe-mangas.md)),
+**O encaixe, medido em 2026-10-06 ([KITS-TASK-43](/docs/tasks/concluidos/kits/43-medir-encaixe-mangas.md)),
 no mesmo slot 5.** Cada primitiva de kit do quadro foi casada com a primitiva
 de modelo que tem os mesmos quatro cantos de texel, e só contou o casamento
 com uma seção única. Os jogadores na tela foram separados por contato das
@@ -665,7 +665,7 @@ Com 9 ou 10 pontos por seção, contra 11 incógnitas, o ajuste é frouxo
 demais para dizer se duas peças dividem a matriz. Isso é limite da medida, e a
 resposta exigiria ler a matriz do GTE, como o `looks` faz com o `--pose`.
 
-**O encaixe pela matriz do GTE, medido em 2026-10-06 ([KITS-TASK-44](/docs/tasks/kits/44-matriz-gte-model-bin.md)),
+**O encaixe pela matriz do GTE, medido em 2026-10-06 ([KITS-TASK-44](/docs/tasks/concluidos/kits/44-matriz-gte-model-bin.md)),
 no slot 5.** A partida carrega a matriz de cada peça pela mesma instrução que
 a `LOOKS SET` (`layout.POSE_PIECE_MATRIX`, 0x8001229C), e os ponteiros vivos
 nomeiam seções do `MODEL.BIN`. Valem as duas armadilhas do `looks`: a matriz
@@ -696,10 +696,10 @@ e `--plant-matrix slot` (a braçadeira esperada no lugar da 98), que também sai
 
 Isso fecha a pergunta que o ajuste projetivo da KITS-TASK-43 deixou aberta,
 "matriz compartilhada ou própria", e responde **própria**. A
-[CORR-KITS-071](/docs/tasks/kits/CORR-KITS-071.md) reabriu essa pergunta.
+[CORR-KITS-071](/docs/tasks/concluidos/kits/CORR-KITS-071.md) reabriu essa pergunta.
 A manga curta foi medida depois, logo abaixo.
 
-**Manga curta, medida em 2026-10-06 ([KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md)),
+**Manga curta, medida em 2026-10-06 ([KITS-TASK-46](/docs/tasks/concluidos/kits/46-manga-curta-partida.md)),
 no slot 6:** a mesma partida, Noruega × Equador, com os dois times de manga
 curta e o camisa 10 da Noruega, capitão, com a bola. **Manga curta e longa são
 seções alternativas das mesmas peças**, na mesma posição da ordem de desenho:
@@ -716,7 +716,7 @@ amostrada pela braçadeira, com 4 primitivas na zona "armband, short sleeve",
 das seções 90 e 91, que guardam os mesmos quads. Dos braços curtos, o
 `--attach 6 --sleeve-length short` vê pelas texturas só as seções 3 e 4 (e as
 57 e 59 do goleiro) nas páginas de kit; as 5 e 6, e as 58 e 60, não aparecem
-por texel próprio neste quadro ([CORR-KITS-079](/docs/tasks/kits/CORR-KITS-079.md)).
+por texel próprio neste quadro ([CORR-KITS-079](/docs/tasks/concluidos/kits/CORR-KITS-079.md)).
 Cada peça continua com matriz própria.
 
 Pelo texel a troca da braçadeira não se decide aqui: a 90 tem 5 quads no disco,
@@ -740,19 +740,19 @@ O `oracle.py --sleeves-image SLOT --page X --tag T`, que compara a imagem de
 mangas da VRAM com a do disco bloco a bloco, é **só relatório**: não tem valor
 esperado nem planta e sai sempre 0. Os números dele são pista, não veredito, e
 nenhuma regra desta seção se apoia neles
-([CORR-KITS-082](/docs/tasks/kits/CORR-KITS-082.md)).
+([CORR-KITS-082](/docs/tasks/concluidos/kits/CORR-KITS-082.md)).
 
 **O que isso pede da aba 3D.** Desenhar a braçadeira e a manga longa é
 desenhar a figura de partida: as seções do `MODEL.BIN` na ordem medida, com a
 93 no lugar da 97 de manga longa, ou a 90 no lugar da 4 de manga curta, e uma
 pose para elas. Em 2026-10-06 o usuário decidiu abrir esse trabalho:
-[KITS-TASK-45](/docs/tasks/kits/45-pose-figura-partida.md) captura a pose,
-[KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md) mediu a manga curta
+[KITS-TASK-45](/docs/tasks/concluidos/kits/45-pose-figura-partida.md) captura a pose,
+[KITS-TASK-46](/docs/tasks/concluidos/kits/46-manga-curta-partida.md) mediu a manga curta
 no slot 6 (a tabela acima), e
-[KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md) desenha a figura
+[KITS-TASK-47](/docs/tasks/concluidos/kits/47-figura-partida-aba-3d.md) desenha a figura
 na aba. Os checkboxes da KITS-TASK-40 vêm depois.
 
-**A pose, medida em 2026-10-06 ([KITS-TASK-45](/docs/tasks/kits/45-pose-figura-partida.md)),
+**A pose, medida em 2026-10-06 ([KITS-TASK-45](/docs/tasks/concluidos/kits/45-pose-figura-partida.md)),
 no slot 5.** Numa só corrida, com dois breakpoints, o jogo para em cada carga
 de matriz por peça (`layout.POSE_PIECE_MATRIX`) e em cada envio de lista ao
 GPU (`layout.GPU_LIST_SUBMIT`). As matrizes carregadas desde o envio anterior
@@ -776,7 +776,7 @@ Uma descoberta de leitura: **o texel de cada canto segue a ordem gravada dos
 oferece como desembaraçada. Pareado por `corners`
 (`oracle.py --match-pose 5 --pair-by corners`), as peças erram de 1,48 a
 4,05 px, 21 das 24 acima do limite de 2,00; pela ordem gravada, o pior é
-1,01 px ([CORR-KITS-083](/docs/tasks/kits/CORR-KITS-083.md)).
+1,01 px ([CORR-KITS-083](/docs/tasks/concluidos/kits/CORR-KITS-083.md)).
 
 A pose de cada corrida mora em `work/kits-pose/slot5-<cabeça>.json`, fora do git (a
 versionada é a do parágrafo seguinte): a projeção
@@ -786,7 +786,7 @@ que refaz: `python tools/kits/oracle.py --match-pose 5`, com
 `work/kits-oracle/pose-5.json`, e `--frame-json` a relê sem emulador. São duas
 figuras de um quadro: a pose de um instante de corrida, não um ciclo.
 
-**A figura de partida na aba 3D, desde 2026-10-06 ([KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md)).**
+**A figura de partida na aba 3D, desde 2026-10-06 ([KITS-TASK-47](/docs/tasks/concluidos/kits/47-figura-partida-aba-3d.md)).**
 A pose que a aba lê é versionada em `tools/kits/core/match_pose.json`, escrita
 por `python tools/kits/oracle.py --match-pose 5 --write` e nunca à mão. O
 `work/kits-pose/` continua sendo a saída de cada corrida. O núcleo
@@ -823,7 +823,7 @@ leitura do §1.1 dizem (704, 256), que é a bandeira. E na `LOOKS SET` o (704, 2
 é a página da fonte (`EDT_2D.BIN`). Suspeita: a linha do plano do `looks` está
 velha. Conferir antes de o 3D pedir qualquer coisa à bandeira.
 
-**Fechada em 2026-09-30 ([KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md))**,
+**Fechada em 2026-09-30 ([KITS-TASK-02](/docs/tasks/concluidos/kits/02-retangulos-608-e-704.md))**,
 com `python tools/kits/cli.py rects roms/japanese-shift-jis.bin 608,256 704,256`:
 
 - **(608, 256) não é origem de registro nenhum do disco** — "0 start there". É
@@ -846,7 +846,7 @@ roms/japanese-shift-jis.bin 704,256`, e o controle negativo da busca de
 `python tools/kits/cli.py rects --negative roms/japanese-shift-jis.bin 608,256`:
 com as duas origens de uniforme do `TEX_A4` deslocadas de 576 para 640, os donos
 de (608, 256) caem de 106 para 105 arquivos e de 211 para 209 registros
-([CORR-KITS-003](/docs/tasks/kits/CORR-KITS-003.md)).
+([CORR-KITS-003](/docs/tasks/concluidos/kits/CORR-KITS-003.md)).
 
 ### 4.5 (e) A paleta do árbitro
 
@@ -867,9 +867,9 @@ cotovelos, a manga curta de capitão das duas figuras — §4.3), ou é a dos n�
 quem desenha o número de camisa não está nesta tela. A frase dizia antes "manga
 longa, braçadeira e figurantes com bandeira", e o veredito abaixo aceitou os
 números por outro motivo; a regra foi reescrita para bater
-([CORR-KITS-029](/docs/tasks/kits/CORR-KITS-029.md)).
+([CORR-KITS-029](/docs/tasks/concluidos/kits/CORR-KITS-029.md)).
 
-**A entrada da conferência foi medida em 2026-09-30 ([KITS-TASK-04](/docs/tasks/kits/04-uv-no-bitmap-de-trabalho.md)).**
+**A entrada da conferência foi medida em 2026-09-30 ([KITS-TASK-04](/docs/tasks/concluidos/kits/04-uv-no-bitmap-de-trabalho.md)).**
 Ela não é um arquivo versionado: mora no comando, que a refaz do disco —
 `python tools/kits/cli.py uv <imagem> --json` dá o retângulo de UV de cada
 primitiva no bitmap de trabalho de 256×128 (uniforme em x 0–127, mangas em
@@ -888,7 +888,7 @@ Toda primitiva cai dentro do bitmap, e toda na metade do uniforme — nenhuma na
 das mangas (§4.3). As duas figuras dividem a imagem de uniforme e se sobrepõem
 em x 48–63. A fase 3 cruza essa lista com o mapa de zonas.
 
-**Veredito, medido em 2026-10-02 ([KITS-TASK-16](/docs/tasks/kits/16-zonas.md)): a
+**Veredito, medido em 2026-10-02 ([KITS-TASK-16](/docs/tasks/concluidos/kits/16-zonas.md)): a
 §4.6 vale, com seis lacunas declaradas** — tronco e gola nas duas figuras, a gola em dois retângulos cada; o número é o da linha `gaps: (...)` do `cli.py zones`. O mapa é o `ZONES` do
 `tools/kits/core/zones.py` — cada linha remedida do `Zonas We2002.png` do
 polipoli, e `cli.py zones --map <Zonas We2002.png>` confere: nenhum pixel pintado
@@ -938,7 +938,7 @@ reprova; o `--map --negative` faz o mesmo contra o PNG (248 pixels pintados fora
 de zona). Os dois rodam no `kits_image`; os dois do `--map` só quando
 `WE2002_KITS_ZONES_PNG` aponta o `Zonas We2002.png` do polipoli, que é arquivo do
 usuário e não entra no repositório — sem a variável o `kits_image` diz que não os
-rodou ([CORR-KITS-028](/docs/tasks/kits/CORR-KITS-028.md)).
+rodou ([CORR-KITS-028](/docs/tasks/concluidos/kits/CORR-KITS-028.md)).
 
 ### 4.7 (g) As costas e o número
 
@@ -951,7 +951,7 @@ bitmaps e transparente em 190. O desenho está fiel ao disco; o que não se sabe
 número de camisa — antes de desenhar.
 
 O que medir, nessa ordem
-([KITS-TASK-38](/docs/tasks/kits/38-medir-costas-numero.md)):
+([KITS-TASK-38](/docs/tasks/concluidos/kits/38-medir-costas-numero.md)):
 
 1. a VRAM da imagem de uniforme em (576,256) + (0,80) 20×24 e + (100,104)
    20×24 com a `LOOKS SET` na tela, pelos dois states: o jogo escreveu ali ou
@@ -966,7 +966,7 @@ O número só entra na aba 3D com essa regra medida, e nunca por remapeamento de
 UV feito à mão (§0). Sem a regra, o checkbox de número fica desligado com a
 frase de que não foi medido (KITS-TASK-40).
 
-**Medido em 2026-10-05 ([KITS-TASK-38](/docs/tasks/kits/38-medir-costas-numero.md)),
+**Medido em 2026-10-05 ([KITS-TASK-38](/docs/tasks/concluidos/kits/38-medir-costas-numero.md)),
 na `LOOKS SET`, nos dois states e com o `TEX_A4` que a tela veste:** o jogo
 **escreve** nas duas lacunas, e o que escreve são **as costas, sem número**.
 
@@ -991,7 +991,7 @@ comparação é feita nesses 7. E é **um** kit numa tela: a regra da cópia val
 para o `TEX_A4` na `LOOKS SET`. O número numa partida foi medido depois, logo
 abaixo.
 
-**Medido numa partida em 2026-10-06 ([KITS-TASK-42](/docs/tasks/kits/42-medir-numero-partida.md)),
+**Medido numa partida em 2026-10-06 ([KITS-TASK-42](/docs/tasks/concluidos/kits/42-medir-numero-partida.md)),
 no slot 5 que o usuário salvou** (Noruega × Equador, `work/kits-states/`)**:**
 na partida o jogo **escreve o número**. Ele usa a área abaixo do mapa, linhas
 80 a 127, como uma **grade de painéis de costas** de 20×24, um por jogador em
@@ -1032,7 +1032,7 @@ Para a aba 3D a regra já basta: o painel do número escolhido, montado em (0,80
 ou (100,104), é o que o jogo desenharia nas costas. Também foi uma partida só, com dois
 times e números de um e de dois dígitos.
 
-**Na aba 3D desde 2026-10-06 ([KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md)).**
+**Na aba 3D desde 2026-10-06 ([KITS-TASK-40](/docs/tasks/concluidos/kits/40-checkboxes-numero-bracadeira.md)).**
 O `api.numbered` monta esse painel na lacuna do torso de uma figura da `LOOKS
 SET`, com as costas copiadas de (44,6) ou (108,6) e a tinta dos glifos por
 cima, e recolore as superfícies do kit pela mesma janela de paleta. O TEX não
@@ -1081,7 +1081,7 @@ painel o torso dela amostra.
      tem de dar `KitUnreadable`, e um arquivo posto logo depois dos setores ISO
      de um TEX cujo cabeçalho acaba além deles tem de parar a leitura no tamanho
      ISO e deixar o TEX recusado — as duas regras do §2.1, no
-     `cli.py tex --negative` ([CORR-KITS-014](/docs/tasks/kits/CORR-KITS-014.md));
+     `cli.py tex --negative` ([CORR-KITS-014](/docs/tasks/concluidos/kits/CORR-KITS-014.md));
    - o mapa de zonas deslocado 1 px tem de reprovar a §4.6;
    - pedir o suplente do `TEX_A4` tem de dar o mesmo quadro que o titular, e
      de qualquer tag do §1.1 que difere, um quadro diferente.

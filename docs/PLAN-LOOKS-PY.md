@@ -873,7 +873,7 @@ juntas.
 (576, 256), 64×128 halfwords, dos 105 TEX. Registro que *começa* ali não existe
 no disco — medido em 2026-09-30 por `python tools/kits/cli.py rects
 roms/japanese-shift-jis.bin 608,256`
-([KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md)). A tabela fica como o
+([KITS-TASK-02](/docs/tasks/concluidos/kits/02-retangulos-608-e-704.md)). A tabela fica como o
 comando a imprimiu; esta nota diz como lê-la.
 
 A resposta é uma frase: **o uniforme é por time**, e por isso não mora no
