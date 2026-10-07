@@ -65,3 +65,10 @@ Imprime 3 linhas hoje; tem de não imprimir nada depois da correção.
   `api.numbered` diz que só pinta os dígitos.
 - Verificação: o `grep` não imprime nada (exit 1). `python3 tools/kits/selftest.py`:
   `controls: 0 failure(s)`, `kits_selftest: 0 failure(s)`.
+- **Closed** — commit `4a7952e` (2026-10-07): docs(kits): mark G5 'Hoje' as the state before K3D-TASK-05
+  - Files (`git show --name-status 4a7952e`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-003.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/core/api.py`
