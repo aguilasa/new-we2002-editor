@@ -63,9 +63,39 @@ $ python3 tools/kits/controls.py
 controls: 29 of 29 red
 ```
 
-Varredura: "Set"/"Conjunto"/"titular"/"suplente" só sobram em `PLAN-KITS-PY.md` e na
-seção "Hoje" do `KITS-AJUSTES-3D.md`, que são registro; docstrings de formato
-("first set") no `cli.py` falam do registro do TEX, não do rótulo, e ficam.
+Varredura (refeita pela [CORR-K3D-001](/docs/tasks/kits-3d/CORR-K3D-001.md)): nenhum
+rótulo do seletor 3D diz mais "Set"/"Conjunto"/"titular"/"suplente". O que sobra na
+árvore, e por que fica:
+
+```text
+$ grep -rlI -i 'titular\|suplente' tools docs --include='*.py' --include='*.md' | grep -v 'concluidos\|kits-3d\|tasks/pes2' | sort
+docs/biblia-we2002/07-times.md
+docs/biblia-we2002/08-uniformes.md
+docs/KITS-AJUSTES-3D.md
+docs/KITS-INICIAR-CICLO.md
+docs/PARIDADE-FUNCIONAL.md
+docs/PLAN-KIT2D-PY.md
+docs/PLAN-KITS-PY.md
+docs/prompts/perfil-kits.md
+docs/SUPERPACK-UNIFORMES.md
+```
+
+- `PLAN-KITS-PY.md`, a seção "Hoje" do `KITS-AJUSTES-3D.md`, `KITS-INICIAR-CICLO.md`
+  e `perfil-kits.md` são registro do ciclo `kits`, escritos antes deste.
+- `SUPERPACK-UNIFORMES.md` descreve o formato do `TEX_*.BIN` e o vocabulário do WETex
+  (Titular/Suplente); `biblia-we2002/08-uniformes.md` transcreve o tutorial da
+  comunidade. São nomes de terceiro, não rótulo nosso.
+- `PLAN-KIT2D-PY.md` é o plano de outro projeto (o 2D), com vocabulário próprio.
+- `biblia-we2002/07-times.md` e `PARIDADE-FUNCIONAL.md` dizem "titulares" no sentido
+  de onze iniciais, não de uniforme.
+- `tools/kits/ui/i18n.py:112-113` — `work_set_1`/`work_set_2` ("1º/2º conjunto",
+  "1st/2nd set") rotulam a lista de **bitmaps de trabalho**, fora do G1, que só fala
+  do seletor 3D. Trocá-los por Casa/Visitante seria task nova.
+- Docstrings e mensagens de formato em `tools/kits` ("set 1", "first set") falam do
+  registro do TEX, não do rótulo, e ficam.
+
+O "conjunto" no resto de `docs/` (`subconjunto`, "conjunto de cópias" do PES2) é
+outra palavra, e a varredura ampla da CORR o mostra junto.
 
 ## Log de Execução
 

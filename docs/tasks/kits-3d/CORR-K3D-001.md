@@ -52,3 +52,12 @@ Todo arquivo que aparecer precisa estar nomeado na nota de varredura da task. Ho
 falha em `tools/kits/ui/i18n.py` e `docs/SUPERPACK-UNIFORMES.md`.
 
 ## Log de Execução
+
+- 2026-10-07 — triagem inline: **REPRODUCED**. O `grep` da Evidência ainda lista
+  `tools/kits/ui/i18n.py:112-113`; o `head -4` agora corta antes do
+  `SUPERPACK-UNIFORMES.md` (o `PLAN-WTE-LAZARUS.md` entra na frente com
+  "subconjunto"), mas o arquivo continua no resultado sem o `head`.
+- A varredura ampla da Verificação acha 44 arquivos, quase todos com "conjunto" em
+  outro sentido. A nota foi reescrita sobre o recorte que importa — `titular|suplente`
+  fora do arquivo morto, do `kits-3d` e do PES2, nove arquivos — mais o
+  `i18n.py`, e cada um com o motivo de ficar. `rite check --cycle kits-3d`: 0 erros.
