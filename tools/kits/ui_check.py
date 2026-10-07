@@ -160,9 +160,9 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES = (
+STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO = (
     "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset",
-    "match", "dressing", "dressing boxes")
+    "match", "dressing", "dressing boxes", "combo width")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -221,6 +221,10 @@ PLANTS = (
     ("kit 1 labelled first", BOXES,
      '        self.set_box.setItemText(0, tr("set_first"))\n',
      '        self.set_box.setItemText(0, "first")  # planted\n'),
+    ("Kit combo keeps its first width", COMBO,
+     "        for box in self.combos().values():\n",
+     "        for box in [b for b in self.combos().values() if b is not self.set_box]:"
+     "  # planted\n"),
     ("Long sleeves always shown", BOXES,
      "        self.long_box.setVisible(figure != 1)\n",
      "        self.long_box.setVisible(True)  # planted\n"),
@@ -827,6 +831,49 @@ def boxes_judge(python, image, env, app=APP) -> list:
     return bad
 
 
+COMBO_NAMES = ("tag_box", "language_box", "image_box", "palette_box", "zoom_box",
+               "set_box", "figure_box")
+"""Every combo of the window, written here: the window finds its own, and one
+missing from its list -- or a new one missing from this -- fails the judge (G2)."""
+COMBO_SWITCHES = (("en-US", "pt-BR"), ("pt-BR", "en-US"))
+"""Open in one language, pick the other live: the default policy sizes a combo
+once, on first show, so the switch is where a combo keeps the old width."""
+
+
+def combos_judge(python, image, env, app=APP) -> tuple:
+    """(failures, what was seen): after each live switch, on the 3D tab where
+    every combo is laid out, each combo's text field is at least as wide as its
+    longest item (`app.py --list-combos`, the style's field, arrow excluded)."""
+    bad, seen = [], []
+    for first, then in COMBO_SWITCHES:
+        code, output = run_app(python, app, [image, "--tag", MATCH_TAG, "--tab", "3d",
+                                             "--lang", first, "--switch-to", then,
+                                             "--list-combos"], env)
+        if code != 0:
+            bad.append("%s to %s: exit %s" % (first, then, code))
+            continue
+        got = {}
+        for line in output.splitlines():
+            line = line.strip()
+            if line.startswith("combo "):
+                name, rest = line[len("combo "):].split(": ", 1)
+                field, longest, text = rest.split(", ", 2)
+                got[name] = (int(field.split()[1]), int(longest.split()[1]), text)
+        if sorted(got) != sorted(COMBO_NAMES):
+            bad.append("%s to %s: the window lists combos %s, not %s"
+                       % (first, then, sorted(got), sorted(COMBO_NAMES)))
+        for name in COMBO_NAMES:
+            if name not in got:
+                bad.append("%s to %s: no %s" % (first, then, name))
+                continue
+            field, longest, text = got[name]
+            seen.append("%s>%s %s %d/%d" % (first[:2], then[:2], name, field, longest))
+            if field < longest:
+                bad.append("%s to %s: %s field %d px, its longest item %s %d px"
+                           % (first, then, name, field, text, longest))
+    return bad, ", ".join(seen)
+
+
 def off_judge(python, image, env, tmp, app=APP) -> list:
     """A lone TEX with WE2002_LOOKS_IMAGE unset: the 3D tab refuses with the
     sentence, and the Plan capture differs from the one with the variable only
@@ -970,6 +1017,9 @@ def run(python: str, image: str) -> int:
              "dressings with no rule off with the sentence, and the kit selector "
              "Kit Home/Away, Uniforme Casa/Visitante, in en-US and pt-BR",
              boxes_judge(python, image, env))
+        bad, seen = combos_judge(python, image, env)
+        t.ok("every combo is as wide as its longest item after a live switch, both "
+             "ways (field/longest px: %s)" % seen, bad)
         t.ok("with no geometry disc the 3D tab is off with the sentence, and Plan is the same",
              off_judge(python, image, env, tmp))
         bad, digests = reset_judge(python, image, env, tmp)
@@ -1004,6 +1054,8 @@ def run(python: str, image: str) -> int:
                     bad = []
                 elif judge == DRESS:
                     red, bad = dress_judge(python, image, env, box, app)[0], []
+                elif judge == COMBO:
+                    red, bad = combos_judge(python, image, env, app)[0], []
                 elif judge == BOXES:
                     red, bad = boxes_judge(python, image, env, app), []
                 elif judge == MATCH:

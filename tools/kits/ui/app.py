@@ -323,10 +323,6 @@ class Window(QtWidgets.QMainWindow):
         top.addWidget(self.language_box)
 
         self.image_box = QtWidgets.QComboBox()
-        # Its labels change with the language, and the default policy sizes a
-        # combo once, on first show: pt-BR picked live kept the en-US width.
-        self.image_box.setSizeAdjustPolicy(
-            QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents)
         for label, key in image_choices():
             self.image_box.addItem(label, key)
         self.image_box.currentIndexChanged.connect(self.image_changed)
@@ -460,10 +456,21 @@ class Window(QtWidgets.QMainWindow):
         layout.addWidget(self.status)
         layout.addWidget(self.figure_note)
         self.setCentralWidget(central)
+        # Labels change with the language, and the default policy sizes a
+        # combo once, on first show: pt-BR picked live kept the en-US width,
+        # and cut "Visitante" and "jogador em partida" (G2, K3D-TASK-02).
+        for box in self.combos().values():
+            box.setSizeAdjustPolicy(QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents)
         self.retranslate()
         self.image_changed()
 
     # -- language ---------------------------------------------------------------
+
+    def combos(self) -> dict:
+        """Every combo of the window, by attribute name, found rather than
+        listed so that a new one is fitted and judged with the rest (G2)."""
+        return {name: widget for name, widget in vars(self).items()
+                if isinstance(widget, QtWidgets.QComboBox)}
 
     def retranslate(self) -> None:
         """Every text of the window again, in the language in force."""
@@ -838,6 +845,19 @@ def park(window: QtWidgets.QWidget, visible: bool) -> None:
     window.move(OFF_THE_DESKTOP, OFF_THE_DESKTOP)
 
 
+def combo_fit(box: QtWidgets.QComboBox) -> tuple:
+    """(width of the box's text field, width of its longest item, that item):
+    the field is the style's, so the arrow and the frame are not counted in."""
+    opt = QtWidgets.QStyleOptionComboBox()
+    box.initStyleOption(opt)
+    field = box.style().subControlRect(QtWidgets.QStyle.ComplexControl.CC_ComboBox, opt,
+                                       QtWidgets.QStyle.SubControl.SC_ComboBoxEditField, box)
+    metrics = box.fontMetrics()
+    texts = [box.itemText(i) for i in range(box.count())] or [""]
+    longest = max(texts, key=metrics.horizontalAdvance)
+    return field.width(), metrics.horizontalAdvance(longest), longest
+
+
 def settle(app: QtWidgets.QApplication, frames: int = FRAMES) -> None:
     for _ in range(frames):
         app.processEvents()
@@ -953,6 +973,9 @@ def main(argv=None) -> int:
                         help="print the Diagnosis tab of the kit shown (summary and rows) and exit")
     parser.add_argument("--list-kits", action="store_true",
                         help="print the kit selector's items, one per line, and exit")
+    parser.add_argument("--list-combos", action="store_true",
+                        help="after --switch-to, print each combo's text field width and "
+                        "its longest item's, and exit")
     parser.add_argument("--switch-to", choices=i18n.LANGUAGES, metavar="LANG",
                         help="once everything is set, pick LANG in the window's own "
                         "language selector, as a click would")
@@ -1028,8 +1051,17 @@ def main(argv=None) -> int:
     elif TAB_NAMES.index(args.tab) == 2:
         window.tabs.setCurrentIndex(2)
     if args.switch_to:
+        # A click comes after the window has been laid out and shown: without
+        # this the combos would first be sized in LANG, and a combo that keeps
+        # its first width would pass unseen (K3D-TASK-02).
+        settle(app)
         window.language_box.setCurrentIndex(i18n.LANGUAGES.index(args.switch_to))
     settle(app)
+    if args.list_combos:
+        for name, box in window.combos().items():
+            field, longest, text = combo_fit(box)
+            print("  combo %s: field %d, longest %d, %r" % (name, field, longest, text))
+        return 0
 
     if args.walk:
         return walk(app, window, args.plant)
