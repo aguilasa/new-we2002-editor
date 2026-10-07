@@ -78,3 +78,4 @@ seção "Hoje" do `KITS-AJUSTES-3D.md`, que são registro; docstrings de formato
     - `M tools/kits/ui/app.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-07) at `50341a4`: CORR-K3D-001

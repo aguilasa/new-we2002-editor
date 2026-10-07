@@ -1,5 +1,19 @@
 {
   "schema": 1,
   "cycle": "kits-3d",
-  "fixes": []
+  "fixes": [
+    {
+      "id": "CORR-K3D-001",
+      "file": "CORR-K3D-001.md",
+      "title": "Nota de varredura omite i18n work_set e SUPERPACK-UNIFORMES",
+      "origin": "K3D-TASK-01",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    }
+  ]
 }
