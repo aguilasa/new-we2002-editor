@@ -117,7 +117,8 @@ ARMBAND_SHARE = 5.0
 (measured 1.3 %, before and after KITS-TASK-40)."""
 ARM_SIDE = 0.35
 """The armband's change lies in the outer ARM_SIDE of the figure's box, on
-either side: measured at x 0.01-0.20 of it (KITS-TASK-47, CORR-KITS-087)."""
+either side: measured at x 0.80-0.99 of it with the view unmirrored
+(KITS-TASK-40); x 0.01-0.20 while it was mirrored (KITS-TASK-47, CORR-KITS-087)."""
 ARM_ROWS = (0.15, 0.55)
 """...and between these fractions of its height, shoulder to waist: measured
 at y 0.28-0.33."""

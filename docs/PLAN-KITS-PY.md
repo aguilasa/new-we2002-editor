@@ -374,8 +374,9 @@ devolve.
   **Reset view** (e o duplo clique na vista) volta ao giro de abertura; a dica
   da aba diz que as costas saem vazadas porque a área que o torso amostra está
   vazia no TEX, que o jogo copia as costas da camisa para ela (medido, §4.7) e
-  que o número não foi medido — o desenho segue os dados (decisão do usuário,
-  2026-10-05; KITS-TASK-37, CORR-KITS-066). O seletor de figura tem um
+  que marcar **Number** pinta ali o painel que a partida monta — sem a caixa, o
+  desenho segue os dados (decisão do usuário, 2026-10-05; KITS-TASK-37,
+  CORR-KITS-066, KITS-TASK-40). O seletor de figura tem um
   terceiro item, **match player**, a figura de partida do `MODEL.BIN` na pose
   medida no jogo (§4.3, KITS-TASK-47).
 - **Os três checkboxes da aba 3D** (KITS-TASK-40) desenham só o que foi
