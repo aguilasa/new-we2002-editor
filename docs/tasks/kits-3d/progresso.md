@@ -56,7 +56,7 @@ graph TD
 | [K3D-TASK-03](/docs/tasks/kits-3d/03-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | closing | K3D-TASK-01, K3D-TASK-02 | done | 2026-10-07 | 2026-10-07 |
 | [K3D-TASK-04](/docs/tasks/kits-3d/04-buracos-por-angulo.md) | Ferramenta que conta o que falta na figura por ângulo | 2 | ferramenta | — | done | 2026-10-07 | 2026-10-07 |
 | [K3D-TASK-05](/docs/tasks/kits-3d/05-costas-sempre.md) | Cópia das costas sempre e conserto do que a contagem achar | 2 | implementação | K3D-TASK-04 | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-06](/docs/tasks/kits-3d/06-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | closing | K3D-TASK-04, K3D-TASK-05 | pending | — | — |
+| [K3D-TASK-06](/docs/tasks/kits-3d/06-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | closing | K3D-TASK-04, K3D-TASK-05 | done | 2026-10-07 | pending |
 | [K3D-TASK-07](/docs/tasks/kits-3d/07-medir-geometria-edt-mod.md) | Medir como braçadeira e manga longa entram na figura do EDT_MOD.BIN | 3 | investigação | — | pending | — | — |
 | [K3D-TASK-08](/docs/tasks/kits-3d/08-medir-bracadeira-goleiro.md) | Medir a braçadeira do goleiro no emulador | 3 | verificação | — | pending | — | — |
 | [K3D-TASK-09](/docs/tasks/kits-3d/09-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | closing | K3D-TASK-07, K3D-TASK-08 | pending | — | — |
