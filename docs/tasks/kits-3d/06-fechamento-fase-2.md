@@ -55,12 +55,20 @@ com `number=None`, o que quer dizer só `BACK_COPY`:
 
 ```
 $ grep -rn "planted_gap\|numbered_scene(\|numbered_indices(" tools/kits/*.py tools/kits/ui/*.py tools/kits/core/*.py | grep -v "def "
+tools/kits/cli.py:1237:        planted = api.planted_gap(drawn, kit, figure, HOLE_ZONE)
+tools/kits/selftest.py:1056:        got = read_back(_figure.numbered_indices(bytes(plain), side, 0, number))
+tools/kits/selftest.py:1063:    flipped = bytearray(_figure.numbered_indices(bytes(plain), side, 0, 10))
+tools/kits/ui_check.py:229:     "    return numbered_scene(built, kit, kit_set, figure, None)\n",
+tools/kits/core/api.py:124:    return _figure.numbered_scene(drawn, kit, kit_set, figure, number)
+tools/kits/core/api.py:140:    return _figure.planted_gap(drawn, kit, figure, zone_name)
 tools/kits/core/figure.py:108:    return numbered_scene(built, kit, kit_set, figure, None)
 tools/kits/core/figure.py:161:        indices = numbered_indices(indices, width, figure, None)
 tools/kits/core/figure.py:425:        indices = numbered_indices(indices, width, figure, number)
-tools/kits/cli.py:1237:        planted = api.planted_gap(drawn, kit, figure, HOLE_ZONE)
-(e os de selftest/ui_check/api, que são teste, planta e fachada)
 ```
+
+Das nove linhas, quatro são do desenho e do controle (`core/figure.py:108`, `:161`, `:425` e
+`cli.py:1237`). As outras cinco são de selftest/ui_check/api: a planta do `ui_check.py`, os dois
+testes do `selftest.py` e os dois invólucros do `api.py`, que só repassam a chamada.
 
 **Fase 2, item 3, e os critérios de ctest, controles e check:**
 

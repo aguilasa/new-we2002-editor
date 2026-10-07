@@ -52,3 +52,8 @@ sed -n '/numbered_indices(/,/selftest\/ui_check/p' docs/tasks/kits-3d/06-fechame
 Hoje dá 9 e 4; depois, os dois números iguais (ou o comando do Log estreitado).
 
 ## Log de Execução
+
+- 2026-10-07 — triagem inline: **REPRODUCED**. Os dois comandos da Evidência davam `9` e `4`.
+- Item 2 do Log da K3D-TASK-06 com a saída do `grep` colada inteira (nove linhas), e a nota
+  sobre os cinco chamadores de teste, planta e fachada movida para prosa depois do bloco.
+- Verificação: os dois comandos dão `9` e `9`.
