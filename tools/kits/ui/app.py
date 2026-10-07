@@ -929,7 +929,7 @@ def main(argv=None) -> int:
     parser.add_argument("--tab", choices=TAB_NAMES, default=TAB_NAMES[0],
                         help="the tab shown")
     parser.add_argument("--kit-set", type=int, choices=(1, 2), default=1,
-                        help="3D: the first or the second set")
+                        help="3D: the kit, 1 home or 2 away")
     parser.add_argument("--figure", type=int, choices=(0, 1, MATCH_FIGURE), default=0,
                         help="3D: 0 the player, 1 the goalkeeper, %d the match player"
                         % MATCH_FIGURE)
@@ -1009,6 +1009,9 @@ def main(argv=None) -> int:
         for name, box in boxes.items():
             print("  box %s: shown %s, enabled %s, ticked %s, text %s"
                   % (name, not box.isHidden(), box.isEnabled(), box.isChecked(), box.text()))
+        print("  kit selector: %s: %s" % (
+            window.figure_labels["kit_set"].text(),
+            " | ".join(window.set_box.itemText(i) for i in range(window.set_box.count()))))
         return 0
     window.figure_view.turn_to(window.figure_view.yaw if args.yaw is None else args.yaw,
                                window.figure_view.pitch if args.pitch is None else args.pitch)

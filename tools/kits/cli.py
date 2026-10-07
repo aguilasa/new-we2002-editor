@@ -20,7 +20,8 @@ Usage:
     python tools/kits/cli.py export --confront [--negative] [--tag TAG ...] <image.bin>
     python tools/kits/cli.py zones [--negative] <image.bin>
     python tools/kits/cli.py zones --map <Zonas We2002.png> [--negative]
-    python tools/kits/cli.py figure [--tag TAG] [--set 1|2] [--figure 0|1] [--geometry BIN] <path>
+    python tools/kits/cli.py figure [--tag TAG] [--set 1|2 | --kit home|away] [--figure 0|1]
+                                    [--geometry BIN] <path>
     python tools/kits/cli.py figure --negative [--tag TAG] [--geometry BIN] <path>
     python tools/kits/cli.py figure --match [--armband] [--sleeves long|short] [--tag TAG] <path>
 """
@@ -1051,6 +1052,18 @@ def confront(image_path: str, tags, negative: bool) -> int:
     return 0 if not differ and kits else 1
 
 
+KIT_NAMES = {"home": 1, "away": 2}
+"""`figure --kit` against `--set`: kit 1 is home and kit 2 away, by football's
+convention and not by measurement (user, 2026-10-07; G1 of KITS-AJUSTES-3D.md)."""
+
+
+def chosen_sets(args) -> tuple:
+    """The sets `figure` draws: those of --set and --kit together, in order,
+    or both when neither is given."""
+    picked = set(args.set or ()) | {KIT_NAMES[k] for k in args.kit or ()}
+    return tuple(sorted(picked)) or (1, 2)
+
+
 def _scene_digest(scene) -> str:
     """sha256 of what the window draws of *scene*: every part's points, UVs
     and the RGBA of its surface, in draw-list order."""
@@ -1116,7 +1129,7 @@ def cmd_figure(args) -> int:
     except api.FigureError as exc:
         print("figure: %s" % exc, file=sys.stderr)
         return 1
-    sets = (1, 2) if args.negative else tuple(args.set or (1, 2))
+    sets = (1, 2) if args.negative else chosen_sets(args)
     figures = tuple(args.figure or (0, 1))
     if args.match:
         return _match_figure(kit, geometry, sets, args.armband, args.sleeves)
@@ -1163,7 +1176,8 @@ def cmd_figure(args) -> int:
                  and len(flipped) == sum(clean.values())) else 1
 
 
-def main(argv=None) -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """The command line, apart so the selftest can read it without running it."""
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("survey", help="measure the 105 kit containers of a disc")
@@ -1254,7 +1268,10 @@ def main(argv=None) -> int:
     p.add_argument("path", help="a disc image, its cue sheet, or a lone TEX")
     p.add_argument("--tag", help="the kit, on a disc (e.g. 00)")
     p.add_argument("--set", type=int, choices=(1, 2), action="append",
-                   help="first or second set (default both; repeatable)")
+                   help="1 the home kit, 2 the away kit (default both; repeatable)")
+    p.add_argument("--kit", choices=tuple(KIT_NAMES), action="append",
+                   help="home (= --set 1) or away (= --set 2); repeatable, and "
+                        "adds to --set")
     p.add_argument("--figure", type=int, choices=(0, 1), action="append",
                    help="0 player, 1 goalkeeper (default both; repeatable)")
     p.add_argument("--geometry", help="the Japanese data track (default $WE2002_LOOKS_IMAGE)")
@@ -1266,6 +1283,11 @@ def main(argv=None) -> int:
     p.add_argument("--sleeves", choices=("long", "short"), default="long",
                    help="with --match: the sleeve length (default long)")
     p.set_defaults(fn=cmd_figure)
+    return parser
+
+
+def main(argv=None) -> int:
+    parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "export" and not args.confront and not args.out:
         parser.error("export needs --out (or --confront)")

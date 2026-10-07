@@ -556,6 +556,31 @@ def _catalog():
     return module
 
 
+def _kit_cli_checks(c) -> None:
+    """G1 of KITS-AJUSTES-3D.md on the command line: `figure --kit home|away`
+    picks the set `--set 1|2` picks, and the help says which is which."""
+    spec = importlib.util.spec_from_file_location("kits_cli", os.path.join(KITS_DIR, "cli.py"))
+    cli = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cli)
+    parser = cli.build_parser()
+
+    def sets(*words):
+        return cli.chosen_sets(parser.parse_args(["figure", "x.bin"] + list(words)))
+
+    cases = ((("--kit", "home"), (1,)), (("--kit", "away"), (2,)),
+             (("--set", "1"), (1,)), (("--set", "2"), (2,)),
+             (("--kit", "home", "--kit", "away"), (1, 2)),
+             (("--set", "1", "--kit", "away"), (1, 2)), ((), (1, 2)))
+    wrong = ["%s gives %s, not %s" % (" ".join(w) or "(none)", sets(*w), want)
+             for w, want in cases if sets(*w) != want]
+    c.ok("cli.py figure --kit home is --set 1 and --kit away is --set 2",
+         not wrong, "; ".join(wrong))
+    figure_help = next(a for a in parser._subparsers._group_actions[0].choices.items()
+                       if a[0] == "figure")[1].format_help()
+    c.ok("cli.py figure --help says 1 is home and 2 is away",
+         "1 the home kit, 2 the away kit" in " ".join(figure_help.split()), figure_help[-400:])
+
+
 def _language_checks(c) -> None:
     catalog = c.attempt("import ui/i18n.py", _catalog)
     if catalog is not None:
@@ -1003,6 +1028,7 @@ def run(verbose: bool = True, plant: bool = True) -> int:
         total += harness.run("core", _core_checks, verbose)
         total += harness.run("rules", _rule_checks, verbose)
         total += harness.run("language", _language_checks, verbose)
+        total += harness.run("kit cli", _kit_cli_checks, verbose)
         total += harness.run("confront 2", _confront2_checks, verbose)
         total += harness.run("oracle", _oracle_checks, verbose)
         if plant:
@@ -1191,6 +1217,22 @@ def _figure_cli_checks(c, image_path, kit, geometry) -> None:
     last = proc.stdout.strip().splitlines()[-1] if proc.stdout.strip() else proc.stderr
     print("  ..... %s" % last)
     c.ok("cli.py figure --negative: the set ignored is seen red", proc.returncode == 0, last)
+    by_name = {}
+    for words in (("--kit", "home"), ("--set", "1"), ("--kit", "away"), ("--set", "2")):
+        proc = subprocess.run([sys.executable, cli, "figure", image_path, "--tag", "00",
+                               "--figure", "0"] + list(words),
+                              capture_output=True, text=True, env=env)
+        found = [line.split()[-1] for line in proc.stdout.splitlines()
+                 if line.startswith("set ") and " figure 0 " in line]
+        by_name[words] = found[0] if proc.returncode == 0 and len(found) == 1 else None
+    print("  ..... cli.py figure TEX_00 figure 0: %s" % ", ".join(
+        "%s %s" % (" ".join(w), (d or "?")[:12]) for w, d in by_name.items()))
+    c.ok("cli.py figure --kit home draws --set 1's digest and --kit away --set 2's, "
+         "and the two differ",
+         None not in by_name.values()
+         and by_name["--kit", "home"] == by_name["--set", "1"]
+         and by_name["--kit", "away"] == by_name["--set", "2"]
+         and by_name["--kit", "home"] != by_name["--kit", "away"], str(by_name))
 
 
 def run_image(verbose: bool = True) -> int:

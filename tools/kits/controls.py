@@ -251,6 +251,15 @@ CONTROLS = (
         "(CORR-KITS-068)",
     ),
     Control(
+        "cli-kit-swapped", "kits/cli.py", "module constant",
+        'KIT_NAMES = {"home": 1, "away": 2}',
+        'KIT_NAMES = {"home": 2, "away": 1}',
+        "FAIL  cli.py figure --kit home is --set 1 and --kit away is --set 2",
+        "kit 1 is home and kit 2 away by football's convention (G1 of "
+        "KITS-AJUSTES-3D.md); --kit swapped draws the other uniform under the "
+        "right name, with nothing else to show it (K3D-TASK-01)",
+    ),
+    Control(
         "scene-outside-figure", "kits/core/teams.py", "module imports",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n"

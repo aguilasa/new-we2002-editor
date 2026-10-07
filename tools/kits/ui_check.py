@@ -218,6 +218,9 @@ PLANTS = (
     ("Long sleeves ignored", DRESS,
      "                                             0 if self.long_box.isChecked() else 1],\n",
      "                                             1],  # planted: Long sleeves ignored\n"),
+    ("kit 1 labelled first", BOXES,
+     '        self.set_box.setItemText(0, tr("set_first"))\n',
+     '        self.set_box.setItemText(0, "first")  # planted\n'),
     ("Long sleeves always shown", BOXES,
      "        self.long_box.setVisible(figure != 1)\n",
      "        self.long_box.setVisible(True)  # planted\n"),
@@ -757,6 +760,11 @@ BOX_WANT = {
 enabled, text) of each dressing box, None where it does not matter.  The
 long sleeves only exist for a player, so the goalkeeper HIDES the box; the
 two dressings with no measured rule there are off and say so."""
+KIT_WANT = {"en-US": "Kit: Home | Away", "pt-BR": "Uniforme: Casa | Visitante"}
+"""What `app.py --list-3d` prints of the kit selector, per language: its label,
+then kit 1 and kit 2.  Kit 1 is home and kit 2 away by football's convention,
+not by measurement (user, 2026-10-07, G1 of KITS-AJUSTES-3D.md); written here
+and not read from ui/i18n.py, so the window is judged from outside its catalog."""
 
 
 def dress_judge(python, image, env, tmp, app=APP) -> tuple:
@@ -790,9 +798,11 @@ def boxes_judge(python, image, env, app=APP) -> list:
         if code != 0:
             bad.append("figure %s %s: exit %s" % (figure, lang, code))
             continue
-        got = {}
+        got, selector = {}, None
         for line in output.splitlines():
             line = line.strip()
+            if line.startswith("kit selector: "):
+                selector = line[len("kit selector: "):]
             if not line.startswith("box "):
                 continue
             name, rest = line[4:].split(": ", 1)
@@ -811,6 +821,9 @@ def boxes_judge(python, image, env, app=APP) -> list:
                                                          "on" if have[1] else "off"))
             if text is not None and have[2] != text:
                 bad.append("figure %s %s: %s box says %r" % (figure, lang, name, have[2]))
+        if selector != KIT_WANT[lang]:
+            bad.append("figure %s %s: the kit selector says %r, not %r"
+                       % (figure, lang, selector, KIT_WANT[lang]))
     return bad
 
 
@@ -954,7 +967,8 @@ def run(python: str, image: str) -> int:
         t.ok("3D TEX_%s from the back: each measured dressing changes the view (%s)"
              % (MATCH_TAG, seen), bad)
         t.ok("the dressing boxes: Long sleeves hidden with the goalkeeper, and the "
-             "dressings with no rule off with the sentence, in en-US and pt-BR",
+             "dressings with no rule off with the sentence, and the kit selector "
+             "Kit Home/Away, Uniforme Casa/Visitante, in en-US and pt-BR",
              boxes_judge(python, image, env))
         t.ok("with no geometry disc the 3D tab is off with the sentence, and Plan is the same",
              off_judge(python, image, env, tmp))
