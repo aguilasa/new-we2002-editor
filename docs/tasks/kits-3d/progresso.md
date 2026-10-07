@@ -53,7 +53,7 @@ graph TD
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [K3D-TASK-01](/docs/tasks/kits-3d/01-kit-home-away.md) | Kit Home/Away na aba e --kit home\|away no CLI | 1 | implementação | — | done | 2026-10-07 | 2026-10-07 |
 | [K3D-TASK-02](/docs/tasks/kits-3d/02-combos-ajustados.md) | Combos do tamanho da opção mais longa | 1 | implementação | — | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-03](/docs/tasks/kits-3d/03-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | closing | K3D-TASK-01, K3D-TASK-02 | done | 2026-10-07 | pending |
+| [K3D-TASK-03](/docs/tasks/kits-3d/03-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | closing | K3D-TASK-01, K3D-TASK-02 | done | 2026-10-07 | 2026-10-07 |
 | [K3D-TASK-04](/docs/tasks/kits-3d/04-buracos-por-angulo.md) | Ferramenta que conta o que falta na figura por ângulo | 2 | ferramenta | — | pending | — | — |
 | [K3D-TASK-05](/docs/tasks/kits-3d/05-costas-sempre.md) | Cópia das costas sempre e conserto do que a contagem achar | 2 | implementação | K3D-TASK-04 | pending | — | — |
 | [K3D-TASK-06](/docs/tasks/kits-3d/06-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | closing | K3D-TASK-04, K3D-TASK-05 | pending | — | — |
