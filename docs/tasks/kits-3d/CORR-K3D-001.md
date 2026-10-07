@@ -61,3 +61,7 @@ falha em `tools/kits/ui/i18n.py` e `docs/SUPERPACK-UNIFORMES.md`.
   outro sentido. A nota foi reescrita sobre o recorte que importa — `titular|suplente`
   fora do arquivo morto, do `kits-3d` e do PES2, nove arquivos — mais o
   `i18n.py`, e cada um com o motivo de ficar. `rite check --cycle kits-3d`: 0 erros.
+- **Closed** — commit `17c4581` (2026-10-07): docs(kits): list what the K3D-TASK-01 sweep leaves, and why
+  - Files (`git show --name-status 17c4581`):
+    - `M docs/tasks/kits-3d/01-kit-home-away.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-001.md`
