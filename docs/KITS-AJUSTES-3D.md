@@ -38,9 +38,9 @@ campo é **Uniforme**, com **Casa** e **Visitante**. Quando o idioma troca, os t
 (mandante) e o segundo, o de visitante, e uma coisa não exclui a outra. O conjunto 1 é Home/Casa e
 o 2 é Away/Visitante. Isto é convenção do domínio, não medição, e o texto deve dizer assim.
 
-**Em aberto.** O CLI usa `--set 1|2` (`cli.py:1256`), e os documentos falam em "primeiro e segundo
-conjunto". Falta decidir se a troca vale só para a interface ou também para o vocabulário de CLI e
-docs.
+**Decidido também (usuário, 2026-10-07): interface e CLI.** O CLI usa `--set 1|2` (`cli.py:1256`) e
+ganha `--kit home|away` com o mesmo efeito; o help diz que 1 é home e 2 é away. Os documentos
+históricos do ciclo `kits` continuam dizendo "primeiro e segundo conjunto", porque são registro.
 
 ## G2 — Combos do tamanho da opção mais longa
 
@@ -93,7 +93,8 @@ medida do `MODEL.BIN` sem remapear UV à mão, o que o §0 proíbe. Há duas sa�
 - transplantar as seções do `MODEL.BIN` para a figura, com matriz medida;
 - medir se o `EDT_MOD.BIN` tem peça equivalente.
 
-As duas pedem medição antes de código.
+As duas pedem medição antes de código. **Decidido (usuário, 2026-10-07): medir primeiro.** Uma
+task de investigação compara as duas figuras e escreve a regra aqui; a implementação depende dela.
 
 ## G4 — Number, Captain armband e Long sleeves em qualquer combinação, nas duas figuras
 
@@ -113,7 +114,8 @@ Hoje só a braçadeira e a manga longa combinam entre si.
 **Em aberto:**
 
 - A braçadeira do goleiro não foi medida. `SLEEVE_LENGTHS` lista os braços do goleiro (99-102 e
-  57-60), mas nenhuma braçadeira para ele.
+  57-60), mas nenhuma braçadeira para ele. **Decidido (usuário, 2026-10-07): medir no emulador.** Se
+  faltar um save state de goleiro capitão, a task fica blocked até o usuário gravar um.
 - O pedido **reabre uma decisão** da KITS-TASK-40, a de esconder a manga longa no goleiro. A mudança
   precisa ser registrada como decisão nova, com data.
 - O Number junto com a braçadeira ou a manga longa depende de G3: em qual torso o painel é
@@ -147,7 +149,9 @@ não aparecem.
 
 **Em aberto.** Aplicar sempre a cópia das costas é regra medida do jogo, não invenção. O resto
 precisa de uma ferramenta que, por ângulo, conte o que falta na figura: texel transparente, ordem de
-profundidade e triângulo pulado. Só depois disso se escolhe o conserto.
+profundidade e triângulo pulado. Só depois disso se escolhe o conserto. **Decidido (usuário,
+2026-10-07):** a cópia das costas passa a valer sempre, e uma ferramenta conta por ângulo o que
+ainda falta; o ciclo conserta o que ela achar.
 
 ## Para o ciclo
 
