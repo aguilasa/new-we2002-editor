@@ -57,3 +57,9 @@ Hoje dá 9 e 4; depois, os dois números iguais (ou o comando do Log estreitado)
 - Item 2 do Log da K3D-TASK-06 com a saída do `grep` colada inteira (nove linhas), e a nota
   sobre os cinco chamadores de teste, planta e fachada movida para prosa depois do bloco.
 - Verificação: os dois comandos dão `9` e `9`.
+- **Closed** — commit `8fb17e4` (2026-10-07): docs(kits): paste the full caller grep in the K3D-TASK-06 log
+  - Files (`git show --name-status 8fb17e4`):
+    - `M docs/tasks/kits-3d/06-fechamento-fase-2.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-004.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
