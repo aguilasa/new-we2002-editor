@@ -111,7 +111,7 @@
       "phase": 10,
       "depends_on": ["KITS-TASK-37", "KITS-TASK-38", "KITS-TASK-39"],
       "source_of_truth": "/docs/PLAN-KITS-PY.md#4.7",
-      "files": ["tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py", "docs/PLAN-KITS-PY.md"],
+      "files": ["tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py", "docs/PLAN-KITS-PY.md", "tools/kits/core/api.py", "tools/kits/core/figure.py", "tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/ui/figure_view.py"],
       "resources": ["tela"],
       "status": "done",
       "done_on": "2026-10-06",

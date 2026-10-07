@@ -55,3 +55,7 @@ LC_ALL=C comm -13 \
 Hoje imprime as cinco linhas da Evidência. Depois da correção não imprime nada.
 
 ## Log de Execução
+
+- **Closed** — commit `c70ad8b` (2026-10-07): docs(kits): declare the five files KITS-TASK-40 changed out of scope
+  - Files (`git show --name-status c70ad8b`):
+    - `M docs/tasks/kits/40-checkboxes-numero-bracadeira.md`
