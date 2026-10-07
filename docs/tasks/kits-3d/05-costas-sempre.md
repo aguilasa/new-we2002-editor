@@ -80,4 +80,11 @@ só se monta com o disco; o `controls.py` roda o selftest sem imagem e não ganh
 
 Varredura: `docs/PLAN-KITS-PY.md:375` ainda descreve a dica antiga ("as costas saem vazadas").
 É o plano do ciclo `kits`, já arquivado, e fica como registro; a decisão nova está em G5.
-
+- **Closed** — commit `eb6ded5` (2026-10-07): feat(kits): copy the shirt back into the torso gap on every figure
+  - Files (`git show --name-status eb6ded5`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/05-costas-sempre.md`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`

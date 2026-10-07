@@ -80,10 +80,10 @@
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g5--figura-inteira-em-qualquer-giro",
       "files": ["tools/kits/core/figure.py", "tools/kits/core/api.py", "tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-07",
+      "done_commit": "eb6ded5",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
