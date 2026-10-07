@@ -88,3 +88,4 @@ Varredura: `docs/PLAN-KITS-PY.md:375` ainda descreve a dica antiga ("as costas s
     - `M tools/kits/selftest.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-07) at `1dafb8e`: CORR-K3D-003
