@@ -98,10 +98,14 @@ def scene_of(kit, kit_set: int = 1, figure: int = 0, geometry_path=None, frame=N
     files = dict(geometry)
     files[SLOT] = kit.data
     try:
-        return scene.build(files, looks.parse_tuple(TUPLE), figure, frame,
-                           layout.KIT_ON_SCREEN, kit_set)
+        built = scene.build(files, looks.parse_tuple(TUPLE), figure, frame,
+                            layout.KIT_ON_SCREEN, kit_set)
     except (scene.BadScene, assembly.BadAssembly, texture.BadTable) as exc:
         raise FigureError("%s cannot be drawn on the figure: %s" % (kit.label, exc)) from exc
+    # The game copies the shirt back into the torso gap on every LOOKS SET
+    # figure (BACK_COPY, measured), number or not: drawn without it the back
+    # showed through (KITS-AJUSTES-3D.md G5, K3D-TASK-05).
+    return numbered_scene(built, kit, kit_set, figure, None)
 
 
 # -- control 4 of section 5: swapping 486 and 488 -----------------------------------
@@ -152,7 +156,9 @@ def palette_swap(kit, kit_set: int, figure: int, geometry: dict) -> SwapControl:
             continue
         compared += 1
         colours = texture.WIDE if surface.depth else texture.NARROW
-        indices, _, _ = atlas.read_image(kit.data, images[surface.record], surface.depth)
+        indices, width, _ = atlas.read_image(kit.data, images[surface.record], surface.depth)
+        # the figure carries the shirt back in its torso gap (G5): so does the reference
+        indices = numbered_indices(indices, width, figure, None)
         where, first = texture.window_for(palettes, column * texture.NARROW, other[row], colours)
         entries = texture.read_palette(kit.data, where, colours, first)
         want = b"".join(bytes(entries[i]) for i in indices)
@@ -367,14 +373,15 @@ def digit_xs(count: int, width: int = 20) -> list:
     return [first + DIGIT_STEP * i for i in range(count)]
 
 
-def numbered_indices(indices: bytes, width: int, figure: int, number: int) -> bytes:
+def numbered_indices(indices: bytes, width: int, figure: int, number) -> bytes:
     """A uniform image's indices with *figure*'s torso gap made a back panel:
-    the shirt back block copied in (KITS-TASK-38), and the digits of *number*
-    painted over it with the ink of the "numbers 0-9" glyphs -- every pixel of
-    a glyph that is not the zone's commonest index (KITS-TASK-42)."""
+    the shirt back block copied in (KITS-TASK-38), and, unless *number* is
+    None, the digits of *number* painted over it with the ink of the
+    "numbers 0-9" glyphs -- every pixel of a glyph that is not the zone's
+    commonest index (KITS-TASK-42)."""
     from . import zones
 
-    if not NUMBERS[0] <= number <= NUMBERS[1]:
+    if number is not None and not NUMBERS[0] <= number <= NUMBERS[1]:
         raise FigureError("Shirt number %r is not one of %d to %d." % ((number,) + NUMBERS))
     gap = next(g for g in zones.GAPS if g.name.startswith("torso") and g.figure == figure)
     zone = next(z for z in zones.ZONES if z.name == "numbers 0-9")
@@ -383,6 +390,8 @@ def numbered_indices(indices: bytes, width: int, figure: int, number: int) -> by
     for y in range(gap.h):
         for x in range(gap.w):
             panel[(gap.y + y) * width + gap.x + x] = indices[(sy + y) * width + sx + x]
+    if number is None:
+        return bytes(panel)
     tally = {}
     for y in range(zone.h):
         for x in range(zone.w):
@@ -399,10 +408,12 @@ def numbered_indices(indices: bytes, width: int, figure: int, number: int) -> by
     return bytes(panel)
 
 
-def numbered_scene(drawn, kit, kit_set: int, figure: int, number: int):
-    """*drawn* (a LOOKS SET figure of `scene_of`) with the shirt number on its
-    back: every kit surface re-coloured from `numbered_indices`, through the
-    same palette window, and every part pointed at the new surface."""
+def numbered_scene(drawn, kit, kit_set: int, figure: int, number):
+    """*drawn* (a LOOKS SET figure of `scene_of`) with the shirt back copied
+    into its torso gap and, unless *number* is None, the shirt number on it:
+    every kit surface re-coloured from `numbered_indices`, through the same
+    palette window, and every part pointed at the new surface.  Re-reads the
+    kit's own indices, so applying it to a figure already backed is the same."""
     images = {r.offset: r for r in texture.images(kit.data)}
     palettes = texture.in_set_order(texture.palettes(kit.data), kit_set)
     swapped = {}
@@ -428,7 +439,9 @@ def numbered_scene(drawn, kit, kit_set: int, figure: int, number: int):
     surfaces = dict(drawn.surfaces)
     surfaces.update(swapped)
     notes = dict(drawn.notes)
-    notes["number"] = number
+    notes["back copy"] = BACK_COPY[figure]
+    if number is not None:
+        notes["number"] = number
     return scene.Scene(parts, surfaces, drawn.values, drawn.figure, notes)
 
 

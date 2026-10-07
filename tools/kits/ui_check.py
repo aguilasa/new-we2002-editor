@@ -160,9 +160,9 @@ OFF_IMAGE = (9999, 0)
 HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
-STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO = (
-    "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset",
-    "match", "dressing", "dressing boxes", "combo width")
+STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO, \
+    BACK = ("style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note",
+            "reset", "match", "dressing", "dressing boxes", "combo width", "back copy")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -225,6 +225,10 @@ PLANTS = (
      "        for box in self.combos().values():\n",
      "        for box in [b for b in self.combos().values() if b is not self.set_box]:"
      "  # planted\n"),
+    ("back copy only with Number", BACK,
+     "    return numbered_scene(built, kit, kit_set, figure, None)\n",
+     "    return built  # planted: the back copy only with Number\n",
+     "../core/figure.py"),
     ("Long sleeves always shown", BOXES,
      "        self.long_box.setVisible(figure != 1)\n",
      "        self.long_box.setVisible(True)  # planted\n"),
@@ -874,6 +878,36 @@ def combos_judge(python, image, env, app=APP) -> tuple:
     return bad, ", ".join(seen)
 
 
+BACK_TAG = "00"
+TORSO_GAP = "gap torso"
+"""What `cli.py holes` names a pixel seen through the torso gap with."""
+
+
+def back_judge(image, env, app=APP) -> tuple:
+    """(failures, what was seen): `cli.py holes`, every 15 degrees on both
+    figures with Number unticked, finds no pixel seen through the torso gap
+    -- the shirt back is copied into it whatever Number says (G5).  Runs the
+    cli.py beside *app*, so a plant in its core is what is judged."""
+    cli = os.path.join(os.path.dirname(os.path.dirname(app)), "cli.py")
+    try:
+        done = subprocess.run([sys.executable, cli, "holes", image, "--tag", BACK_TAG,
+                               "--top", "60"], env=env, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace", timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return ["cli.py holes did not exit within %d s" % TIMEOUT], ""
+    lines = [ln for ln in done.stdout.splitlines() if ln.startswith("figure ")]
+    torso = [ln.split(":", 1)[0] for ln in lines if TORSO_GAP in ln]
+    bad = []
+    if done.returncode != 0:
+        bad.append("cli.py holes exited %s: %s" % (done.returncode, done.stderr.strip()[-300:]))
+    if len(lines) != 48:
+        bad.append("%d line(s), not 2 figures x 24 turns" % len(lines))
+    if torso:
+        bad.append("the torso gap shows through at %d turn(s): %s"
+                   % (len(torso), ", ".join(torso[:6])))
+    return bad, "%d turn(s), %d with the torso gap" % (len(lines), len(torso))
+
+
 def off_judge(python, image, env, tmp, app=APP) -> list:
     """A lone TEX with WE2002_LOOKS_IMAGE unset: the 3D tab refuses with the
     sentence, and the Plan capture differs from the one with the variable only
@@ -1017,6 +1051,9 @@ def run(python: str, image: str) -> int:
              "dressings with no rule off with the sentence, and the kit selector "
              "Kit Home/Away, Uniforme Casa/Visitante, in en-US and pt-BR",
              boxes_judge(python, image, env))
+        bad, seen = back_judge(image, env)
+        t.ok("Number unticked, the torso gap shows through at no turn of either figure (%s)"
+             % seen, bad)
         bad, seen = combos_judge(python, image, env)
         t.ok("every combo is as wide as its longest item after a live switch, both "
              "ways (field/longest px: %s)" % seen, bad)
@@ -1054,6 +1091,8 @@ def run(python: str, image: str) -> int:
                     bad = []
                 elif judge == DRESS:
                     red, bad = dress_judge(python, image, env, box, app)[0], []
+                elif judge == BACK:
+                    red, bad = back_judge(image, env, app)[0], []
                 elif judge == COMBO:
                     red, bad = combos_judge(python, image, env, app)[0], []
                 elif judge == BOXES:

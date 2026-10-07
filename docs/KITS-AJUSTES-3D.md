@@ -153,6 +153,36 @@ profundidade e triângulo pulado. Só depois disso se escolhe o conserto. **Deci
 2026-10-07):** a cópia das costas passa a valer sempre, e uma ferramenta conta por ângulo o que
 ainda falta; o ciclo conserta o que ela achar.
 
+**Decisão nova, datada (usuário, 2026-10-07), que substitui a de 2026-10-05 (KITS-TASK-37).** As
+costas deixam de sair vazadas: toda figura da `LOOKS SET` recebe a cópia das costas (`BACK_COPY`),
+com ou sem Number, porque é o que o jogo faz (§4.7 do PLAN-KITS-PY). Nenhum outro texel foi
+inventado.
+
+**Feito (K3D-TASK-05, 2026-10-07).** O `scene_of` (`core/figure.py`) aplica a cópia sempre, e o
+Number só pinta os dígitos por cima. A contagem é feita pelo comando abaixo, de 15 em 15 graus nas
+duas figuras do TEX_00, kit 1, com Number desmarcado:
+
+```
+WE2002_LOOKS_IMAGE=<japonês> python3 tools/kits/cli.py holes <japonês> --tag 00 --top 60
+```
+
+Ela dá **0 px vindos da lacuna do torso em todo giro**. Antes eram 3.853 px no jogador e 3.857 no
+goleiro, de costas. O `kits_ui` afirma isso, e a planta que tira a cópia sem Number deixa a lacuna
+à vista em 42 dos 48 giros.
+
+**O que ainda falta, com a causa:**
+
+| Tipo | Jogador, px por giro | Goleiro, px por giro | Causa |
+|---|---|---|---|
+| `transparent` | 0 a 30 | 0 a 13 | Texel transparente do próprio TEX no colarinho. Nas zonas: `shirt front, collar` (só no jogador) e as duas `collar tip` (nas duas figuras). Nas lacunas da KITS-TASK-16: `collar, between its tips` (nas duas figuras) e `collar, the notch between the shoulders` (só no goleiro). É o decote, e é dado do TEX, não buraco do desenho. |
+| `skipped` | 108 a 514 | 203 a 423 | O triângulo tem UV sem área: um canto repetido, ou os três colineares. A vista (`ui/figure_view.py:119-121`) não acha transformação afim e pula o triângulo. A definição do tipo é exatamente essa. |
+| `misordered` | 124 a 427 | 146 a 418 | A vista pinta de trás para frente pela profundidade média de cada triângulo (`ui/figure_view.py:97-100`). Onde seções vizinhas se cruzam, o triângulo mais próximo é pintado antes de outro que fica atrás dele. |
+
+`skipped` e `misordered` são do desenho em `ui/figure_view.py`, que nenhuma task deste ciclo
+cobre. Consertar os dois é decisão para um item novo. Um caminho seria pintar o triângulo de UV
+degenerado com a linha de texels que ele amostra e trocar a ordem por triângulo por profundidade
+por pixel. Os dois são comportamento de rasterizador, não texel nem geometria inventados.
+
 ## Para o ciclo
 
 **Ordem sugerida:**

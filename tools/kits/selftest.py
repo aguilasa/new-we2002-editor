@@ -663,6 +663,11 @@ def _language_checks(c) -> None:
                  ", ".join(catalog.LANGUAGES)))
         bad = catalog.self_check()
         c.ok("ui/i18n.py's own self-check", bad == [], "%s" % bad)
+        hints = {lang: catalog.CATALOG[lang]["figure_hint"] for lang in catalog.LANGUAGES}
+        stale = [lang for lang, text in hints.items()
+                 if any(w in text for w in ("shows through", "vazad"))]
+        c.ok("the 3D hint no longer says the back shows through, in any language (G5)",
+             not stale, "%s" % {lang: hints[lang] for lang in stale})
     with open(os.path.join(KITS_DIR, UI_APP), encoding="utf-8") as fh:
         found = c.attempt("sweep ui/app.py for window text", lambda: visible_literals(fh.read()),
                           default=None)
@@ -1292,14 +1297,14 @@ def _figure_cli_checks(c, image_path, kit, geometry) -> None:
     proc = subprocess.run([sys.executable, cli, "holes", image_path, "--tag", "00",
                            "--step", "180", "--negative"], capture_output=True, text=True, env=env)
     lines = proc.stdout.splitlines()
-    torso = {f: any(line.startswith("figure %d yaw   0:" % f) and gap in line for line in lines)
-             for f, gap in ((0, "gap torso, under the map (0,80) 20x24"),
-                            (1, "gap torso, under the map (100,104) 20x24"))}
+    torso = {f: any(line.startswith("figure %d yaw" % f) and "gap torso" in line
+                    for line in lines) for f in (0, 1)}
     print("  ..... cli.py holes TEX_00, yaws 0 and 180: exit %d, %s" % (
         proc.returncode, "; ".join(line for line in lines if line.startswith("negative"))))
-    c.ok("cli.py holes: from the back the torso gap shows through on both figures, and "
-         "its --negative sees a planted gap",
-         proc.returncode == 0 and all(torso.values()), proc.stdout[-600:] + proc.stderr)
+    c.ok("cli.py holes: from the back the torso gap shows through on neither figure, "
+         "the shirt back copied in with Number unticked (G5), and its --negative sees a "
+         "planted gap",
+         proc.returncode == 0 and not any(torso.values()), proc.stdout[-600:] + proc.stderr)
     by_name = {}
     for words in (("--kit", "home"), ("--set", "1"), ("--kit", "away"), ("--set", "2")):
         proc = subprocess.run([sys.executable, cli, "figure", image_path, "--tag", "00",
