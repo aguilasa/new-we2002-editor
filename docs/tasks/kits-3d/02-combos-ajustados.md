@@ -65,3 +65,4 @@ Visto de passagem, fora do escopo: em pt-BR o `image_box` ainda diz "1º conjunt
     - `M docs/tasks/kits-3d/02-combos-ajustados.md`
     - `M tools/kits/ui/app.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-07) at `06e59ac`: no finding
