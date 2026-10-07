@@ -32,10 +32,10 @@
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g2--combos-do-tamanho-da-opção-mais-longa",
       "files": ["tools/kits/ui/app.py", "tools/kits/ui_check.py", "tools/kits/controls.py"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-07",
+      "done_commit": "f24ab93",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

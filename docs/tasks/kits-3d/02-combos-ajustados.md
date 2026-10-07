@@ -59,3 +59,9 @@ Visto de passagem, fora do escopo: em pt-BR o `image_box` ainda diz "1º conjunt
 ("goalkeeper palette, first set") — vocabulário que a G1 não alcançou.
 
 ## Log de Execução
+
+- **Closed** — commit `f24ab93` (2026-10-07): feat(kits): fit every combo to its longest item across language switches
+  - Files (`git show --name-status f24ab93`):
+    - `M docs/tasks/kits-3d/02-combos-ajustados.md`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui_check.py`
