@@ -260,6 +260,14 @@ CONTROLS = (
         "right name, with nothing else to show it (K3D-TASK-01)",
     ),
     Control(
+        "holes-alpha-ignored", "kits/core/figure.py", "count_holes",
+        "                    opaque = surface.rgba[(ty * surface.width + tx) * 4 + 3] != 0\n",
+        "                    opaque = True\n",
+        "FAIL  hole count: a transparent texel in the uniform raises the count",
+        "a count that takes every texel as opaque never sees the torso gap or a "
+        "new one, and prints a clean figure at every turn (K3D-TASK-04)",
+    ),
+    Control(
         "scene-outside-figure", "kits/core/teams.py", "module imports",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n",
         "import layout  # noqa: E402  (tools/looks: the boot file and its Japanese digest)\n"

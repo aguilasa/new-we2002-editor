@@ -581,6 +581,77 @@ def _kit_cli_checks(c) -> None:
          "1 the home kit, 2 the away kit" in " ".join(figure_help.split()), figure_help[-400:])
 
 
+def _hole_scene(hole: bool, flat_uv: bool = False):
+    """Two quads facing the eye at yaw 180 -- a near one and an opaque one
+    behind it -- the near one with a transparent texel block when *hole*, or
+    with its UVs on one point when *flat_uv* (a triangle the view cannot map)."""
+    from core import figure as _figure
+
+    import scene as looks_scene
+
+    side = 8
+    rgba = bytearray(b"\x80\x40\x20\xff" * side * side)
+    if hole:
+        for y in range(2, 6):
+            for x in range(2, 6):
+                rgba[(y * side + x) * 4 + 3] = 0
+    near = looks_scene.Surface(("near",), side, side, bytes(rgba), 0, 8, 0)
+    far = looks_scene.Surface(("far",), side, side, b"\x10\x20\x30\xff" * side * side, 1, 8, 0)
+    corners = ((-1.0, 1.0), (1.0, 1.0), (-1.0, -1.0), (1.0, -1.0))
+    uvs = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0))
+    parts = []
+    for name, surface, z in (("near", near, -1.0), ("far", far, 1.0)):
+        quad_uvs = ((0.5, 0.5),) * 4 if (flat_uv and name == "near") else uvs
+        parts.append(looks_scene.Part(name, 0, 0, tuple((x, y, z) for x, y in corners),
+                                      quad_uvs, surface, "", 0, None))
+    return looks_scene.Scene(parts, {("near",): near, ("far",): far}, (), 0, {}), _figure
+
+
+def _hole_checks(c) -> None:
+    """K3D-TASK-04: the hole count, on a scene built here.  A transparent block
+    in the near surface has to raise the count and name that part; a triangle
+    with no UV area has to be counted as skipped; and the count's camera is the
+    3D view's (the same rotate() and the same margin)."""
+    whole, _figure = _hole_scene(False)
+    holed, _ = _hole_scene(True)
+    flat_uv, _ = _hole_scene(False, flat_uv=True)
+    yaw = 180.0
+    before = _figure.count_holes(whole, yaw, size=64)
+    after = _figure.count_holes(holed, yaw, size=64)
+    skipped = _figure.count_holes(flat_uv, yaw, size=64)
+    print("  ..... whole: missing %d; holed: transparent %d (backdrop %d) from %s; "
+          "flat UV: skipped %d" % (before.missing, after.transparent, after.backdrop,
+                                   [s[:2] for s in after.sources], skipped.skipped))
+    c.ok("hole count: a whole figure misses nothing", before.missing == 0, str(before))
+    c.ok("hole count: a transparent texel in the uniform raises the count, from that part",
+         after.transparent > before.transparent and after.backdrop == 0
+         and any(s[0] == "transparent" and s[1] == "near section 0" for s in after.sources),
+         str(after))
+    c.ok("hole count: a triangle with no UV area is counted as skipped",
+         skipped.skipped > 0, str(skipped))
+    import ast
+    import math
+
+    view = os.path.join(KITS_DIR, "ui", "figure_view.py")
+    with open(view, encoding="utf-8") as fh:
+        tree = ast.parse(fh.read(), view)
+    space = {"math": math}
+    margin = None
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == "rotate":
+            exec(compile(ast.Module([node], []), view, "exec"), space)
+        if isinstance(node, ast.Assign) and any(getattr(t, "id", "") == "MARGIN"
+                                                for t in node.targets):
+            margin = ast.literal_eval(node.value)
+    points = ((1.0, 2.0, 3.0), (-4.0, 0.5, 2.0))
+    turns = ((0.0, 0.0), (37.0, -12.0), (180.0, 30.0))
+    same = "rotate" in space and all(
+        all(abs(a - b) < 1e-9 for a, b in zip(space["rotate"](p, y, t), _figure._turn(p, y, t)))
+        for p in points for y, t in turns)
+    c.ok("hole count: its camera is ui/figure_view.py's rotate() and MARGIN",
+         same and margin == _figure.HOLE_MARGIN, "margin %r" % margin)
+
+
 def _language_checks(c) -> None:
     catalog = c.attempt("import ui/i18n.py", _catalog)
     if catalog is not None:
@@ -1029,6 +1100,7 @@ def run(verbose: bool = True, plant: bool = True) -> int:
         total += harness.run("rules", _rule_checks, verbose)
         total += harness.run("language", _language_checks, verbose)
         total += harness.run("kit cli", _kit_cli_checks, verbose)
+        total += harness.run("holes", _hole_checks, verbose)
         total += harness.run("confront 2", _confront2_checks, verbose)
         total += harness.run("oracle", _oracle_checks, verbose)
         if plant:
@@ -1217,6 +1289,17 @@ def _figure_cli_checks(c, image_path, kit, geometry) -> None:
     last = proc.stdout.strip().splitlines()[-1] if proc.stdout.strip() else proc.stderr
     print("  ..... %s" % last)
     c.ok("cli.py figure --negative: the set ignored is seen red", proc.returncode == 0, last)
+    proc = subprocess.run([sys.executable, cli, "holes", image_path, "--tag", "00",
+                           "--step", "180", "--negative"], capture_output=True, text=True, env=env)
+    lines = proc.stdout.splitlines()
+    torso = {f: any(line.startswith("figure %d yaw   0:" % f) and gap in line for line in lines)
+             for f, gap in ((0, "gap torso, under the map (0,80) 20x24"),
+                            (1, "gap torso, under the map (100,104) 20x24"))}
+    print("  ..... cli.py holes TEX_00, yaws 0 and 180: exit %d, %s" % (
+        proc.returncode, "; ".join(line for line in lines if line.startswith("negative"))))
+    c.ok("cli.py holes: from the back the torso gap shows through on both figures, and "
+         "its --negative sees a planted gap",
+         proc.returncode == 0 and all(torso.values()), proc.stdout[-600:] + proc.stderr)
     by_name = {}
     for words in (("--kit", "home"), ("--set", "1"), ("--kit", "away"), ("--set", "2")):
         proc = subprocess.run([sys.executable, cli, "figure", image_path, "--tag", "00",

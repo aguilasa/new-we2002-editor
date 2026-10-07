@@ -430,3 +430,206 @@ def numbered_scene(drawn, kit, kit_set: int, figure: int, number: int):
     notes = dict(drawn.notes)
     notes["number"] = number
     return scene.Scene(parts, surfaces, drawn.values, drawn.figure, notes)
+
+
+# -- what the turned figure lets through (KITS-AJUSTES-3D.md G5, K3D-TASK-04) ------
+
+HOLE_SIZE = 320
+"""The square the count is taken in: the 3D view's minimum size."""
+HOLE_MARGIN = 0.08
+HOLE_DEPTH_TIE = 1e-6
+"""The view's fit (`ui/figure_view.py` MARGIN), and how close two depths are
+before a disagreement between paint order and depth is a tie, not an error."""
+
+
+@dataclass(frozen=True)
+class HoleCount:
+    """What one figure shows at one turn, counted pixel by pixel.
+
+    At each pixel the triangle nearest the eye is what a figure drawn whole
+    would show.  `transparent` counts the pixels where that triangle samples a
+    transparent texel -- what shows there is whatever lies behind, the inside
+    of the figure or the backdrop, and `backdrop` is how many of them show the
+    backdrop; `skipped` those where it is a triangle the view cannot map (its
+    UV triangle has no area, so nothing is painted); `misordered` those where
+    it is opaque but the view paints another triangle last over it.
+    `silhouette` is every pixel some triangle covers.  `sources` counts each
+    kind by where it comes from: (kind, "file section N", zone, gap or "-")."""
+
+    yaw: float
+    pitch: float
+    silhouette: int
+    transparent: int
+    backdrop: int
+    skipped: int
+    misordered: int
+    sources: tuple          # ((kind, part, where, pixels), ...), most pixels first
+
+    @property
+    def missing(self) -> int:
+        """Pixels where the nearest surface is not what is shown."""
+        return self.transparent + self.skipped + self.misordered
+
+
+def _turn(point, yaw, pitch):
+    """`ui/figure_view.py` rotate(), kept equal by the selftest."""
+    import math
+
+    x, y, z = point
+    a, b = math.radians(yaw), math.radians(pitch)
+    x, z = x * math.cos(a) + z * math.sin(a), -x * math.sin(a) + z * math.cos(a)
+    y, z = y * math.cos(b) - z * math.sin(b), y * math.sin(b) + z * math.cos(b)
+    return x, y, z
+
+
+def record_numbers(kit) -> dict:
+    """Offset -> record number (tex.RECORD_NAMES) of *kit*'s records."""
+    import bin_archive
+
+    return {e.offset: i for i, e in enumerate(bin_archive.entries(kit.data))}
+
+
+def texel_zone(numbers, surface, tx: int, ty: int, figure: int) -> str:
+    """The zone or gap of the work bitmap a kit texel lies in, "-" for a texel
+    of another file (or with no kit to read *numbers* from) and "no zone" for
+    one of the kit outside the map.  *numbers* is `record_numbers(kit)`."""
+    from . import flat, zones
+
+    if numbers is None or surface.key[0] != SLOT:
+        return "-"
+    record = numbers.get(surface.record)
+    if record in flat.UNIFORM.values():
+        wx = tx
+    elif record in flat.SLEEVES.values():
+        wx = tx + flat.WORK_W // 2
+    else:
+        return "record %s" % record
+    for gap in zones.GAPS:
+        if gap.figure == figure and gap.contains(wx, ty):
+            return "gap %s (%d,%d) %dx%d" % (gap.name, gap.x, gap.y, gap.w, gap.h)
+    zone = zones.zone_at(wx, ty)
+    return "zone %s" % zone.name if zone is not None else "no zone (%d,%d)" % (wx, ty)
+
+
+def count_holes(drawn, yaw: float, pitch: float = 0.0, kit=None, size: int = HOLE_SIZE,
+                triangles=TRIANGLES) -> HoleCount:
+    """What *drawn* lets through at (*yaw*, *pitch*), drawn as the 3D view
+    draws it: the same orthographic camera fitted to the same square, the same
+    back-to-front order by each triangle's mean depth, and the texture sampled
+    at each pixel's centre (nearest texel, no smoothing).  A model of the
+    view's QPainter, not a capture of it: it counts, it does not compare
+    pixels with a screenshot."""
+    parts = drawn.parts
+    centre = drawn.centre()
+    turned = [[_turn(tuple(p[i] - centre[i] for i in range(3)), yaw, pitch)
+               for p in part.points] for part in parts]
+    xs = [p[0] for pts in turned for p in pts]
+    ys = [p[1] for pts in turned for p in pts]
+    span = max(max(xs) - min(xs), max(ys) - min(ys)) or 1.0
+    scale = size * (1.0 - 2 * HOLE_MARGIN) / span
+    mx, my = (max(xs) + min(xs)) / 2.0, (max(ys) + min(ys)) / 2.0
+    c = size / 2.0
+    order = []
+    for n, (part, pts) in enumerate(zip(parts, turned)):
+        screen = [(c - (p[0] - mx) * scale, c - (p[1] - my) * scale, p[2]) for p in pts]
+        for tri in triangles:
+            order.append((sum(pts[i][2] for i in tri) / 3.0, n,
+                          [screen[i] for i in tri], [part.uvs[i] for i in tri]))
+    order.sort(key=lambda t: t[0])
+    frags = {}      # pixel -> [(order, n, depth, opaque or None if unmapped, texel)]
+    numbers = record_numbers(kit) if kit is not None else None
+    for step, (_, n, tri, uvs) in enumerate(order):
+        part = parts[n]
+        surface = part.surface
+        (x0, y0, z0), (x1, y1, z1), (x2, y2, z2) = tri
+        area = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0)
+        if abs(area) < 1e-12:
+            continue
+        mapped = True
+        if surface is not None:
+            (u0, v0), (u1, v1), (u2, v2) = ((u * surface.width, v * surface.height)
+                                            for u, v in uvs)
+            mapped = abs((u1 - u0) * (v2 - v0) - (u2 - u0) * (v1 - v0)) >= 1e-9
+        for py in range(max(0, int(min(y0, y1, y2))), min(size, int(max(y0, y1, y2)) + 1)):
+            for px in range(max(0, int(min(x0, x1, x2))), min(size, int(max(x0, x1, x2)) + 1)):
+                sx, sy = px + 0.5, py + 0.5
+                a = ((x1 - sx) * (y2 - sy) - (x2 - sx) * (y1 - sy)) / area
+                b = ((x2 - sx) * (y0 - sy) - (x0 - sx) * (y2 - sy)) / area
+                g = 1.0 - a - b
+                if a < 0 or b < 0 or g < 0:
+                    continue
+                depth = a * z0 + b * z1 + g * z2
+                texel, opaque = None, True
+                if not mapped:
+                    opaque = None
+                elif surface is not None:
+                    tx = min(surface.width - 1, max(0, int(a * u0 + b * u1 + g * u2)))
+                    ty = min(surface.height - 1, max(0, int(a * v0 + b * v1 + g * v2)))
+                    opaque = surface.rgba[(ty * surface.width + tx) * 4 + 3] != 0
+                    texel = (tx, ty)
+                frags.setdefault((px, py), []).append((step, n, depth, opaque, texel))
+    tally = {}
+
+    def name(n):
+        return "%s section %d" % (parts[n].file, parts[n].section)
+
+    def add(kind, n, where):
+        key = (kind, name(n), where)
+        tally[key] = tally.get(key, 0) + 1
+
+    zone_of = {}
+    transparent = backdrop = skipped = misordered = 0
+    for pixel, here in frags.items():
+        far = max(f[2] for f in here)
+        # the nearest; among depths within the tie, the one painted last
+        near = max((f for f in here if f[2] >= far - HOLE_DEPTH_TIE), key=lambda f: f[0])
+        painted = [f for f in here if f[3]]
+        last = max(painted, key=lambda f: f[0]) if painted else None
+        if near[3] is None:
+            skipped += 1
+            add("skipped", near[1], "-")
+        elif not near[3]:
+            transparent += 1
+            backdrop += last is None
+            key = (near[1], near[4])
+            if key not in zone_of:
+                zone_of[key] = texel_zone(numbers, parts[near[1]].surface, near[4][0],
+                                          near[4][1], drawn.figure) \
+                    if near[4] is not None else "-"
+            add("transparent", near[1], zone_of[key])
+        elif last is not near and last[2] < near[2] - HOLE_DEPTH_TIE:
+            misordered += 1
+            add("misordered", last[1], "over %s" % name(near[1]))
+    sources = tuple(sorted(((k[0], k[1], k[2], v) for k, v in tally.items()),
+                           key=lambda s: (-s[3], s)))
+    return HoleCount(yaw, pitch, len(frags), transparent, backdrop, skipped, misordered,
+                     sources)
+
+
+def planted_gap(drawn, kit, figure: int, zone_name: str = "shirt front"):
+    """*drawn* with *figure*'s zone *zone_name* made transparent in the kit's
+    uniform -- a gap the count has to find (the control of K3D-TASK-04)."""
+    from . import flat, zones
+
+    zone = next((z for z in zones.ZONES if z.name == zone_name and z.figure == figure), None)
+    if zone is None or zone.x + zone.w > flat.WORK_W // 2:
+        raise FigureError("No zone %r of figure %d in the uniform image." % (zone_name, figure))
+    numbers = record_numbers(kit)
+    surfaces, by_object = dict(drawn.surfaces), {}
+    for key, surface in drawn.surfaces.items():
+        if key[0] != SLOT or numbers.get(surface.record) not in flat.UNIFORM.values():
+            continue
+        rgba = bytearray(surface.rgba)
+        for y in range(zone.y, min(surface.height, zone.y + zone.h)):
+            for x in range(zone.x, min(surface.width, zone.x + zone.w)):
+                rgba[(y * surface.width + x) * 4 + 3] = 0
+        surfaces[key] = scene.Surface(surface.key, surface.width, surface.height, bytes(rgba),
+                                      surface.record, surface.depth, surface.clut)
+        by_object[id(surface)] = surfaces[key]
+    if not by_object:
+        raise FigureError("%s has no uniform surface on this figure to plant a gap in"
+                          % kit.label)
+    parts = [scene.Part(p.file, p.section, p.primitive, p.points, p.uvs,
+                        by_object.get(id(p.surface), p.surface), p.why, p.clut, p.band,
+                        p.band_unmeasured) for p in drawn.parts]
+    return scene.Scene(parts, surfaces, drawn.values, drawn.figure, dict(drawn.notes))

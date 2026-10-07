@@ -27,6 +27,9 @@ build it.
                      view="torso")   # the MODEL.BIN match figure, in its measured pose
     api.numbered(scene, kit, kit_set, figure, number)
                                      # a LOOKS SET figure with the number on its back
+    api.count_holes(scene, yaw, pitch=0, kit=None)
+                                     # HoleCount: what the turned view shows that is
+                                     # not the nearest surface, and where it comes from
 """
 
 from __future__ import annotations
@@ -118,6 +121,22 @@ def numbered(drawn, kit, kit_set, figure, number):
     """A LOOKS SET figure of `figure()` with the shirt number on its back, as
     the game builds a match's back panel (section 4.7)."""
     return _figure.numbered_scene(drawn, kit, kit_set, figure, number)
+
+
+HoleCount = _figure.HoleCount
+HOLE_SIZE = _figure.HOLE_SIZE
+
+
+def count_holes(drawn, yaw, pitch=0.0, kit=None, size=None):
+    """What *drawn* turned to (*yaw*, *pitch*) lets through, counted by pixel
+    as the 3D view draws it (KITS-AJUSTES-3D.md G5)."""
+    return _figure.count_holes(drawn, yaw, pitch, kit, size or _figure.HOLE_SIZE)
+
+
+def planted_gap(drawn, kit, figure, zone_name="shirt front"):
+    """*drawn* with one zone of the uniform made transparent: the control the
+    hole count has to see (K3D-TASK-04)."""
+    return _figure.planted_gap(drawn, kit, figure, zone_name)
 
 
 def match_pose(path=None):

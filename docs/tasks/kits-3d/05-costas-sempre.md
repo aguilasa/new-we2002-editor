@@ -30,4 +30,9 @@ A cópia medida das costas (`BACK_COPY`) vale sempre, com ou sem Number, e o res
 
 Reabre a decisão de 2026-10-05 (KITS-TASK-37): registrar datada em G5.
 
+Da K3D-TASK-04 (2026-10-07): a contagem é `python3 tools/kits/cli.py holes <disco> --tag 00`.
+Hoje, além da lacuna do torso (yaw 0: 3.853 px no jogador, 3.857 no goleiro), ela acha em todo
+giro triângulos `skipped` (UV sem área, 108 a 514 px por giro) e `misordered` (pintura por
+profundidade média invertendo seções vizinhas, 124 a 427 px por giro). A transcrição inteira está no Log da 04.
+
 ## Log de Execução

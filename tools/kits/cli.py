@@ -24,6 +24,8 @@ Usage:
                                     [--geometry BIN] <path>
     python tools/kits/cli.py figure --negative [--tag TAG] [--geometry BIN] <path>
     python tools/kits/cli.py figure --match [--armband] [--sleeves long|short] [--tag TAG] <path>
+    python tools/kits/cli.py holes [--tag TAG] [--set 1|2] [--figure 0|1] [--step DEG]
+                                   [--top N] [--negative] [--geometry BIN] <path>
 """
 
 from __future__ import annotations
@@ -1176,6 +1178,77 @@ def cmd_figure(args) -> int:
                  and len(flipped) == sum(clean.values())) else 1
 
 
+HOLE_STEP = 15
+"""Degrees between two turns of `holes`: 0 to 345, 24 turns."""
+HOLE_ZONE = "shirt front"
+"""The zone `holes --negative` makes transparent: one the figure shows facing."""
+
+
+def _hole_line(figure, count, top) -> str:
+    where = "; ".join("%s %s %s %d" % s for s in count.sources[:top])
+    return ("figure %d yaw %3d: silhouette %d, missing %d (transparent %d, backdrop %d; "
+            "skipped %d; misordered %d)  %s"
+            % (figure, count.yaw, count.silhouette, count.missing, count.transparent,
+               count.backdrop, count.skipped, count.misordered, where or "-"))
+
+
+def cmd_holes(args) -> int:
+    """What the 3D view shows that is not the figure's nearest surface, per
+    figure and turn (KITS-AJUSTES-3D.md G5): pixels where the nearest triangle
+    samples a transparent texel, where it is one the view cannot map, and
+    where the view paints another over it -- each with the part and the zone
+    of the TEX it comes from.  The figure is the window's as it opens, Number
+    unticked.  --negative makes a zone of the uniform transparent and passes
+    only if the count rises, from that zone."""
+    try:
+        source = api.open_source(args.path)
+    except api.KitsError as exc:
+        print("holes: %s" % exc, file=sys.stderr)
+        return 1
+    if source.kind == api.KIND_ROM and not args.tag:
+        print("holes: a disc needs --tag", file=sys.stderr)
+        return 2
+    try:
+        kit = source.kit(args.tag) if source.kind == api.KIND_ROM else source.kit()
+        geometry = api.read_geometry(args.geometry)
+    except (api.KitError, api.FigureError) as exc:
+        print("holes: %s" % exc, file=sys.stderr)
+        return 1
+    if not kit.ok:
+        print("holes: %s is refused by the guard: %s" % (kit.label, "; ".join(kit.problems)),
+              file=sys.stderr)
+        return 1
+    kit_set = (chosen_sets(args) + (1,))[0] if (args.set or args.kit) else 1
+    yaws = range(0, 360, args.step)
+    bad = 0
+    for figure in tuple(args.figure or api.FIGURES):
+        try:
+            drawn = api.figure(kit, kit_set, figure, frame=api.FIGURE_POSE, geometry=geometry)
+        except api.FigureError as exc:
+            print("figure %d: %s" % (figure, exc))
+            bad += 1
+            continue
+        clean = []
+        for yaw in yaws:
+            clean.append(api.count_holes(drawn, yaw, kit=kit))
+            print(_hole_line(figure, clean[-1], args.top))
+        if not args.negative:
+            continue
+        planted = api.planted_gap(drawn, kit, figure, HOLE_ZONE)
+        rise = 0
+        for yaw, before in zip(yaws, clean):
+            after = api.count_holes(planted, yaw, kit=kit)
+            if after.transparent > before.transparent and any(
+                    s[0] == "transparent" and s[2] == "zone %s" % HOLE_ZONE
+                    for s in after.sources):
+                rise += 1
+        print("negative: figure %d, %s made transparent: the count rises from it at %d "
+              "of %d turn(s) -- %s" % (figure, HOLE_ZONE, rise, len(clean),
+                                        "ok" if rise else "FAIL"))
+        bad += not rise
+    return 1 if bad else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """The command line, apart so the selftest can read it without running it."""
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__.splitlines()[0])
@@ -1283,6 +1356,24 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--sleeves", choices=("long", "short"), default="long",
                    help="with --match: the sleeve length (default long)")
     p.set_defaults(fn=cmd_figure)
+    p = sub.add_parser("holes", help="what the turned 3D figure shows that is not its "
+                                     "nearest surface, per turn (G5)")
+    p.add_argument("path", help="a disc image, its cue sheet, or a lone TEX")
+    p.add_argument("--tag", help="the kit, on a disc (e.g. 00)")
+    p.add_argument("--set", type=int, choices=(1, 2), action="append",
+                   help="1 the home kit, 2 the away kit (default 1)")
+    p.add_argument("--kit", choices=tuple(KIT_NAMES), action="append",
+                   help="home (= --set 1) or away (= --set 2)")
+    p.add_argument("--figure", type=int, choices=(0, 1), action="append",
+                   help="0 player, 1 goalkeeper (default both; repeatable)")
+    p.add_argument("--step", type=int, default=HOLE_STEP,
+                   help="degrees between turns, from 0 (default %d)" % HOLE_STEP)
+    p.add_argument("--top", type=int, default=4, help="sources printed per line (default 4)")
+    p.add_argument("--geometry", help="the Japanese data track (default $WE2002_LOOKS_IMAGE)")
+    p.add_argument("--negative", action="store_true",
+                   help="make the %s transparent and require the count to rise from it"
+                        % HOLE_ZONE)
+    p.set_defaults(fn=cmd_holes)
     return parser
 
 
