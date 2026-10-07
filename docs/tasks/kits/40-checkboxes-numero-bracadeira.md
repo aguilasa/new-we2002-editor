@@ -15,6 +15,7 @@ A aba 3D ganha três checkboxes, **Number**, **Captain armband** e **Long sleeve
   - `tools/kits/core/figure.py` e `tools/kits/core/api.py`, se a regra medida pedir composição de texels ou geometria a mais
   - `tools/kits/ui_check.py`: a verificação e a planta
   - `docs/PLAN-KITS-PY.md`: §3.4
+  - defeito achado no caminho: a vista da aba 3D saía espelhada, e o conserto (`ui/figure_view.py` desenha `cx - x`) entrou aqui, com `core/figure.py`, `core/api.py`, `oracle.py` e `selftest.py` acompanhando (CORR-KITS-089; o Log explica)
 - Out: árbitro (§4.5)
 
 ## Done criteria
