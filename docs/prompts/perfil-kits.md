@@ -14,7 +14,7 @@ Todas do [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md), proposta de 2026-09-29. Onde
 este perfil e o plano divergirem, o plano ganha.
 
 - **Só lê.** Não grava na imagem nem no TEX — §0 (Não-objetivos).
-- **Não inventa geometria.** Manga longa e braçadeira só no 3D depois de achadas e medidas; até lá o 3D diz que não as tem — §0, §4.3.
+- **Não inventa geometria.** Manga longa e braçadeira entraram no 3D só depois de medidas (fase 10: seções do `MODEL.BIN`, pose medida); o que não foi medido o 3D diz que não tem — §0, §4.3.
 - **Projeto próprio em `tools/kits/`, que importa o núcleo do `tools/looks/` sem copiar** — §2.
 - **As duas mudanças no `looks` (`scene.Builder(kit=...)`, `kit_set`) são tasks deste ciclo**, aditivas, default igual ao de hoje, com os quatro gates do `looks` verdes antes e depois — §2, §6, fase 5 da §7.
 - **Geometria do disco confiável pela guarda do `looks` (`WE2002_LOOKS_IMAGE`); o TEX vem de qualquer lugar, com guarda de forma, não de digest** — §2.1.
@@ -28,7 +28,7 @@ este perfil e o plano divergirem, o plano ganha.
 - **Nada do Superpack entra no git**; pares de bandeira por `WE2002_KITS_CORPUS` — §6.
 - **Crédito é de autor, não de compilação.** O Superpack não se cita; cita-se quem aparece dentro dele (polipoli, ramonpsx, Lagarto, Obocaman…). **Todo código de terceiro que o `kits` alcança**, inclusive por import (CARP via `tools/pes2/`, `we3d` via `tools/looks/`), tem linha no `NOTICE.md`, no mesmo commit que o traz — usuário, 2026-09-30.
 - **Texto da UI em inglês dos EUA por default, por catálogo i18n (`ui/i18n.py`) com `pt-BR` escolhível; núcleo e CLI só inglês** — usuário, 2026-10-03, §3.4 (*Idioma da interface*).
-- **Fases 1 a 3 sem janela; a fase 7 (emulador) não pode ser pulada; manga longa/braçadeira/árbitro esperam §4.3 e §4.5** — §7.
+- **Fases 1 a 3 sem janela; a fase 7 (emulador) não pode ser pulada; o árbitro espera a §4.5 (manga longa e braçadeira medidas na fase 10, §4.3)** — §7.
 
 ## Sources of truth
 
