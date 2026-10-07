@@ -64,10 +64,10 @@
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g5--figura-inteira-em-qualquer-giro",
       "files": ["tools/kits/cli.py", "tools/kits/oracle.py", "tools/kits/core/figure.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-07",
+      "done_commit": "b90d7e7",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

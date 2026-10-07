@@ -127,4 +127,15 @@ Leitura: de costas (yaw 0) a lacuna do torso responde por 3.853 px no jogador
 (`gap torso, under the map (0,80) 20x24`, seção 0) e 3.857 no goleiro (`(100,104) 20x24`,
 seção 11). Ao lado dela, de todo ângulo, aparecem triângulos pulados (UV sem área) e ordem
 de pintura invertida entre seções vizinhas. O conserto é da K3D-TASK-05.
-
+- **Closed** — commit `b90d7e7` (2026-10-07): feat(kits): count what the turned 3D figure misses, per angle
+  - Files (`git show --name-status b90d7e7`):
+    - `M docs/tasks/kits-3d/04-buracos-por-angulo.md`
+    - `M docs/tasks/kits-3d/05-costas-sempre.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/selftest.py`
+  - **Outside declared files** (`tools/kits/cli.py`, `tools/kits/oracle.py`, `tools/kits/core/figure.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
+    - `docs/tasks/kits-3d/05-costas-sempre.md`
+    - `tools/kits/core/api.py`
