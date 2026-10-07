@@ -122,4 +122,4 @@ Escolha do usuário (2026-10-07):
 - **Issues I1 a I3:** pedido abrir com `gh issue create`, e **não foram abertas**.
   - O GitHub devolveu `500 Internal Server Error` em toda criação de issue em `aguilasa/rite`, pelos três caminhos: GraphQL, REST e MCP.
   - Foi em 2026-10-07, por volta das 15:15 UTC. Um teste com título descartável deu o mesmo 500.
-  - Os três textos acima são os rascunhos, para abrir depois.
+  - Abertas no mesmo dia, quando o GitHub voltou: I1 é aguilasa/rite#8, I2 é aguilasa/rite#9 e I3 é aguilasa/rite#10.
