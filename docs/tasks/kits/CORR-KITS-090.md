@@ -50,3 +50,8 @@ grep -n "que o número não foi medido" docs/PLAN-KITS-PY.md; grep -n "measured 
 Hoje imprime as duas linhas. Depois da correção não imprime nada.
 
 ## Log de Execução
+
+- **Closed** — commit `46984e5` (2026-10-07): docs(kits): sweep the 3D hint and ARM_SIDE after KITS-TASK-40
+  - Files (`git show --name-status 46984e5`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M tools/kits/ui_check.py`
