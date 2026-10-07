@@ -68,3 +68,13 @@ seção "Hoje" do `KITS-AJUSTES-3D.md`, que são registro; docstrings de formato
 ("first set") no `cli.py` falam do registro do TEX, não do rótulo, e ficam.
 
 ## Log de Execução
+
+- **Closed** — commit `5669790` (2026-10-07): feat(kits): name the 3D set selector Kit Home/Away, add figure --kit
+  - Files (`git show --name-status 5669790`):
+    - `M docs/tasks/kits-3d/01-kit-home-away.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`

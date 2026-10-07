@@ -51,7 +51,7 @@ graph TD
 <!-- rite:begin tasks -->
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [K3D-TASK-01](/docs/tasks/kits-3d/01-kit-home-away.md) | Kit Home/Away na aba e --kit home\|away no CLI | 1 | implementação | — | pending | — | — |
+| [K3D-TASK-01](/docs/tasks/kits-3d/01-kit-home-away.md) | Kit Home/Away na aba e --kit home\|away no CLI | 1 | implementação | — | done | 2026-10-07 | pending |
 | [K3D-TASK-02](/docs/tasks/kits-3d/02-combos-ajustados.md) | Combos do tamanho da opção mais longa | 1 | implementação | — | pending | — | — |
 | [K3D-TASK-03](/docs/tasks/kits-3d/03-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | closing | K3D-TASK-01, K3D-TASK-02 | pending | — | — |
 | [K3D-TASK-04](/docs/tasks/kits-3d/04-buracos-por-angulo.md) | Ferramenta que conta o que falta na figura por ângulo | 2 | ferramenta | — | pending | — | — |
