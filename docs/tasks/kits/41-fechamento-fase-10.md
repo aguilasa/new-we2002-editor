@@ -55,4 +55,8 @@ Estado do ciclo (`rite status --cycle kits`): 46 tasks feitas e esta em curso, f
 5. **Manga longa só com o jogador de linha.** O mesmo juiz dos checkboxes afirma o checkbox escondido com o goleiro, e a planta `'Long sleeves always shown'` falha nele.
 
 **`rite check --cycle kits`:** 0 erros. Dos dois avisos, um era desta task, a `depends_on` sem as KITS-TASK-42 a 47. Corrigi com `rite set KITS-TASK-41 --depends-on ...`. O outro é da KITS-TASK-20 (fase 4, sem a 36), e a CLI recusa mudá-lo: `rite: KITS-TASK-20 is done: its dependencies were the order it ran in`. Fica como aviso histórico, sem item aberto.
-
+- **Closed** — commit `7f0f662` (2026-10-07): chore(kits): phase 10 closing checks at HEAD
+  - Files (`git show --name-status 7f0f662`):
+    - `M docs/tasks/kits/41-fechamento-fase-10.md`
+    - `M docs/tasks/kits/progress.json`
+    - `M docs/tasks/kits/progresso.md`
