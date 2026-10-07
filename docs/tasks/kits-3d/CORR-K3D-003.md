@@ -56,3 +56,12 @@ grep -n "só acontece \*\*com Number marcado\|core/figure.py:351\|explica o vaza
 Imprime 3 linhas hoje; tem de não imprimir nada depois da correção.
 
 ## Log de Execução
+
+- 2026-10-07 — triagem inline: **REPRODUCED**. O `grep` da Evidência imprimia as linhas
+  137, 138 e 147 do `KITS-AJUSTES-3D.md`; `BACK_COPY` está em `core/figure.py:357`.
+- G5 "Hoje" marcado como estado antes da K3D-TASK-05; os dois itens que ela mudou (cópia
+  só com Number, dica do vazado) dizem o que mudou, com as linhas atuais
+  (`core/figure.py:357`, `ui/app.py:629-632`, `ui/i18n.py:79-82`). Docstring de
+  `api.numbered` diz que só pinta os dígitos.
+- Verificação: o `grep` não imprime nada (exit 1). `python3 tools/kits/selftest.py`:
+  `controls: 0 failure(s)`, `kits_selftest: 0 failure(s)`.

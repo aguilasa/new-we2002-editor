@@ -118,8 +118,9 @@ SHIRT_NUMBERS = _figure.NUMBERS
 
 
 def numbered(drawn, kit, kit_set, figure, number):
-    """A LOOKS SET figure of `figure()` with the shirt number on its back, as
-    the game builds a match's back panel (section 4.7)."""
+    """A LOOKS SET figure of `figure()` with the shirt number painted on its
+    back (section 4.7).  Only the digits: the shirt back copied into the torso
+    gap already comes from `figure()`, Number or not (K3D-TASK-05)."""
     return _figure.numbered_scene(drawn, kit, kit_set, figure, number)
 
 

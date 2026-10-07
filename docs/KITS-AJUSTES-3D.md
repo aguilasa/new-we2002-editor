@@ -129,14 +129,16 @@ captura, e cada uma precisa de uma planta que a ignore e fique vermelha.
 **Pedido.** Em qualquer posição de giro, o jogador aparece completo. Hoje as costas e outras partes
 não aparecem.
 
-**Hoje.** O que se sabe de por que falta pedaço:
+**Hoje** (estado antes da K3D-TASK-05; os dois itens que ela mudou dizem o que mudou). O que se
+sabia de por que falta pedaço:
 
 - **Lacuna do torso.** O torso amostra (0,80) 20×24 no jogador e (100,104) 20×24 no goleiro
   (`core/zones.py:194-196`). Essa área é transparente no TEX.
-- **A cópia das costas é medida, mas condicional.** O jogo copia a "shirt back" para essa lacuna:
-  (44,6) no jogador e (108,6) no goleiro (`BACK_COPY`, `core/figure.py:351`; medido na §4.7). Aqui
-  a cópia só acontece **com Number marcado** (`api.numbered`, `ui/app.py:619-625`). Na figura de
-  partida ela nunca acontece.
+- **A cópia das costas é medida; antes da K3D-TASK-05 era condicional.** O jogo copia a "shirt
+  back" para essa lacuna: (44,6) no jogador e (108,6) no goleiro (`BACK_COPY`,
+  `core/figure.py:357`; medido na §4.7). Até a K3D-TASK-05 a cópia dependia de Number marcado e
+  nunca acontecia na figura de partida; desde ela o `scene_of` a aplica sempre, e o
+  `api.numbered` (`ui/app.py:629-632`) só pinta os dígitos.
 - **Texel transparente deixa ver o fundo.** As superfícies são desenhadas em RGBA
   (`ui/figure_view.py:64-65`), então o que é transparente mostra o que está atrás.
 - **Ordem de desenho.** O `figure_view` não descarta faces. Ele ordena os triângulos pela
@@ -144,8 +146,9 @@ não aparecem.
   cruzam.
 - **Triângulos perdidos.** Um triângulo com transformação degenerada é pulado sem aviso
   (`ui/figure_view.py:119-121`).
-- **A dica da aba explica o vazado** (`ui/i18n.py:79-82`). Ela foi escrita sob a decisão de
-  2026-10-05 (KITS-TASK-37) de desenhar fiel aos dados.
+- **A dica da aba explicava o vazado**, escrita sob a decisão de 2026-10-05 (KITS-TASK-37) de
+  desenhar fiel aos dados. A K3D-TASK-05 a reescreveu: hoje (`figure_hint`, `ui/i18n.py:79-82`)
+  ela diz que a lacuna do torso é desenhada com a cópia das costas que o jogo faz.
 
 **Em aberto.** Aplicar sempre a cópia das costas é regra medida do jogo, não invenção. O resto
 precisa de uma ferramenta que, por ângulo, conte o que falta na figura: texel transparente, ordem de
