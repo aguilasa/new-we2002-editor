@@ -86,6 +86,12 @@ graph TD
   KITS_TASK_38 --> KITS_TASK_41
   KITS_TASK_39 --> KITS_TASK_41
   KITS_TASK_40 --> KITS_TASK_41
+  KITS_TASK_42 --> KITS_TASK_41
+  KITS_TASK_43 --> KITS_TASK_41
+  KITS_TASK_44 --> KITS_TASK_41
+  KITS_TASK_45 --> KITS_TASK_41
+  KITS_TASK_46 --> KITS_TASK_41
+  KITS_TASK_47 --> KITS_TASK_41
   KITS_TASK_03 --> KITS_TASK_04
   KITS_TASK_01 --> KITS_TASK_05
   KITS_TASK_02 --> KITS_TASK_05
@@ -161,7 +167,7 @@ graph TD
 | [KITS-TASK-46](/docs/tasks/kits/46-manga-curta-partida.md) | Medir a manga curta da figura de partida | 10 | implementação | — | done | 2026-10-06 | 2026-10-06 |
 | [KITS-TASK-47](/docs/tasks/kits/47-figura-partida-aba-3d.md) | Figura de partida na aba 3D | 10 | implementação | — | done | 2026-10-06 | 2026-10-06 |
 | [KITS-TASK-40](/docs/tasks/kits/40-checkboxes-numero-bracadeira.md) | Checkboxes de número e braçadeira na aba 3D | 10 | implementação | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39 | done | 2026-10-06 | 2026-10-06 |
-| [KITS-TASK-41](/docs/tasks/kits/41-fechamento-fase-10.md) | Fechamento da fase 10 | 10 | closing | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39, KITS-TASK-40 | pending | — | — |
+| [KITS-TASK-41](/docs/tasks/kits/41-fechamento-fase-10.md) | Fechamento da fase 10 | 10 | closing | KITS-TASK-37, KITS-TASK-38, KITS-TASK-39, KITS-TASK-40, KITS-TASK-42, KITS-TASK-43, KITS-TASK-44, KITS-TASK-45, KITS-TASK-46, KITS-TASK-47 | in-progress | — | — |
 | [KITS-TASK-01](/docs/tasks/kits/01-levantamento-do-tex.md) | Promover o levantamento do §1.1 a ferramenta versionada | 0 | ferramenta | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-02](/docs/tasks/kits/02-retangulos-608-e-704.md) | Medir o que são os retângulos (608,256) e (704,256) | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
 | [KITS-TASK-03](/docs/tasks/kits/03-primitivas-por-retangulo.md) | Contar primitivas de cada figura por retângulo do TEX | 0 | investigação | — | done | 2026-09-30 | 2026-09-30 |
