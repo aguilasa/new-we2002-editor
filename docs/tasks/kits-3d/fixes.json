@@ -14,6 +14,19 @@
       "depends_on": [],
       "done_on": "2026-10-07",
       "done_commit": "17c4581"
+    },
+    {
+      "id": "CORR-K3D-002",
+      "file": "CORR-K3D-002.md",
+      "title": "files da K3D-TASK-04 omite api.py e a nota na K3D-TASK-05",
+      "origin": "K3D-TASK-04",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

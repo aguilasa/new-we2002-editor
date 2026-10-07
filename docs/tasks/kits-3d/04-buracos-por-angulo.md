@@ -139,3 +139,4 @@ de pintura invertida entre seções vizinhas. O conserto é da K3D-TASK-05.
   - **Outside declared files** (`tools/kits/cli.py`, `tools/kits/oracle.py`, `tools/kits/core/figure.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
     - `docs/tasks/kits-3d/05-costas-sempre.md`
     - `tools/kits/core/api.py`
+- **Reviewed** (2026-10-07) at `461b2a4`: CORR-K3D-002

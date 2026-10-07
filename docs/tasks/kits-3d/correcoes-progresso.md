@@ -4,4 +4,5 @@
 | ID | Title | Origin | Severity | Status | Done on |
 | --- | --- | --- | --- | --- | --- |
 | [CORR-K3D-001](/docs/tasks/kits-3d/CORR-K3D-001.md) | Nota de varredura omite i18n work_set e SUPERPACK-UNIFORMES | K3D-TASK-01 | low | done | 2026-10-07 |
+| [CORR-K3D-002](/docs/tasks/kits-3d/CORR-K3D-002.md) | files da K3D-TASK-04 omite api.py e a nota na K3D-TASK-05 | K3D-TASK-04 | low | pending | — |
 <!-- rite:end -->
