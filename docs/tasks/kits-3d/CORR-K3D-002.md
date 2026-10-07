@@ -60,3 +60,10 @@ Imprime `False` hoje; tem de imprimir `True` depois da correção.
   `docs/tasks/kits-3d/05-costas-sempre.md`. Verificação agora imprime `True`.
 - A nota na 05 fica onde está, declarada nas Notes da 04 como passagem deliberada: é a
   05 que usa os números.
+- **Closed** — commit `50c72f5` (2026-10-07): docs(kits): declare api.py and the K3D-TASK-05 note in K3D-TASK-04 files
+  - Files (`git show --name-status 50c72f5`):
+    - `M docs/tasks/kits-3d/04-buracos-por-angulo.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-002.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M docs/tasks/kits-3d/progress.json`
