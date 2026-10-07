@@ -53,3 +53,10 @@ sh "$RITE_HOME/bin/rite" context K3D-TASK-04 --json | python3 -c 'import json,sy
 Imprime `False` hoje; tem de imprimir `True` depois da correção.
 
 ## Log de Execução
+
+- 2026-10-07 — triagem inline: **REPRODUCED**. `git show --stat b90d7e7` lista `api.py`
+  (19 +) e `05-costas-sempre.md` (5 +); `rite context K3D-TASK-04` → `False`.
+- `rite set K3D-TASK-04 --files …` acrescentou `tools/kits/core/api.py` e
+  `docs/tasks/kits-3d/05-costas-sempre.md`. Verificação agora imprime `True`.
+- A nota na 05 fica onde está, declarada nas Notes da 04 como passagem deliberada: é a
+  05 que usa os números.

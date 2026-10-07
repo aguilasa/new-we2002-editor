@@ -28,6 +28,13 @@ Uma ferramenta versionada conta, por giro e por figura, os pixels do boneco por 
 
 Causas candidatas em G5: lacuna do torso, RGBA, ordem por profundidade média, triângulo degenerado pulado.
 
+Passagem deliberada para a [K3D-TASK-05](/docs/tasks/kits-3d/05-costas-sempre.md): o commit
+`b90d7e7` escreveu nas Notes dela os números da contagem (lacuna do torso, `skipped`,
+`misordered`), porque é ela que decide o que fazer com as costas. Por isso o
+`05-costas-sempre.md` está no `files` desta task, junto com `tools/kits/core/api.py`
+(`count_holes`, `planted_gap`, `HoleCount`) — os dois declarados depois, pela
+[CORR-K3D-002](/docs/tasks/kits-3d/CORR-K3D-002.md).
+
 ## Log de Execução
 
 **A ferramenta.** `python3 tools/kits/cli.py holes <disco> --tag TAG [--set|--kit] [--figure]

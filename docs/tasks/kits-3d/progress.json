@@ -62,7 +62,7 @@
       "phase": 2,
       "depends_on": [],
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g5--figura-inteira-em-qualquer-giro",
-      "files": ["tools/kits/cli.py", "tools/kits/oracle.py", "tools/kits/core/figure.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
+      "files": ["tools/kits/cli.py", "tools/kits/oracle.py", "tools/kits/core/figure.py", "tools/kits/core/api.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/tasks/kits-3d/05-costas-sempre.md"],
       "resources": [],
       "status": "done",
       "done_on": "2026-10-07",
