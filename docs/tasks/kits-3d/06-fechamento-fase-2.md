@@ -80,3 +80,4 @@ $ rite check --cycle kits-3d --json
 - **Closed** — commit `206f204` (2026-10-07): docs(kits): record the phase 2 checks of kits-3d at HEAD
   - Files (`git show --name-status 206f204`):
     - `M docs/tasks/kits-3d/06-fechamento-fase-2.md`
+- **Reviewed** (2026-10-07) at `c39dfc2`: CORR-K3D-004
