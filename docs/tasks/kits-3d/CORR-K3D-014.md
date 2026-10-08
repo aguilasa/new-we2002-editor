@@ -70,3 +70,11 @@ $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.
 ```
 
   `grep -c "27 whole"` → 0. `selftest.py`: `kits_selftest: 0 failure(s)`.
+- **Closed** — commit `062b552` (2026-10-08): fix(kits): count whole and cut goalkeeper figures apart in --keeper-armband
+  - Files (`git show --name-status 062b552`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/08-medir-bracadeira-goleiro.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-014.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/oracle.py`
