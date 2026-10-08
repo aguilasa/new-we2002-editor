@@ -79,6 +79,45 @@
       "depends_on": [],
       "done_on": "2026-10-08",
       "done_commit": "79954f3"
+    },
+    {
+      "id": "CORR-K3D-007",
+      "file": "CORR-K3D-007.md",
+      "title": "Limite de tempo de quadro do raster_judge nunca visto vermelho",
+      "origin": "K3D-TASK-14",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-008",
+      "file": "CORR-K3D-008.md",
+      "title": "Tempo de quadro medido numa chamada à parte, não no desenho da vista",
+      "origin": "K3D-TASK-14",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-009",
+      "file": "CORR-K3D-009.md",
+      "title": "Faixa 99 a 104 ms não colada da ferramenta, e files da K3D-TASK-14 desatualizado",
+      "origin": "K3D-TASK-14",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

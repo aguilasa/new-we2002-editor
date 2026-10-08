@@ -77,3 +77,4 @@ A planta é do `PLANTS` do `ui_check.py` (alvo `figure_view.py`); o `controls.py
     - `docs/KITS-AJUSTES-3D.md`
     - `tools/kits/core/api.py`
     - `tools/kits/selftest.py`
+- **Reviewed** (2026-10-08) at `b9efea8`: CORR-K3D-007, CORR-K3D-008, CORR-K3D-009
