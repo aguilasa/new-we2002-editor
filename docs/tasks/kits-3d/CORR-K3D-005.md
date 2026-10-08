@@ -69,3 +69,8 @@ Imprime duas linhas hoje; depois, nada — ou o número da ferramenta com o coma
   corrigido na mesma frase.
 - Notes da K3D-TASK-14: o 0,10 s de sonda saiu; o tempo de quadro fica para o `app.py`.
 - Verificação: o `grep` não imprime nada (exit 1).
+- **Closed** — commit `9569805` (2026-10-08): docs(kits): replace probe numbers in K3D-TASK-13/14 notes with tool output
+  - Files (`git show --name-status 9569805`):
+    - `M docs/tasks/kits-3d/13-rasterizador-nucleo.md`
+    - `M docs/tasks/kits-3d/14-vista-rasterizador.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-005.md`
