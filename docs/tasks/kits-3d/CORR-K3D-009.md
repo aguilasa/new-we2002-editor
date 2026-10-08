@@ -60,3 +60,10 @@ Hoje casa; depois tem de sumir, ou casar com uma transcrição colada.
   (106 a 111 ms, já cronometrando o `picture()` da vista), com a linha colada na task. O `files` da
   K3D-TASK-14 ganhou `core/api.py`, `selftest.py` e `KITS-AJUSTES-3D.md` via `rite set`.
 - Verificação: `grep -n "99 to 104" tools/kits/ui_check.py` não imprime nada (exit 1).
+- **Closed** — commit `19f5dca` (2026-10-08): docs(kits): quote the measured frame range and declare K3D-TASK-14 files
+  - Files (`git show --name-status 19f5dca`):
+    - `M docs/tasks/kits-3d/14-vista-rasterizador.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-009.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/ui_check.py`
