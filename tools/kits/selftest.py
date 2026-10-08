@@ -607,6 +607,30 @@ def _hole_scene(hole: bool, flat_uv: bool = False):
     return looks_scene.Scene(parts, {("near",): near, ("far",): far}, (), 0, {}), _figure
 
 
+CROSSING_INK = (b"\xc0\x10\x10", b"\x10\x10\xc0")
+"""The colours of the two crossing quads, part 0 and part 1."""
+
+
+def _crossing_scene():
+    """Two quads through each other at yaw 0: part 0 on z = x, part 1 on
+    z = -x, so each is nearer on one half.  Both have mean depth 0, and the old
+    order by mean depth paints the second over the whole of the first."""
+    import scene as looks_scene
+
+    side = 4
+    corners = ((-1.0, 1.0), (1.0, 1.0), (-1.0, -1.0), (1.0, -1.0))
+    uvs = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0))
+    parts, surfaces = [], {}
+    for n, slope in enumerate((1.0, -1.0)):
+        key = ("crossing %d" % n,)
+        surfaces[key] = looks_scene.Surface(key, side, side,
+                                            (CROSSING_INK[n] + b"\xff") * side * side, n, 8, 0)
+        parts.append(looks_scene.Part(key[0], 0, 0,
+                                      tuple((x, y, slope * x) for x, y in corners), uvs,
+                                      surfaces[key], "", 0, None))
+    return looks_scene.Scene(parts, surfaces, (), 0, {})
+
+
 def _hole_checks(c) -> None:
     """K3D-TASK-04: the hole count, on a scene built here.  A transparent block
     in the near surface has to raise the count and name that part; a triangle
@@ -627,8 +651,40 @@ def _hole_checks(c) -> None:
          after.transparent > before.transparent and after.backdrop == 0
          and any(s[0] == "transparent" and s[1] == "near section 0" for s in after.sources),
          str(after))
-    c.ok("hole count: a triangle with no UV area is counted as skipped",
-         skipped.skipped > 0, str(skipped))
+    from core import raster as _raster
+
+    old_way = _figure.count_holes(flat_uv, yaw, size=64, order=_raster.MEAN,
+                                  skip_degenerate=True)
+    picture = _raster.draw(flat_uv, yaw, 0.0, 64, 64, _figure.TRIANGLES)
+    near_ink = sum(1 for i in range(0, len(picture.rgba), 4)
+                   if bytes(picture.rgba[i:i + 3]) == b"\x80\x40\x20")
+    print("  ..... flat UV: the drawing paints %d px of the near quad, skipped %d; the old "
+          "drawing skips %d" % (near_ink, skipped.skipped, old_way.skipped))
+    c.ok("the drawing paints a triangle with no UV area (G6), and the old drawing's count "
+         "still sees it skipped",
+         near_ink > 0 and skipped.skipped == 0 and old_way.skipped > 0,
+         "painted %d, skipped %d, old %d" % (near_ink, skipped.skipped, old_way.skipped))
+    crossing = _crossing_scene()
+    by_depth = _figure.count_holes(crossing, 0.0, size=64)
+    by_mean = _figure.count_holes(crossing, 0.0, size=64, order=_raster.MEAN)
+    picture = _raster.draw(crossing, 0.0, 0.0, 64, 64, _figure.TRIANGLES)
+    inks = {}
+    wrong = 0
+    for at, near in enumerate(picture.nearest):
+        if near is None:
+            continue
+        ink = bytes(picture.rgba[at * 4:at * 4 + 3])
+        inks[ink] = inks.get(ink, 0) + 1
+        wrong += ink != CROSSING_INK[near[1]]
+    print("  ..... crossing quads: by depth misordered %d, %d px off the nearest, inks %s; "
+          "by mean depth misordered %d" % (by_depth.misordered, wrong, sorted(inks.values()),
+                                           by_mean.misordered))
+    c.ok("crossing quads: at every pixel the nearest wins (G6), and the old order by mean "
+         "depth is seen misordered",
+         by_depth.misordered == 0 and wrong == 0 and len(inks) == 2
+         and by_mean.misordered > 0,
+         "depth %d, off %d, inks %d, mean %d" % (by_depth.misordered, wrong, len(inks),
+                                                by_mean.misordered))
     import ast
     import math
 

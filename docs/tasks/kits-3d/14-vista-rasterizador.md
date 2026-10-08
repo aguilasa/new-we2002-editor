@@ -26,6 +26,8 @@ A aba 3D mostra a imagem que o rasterizador do núcleo desenha, no tamanho do wi
 
 ## Notes
 
-Depende do `raster.draw` da K3D-TASK-13.
+Depende do `raster.draw` da K3D-TASK-13, que a fachada expõe como `api.draw_figure(scene, yaw, pitch, width, height)` (RGBA, alfa 0 onde nada foi pintado). Medido na 13: 0,10 s a 940×409, de costas, no TEX_00 — a medida é de sonda; a deste item sai do `app.py`.
+
+Da K3D-TASK-13 (varredura): a tabela "O que ainda falta" de G5 (`docs/KITS-AJUSTES-3D.md`) atribui `skipped` e `misordered` ao `ui/figure_view.py`. Quando a vista passar a mostrar o rasterizador, essas duas linhas viram história: atualizar G5 apontando para G6, com a contagem nova.
 
 ## Log de Execução

@@ -27,6 +27,9 @@ build it.
                      view="torso")   # the MODEL.BIN match figure, in its measured pose
     api.numbered(scene, kit, kit_set, figure, number)
                                      # a LOOKS SET figure with the number on its back
+    api.draw_figure(scene, yaw, pitch, width, height)
+                                     # Raster: the figure drawn by pixel (depth buffer),
+                                     # as the 3D tab shows it
     api.count_holes(scene, yaw, pitch=0, kit=None)
                                      # HoleCount: what the turned view shows that is
                                      # not the nearest surface, and where it comes from
@@ -124,13 +127,19 @@ def numbered(drawn, kit, kit_set, figure, number):
     return _figure.numbered_scene(drawn, kit, kit_set, figure, number)
 
 
+def draw_figure(drawn, yaw, pitch, width, height):
+    """*drawn* turned to (*yaw*, *pitch*) and drawn in software into a
+    *width* x *height* RGBA picture: the 3D tab's drawing (G6)."""
+    return _figure.raster.draw(drawn, yaw, pitch, width, height, _figure.TRIANGLES)
+
+
 HoleCount = _figure.HoleCount
 HOLE_SIZE = _figure.HOLE_SIZE
 
 
 def count_holes(drawn, yaw, pitch=0.0, kit=None, size=None):
     """What *drawn* turned to (*yaw*, *pitch*) lets through, counted by pixel
-    as the 3D view draws it (KITS-AJUSTES-3D.md G5)."""
+    as `draw_figure` draws it (KITS-AJUSTES-3D.md G5, G6)."""
     return _figure.count_holes(drawn, yaw, pitch, kit, size or _figure.HOLE_SIZE)
 
 

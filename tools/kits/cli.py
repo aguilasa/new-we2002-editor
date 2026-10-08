@@ -1193,11 +1193,13 @@ def _hole_line(figure, count, top) -> str:
 
 
 def cmd_holes(args) -> int:
-    """What the 3D view shows that is not the figure's nearest surface, per
-    figure and turn (KITS-AJUSTES-3D.md G5): pixels where the nearest triangle
-    samples a transparent texel, where it is one the view cannot map, and
-    where the view paints another over it -- each with the part and the zone
-    of the TEX it comes from.  The figure is the window's as it opens, Number
+    """What the figure's drawing (`core/raster.py`) shows that is not its
+    nearest surface, per figure and turn (KITS-AJUSTES-3D.md G5, G6): pixels
+    where the nearest triangle samples a transparent texel, where it is one
+    the drawing leaves out, and where another is shown over it -- each with
+    the part and the zone of the TEX it comes from.  The last two are 0 by
+    construction since G6 (depth buffer, UV by pixel); the count keeps them
+    for the old drawing, which the selftest measures against.  The figure is the window's as it opens, Number
     unticked.  --negative makes a zone of the uniform transparent and passes
     only if the count rises, from that zone."""
     try:

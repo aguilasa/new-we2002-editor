@@ -260,12 +260,28 @@ CONTROLS = (
         "right name, with nothing else to show it (K3D-TASK-01)",
     ),
     Control(
-        "holes-alpha-ignored", "kits/core/figure.py", "count_holes",
-        "                    opaque = surface.rgba[(ty * surface.width + tx) * 4 + 3] != 0\n",
-        "                    opaque = True\n",
+        "holes-alpha-ignored", "kits/core/raster.py", "draw",
+        "                    if data[k + 3]:\n",
+        "                    if True:\n",
         "FAIL  hole count: a transparent texel in the uniform raises the count",
         "a count that takes every texel as opaque never sees the torso gap or a "
         "new one, and prints a clean figure at every turn (K3D-TASK-04)",
+    ),
+    Control(
+        "raster-skips-flat-uv", "kits/core/raster.py", "draw",
+        "            unmapped = skip_degenerate and \\\n",
+        "            unmapped = True and \\\n",
+        "FAIL  the drawing paints a triangle with no UV area",
+        "a triangle whose UV has no area left out is what opened the shorts at the "
+        "back (G6, K3D-TASK-13)",
+    ),
+    Control(
+        "raster-mean-order", "kits/core/raster.py", "draw",
+        "                if order == MEAN or here is None or depth >= here[0] - DEPTH_TIE:\n",
+        "                if True:\n",
+        "FAIL  crossing quads: at every pixel the nearest wins",
+        "painting in order regardless of depth is the old order by mean depth, which "
+        "put the leg over the shorts (G6, K3D-TASK-13)",
     ),
     Control(
         "scene-outside-figure", "kits/core/teams.py", "module imports",
