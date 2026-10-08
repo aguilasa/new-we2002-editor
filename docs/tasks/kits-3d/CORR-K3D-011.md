@@ -51,3 +51,24 @@ Com a planta de `ARM_PIECES[93]` acima numa cópia da árvore,
 tem de sair diferente de zero. Hoje sai 0.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem: **REPRODUCED**, à mão. O `rite reproduce` roda cada linha da Evidência
+  em separado, então o `cd $T` não valeu e a planta de `ARM_PIECES[93]` caiu na árvore do
+  repositório; desfeita antes de qualquer edição (`git diff` sem a linha 93). Refeita numa cópia
+  no scratchpad: `oracle.py --edt-arms` acusa a seção 93 e `selftest.py --image --quiet` termina
+  em `figure: 0 failure(s)`, exit 0.
+- `selftest.py`: `_edt_arms_checks` no `kits_image` — `oracle.run_edt_arms` sai 0 no disco, a
+  corrida plantada sai 1 com uma linha `units out of` por seção de `ARM_PIECES`, e o juiz recusa a
+  regra com a 93 trocada. O `controls.py` não ganhou entrada: ele roda a cópia sem o disco
+  (`env.pop("WE2002_LOOKS_IMAGE")`), e por isso o vermelho visto mora no próprio `kits_image`.
+- Verificação, com a planta da Evidência numa cópia da árvore:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/selftest.py --image --quiet
+  FAIL  oracle --edt-arms: every sleeve and armband section sits where ARM_PIECES says  exit 1; FAIL  section 93: on upper arm b, the rule says upper arm a
+figure: 0 failure(s)
+rc=1
+```
+
+  Na árvore sem planta: `ok    oracle --edt-arms: every sleeve and armband section sits where ARM_PIECES says`, `rc=0`.
+  `controls.py`: `controls: 34 of 34 red`.

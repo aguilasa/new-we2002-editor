@@ -13,7 +13,7 @@
 | [CORR-K3D-008](/docs/tasks/kits-3d/CORR-K3D-008.md) | Tempo de quadro medido numa chamada à parte, não no desenho da vista | K3D-TASK-14 | low | done | 2026-10-08 |
 | [CORR-K3D-009](/docs/tasks/kits-3d/CORR-K3D-009.md) | Faixa 99 a 104 ms não colada da ferramenta, e files da K3D-TASK-14 desatualizado | K3D-TASK-14 | low | done | 2026-10-08 |
 | [CORR-K3D-010](/docs/tasks/kits-3d/CORR-K3D-010.md) | Log da K3D-TASK-15 sem os comandos de recorte e da folha de contato | K3D-TASK-15 | low | done | 2026-10-08 |
-| [CORR-K3D-011](/docs/tasks/kits-3d/CORR-K3D-011.md) | Regra do disco ARM_PIECES sem gate no kits_image | K3D-TASK-07 | medium | pending | — |
+| [CORR-K3D-011](/docs/tasks/kits-3d/CORR-K3D-011.md) | Regra do disco ARM_PIECES sem gate no kits_image | K3D-TASK-07 | medium | in-progress | — |
 | [CORR-K3D-012](/docs/tasks/kits-3d/CORR-K3D-012.md) | "Posed alike" do G3 é verdade por construção, não medição | K3D-TASK-07 | medium | pending | — |
 | [CORR-K3D-013](/docs/tasks/kits-3d/CORR-K3D-013.md) | FRAME_SLACK sozinho não sustenta "mesmo referencial" | K3D-TASK-07 | medium | pending | — |
 <!-- rite:end -->

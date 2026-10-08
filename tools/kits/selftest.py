@@ -1222,6 +1222,59 @@ def _image_checks(c, image_path) -> None:
              "%s" % [o.name for o in opened if not o.ok])
     _confront_checks(c, image_path, len(kits))
     _zones_checks(c, image_path)
+    _edt_arms_checks(c, image_path)
+
+
+def _edt_arms_checks(c, image_path) -> None:
+    """`oracle.py --edt-arms` on the disc (K3D-TASK-07, CORR-K3D-011): the
+    rule ARM_PIECES holds, every arm moved out of its frame fails, and the
+    judge refuses a rule with one piece swapped -- the red this check has to
+    be seen to give, since controls.py runs without the disc."""
+    import contextlib
+
+    oracle = c.attempt("import tools/kits/oracle.py", lambda: _kits_module("oracle"))
+    if oracle is None:
+        return
+
+    def quiet(plant):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            code = oracle.run_edt_arms(image_path, plant)
+        return code, out.getvalue()
+
+    code, out = c.attempt("oracle --edt-arms on the disc", lambda: quiet(False), default=(None, ""))
+    c.ok("oracle --edt-arms: every sleeve and armband section sits where ARM_PIECES says",
+         code == 0, "exit %s; %s" % (code, "; ".join(
+             ln.strip() for ln in out.splitlines() if "FAIL" in ln)[:300]))
+    code, out = c.attempt("oracle --edt-arms --plant-edt-arms", lambda: quiet(True),
+                          default=(None, ""))
+    c.ok("oracle --edt-arms --plant-edt-arms: every arm out of its frame fails",
+         code == 1 and out.count("units out of") == len(oracle.ARM_PIECES),
+         "exit %s, %d 'units out of'" % (code, out.count("units out of")))
+    swapped = {**oracle.ARM_PIECES, 93: "upper arm a"}
+    report = c.attempt("measure the arms for the swapped rule", lambda: _edt_arms_report(
+        oracle, image_path), default=None)
+    c.ok("oracle --edt-arms: a rule with section 93 on upper arm a is refused",
+         report is not None and any("section 93: on upper arm b, the rule says upper arm a" in f
+                                    for f in oracle.arms_judge(report, swapped)))
+
+
+def _edt_arms_report(oracle, image_path) -> dict:
+    """`oracle.arms_report` on the disc, as `run_edt_arms` builds it."""
+    import iso_source
+    import pieces
+    import section
+
+    layout = oracle.layout
+    with iso_source.open_disc(image_path) as disc:
+        files = {n: disc.read(n) for n in (layout.EDT_MOD, layout.MODEL)}
+    edt = section.scan(files[layout.EDT_MOD],
+                       layout.geometry_start(files[layout.EDT_MOD])).sections
+    model = section.scan(files[layout.MODEL], layout.MODEL_GEOMETRY_START).sections
+    named, _orders, _paired = pieces.name_pieces(files[layout.EDT_MOD])
+    arms = {(i, p.full_name): [(v.x, v.y, v.z) for v in edt[i].vertices]
+            for i, p in named.items() if p.full_name in oracle.ARM_NAMES}
+    return oracle.arms_report({n: [(v.x, v.y, v.z) for v in model[n].vertices]
+                               for n in oracle.ARM_PIECES}, arms)
 
 
 def _zones_checks(c, image_path) -> None:
