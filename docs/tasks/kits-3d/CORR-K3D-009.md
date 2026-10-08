@@ -54,3 +54,9 @@ grep -n "99 to 104" tools/kits/ui_check.py
 Hoje casa; depois tem de sumir, ou casar com uma transcrição colada.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. `99 to 104` no docstring; `121 ms` no Log.
+- Docstring de `FRAME_LIMIT_MS` e Notes da K3D-TASK-14 citam a faixa da linha "seen" do juiz
+  (106 a 111 ms, já cronometrando o `picture()` da vista), com a linha colada na task. O `files` da
+  K3D-TASK-14 ganhou `core/api.py`, `selftest.py` e `KITS-AJUSTES-3D.md` via `rite set`.
+- Verificação: `grep -n "99 to 104" tools/kits/ui_check.py` não imprime nada (exit 1).

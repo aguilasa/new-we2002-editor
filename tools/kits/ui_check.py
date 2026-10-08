@@ -924,8 +924,9 @@ RASTER_TURNS = ((0, 0), (0, 180), (1, 0), (1, 180))
 from the back, where the shorts opened (G6), and from the front."""
 FRAME_LIMIT_MS = 400.0
 """One frame of the core's drawing at the view's default size (940x409 in the
-980x640 window) may take this long.  Measured on 2026-10-08 under the Xvfb:
-99 to 104 ms for TEX_00 front and back (`app.py --export-3d`); the limit
+980x640 window) may take this long.  Measured on 2026-10-08 under the Xvfb,
+the judge's own "seen" line: 106 to 111 ms for TEX_00 front and back, timed
+on the view's picture() (CORR-K3D-008, CORR-K3D-009); the limit
 leaves room for a slower machine and still fails a drawing several times
 slower than this one."""
 

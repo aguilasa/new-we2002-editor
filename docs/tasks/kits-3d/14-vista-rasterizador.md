@@ -41,7 +41,14 @@ Da K3D-TASK-13 (varredura): a tabela "O que ainda falta" de G5 (`docs/KITS-AJUST
 - O caso de câmera do `selftest.py` (que executava o `rotate` da vista) virou: "a vista não tem câmera nem desenho próprios" (`core/api.py` e `selftest.py`, fora dos `files`).
 - G5 diz agora que `skipped` e `misordered` foram consertados em G6.
 
-O limite do quadro, `FRAME_LIMIT_MS = 400` no `ui_check.py`, é medido: 99 a 104 ms a 940×409 no Xvfb, com folga para máquina mais lenta.
+O limite do quadro, `FRAME_LIMIT_MS = 400` no `ui_check.py`, é medido a 940×409 no Xvfb, com folga para máquina mais lenta. A faixa sai da linha do juiz, não de memória: a transcrição abaixo dá 100 a 121 ms; depois das CORR-K3D-007 a 009, que passaram a cronometrar o `picture()` da própria vista, a mesma linha dá 106 a 111 ms:
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/ui_check.py | grep "core's drawing"
+  ok    the 3D view is the core's drawing, pixel for pixel, from the back and the front of both figures (figure 0 yaw 0 0 px off, 108 ms; figure 0 yaw 180 0 px off, 111 ms; figure 1 yaw 0 0 px off, 108 ms; figure 1 yaw 180 0 px off, 106 ms)
+```
+
+O `files` desta task ganhou `tools/kits/core/api.py`, `tools/kits/selftest.py` e `docs/KITS-AJUSTES-3D.md`, que o commit `d4edbcc` tocou e o Log já citava (CORR-K3D-009).
 
 Evidência (2026-10-08):
 
