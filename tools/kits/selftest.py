@@ -634,8 +634,9 @@ def _crossing_scene():
 def _hole_checks(c) -> None:
     """K3D-TASK-04: the hole count, on a scene built here.  A transparent block
     in the near surface has to raise the count and name that part; a triangle
-    with no UV area has to be counted as skipped; and the count's camera is the
-    3D view's (the same rotate() and the same margin)."""
+    with no UV area is painted by the drawing and skipped only by the old one;
+    two crossing quads come out by depth, and out of order by mean depth; and
+    the 3D view has no drawing of its own, so the count is of what it shows."""
     whole, _figure = _hole_scene(False)
     holed, _ = _hole_scene(True)
     flat_uv, _ = _hole_scene(False, flat_uv=True)
@@ -686,26 +687,16 @@ def _hole_checks(c) -> None:
          "depth %d, off %d, inks %d, mean %d" % (by_depth.misordered, wrong, len(inks),
                                                 by_mean.misordered))
     import ast
-    import math
 
     view = os.path.join(KITS_DIR, "ui", "figure_view.py")
     with open(view, encoding="utf-8") as fh:
-        tree = ast.parse(fh.read(), view)
-    space = {"math": math}
-    margin = None
-    for node in tree.body:
-        if isinstance(node, ast.FunctionDef) and node.name == "rotate":
-            exec(compile(ast.Module([node], []), view, "exec"), space)
-        if isinstance(node, ast.Assign) and any(getattr(t, "id", "") == "MARGIN"
-                                                for t in node.targets):
-            margin = ast.literal_eval(node.value)
-    points = ((1.0, 2.0, 3.0), (-4.0, 0.5, 2.0))
-    turns = ((0.0, 0.0), (37.0, -12.0), (180.0, 30.0))
-    same = "rotate" in space and all(
-        all(abs(a - b) < 1e-9 for a, b in zip(space["rotate"](p, y, t), _figure._turn(p, y, t)))
-        for p in points for y, t in turns)
-    c.ok("hole count: its camera is ui/figure_view.py's rotate() and MARGIN",
-         same and margin == _figure.HOLE_MARGIN, "margin %r" % margin)
+        source = fh.read()
+    tree = ast.parse(source, view)
+    own = sorted(node.name for node in tree.body
+                 if isinstance(node, ast.FunctionDef) and node.name in ("rotate", "_affine"))
+    c.ok("hole count: the 3D view has no camera or drawing of its own, it shows the "
+         "core's (G6), so the count is of the view's picture",
+         not own and "self.draw(" in source, "figure_view.py defines %s" % own)
 
 
 def _language_checks(c) -> None:

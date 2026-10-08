@@ -40,6 +40,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -47,7 +48,7 @@ from core import api  # noqa: E402
 import i18n  # noqa: E402
 from i18n import tr  # noqa: E402
 from PySide6 import QtCore, QtGui, QtWidgets  # noqa: E402
-from figure_view import FigureView  # noqa: E402
+from figure_view import FigureView, composed  # noqa: E402
 
 OFF_THE_DESKTOP = -32000  # not-an-address: the parking spot CLAUDE.md names
 FRAMES = 5
@@ -408,7 +409,7 @@ class Window(QtWidgets.QMainWindow):
         self.figure_box.currentIndexChanged.connect(self.dressings)
         self.set_box.currentIndexChanged.connect(self.draw_figure)
         self.figure_box.currentIndexChanged.connect(self.draw_figure)
-        self.figure_view = FigureView(api.FIGURE_TRIANGLES)
+        self.figure_view = FigureView(api.draw_figure)
         self.figure_hint = QtWidgets.QLabel()
         self.figure_hint.setWordWrap(True)
         self.reset_button = QtWidgets.QPushButton()
@@ -973,6 +974,10 @@ def main(argv=None) -> int:
                         help="print the Diagnosis tab of the kit shown (summary and rows) and exit")
     parser.add_argument("--list-kits", action="store_true",
                         help="print the kit selector's items, one per line, and exit")
+    parser.add_argument("--export-3d", metavar="PNG",
+                        help="3D: write the core's drawing of the figure at the view's size "
+                        "and turn, over the backdrop, and print where the view is and how "
+                        "long one frame of it takes")
     parser.add_argument("--list-combos", action="store_true",
                         help="after --switch-to, print each combo's text field width and "
                         "its longest item's, and exit")
@@ -1067,7 +1072,21 @@ def main(argv=None) -> int:
         return walk(app, window, args.plant)
     if args.hover:
         return hover(app, window, args.hover)
-    pictures = args.export or args.screenshot
+    if args.export_3d:
+        view = window.figure_view
+        if view.scene is None:
+            print("the 3D tab has no figure to draw", file=sys.stderr)
+            return 1
+        started = time.perf_counter()
+        drawn = api.draw_figure(view.scene, view.yaw, view.pitch, view.width(), view.height())
+        frame_ms = (time.perf_counter() - started) * 1000.0
+        if not composed(drawn).save(args.export_3d):
+            print("could not write %s" % args.export_3d, file=sys.stderr)
+            return 1
+        at = view.mapTo(window, QtCore.QPoint(0, 0))
+        print("  3d view: at %d,%d, %dx%d, yaw %g, pitch %g, frame %.0f ms"
+              % (at.x(), at.y(), view.width(), view.height(), view.yaw, view.pitch, frame_ms))
+    pictures = args.export or args.screenshot or args.export_3d
     if args.export and not window.export(args.export):
         print("could not write %s" % args.export, file=sys.stderr)
         return 1

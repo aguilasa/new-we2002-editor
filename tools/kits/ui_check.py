@@ -161,8 +161,9 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
 STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO, \
-    BACK = ("style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note",
-            "reset", "match", "dressing", "dressing boxes", "combo width", "back copy")
+    BACK, RASTER = ("style", "hover", "3D", "3D off", "selector", "diagnosis",
+                    "diagnosis note", "reset", "match", "dressing", "dressing boxes",
+                    "combo width", "back copy", "core drawing")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -229,6 +230,11 @@ PLANTS = (
      "    return numbered_scene(built, kit, kit_set, figure, None)\n",
      "    return built  # planted: the back copy only with Number\n",
      "../core/figure.py"),
+    ("the view back to the old drawing", RASTER,
+     "        drawn = self.draw(self.scene, self.yaw, self.pitch, self.width(), self.height())\n",
+     "        drawn = self.draw(self.scene, self.yaw, self.pitch, self.width(), self.height(),\n"
+     "                          \"mean\", True)  # planted: by mean depth, flat UVs left out\n",
+     "figure_view.py"),
     ("Long sleeves always shown", BOXES,
      "        self.long_box.setVisible(figure != 1)\n",
      "        self.long_box.setVisible(True)  # planted\n"),
@@ -908,6 +914,57 @@ def back_judge(image, env, app=APP) -> tuple:
     return bad, "%d turn(s), %d with the torso gap" % (len(lines), len(torso))
 
 
+RASTER_TURNS = ((0, 0), (0, 180), (1, 0), (1, 180))
+"""(figure, yaw) the view is compared with the core's drawing at: each figure
+from the back, where the shorts opened (G6), and from the front."""
+FRAME_LIMIT_MS = 400.0
+"""One frame of the core's drawing at the view's default size (940x409 in the
+980x640 window) may take this long.  Measured on 2026-10-08 under the Xvfb:
+99 to 104 ms for TEX_00 front and back (`app.py --export-3d`); the limit
+leaves room for a slower machine and still fails a drawing several times
+slower than this one."""
+
+
+def raster_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, what was seen): the 3D view in the window's screenshot is,
+    pixel for pixel, the core's drawing `app.py --export-3d` writes at the
+    view's size and turn (G6), and one frame of it is within FRAME_LIMIT_MS."""
+    bad, seen = [], []
+    for figure, yaw in RASTER_TURNS:
+        shot_path = os.path.join(tmp, "raster-%d-%d.png" % (figure, yaw))
+        core_path = os.path.join(tmp, "raster-%d-%d-core.png" % (figure, yaw))
+        shot, more, output = capture(python, app, image,
+                                     ["--tag", BACK_TAG, "--tab", "3d", "--figure",
+                                      str(figure), "--yaw", str(yaw), "--export-3d",
+                                      core_path], shot_path, env)
+        what = "figure %d yaw %d" % (figure, yaw)
+        bad += ["%s: %s" % (what, m) for m in more]
+        line = next((ln.split("3d view:", 1)[1] for ln in output.splitlines()
+                     if "3d view:" in ln), None)
+        if shot is None or line is None:
+            bad.append("%s: no 3d view line" % what)
+            continue
+        fields = [f.strip() for f in line.split(",")]
+        x, y = int(fields[0].split()[1]), int(fields[1])
+        frame_ms = float(fields[-1].split()[1])
+        try:
+            core = picture(core_path)
+        except (OSError, BadPicture, zlib.error) as exc:
+            bad.append("%s: %s" % (what, exc))
+            continue
+        w, h = core[0], core[1]
+        differ = sum(1 for row in range(h) for col in range(w)
+                     if shot[2][(y + row) * shot[0] + x + col] != core[2][row * w + col])
+        seen.append("%s %d px off, %.0f ms" % (what, differ, frame_ms))
+        if differ:
+            bad.append("%s: %d of %d px of the view are not the core's drawing"
+                       % (what, differ, w * h))
+        if frame_ms > FRAME_LIMIT_MS:
+            bad.append("%s: one frame took %.0f ms, over %.0f" % (what, frame_ms,
+                                                                 FRAME_LIMIT_MS))
+    return bad, "; ".join(seen)
+
+
 def off_judge(python, image, env, tmp, app=APP) -> list:
     """A lone TEX with WE2002_LOOKS_IMAGE unset: the 3D tab refuses with the
     sentence, and the Plan capture differs from the one with the variable only
@@ -1051,6 +1108,9 @@ def run(python: str, image: str) -> int:
              "dressings with no rule off with the sentence, and the kit selector "
              "Kit Home/Away, Uniforme Casa/Visitante, in en-US and pt-BR",
              boxes_judge(python, image, env))
+        bad, seen = raster_judge(python, image, env, tmp)
+        t.ok("the 3D view is the core's drawing, pixel for pixel, from the back and the "
+             "front of both figures (%s)" % seen, bad)
         bad, seen = back_judge(image, env)
         t.ok("Number unticked, the torso gap shows through at no turn of either figure (%s)"
              % seen, bad)
@@ -1091,6 +1151,8 @@ def run(python: str, image: str) -> int:
                     bad = []
                 elif judge == DRESS:
                     red, bad = dress_judge(python, image, env, box, app)[0], []
+                elif judge == RASTER:
+                    red, bad = raster_judge(python, image, env, box, app)[0], []
                 elif judge == BACK:
                     red, bad = back_judge(image, env, app)[0], []
                 elif judge == COMBO:

@@ -181,10 +181,11 @@ goleiro, de costas. O `kits_ui` afirma isso, e a planta que tira a cópia sem Nu
 | `skipped` | 108 a 514 | 203 a 423 | O triângulo tem UV sem área: um canto repetido, ou os três colineares. A vista (`ui/figure_view.py:119-121`) não acha transformação afim e pula o triângulo. A definição do tipo é exatamente essa. |
 | `misordered` | 124 a 427 | 146 a 418 | A vista pinta de trás para frente pela profundidade média de cada triângulo (`ui/figure_view.py:97-100`). Onde seções vizinhas se cruzam, o triângulo mais próximo é pintado antes de outro que fica atrás dele. |
 
-`skipped` e `misordered` são do desenho em `ui/figure_view.py`, que nenhuma task deste ciclo
-cobre. Consertar os dois é decisão para um item novo. Um caminho seria pintar o triângulo de UV
-degenerado com a linha de texels que ele amostra e trocar a ordem por triângulo por profundidade
-por pixel. Os dois são comportamento de rasterizador, não texel nem geometria inventados.
+`skipped` e `misordered` eram do desenho que o `ui/figure_view.py` fazia. **Consertados em G6**
+(K3D-TASK-13 e 14, 2026-10-08): a vista passou a mostrar o desenho do núcleo (`core/raster.py`),
+com profundidade por pixel e UV interpolado a partir da tela. Agora o mesmo `cli.py holes` dá
+`skipped 0` e `misordered 0` nos 48 giros. Os números da tabela acima são de antes dessa troca, e
+as linhas do `figure_view.py` que ela cita não existem mais.
 
 ## G6 — Desenho com profundidade por pixel
 

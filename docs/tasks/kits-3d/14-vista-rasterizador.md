@@ -18,11 +18,11 @@ A aba 3D mostra a imagem que o rasterizador do núcleo desenha, no tamanho do wi
 
 ## Done criteria
 
-- [ ] o `kits_ui` compara a área da vista no screenshot com o `app.py --export-3d`, pixel a pixel, de costas (yaw 0) e de frente, nas duas figuras; a planta que volta ao desenho por triângulo fica vermelha
-- [ ] o `app.py` imprime o tempo de um quadro no tamanho padrão (980×640); o limite é medido, registrado como constante no `ui_check.py` e afirmado pelo `kits_ui`
-- [ ] continuam verdes `figure_judge`, `dress_judge`, `reset_judge`, `match_judge` e `back_judge`
-- [ ] `ctest --test-dir build -R kits` com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`: `100% tests passed, 0 tests failed out of 4`, sem *skipped*
-- [ ] `python3 tools/kits/controls.py`: última linha `controls: N of N red`
+- [x] o `kits_ui` compara a área da vista no screenshot com o `app.py --export-3d`, pixel a pixel, de costas (yaw 0) e de frente, nas duas figuras; a planta que volta ao desenho por triângulo fica vermelha
+- [x] o `app.py` imprime o tempo de um quadro no tamanho padrão (980×640); o limite é medido, registrado como constante no `ui_check.py` e afirmado pelo `kits_ui`
+- [x] continuam verdes `figure_judge`, `dress_judge`, `reset_judge`, `match_judge` e `back_judge`
+- [x] `ctest --test-dir build -R kits` com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`: `100% tests passed, 0 tests failed out of 4`, sem *skipped*
+- [x] `python3 tools/kits/controls.py`: última linha `controls: N of N red`
 
 ## Notes
 
@@ -31,3 +31,37 @@ Depende do `raster.draw` da K3D-TASK-13, que a fachada expõe como `api.draw_fig
 Da K3D-TASK-13 (varredura): a tabela "O que ainda falta" de G5 (`docs/KITS-AJUSTES-3D.md`) atribui `skipped` e `misordered` ao `ui/figure_view.py`. Quando a vista passar a mostrar o rasterizador, essas duas linhas viram história: atualizar G5 apontando para G6, com a contagem nova.
 
 ## Log de Execução
+
+**O que mudou.**
+
+- `ui/figure_view.py` não tem mais câmera nem desenho próprios: saem `rotate`, `MARGIN`, `_projected` e `_affine`.
+- O `paintEvent` mostra `picture()`, que é o `api.draw_figure` no tamanho e no giro do widget, por cima do fundo (`composed`).
+- `app.py --export-3d PNG` chama a fachada direto, sem passar pelo `paintEvent`, e imprime `3d view: at X,Y, WxH, yaw, pitch, frame N ms`.
+- `api.draw_figure` ganhou `order` e `skip_degenerate`, só para a planta trazer o desenho antigo de volta.
+- O caso de câmera do `selftest.py` (que executava o `rotate` da vista) virou: "a vista não tem câmera nem desenho próprios" (`core/api.py` e `selftest.py`, fora dos `files`).
+- G5 diz agora que `skipped` e `misordered` foram consertados em G6.
+
+O limite do quadro, `FRAME_LIMIT_MS = 400` no `ui_check.py`, é medido: 99 a 104 ms a 940×409 no Xvfb, com folga para máquina mais lenta.
+
+Evidência (2026-10-08):
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/ui_check.py
+  ok    the 3D view is the core's drawing, pixel for pixel, from the back and the front of both figures (figure 0 yaw 0 0 px off, 121 ms; figure 0 yaw 180 0 px off, 101 ms; figure 1 yaw 0 0 px off, 102 ms; figure 1 yaw 180 0 px off, 100 ms)
+        plant 'the view back to the old drawing': figure 0 yaw 0: 995 of 384460 px of the view are not the core's drawing; figure 0 yaw 180: 714 of 384460 px ...; figure 1 yaw 0: 873 ...; figure 1 yaw 180: 816 ...
+  ok    plant 'the view back to the old drawing' fails the core drawing judge
+  ok    3D TEX_00: the four combinations draw a figure, and set 1 is not set 2 for either figure ...      (figure_judge)
+  ok    3D TEX_14: the match player is drawn, and the captain's armband changes only a box on its arm ... (match_judge)
+  ok    3D TEX_14 from the back: each measured dressing changes the view (Number 1197 px, ...)          (dress_judge)
+  ok    Reset view and a double click after --yaw 0 --pitch 30 are the 3D as it opens, ...             (reset_judge)
+  ok    Number unticked, the torso gap shows through at no turn of either figure (48 turn(s), 0 ...)    (back_judge)
+kits_ui: 0 failure(s)
+
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits
+100% tests passed, 0 tests failed out of 4
+$ python3 tools/kits/controls.py
+controls: 32 of 32 red
+```
+
+A planta é do `PLANTS` do `ui_check.py` (alvo `figure_view.py`); o `controls.py` roda sem tela e não ganhou entrada.
+

@@ -127,10 +127,16 @@ def numbered(drawn, kit, kit_set, figure, number):
     return _figure.numbered_scene(drawn, kit, kit_set, figure, number)
 
 
-def draw_figure(drawn, yaw, pitch, width, height):
+FIGURE_DEPTH, FIGURE_MEAN = _figure.raster.DEPTH, _figure.raster.MEAN
+
+
+def draw_figure(drawn, yaw, pitch, width, height, order=FIGURE_DEPTH, skip_degenerate=False):
     """*drawn* turned to (*yaw*, *pitch*) and drawn in software into a
-    *width* x *height* RGBA picture: the 3D tab's drawing (G6)."""
-    return _figure.raster.draw(drawn, yaw, pitch, width, height, _figure.TRIANGLES)
+    *width* x *height* RGBA picture: the 3D tab's drawing (G6).  *order* and
+    *skip_degenerate* are there for the controls that bring the old drawing
+    back (FIGURE_MEAN, True); the window never passes them."""
+    return _figure.raster.draw(drawn, yaw, pitch, width, height, _figure.TRIANGLES, order,
+                               skip_degenerate)
 
 
 HoleCount = _figure.HoleCount
