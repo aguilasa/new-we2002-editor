@@ -64,4 +64,16 @@ controls: 32 of 32 red
 ```
 
 A planta é do `PLANTS` do `ui_check.py` (alvo `figure_view.py`); o `controls.py` roda sem tela e não ganhou entrada.
-
+- **Closed** — commit `d4edbcc` (2026-10-08): feat(kits): show the core's per-pixel drawing in the 3D tab
+  - Files (`git show --name-status d4edbcc`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/14-vista-rasterizador.md`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/figure_view.py`
+    - `M tools/kits/ui_check.py`
+  - **Outside declared files** (`tools/kits/ui/figure_view.py`, `tools/kits/ui/app.py`, `tools/kits/ui_check.py`):
+    - `docs/KITS-AJUSTES-3D.md`
+    - `tools/kits/core/api.py`
+    - `tools/kits/selftest.py`
