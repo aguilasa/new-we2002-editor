@@ -123,4 +123,15 @@ negative: figure 1, shirt front made transparent: the count rises from it at 18 
 De olho, numa sonda que gravou o PNG do `api.draw_figure` a 940×409, de costas: a junção da
 bermuda com a camiseta sai inteira, sem o fundo aparecendo. A janela continua com o desenho antigo
 até a K3D-TASK-14.
-
+- **Closed** — commit `3982070` (2026-10-08): feat(kits): draw the 3D figure per pixel in the core
+  - Files (`git show --name-status 3982070`):
+    - `M docs/tasks/kits-3d/13-rasterizador-nucleo.md`
+    - `M docs/tasks/kits-3d/14-vista-rasterizador.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
+    - `A tools/kits/core/raster.py`
+    - `M tools/kits/selftest.py`
+  - **Outside declared files** (`tools/kits/core/raster.py`, `tools/kits/core/figure.py`, `tools/kits/core/api.py`, `tools/kits/cli.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
+    - `docs/tasks/kits-3d/14-vista-rasterizador.md`

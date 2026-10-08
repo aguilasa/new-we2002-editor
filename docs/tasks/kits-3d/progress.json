@@ -113,10 +113,10 @@
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel",
       "files": ["tools/kits/core/raster.py", "tools/kits/core/figure.py", "tools/kits/core/api.py", "tools/kits/cli.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-08",
+      "done_commit": "3982070",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
