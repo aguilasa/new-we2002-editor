@@ -58,3 +58,9 @@ Hoje não imprime nada; depois, os comandos de recorte e da folha, e rodá-los r
   grey20`. Refeitos no scratchpad: `compare -metric AE` = 0 nos seis recortes e na folha. Controle
   sem `-background grey20`: AE = 32784.
 - Verificação: o `grep` agora mostra as linhas 62, 67, 68 e 72.
+- **Closed** — commit `6f10ea5` (2026-10-08): docs(kits): record the crop and contact-sheet commands in K3D-TASK-15
+  - Files (`git show --name-status 6f10ea5`):
+    - `M docs/tasks/kits-3d/15-fechamento-fase-5.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-010.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
