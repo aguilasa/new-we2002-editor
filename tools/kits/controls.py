@@ -251,6 +251,14 @@ CONTROLS = (
         "(CORR-KITS-068)",
     ),
     Control(
+        "oracle-keeper-armband-unasked", "kits/oracle.py", "keeper_armband_judge",
+        "    if not captains:\n        out.append(\"no figure opened at section %d draws section %d\" % (root, armband))",
+        "    if False:\n        out.append(\"no figure opened at section %d draws section %d\" % (root, armband))",
+        "FAIL  oracle --keeper-armband: no goalkeeper drawing the armband fails",
+        "the armband is the claim of G4 (K3D-TASK-08); a judge that never asks "
+        "for it passes any section with 15's vertices, 103 as well as 92",
+    ),
+    Control(
         "oracle-arm-side-flipped", "kits/oracle.py", "arm_side",
         '    return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"',
         '    return "a" if sum(p[2] for p in points) / len(points) > 0 else "b"',

@@ -186,7 +186,7 @@ Hoje só a braçadeira e a manga longa combinam entre si.
 
 **Em aberto:**
 
-- A braçadeira do goleiro não foi medida. `SLEEVE_LENGTHS` lista os braços do goleiro (99-102 e
+- A braçadeira do goleiro **foi medida pela K3D-TASK-08** (abaixo). Antes, não havia medida: `SLEEVE_LENGTHS` lista os braços do goleiro (99-102 e
   57-60), mas nenhuma braçadeira para ele. **Decidido (usuário, 2026-10-07): medir no emulador.** Se
   faltar um save state de goleiro capitão, a task fica blocked até o usuário gravar um.
 - O pedido **reabre uma decisão** da KITS-TASK-40, a de esconder a manga longa no goleiro. A mudança
@@ -196,6 +196,67 @@ Hoje só a braçadeira e a manga longa combinam entre si.
 
 **A verificação deve prever** as oito combinações nas duas figuras. Cada caixa tem de mudar a
 captura, e cada uma precisa de uma planta que a ignore e fique vermelha.
+
+**Medido (K3D-TASK-08, 2026-10-08): a braçadeira do goleiro de manga longa é a seção 92, no lugar da
+15.** Medido no slot 7 (`work/kits-states/SLPM-87056_7.sav`): Brasil x China, e Marcos, goleiro e
+capitão do Brasil, está com a bola nos pés e de manga longa. Nesse quadro, o jogo desenha o goleiro
+com outra família de seções do `MODEL.BIN`, não a dos slots 5 e 6 (torso 56, braços 99-102 ou
+57-60): torso 13, braços 14 16 15 17, pernas 18-21 e cabeça 34. A tabela é `KEEPER_ARMBANDS` de
+`tools/kits/oracle.py`, e quem a mede e afirma é:
+
+```sh
+WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin \
+WE2002_LOOKS_DRIVE_IMAGE=$PWD/work/looks-disc/we2002-english.cue DISPLAY=:98 XAUTHORITY= \
+  python3 tools/kits/oracle.py --keeper-armband 7
+```
+
+Lida de volta das paradas que essa corrida guardou (`--frame-json work/kits-oracle/matrix-7.json`):
+
+```text
+  stops read from work/kits-oracle/matrix-7.json, no emulator
+  600 stop(s); 27 whole figure(s) opened at section 13, in the order:
+    x23  34 13 14 16 92 17 18 20 11 19 21 12
+  every such figure's translations within 153 to 196 of its median (limit 500)
+  section 92 has section 15's vertices; its texels touch: armband, short sleeve (goalkeeper), short sleeve, left, captain (goalkeeper), short sleeve, left, captain, under the armband (goalkeeper), shoulder, second (goalkeeper)
+  not drawn here: section 91 has the mirrored vertices of goalkeeper arm 57; its texels touch: armband, short sleeve (player), short sleeve, left, captain (player), short sleeve, left, captain, under the armband (player), shoulder, second (player)
+  not drawn here: section 94 has the vertices of goalkeeper arm 59; its texels touch: armband, long sleeve (player), long sleeve, left, captain (player), long sleeve, left, captain, under the armband (player), shoulder, second (player)
+  not drawn here: section 91 has the mirrored vertices of goalkeeper arm 99; its texels touch: armband, short sleeve (player), short sleeve, left, captain (player), short sleeve, left, captain, under the armband (player), shoulder, second (player)
+  not drawn here: section 94 has the vertices of goalkeeper arm 100; its texels touch: armband, long sleeve (player), long sleeve, left, captain (player), long sleeve, left, captain, under the armband (player), shoulder, second (player)
+  ok    the goalkeeper opened at section 13 draws section 92 in place of 15
+```
+
+O que a saída diz:
+
+- **A 92 entra no lugar da 15.** Nas 23 figuras inteiras, o goleiro desenha a 92 na quinta posição, onde
+  fica o `upper arm b`, e nunca desenha a 15. A 92 tem os vértices da 15, vértice por vértice: é o
+  mesmo braço com outros texels, como a 93 em relação à 97 e a 90 em relação à 4 (G3). Pela regra de
+  G3, ela vai no `upper arm b` da figura do `EDT_MOD.BIN`.
+- **Os texels da 92 são as linhas de capitão do goleiro** na imagem das mangas, as zonas de
+  `zones.py` marcadas como goleiro: `short sleeve, left, captain`, `armband, short sleeve` e
+  `… under the armband`. Os nomes dessas zonas, que vêm do Superpack, dizem "short sleeve", mas o
+  goleiro medido usa manga longa.
+- **Cada peça tem matriz própria**, e as translações de cada figura ficam entre 153 e 196 da mediana
+  (limite 500).
+
+O controle `--plant-keeper-armband` espera a 103, que também tem os vértices da 15, e a corrida sai 1 com
+`FAIL  no figure opened at section 13 draws section 103`: é o desenho que decide, não a geometria. No
+catálogo do `controls.py`, `oracle-keeper-armband-unasked` derruba o caso sintético do `selftest.py`.
+
+**O goleiro só tem manga longa neste jogo** (usuário, 2026-10-08). Por isso não há braçadeira de
+manga curta para medir, e na figura do `EDT_MOD.BIN` a braçadeira do goleiro é a 92 no `upper arm b`,
+com ou sem a caixa Long sleeves. As seções 57-60 de `SLEEVE_LENGTHS["short"]` são as que o slot 6
+desenhou num goleiro de partida em que os jogadores de linha usavam manga curta (KITS-TASK-46). O
+"short" ali é o comprimento da manga do jogador de linha, não do goleiro.
+
+**Não visto, e fora da regra:** o goleiro capitão da família dos slots 5 e 6 (torso 56). No slot 7, o
+goleiro com a bola é desenhado pela família 13. Pela geometria, a saída lista dois candidatos que
+nenhum quadro mostrou desenhados (`not drawn here`):
+
+- a 91, espelho da 57/99, cujos texels tocam as linhas de capitão de manga curta do jogador;
+- a 94, com os vértices da 59/100, cujos texels tocam as linhas de capitão de manga longa do jogador.
+
+A regra vale para o caso medido. Se um dia aparecer um state do goleiro capitão na família 56, ele é
+medido pelo mesmo `--keeper-armband`, com uma entrada nova em `KEEPER_ARMBANDS`.
 
 ## G5 — Figura inteira em qualquer giro
 

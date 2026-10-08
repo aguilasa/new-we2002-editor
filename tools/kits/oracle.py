@@ -39,6 +39,7 @@ Usage:
     python tools/kits/oracle.py --match-silhouette 5 --tag 14 [--plant-silhouette]
                                 [--pair-by indices|corners]
     python tools/kits/oracle.py --edt-arms [--plant-edt-arms]      # disc only
+    python tools/kits/oracle.py --keeper-armband 7 [--frame-json <stops>] [--plant-keeper-armband]
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
 the page that are not flat (more than one distinct 15-bit value) and how many
@@ -1179,10 +1180,11 @@ def matrix_pieces(stops, lag: int = 1) -> list:
     return out
 
 
-def matrix_passes(pieces) -> list:
+def matrix_passes(pieces, roots_of=ROOT_SECTIONS) -> list:
     """The pieces cut into figures: a figure opens at its root, section 2
-    (outfield) or 56 (goalkeeper), and takes the piece before it, its head."""
-    roots = [k for k, p in enumerate(pieces) if p["section"] in ROOT_SECTIONS]
+    (outfield) or 56 (goalkeeper) unless *roots_of* says otherwise, and takes
+    the piece before it, its head."""
+    roots = [k for k, p in enumerate(pieces) if p["section"] in roots_of]
     out = []
     for at, start in enumerate(roots):
         end = roots[at + 1] - 1 if at + 1 < len(roots) else None
@@ -2326,6 +2328,157 @@ def run_back(slot: int, cue: str, expect=None, plant=None, grid=False,
     return 1 if failures else 0
 
 
+# --- G4: the goalkeeper captain's armband, in a match ------------------------
+
+KEEPER_ROOTS = ROOT_SECTIONS + (13,)
+"""The roots a frame is cut at by `--keeper-armband`: 2 and 56 as in slot 5,
+and 13, the body of the goalkeeper slot 7 draws -- on the ball, in a close
+camera, with legs 18-21 and long arms 14 16 15 17 (K3D-TASK-08)."""
+KEEPER_ARMBANDS = {13: {"armband": 92, "replaced": 15}}
+"""The rule `--keeper-armband 7` measures (KITS-AJUSTES-3D.md G4): the
+goalkeeper whose body is section 13 draws the captain's armband as section 92
+in place of 15, its upper arm b.  92 has 15's vertices, vertex for vertex,
+and other texels."""
+PLANT_KEEPER_ARMBAND = 103
+"""`--plant-keeper-armband` expects this section instead of 92: it also has
+15's vertices, so only the drawing can tell the two apart."""
+
+
+def same_vertices(index, one: int, other: int) -> bool:
+    """Whether MODEL.BIN sections *one* and *other* hold the same vertices."""
+    def points(i):
+        sec = index["sections"].get((layout.MODEL, i))
+        return sorted((v.x, v.y, v.z) for v in sec.vertices) if sec else None
+    return points(one) is not None and points(one) == points(other)
+
+
+KEEPER_ARMS = (57, 59, 99, 100)
+"""The upper arms of the goalkeeper of slots 5 and 6 (`SLEEVE_LENGTHS`): the
+pieces a captain's armband of that figure would take the place of."""
+
+
+def keeper_candidates(index, drawn: set) -> list:
+    """[(section, arm, "same" or "mirror")]: the MODEL.BIN sections, none of
+    them `KEEPER_ARMS` and none in *drawn*, that hold the vertices of one of
+    those arms or their mirror in z -- where an armband of that goalkeeper
+    could be, by geometry alone."""
+    def points(i, mirror=False):
+        sec = index["sections"][(layout.MODEL, i)]
+        return sorted((v.x, v.y, -v.z if mirror else v.z) for v in sec.vertices)
+    count = 1 + max(i for name, i in index["sections"] if name == layout.MODEL)
+    out = []
+    for arm in KEEPER_ARMS:
+        for i in range(count):
+            if i in KEEPER_ARMS or i in drawn or i in SLEEVE_LENGTHS["short"]["worn"] \
+                    or i in SLEEVE_LENGTHS["long"]["worn"]:
+                continue
+            if points(i) == points(arm):
+                out.append((i, arm, "same"))
+            elif points(i) == points(arm, True):
+                out.append((i, arm, "mirror"))
+    return out
+
+
+def armband_zones(index, armband: int) -> list:
+    """[(zone name, figure)] the texels of MODEL.BIN section *armband* touch."""
+    from core import api
+
+    names = set()
+    for prim in index["sections"][(layout.MODEL, armband)].primitives:
+        points = [work_point(u, v) for u, v in prim.texcoords]
+        x0, y0 = min(p[0] for p in points), min(p[1] for p in points)
+        x1, y1 = max(p[0] for p in points), max(p[1] for p in points)
+        names |= {(z.name, z.figure) for z in api.ZONES
+                  if z.x <= x1 and x0 < z.x + z.w and z.y <= y1 and y0 < z.y + z.h}
+    return sorted(names, key=lambda n: (str(n[1]), n[0]))
+
+
+def keeper_armband_judge(report: dict, root: int, armband: int, replaced: int,
+                         geometry_same: bool) -> list:
+    """Failures of the goalkeeper's armband rule: some figure opened at
+    *root* draws *armband*; none of those also draws *replaced*; each worn
+    section has its own matrix and each figure its own translations; and
+    *armband* has *replaced*'s vertices (*geometry_same*)."""
+    out = ["figure %d: section %d shares its matrix with %s" % (f["figure"], section, same)
+           for f in report["figures"] for section, same in f["worn"] if same]
+    out += ["figure %d: a translation %.0f from the figure's median, over %d"
+            % (f["figure"], f["spread"], FIGURE_SPREAD)
+            for f in report["figures"] if f["spread"] > FIGURE_SPREAD]
+    keepers = [o for o in report["orders"] if len(o) > 1 and o[1] == root]
+    captains = [o for o in keepers if armband in o]
+    if not captains:
+        out.append("no figure opened at section %d draws section %d" % (root, armband))
+    out += ["a figure draws %d and %d both: %s" % (armband, replaced, " ".join(map(str, o)))
+            for o in captains if replaced in o]
+    if not geometry_same:
+        out.append("section %d does not have section %d's vertices" % (armband, replaced))
+    return out
+
+
+def run_keeper_armband(slot: int, cue: str, cache=None, plant=False) -> int:
+    """`--keeper-armband SLOT`: section G4, what the goalkeeper captain draws."""
+    import json
+
+    import oracle as looks_oracle  # tools/looks
+
+    image = os.environ[IMAGE_VARIABLE]
+    path = cache or os.path.join(ATTACH_DIR, "matrix-%d.json" % slot)
+    if cache and os.path.isfile(cache):
+        with open(cache) as fh:
+            kept = json.load(fh)
+        print("  stops read from %s, no emulator" % cache)
+    else:
+        maps = looks_oracle.model_maps(image)
+        with looks_oracle.Oracle(cue) as game:
+            load_slot(game, slot, "matrix-%d" % slot)
+            stops = matrix_stops(game, maps)
+        kept = {"resident": {}, "stops": stops}
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump(kept, fh)
+        print("  stops kept at %s (--frame-json reads them back)" % path)
+    index = model_index(image)
+    passes = matrix_passes(matrix_pieces(kept["stops"], 1), KEEPER_ROOTS)
+    failures = []
+    for root, rule in sorted(KEEPER_ARMBANDS.items()):
+        armband = PLANT_KEEPER_ARMBAND if plant else rule["armband"]
+        replaced = rule["replaced"]
+        report = matrix_report([p for p in passes if p[1]["section"] == root],
+                               (armband, replaced))
+        print("  %d stop(s); %d whole figure(s) opened at section %d, in the order:"
+              % (len(kept["stops"]), len(report["figures"]), root))
+        for order, n in sorted(report["orders"].items(), key=lambda kv: -kv[1]):
+            print("    x%-3d %s" % (n, " ".join(str(s) for s in order)))
+        spreads = [f["spread"] for f in report["figures"]]
+        if spreads:
+            print("  every such figure's translations within %.0f to %.0f of its median "
+                  "(limit %d)" % (min(spreads), max(spreads), FIGURE_SPREAD))
+        same = same_vertices(index, armband, replaced)
+        print("  section %d %s section %d's vertices; its texels touch: %s"
+              % (armband, "has" if same else "does not have", replaced,
+                 ", ".join("%s (%s)" % (name, ("player", "goalkeeper")[fig]
+                                         if fig is not None else "shared")
+                           for name, fig in armband_zones(index, armband))))
+        seen = {i for p in passes for i in (q["section"] for q in p) if i is not None}
+        for i, arm, how in keeper_candidates(index, seen):
+            print("  not drawn here: section %d has the %svertices of goalkeeper arm %d; "
+                  "its texels touch: %s"
+                  % (i, "mirrored " if how == "mirror" else "", arm,
+                     ", ".join("%s (%s)" % (name, ("player", "goalkeeper")[fig]
+                                             if fig is not None else "shared")
+                               for name, fig in armband_zones(index, i))))
+        if plant:
+            print("  PLANT  section %d expected as the armband, in place of %d"
+                  % (armband, rule["armband"]))
+        failures += keeper_armband_judge(report, root, armband, replaced, same)
+        if not failures:
+            print("  ok    the goalkeeper opened at section %d draws section %d in place of %d"
+                  % (root, armband, replaced))
+    for line in failures:
+        print("  FAIL  %s" % line)
+    return 1 if failures else 0
+
+
 # --- G3: where MODEL.BIN's sleeves and armband go on the EDT_MOD.BIN figure ---
 
 ARM_PIECES = {
@@ -2517,6 +2670,9 @@ def main(argv=None) -> int:
     source.add_argument("--sleeves-image", type=int, metavar="SLOT",
                         help="section 4.3: the sleeves image this slot holds in VRAM, "
                              "against the disc (with --page, --tag, --set); a report, always exits 0")
+    source.add_argument("--keeper-armband", type=int, metavar="SLOT",
+                        help="G4: what the goalkeeper captain of this match slot draws "
+                             "for the armband, and in place of what")
     source.add_argument("--edt-arms", action="store_true",
                         help="G3: which EDT_MOD.BIN arm piece each MODEL.BIN sleeve and "
                              "armband section stands in for, in that piece's frame (disc only)")
@@ -2576,6 +2732,10 @@ def main(argv=None) -> int:
     parser.add_argument("--plant-attach", action="store_true",
                         help="with --attach: the control -- name section %d the armband, "
                              "in place of the length's neighbour" % PLANT_ARMBAND)
+    parser.add_argument("--plant-keeper-armband", action="store_true",
+                        help="with --keeper-armband: the control -- expect section %d, "
+                             "which has the same vertices, as the armband"
+                             % PLANT_KEEPER_ARMBAND)
     parser.add_argument("--plant-edt-arms", action="store_true",
                         help="with --edt-arms: the control -- every MODEL.BIN arm moved "
                              "out of its frame, which has to fail")
@@ -2597,6 +2757,13 @@ def main(argv=None) -> int:
         return SKIP
     if args.edt_arms:
         return run_edt_arms(image, args.plant_edt_arms)
+    if args.keeper_armband is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue and not args.frame_json:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_keeper_armband(args.keeper_armband, cue, args.frame_json,
+                                  args.plant_keeper_armband)
     if args.sleeves is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue:

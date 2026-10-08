@@ -1128,6 +1128,24 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --sleeves: a tally whose parts do not sum to the sleeves image fails",
          any("not the" in f for f in oracle.sleeves_judge(
              dict(split, **{"long sleeve": 1}))), "%s" % split)
+    # --keeper-armband (K3D-TASK-08): a goalkeeper opened at 13 drawing 92 and
+    # not 15 holds the rule; expecting 103, drawing both, or an armband with
+    # other vertices does not.
+    keeper = {"figures": [{"figure": 0, "head": 34, "worn": [(92, None), (14, None)],
+                           "spread": 150.0}],
+              "orders": {(34, 13, 14, 16, 92, 17, 18, 20, 11, 19, 21, 12): 23,
+                         (46, 2, 3, 5, 4, 6, 7, 9, 11, 8, 10, 12): 20}}
+    c.ok("oracle --keeper-armband: a goalkeeper drawing 92 in place of 15 holds the rule",
+         oracle.keeper_armband_judge(keeper, 13, 92, 15, True) == [],
+         "; ".join(oracle.keeper_armband_judge(keeper, 13, 92, 15, True)))
+    c.ok("oracle --keeper-armband: no goalkeeper drawing the armband fails",
+         any("draws section 103" in f
+             for f in oracle.keeper_armband_judge(keeper, 13, 103, 15, True)))
+    both = dict(keeper, orders={(34, 13, 14, 16, 92, 15, 17): 1})
+    c.ok("oracle --keeper-armband: a goalkeeper drawing armband and arm both fails",
+         any("both" in f for f in oracle.keeper_armband_judge(both, 13, 92, 15, True)))
+    c.ok("oracle --keeper-armband: an armband without the arm's vertices fails",
+         len(oracle.keeper_armband_judge(keeper, 13, 92, 15, False)) == 1)
     # --edt-arms (K3D-TASK-07): an arm laid on four EDT-like pieces -- two
     # cylinders a side, the upper arm over y -40..40 and the forearm over
     # 20..120, side a below z 0 and side b its mirror -- goes on its own piece,
