@@ -28,4 +28,9 @@ Fica medido se, e como, o jogo desenha a braçadeira de capitão no goleiro (se�
 
 Recursos: emulador e save-states. Como na KITS-TASK-43, o `oracle.py --attach` serve de ponto de partida.
 
+**Save state do goleiro capitão: slot 7** (usuário, 2026-10-08). A partida é Brasil x China, e o
+goleiro do Brasil é o capitão. No momento do save, ele está com a bola. Hoje o arquivo está em
+`~/.local/share/duckstation/savestates/SLPM-87056_7.sav` e ainda não foi copiado para
+`work/kits-states/`, onde ficam os slots 3 a 6.
+
 ## Log de Execução
