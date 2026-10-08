@@ -131,6 +131,45 @@
       "depends_on": [],
       "done_on": "2026-10-08",
       "done_commit": "6f10ea5"
+    },
+    {
+      "id": "CORR-K3D-011",
+      "file": "CORR-K3D-011.md",
+      "title": "Regra do disco ARM_PIECES sem gate no kits_image",
+      "origin": "K3D-TASK-07",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-012",
+      "file": "CORR-K3D-012.md",
+      "title": "\"Posed alike\" do G3 é verdade por construção, não medição",
+      "origin": "K3D-TASK-07",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-013",
+      "file": "CORR-K3D-013.md",
+      "title": "FRAME_SLACK sozinho não sustenta \"mesmo referencial\"",
+      "origin": "K3D-TASK-07",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

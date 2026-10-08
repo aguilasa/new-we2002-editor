@@ -64,3 +64,4 @@ por cima dela. Está registrado no fim da medição em G3.
     - `M tools/kits/controls.py`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-08) at `cc4d26d`: CORR-K3D-011, CORR-K3D-012, CORR-K3D-013
