@@ -29,7 +29,19 @@ O núcleo desenha a figura 3D em software, por pixel: z-buffer, UV interpolado p
 
 ## Notes
 
-Medido em G6 (2026-10-08): de costas, a bermuda (seção 5) perde 218 px por triângulos de UV degenerado, e a seção 7 sai pintada sobre a 5 (70 px).
+Medido no desenho antigo (commit `1aa4b87`, o pai do trabalho desta task), de costas: a bermuda
+(seção 5) perde 221 px por triângulos de UV sem área, e a seção 5 sai pintada por cima da 7, que
+estava na frente (70 px). Corrigido pela [CORR-K3D-005](/docs/tasks/kits-3d/CORR-K3D-005.md): o G6
+dizia 218 (número de sonda), e a ordem das seções invertida.
+
+```
+$ git archive 1aa4b87 | tar -x -C "$T"; ln -s "$PWD/roms" "$T/roms"; cd "$T"
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/cli.py holes roms/japanese-shift-jis.bin --tag 00 | grep 'figure 0 yaw   0:'
+figure 0 yaw   0: silhouette 15161, missing 714 (transparent 0, backdrop 0; skipped 514; misordered 200)  skipped /BIN/EDT_MOD.BIN section 5 - 221; skipped /BIN/EDT_MOD.BIN section 2 - 79; skipped /BIN/EDT_MOD.BIN section 0 - 78; misordered /BIN/EDT_MOD.BIN section 5 over /BIN/EDT_MOD.BIN section 7 70
+```
+
+No `misordered`, a primeira seção é a que aparece e o `over` nomeia a que estava mais perto
+(`core/figure.py:562`).
 
 ## Log de Execução
 

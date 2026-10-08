@@ -59,3 +59,13 @@ grep -n '0,10 s\|218 px' docs/tasks/kits-3d/13-rasterizador-nucleo.md docs/tasks
 Imprime duas linhas hoje; depois, nada — ou o número da ferramenta com o comando ao lado.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. O `grep` imprimia as duas linhas. O passo
+  `git archive` da Evidência tem marcadores (`<tmp>`) e não roda como está; rodado à mão num
+  diretório do scratchpad, o `cli.py holes` sobre `1aa4b87` imprime `section 5 - 221` e
+  `misordered … section 5 over … section 7 70`.
+- Notes da K3D-TASK-13: 221 com o comando e a saída colados. A frase também dizia "a seção 7
+  sai pintada sobre a 5"; pelo `core/figure.py:562` a seção mostrada é a 5, por cima da 7 —
+  corrigido na mesma frase.
+- Notes da K3D-TASK-14: o 0,10 s de sonda saiu; o tempo de quadro fica para o `app.py`.
+- Verificação: o `grep` não imprime nada (exit 1).
