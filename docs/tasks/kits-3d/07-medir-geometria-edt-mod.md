@@ -57,4 +57,10 @@ a task não vai a blocked.
 
 Fica para a K3D-TASK-10: substituir a peça do `EDT_MOD.BIN` pela seção do `MODEL.BIN` ou desenhar
 por cima dela. Está registrado no fim da medição em G3.
-
+- **Closed** — commit `08ab6a4` (2026-10-08): feat(kits): measure where MODEL.BIN sleeves and armband sit on the EDT_MOD.BIN figure
+  - Files (`git show --name-status 08ab6a4`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/07-medir-geometria-edt-mod.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
