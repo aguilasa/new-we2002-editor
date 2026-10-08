@@ -57,3 +57,9 @@ que nomeia a edição.
   `14-vista-rasterizador.md | 4 +-`; o `grep` só achava as linhas do registro gerado.
 - Log da K3D-TASK-13 com um parágrafo "Varredura fora do `files`" nomeando a edição e o que ela
   leva. Verificação: o `grep` agora acha também a linha 140, do Log escrito.
+- **Closed** — commit `79954f3` (2026-10-08): docs(kits): name the K3D-TASK-14 note edit in the K3D-TASK-13 log
+  - Files (`git show --name-status 79954f3`):
+    - `M docs/tasks/kits-3d/13-rasterizador-nucleo.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-006.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
