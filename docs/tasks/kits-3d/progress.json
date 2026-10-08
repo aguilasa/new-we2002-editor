@@ -145,10 +145,10 @@
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel",
       "files": ["docs/tasks/kits-3d/15-fechamento-fase-5.md"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-08",
+      "done_commit": "982c294",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

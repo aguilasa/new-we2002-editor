@@ -59,4 +59,6 @@ jogador, de baixo o goleiro). De costas a bermuda fecha inteira nas duas pernas 
 camiseta — o defeito do relato de 2026-10-08 não aparece.
 
 **`rite check --cycle kits-3d`:** `check: 0 error(s), 0 warning(s) in 1 cycle(s)`.
-
+- **Closed** — commit `982c294` (2026-10-08): docs(kits): verify phase 5 at HEAD and record the back and side captures
+  - Files (`git show --name-status 982c294`):
+    - `M docs/tasks/kits-3d/15-fechamento-fase-5.md`
