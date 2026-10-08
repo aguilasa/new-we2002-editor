@@ -1,0 +1,74 @@
+---
+id: CORR-K3D-016
+---
+
+# CORR-K3D-016 — Braçadeira de manga curta sem juiz no desenho
+
+Origin: [K3D-TASK-10](/docs/tasks/kits-3d/10-duas-figuras.md)
+
+## Problem
+
+Na [K3D-TASK-10](/docs/tasks/kits-3d/10-duas-figuras.md), com manga curta (o padrão) a braçadeira é a seção 90 do `MODEL.BIN` no lugar do
+`upper arm b` do jogador, e nenhum juiz do `kits_ui` olha esse desenho. O `match_judge` só
+roda com `--long-sleeves`; o `same_judge` confere só a silhueta; e o `dress_judge` só pede
+"> 0 px mudados", o que aqui é sempre verdade: o `raster.py` ajusta a vista aos limites
+da cena (`MARGIN`, linhas 83-85), então trocar uma seção de limites diferentes desloca a
+figura inteira. A diferença entre sem e com braçadeira é o contorno do corpo todo
+(6178 px, da cabeça às chuteiras), não a faixa. Numa cópia que desenha o braço simples
+(seção 4) no lugar da 90, a braçadeira some da tela e todo juiz fica verde; o caso
+`arm_dress` do selftest também, porque a tabela não muda. O mesmo reenquadramento faz a
+figura pular ao marcar a caixa, e deixaria passar de graça o "cada caixa muda a captura
+em todo contexto" da K3D-TASK-11.
+
+## Evidência
+
+```text
+$ D=$(mktemp -d); git archive HEAD tools | tar -x -C $D
+$ python3 - "$D/tools/kits/core/figure.py" <<'PY'
+import sys; p=sys.argv[1]; s=open(p).read()
+old="        one = sections[number]\n        place = places.get((layout.EDT_MOD, index))"
+assert s.count(old)==1
+open(p,'w').write(s.replace(old,"        one = sections[4 if number == 90 else number]  # planted\n        place = places.get((layout.EDT_MOD, index))"))
+PY
+$ cd $D/tools/kits && DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=<repo>/roms/japanese-shift-jis.bin python3 - <repo> $D <<'PY'
+import sys; sys.path.insert(0,'.'); import ui_check as u
+R,D=sys.argv[1],sys.argv[2]; env=u.environment(); py=R+'/work/venv-looks/bin/python'; img=R+'/roms/japanese-shift-jis.bin'
+print('dress', u.dress_judge(py,img,env,D)); print('same', u.same_judge(py,img,env,D)); print('match', u.match_judge(py,img,env,D))
+PY
+dress ([], 'Number 1197 px, Captain armband 5957 px, Long sleeves 5270 px')
+same ([], 'Captain armband 0.959, Long sleeves 0.962, both 0.962')
+match ([], "369 px (1.5 % of the figure) in a 30x19 box, x 0.74-0.97 y 0.26-0.32 of the figure's box")
+```
+
+Uma captura da cópia plantada (`app.py ... --figure 0 --yaw 0 --armband`) não mostra a
+faixa amarela no braço; na HEAD a mesma captura mostra.
+
+## Root cause
+
+O juiz da braçadeira veio da figura de partida, onde só rodava com manga longa (93 e 97
+dividem a caixa de vértices, então não havia reenquadramento). O caso de manga curta
+ficou só com o selftest no nível da tabela, e o "> 0 px" do `dress_judge` não distingue
+o vestir do reenquadramento da vista (provado pela planta acima).
+
+## Fix
+
+Em `tools/kits/ui_check.py`, fazer o juiz da braçadeira rodar também sem
+`--long-sleeves` e afirmar a faixa dentro de `ARM_SIDE`/`ARM_ROWS`, com uma planta como a
+de cima vista vermelha. Um caminho é, em `tools/kits/core/raster.py` ou
+`tools/kits/ui/figure_view.py`, ajustar a vista aos limites da figura sem vestir, para
+marcar uma caixa não reenquadrar; se o reenquadramento ficar, julgar a faixa de manga
+curta pela cor ou região própria, não por diferença crua de pixel.
+
+## Arquivos a criar ou modificar
+
+- tools/kits/ui_check.py
+- tools/kits/core/raster.py (ou tools/kits/ui/figure_view.py)
+- tools/kits/controls.py
+
+## Verificação
+
+Refazer os comandos da cópia plantada acima: ao menos um juiz tem de devolver lista de
+falhas não vazia para "Captain armband" com manga curta, e
+`ctest --test-dir build -R kits_ui` tem de listar uma planta nova que derruba esse juiz.
+
+## Log de Execução

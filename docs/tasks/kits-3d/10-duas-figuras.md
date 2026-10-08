@@ -88,3 +88,4 @@ O seletor de figura tem só **player** e **goalkeeper**; a figura de partida sai
     - `M tools/kits/ui/app.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-08) at `9f86fa6`: CORR-K3D-016, CORR-K3D-017

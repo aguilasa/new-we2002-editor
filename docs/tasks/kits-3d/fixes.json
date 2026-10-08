@@ -196,6 +196,32 @@
       "depends_on": [],
       "done_on": "2026-10-08",
       "done_commit": "7e8d8ee"
+    },
+    {
+      "id": "CORR-K3D-016",
+      "file": "CORR-K3D-016.md",
+      "title": "Braçadeira de manga curta sem juiz no desenho",
+      "origin": "K3D-TASK-10",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-017",
+      "file": "CORR-K3D-017.md",
+      "title": "Documentos e docstrings ainda descrevem a figura de partida e o ARM_PIECES antigo",
+      "origin": "K3D-TASK-10",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
