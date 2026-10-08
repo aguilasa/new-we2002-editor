@@ -1221,7 +1221,7 @@ def matrix_report(passes, worn_sections=SLEEVE_LENGTHS["long"]["worn"]) -> dict:
         spread = max(sum((t[i] - median[i]) ** 2 for i in range(3)) ** 0.5
                      for t in translations)
         figures.append({"figure": number, "head": sections[0], "worn": worn,
-                        "spread": spread})
+                        "spread": spread, "cut": None in sections})
     return {"figures": figures, "orders": orders, "cut": cut}
 
 
@@ -2445,13 +2445,17 @@ def run_keeper_armband(slot: int, cue: str, cache=None, plant=False) -> int:
         replaced = rule["replaced"]
         report = matrix_report([p for p in passes if p[1]["section"] == root],
                                (armband, replaced))
-        print("  %d stop(s); %d whole figure(s) opened at section %d, in the order:"
-              % (len(kept["stops"]), len(report["figures"]), root))
+        # matrix_report keeps the cut figures (last piece unnamed) in
+        # "figures" for the matrices and out of "orders" (CORR-K3D-014).
+        print("  %d stop(s); %d whole and %d cut figure(s) opened at section %d; "
+              "the whole ones in the order:"
+              % (len(kept["stops"]), len(report["figures"]) - report["cut"], report["cut"],
+                 root))
         for order, n in sorted(report["orders"].items(), key=lambda kv: -kv[1]):
             print("    x%-3d %s" % (n, " ".join(str(s) for s in order)))
-        spreads = [f["spread"] for f in report["figures"]]
+        spreads = [f["spread"] for f in report["figures"] if not f["cut"]]
         if spreads:
-            print("  every such figure's translations within %.0f to %.0f of its median "
+            print("  every whole figure's translations within %.0f to %.0f of its median "
                   "(limit %d)" % (min(spreads), max(spreads), FIGURE_SPREAD))
         same = same_vertices(index, armband, replaced)
         print("  section %d %s section %d's vertices; its texels touch: %s"

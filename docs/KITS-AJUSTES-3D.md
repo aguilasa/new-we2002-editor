@@ -214,9 +214,9 @@ Lida de volta das paradas que essa corrida guardou (`--frame-json work/kits-orac
 
 ```text
   stops read from work/kits-oracle/matrix-7.json, no emulator
-  600 stop(s); 27 whole figure(s) opened at section 13, in the order:
+  600 stop(s); 23 whole and 4 cut figure(s) opened at section 13; the whole ones in the order:
     x23  34 13 14 16 92 17 18 20 11 19 21 12
-  every such figure's translations within 153 to 196 of its median (limit 500)
+  every whole figure's translations within 153 to 184 of its median (limit 500)
   section 92 has section 15's vertices; its texels touch: armband, short sleeve (goalkeeper), short sleeve, left, captain (goalkeeper), short sleeve, left, captain, under the armband (goalkeeper), shoulder, second (goalkeeper)
   not drawn here: section 91 has the mirrored vertices of goalkeeper arm 57; its texels touch: armband, short sleeve (player), short sleeve, left, captain (player), short sleeve, left, captain, under the armband (player), shoulder, second (player)
   not drawn here: section 94 has the vertices of goalkeeper arm 59; its texels touch: armband, long sleeve (player), long sleeve, left, captain (player), long sleeve, left, captain, under the armband (player), shoulder, second (player)
@@ -235,8 +235,10 @@ O que a saída diz:
   `zones.py` marcadas como goleiro: `short sleeve, left, captain`, `armband, short sleeve` e
   `… under the armband`. Os nomes dessas zonas, que vêm do Superpack, dizem "short sleeve", mas o
   goleiro medido usa manga longa.
-- **Cada peça tem matriz própria**, e as translações de cada figura ficam entre 153 e 196 da mediana
-  (limite 500).
+- **Cada peça tem matriz própria**, e as translações de cada figura inteira ficam entre 153 e 184 da
+  mediana (limite 500). As 4 cortadas (a última peça de um quadro, sem parada que a nomeie) ficam fora
+  da ordem e da faixa; até a [CORR-K3D-014](/docs/tasks/kits-3d/CORR-K3D-014.md) a saída as contava como
+  inteiras ("27 whole") e a faixa ia a 196.
 
 O controle `--plant-keeper-armband` espera a 103, que também tem os vértices da 15, e a corrida sai 1 com
 `FAIL  no figure opened at section 13 draws section 103`: é o desenho que decide, não a geometria. No

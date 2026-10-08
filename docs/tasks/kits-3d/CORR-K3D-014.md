@@ -54,3 +54,19 @@ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py
 Hoje imprime 1; depois, 0, com "23 whole … 4 cut" na saída.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. `--keeper-armband 7 --frame-json …` imprimia
+  `27 whole figure(s)` com uma só linha de ordem, `x23`.
+- `oracle.py`: `matrix_report` marca cada figura com `cut`; o `run_keeper_armband` imprime inteiras e
+  cortadas em separado e a faixa de translação só das inteiras. G4 recolado da HEAD e Log da
+  K3D-TASK-08 com a nota.
+- Verificação:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --keeper-armband 7 --frame-json work/kits-oracle/matrix-7.json | grep -E "whole|x23"
+  600 stop(s); 23 whole and 4 cut figure(s) opened at section 13; the whole ones in the order:
+    x23  34 13 14 16 92 17 18 20 11 19 21 12
+  every whole figure's translations within 153 to 184 of its median (limit 500)
+```
+
+  `grep -c "27 whole"` → 0. `selftest.py`: `kits_selftest: 0 failure(s)`.

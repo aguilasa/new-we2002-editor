@@ -48,6 +48,11 @@ com a saída colada.
   - `x23  34 13 14 16 92 17 18 20 11 19 21 12`;
   - `ok    the goalkeeper opened at section 13 draws section 92 in place of 15`, `rc=0`.
 
+  A linha de contagem desta corrida dizia `27 whole figure(s)`, e eram 23 inteiras e 4 cortadas; a
+  faixa de translação, `153 to 196`, incluía as cortadas. Refeita pela
+  [CORR-K3D-014](/docs/tasks/kits-3d/CORR-K3D-014.md) sobre as mesmas paradas
+  (`--frame-json work/kits-oracle/matrix-7.json`): `23 whole and 4 cut figure(s)`, `153 to 184`.
+
   A captura `work/looks-shots/matrix-7.png` mostra Marcos (GK nº 1, Brasil) com a bola nos pés.
 - A planta `--plant-keeper-armband` sai `rc=1`, com
   `FAIL  no figure opened at section 13 draws section 103`.
