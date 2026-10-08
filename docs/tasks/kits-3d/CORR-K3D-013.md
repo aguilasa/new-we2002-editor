@@ -74,3 +74,10 @@ $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.
 
   A corrida sem planta imprime as mesmas 24 linhas que o G3 transcreve. `selftest.py`:
   `kits_selftest: 0 failure(s)`; `controls.py`: `controls: 34 of 34 red`.
+- **Closed** — commit `a63b444` (2026-10-08): fix(kits): measure the arm frame offset against the rule's piece
+  - Files (`git show --name-status a63b444`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-013.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/oracle.py`
