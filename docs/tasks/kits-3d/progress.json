@@ -180,8 +180,8 @@
       "status": "done",
       "done_on": "2026-10-08",
       "done_commit": "8b73f96",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-08",
+      "review_commit": "23ef8aa"
     },
     {
       "id": "K3D-TASK-09",

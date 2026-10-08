@@ -75,3 +75,4 @@ Gates:
     - `M tools/kits/controls.py`
     - `M tools/kits/oracle.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-08) at `23ef8aa`: CORR-K3D-014, CORR-K3D-015

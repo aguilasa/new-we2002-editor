@@ -170,6 +170,32 @@
       "depends_on": [],
       "done_on": "2026-10-08",
       "done_commit": "a63b444"
+    },
+    {
+      "id": "CORR-K3D-014",
+      "file": "CORR-K3D-014.md",
+      "title": "--keeper-armband conta figuras cortadas como inteiras (27 contra 23)",
+      "origin": "K3D-TASK-08",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-015",
+      "file": "CORR-K3D-015.md",
+      "title": "\"No lugar da 15\" do G4 é inferido da geometria, não visto desenhado",
+      "origin": "K3D-TASK-08",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

@@ -16,4 +16,6 @@
 | [CORR-K3D-011](/docs/tasks/kits-3d/CORR-K3D-011.md) | Regra do disco ARM_PIECES sem gate no kits_image | K3D-TASK-07 | medium | done | 2026-10-08 |
 | [CORR-K3D-012](/docs/tasks/kits-3d/CORR-K3D-012.md) | "Posed alike" do G3 é verdade por construção, não medição | K3D-TASK-07 | medium | done | 2026-10-08 |
 | [CORR-K3D-013](/docs/tasks/kits-3d/CORR-K3D-013.md) | FRAME_SLACK sozinho não sustenta "mesmo referencial" | K3D-TASK-07 | medium | done | 2026-10-08 |
+| [CORR-K3D-014](/docs/tasks/kits-3d/CORR-K3D-014.md) | --keeper-armband conta figuras cortadas como inteiras (27 contra 23) | K3D-TASK-08 | medium | pending | — |
+| [CORR-K3D-015](/docs/tasks/kits-3d/CORR-K3D-015.md) | "No lugar da 15" do G4 é inferido da geometria, não visto desenhado | K3D-TASK-08 | low | pending | — |
 <!-- rite:end -->
