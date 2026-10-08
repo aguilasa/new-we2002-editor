@@ -73,3 +73,8 @@ kits_ui: 0 failure(s)
 
 - O `app.py` ficou fora: a planta cai em `figure_view.py`, porque o tempo passou a vir do
   `picture()` da vista (CORR-K3D-008). `controls.py`: `controls: 32 of 32 red`.
+- **Closed** — commit `cefbdf4` (2026-10-08): test(kits): plant a slow frame so the frame-time branch is seen red
+  - Files (`git show --name-status cefbdf4`):
+    - `M docs/tasks/kits-3d/CORR-K3D-007.md`
+    - `M docs/tasks/kits-3d/progress.json`
+    - `M tools/kits/ui_check.py`
