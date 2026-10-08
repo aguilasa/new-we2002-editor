@@ -72,3 +72,9 @@ rc=1
 
   Na árvore sem planta: `ok    oracle --edt-arms: every sleeve and armband section sits where ARM_PIECES says`, `rc=0`.
   `controls.py`: `controls: 34 of 34 red`.
+- **Closed** — commit `6cfab4a` (2026-10-08): test(kits): run oracle --edt-arms on the disc in kits_image
+  - Files (`git show --name-status 6cfab4a`):
+    - `M docs/tasks/kits-3d/CORR-K3D-011.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/selftest.py`
