@@ -198,7 +198,7 @@ Hoje só a braçadeira e a manga longa combinam entre si.
 captura, e cada uma precisa de uma planta que a ignore e fique vermelha.
 
 **Medido (K3D-TASK-08, 2026-10-08): a braçadeira do goleiro de manga longa é a seção 92, no lugar da
-15.** Medido no slot 7 (`work/kits-states/SLPM-87056_7.sav`): Brasil x China, e Marcos, goleiro e
+15** (a 92 desenhada é medida; o "no lugar da 15" é inferido dos vértices e dos texels, ver abaixo). Medido no slot 7 (`work/kits-states/SLPM-87056_7.sav`): Brasil x China, e Marcos, goleiro e
 capitão do Brasil, está com a bola nos pés e de manga longa. Nesse quadro, o jogo desenha o goleiro
 com outra família de seções do `MODEL.BIN`, não a dos slots 5 e 6 (torso 56, braços 99-102 ou
 57-60): torso 13, braços 14 16 15 17, pernas 18-21 e cabeça 34. A tabela é `KEEPER_ARMBANDS` de
@@ -218,6 +218,7 @@ Lida de volta das paradas que essa corrida guardou (`--frame-json work/kits-orac
     x23  34 13 14 16 92 17 18 20 11 19 21 12
   every whole figure's translations within 153 to 184 of its median (limit 500)
   section 92 has section 15's vertices; its texels touch: armband, short sleeve (goalkeeper), short sleeve, left, captain (goalkeeper), short sleeve, left, captain, under the armband (goalkeeper), shoulder, second (goalkeeper)
+  section 15 is drawn by 0 of these 27 figure(s); its texels touch: shoulder, second (goalkeeper), sleeve, shoulder to elbow (goalkeeper)
   not drawn here: section 91 has the mirrored vertices of goalkeeper arm 57; its texels touch: armband, short sleeve (player), short sleeve, left, captain (player), short sleeve, left, captain, under the armband (player), shoulder, second (player)
   not drawn here: section 94 has the vertices of goalkeeper arm 59; its texels touch: armband, long sleeve (player), long sleeve, left, captain (player), long sleeve, left, captain, under the armband (player), shoulder, second (player)
   not drawn here: section 91 has the mirrored vertices of goalkeeper arm 99; its texels touch: armband, short sleeve (player), short sleeve, left, captain (player), short sleeve, left, captain, under the armband (player), shoulder, second (player)
@@ -227,10 +228,15 @@ Lida de volta das paradas que essa corrida guardou (`--frame-json work/kits-orac
 
 O que a saída diz:
 
-- **A 92 entra no lugar da 15.** Nas 23 figuras inteiras, o goleiro desenha a 92 na quinta posição, onde
-  fica o `upper arm b`, e nunca desenha a 15. A 92 tem os vértices da 15, vértice por vértice: é o
-  mesmo braço com outros texels, como a 93 em relação à 97 e a 90 em relação à 4 (G3). Pela regra de
-  G3, ela vai no `upper arm b` da figura do `EDT_MOD.BIN`.
+- **A 92 entra no lugar da 15 — inferido, não visto trocar.** Nas 23 figuras inteiras, o goleiro
+  desenha a 92 na quinta posição, onde fica o `upper arm b`, e nenhuma das 27 desenha a 15. A 92 tem os
+  vértices da 15, vértice por vértice: é o mesmo braço com outros texels, como a 93 em relação à 97 e a
+  90 em relação à 4 (G3). Os texels dizem o resto: a 92 toca as zonas de capitão do goleiro, a 15 só
+  `shoulder, second` e `sleeve, shoulder to elbow`. O "no lugar da 15" se apoia nesses dois fatos;
+  nenhum goleiro da família 13 desenhando a 15 foi visto, porque o slot 7 só tem o goleiro capitão
+  nessa família, e por isso o `keeper_armband_judge` não exige a ordem simples como o
+  `matrix_judge` faz ([CORR-K3D-015](/docs/tasks/kits-3d/CORR-K3D-015.md)). Pela regra de G3, a 92 vai
+  no `upper arm b` da figura do `EDT_MOD.BIN`.
 - **Os texels da 92 são as linhas de capitão do goleiro** na imagem das mangas, as zonas de
   `zones.py` marcadas como goleiro: `short sleeve, left, captain`, `armband, short sleeve` e
   `… under the armband`. Os nomes dessas zonas, que vêm do Superpack, dizem "short sleeve", mas o

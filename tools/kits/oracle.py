@@ -2463,6 +2463,15 @@ def run_keeper_armband(slot: int, cue: str, cache=None, plant=False) -> int:
                  ", ".join("%s (%s)" % (name, ("player", "goalkeeper")[fig]
                                          if fig is not None else "shared")
                            for name, fig in armband_zones(index, armband))))
+        # "In place of" rests on the shared vertices and the captain texels:
+        # no figure of this family draws the replaced section (CORR-K3D-015).
+        family = [p for p in passes if p[1]["section"] == root]
+        print("  section %d is drawn by %d of these %d figure(s); its texels touch: %s"
+              % (replaced, sum(1 for p in family if any(q["section"] == replaced for q in p)),
+                 len(family),
+                 ", ".join("%s (%s)" % (name, ("player", "goalkeeper")[fig]
+                                         if fig is not None else "shared")
+                           for name, fig in armband_zones(index, replaced))))
         seen = {i for p in passes for i in (q["section"] for q in p) if i is not None}
         for i, arm, how in keeper_candidates(index, seen):
             print("  not drawn here: section %d has the %svertices of goalkeeper arm %d; "

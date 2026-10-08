@@ -54,3 +54,20 @@ grep -n "nenhum goleiro da família 13 desenhando a 15\|inferid" docs/KITS-AJUST
 Hoje vazio; depois tem de casar.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. O `grep` não achava nada (exit 1).
+- `oracle.py --keeper-armband` imprime agora quantas figuras da família desenham a seção substituída
+  e as zonas de texel dela — o que o revisor mediu numa sonda virou saída da ferramenta:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --keeper-armband 7 --frame-json work/kits-oracle/matrix-7.json
+  section 15 is drawn by 0 of these 27 figure(s); its texels touch: shoulder, second (goalkeeper), sleeve, shoulder to elbow (goalkeeper)
+```
+
+- G4: o título diz que a 92 desenhada é medida e o "no lugar da 15" é inferido; o item diz em que se
+  apoia (vértices e texels) e que nenhum goleiro da família 13 desenhando a 15 foi visto, com o
+  motivo de o juiz não exigir a ordem simples. Bloco de saída recolado (`diff` contra a ferramenta:
+  só as cercas).
+- Verificação: o `grep` casa as linhas 231 e 236. `selftest.py`: `kits_selftest: 0 failure(s)`;
+  `controls.py`: `controls: 35 of 35 red`; a planta segue `FAIL  no figure opened at section 13
+  draws section 103`.
