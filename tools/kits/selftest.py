@@ -1128,6 +1128,37 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --sleeves: a tally whose parts do not sum to the sleeves image fails",
          any("not the" in f for f in oracle.sleeves_judge(
              dict(split, **{"long sleeve": 1}))), "%s" % split)
+    # --edt-arms (K3D-TASK-07): an arm laid on four EDT-like pieces -- two
+    # cylinders a side, the upper arm over y -40..40 and the forearm over
+    # 20..120, side a below z 0 and side b its mirror -- goes on its own piece,
+    # in its frame; mirrored it goes on side b; moved out of its frame it fails.
+    import math as _math
+
+    def _ring(y0, y1, radius, z0, rows=9, around=12):
+        return [(radius * _math.cos(2 * _math.pi * k / around),
+                 y0 + (y1 - y0) * r / (rows - 1),
+                 z0 + radius * _math.sin(2 * _math.pi * k / around))
+                for r in range(rows) for k in range(around)]
+
+    def _mirror(points):
+        return [(x, y, -z) for x, y, z in points]
+
+    upper, fore = _ring(-40, 40, 15, -2), _ring(20, 120, 10, -2)
+    arms = {(1, "upper arm a"): upper, (2, "upper arm b"): _mirror(upper),
+            (3, "forearm a"): fore, (4, "forearm b"): _mirror(fore)}
+    sleeve = [(x + 0.5, y + 0.5, z) for x, y, z in _ring(-38, 38, 14, -2, 3, 4)]
+    seen = oracle.arms_report({95: sleeve, 97: _mirror(sleeve)}, arms)
+    rule = {95: "upper arm a", 97: "upper arm b"}
+    c.ok("oracle --edt-arms: a sleeve goes on its own piece, in its frame",
+         oracle.arms_judge(seen, rule) == [], "; ".join(oracle.arms_judge(seen, rule)))
+    c.ok("oracle --edt-arms: the mirrored sleeve goes on side b",
+         seen[97]["piece"] == "upper arm b", "%s" % seen[97]["piece"])
+    moved = oracle.arms_report({95: sleeve}, arms, oracle.ARM_PLANT_SHIFT)
+    c.ok("oracle --edt-arms: a sleeve moved out of its frame fails",
+         any("out of" in f for f in oracle.arms_judge(moved, {95: "upper arm a"})),
+         "%s" % moved[95])
+    c.ok("oracle --edt-arms: an arm the two figures pose apart fails",
+         len(oracle.arms_judge(seen, rule, {"upper arm a": False})) == 1)
 
 
 def _negative(c) -> None:

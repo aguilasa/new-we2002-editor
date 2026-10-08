@@ -38,6 +38,7 @@ Usage:
     python tools/kits/oracle.py --match-pose 5 --write|--check     # core/match_pose.json
     python tools/kits/oracle.py --match-silhouette 5 --tag 14 [--plant-silhouette]
                                 [--pair-by indices|corners]
+    python tools/kits/oracle.py --edt-arms [--plant-edt-arms]      # disc only
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
 the page that are not flat (more than one distinct 15-bit value) and how many
@@ -99,6 +100,12 @@ player on the pitch, and `--back SLOT --page X --tag TT --panels` reads it
 numbers zone centred on row 7, one at x 7, two at x 3 and 11.  `--keeper-set`
 takes the goalkeeper zones from the other set, `--plant-back panels` reads
 every panel a row up, and `--blocks` / `--picture` show what differs.
+
+`--edt-arms` (KITS-AJUSTES-3D.md G3, K3D-TASK-07) needs no emulator: it lays
+each sleeve and armband section of MODEL.BIN on the EDT_MOD.BIN arm pieces and
+asserts `ARM_PIECES` -- the piece each one stands in for, in that piece's frame
+within `FRAME_SLACK` -- and that both figures pose each arm piece alike.
+`--plant-edt-arms` moves every MODEL.BIN arm out of its frame and has to fail.
 """
 
 from __future__ import annotations
@@ -2315,6 +2322,156 @@ def run_back(slot: int, cue: str, expect=None, plant=None, grid=False,
     return 1 if failures else 0
 
 
+# --- G3: where MODEL.BIN's sleeves and armband go on the EDT_MOD.BIN figure ---
+
+ARM_PIECES = {
+    3: "upper arm a", 4: "upper arm b", 5: "forearm a", 6: "forearm b",
+    90: "upper arm b",
+    93: "upper arm b", 95: "upper arm a", 96: "forearm a", 97: "upper arm b", 98: "forearm b",
+    57: "upper arm a", 58: "forearm a", 59: "upper arm b", 60: "forearm b",
+    99: "upper arm a", 100: "upper arm b", 101: "forearm a", 102: "forearm b",
+}
+"""The rule `--edt-arms` measures (KITS-AJUSTES-3D.md G3, K3D-TASK-07): the
+EDT_MOD.BIN piece, by `pieces.py`'s name, each sleeve and armband section of
+MODEL.BIN stands in for.  The section sits in that piece's local frame, so it
+is drawn with the matrix and place the figure gives that piece (`scene.pose`,
+which is by name and the same for both figures).  The part -- upper arm or
+forearm -- is the EDT_MOD.BIN piece whose vertices lie nearest; the side, a
+or b, is the sign of the section's mean z, since each pair is the other one
+mirrored in z vertex for vertex."""
+ARM_NAMES = ("upper arm a", "upper arm b", "forearm a", "forearm b")
+FRAME_SLACK = 3.0
+"""How far, in model units, the translation that best lays a MODEL.BIN arm on
+its EDT_MOD.BIN piece may be from zero before the two frames are not the same.
+Measured on the disc: 1.9 at most (`--edt-arms`); with every arm moved 20
+units (`--plant-edt-arms`) the run fails."""
+ARM_PLANT_SHIFT = (0.0, 20.0, 0.0)
+"""`--plant-edt-arms` moves every MODEL.BIN arm by this before matching: the
+same section in a frame of its own, which `FRAME_SLACK` has to refuse."""
+ICP_STEPS = 30
+
+
+def mean_nearest(points, others) -> float:
+    """The mean distance from each of *points* to the nearest of *others*."""
+    import math
+
+    return sum(min(math.dist(p, q) for q in others) for p in points) / len(points)
+
+
+def frame_offset(points, others, steps: int = ICP_STEPS) -> tuple:
+    """(translation, mean nearest distance after it): the shift that best lays
+    *points* on *others*, by nearest-point iteration (translation only)."""
+    import math
+
+    t = [0.0, 0.0, 0.0]
+    for _ in range(steps):
+        moved = [tuple(p[i] + t[i] for i in range(3)) for p in points]
+        near = [min(others, key=lambda q, p=p: math.dist(p, q)) for p in moved]
+        t = [t[i] + sum(q[i] - p[i] for p, q in zip(moved, near)) / len(points)
+             for i in range(3)]
+    moved = [tuple(p[i] + t[i] for i in range(3)) for p in points]
+    return tuple(t), mean_nearest(moved, others)
+
+
+def arm_side(points) -> str:
+    """"a" for an arm whose mean z is below zero, "b" above (`pieces.py`'s pairs)."""
+    return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"
+
+
+def arm_match(points, pieces: dict) -> dict:
+    """Where one MODEL.BIN arm goes among *pieces* -- {(section, name): points}
+    of EDT_MOD.BIN, both figures.  The part is the nearest piece of the arm's
+    side; its frame offset is measured against that piece."""
+    import math
+
+    side = arm_side(points)
+    ranked = sorted((mean_nearest(points, pts), at, name)
+                    for (at, name), pts in pieces.items() if name.endswith(" " + side))
+    distance, at, name = ranked[0]
+    other = next((d for d, _a, n in ranked if n.split()[0] != name.split()[0]), None)
+    shift, fitted = frame_offset(points, pieces[(at, name)])
+    return {"piece": name, "section": at, "distance": distance, "other part": other,
+            "offset": math.sqrt(sum(v * v for v in shift)), "shift": shift, "fitted": fitted}
+
+
+def arms_report(model_sections: dict, pieces: dict, shift=(0.0, 0.0, 0.0)) -> dict:
+    """{MODEL.BIN section: arm_match} for every section of `ARM_PIECES` in
+    *model_sections* ({section: points}), each moved by *shift* first."""
+    return {number: arm_match([tuple(p[i] + shift[i] for i in range(3)) for p in pts], pieces)
+            for number, pts in sorted(model_sections.items())}
+
+
+def arms_judge(report: dict, expect: dict = None, shared=None) -> list:
+    """What breaks the rule: a section on another piece than `ARM_PIECES`
+    says, nearer the other part, or out of the piece's frame by more than
+    `FRAME_SLACK`; and, when *shared* ({name: bool}) is given, an arm name
+    the two figures do not pose alike."""
+    expect = ARM_PIECES if expect is None else expect
+    bad = []
+    for number, want in sorted(expect.items()):
+        got = report.get(number)
+        if got is None:
+            bad.append("section %d: not measured" % number)
+            continue
+        if got["piece"] != want:
+            bad.append("section %d: on %s, the rule says %s" % (number, got["piece"], want))
+        if got["other part"] is not None and got["other part"] <= got["distance"]:
+            bad.append("section %d: the other part is as near (%.1f against %.1f)"
+                       % (number, got["other part"], got["distance"]))
+        if got["offset"] > FRAME_SLACK:
+            bad.append("section %d: %.1f units out of %s's frame, past %.1f"
+                       % (number, got["offset"], got["piece"], FRAME_SLACK))
+    for name, same in sorted((shared or {}).items()):
+        if not same:
+            bad.append("%s: the player and the goalkeeper pose it apart" % name)
+    return bad
+
+
+def run_edt_arms(image_path: str, plant: bool = False) -> int:
+    """`--edt-arms`: the rule of G3, measured on the disc and asserted."""
+    import iso_source
+    import pieces
+    import scene
+    import section
+
+    with iso_source.open_disc(image_path) as disc:
+        files = {name: disc.read(name) for name in (layout.EDT_MOD, layout.MODEL, layout.ANIME)}
+    edt = section.scan(files[layout.EDT_MOD],
+                       layout.geometry_start(files[layout.EDT_MOD])).sections
+    model = section.scan(files[layout.MODEL], layout.MODEL_GEOMETRY_START).sections
+    named, _orders, _paired = pieces.name_pieces(files[layout.EDT_MOD])
+    arms = {(i, piece.full_name): [(v.x, v.y, v.z) for v in edt[i].vertices]
+            for i, piece in named.items() if piece.full_name in ARM_NAMES}
+    pose = scene.pose(files)
+    shared = {}
+    for name in ARM_NAMES:
+        placed = {repr(pose.get((layout.EDT_MOD, at))) for at, n in arms if n == name}
+        shared[name] = len(placed) == 1
+    report = arms_report({n: [(v.x, v.y, v.z) for v in model[n].vertices] for n in ARM_PIECES},
+                         arms, ARM_PLANT_SHIFT if plant else (0.0, 0.0, 0.0))
+    print("edt-arms: %s and %s%s" % (layout.MODEL, layout.EDT_MOD,
+                                     ", every MODEL.BIN arm moved by %s (the control)"
+                                     % (ARM_PLANT_SHIFT,) if plant else ""))
+    for name in ARM_NAMES:
+        print("  %-11s EDT_MOD.BIN sections %s, %s"
+              % (name, " ".join(str(at) for at, n in sorted(arms) if n == name),
+                 "posed alike" if shared[name] else "posed apart"))
+    for number, got in report.items():
+        print("  section %3d -> %-11s (nearest EDT section %2d at %.1f, other part %s), "
+              "frame offset %.1f (%+.1f,%+.1f,%+.1f)"
+              % (number, got["piece"], got["section"], got["distance"],
+                 "%.1f" % got["other part"] if got["other part"] is not None else "-",
+                 got["offset"], *got["shift"]))
+    failures = arms_judge(report, shared=shared)
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if not failures:
+        print("  ok    every sleeve and armband section is in its EDT_MOD.BIN piece's frame "
+              "(offset %.1f at most, slack %.1f)"
+              % (max(g["offset"] for g in report.values()), FRAME_SLACK))
+    return 1 if failures else 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     source = parser.add_mutually_exclusive_group(required=True)
@@ -2338,6 +2495,9 @@ def main(argv=None) -> int:
     source.add_argument("--sleeves-image", type=int, metavar="SLOT",
                         help="section 4.3: the sleeves image this slot holds in VRAM, "
                              "against the disc (with --page, --tag, --set); a report, always exits 0")
+    source.add_argument("--edt-arms", action="store_true",
+                        help="G3: which EDT_MOD.BIN arm piece each MODEL.BIN sleeve and "
+                             "armband section stands in for, in that piece's frame (disc only)")
     source.add_argument("--back", type=int, metavar="SLOT",
                         help="section 4.7: does the LOOKS SET of this slot fill the torso gaps")
     parser.add_argument("--cue", help="the disc the state was saved on (default $%s)"
@@ -2394,6 +2554,9 @@ def main(argv=None) -> int:
     parser.add_argument("--plant-attach", action="store_true",
                         help="with --attach: the control -- name section %d the armband, "
                              "in place of the length's neighbour" % PLANT_ARMBAND)
+    parser.add_argument("--plant-edt-arms", action="store_true",
+                        help="with --edt-arms: the control -- every MODEL.BIN arm moved "
+                             "out of its frame, which has to fail")
     parser.add_argument("--panels", action="store_true",
                         help="with --back: read every back panel under the map (a match)")
     parser.add_argument("--picture", metavar="PNG",
@@ -2410,6 +2573,8 @@ def main(argv=None) -> int:
         print("oracle: skipped -- %s is not set (the Japanese data track .bin)"
               % IMAGE_VARIABLE)
         return SKIP
+    if args.edt_arms:
+        return run_edt_arms(image, args.plant_edt_arms)
     if args.sleeves is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue:

@@ -251,6 +251,22 @@ CONTROLS = (
         "(CORR-KITS-068)",
     ),
     Control(
+        "oracle-arm-side-flipped", "kits/oracle.py", "arm_side",
+        '    return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"',
+        '    return "a" if sum(p[2] for p in points) / len(points) > 0 else "b"',
+        "FAIL  oracle --edt-arms: a sleeve goes on its own piece, in its frame",
+        "the side of an arm is the sign of its mean z (K3D-TASK-07); read the "
+        "other way, the armband lands on the other arm and nothing else differs",
+    ),
+    Control(
+        "oracle-arm-frame-blind", "kits/oracle.py", "frame_offset",
+        "    for _ in range(steps):",
+        "    for _ in range(0):",
+        "FAIL  oracle --edt-arms: a sleeve moved out of its frame fails",
+        "an offset that never iterates is 0 for any arm, and the rule that the "
+        "MODEL.BIN section shares its EDT_MOD.BIN piece's frame asserts nothing",
+    ),
+    Control(
         "cli-kit-swapped", "kits/cli.py", "module constant",
         'KIT_NAMES = {"home": 1, "away": 2}',
         'KIT_NAMES = {"home": 2, "away": 1}',

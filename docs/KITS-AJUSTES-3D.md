@@ -87,7 +87,7 @@ sai da interface. Do trabalho de "match player", só o **conhecimento medido** p
   `core/figure.py:177-182`);
 - a matriz de GTE de cada peça e a pose medida.
 
-**Em aberto: é a decisão central do ciclo.** Como vestir a figura do `EDT_MOD.BIN` com geometria
+**Era a decisão central do ciclo, e a K3D-TASK-07 a mediu (abaixo).** Como vestir a figura do `EDT_MOD.BIN` com geometria
 medida do `MODEL.BIN` sem remapear UV à mão, o que o §0 proíbe. Há duas saídas:
 
 - transplantar as seções do `MODEL.BIN` para a figura, com matriz medida;
@@ -95,6 +95,70 @@ medida do `MODEL.BIN` sem remapear UV à mão, o que o §0 proíbe. Há duas sa�
 
 As duas pedem medição antes de código. **Decidido (usuário, 2026-10-07): medir primeiro.** Uma
 task de investigação compara as duas figuras e escreve a regra aqui; a implementação depende dela.
+
+**Medido (K3D-TASK-07, 2026-10-08): transplante, sem peça equivalente.** Cada seção de manga e de
+braçadeira do `MODEL.BIN` entra no lugar de uma peça de braço do `EDT_MOD.BIN` e é desenhada com a
+matriz e o lugar que a figura dá a essa peça. A tabela é `ARM_PIECES` de `tools/kits/oracle.py`, e
+quem a mede e afirma é:
+
+```sh
+WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --edt-arms
+```
+
+```text
+edt-arms: /BIN/MODEL.BIN and /BIN/EDT_MOD.BIN
+  upper arm a EDT_MOD.BIN sections 1 12, posed alike
+  upper arm b EDT_MOD.BIN sections 2 13, posed alike
+  forearm a   EDT_MOD.BIN sections 3 14, posed alike
+  forearm b   EDT_MOD.BIN sections 4 15, posed alike
+  section   3 -> upper arm a (nearest EDT section  1 at 5.6, other part 8.2), frame offset 0.8 (+0.1,+0.8,-0.2)
+  section   4 -> upper arm b (nearest EDT section  2 at 5.6, other part 8.2), frame offset 0.8 (+0.1,+0.8,+0.2)
+  section   5 -> forearm a   (nearest EDT section 14 at 3.6, other part 10.9), frame offset 0.7 (-0.4,+0.6,+0.1)
+  section   6 -> forearm b   (nearest EDT section 15 at 3.6, other part 10.9), frame offset 0.7 (-0.4,+0.6,-0.1)
+  section  57 -> upper arm a (nearest EDT section  1 at 5.6, other part 7.9), frame offset 1.8 (+1.6,+0.8,+0.4)
+  section  58 -> forearm a   (nearest EDT section  3 at 4.3, other part 13.5), frame offset 1.8 (-0.2,+1.8,+0.4)
+  section  59 -> upper arm b (nearest EDT section  2 at 5.5, other part 8.2), frame offset 1.2 (+0.9,+0.8,-0.4)
+  section  60 -> forearm b   (nearest EDT section  4 at 4.3, other part 13.5), frame offset 1.8 (-0.2,+1.8,-0.4)
+  section  90 -> upper arm b (nearest EDT section  2 at 5.6, other part 8.2), frame offset 0.8 (+0.1,+0.8,+0.2)
+  section  93 -> upper arm b (nearest EDT section 13 at 6.1, other part 8.5), frame offset 0.8 (+0.4,+0.3,-0.6)
+  section  95 -> upper arm a (nearest EDT section 12 at 6.1, other part 8.5), frame offset 0.8 (+0.4,+0.3,+0.6)
+  section  96 -> forearm a   (nearest EDT section 14 at 3.5, other part 11.1), frame offset 0.8 (+0.3,+0.7,-0.3)
+  section  97 -> upper arm b (nearest EDT section 13 at 6.1, other part 8.5), frame offset 0.8 (+0.4,+0.3,-0.6)
+  section  98 -> forearm b   (nearest EDT section 15 at 3.5, other part 11.1), frame offset 0.8 (+0.3,+0.7,+0.3)
+  section  99 -> upper arm a (nearest EDT section  1 at 5.6, other part 7.9), frame offset 1.8 (+1.6,+0.8,+0.4)
+  section 100 -> upper arm b (nearest EDT section  2 at 5.5, other part 8.2), frame offset 1.2 (+0.9,+0.8,-0.4)
+  section 101 -> forearm a   (nearest EDT section 14 at 4.1, other part 12.8), frame offset 1.8 (-0.3,+1.8,+0.3)
+  section 102 -> forearm b   (nearest EDT section 15 at 4.1, other part 13.1), frame offset 1.9 (-0.6,+1.8,-0.3)
+  ok    every sleeve and armband section is in its EDT_MOD.BIN piece's frame (offset 1.9 at most, slack 3.0)
+```
+
+O que a saída diz:
+
+- **Não há peça equivalente no `EDT_MOD.BIN`.** A distância média ao vértice mais próximo da peça
+  mais perto fica entre 3,5 e 6,1, nunca 0: as peças de braço do `EDT_MOD.BIN` são outra malha. Nenhuma
+  delas é a braçadeira, que só existe no `MODEL.BIN` (90 e 93).
+- **A seção do `MODEL.BIN` está no referencial da peça.** A translação que melhor deita cada
+  seção sobre a sua peça fica entre 0,7 e 1,9 unidade (`FRAME_SLACK` 3,0). Por isso a matriz certa
+  para desenhá-la é a da própria peça, sem matriz nova.
+- **A parte (braço ou antebraço) é a peça mais perto.** A outra parte fica sempre mais longe
+  (coluna "other part"). **O lado (a ou b) é o sinal do z médio da seção.** As seções vêm em pares
+  espelhados em z, e por isso a distância não decide o lado.
+- **As duas figuras posam cada peça de braço igual** ("posed alike"). As seções 1 e 12, 2 e 13, 3 e
+  14, 4 e 15 têm o mesmo nome em `pieces.py` e a mesma matriz em `scene.pose`. O braço longo cabe
+  melhor no braço do goleiro (12 e 13); no jogador, ele vai no slot de mesmo nome (1 e 2), com a
+  mesma matriz.
+- **Concorda com a ordem medida no jogo** (`SLEEVE_LENGTHS`, `LONG_TO_SHORT`). 95→3 e 97→4 caem nos
+  mesmos `upper arm a` e `upper arm b`; 96→5 e 98→6 nos mesmos antebraços. A braçadeira (93 no lugar
+  da 97, 90 no lugar da 4) cai em `upper arm b`, o braço que ela substitui. No goleiro, 99/101/100/102
+  caem nas peças de 57/58/59/60.
+
+O controle `--plant-edt-arms` move todo braço do `MODEL.BIN` 20 unidades em y antes de medir, e a
+corrida sai 1 com 21 linhas `FAIL`. No catálogo do `controls.py`, `oracle-arm-side-flipped` e
+`oracle-arm-frame-blind` derrubam os casos sintéticos do `selftest.py`.
+
+**O que fica para a K3D-TASK-10:** substituir a peça inteira pela seção do `MODEL.BIN` ou desenhar
+a braçadeira por cima da malha do `EDT_MOD.BIN`. A regra diz onde a seção vai e com que matriz; ela
+não diz qual das duas malhas aparece.
 
 ## G4 — Number, Captain armband e Long sleeves em qualquer combinação, nas duas figuras
 
