@@ -118,6 +118,19 @@
       "depends_on": [],
       "done_on": "2026-10-08",
       "done_commit": "19f5dca"
+    },
+    {
+      "id": "CORR-K3D-010",
+      "file": "CORR-K3D-010.md",
+      "title": "Log da K3D-TASK-15 sem os comandos de recorte e da folha de contato",
+      "origin": "K3D-TASK-15",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

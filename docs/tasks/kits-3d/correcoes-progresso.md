@@ -12,4 +12,5 @@
 | [CORR-K3D-007](/docs/tasks/kits-3d/CORR-K3D-007.md) | Limite de tempo de quadro do raster_judge nunca visto vermelho | K3D-TASK-14 | medium | done | 2026-10-08 |
 | [CORR-K3D-008](/docs/tasks/kits-3d/CORR-K3D-008.md) | Tempo de quadro medido numa chamada à parte, não no desenho da vista | K3D-TASK-14 | low | done | 2026-10-08 |
 | [CORR-K3D-009](/docs/tasks/kits-3d/CORR-K3D-009.md) | Faixa 99 a 104 ms não colada da ferramenta, e files da K3D-TASK-14 desatualizado | K3D-TASK-14 | low | done | 2026-10-08 |
+| [CORR-K3D-010](/docs/tasks/kits-3d/CORR-K3D-010.md) | Log da K3D-TASK-15 sem os comandos de recorte e da folha de contato | K3D-TASK-15 | low | pending | — |
 <!-- rite:end -->

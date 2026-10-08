@@ -69,7 +69,7 @@ graph TD
 | [K3D-TASK-06](/docs/tasks/kits-3d/06-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | closing | K3D-TASK-04, K3D-TASK-05 | done | 2026-10-07 | 2026-10-07 |
 | [K3D-TASK-13](/docs/tasks/kits-3d/13-rasterizador-nucleo.md) | Rasterizador por pixel no núcleo | 5 | implementação | — | done | 2026-10-08 | 2026-10-08 |
 | [K3D-TASK-14](/docs/tasks/kits-3d/14-vista-rasterizador.md) | A vista mostra o rasterizador | 5 | implementação | K3D-TASK-13 | done | 2026-10-08 | 2026-10-08 |
-| [K3D-TASK-15](/docs/tasks/kits-3d/15-fechamento-fase-5.md) | Fechamento da fase 5 | 5 | closing | K3D-TASK-13, K3D-TASK-14 | done | 2026-10-08 | pending |
+| [K3D-TASK-15](/docs/tasks/kits-3d/15-fechamento-fase-5.md) | Fechamento da fase 5 | 5 | closing | K3D-TASK-13, K3D-TASK-14 | done | 2026-10-08 | 2026-10-08 |
 | [K3D-TASK-07](/docs/tasks/kits-3d/07-medir-geometria-edt-mod.md) | Medir como braçadeira e manga longa entram na figura do EDT_MOD.BIN | 3 | investigação | K3D-TASK-15 | pending | — | — |
 | [K3D-TASK-08](/docs/tasks/kits-3d/08-medir-bracadeira-goleiro.md) | Medir a braçadeira do goleiro no emulador | 3 | verificação | K3D-TASK-15 | pending | — | — |
 | [K3D-TASK-09](/docs/tasks/kits-3d/09-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | closing | K3D-TASK-07, K3D-TASK-08 | pending | — | — |

@@ -62,3 +62,4 @@ camiseta — o defeito do relato de 2026-10-08 não aparece.
 - **Closed** — commit `982c294` (2026-10-08): docs(kits): verify phase 5 at HEAD and record the back and side captures
   - Files (`git show --name-status 982c294`):
     - `M docs/tasks/kits-3d/15-fechamento-fase-5.md`
+- **Reviewed** (2026-10-08) at `97b580b`: CORR-K3D-010
