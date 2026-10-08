@@ -135,6 +135,13 @@ negative: figure 1, shirt front made transparent: the count rises from it at 18 
 De olho, numa sonda que gravou o PNG do `api.draw_figure` a 940×409, de costas: a junção da
 bermuda com a camiseta sai inteira, sem o fundo aparecendo. A janela continua com o desenho antigo
 até a K3D-TASK-14.
+
+**Varredura fora do `files`.** O commit `3982070` também editou as Notes da
+[K3D-TASK-14](/docs/tasks/kits-3d/14-vista-rasterizador.md) (`14-vista-rasterizador.md`): a
+assinatura de `api.draw_figure`, um tempo de quadro de sonda (tirado depois pela
+[CORR-K3D-005](/docs/tasks/kits-3d/CORR-K3D-005.md)) e a pendência de atualizar a tabela "O que ainda
+falta" do G5. É passagem para a task que liga a vista ao rasterizador. Declarado aqui pela
+[CORR-K3D-006](/docs/tasks/kits-3d/CORR-K3D-006.md).
 - **Closed** — commit `3982070` (2026-10-08): feat(kits): draw the 3D figure per pixel in the core
   - Files (`git show --name-status 3982070`):
     - `M docs/tasks/kits-3d/13-rasterizador-nucleo.md`

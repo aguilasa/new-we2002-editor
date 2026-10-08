@@ -52,3 +52,8 @@ Hoje só imprime as linhas 129 e 137, do registro gerado; depois, também a linh
 que nomeia a edição.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. `git show --stat 3982070` lista
+  `14-vista-rasterizador.md | 4 +-`; o `grep` só achava as linhas do registro gerado.
+- Log da K3D-TASK-13 com um parágrafo "Varredura fora do `files`" nomeando a edição e o que ela
+  leva. Verificação: o `grep` agora acha também a linha 140, do Log escrito.
