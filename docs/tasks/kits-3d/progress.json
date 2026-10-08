@@ -177,10 +177,10 @@
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g4--number-captain-armband-e-long-sleeves-em-qualquer-combinação-nas-duas-figuras",
       "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md"],
       "resources": ["emulador", "save-states"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-08",
+      "done_commit": "8b73f96",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

@@ -68,4 +68,10 @@ Gates:
   `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 35 of 35 red`.
 - O critério de blocked não se aplica: há save state de goleiro capitão (slot 7).
-
+- **Closed** — commit `8b73f96` (2026-10-08): feat(kits): measure the goalkeeper captain's armband in a match
+  - Files (`git show --name-status 8b73f96`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/08-medir-bracadeira-goleiro.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
