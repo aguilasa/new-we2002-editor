@@ -78,3 +78,11 @@ tirar `shared` de outra fonte que não `scene.pose`.
 - Verificação: o `grep` agora devolve `posed alike by name` nas quatro linhas da transcrição e o item
   150 com a ressalva. `selftest.py`: `kits_selftest: 0 failure(s)`; `selftest.py --image`:
   `figure: 0 failure(s)`, rc=0; `controls.py`: `controls: 34 of 34 red`.
+- **Closed** — commit `c568724` (2026-10-08): docs(kits): say the arm pose check is by name, not measured
+  - Files (`git show --name-status c568724`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-012.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
