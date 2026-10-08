@@ -49,3 +49,12 @@ grep -n "view.frame_ms\|figure_view.frame_ms" tools/kits/ui/app.py
 Hoje vazio; depois tem de casar — ou o atributo tem de sumir de `figure_view.py`.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. `frame_ms` da vista só era escrito, nunca lido.
+- `figure_view.py`: `picture()` cronometra desenho e composição. `app.py --export-3d`: o PNG
+  continua sendo `api.draw_figure` chamado à parte (é o que deixa o juiz de pixel ver uma vista que
+  desenha outra coisa), e o tempo impresso é o `view.frame_ms` depois de `view.picture()`. O
+  `import time` do `app.py` ficou sem uso e saiu.
+- Verificação: `grep -n "view.frame_ms" tools/kits/ui/app.py` → `1084:        frame_ms = view.frame_ms`.
+  `ui_check.py`: `  ok    the 3D view is the core's drawing, pixel for pixel, …` com 106 a 111 ms, `kits_ui: 0 failure(s)`.
+  `selftest.py`: `kits_selftest: 0 failure(s)`.

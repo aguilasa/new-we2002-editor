@@ -40,7 +40,6 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -1077,9 +1076,12 @@ def main(argv=None) -> int:
         if view.scene is None:
             print("the 3D tab has no figure to draw", file=sys.stderr)
             return 1
-        started = time.perf_counter()
+        # The PNG is the core's own drawing, called apart from the view, so
+        # the pixel judge still sees a view that draws something else; the
+        # time is the view's own picture(), drawing and composing (CORR-K3D-008).
         drawn = api.draw_figure(view.scene, view.yaw, view.pitch, view.width(), view.height())
-        frame_ms = (time.perf_counter() - started) * 1000.0
+        view.picture()
+        frame_ms = view.frame_ms
         if not composed(drawn).save(args.export_3d):
             print("could not write %s" % args.export_3d, file=sys.stderr)
             return 1

@@ -73,8 +73,9 @@ class FigureView(QtWidgets.QWidget):
         """The figure at the widget's size and turn, drawn by the core."""
         started = time.perf_counter()
         drawn = self.draw(self.scene, self.yaw, self.pitch, self.width(), self.height())
+        image = composed(drawn)
         self.frame_ms = (time.perf_counter() - started) * 1000.0
-        return composed(drawn)
+        return image
 
     def paintEvent(self, _event) -> None:
         p = QtGui.QPainter(self)
