@@ -127,7 +127,7 @@
       "phase": 5,
       "depends_on": ["K3D-TASK-13"],
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel",
-      "files": ["tools/kits/ui/figure_view.py", "tools/kits/ui/app.py", "tools/kits/ui_check.py"],
+      "files": ["tools/kits/ui/figure_view.py", "tools/kits/ui/app.py", "tools/kits/ui_check.py", "tools/kits/core/api.py", "tools/kits/selftest.py", "docs/KITS-AJUSTES-3D.md"],
       "resources": ["tela"],
       "status": "done",
       "done_on": "2026-10-08",

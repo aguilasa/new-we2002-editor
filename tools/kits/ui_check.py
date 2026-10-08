@@ -161,9 +161,9 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
 STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO, \
-    BACK, RASTER = ("style", "hover", "3D", "3D off", "selector", "diagnosis",
-                    "diagnosis note", "reset", "match", "dressing", "dressing boxes",
-                    "combo width", "back copy", "core drawing")
+    BACK, RASTER, FRAME = ("style", "hover", "3D", "3D off", "selector", "diagnosis",
+                           "diagnosis note", "reset", "match", "dressing", "dressing boxes",
+                           "combo width", "back copy", "core drawing", "frame time")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -234,6 +234,11 @@ PLANTS = (
      "        drawn = self.draw(self.scene, self.yaw, self.pitch, self.width(), self.height())\n",
      "        drawn = self.draw(self.scene, self.yaw, self.pitch, self.width(), self.height(),\n"
      "                          \"mean\", True)  # planted: by mean depth, flat UVs left out\n",
+     "figure_view.py"),
+    ("a slow frame of the view", FRAME,
+     "        self.frame_ms = (time.perf_counter() - started) * 1000.0\n",
+     "        time.sleep(0.5)  # planted: a slow frame\n"
+     "        self.frame_ms = (time.perf_counter() - started) * 1000.0\n",
      "figure_view.py"),
     ("Long sleeves always shown", BOXES,
      "        self.long_box.setVisible(figure != 1)\n",
@@ -1153,6 +1158,10 @@ def run(python: str, image: str) -> int:
                     red, bad = dress_judge(python, image, env, box, app)[0], []
                 elif judge == RASTER:
                     red, bad = raster_judge(python, image, env, box, app)[0], []
+                elif judge == FRAME:
+                    # only the time branch counts: the slow frame draws the same pixels
+                    red, bad = [m for m in raster_judge(python, image, env, box, app)[0]
+                                if "one frame took" in m], []
                 elif judge == BACK:
                     red, bad = back_judge(image, env, app)[0], []
                 elif judge == COMBO:

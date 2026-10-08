@@ -56,3 +56,20 @@ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin pyth
 Hoje não casa nada; depois, mostra a linha vermelha da planta.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. O `grep` da Evidência mostrava uma única planta
+  `RASTER`, a de pixel.
+- `ui_check.py`: juiz novo `FRAME` ("frame time") e a planta "a slow frame of the view", que põe
+  `time.sleep(0.5)` antes do `self.frame_ms = ...` de `figure_view.py`. O juiz roda o
+  `raster_judge` e só conta as falhas que trazem "one frame took", então a planta só fica vermelha
+  pelo ramo de tempo. Vermelho visto:
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/ui_check.py
+        plant 'a slow frame of the view': figure 0 yaw 0: one frame took 610 ms, over 400; figure 0 yaw 180: one frame took 613 ms, over 400; figure 1 yaw 0: one frame took 619 ms, over 400; figure 1 yaw 180: one frame took 647 ms, over 400
+  ok    plant 'a slow frame of the view' fails the frame time judge
+kits_ui: 0 failure(s)
+```
+
+- O `app.py` ficou fora: a planta cai em `figure_view.py`, porque o tempo passou a vir do
+  `picture()` da vista (CORR-K3D-008). `controls.py`: `controls: 32 of 32 red`.
