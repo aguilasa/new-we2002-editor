@@ -105,7 +105,8 @@ every panel a row up, and `--blocks` / `--picture` show what differs.
 each sleeve and armband section of MODEL.BIN on the EDT_MOD.BIN arm pieces and
 asserts `ARM_PIECES` -- the piece each one stands in for, in that piece's frame
 within `FRAME_SLACK` -- and that both figures pose each arm piece alike.
-`--plant-edt-arms` moves every MODEL.BIN arm out of its frame and has to fail.
+`--plant-edt-arms` moves every MODEL.BIN arm out of its frame, keeping its
+nearest piece, and has to fail on the frame alone.
 """
 
 from __future__ import annotations
@@ -2342,12 +2343,17 @@ mirrored in z vertex for vertex."""
 ARM_NAMES = ("upper arm a", "upper arm b", "forearm a", "forearm b")
 FRAME_SLACK = 3.0
 """How far, in model units, the translation that best lays a MODEL.BIN arm on
-its EDT_MOD.BIN piece may be from zero before the two frames are not the same.
-Measured on the disc: 1.9 at most (`--edt-arms`); with every arm moved 20
-units (`--plant-edt-arms`) the run fails."""
-ARM_PLANT_SHIFT = (0.0, 20.0, 0.0)
-"""`--plant-edt-arms` moves every MODEL.BIN arm by this before matching: the
-same section in a frame of its own, which `FRAME_SLACK` has to refuse."""
+the EDT_MOD.BIN piece `ARM_PIECES` gives it may be from zero before the two
+frames are not the same.  Measured on the disc: 1.9 at most (`--edt-arms`).
+The fit runs against the rule's piece, not the nearest one: against the
+nearest, an arm moved 20 units in y settled on the other part at 2.0 to 2.2
+and passed (CORR-K3D-013).  Measured against the rule's piece with
+`--plant-edt-arms`, a move of 8 in x is refused at all 18 sections.  The fit
+recovers part of a move, so the slack bounds a shift only roughly."""
+ARM_PLANT_SHIFT = (8.0, 0.0, 0.0)
+"""`--plant-edt-arms` moves every MODEL.BIN arm by this before matching: each
+section keeps its nearest piece and leaves that piece's frame, so only
+`FRAME_SLACK` can refuse it (CORR-K3D-013)."""
 ICP_STEPS = 30
 
 
@@ -2378,10 +2384,14 @@ def arm_side(points) -> str:
     return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"
 
 
-def arm_match(points, pieces: dict) -> dict:
+def arm_match(points, pieces: dict, want: str = None) -> dict:
     """Where one MODEL.BIN arm goes among *pieces* -- {(section, name): points}
     of EDT_MOD.BIN, both figures.  The part is the nearest piece of the arm's
-    side; its frame offset is measured against that piece."""
+    side.  The frame offset is measured against the piece *want* names (the
+    rule's, the nearest section of that name), not against the nearest piece:
+    started from zero, the fit settles on whatever piece is closest, so
+    against the nearest one a small offset only says the arm lies on some
+    arm piece (CORR-K3D-013)."""
     import math
 
     side = arm_side(points)
@@ -2389,15 +2399,21 @@ def arm_match(points, pieces: dict) -> dict:
                     for (at, name), pts in pieces.items() if name.endswith(" " + side))
     distance, at, name = ranked[0]
     other = next((d for d, _a, n in ranked if n.split()[0] != name.split()[0]), None)
-    shift, fitted = frame_offset(points, pieces[(at, name)])
+    against = next(((a, n) for _d, a, n in ranked if n == want), (at, name))
+    shift, fitted = frame_offset(points, pieces[against])
     return {"piece": name, "section": at, "distance": distance, "other part": other,
-            "offset": math.sqrt(sum(v * v for v in shift)), "shift": shift, "fitted": fitted}
+            "against": against[1], "offset": math.sqrt(sum(v * v for v in shift)),
+            "shift": shift, "fitted": fitted}
 
 
-def arms_report(model_sections: dict, pieces: dict, shift=(0.0, 0.0, 0.0)) -> dict:
+def arms_report(model_sections: dict, pieces: dict, shift=(0.0, 0.0, 0.0),
+                expect: dict = None) -> dict:
     """{MODEL.BIN section: arm_match} for every section of `ARM_PIECES` in
-    *model_sections* ({section: points}), each moved by *shift* first."""
-    return {number: arm_match([tuple(p[i] + shift[i] for i in range(3)) for p in pts], pieces)
+    *model_sections* ({section: points}), each moved by *shift* first and
+    its frame offset measured against the piece *expect* gives it."""
+    expect = ARM_PIECES if expect is None else expect
+    return {number: arm_match([tuple(p[i] + shift[i] for i in range(3)) for p in pts], pieces,
+                              expect.get(number))
             for number, pts in sorted(model_sections.items())}
 
 
@@ -2420,7 +2436,8 @@ def arms_judge(report: dict, expect: dict = None, shared=None) -> list:
                        % (number, got["other part"], got["distance"]))
         if got["offset"] > FRAME_SLACK:
             bad.append("section %d: %.1f units out of %s's frame, past %.1f"
-                       % (number, got["offset"], got["piece"], FRAME_SLACK))
+                       % (number, got["offset"], got.get("against", got["piece"]),
+                          FRAME_SLACK))
     for name, same in sorted((shared or {}).items()):
         if not same:
             bad.append("%s: the player and the goalkeeper pose it apart" % name)

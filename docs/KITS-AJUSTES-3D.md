@@ -138,8 +138,11 @@ O que a saída diz:
   mais perto fica entre 3,5 e 6,1, nunca 0: as peças de braço do `EDT_MOD.BIN` são outra malha. Nenhuma
   delas é a braçadeira, que só existe no `MODEL.BIN` (90 e 93).
 - **A seção do `MODEL.BIN` está no referencial da peça.** A translação que melhor deita cada
-  seção sobre a sua peça fica entre 0,7 e 1,9 unidade (`FRAME_SLACK` 3,0). Por isso a matriz certa
-  para desenhá-la é a da própria peça, sem matriz nova.
+  seção sobre a peça que a regra lhe dá (`ARM_PIECES`, não a mais próxima) fica entre 0,7 e 1,9
+  unidade (`FRAME_SLACK` 3,0). Por isso a matriz certa para desenhá-la é a da própria peça, sem
+  matriz nova. Até a [CORR-K3D-013](/docs/tasks/kits-3d/CORR-K3D-013.md) o ajuste corria contra a
+  peça mais próxima, e aí um resíduo pequeno só dizia "está sobre alguma peça de braço": um braço
+  movido 20 em y assentava na outra parte com 2,0 a 2,2 e passava.
 - **A parte (braço ou antebraço) é a peça mais perto.** A outra parte fica sempre mais longe
   (coluna "other part"). **O lado (a ou b) é o sinal do z médio da seção.** As seções vêm em pares
   espelhados em z, e por isso a distância não decide o lado.
@@ -152,8 +155,10 @@ O que a saída diz:
   da 97, 90 no lugar da 4) cai em `upper arm b`, o braço que ela substitui. No goleiro, 99/101/100/102
   caem nas peças de 57/58/59/60.
 
-O controle `--plant-edt-arms` move todo braço do `MODEL.BIN` 20 unidades em y antes de medir, e a
-corrida sai 1 com 21 linhas `FAIL`. No catálogo do `controls.py`, `oracle-arm-side-flipped` e
+O controle `--plant-edt-arms` move todo braço do `MODEL.BIN` 8 unidades em x antes de medir. Toda
+seção continua com a mesma peça mais próxima, e a corrida sai 1 só pelo referencial: 18 linhas
+`FAIL`, todas `units out of` (até a CORR-K3D-013 o controle era 20 em y, que trocava a peça mais
+próxima e saía com 21 `FAIL`). No catálogo do `controls.py`, `oracle-arm-side-flipped` e
 `oracle-arm-frame-blind` derrubam os casos sintéticos do `selftest.py`.
 
 **O que fica para a K3D-TASK-10:** substituir a peça inteira pela seção do `MODEL.BIN` ou desenhar

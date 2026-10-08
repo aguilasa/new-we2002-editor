@@ -54,3 +54,23 @@ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py
 Tem de contar toda seção plantada (18). Hoje conta 11.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. Com a planta, `grep -c "units out of"` dava 11.
+- `oracle.py`: `arm_match` mede o deslocamento contra a peça que `ARM_PIECES` dá à seção (a
+  seção mais próxima com esse nome), não contra a mais próxima; `arms_report` passa a regra. O
+  controle passou de 20 em y para `ARM_PLANT_SHIFT = (8, 0, 0)`: toda seção mantém a peça mais
+  próxima e só o referencial a recusa. Docstrings de `FRAME_SLACK`/`ARM_PLANT_SHIFT` e o G3
+  reescritos.
+- Verificação:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --edt-arms --plant-edt-arms | grep -c "units out of"
+18
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --edt-arms --plant-edt-arms | grep -c FAIL
+18
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --edt-arms | tail -1
+  ok    every sleeve and armband section is in its EDT_MOD.BIN piece's frame (offset 1.9 at most, slack 3.0)
+```
+
+  A corrida sem planta imprime as mesmas 24 linhas que o G3 transcreve. `selftest.py`:
+  `kits_selftest: 0 failure(s)`; `controls.py`: `controls: 34 of 34 red`.
