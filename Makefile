@@ -54,6 +54,7 @@ COPY := $(WORK)/$(notdir $(IMAGE))
         golden golden-gui install uipreview gen gen-check clean distclean \
         run-obocaman run-obocaman-98 run-lazarus run-lazarus-98 \
         pes2 pes2-play pes2-98 pes2-copy pes2-kill pes2-status \
+        pes2-enfrde pes2-enfrde-play \
         we2002-play we2002-play-fresh we2002-98 we2002-cards \
         we2002-ptbr-play we2002-ptbr-play-fresh we2002-ptbr-98 \
         we2002-card-snap we2002-card-list \
@@ -87,6 +88,8 @@ help:
 	@echo '  pes2-kill     encerra o emulador (os tres nomes de processo)'
 	@echo '  pes2-status   diz o que esta rodando, e se e o fork ou o AppImage'
 	@echo '                PES2_TAG=EsIt|EnFrDe escolhe a release'
+	@echo '  pes2-enfrde   pes2 com a release (EnFrDe), copia em $$(WORK)/pes2-EnFrDe'
+	@echo '  pes2-enfrde-play  idem, na SUA tela'
 	@echo
 	@echo '  O JOGO deste repositorio, sob o mesmo fork do DuckStation:'
 	@echo '  we2002-play   roda $$(GAME_IMAGE) na SUA tela, sobre o cartao que houver'
@@ -413,6 +416,14 @@ pes2-play:
 # de GUI aqui tem o par `-98`, e quem procurar por ele tem de achar.
 pes2-98:
 	@$(MAKE) --no-print-directory pes2 PES2_DISPLAY=$(XVFB)
+
+# Atalhos para a release (EnFrDe): o mesmo `pes2` com o PES2_TAG fixado, entao
+# a copia vai para $(WORK)/pes2-EnFrDe e so e feita se o carimbo nao existir.
+pes2-enfrde:
+	@$(MAKE) --no-print-directory pes2 PES2_TAG=EnFrDe
+
+pes2-enfrde-play:
+	@$(MAKE) --no-print-directory pes2-play PES2_TAG=EnFrDe
 
 pes2-kill:
 	@python3 tools/pes2/fork.py kill
