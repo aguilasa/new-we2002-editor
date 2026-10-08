@@ -75,4 +75,16 @@ O seletor de figura tem só **player** e **goalkeeper**; a figura de partida sai
 - `python3 tools/kits/controls.py`: `controls: 36 of 36 red`.
 - Captura do núcleo para conferir de olho: `work/k3d-10/dress.png`, com o TEX_00 jogador de costas,
   de lado e de frente. As colunas são: sem caixas, braçadeira, manga longa, as duas.
-
+- **Closed** — commit `dbc021c` (2026-10-08): feat(kits): dress the EDT_MOD.BIN player with MODEL.BIN arms, drop the match figure
+  - Files (`git show --name-status dbc021c`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits-3d/10-duas-figuras.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`
