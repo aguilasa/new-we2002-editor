@@ -16,7 +16,10 @@ which commands search instead of reading whole.
 - **A braçadeira do goleiro é medida no emulador**; sem o save state, a task fica blocked (usuário, 2026-10-07; [G4](/docs/KITS-AJUSTES-3D.md#g4--number-captain-armband-e-long-sleeves-em-qualquer-combinação-nas-duas-figuras)).
 - **A cópia das costas vale sempre**, e o que ainda falta se conta por ângulo com ferramenta (usuário, 2026-10-07; [G5](/docs/KITS-AJUSTES-3D.md#g5--figura-inteira-em-qualquer-giro)).
 - **Não inventa geometria.** Nem geometria nem UV remapeado à mão; só o medido entra no desenho ([§0 do PLAN-KITS-PY](/docs/PLAN-KITS-PY.md#0); [Para o ciclo](/docs/KITS-AJUSTES-3D.md#para-o-ciclo)).
-- **O 3D segue em `QPainter` por software, e o texto da UI só sai do catálogo `tools/kits/ui/i18n.py`** ([§3.4 do PLAN-KITS-PY](/docs/PLAN-KITS-PY.md#3.4); [Para o ciclo](/docs/KITS-AJUSTES-3D.md#para-o-ciclo)).
+- **O 3D é desenhado em software no núcleo e mostrado por `QPainter`, e o texto da UI só sai do catálogo `tools/kits/ui/i18n.py`** ([§3.4 do PLAN-KITS-PY](/docs/PLAN-KITS-PY.md#3.4); [Para o ciclo](/docs/KITS-AJUSTES-3D.md#para-o-ciclo); refinado em [G6](/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel), usuário, 2026-10-08).
+- **Profundidade por pixel (z-buffer)** no desenho da aba 3D, não a ordem do jogo: a figura inteira em qualquer giro (usuário, 2026-10-08; [G6](/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel)).
+- **O rasterizador fica no núcleo**: z-buffer, UV interpolado por pixel a partir da tela (cobre o UV degenerado) e texel mais próximo. A vista e o `cli.py holes` usam o mesmo código (usuário, 2026-10-08; [G6](/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel)).
+- **A fase 5 (G6) roda antes da K3D-TASK-07** (usuário, 2026-10-08).
 
 ## Sources of truth
 
@@ -60,6 +63,14 @@ which commands search instead of reading whole.
 
 - A ferramenta de contagem por ângulo foi vista vermelha com uma lacuna plantada.
 - Nenhum texel entra no desenho sem regra medida: o único preenchimento novo é o `BACK_COPY` (§4.7 do PLAN-KITS-PY).
+- `ctest -R kits` 4/4 e `controls.py` todo vermelho.
+
+### Fase 5 — desenho por pixel (G6)
+
+- `cli.py holes --tag 00`: `skipped 0` e `misordered 0` nos 48 giros das duas figuras, e `transparent` só nas zonas e lacunas do colarinho.
+- Os dois casos sintéticos do selftest (UV degenerado pintado, quads que se cruzam na ordem da profundidade) foram vistos vermelhos no `controls.py`.
+- O `kits_ui` compara a vista com o `app.py --export-3d` pixel a pixel, e a planta que volta ao desenho por triângulo fica vermelha.
+- O tempo de um quadro no tamanho padrão está abaixo do limite registrado na K3D-TASK-14.
 - `ctest -R kits` 4/4 e `controls.py` todo vermelho.
 
 ### Fase 3 — medidas de geometria (G3, G4)

@@ -30,11 +30,21 @@ graph TD
     K3D_TASK_11["K3D-TASK-11<br/>Number, braçadeira e manga longa livres nas duas figuras"]
     K3D_TASK_12["K3D-TASK-12<br/>Fechamento da fase 4"]
   end
+  subgraph phase_5["Fase 5"]
+    K3D_TASK_13["K3D-TASK-13<br/>Rasterizador por pixel no núcleo"]
+    K3D_TASK_14["K3D-TASK-14<br/>A vista mostra o rasterizador"]
+    K3D_TASK_15["K3D-TASK-15<br/>Fechamento da fase 5"]
+  end
   K3D_TASK_01 --> K3D_TASK_03
   K3D_TASK_02 --> K3D_TASK_03
   K3D_TASK_04 --> K3D_TASK_05
   K3D_TASK_04 --> K3D_TASK_06
   K3D_TASK_05 --> K3D_TASK_06
+  K3D_TASK_13 --> K3D_TASK_14
+  K3D_TASK_13 --> K3D_TASK_15
+  K3D_TASK_14 --> K3D_TASK_15
+  K3D_TASK_15 --> K3D_TASK_07
+  K3D_TASK_15 --> K3D_TASK_08
   K3D_TASK_07 --> K3D_TASK_09
   K3D_TASK_08 --> K3D_TASK_09
   K3D_TASK_07 --> K3D_TASK_10
@@ -57,8 +67,11 @@ graph TD
 | [K3D-TASK-04](/docs/tasks/kits-3d/04-buracos-por-angulo.md) | Ferramenta que conta o que falta na figura por ângulo | 2 | ferramenta | — | done | 2026-10-07 | 2026-10-07 |
 | [K3D-TASK-05](/docs/tasks/kits-3d/05-costas-sempre.md) | Cópia das costas sempre e conserto do que a contagem achar | 2 | implementação | K3D-TASK-04 | done | 2026-10-07 | 2026-10-07 |
 | [K3D-TASK-06](/docs/tasks/kits-3d/06-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | closing | K3D-TASK-04, K3D-TASK-05 | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-07](/docs/tasks/kits-3d/07-medir-geometria-edt-mod.md) | Medir como braçadeira e manga longa entram na figura do EDT_MOD.BIN | 3 | investigação | — | pending | — | — |
-| [K3D-TASK-08](/docs/tasks/kits-3d/08-medir-bracadeira-goleiro.md) | Medir a braçadeira do goleiro no emulador | 3 | verificação | — | pending | — | — |
+| [K3D-TASK-13](/docs/tasks/kits-3d/13-rasterizador-nucleo.md) | Rasterizador por pixel no núcleo | 5 | implementação | — | pending | — | — |
+| [K3D-TASK-14](/docs/tasks/kits-3d/14-vista-rasterizador.md) | A vista mostra o rasterizador | 5 | implementação | K3D-TASK-13 | pending | — | — |
+| [K3D-TASK-15](/docs/tasks/kits-3d/15-fechamento-fase-5.md) | Fechamento da fase 5 | 5 | closing | K3D-TASK-13, K3D-TASK-14 | pending | — | — |
+| [K3D-TASK-07](/docs/tasks/kits-3d/07-medir-geometria-edt-mod.md) | Medir como braçadeira e manga longa entram na figura do EDT_MOD.BIN | 3 | investigação | K3D-TASK-15 | pending | — | — |
+| [K3D-TASK-08](/docs/tasks/kits-3d/08-medir-bracadeira-goleiro.md) | Medir a braçadeira do goleiro no emulador | 3 | verificação | K3D-TASK-15 | pending | — | — |
 | [K3D-TASK-09](/docs/tasks/kits-3d/09-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | closing | K3D-TASK-07, K3D-TASK-08 | pending | — | — |
 | [K3D-TASK-10](/docs/tasks/kits-3d/10-duas-figuras.md) | Seletor só com player e goalkeeper, vestidos pela regra medida | 4 | implementação | K3D-TASK-07 | pending | — | — |
 | [K3D-TASK-11](/docs/tasks/kits-3d/11-caixas-livres.md) | Number, braçadeira e manga longa livres nas duas figuras | 4 | implementação | K3D-TASK-05, K3D-TASK-08, K3D-TASK-10 | pending | — | — |

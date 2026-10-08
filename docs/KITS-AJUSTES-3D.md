@@ -186,6 +186,40 @@ cobre. Consertar os dois é decisão para um item novo. Um caminho seria pintar 
 degenerado com a linha de texels que ele amostra e trocar a ordem por triângulo por profundidade
 por pixel. Os dois são comportamento de rasterizador, não texel nem geometria inventados.
 
+## G6 — Desenho com profundidade por pixel
+
+**Pedido (teste manual do usuário, 2026-10-08).** De costas, a bermuda do jogador fica incompleta
+na perna direita, entre a nádega e a camiseta. Do lado esquerdo, na junção da bermuda com a
+camiseta, há trechos sem textura.
+
+**Medido (2026-10-08)** com o modelo do `cli.py holes` (TEX_00, kit 1, jogador, yaw 0). Os números
+por seção saíram de uma sonda descartável que só lê; o total por tipo é o que o `cli.py holes`
+imprime.
+
+- **Nádega direita / camiseta:** são os `skipped` da seção 5 (bermuda). Os triângulos têm UV
+  degenerado, com um canto repetido ou os três colineares, como `(56.5,30.5) (53.5,31.5)
+  (56.5,30.5)`. A vista não acha a afim textura→tela (`ui/figure_view.py:119-121`), pula o
+  triângulo, e o fundo aparece.
+- **Cintura esquerda e joelho:** são os `misordered`. A vista ordena pela profundidade média de
+  cada triângulo (`ui/figure_view.py:97-100`), e uma peça de trás sai pintada por cima de outra da
+  frente: a seção 7 sobre a 5, e uma linha na cintura entre as seções 0, 1, 6 e 24.
+- **Rachaduras de geometria** não são a causa: no jogador, nenhum pixel fechado dentro da silhueta
+  fica sem triângulo.
+
+**Decidido (usuário, 2026-10-08):**
+
+- **Profundidade por pixel (z-buffer).** Em cada pixel vence o triângulo mais próximo. Isso diverge
+  da ordem do jogo (a tabela de ordem do PS1), mas o jogo só mostra a figura de frente, e o pedido
+  é a figura inteira em qualquer giro.
+- **O rasterizador fica no núcleo.** O `core` desenha a figura com z-buffer, UV interpolado por
+  pixel a partir da tela e texel mais próximo, sem suavização. A interpolação a partir da tela
+  também cobre o triângulo de UV degenerado, como a GPU do PS1 faz. Texel transparente não escreve
+  cor nem profundidade. A vista só mostra a imagem pronta por QPainter, e a contagem do
+  `cli.py holes` usa o mesmo código, o que acaba com a diferença entre modelo e vista. Continua em
+  software. Isto refina a decisão "3D em QPainter por software" (§3.4 do PLAN-KITS-PY).
+
+**Pedido também (usuário, 2026-10-08):** este trabalho vem antes de G3 e G4.
+
 ## Para o ciclo
 
 **Ordem sugerida:**
