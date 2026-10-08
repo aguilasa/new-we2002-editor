@@ -82,8 +82,10 @@ def read_geometry(path: str) -> dict:
 
 
 def scene_of(kit, kit_set: int = 1, figure: int = 0, geometry_path=None, frame=None,
-             geometry=None):
-    """The looks `Scene` of *figure* wearing set *kit_set* of *kit*.
+             geometry=None, armband: bool = False, sleeves: str = "short"):
+    """The looks `Scene` of *figure* wearing set *kit_set* of *kit*, with the
+    captain's *armband* and *sleeves* ("short" or "long") put on by
+    `dressed_scene`.
 
     *geometry* is the dict `read_geometry` gives, for a caller drawing more
     than one figure off the same disc."""
@@ -105,7 +107,8 @@ def scene_of(kit, kit_set: int = 1, figure: int = 0, geometry_path=None, frame=N
     # The game copies the shirt back into the torso gap on every LOOKS SET
     # figure (BACK_COPY, measured), number or not: drawn without it the back
     # showed through (KITS-AJUSTES-3D.md G5, K3D-TASK-05).
-    return numbered_scene(built, kit, kit_set, figure, None)
+    backed = numbered_scene(built, kit, kit_set, figure, None)
+    return dressed_scene(backed, kit, kit_set, figure, geometry, frame, armband, sleeves)
 
 
 # -- control 4 of section 5: swapping 486 and 488 -----------------------------------
@@ -196,6 +199,23 @@ LONG_TO_SHORT = dict(zip((95, 96, 97, 98), (3, 5, 4, 6)))
 one it stands for.  The two share a local frame on the disc: 93 and 97 have
 the same vertex box, and 3/4 against 95/97 differ by three units in x."""
 
+ARM_PIECES = {
+    3: "upper arm a", 4: "upper arm b", 5: "forearm a", 6: "forearm b",
+    90: "upper arm b",
+    93: "upper arm b", 95: "upper arm a", 96: "forearm a", 97: "upper arm b", 98: "forearm b",
+    57: "upper arm a", 58: "forearm a", 59: "upper arm b", 60: "forearm b",
+    99: "upper arm a", 100: "upper arm b", 101: "forearm a", 102: "forearm b",
+}
+"""The rule `oracle.py --edt-arms` measures and asserts (KITS-AJUSTES-3D.md G3,
+K3D-TASK-07), kept here so the drawing reads the same table: the
+EDT_MOD.BIN piece, by `pieces.py`'s name, each sleeve and armband section of
+MODEL.BIN stands in for.  The section sits in that piece's local frame, so it
+is drawn with the matrix and place the figure gives that piece (`scene.pose`,
+which is by name and the same for both figures).  The part -- upper arm or
+forearm -- is the EDT_MOD.BIN piece whose vertices lie nearest; the side, a
+or b, is the sign of the section's mean z, since each pair is the other one
+mirrored in z vertex for vertex."""
+
 
 def read_match_pose(path=None) -> dict:
     """The measured match pose, or `FigureError` with the command that makes it."""
@@ -253,6 +273,52 @@ class _Vertex:
         self.x, self.y, self.z = x, y, z
 
 
+def _model_banks(geometry, kit, kit_set: int) -> list:
+    """Where a MODEL.BIN primitive's page and CLUT are looked for, in order:
+    `DAT2D.BIN` first, the kit's set *kit_set* second."""
+    data2d = geometry[layout.DAT2D]
+    return [(layout.DAT2D, data2d, texture.images(data2d), texture.palettes(data2d)),
+            (SLOT, kit.data, texture.in_set_order(texture.images(kit.data), kit_set),
+             texture.in_set_order(texture.palettes(kit.data), kit_set))]
+
+
+def _model_part(primitive, vertices, number: int, at: int, banks, surfaces: dict,
+                notes: dict):
+    """One MODEL.BIN primitive as a part, textured the way `assembly.draw_list`
+    resolves one: the page and CLUT the disc gives it, in the first of *banks*
+    that holds both.  *surfaces* and *notes* are shared across the figure."""
+    corner = atlas.texel(primitive, *primitive.texcoords[0])
+    row, column = skin.grid(primitive.clut)
+    record, surface = None, None
+    for path, body, images, palettes in banks:
+        page = atlas.image_at(images, *corner)
+        if page is None:
+            continue
+        try:
+            texture.covering(palettes, column * texture.NARROW, row, texture.NARROW)
+        except texture.NoPalette:
+            continue
+        record = page
+        key = (path, record.offset, primitive.tpage_depth, primitive.clut)
+        if key not in surfaces:
+            try:
+                surfaces[key] = scene.surface_for(body, record, primitive.tpage_depth,
+                                                  primitive.clut, palettes, path)
+            except texture.NoPalette:
+                surfaces[key] = None
+        surface = surfaces[key]
+        break
+    if record is None:
+        notes["no image"] = notes.get("no image", 0) + 1
+    elif surface is None:
+        notes["no palette"] = notes.get("no palette", 0) + 1
+    part = scene.part_for(primitive, vertices, record, surface, primitive.clut, 0,
+                          (layout.MODEL, number), at)
+    if surface is not None and part.surface is None:
+        notes["off the record"] = notes.get("off the record", 0) + 1
+    return part
+
+
 def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "long",
                 figure: str = "outfield", view: str = "torso", geometry=None,
                 geometry_path=None, pose=None):
@@ -279,10 +345,7 @@ def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "lo
     if geometry is None:
         geometry = read_geometry(geometry_path_for(geometry_path))
     kit.require()
-    data2d = geometry[layout.DAT2D]
-    banks = [(layout.DAT2D, data2d, texture.images(data2d), texture.palettes(data2d)),
-             (SLOT, kit.data, texture.in_set_order(texture.images(kit.data), kit_set),
-              texture.in_set_order(texture.palettes(kit.data), kit_set))]
+    banks = _model_banks(geometry, kit, kit_set)
     sections = section.scan(geometry[layout.MODEL], layout.MODEL_GEOMETRY_START).sections
     root = next(((r, t) for s, r, t in order if s == ROOT_SECTION), None)
     if root is None:
@@ -305,36 +368,7 @@ def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "lo
                 p = _apply(undo, (p[0] - root[1][0], p[1] - root[1][1], p[2] - root[1][2]))
             moved.append(_Vertex(*p))
         for at, primitive in enumerate(one.primitives):
-            corner = atlas.texel(primitive, *primitive.texcoords[0])
-            row, column = skin.grid(primitive.clut)
-            record, surface = None, None
-            for path, body, images, palettes in banks:
-                page = atlas.image_at(images, *corner)
-                if page is None:
-                    continue
-                try:
-                    texture.covering(palettes, column * texture.NARROW, row, texture.NARROW)
-                except texture.NoPalette:
-                    continue
-                record = page
-                key = (path, record.offset, primitive.tpage_depth, primitive.clut)
-                if key not in surfaces:
-                    try:
-                        surfaces[key] = scene.surface_for(body, record, primitive.tpage_depth,
-                                                          primitive.clut, palettes, path)
-                    except texture.NoPalette:
-                        surfaces[key] = None
-                surface = surfaces[key]
-                break
-            if record is None:
-                notes["no image"] += 1
-            elif surface is None:
-                notes["no palette"] += 1
-            part = scene.part_for(primitive, moved, record, surface, primitive.clut, 0,
-                                  (layout.MODEL, number), at)
-            if surface is not None and part.surface is None:
-                notes["off the record"] += 1
-            parts.append(part)
+            parts.append(_model_part(primitive, moved, number, at, banks, surfaces, notes))
     return scene.Scene(parts, {k: v for k, v in surfaces.items() if v is not None},
                        looks.parse_tuple(TUPLE), 0, notes)
 
@@ -416,9 +450,12 @@ def numbered_scene(drawn, kit, kit_set: int, figure: int, number):
     kit's own indices, so applying it to a figure already backed is the same."""
     images = {r.offset: r for r in texture.images(kit.data)}
     palettes = texture.in_set_order(texture.palettes(kit.data), kit_set)
+    # The back copy and the digits are rectangles of the uniform image; the
+    # sleeves image a dressed figure samples (K3D-TASK-10) keeps its texels.
+    uniform = texture.in_set_order(texture.images(kit.data), kit_set)[0].offset
     swapped = {}
     for key, surface in drawn.surfaces.items():
-        if key[0] != SLOT:
+        if key[0] != SLOT or surface.record != uniform:
             continue
         record = images[surface.record]
         indices, width, _height = atlas.read_image(kit.data, record, surface.depth)
@@ -593,3 +630,66 @@ def planted_gap(drawn, kit, figure: int, zone_name: str = "shirt front"):
                         by_object.get(id(p.surface), p.surface), p.why, p.clut, p.band,
                         p.band_unmeasured) for p in drawn.parts]
     return scene.Scene(parts, surfaces, drawn.values, drawn.figure, dict(drawn.notes))
+
+
+# -- the dressings on the LOOKS SET figure (KITS-AJUSTES-3D.md G3, K3D-TASK-10) -------
+
+DRESSED_FIGURES = (0,)
+"""The figures the armband and the long sleeves dress: the outfield player.
+The goalkeeper's (K3D-TASK-08, G4) is K3D-TASK-11's to open."""
+
+
+def arm_dress(armband: bool, sleeves: str) -> dict:
+    """{EDT_MOD.BIN piece name: MODEL.BIN section} that dress the player: the
+    long-sleeve arms (`LONG_TO_SHORT`'s 95 96 97 98) and the armband of the
+    sleeve length in place of the arm it replaces (`SLEEVE_LENGTHS`), each on
+    the piece `ARM_PIECES` gives it.  Short sleeves and no armband: none -- the
+    figure keeps its own arms."""
+    if sleeves not in MATCH_SLEEVES:
+        raise FigureError("Sleeves %r are not one of %s." % (sleeves, MATCH_SLEEVES))
+    out = {ARM_PIECES[s]: s for s in LONG_TO_SHORT} if sleeves == "long" else {}
+    if armband:
+        band = SLEEVE_LENGTHS[sleeves]["armband"]
+        out[ARM_PIECES[band]] = band
+    return out
+
+
+def dressed_scene(drawn, kit, kit_set: int, figure: int, geometry, frame=None,
+                  armband: bool = False, sleeves: str = "short"):
+    """*drawn* (a LOOKS SET figure of `scene_of`) with the armband and the
+    long sleeves: each EDT_MOD.BIN arm piece `arm_dress` names is taken out
+    and the MODEL.BIN section put in, through the matrix and place the frame
+    gives that piece (`scene.pose`) -- the section sits in the piece's own
+    frame (G3).  No geometry or UV is made here: the section's own vertices
+    and texels, textured as `match_scene` textures them."""
+    import section
+
+    dress = arm_dress(armband, sleeves)
+    if not dress:
+        return drawn
+    if figure not in DRESSED_FIGURES:
+        raise FigureError("The captain's armband and the long sleeves are not measured "
+                          "on figure %d." % figure)
+    members = scene._figure_sections(geometry)[figure]
+    piece_of = {name: index for (file, index), name in scene.piece_names(geometry).items()
+                if file == layout.EDT_MOD and index in members}
+    taken = {piece_of[name]: number for name, number in dress.items()}
+    places = scene.pose(geometry, frame) if frame is not None else {}
+    sections = section.scan(geometry[layout.MODEL], layout.MODEL_GEOMETRY_START).sections
+    banks = _model_banks(geometry, kit, kit_set)
+    surfaces, notes = dict(drawn.surfaces), dict(drawn.notes)
+    parts = [p for p in drawn.parts if not (p.file == layout.EDT_MOD and p.section in taken)]
+    for index, number in sorted(taken.items()):
+        one = sections[number]
+        place = places.get((layout.EDT_MOD, index))
+        for at, primitive in enumerate(one.primitives):
+            part = _model_part(primitive, one.vertices, number, at, banks, surfaces, notes)
+            if place is not None:
+                part = scene.Part(part.file, part.section, part.primitive,
+                                  scene.drawn_points(part.points, *place), part.uvs,
+                                  part.surface, part.why, part.clut, part.band,
+                                  part.band_unmeasured)
+            parts.append(part)
+    notes["dressed"] = {piece: number for piece, number in sorted(dress.items())}
+    return scene.Scene(parts, {k: v for k, v in surfaces.items() if v is not None},
+                       drawn.values, drawn.figure, notes)

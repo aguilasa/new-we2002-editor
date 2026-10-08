@@ -251,6 +251,15 @@ CONTROLS = (
         "(CORR-KITS-068)",
     ),
     Control(
+        "figure-long-sleeves-short-arms", "kits/core/figure.py", "arm_dress",
+        '    out = {ARM_PIECES[s]: s for s in LONG_TO_SHORT} if sleeves == "long" else {}',
+        '    out = {ARM_PIECES[s]: s for s in LONG_TO_SHORT.values()} if sleeves == "long" else {}',
+        "FAIL  arm_dress: armband False, long sleeves",
+        "the long sleeves are MODEL.BIN's 95 96 97 98 on the arm pieces (G3, "
+        "K3D-TASK-10); dressed with the short arms they stand for, the box draws "
+        "the figure it was ticked on",
+    ),
+    Control(
         "oracle-keeper-armband-unasked", "kits/oracle.py", "keeper_armband_judge",
         "    if not captains:\n        out.append(\"no figure opened at section %d draws section %d\" % (root, armband))",
         "    if False:\n        out.append(\"no figure opened at section %d draws section %d\" % (root, armband))",

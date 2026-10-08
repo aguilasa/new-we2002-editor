@@ -699,6 +699,27 @@ def _hole_checks(c) -> None:
          not own and "self.draw(" in source, "figure_view.py defines %s" % own)
 
 
+def _dress_checks(c) -> None:
+    """K3D-TASK-10: what dresses the player, read off the rule of G3
+    (`figure.ARM_PIECES`, `LONG_TO_SHORT`, `SLEEVE_LENGTHS`): the long-sleeve
+    arms on the four arm pieces, the armband of each length on upper arm b in
+    place of the arm it replaces, and nothing for short sleeves alone."""
+    from core import figure as _figure
+
+    want = {
+        (False, "short"): {},
+        (True, "short"): {"upper arm b": 90},
+        (False, "long"): {"upper arm a": 95, "forearm a": 96, "upper arm b": 97,
+                          "forearm b": 98},
+        (True, "long"): {"upper arm a": 95, "forearm a": 96, "upper arm b": 93,
+                         "forearm b": 98},
+    }
+    for (armband, sleeves), expect in sorted(want.items()):
+        got = _figure.arm_dress(armband, sleeves)
+        c.ok("arm_dress: armband %s, %s sleeves -> %s" % (armband, sleeves, expect or "nothing"),
+             got == expect, "%s" % got)
+
+
 def _language_checks(c) -> None:
     catalog = c.attempt("import ui/i18n.py", _catalog)
     if catalog is not None:
@@ -1204,6 +1225,7 @@ def run(verbose: bool = True, plant: bool = True) -> int:
         total += harness.run("language", _language_checks, verbose)
         total += harness.run("kit cli", _kit_cli_checks, verbose)
         total += harness.run("holes", _hole_checks, verbose)
+        total += harness.run("dressings", _dress_checks, verbose)
         total += harness.run("confront 2", _confront2_checks, verbose)
         total += harness.run("oracle", _oracle_checks, verbose)
         if plant:

@@ -376,15 +376,19 @@ devolve.
   vazia no TEX, que o jogo copia as costas da camisa para ela (medido, §4.7) e
   que marcar **Number** pinta ali o painel que a partida monta — sem a caixa, o
   desenho segue os dados (decisão do usuário, 2026-10-05; KITS-TASK-37,
-  CORR-KITS-066, KITS-TASK-40). O seletor de figura tem um
+  CORR-KITS-066, KITS-TASK-40). O seletor de figura tinha um
   terceiro item, **match player**, a figura de partida do `MODEL.BIN` na pose
-  medida no jogo (§4.3, KITS-TASK-47).
+  medida no jogo (§4.3, KITS-TASK-47). **Reaberto em 2026-10-08** (K3D-TASK-10,
+  G3 do [KITS-AJUSTES-3D](/docs/KITS-AJUSTES-3D.md#g3--sem-match-player-só-player-e-goalkeeper)):
+  o seletor tem só jogador e goleiro, e a braçadeira e a manga longa vestem o
+  jogador do `EDT_MOD.BIN` com as seções do `MODEL.BIN`.
 - **Os três checkboxes da aba 3D** (KITS-TASK-40) desenham só o que foi
   medido. **Number**, com o campo do número (0 a 99, abre em 10), pinta nas
   costas de uma figura da `LOOKS SET` o painel que a partida monta (§4.7).
   **Captain armband** e **Long sleeves** só existem no `MODEL.BIN` (§4.3). Com o
-  jogador da `LOOKS SET`, marcar um dos dois passa a desenhar a figura de
-  partida. Com **match player**, a manga segue o checkbox: longa marcada,
+  jogador da `LOOKS SET`, marcar um dos dois passava a desenhar a figura de
+  partida; desde a K3D-TASK-10, as seções vestem o próprio jogador (G3 do
+  KITS-AJUSTES-3D), e o que segue sobre **match player** é registro. Com **match player**, a manga segue o checkbox: longa marcada,
   curta desmarcada. O que não foi medido fica desligado, com a frase no texto
   do próprio checkbox: a braçadeira no goleiro e o número na figura de
   partida. O **Long sleeves** fica **escondido** com o goleiro, que não tem

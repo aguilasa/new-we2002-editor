@@ -37,14 +37,15 @@ WHAT IT JUDGES:
   and the plants, each in a copy of the tree: the window without Fusion and
       without the fixed palette (section 3.4) FAIL the style judge, and the
       readout reading the pixel to the right FAILS the hover judge; the 3D
-      tab drawing set 1 for both sets FAILS the 3D judge, the match player
-      drawn with section 97 when the armband is asked FAILS the match judge
-      (KITS-TASK-47: with TEX_14 and long sleeves the armband changes 291 px in a
-      24x17 box since KITS-TASK-40 unmirrored the view (337 px, 25x18, before),
-      and the judge wants something changed, in at most ARMBAND_BOX px each
-      way and ARMBAND_SHARE % of the figure, inside ARM_SIDE and ARM_ROWS
-      of the figure's box -- the armband drawn on the head FAILS it too,
-      CORR-KITS-087), and the tab left on
+      tab drawing set 1 for both sets FAILS the 3D judge, the player in long
+      sleeves drawn without the armband when it is asked FAILS the armband
+      judge (K3D-TASK-10: with TEX_14 the armband changes 369 px in a 30x19
+      box of the EDT_MOD.BIN player, and the judge wants something changed,
+      in at most ARMBAND_BOX px each way and ARMBAND_SHARE % of the figure,
+      inside ARM_SIDE and ARM_ROWS of the figure's box -- the armband drawn on
+      the torso FAILS it too), the match figure drawn for the dressings FAILS
+      the same-figure judge (SAME_FIGURE), a third item in the figure
+      selector FAILS the dressing boxes judge, and the tab left on
       with no geometry, or a Plan widget that changes with no geometry, FAIL
       the 3D off judge; the kit selector labelled with bare tags FAILS the
       selector judge; the Diagnosis tab without its problem rows FAILS the
@@ -105,23 +106,36 @@ BACKDROP_3D = (0x8C, 0x8C, 0x8C)
 FIGURE_FLOOR = 5.0
 """The figure covers at least this percentage of a 3D capture."""
 MATCH_TAG = "14"
-"""The match figure's kit: Norway, the team of the slot 5 captain (section 4.3)."""
-MATCH_ITEM = "2"
-"""`app.py --figure` of the match player."""
+"""The kit the dressings are judged in: Norway, the team of the slot 5 captain
+(section 4.3), whose armband the match figure was measured with."""
+FIGURE_WANT = {"en-US": "Figure: player | goalkeeper", "pt-BR": "Figura: jogador | goleiro"}
+"""What `app.py --list-3d` prints of the figure selector, per language: two
+items, the match player gone from the window (G3, K3D-TASK-10); written here
+and not read from ui/i18n.py."""
+SAME_FIGURE = 0.90
+"""The least intersection over union between the player's silhouette with a
+dressing and without, seen from the back: the dressed figure is still the
+EDT_MOD.BIN one (K3D-TASK-10).  Measured on :98 with TEX_14: 0.959 with the
+armband, 0.962 with the long sleeves and with both; the match figure in its
+place (the plant) 0.745."""
 ARMBAND_BOX = 40
 """The most pixels, each way, the armband's difference may span: measured on
-:98 with TEX_14 and long sleeves, 291 pixels in a 24x17 box on the arm (KITS-TASK-40,
-the view unmirrored; 337 in 25x18 before, KITS-TASK-47)."""
+:98 with TEX_14 and long sleeves, on the EDT_MOD.BIN player since K3D-TASK-10,
+369 pixels in a 30x19 box on the arm (on the match figure it was 291 in 24x17,
+KITS-TASK-40, and 337 in 25x18 before, KITS-TASK-47)."""
 ARMBAND_SHARE = 5.0
 """The most, in percent of the figure's pixels, the armband may change
-(measured 1.3 %, before and after KITS-TASK-40)."""
+(measured 1.5 % on the EDT_MOD.BIN player, K3D-TASK-10; 1.3 % on the match
+figure, before and after KITS-TASK-40)."""
 ARM_SIDE = 0.35
 """The armband's change lies in the outer ARM_SIDE of the figure's box, on
-either side: measured at x 0.80-0.99 of it with the view unmirrored
-(KITS-TASK-40); x 0.01-0.20 while it was mirrored (KITS-TASK-47, CORR-KITS-087)."""
+either side: measured at x 0.74-0.97 of it on the EDT_MOD.BIN player
+(K3D-TASK-10); on the match figure x 0.80-0.99 with the view unmirrored
+(KITS-TASK-40), x 0.01-0.20 while it was mirrored (KITS-TASK-47, CORR-KITS-087)."""
 ARM_ROWS = (0.15, 0.55)
 """...and between these fractions of its height, shoulder to waist: measured
-at y 0.28-0.33."""
+at y 0.26-0.32 on the EDT_MOD.BIN player (K3D-TASK-10), 0.28-0.33 on the
+match figure."""
 NOTE_ROWS = 60
 """Bottom rows of a capture that hold the status and the 3D note."""
 TAB_LABEL = (40, 20, 80)
@@ -161,9 +175,10 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
 STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO, \
-    BACK, RASTER, FRAME = ("style", "hover", "3D", "3D off", "selector", "diagnosis",
-                           "diagnosis note", "reset", "match", "dressing", "dressing boxes",
-                           "combo width", "back copy", "core drawing", "frame time")
+    BACK, RASTER, FRAME, SAME = ("style", "hover", "3D", "3D off", "selector", "diagnosis",
+                                 "diagnosis note", "reset", "armband", "dressing",
+                                 "dressing boxes", "combo width", "back copy", "core drawing",
+                                 "frame time", "same figure")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -208,17 +223,27 @@ PLANTS = (
      "        index = self.picture.indices[y * self.picture.width + x]\n",
      "        index = self.picture.indices[y * self.picture.width + x + 1]\n"),
     ("3D set ignored", FIGURE,
-     "                scene = api.figure(self.kit, self.set_box.currentData(),\n",
-     "                scene = api.figure(self.kit, 1,\n"),
-    ("armband drawn as section 97", MATCH,
-     "                                         armband=self.armband_box.isChecked(),\n",
-     "                                         armband=False,  # planted\n"),
+     "            scene = api.figure(self.kit, self.set_box.currentData(),\n",
+     "            scene = api.figure(self.kit, 1,\n"),
+    ("armband never put on", MATCH,
+     "                               armband=self.armband_box.isChecked(),\n",
+     "                               armband=False,  # planted\n"),
+    ("the match figure back for the dressings", SAME,
+     "            scene = api.figure(self.kit, self.set_box.currentData(),\n",
+     "            scene = api.match_figure(self.kit, self.set_box.currentData(),\n"
+     "                                     armband=self.armband_box.isChecked(),\n"
+     "                                     geometry=self.geometry) \\\n"
+     "                if self.armband_box.isChecked() or self.long_box.isChecked() \\\n"
+     "                else api.figure(self.kit, self.set_box.currentData(),  # planted\n"),
+    ("a third figure in the selector", BOXES,
+     '        self.figure_box.addItem("", 1)\n',
+     '        self.figure_box.addItem("", 1)\n        self.figure_box.addItem("", 2)  # planted\n'),
     ("Number ignored", DRESS,
-     "                if self.number_box.isChecked():\n",
-     "                if False:  # planted: Number ignored\n"),
+     "            if self.number_box.isChecked():\n",
+     "            if False:  # planted: Number ignored\n"),
     ("Long sleeves ignored", DRESS,
-     "                                             0 if self.long_box.isChecked() else 1],\n",
-     "                                             1],  # planted: Long sleeves ignored\n"),
+     "                                   0 if self.long_box.isChecked() else 1])\n",
+     "                                   1])  # planted: Long sleeves ignored\n"),
     ("kit 1 labelled first", BOXES,
      '        self.set_box.setItemText(0, tr("set_first"))\n',
      '        self.set_box.setItemText(0, "first")  # planted\n'),
@@ -227,8 +252,8 @@ PLANTS = (
      "        for box in [b for b in self.combos().values() if b is not self.set_box]:"
      "  # planted\n"),
     ("back copy only with Number", BACK,
-     "    return numbered_scene(built, kit, kit_set, figure, None)\n",
-     "    return built  # planted: the back copy only with Number\n",
+     "    backed = numbered_scene(built, kit, kit_set, figure, None)\n",
+     "    backed = built  # planted: the back copy only with Number\n",
      "../core/figure.py"),
     ("the view back to the old drawing", RASTER,
      "        drawn = self.draw(self.scene, self.yaw, self.pitch, self.width(), self.height())\n",
@@ -243,9 +268,9 @@ PLANTS = (
     ("Long sleeves always shown", BOXES,
      "        self.long_box.setVisible(figure != 1)\n",
      "        self.long_box.setVisible(True)  # planted\n"),
-    ("armband drawn on the head", MATCH,
-     '        if armband and section == rule["replaced"]:\n',
-     "        if armband and piece is pieces[0]:  # planted: the head\n",
+    ("armband drawn on the torso", MATCH,
+     "        out[ARM_PIECES[band]] = band\n",
+     '        out["torso"] = band  # planted: the armband on the torso\n',
      "../core/figure.py"),
     ("3D tab never off", OFF,
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
@@ -702,15 +727,15 @@ def figure_judge(python, image, env, tmp, app=APP) -> tuple:
 
 
 def match_judge(python, image, env, tmp, app=APP) -> tuple:
-    """(failures, what was seen) of the match player in the 3D tab, without
-    and with the captain's armband: both draw a figure, and the armband
-    changes a small box of it, on an arm (ARM_SIDE, ARM_ROWS), and nothing
-    else."""
+    """(failures, what was seen) of the player in long sleeves in the 3D tab,
+    without and with the captain's armband: both draw a figure, and the
+    armband changes a small box of it, on an arm (ARM_SIDE, ARM_ROWS), and
+    nothing else."""
     shots, bad = {}, []
     for armband in (False, True):
         out = os.path.join(tmp, "match-%d.png" % armband)
         shot, more, _ = capture(python, app, image, ["--tag", MATCH_TAG, "--tab", "3d",
-                                                     "--figure", MATCH_ITEM, "--long-sleeves"]
+                                                     "--figure", "0", "--long-sleeves"]
                                 + (["--armband"] if armband else []), out, env)
         bad += ["armband %s: %s" % (armband, m) for m in more]
         if shot is None:
@@ -756,9 +781,51 @@ def match_judge(python, image, env, tmp, app=APP) -> tuple:
     return bad, seen
 
 
+SAME_DRESSINGS = (("Captain armband", ["--armband"]), ("Long sleeves", ["--long-sleeves"]),
+                  ("both", ["--armband", "--long-sleeves"]))
+"""What `same_judge` ticks on the player, each against nothing ticked."""
+
+
+def silhouette(shot: tuple) -> set:
+    """The pixels of the 3D view that are not its backdrop."""
+    box = view_box(shot)
+    if box is None:
+        return set()
+    w = shot[0]
+    return {(x, y) for y in range(box[1], box[3] + 1) for x in range(box[0], box[2] + 1)
+            if shot[2][y * w + x] != BACKDROP_3D}
+
+
+def same_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, what was seen): the player with the armband, the long
+    sleeves or both is the EDT_MOD.BIN figure it is without them -- its
+    silhouette from the back overlaps the bare one by SAME_FIGURE or more."""
+    bad, seen, shots = [], [], {}
+    for name, ticks in (("bare", []),) + SAME_DRESSINGS:
+        out = os.path.join(tmp, "same-%s.png" % name.split()[0].lower())
+        shot, more, _ = capture(python, app, image, ["--tag", MATCH_TAG, "--tab", "3d",
+                                                     "--figure", "0", "--yaw", "0"] + ticks,
+                                out, env)
+        bad += ["%s: %s" % (name, m) for m in more]
+        shots[name] = shot
+    if shots["bare"] is None:
+        return bad + ["no bare capture"], "-"
+    bare = silhouette(shots["bare"])
+    for name, _ticks in SAME_DRESSINGS:
+        if shots[name] is None:
+            continue
+        drawn = silhouette(shots[name])
+        overlap = len(bare & drawn) / max(len(bare | drawn), 1)
+        seen.append("%s %.3f" % (name, overlap))
+        if overlap < SAME_FIGURE:
+            bad.append("%s: the silhouette overlaps the bare figure's by %.3f, under %.2f -- "
+                       "not the EDT_MOD.BIN figure" % (name, overlap, SAME_FIGURE))
+    return bad, ", ".join(seen)
+
+
 DRESSINGS = (("Number", "0", ["--number", "10"]),
-             ("Captain armband", MATCH_ITEM, ["--armband"]),
-             ("Long sleeves", MATCH_ITEM, ["--long-sleeves"]))
+             ("Captain armband", "0", ["--armband"]),
+             ("Long sleeves", "0", ["--long-sleeves"]))
 """(box, --figure, what ticks it) of the three dressings whose rule was
 measured (KITS-TASK-40): each is captured from the back, on and off."""
 BOX_WANT = {
@@ -768,12 +835,11 @@ BOX_WANT = {
     ("1", "en-US"): {"number": (True, True, "Number"),
                      "armband": (True, False, "Captain armband: not measured on the goalkeeper"),
                      "long sleeves": (False, None, None)},
-    (MATCH_ITEM, "en-US"): {"number": (True, False, "Number: not measured on the match figure"),
-                            "armband": (True, True, "Captain armband"),
-                            "long sleeves": (True, True, "Long sleeves")},
     ("1", "pt-BR"): {"armband": (True, False, "Braçadeira de capitão: não medida no goleiro"),
                      "long sleeves": (False, None, None)},
-    (MATCH_ITEM, "pt-BR"): {"number": (True, False, "Número: não medido na figura de partida")},
+    ("0", "pt-BR"): {"number": (True, True, "Número"),
+                     "armband": (True, True, "Braçadeira de capitão"),
+                     "long sleeves": (True, True, "Mangas longas")},
 }
 """What `app.py --list-3d` has to print per (figure, language): (shown,
 enabled, text) of each dressing box, None where it does not matter.  The
@@ -817,11 +883,13 @@ def boxes_judge(python, image, env, app=APP) -> list:
         if code != 0:
             bad.append("figure %s %s: exit %s" % (figure, lang, code))
             continue
-        got, selector = {}, None
+        got, selector, figures = {}, None, None
         for line in output.splitlines():
             line = line.strip()
             if line.startswith("kit selector: "):
                 selector = line[len("kit selector: "):]
+            if line.startswith("figure selector: "):
+                figures = line[len("figure selector: "):]
             if not line.startswith("box "):
                 continue
             name, rest = line[4:].split(": ", 1)
@@ -843,6 +911,9 @@ def boxes_judge(python, image, env, app=APP) -> list:
         if selector != KIT_WANT[lang]:
             bad.append("figure %s %s: the kit selector says %r, not %r"
                        % (figure, lang, selector, KIT_WANT[lang]))
+        if figures != FIGURE_WANT[lang]:
+            bad.append("figure %s %s: the figure selector says %r, not %r"
+                       % (figure, lang, figures, FIGURE_WANT[lang]))
     return bad
 
 
@@ -1105,14 +1176,19 @@ def run(python: str, image: str) -> int:
                  "set %d fig %d %s" % (k[0], k[1], v[:12]) for k, v in sorted(digests.items()))),
              bad)
         bad, seen = match_judge(python, image, env, tmp)
-        t.ok("3D TEX_%s: the match player is drawn, and the captain's armband changes "
-             "only a box on its arm (%s)" % (MATCH_TAG, seen), bad)
+        t.ok("3D TEX_%s: the player in long sleeves is drawn, and the captain's armband "
+             "changes only a box on its arm (%s)" % (MATCH_TAG, seen), bad)
+        bad, seen = same_judge(python, image, env, tmp)
+        t.ok("3D TEX_%s from the back: with the armband, the long sleeves or both the "
+             "player is the EDT_MOD.BIN figure, silhouette overlap %s (least %.2f)"
+             % (MATCH_TAG, seen, SAME_FIGURE), bad)
         bad, seen = dress_judge(python, image, env, tmp)
         t.ok("3D TEX_%s from the back: each measured dressing changes the view (%s)"
              % (MATCH_TAG, seen), bad)
         t.ok("the dressing boxes: Long sleeves hidden with the goalkeeper, and the "
-             "dressings with no rule off with the sentence, and the kit selector "
-             "Kit Home/Away, Uniforme Casa/Visitante, in en-US and pt-BR",
+             "dressings with no rule off with the sentence; the kit selector "
+             "Kit Home/Away, Uniforme Casa/Visitante; the figure selector two items, "
+             "player and goalkeeper, in en-US and pt-BR",
              boxes_judge(python, image, env))
         bad, seen = raster_judge(python, image, env, tmp)
         t.ok("the 3D view is the core's drawing, pixel for pixel, from the back and the "
@@ -1171,6 +1247,8 @@ def run(python: str, image: str) -> int:
                     red, bad = boxes_judge(python, image, env, app), []
                 elif judge == MATCH:
                     red, bad = match_judge(python, image, env, box, app)[0], []
+                elif judge == SAME:
+                    red, bad = same_judge(python, image, env, box, app)[0], []
                 elif judge == OFF:
                     red, bad = off_judge(python, image, env, box, app), []
                 elif judge == SELECTOR:

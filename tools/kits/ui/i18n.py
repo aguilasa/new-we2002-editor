@@ -75,13 +75,11 @@ CATALOG = {
         "figure": "Figure",
         "figure_player": "player",
         "figure_keeper": "goalkeeper",
-        "figure_match": "match player",
         "figure_hint": "Drag to turn, double-click to reset. The area the torso samples "
                        "is empty in the TEX; it is drawn with the shirt back the game "
                        "copies into it (measured). Tick Number to paint the number a "
                        "match puts there.",
         "number": "Number",
-        "number_off": "Number: not measured on the match figure",
         "armband": "Captain armband",
         "armband_off": "Captain armband: not measured on the goalkeeper",
         "long_sleeves": "Long sleeves",
@@ -135,13 +133,11 @@ CATALOG = {
         "figure": "Figura",
         "figure_player": "jogador",
         "figure_keeper": "goleiro",
-        "figure_match": "jogador em partida",
         "figure_hint": "Arraste para girar, duplo clique para restaurar. A área que o "
                        "torso amostra está vazia no TEX; ela sai com as costas da camisa "
                        "que o jogo copia para lá (medido). Marque Número para pintar o "
                        "número que uma partida põe ali.",
         "number": "Número",
-        "number_off": "Número: não medido na figura de partida",
         "armband": "Braçadeira de capitão",
         "armband_off": "Braçadeira de capitão: não medida no goleiro",
         "long_sleeves": "Mangas longas",

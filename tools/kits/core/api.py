@@ -96,11 +96,14 @@ FIGURE_POSE = _figure.POSE_FRAME
 FIGURE_TRIANGLES = _figure.TRIANGLES
 
 
-def figure(kit, kit_set=1, figure=0, geometry_path=None, frame=None, geometry=None):
+def figure(kit, kit_set=1, figure=0, geometry_path=None, frame=None, geometry=None,
+           armband=False, sleeves="short"):
     """The looks `Scene` of *figure* (0 player, 1 goalkeeper) in set *kit_set*
-    of *kit*.  The geometry comes from *geometry_path*, else from
-    `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry` (section 3.1)."""
-    return _figure.scene_of(kit, kit_set, figure, geometry_path, frame, geometry)
+    of *kit*, with the captain's *armband* and *sleeves* ("short" or "long")
+    put on by the rule of G3.  The geometry comes from *geometry_path*, else
+    from `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry` (section 3.1)."""
+    return _figure.scene_of(kit, kit_set, figure, geometry_path, frame, geometry,
+                            armband, sleeves)
 
 
 MATCH_FIGURES = _figure.MATCH_FIGURES

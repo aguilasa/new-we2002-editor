@@ -1194,7 +1194,7 @@ def matrix_passes(pieces, roots_of=ROOT_SECTIONS) -> list:
     return out
 
 
-from core.figure import SLEEVE_LENGTHS  # noqa: E402  (one table, the core's)
+from core.figure import ARM_PIECES, SLEEVE_LENGTHS  # noqa: E402,F401  (the core's tables)
 
 
 def matrix_report(passes, worn_sections=SLEEVE_LENGTHS["long"]["worn"]) -> dict:
@@ -2494,21 +2494,6 @@ def run_keeper_armband(slot: int, cue: str, cache=None, plant=False) -> int:
 
 # --- G3: where MODEL.BIN's sleeves and armband go on the EDT_MOD.BIN figure ---
 
-ARM_PIECES = {
-    3: "upper arm a", 4: "upper arm b", 5: "forearm a", 6: "forearm b",
-    90: "upper arm b",
-    93: "upper arm b", 95: "upper arm a", 96: "forearm a", 97: "upper arm b", 98: "forearm b",
-    57: "upper arm a", 58: "forearm a", 59: "upper arm b", 60: "forearm b",
-    99: "upper arm a", 100: "upper arm b", 101: "forearm a", 102: "forearm b",
-}
-"""The rule `--edt-arms` measures (KITS-AJUSTES-3D.md G3, K3D-TASK-07): the
-EDT_MOD.BIN piece, by `pieces.py`'s name, each sleeve and armband section of
-MODEL.BIN stands in for.  The section sits in that piece's local frame, so it
-is drawn with the matrix and place the figure gives that piece (`scene.pose`,
-which is by name and the same for both figures).  The part -- upper arm or
-forearm -- is the EDT_MOD.BIN piece whose vertices lie nearest; the side, a
-or b, is the sign of the section's mean z, since each pair is the other one
-mirrored in z vertex for vertex."""
 ARM_NAMES = ("upper arm a", "upper arm b", "forearm a", "forearm b")
 FRAME_SLACK = 3.0
 """How far, in model units, the translation that best lays a MODEL.BIN arm on

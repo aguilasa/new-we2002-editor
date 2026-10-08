@@ -67,7 +67,7 @@ ajustar quando o idioma muda.
 **Pedido.** O seletor de figura passa a ter só **player** e **goalkeeper**. A figura de partida
 sai da interface. Do trabalho de "match player", só o **conhecimento medido** pode ser usado.
 
-**Hoje:**
+**Antes da K3D-TASK-10** (o estado que motivou o pedido):
 
 - O `figure_box` tem três itens (`ui/app.py:393-398`), e o terceiro é `MATCH_FIGURE = 2` (`:68`).
 - Jogador e goleiro vêm do `EDT_MOD.BIN`, montados por `scene_of` (`core/figure.py:84-104`).
@@ -165,24 +165,51 @@ seção continua com a mesma peça mais próxima, e a corrida sai 1 só pelo ref
 próxima e saía com 21 `FAIL`). No catálogo do `controls.py`, `oracle-arm-side-flipped` e
 `oracle-arm-frame-blind` derrubam os casos sintéticos do `selftest.py`.
 
-**O que fica para a K3D-TASK-10:** substituir a peça inteira pela seção do `MODEL.BIN` ou desenhar
-a braçadeira por cima da malha do `EDT_MOD.BIN`. A regra diz onde a seção vai e com que matriz; ela
-não diz qual das duas malhas aparece.
+**O que ficou para a K3D-TASK-10:** substituir a peça inteira pela seção do `MODEL.BIN`, ou
+desenhar a braçadeira por cima da malha do `EDT_MOD.BIN`. A regra diz onde a seção vai e com que
+matriz; ela não diz qual das duas malhas aparece.
+
+**Decidido e feito (K3D-TASK-10, 2026-10-08): a peça inteira é trocada, e a figura de partida sai
+da interface.** Isto reabre a decisão da KITS-TASK-47, que tinha posto a figura de partida no
+seletor e trocava o desenho para ela ao marcar Captain armband ou Long sleeves.
+
+- **O seletor tem dois itens:** jogador e goleiro, os dois do `EDT_MOD.BIN`. O `match_scene`
+  continua no núcleo, porque o `oracle.py --match-silhouette` o usa; a janela não o chama.
+- **A troca da peça:** marcar as caixas faz o `figure.dressed_scene` tirar do jogador as peças de
+  braço que o `figure.arm_dress` nomeia e pôr no lugar a seção do `MODEL.BIN`, com a matriz e o lugar
+  que a pose dá àquela peça. O `arm_dress` lê só `ARM_PIECES`, `LONG_TO_SHORT` e `SLEEVE_LENGTHS`:
+  - manga longa: 95, 96, 97 e 98 nos quatro braços;
+  - braçadeira: 93 (manga longa) ou 90 (manga curta) no `upper arm b`;
+  - manga curta sem braçadeira: o braço do próprio `EDT_MOD.BIN`.
+- **Por que trocar, e não sobrepor:** a 90 e a 93 têm os vértices da 4 e da 97, ou seja, são o
+  braço inteiro com outros texels, não uma faixa. Desenhada por cima da malha do `EDT_MOD.BIN`, a
+  braçadeira brigaria com ela no z-buffer, as duas superfícies quase coincidentes.
+- **Medido no `kits_ui`** (TEX_14, de costas):
+  - a silhueta do jogador com braçadeira, com manga longa ou com as duas cobre a silhueta sem as
+    caixas em 0,959 a 0,962 (`SAME_FIGURE` 0,90);
+  - com a figura de partida no lugar (a planta), 0,745;
+  - com manga longa, a braçadeira muda 369 px numa caixa de 30×19 no braço.
+- **A cópia das costas vale só para a imagem do uniforme:** o `numbered_scene` deixa de pintar a
+  imagem das mangas, que as seções do `MODEL.BIN` amostram.
+- **O goleiro fica para a K3D-TASK-11:** `DRESSED_FIGURES` tem só o jogador. A braçadeira do
+  goleiro (92, G4) entra lá.
 
 ## G4 — Number, Captain armband e Long sleeves em qualquer combinação, nas duas figuras
 
 **Pedido.** As três caixas valem para **player** e **goalkeeper** e combinam livremente: nenhuma,
 uma, duas ou as três ao mesmo tempo.
 
-**Hoje** (`dressings()`, `ui/app.py:583-601`):
+**Hoje** (`dressings()` em `ui/app.py`; desde a K3D-TASK-10 a figura é sempre a do `EDT_MOD.BIN`, G3):
 
 | Caixa | Jogador | Goleiro |
 |---|---|---|
-| Number | recusado quando a figura de partida é desenhada (`number_off`, `ui/i18n.py:84`): o painel do torso de partida não foi medido (§4.7) | funciona |
-| Captain armband | funciona, trocando para a figura de partida | desligado, com `armband_off` (`ui/i18n.py:86`) |
-| Long sleeves | funciona, trocando para a figura de partida | escondido (`ui/app.py:589`) |
+| Number | funciona, com as outras caixas ou sem elas | funciona |
+| Captain armband | funciona: a 90 ou a 93 no `upper arm b` (`figure.arm_dress`) | desligado, com `armband_off` |
+| Long sleeves | funciona: 95-98 nos quatro braços | escondido |
 
-Hoje só a braçadeira e a manga longa combinam entre si.
+Antes da K3D-TASK-10, o Number era recusado no jogador quando a braçadeira ou a manga longa
+trocavam o desenho para a figura de partida (`number_off`), e só essas duas combinavam entre si. A
+combinação livre nas duas figuras e a verificação das oito combinações são da K3D-TASK-11.
 
 **Em aberto:**
 
