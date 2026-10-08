@@ -53,6 +53,32 @@
       "depends_on": [],
       "done_on": "2026-10-07",
       "done_commit": "8fb17e4"
+    },
+    {
+      "id": "CORR-K3D-005",
+      "file": "CORR-K3D-005.md",
+      "title": "Números de sonda nas tasks 13 e 14 (0,10 s e 218 px)",
+      "origin": "K3D-TASK-13",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-006",
+      "file": "CORR-K3D-006.md",
+      "title": "Edição na K3D-TASK-14 fora do escopo e fora do Log da 13",
+      "origin": "K3D-TASK-13",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

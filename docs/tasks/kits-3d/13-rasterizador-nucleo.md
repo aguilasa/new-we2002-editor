@@ -135,3 +135,4 @@ até a K3D-TASK-14.
     - `M tools/kits/selftest.py`
   - **Outside declared files** (`tools/kits/core/raster.py`, `tools/kits/core/figure.py`, `tools/kits/core/api.py`, `tools/kits/cli.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
     - `docs/tasks/kits-3d/14-vista-rasterizador.md`
+- **Reviewed** (2026-10-08) at `66a98e5`: CORR-K3D-005, CORR-K3D-006
