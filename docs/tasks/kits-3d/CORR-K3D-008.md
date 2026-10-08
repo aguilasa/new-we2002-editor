@@ -58,3 +58,10 @@ Hoje vazio; depois tem de casar — ou o atributo tem de sumir de `figure_view.p
 - Verificação: `grep -n "view.frame_ms" tools/kits/ui/app.py` → `1084:        frame_ms = view.frame_ms`.
   `ui_check.py`: `  ok    the 3D view is the core's drawing, pixel for pixel, …` com 106 a 111 ms, `kits_ui: 0 failure(s)`.
   `selftest.py`: `kits_selftest: 0 failure(s)`.
+- **Closed** — commit `794d9db` (2026-10-08): fix(kits): time the 3D view's own picture in --export-3d
+  - Files (`git show --name-status 794d9db`):
+    - `M docs/tasks/kits-3d/CORR-K3D-008.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/figure_view.py`
