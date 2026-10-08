@@ -107,10 +107,10 @@ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py
 
 ```text
 edt-arms: /BIN/MODEL.BIN and /BIN/EDT_MOD.BIN
-  upper arm a EDT_MOD.BIN sections 1 12, posed alike
-  upper arm b EDT_MOD.BIN sections 2 13, posed alike
-  forearm a   EDT_MOD.BIN sections 3 14, posed alike
-  forearm b   EDT_MOD.BIN sections 4 15, posed alike
+  upper arm a EDT_MOD.BIN sections 1 12, posed alike by name
+  upper arm b EDT_MOD.BIN sections 2 13, posed alike by name
+  forearm a   EDT_MOD.BIN sections 3 14, posed alike by name
+  forearm b   EDT_MOD.BIN sections 4 15, posed alike by name
   section   3 -> upper arm a (nearest EDT section  1 at 5.6, other part 8.2), frame offset 0.8 (+0.1,+0.8,-0.2)
   section   4 -> upper arm b (nearest EDT section  2 at 5.6, other part 8.2), frame offset 0.8 (+0.1,+0.8,+0.2)
   section   5 -> forearm a   (nearest EDT section 14 at 3.6, other part 10.9), frame offset 0.7 (-0.4,+0.6,+0.1)
@@ -146,10 +146,14 @@ O que a saída diz:
 - **A parte (braço ou antebraço) é a peça mais perto.** A outra parte fica sempre mais longe
   (coluna "other part"). **O lado (a ou b) é o sinal do z médio da seção.** As seções vêm em pares
   espelhados em z, e por isso a distância não decide o lado.
-- **As duas figuras posam cada peça de braço igual** ("posed alike"). As seções 1 e 12, 2 e 13, 3 e
-  14, 4 e 15 têm o mesmo nome em `pieces.py` e a mesma matriz em `scene.pose`. O braço longo cabe
-  melhor no braço do goleiro (12 e 13); no jogador, ele vai no slot de mesmo nome (1 e 2), com a
-  mesma matriz.
+- **As duas figuras recebem a mesma pose por peça de braço — por construção, não por medição**
+  ("posed alike by name"). As seções 1 e 12, 2 e 13, 3 e 14, 4 e 15 têm o mesmo nome em `pieces.py`,
+  e o `scene.pose` dá a cada seção a transformação do nome dela (`tools/looks/scene.py`, o laço sobre
+  `piece_names`). A conferência compara essa tabela com ela mesma e não pode imprimir "posed apart".
+  Que o jogo pose a seção 12 do goleiro como a 1 do jogador é suposição herdada do ciclo `looks`, não
+  medida aqui; medir pede a matriz do GTE por peça de cada figura, lida do jogo
+  ([CORR-K3D-012](/docs/tasks/kits-3d/CORR-K3D-012.md)). O braço longo cabe melhor no braço do
+  goleiro (12 e 13); no jogador, ele vai no slot de mesmo nome (1 e 2), com a mesma matriz.
 - **Concorda com a ordem medida no jogo** (`SLEEVE_LENGTHS`, `LONG_TO_SHORT`). 95→3 e 97→4 caem nos
   mesmos `upper arm a` e `upper arm b`; 96→5 e 98→6 nos mesmos antebraços. A braçadeira (93 no lugar
   da 97, 90 no lugar da 4) cai em `upper arm b`, o braço que ela substitui. No goleiro, 99/101/100/102

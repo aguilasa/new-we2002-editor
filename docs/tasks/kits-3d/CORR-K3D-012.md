@@ -62,3 +62,19 @@ Hoje devolve a afirmação sem ressalva; depois, uma com ressalva — ou o orác
 tirar `shared` de outra fonte que não `scene.pose`.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. O G3 afirmava "As duas figuras posam cada peça de
+  braço igual" sem ressalva; `oracle.py:2448-2449` monta `shared` a partir de `scene.pose`, que pose
+  por nome.
+- Escolhido o primeiro caminho da CORR: dizer o que a conferência é. Medir a matriz do GTE por peça,
+  lida do jogo, fica para quem precisar dela.
+  - `oracle.py`: a saída diz `posed alike by name`; docstring do módulo e comentário no laço dizem
+    que a comparação é por construção e não pode dar "posed apart".
+  - `selftest.py`: o caso sintético virou "the judge refuses an arm reported posed apart", com
+    comentário de que só o juiz é exercitado.
+  - G3: o item diz "por construção, não por medição", cita o `scene.pose` e a origem da suposição
+    (ciclo `looks`). A transcrição do G3 foi refeita: `diff` contra a saída de
+    `oracle.py --edt-arms` vazio.
+- Verificação: o `grep` agora devolve `posed alike by name` nas quatro linhas da transcrição e o item
+  150 com a ressalva. `selftest.py`: `kits_selftest: 0 failure(s)`; `selftest.py --image`:
+  `figure: 0 failure(s)`, rc=0; `controls.py`: `controls: 34 of 34 red`.

@@ -104,7 +104,10 @@ every panel a row up, and `--blocks` / `--picture` show what differs.
 `--edt-arms` (KITS-AJUSTES-3D.md G3, K3D-TASK-07) needs no emulator: it lays
 each sleeve and armband section of MODEL.BIN on the EDT_MOD.BIN arm pieces and
 asserts `ARM_PIECES` -- the piece each one stands in for, in that piece's frame
-within `FRAME_SLACK` -- and that both figures pose each arm piece alike.
+within `FRAME_SLACK` -- and that both figures give each arm piece the same
+pose by name.  That last one holds by construction: `scene.pose` poses a
+section by its `pieces.py` name, and both figures' arm sections share the
+names, so the run cannot print "posed apart" (CORR-K3D-012).
 `--plant-edt-arms` moves every MODEL.BIN arm out of its frame, keeping its
 nearest piece, and has to fail on the frame alone.
 """
@@ -2459,6 +2462,8 @@ def run_edt_arms(image_path: str, plant: bool = False) -> int:
     named, _orders, _paired = pieces.name_pieces(files[layout.EDT_MOD])
     arms = {(i, piece.full_name): [(v.x, v.y, v.z) for v in edt[i].vertices]
             for i, piece in named.items() if piece.full_name in ARM_NAMES}
+    # scene.pose gives each section the pose of its name, so this compares a
+    # lookup with itself: it guards the naming, not the game (CORR-K3D-012).
     pose = scene.pose(files)
     shared = {}
     for name in ARM_NAMES:
@@ -2472,7 +2477,7 @@ def run_edt_arms(image_path: str, plant: bool = False) -> int:
     for name in ARM_NAMES:
         print("  %-11s EDT_MOD.BIN sections %s, %s"
               % (name, " ".join(str(at) for at, n in sorted(arms) if n == name),
-                 "posed alike" if shared[name] else "posed apart"))
+                 "posed alike by name" if shared[name] else "posed apart"))
     for number, got in report.items():
         print("  section %3d -> %-11s (nearest EDT section %2d at %.1f, other part %s), "
               "frame offset %.1f (%+.1f,%+.1f,%+.1f)"

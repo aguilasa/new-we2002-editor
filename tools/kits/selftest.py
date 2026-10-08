@@ -1157,7 +1157,9 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --edt-arms: a sleeve moved out of its frame fails",
          any("out of" in f for f in oracle.arms_judge(moved, {95: "upper arm a"})),
          "%s" % moved[95])
-    c.ok("oracle --edt-arms: an arm the two figures pose apart fails",
+    # A judge case: on the disc scene.pose poses by name and cannot report an
+    # arm apart (CORR-K3D-012), so only the judge is exercised here.
+    c.ok("oracle --edt-arms: the judge refuses an arm reported posed apart",
          len(oracle.arms_judge(seen, rule, {"upper arm a": False})) == 1)
 
 
