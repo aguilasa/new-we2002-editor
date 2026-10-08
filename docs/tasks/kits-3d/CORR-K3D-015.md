@@ -71,3 +71,10 @@ $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.
 - Verificação: o `grep` casa as linhas 231 e 236. `selftest.py`: `kits_selftest: 0 failure(s)`;
   `controls.py`: `controls: 35 of 35 red`; a planta segue `FAIL  no figure opened at section 13
   draws section 103`.
+- **Closed** — commit `7e8d8ee` (2026-10-08): docs(kits): say the goalkeeper armband replacing section 15 is inferred
+  - Files (`git show --name-status 7e8d8ee`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-015.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/oracle.py`
