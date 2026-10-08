@@ -58,6 +58,19 @@ com F em 0 e 1 e Y em 0, 90 e 270, recortadas na caixa da vista (`940x409+20+169
 jogador, de baixo o goleiro). De costas a bermuda fecha inteira nas duas pernas e na junção com a
 camiseta — o defeito do relato de 2026-10-08 não aparece.
 
+Recorte e folha, comandos reconstruídos depois pela
+[CORR-K3D-010](/docs/tasks/kits-3d/CORR-K3D-010.md) (ImageMagick 6, `convert`/`montage`; o `magick`
+do IM7 não está instalado) e conferidos contra os arquivos desta corrida:
+
+```
+$ cd work/k3d-15
+$ for f in 0 1; do for y in 0 90 270; do convert fig$f-yaw$y.png -crop 940x409+20+169 +repage crop-fig$f-yaw$y.png; done; done
+$ montage crop-fig0-yaw{0,90,270}.png crop-fig1-yaw{0,90,270}.png -tile 3x2 -geometry 470x205+4+4 -background grey20 sheet.png
+```
+
+Refeitos num diretório à parte, `compare -metric AE` dá 0 nos seis recortes e 0 na folha. O
+controle é a mesma montagem sem `-background grey20`, que dá 32784 contra a `sheet.png`.
+
 **`rite check --cycle kits-3d`:** `check: 0 error(s), 0 warning(s) in 1 cycle(s)`.
 - **Closed** — commit `982c294` (2026-10-08): docs(kits): verify phase 5 at HEAD and record the back and side captures
   - Files (`git show --name-status 982c294`):

@@ -50,3 +50,11 @@ Hoje não imprime nada; depois, os comandos de recorte e da folha, e rodá-los r
 `work/k3d-15/sheet.png` com `compare -metric AE` igual a 0.
 
 ## Log de Execução
+
+- 2026-10-08 — triagem inline: **REPRODUCED**. O `grep` não achava nada (exit 1);
+  `identify work/k3d-15/sheet.png` → `PNG 1434x426`.
+- Comandos reconstruídos e postos no Log da K3D-TASK-15: recorte com `convert … -crop
+  940x409+20+169 +repage` e folha com `montage … -tile 3x2 -geometry 470x205+4+4 -background
+  grey20`. Refeitos no scratchpad: `compare -metric AE` = 0 nos seis recortes e na folha. Controle
+  sem `-background grey20`: AE = 32784.
+- Verificação: o `grep` agora mostra as linhas 62, 67, 68 e 72.
