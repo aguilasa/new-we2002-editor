@@ -371,12 +371,15 @@ devolve.
 - **Aba "3D"**: titular/suplente, jogador/goleiro, giro livre. Desenhada por
   `QPainter` em software (`ui/figure_view.py`), não OpenGL: o mesmo quadro no
   Windows e no Xvfb, que é o que o `kits_ui` compara (KITS-TASK-25). Um botão
-  **Reset view** (e o duplo clique na vista) volta ao giro de abertura; a dica
-  da aba diz que as costas saem vazadas porque a área que o torso amostra está
+  **Reset view** (e o duplo clique na vista) volta ao giro de abertura. A dica
+  da aba dizia que as costas saem vazadas porque a área que o torso amostra está
   vazia no TEX, que o jogo copia as costas da camisa para ela (medido, §4.7) e
   que marcar **Number** pinta ali o painel que a partida monta — sem a caixa, o
-  desenho segue os dados (decisão do usuário, 2026-10-05; KITS-TASK-37,
-  CORR-KITS-066, KITS-TASK-40). O seletor de figura tinha um
+  desenho seguia os dados (decisão do usuário, 2026-10-05; KITS-TASK-37,
+  CORR-KITS-066, KITS-TASK-40). **Reaberto em 2026-10-07** (K3D-TASK-05, G5 do
+  [KITS-AJUSTES-3D](/docs/KITS-AJUSTES-3D.md#g5--figura-inteira-em-qualquer-giro)):
+  toda figura recebe a cópia das costas, com ou sem Number, e a dica diz que a
+  lacuna sai com as costas que o jogo copia. O seletor de figura tinha um
   terceiro item, **match player**, a figura de partida do `MODEL.BIN` na pose
   medida no jogo (§4.3, KITS-TASK-47). **Reaberto em 2026-10-08** (K3D-TASK-10,
   G3 do [KITS-AJUSTES-3D](/docs/KITS-AJUSTES-3D.md#g3--sem-match-player-só-player-e-goalkeeper)):
