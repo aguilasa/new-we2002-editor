@@ -48,3 +48,9 @@ sed -n '/## Arquivos/,/## Done/p' docs/tasks/kits-3d/11-caixas-livres.md | grep 
 Hoje dá 0; depois, 3.
 
 ## Log de Execução
+
+- 2026-10-09 — triagem inline: **REPRODUCED**. O `files` ganhou os três só em `c70d127`; a seção
+  "Arquivos" contava 0.
+- "In:" da K3D-TASK-11 com `oracle.py`, `selftest.py` e `PLAN-KITS-PY.md`, cada um com o motivo
+  tirado do diff de `1549f06`, e uma linha dizendo que entraram no `files` no fechamento.
+- Verificação: o `sed … | grep -c` dá 3.

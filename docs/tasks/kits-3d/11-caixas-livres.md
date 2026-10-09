@@ -15,6 +15,14 @@ Number, Captain armband e Long sleeves combinam livremente — nenhuma, uma, dua
   - `tools/kits/core/figure.py`, `tools/kits/core/api.py`
   - `tools/kits/ui_check.py`, `tools/kits/controls.py`
   - `docs/KITS-AJUSTES-3D.md` (G4: decisão reaberta da KITS-TASK-40, datada)
+  - `tools/kits/oracle.py` (`KEEPER_ARMBANDS` lê a seção 92 do núcleo, `KEEPER_ARMBAND`, e o
+    `--edt-arms` passa a medir também os braços 14-17 e a 92 do goleiro de torso 13)
+  - `tools/kits/selftest.py` (os casos de `arm_dress` do goleiro: braçadeira na `upper arm b`,
+    manga curta recusada)
+  - `docs/PLAN-KITS-PY.md` (§3.4, "Os três checkboxes da aba 3D": a decisão reaberta, datada)
+
+  Os três entraram no `files` no fechamento (`c70d127`), depois do trabalho; a lista acima os
+  declara ([CORR-K3D-018](/docs/tasks/kits-3d/CORR-K3D-018.md)).
 - Out: o que a K3D-TASK-08 não mediu: a caixa fica desligada com a frase, nas duas línguas
 
 ## Done criteria
