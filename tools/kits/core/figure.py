@@ -692,5 +692,7 @@ def dressed_scene(drawn, kit, kit_set: int, figure: int, geometry, frame=None,
                                   part.band_unmeasured)
             parts.append(part)
     notes["dressed"] = {piece: number for piece, number in sorted(dress.items())}
+    # framed by the undressed figure, so a box ticked moves nothing else (CORR-K3D-016)
+    notes.setdefault(raster.FIT, tuple(p for part in drawn.parts for p in part.points))
     return scene.Scene(parts, {k: v for k, v in surfaces.items() if v is not None},
                        drawn.values, drawn.figure, notes)

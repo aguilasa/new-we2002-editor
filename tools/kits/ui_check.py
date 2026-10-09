@@ -41,7 +41,8 @@ WHAT IT JUDGES:
       sleeves drawn without the armband when it is asked FAILS the armband
       judge (K3D-TASK-10: with TEX_14 the armband changes 369 px in a 30x19
       box of the EDT_MOD.BIN player, and the judge wants something changed,
-      in at most ARMBAND_BOX px each way and ARMBAND_SHARE % of the figure,
+      in at most ARMBAND_BOX px each way (ARMBAND_BOX_SHORT in short
+      sleeves, judged too since CORR-K3D-016) and ARMBAND_SHARE % of the figure,
       inside ARM_SIDE and ARM_ROWS of the figure's box -- the armband drawn on
       the torso FAILS it too), the match figure drawn for the dressings FAILS
       the same-figure judge (SAME_FIGURE), a third item in the figure
@@ -117,25 +118,33 @@ SAME_FIGURE = 0.90
 dressing and without, seen from the back: the dressed figure is still the
 EDT_MOD.BIN one (K3D-TASK-10).  Measured on :98 with TEX_14: 0.959 with the
 armband, 0.962 with the long sleeves and with both; the match figure in its
-place (the plant) 0.745."""
+place (the plant) 0.745.  Since the view frames a dressed figure by the
+undressed one (CORR-K3D-016): 0.996 with the armband, 0.973 with the long
+sleeves and with both."""
 ARMBAND_BOX = 40
-"""The most pixels, each way, the armband's difference may span: measured on
-:98 with TEX_14 and long sleeves, on the EDT_MOD.BIN player since K3D-TASK-10,
-369 pixels in a 30x19 box on the arm (on the match figure it was 291 in 24x17,
-KITS-TASK-40, and 337 in 25x18 before, KITS-TASK-47)."""
+"""The most pixels, each way, the long-sleeve armband's difference may span:
+measured on :98 with TEX_14, on the EDT_MOD.BIN player since K3D-TASK-10, 369
+pixels in a 30x19 box on the arm, 367 in 31x19 once the view stopped
+reframing (CORR-K3D-016); on the match figure it was 291 in 24x17,
+KITS-TASK-40, and 337 in 25x18 before, KITS-TASK-47."""
+ARMBAND_BOX_SHORT = 80
+"""The same for the short sleeve, where section 90 takes the whole upper arm
+(section 4) and not a band of it: measured 771 pixels in a 36x63 box on the
+arm (CORR-K3D-016)."""
 ARMBAND_SHARE = 5.0
 """The most, in percent of the figure's pixels, the armband may change
-(measured 1.5 % on the EDT_MOD.BIN player, K3D-TASK-10; 1.3 % on the match
-figure, before and after KITS-TASK-40)."""
+(measured 1.5 % on the EDT_MOD.BIN player, K3D-TASK-10, and 3.1 % in short
+sleeves, CORR-K3D-016; 1.3 % on the match figure, before and after
+KITS-TASK-40)."""
 ARM_SIDE = 0.35
 """The armband's change lies in the outer ARM_SIDE of the figure's box, on
 either side: measured at x 0.74-0.97 of it on the EDT_MOD.BIN player
-(K3D-TASK-10); on the match figure x 0.80-0.99 with the view unmirrored
+(K3D-TASK-10), x 0.74-1.00 in short sleeves (CORR-K3D-016); on the match figure x 0.80-0.99 with the view unmirrored
 (KITS-TASK-40), x 0.01-0.20 while it was mirrored (KITS-TASK-47, CORR-KITS-087)."""
 ARM_ROWS = (0.15, 0.55)
 """...and between these fractions of its height, shoulder to waist: measured
-at y 0.26-0.32 on the EDT_MOD.BIN player (K3D-TASK-10), 0.28-0.33 on the
-match figure."""
+at y 0.26-0.32 on the EDT_MOD.BIN player (K3D-TASK-10), 0.17-0.36 in short
+sleeves (CORR-K3D-016), 0.28-0.33 on the match figure."""
 NOTE_ROWS = 60
 """Bottom rows of a capture that hold the status and the 3D note."""
 TAB_LABEL = (40, 20, 80)
@@ -225,6 +234,11 @@ PLANTS = (
     ("3D set ignored", FIGURE,
      "            scene = api.figure(self.kit, self.set_box.currentData(),\n",
      "            scene = api.figure(self.kit, 1,\n"),
+    ("short-sleeve armband drawn as the plain arm", MATCH,
+     "        one = sections[number]\n        place = places.get((layout.EDT_MOD, index))\n",
+     "        one = sections[4 if number == 90 else number]  # planted: no armband\n"
+     "        place = places.get((layout.EDT_MOD, index))\n",
+     "../core/figure.py"),
     ("armband never put on", MATCH,
      "                               armband=self.armband_box.isChecked(),\n",
      "                               armband=False,  # planted\n"),
@@ -645,16 +659,17 @@ def reset_judge(python, image, env, tmp, app=APP) -> tuple:
     return bad, digests
 
 
-def cli_export(image: str, out: str) -> tuple:
-    """The work bitmap HOVER_TAG as the CLI writes it, decoded here."""
+def cli_export(image: str, out: str, tag: str = HOVER_TAG) -> tuple:
+    """The work bitmap *tag* (set 1, player) as the CLI writes it, decoded here."""
     done = subprocess.run([sys.executable, os.path.join(KITS_DIR, "cli.py"), "export",
-                           "--work-bitmap", "--tag", HOVER_TAG, "--out", out, image],
+                           "--work-bitmap", "--tag", tag, "--out", out, image],
                           capture_output=True, text=True, encoding="utf-8", errors="replace")
     if done.returncode:
         raise BadPicture("cli.py export exited %d: %s" % (done.returncode, done.stderr.strip()))
-    shot = picture(os.path.join(out, HOVER_PNG))
+    name = "TEX_%s_set1_player.png" % tag
+    shot = picture(os.path.join(out, name))
     if shot[3] is None:
-        raise BadPicture("%s is not indexed" % HOVER_PNG)
+        raise BadPicture("%s is not indexed" % name)
     return shot
 
 
@@ -726,16 +741,47 @@ def figure_judge(python, image, env, tmp, app=APP) -> tuple:
     return bad, digests
 
 
+ARMBAND_SLEEVES = (("long sleeves", ["--long-sleeves"], ARMBAND_BOX, (160, 20, 32, 5)),
+                   ("short sleeves", [], ARMBAND_BOX_SHORT, (160, 77, 32, 5)))
+"""The two armbands of the player: 93 on the long sleeve, 90 on the short one
+(the default, which until CORR-K3D-016 no judge looked at).  The last field
+is the zone of the player's work bitmap the band is cut from, (x, y, w, h):
+"armband, long sleeve" and "armband, short sleeve" of `core/zones.py`."""
+ARMBAND_INK = 100
+"""The least pixels of the dressed figure that have to show a colour of the
+band's zone that the undressed figure shows nowhere: the band itself, not
+the arm it rides on re-textured.  Measured on :98 with TEX_14 (CORR-K3D-016):
+367 px in long sleeves, 336 in short; the plain MODEL.BIN arm drawn in place
+of the short-sleeve armband (the plant) shows 0."""
+
+
 def match_judge(python, image, env, tmp, app=APP) -> tuple:
-    """(failures, what was seen) of the player in long sleeves in the 3D tab,
-    without and with the captain's armband: both draw a figure, and the
-    armband changes a small box of it, on an arm (ARM_SIDE, ARM_ROWS), and
-    nothing else."""
+    """(failures, what was seen) of the player in the 3D tab, in each sleeve
+    length of ARMBAND_SLEEVES, without and with the captain's armband: both
+    draw a figure, and the armband changes a small box of it, on an arm
+    (ARM_SIDE, ARM_ROWS), and nothing else.  The view frames a dressed figure
+    by the undressed one, so the change is the armband and not a reframing."""
+    bad, seen = [], []
+    try:
+        work = cli_export(image, os.path.join(tmp, "armband-work"), MATCH_TAG)
+    except (OSError, BadPicture, zlib.error) as exc:
+        return ["the work bitmap of TEX_%s: %s" % (MATCH_TAG, exc)], "-"
+    for label, sleeves, box, zone in ARMBAND_SLEEVES:
+        x0, y0, zw, zh = zone
+        band = {work[2][y * work[0] + x] for y in range(y0, y0 + zh) for x in range(x0, x0 + zw)}
+        more, what = _armband_judge(python, image, env, tmp, app, label, sleeves, box, band)
+        bad += ["%s: %s" % (label, m) for m in more]
+        seen.append("%s %s" % (label, what))
+    return bad, "; ".join(seen)
+
+
+def _armband_judge(python, image, env, tmp, app, label, sleeves, limit, band) -> tuple:
+    """`match_judge` for one sleeve length."""
     shots, bad = {}, []
     for armband in (False, True):
-        out = os.path.join(tmp, "match-%d.png" % armband)
+        out = os.path.join(tmp, "match-%s-%d.png" % (label.split()[0], armband))
         shot, more, _ = capture(python, app, image, ["--tag", MATCH_TAG, "--tab", "3d",
-                                                     "--figure", "0", "--long-sleeves"]
+                                                     "--figure", "0"] + sleeves
                                 + (["--armband"] if armband else []), out, env)
         bad += ["armband %s: %s" % (armband, m) for m in more]
         if shot is None:
@@ -769,8 +815,8 @@ def match_judge(python, image, env, tmp, app=APP) -> tuple:
     top, bottom = (min(ys) - fy0) / fh, (max(ys) - fy0 + 1) / fh
     seen = ("%d px (%.1f %% of the figure) in a %dx%d box, x %.2f-%.2f y %.2f-%.2f of the "
             "figure's box" % ((len(changed), pct) + span + (left, right, top, bottom)))
-    if max(span) > ARMBAND_BOX:
-        bad.append("the armband's change spans %dx%d, over %d" % (span + (ARMBAND_BOX,)))
+    if max(span) > limit:
+        bad.append("the armband's change spans %dx%d, over %d" % (span + (limit,)))
     if not (right <= ARM_SIDE or left >= 1.0 - ARM_SIDE) \
             or top < ARM_ROWS[0] or bottom > ARM_ROWS[1]:
         bad.append("the armband's change is at x %.2f-%.2f y %.2f-%.2f of the figure's box, "
@@ -778,6 +824,12 @@ def match_judge(python, image, env, tmp, app=APP) -> tuple:
                    % ((left, right, top, bottom, ARM_SIDE) + ARM_ROWS))
     if pct > ARMBAND_SHARE:
         bad.append("the armband changes %.1f %% of the figure, over %.1f" % (pct, ARMBAND_SHARE))
+    only = band - set(one[2][y * w + x] for x, y in drawn)
+    ink = sum(1 for x, y in changed if two[2][y * w + x] in only)
+    seen += ", ink %d px" % ink
+    if ink < ARMBAND_INK:
+        bad.append("the band's own colours show on %d px, under %d: the arm changed, "
+                   "the armband is not on it" % (ink, ARMBAND_INK))
     return bad, seen
 
 
@@ -1176,8 +1228,8 @@ def run(python: str, image: str) -> int:
                  "set %d fig %d %s" % (k[0], k[1], v[:12]) for k, v in sorted(digests.items()))),
              bad)
         bad, seen = match_judge(python, image, env, tmp)
-        t.ok("3D TEX_%s: the player in long sleeves is drawn, and the captain's armband "
-             "changes only a box on its arm (%s)" % (MATCH_TAG, seen), bad)
+        t.ok("3D TEX_%s: the player in long and in short sleeves is drawn, and the "
+             "captain's armband changes only a box on its arm (%s)" % (MATCH_TAG, seen), bad)
         bad, seen = same_judge(python, image, env, tmp)
         t.ok("3D TEX_%s from the back: with the armband, the long sleeves or both the "
              "player is the EDT_MOD.BIN figure, silhouette overlap %s (least %.2f)"

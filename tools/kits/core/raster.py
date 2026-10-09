@@ -16,7 +16,10 @@ measured against, never as what is shown.
 
 The camera is the view's: orthographic, model y up and screen y down, screen
 x minus model x (the scene is left-handed), the figure's bounds fitted to the
-smaller side less MARGIN on each edge.
+smaller side less MARGIN on each edge.  A dressed figure is fitted by the
+points of the figure before dressing (`notes["fit"]`, set by
+`figure.dressed_scene`), so ticking a box draws the armband or the sleeve on
+the same frame instead of moving the whole figure (CORR-K3D-016).
 """
 
 from __future__ import annotations
@@ -26,6 +29,8 @@ from dataclasses import dataclass
 
 MARGIN = 0.08
 """Fraction of the target left around the figure (the view's fit)."""
+FIT = "fit"
+"""The scene note holding the points the view is fitted by, when not the parts'."""
 DEPTH, MEAN = "depth", "mean"
 ORDERS = (DEPTH, MEAN)
 """Per-pixel depth, the drawing; per-triangle mean depth, the old one."""
@@ -75,11 +80,18 @@ def draw(drawn, yaw: float, pitch: float, width: int, height: int, triangles,
     parts = drawn.parts
     if not parts:
         return raster
-    centre = drawn.centre()
+    fit = drawn.notes.get(FIT) if isinstance(drawn.notes, dict) else None
+    if fit:
+        centre = tuple((min(p[i] for p in fit) + max(p[i] for p in fit)) / 2.0
+                       for i in range(3))
+    else:
+        centre = drawn.centre()
     turned = [[turn(tuple(p[i] - centre[i] for i in range(3)), yaw, pitch)
                for p in part.points] for part in parts]
-    xs = [p[0] for pts in turned for p in pts]
-    ys = [p[1] for pts in turned for p in pts]
+    framed = [turn(tuple(p[i] - centre[i] for i in range(3)), yaw, pitch)
+              for p in fit] if fit else [p for pts in turned for p in pts]
+    xs = [p[0] for p in framed]
+    ys = [p[1] for p in framed]
     span = max(max(xs) - min(xs), max(ys) - min(ys)) or 1.0
     scale = min(width, height) * (1.0 - 2 * MARGIN) / span
     mx, my = (max(xs) + min(xs)) / 2.0, (max(ys) + min(ys)) / 2.0

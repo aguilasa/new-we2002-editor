@@ -18,6 +18,6 @@
 | [CORR-K3D-013](/docs/tasks/kits-3d/CORR-K3D-013.md) | FRAME_SLACK sozinho não sustenta "mesmo referencial" | K3D-TASK-07 | medium | done | 2026-10-08 |
 | [CORR-K3D-014](/docs/tasks/kits-3d/CORR-K3D-014.md) | --keeper-armband conta figuras cortadas como inteiras (27 contra 23) | K3D-TASK-08 | medium | done | 2026-10-08 |
 | [CORR-K3D-015](/docs/tasks/kits-3d/CORR-K3D-015.md) | "No lugar da 15" do G4 é inferido da geometria, não visto desenhado | K3D-TASK-08 | low | done | 2026-10-08 |
-| [CORR-K3D-016](/docs/tasks/kits-3d/CORR-K3D-016.md) | Braçadeira de manga curta sem juiz no desenho | K3D-TASK-10 | medium | pending | — |
+| [CORR-K3D-016](/docs/tasks/kits-3d/CORR-K3D-016.md) | Braçadeira de manga curta sem juiz no desenho | K3D-TASK-10 | medium | in-progress | — |
 | [CORR-K3D-017](/docs/tasks/kits-3d/CORR-K3D-017.md) | Documentos e docstrings ainda descrevem a figura de partida e o ARM_PIECES antigo | K3D-TASK-10 | medium | done | 2026-10-09 |
 <!-- rite:end -->

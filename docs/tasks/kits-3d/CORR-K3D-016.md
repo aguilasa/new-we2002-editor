@@ -72,3 +72,28 @@ falhas não vazia para "Captain armband" com manga curta, e
 `ctest --test-dir build -R kits_ui` tem de listar uma planta nova que derruba esse juiz.
 
 ## Log de Execução
+
+- 2026-10-09 — triagem: **REPRODUCED**, à mão (a Evidência tem marcadores `<repo>` e escreve
+  arquivos). Na cópia do scratchpad com a 90 trocada pela 4, os três juízes ficavam verdes:
+  `dress ([], 'Number 1197 px, Captain armband 5957 px, …')`, `same ([], …)`, `match ([], …)`.
+- `core/figure.py` + `core/raster.py`: o `dressed_scene` guarda os pontos da figura sem vestir em
+  `notes["fit"]`, e o `raster.draw` enquadra por eles. Marcar uma caixa não reenquadra mais: a
+  diferença da braçadeira no `dress_judge` caiu de 5957 px para 626.
+- `ui_check.py`: o juiz da braçadeira roda nas duas mangas (`ARMBAND_SLEEVES`), com caixa própria
+  para a curta (`ARMBAND_BOX_SHORT`: a 90 toma o braço inteiro, 36x63) e uma asserção nova: as cores
+  da zona da faixa no work bitmap que a figura sem braçadeira não mostra têm de aparecer em ao menos
+  `ARMBAND_INK` px. Planta nova "short-sleeve armband drawn as the plain arm" no `PLANTS`. O
+  `controls.py` ficou como estava: a planta mora no catálogo do `kits_ui`, que é onde o juiz roda.
+- Verificação:
+
+```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits -V
+21:   ok    3D TEX_14: the player in long and in short sleeves is drawn, and the captain's armband changes only a box on its arm (long sleeves 367 px (1.5 % of the figure) in a 31x19 box, x 0.73-0.97 y 0.26-0.32 of the figure's box, ink 367 px; short sleeves 771 px (3.1 % of the figure) in a 36x63 box, x 0.74-1.00 y 0.17-0.36 of the figure's box, ink 336 px)
+21:         plant 'short-sleeve armband drawn as the plain arm': short sleeves: the band's own colours show on 0 px, under 100: the arm changed, the armband is not on it
+21:   ok    plant 'short-sleeve armband drawn as the plain arm' fails the armband judge
+21: kits_ui: 0 failure(s)
+The following tests passed:
+100% tests passed, 0 tests failed out of 4
+$ python3 tools/kits/controls.py | tail -1
+controls: 36 of 36 red
+```
