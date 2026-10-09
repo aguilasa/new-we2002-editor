@@ -62,3 +62,9 @@ Hoje dá 2; depois, 0.
   K3D-TASK-11"), e "quatro plantas … manga sempre visível" virou o apontamento às linhas `plant '…'`
   que o `ui_check.py` imprime, sem contagem à mão.
 - Verificação: `grep -c 'quatro plantas\|manga sempre visível' docs/PLAN-KITS-PY.md` dá 0.
+- **Closed** — commit `2b711d6` (2026-10-09): docs(kits): sweep the plan's checkbox paragraph after K3D-TASK-11
+  - Files (`git show --name-status 2b711d6`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-019.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
