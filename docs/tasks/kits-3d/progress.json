@@ -244,8 +244,8 @@
       "status": "done",
       "done_on": "2026-10-09",
       "done_commit": "b9553a9",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-09",
+      "review_commit": "0f05e56"
     }
   ]
 }
