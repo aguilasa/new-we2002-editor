@@ -97,3 +97,4 @@ Gates:
     - `M tools/kits/selftest.py`
   - **Outside declared files** (`tools/kits/oracle.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/KITS-AJUSTES-3D.md`):
     - `docs/tasks/kits-3d/18-medir-os-22-replay.md`
+- **Reviewed** (2026-10-09) at `4cf6a39`: CORR-K3D-023, CORR-K3D-024, CORR-K3D-025

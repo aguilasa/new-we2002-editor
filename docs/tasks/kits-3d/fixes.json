@@ -287,6 +287,45 @@
       "depends_on": [],
       "done_on": "2026-10-09",
       "done_commit": "7986d19"
+    },
+    {
+      "id": "CORR-K3D-023",
+      "file": "CORR-K3D-023.md",
+      "title": "--replay não imprime o limite de inatividade contra o qual compara",
+      "origin": "K3D-TASK-17",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-024",
+      "file": "CORR-K3D-024.md",
+      "title": "Planta e juiz de foco do replay não testam figura errada, e a margem do G8 não existe",
+      "origin": "K3D-TASK-17",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-025",
+      "file": "CORR-K3D-025.md",
+      "title": "Nota de passagem na K3D-TASK-18 fora do escopo e com afirmação sem saída",
+      "origin": "K3D-TASK-17",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

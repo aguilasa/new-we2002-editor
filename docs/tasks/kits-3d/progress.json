@@ -276,8 +276,8 @@
       "status": "done",
       "done_on": "2026-10-09",
       "done_commit": "f020577",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-09",
+      "review_commit": "4cf6a39"
     },
     {
       "id": "K3D-TASK-18",
