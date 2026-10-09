@@ -2528,6 +2528,20 @@ having turned the figure: the walk sways it by about a degree a frame."""
 PLANT_EDIT_HEAD = 103
 """`--plant-edit-number` expects figures opened with this section, which
 nothing draws."""
+EDIT_EXPECT = {
+    (8, 0): {"head": 34, "family": "goalkeeper", "number": 1, "frames": 30,
+             "tag": "41", "set": 1},
+    (8, 1): {"head": 24, "family": "player", "number": 5, "frames": 30,
+             "tag": "41", "set": 1},
+}
+"""What G7 measured on the EDIT PL. NUM screen, by (slot, row of the list):
+the head section the figure opens with, its family, the number on its back
+panel, the frames the turn took, and the kit the screen wears (K3D-TASK-16,
+`work/kits-oracle/edit-8-0.json` and `edit-8-1.json`).  `edit_number_judge`
+asserts them; a (slot, row) with no entry is reported, not judged
+(CORR-K3D-020)."""
+EDIT_FRAMES_SLACK = 2
+"""Frames the turn may take more or fewer than `EDIT_EXPECT` says."""
 EDIT_ROW_MOVED = 0.005
 """How much of the screen a row down the list has to change for the press to
 count: measured 0.0148 in slot 8 (the cursor's box and the row's colours),
@@ -2640,14 +2654,32 @@ def edit_panels(words, disc_words, width: int, height: int, shift: int = 0) -> l
     return out
 
 
-def edit_number_judge(report: dict, head: int, panels: list) -> list:
+def edit_number_judge(report: dict, head: int, panels: list, expect: dict = None) -> list:
     """Failures of what G7 asks: some figure opens at *head*; every figure
     is one family and has its own translations; the turn moved the torso and
     settled; and after it the panel of the family shown -- the torso gap of
     that figure, `BACK_COPY`'s corner shifted down by the gap -- holds the
     number, read by the match's rule (`panels_judge`).  The other figure's
-    panel is only reported: the screen writes its shirt back with no digit."""
+    panel is only reported: the screen writes its shirt back with no digit.
+    With *expect* (an `EDIT_EXPECT` entry) the family, the number, the
+    frames of the turn and the kit have to be the measured ones too."""
     out = []
+    if expect is not None:
+        out += ["figure %d is the %s, %s expected" % (f["figure"], f["family"], expect["family"])
+                for f in report["figures"]
+                if f["family"] not in ("neither", expect["family"])]
+        turn = report.get("turn") or {}
+        if abs(turn.get("frames", 0) - expect["frames"]) > EDIT_FRAMES_SLACK:
+            out.append("the turn took %d frame(s), %d expected (slack %d)"
+                       % (turn.get("frames", 0), expect["frames"], EDIT_FRAMES_SLACK))
+        if (report.get("tag"), report.get("set")) != (expect["tag"], expect["set"]):
+            out.append("the screen wears TEX_%s set %s, TEX_%s set %s expected"
+                       % (report.get("tag"), report.get("set"), expect["tag"], expect["set"]))
+        numbers = [p["number"] for p in panels
+                   if ("player", "goalkeeper")[p["cell"][0]] == expect["family"]]
+        if numbers and numbers != [expect["number"]]:
+            out.append("the %s's back panel holds %s, number %d expected"
+                       % (expect["family"], ", ".join(map(str, numbers)), expect["number"]))
     if not any(f["head"] == head for f in report["figures"]):
         out.append("no figure opened at section %d" % head)
     out += ["figure %d: a translation %.0f from the figure's median, over %d"
@@ -2784,7 +2816,11 @@ def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: boo
     geometry = _figure.read_geometry(image)
     lists = scene._figure_sections(geometry)
     names = scene.piece_names(geometry)
-    head = PLANT_EDIT_HEAD if plant else None
+    expect = EDIT_EXPECT.get((slot, player))
+    head = PLANT_EDIT_HEAD if plant else expect["head"] if expect else None
+    if expect is None:
+        print("  no measured expectation for slot %d row %d (EDIT_EXPECT): the head, family, "
+              "number and turn are printed, not judged" % (slot, player))
     reports = {}
     for phase in ("front", "turn"):
         figures = edit_figures(edit_pieces(kept[phase]))
@@ -2831,7 +2867,8 @@ def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: boo
         print("  the per-piece matrix load stopped firing after %d stop(s), %d whole figure(s): "
               "once turned, the figure is not drawn through it any more"
               % (len(kept["turn"]), len(turn_yaws)))
-    report = dict(reports["front"], turn=turn, turn_frames=len(turn_yaws), turn_ended=ended)
+    report = dict(reports["front"], turn=turn, turn_frames=len(turn_yaws), turn_ended=ended,
+                  tag=kept.get("tag"), set=kept.get("set"))
     report["figures"] = reports["front"]["figures"] + reports["turn"]["figures"]
     disc_words = None
     if kept.get("tag"):
@@ -2881,7 +2918,7 @@ def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: boo
     if plant:
         print("  PLANT  figures expected to open at section %d, and every panel read one row up"
               % PLANT_EDIT_HEAD)
-    failures = edit_number_judge(report, head, panels)
+    failures = edit_number_judge(report, head, panels, expect)
     for line in failures:
         print("  FAIL  %s" % line)
     if not failures:

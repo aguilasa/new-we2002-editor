@@ -64,3 +64,31 @@ Rodar o heredoc acima e depois
 imprimir um FAIL sobre a cabeça e sair 1. Hoje imprime ok e sai 0.
 
 ## Log de Execução
+
+- 2026-10-09 — triagem: **REPRODUCED**, à mão (o heredoc da Evidência grava `head24.json` no
+  diretório corrente; refeito com saída no scratchpad). Com a cabeça 34 trocada por 24 na captura,
+  `--edit-number 8 --frame-json head24.json` imprimia `ok    the goalkeeper opens at section 24, …`
+  e saía 0.
+- `oracle.py`: `EDIT_EXPECT` por (slot, linha) — cabeça, família, número, quadros do giro e kit,
+  lidos de `edit-8-0.json` e `edit-8-1.json` —, e o `edit_number_judge` os afirma (o quadro com folga
+  `EDIT_FRAMES_SLACK = 2`). A cabeça esperada vem da tabela, não da captura; (slot, linha) sem
+  entrada é impressa como não julgada.
+- `selftest.py`: casos de família nenhuma, família trocada, outro número, outro tamanho de giro e
+  outro kit. `controls.py`: `oracle-edit-number-family-blind` e `oracle-edit-number-number-unasked`.
+- Verificação:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py --edit-number 8 --frame-json <scratch>/head24.json; echo $?
+  FAIL  no figure opened at section 34
+1
+$ … --edit-number 8 --frame-json work/kits-oracle/edit-8-0.json
+  ok    the goalkeeper opens at section 34, Circle turned it -166 degrees in 30 frame(s), and its back panel holds number 1
+$ … --edit-number 8 --player 1 --frame-json work/kits-oracle/edit-8-1.json
+  ok    the player opens at section 24, Circle turned it -168 degrees in 30 frame(s), and its back panel holds number 5
+$ python3 tools/kits/controls.py --only oracle-edit-number-family-blind | tail -1
+controls: 1 of 1 red
+$ python3 tools/kits/controls.py --only oracle-edit-number-number-unasked | tail -1
+controls: 1 of 1 red
+```
+
+  `selftest.py`: `kits_selftest: 0 failure(s)`.

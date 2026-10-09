@@ -287,6 +287,22 @@ CONTROLS = (
         "(K3D-TASK-16); a judge that never asks for it passes the plant's 103",
     ),
     Control(
+        "oracle-edit-number-family-blind", "kits/oracle.py", "edit_number_judge",
+        '            for f in report["figures"] if f["family"] == "neither"]',
+        '            for f in report["figures"] if False]',
+        "FAIL  oracle --edit-number: a figure of no family fails",
+        "a figure whose sections belong to neither list is no EDT_MOD.BIN figure; "
+        "the check was never seen red before CORR-K3D-020",
+    ),
+    Control(
+        "oracle-edit-number-number-unasked", "kits/oracle.py", "edit_number_judge",
+        '        if numbers and numbers != [expect["number"]]:',
+        '        if False:',
+        "FAIL  oracle --edit-number: another number on the measured panel fails",
+        "the number on the back is what G7 measured (1 for Marcos, 5 for Edmilson); "
+        "until CORR-K3D-020 any number the rule read passed",
+    ),
+    Control(
         "oracle-arm-side-flipped", "kits/oracle.py", "arm_side",
         '    return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"',
         '    return "a" if sum(p[2] for p in points) / len(points) > 0 else "b"',

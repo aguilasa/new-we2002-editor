@@ -1230,6 +1230,29 @@ def _oracle_checks(c) -> None:
              report, 34, [dict(panel, unexplained=5)])))
     c.ok("oracle --edit-number: no panel after the turn fails",
          any("no panel" in f for f in oracle.edit_number_judge(report, 34, [])))
+    # CORR-K3D-020: what G7 measured is asserted, not only printed.
+    c.ok("oracle --edit-number: a figure of no family fails",
+         any("of no family" in f for f in oracle.edit_number_judge(
+             dict(report, figures=[dict(report["figures"][0], family="neither")]),
+             34, [panel])))
+    expect = dict(oracle.EDIT_EXPECT[(8, 0)], frames=9)
+    seen = dict(report, tag=expect["tag"], set=expect["set"])
+    c.ok("oracle --edit-number: the measured head, family, number, turn and kit hold",
+         oracle.edit_number_judge(seen, 34, [panel], expect) == [],
+         "; ".join(oracle.edit_number_judge(seen, 34, [panel], expect)))
+    c.ok("oracle --edit-number: the player where the goalkeeper was measured fails",
+         any("goalkeeper expected" in f for f in oracle.edit_number_judge(
+             dict(seen, figures=[dict(seen["figures"][0], family="player")]),
+             34, [panel], expect)))
+    c.ok("oracle --edit-number: another number on the measured panel fails",
+         any("number 1 expected" in f for f in oracle.edit_number_judge(
+             seen, 34, [dict(panel, number=7)], expect)))
+    c.ok("oracle --edit-number: a turn of another length fails",
+         any("took 9 frame(s), 30 expected" in f for f in oracle.edit_number_judge(
+             seen, 34, [panel], dict(expect, frames=30))))
+    c.ok("oracle --edit-number: another kit on the screen fails",
+         any("TEX_41 set 1 expected" in f for f in oracle.edit_number_judge(
+             dict(seen, tag="00"), 34, [panel], expect)))
     # --edt-arms (K3D-TASK-07): an arm laid on four EDT-like pieces -- two
     # cylinders a side, the upper arm over y -40..40 and the forearm over
     # 20..120, side a below z 0 and side b its mirror -- goes on its own piece,
