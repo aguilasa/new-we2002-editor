@@ -222,6 +222,32 @@
       "depends_on": [],
       "done_on": "2026-10-09",
       "done_commit": "9918845"
+    },
+    {
+      "id": "CORR-K3D-018",
+      "file": "CORR-K3D-018.md",
+      "title": "Corpo da K3D-TASK-11 não declara oracle.py, selftest.py e PLAN-KITS-PY.md",
+      "origin": "K3D-TASK-11",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-019",
+      "file": "CORR-K3D-019.md",
+      "title": "PLAN-KITS-PY ainda diz braçadeira do goleiro desligada e quatro plantas",
+      "origin": "K3D-TASK-11",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

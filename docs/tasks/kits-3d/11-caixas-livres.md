@@ -74,3 +74,4 @@ Gates:
     - `M tools/kits/ui/app.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-09) at `c70d127`: CORR-K3D-018, CORR-K3D-019

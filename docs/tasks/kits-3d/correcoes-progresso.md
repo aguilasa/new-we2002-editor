@@ -20,4 +20,6 @@
 | [CORR-K3D-015](/docs/tasks/kits-3d/CORR-K3D-015.md) | "No lugar da 15" do G4 é inferido da geometria, não visto desenhado | K3D-TASK-08 | low | done | 2026-10-08 |
 | [CORR-K3D-016](/docs/tasks/kits-3d/CORR-K3D-016.md) | Braçadeira de manga curta sem juiz no desenho | K3D-TASK-10 | medium | done | 2026-10-09 |
 | [CORR-K3D-017](/docs/tasks/kits-3d/CORR-K3D-017.md) | Documentos e docstrings ainda descrevem a figura de partida e o ARM_PIECES antigo | K3D-TASK-10 | medium | done | 2026-10-09 |
+| [CORR-K3D-018](/docs/tasks/kits-3d/CORR-K3D-018.md) | Corpo da K3D-TASK-11 não declara oracle.py, selftest.py e PLAN-KITS-PY.md | K3D-TASK-11 | medium | pending | — |
+| [CORR-K3D-019](/docs/tasks/kits-3d/CORR-K3D-019.md) | PLAN-KITS-PY ainda diz braçadeira do goleiro desligada e quatro plantas | K3D-TASK-11 | medium | pending | — |
 <!-- rite:end -->
