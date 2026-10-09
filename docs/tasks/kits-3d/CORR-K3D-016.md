@@ -97,3 +97,11 @@ The following tests passed:
 $ python3 tools/kits/controls.py | tail -1
 controls: 36 of 36 red
 ```
+- **Closed** — commit `529825d` (2026-10-09): fix(kits): frame a dressed figure by the undressed one and judge the short-sleeve armband
+  - Files (`git show --name-status 529825d`):
+    - `M docs/tasks/kits-3d/CORR-K3D-016.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/core/raster.py`
+    - `M tools/kits/ui_check.py`
