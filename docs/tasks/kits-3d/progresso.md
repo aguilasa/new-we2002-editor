@@ -35,6 +35,9 @@ graph TD
     K3D_TASK_14["K3D-TASK-14<br/>A vista mostra o rasterizador"]
     K3D_TASK_15["K3D-TASK-15<br/>Fechamento da fase 5"]
   end
+  subgraph phase_6["Fase 6"]
+    K3D_TASK_16["K3D-TASK-16<br/>Medir a tela EDIT PL. NUM no slot 8: modelo, número nas costas e giro"]
+  end
   K3D_TASK_01 --> K3D_TASK_03
   K3D_TASK_02 --> K3D_TASK_03
   K3D_TASK_04 --> K3D_TASK_05
@@ -53,6 +56,7 @@ graph TD
   K3D_TASK_10 --> K3D_TASK_11
   K3D_TASK_10 --> K3D_TASK_12
   K3D_TASK_11 --> K3D_TASK_12
+  K3D_TASK_12 --> K3D_TASK_16
 ```
 <!-- rite:end -->
 
@@ -76,6 +80,7 @@ graph TD
 | [K3D-TASK-10](/docs/tasks/kits-3d/10-duas-figuras.md) | Seletor só com player e goalkeeper, vestidos pela regra medida | 4 | implementação | K3D-TASK-07 | done | 2026-10-08 | 2026-10-08 |
 | [K3D-TASK-11](/docs/tasks/kits-3d/11-caixas-livres.md) | Number, braçadeira e manga longa livres nas duas figuras | 4 | implementação | K3D-TASK-05, K3D-TASK-08, K3D-TASK-10 | done | 2026-10-09 | 2026-10-09 |
 | [K3D-TASK-12](/docs/tasks/kits-3d/12-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | closing | K3D-TASK-10, K3D-TASK-11 | done | 2026-10-09 | 2026-10-09 |
+| [K3D-TASK-16](/docs/tasks/kits-3d/16-medir-tela-edit-pl-num.md) | Medir a tela EDIT PL. NUM no slot 8: modelo, número nas costas e giro | 6 | investigação | K3D-TASK-12 | pending | — | — |
 <!-- rite:end -->
 
 ## Notes
