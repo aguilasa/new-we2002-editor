@@ -98,7 +98,7 @@ task de investigação compara as duas figuras e escreve a regra aqui; a impleme
 
 **Medido (K3D-TASK-07, 2026-10-08): transplante, sem peça equivalente.** Cada seção de manga e de
 braçadeira do `MODEL.BIN` entra no lugar de uma peça de braço do `EDT_MOD.BIN` e é desenhada com a
-matriz e o lugar que a figura dá a essa peça. A tabela é `ARM_PIECES` de `tools/kits/oracle.py`, e
+matriz e o lugar que a figura dá a essa peça. A tabela é `ARM_PIECES` de `tools/kits/core/figure.py` (desde a K3D-TASK-10; o `oracle.py` a importa), e
 quem a mede e afirma é:
 
 ```sh

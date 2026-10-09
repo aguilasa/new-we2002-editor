@@ -20,8 +20,10 @@ build it.
     kit.palette_grid(palette)        # 256 PaletteEntry(index, bgr555, rgba)
     api.zone_at(x, y)                # the map's Zone at a work-bitmap pixel, or None
     api.confront_zones(uv_report)    # section 4.6: Confrontation, `ok` the verdict
-    api.figure(kit, kit_set, figure, geometry_path=None, frame=None)
-                                     # the looks Scene of the figure in the kit;
+    api.figure(kit, kit_set, figure, geometry_path=None, frame=None,
+               armband=False, sleeves="short")
+                                     # the looks Scene of the figure in the kit,
+                                     # MODEL.BIN arms put on by ARM_PIECES;
                                      # geometry from WE2002_LOOKS_IMAGE when no path
     api.match_figure(kit, kit_set, armband=False, sleeves="long", figure="outfield",
                      view="torso")   # the MODEL.BIN match figure, in its measured pose

@@ -7,7 +7,8 @@ looks guard trusts (section 2.1); the kit comes from wherever the user took it,
 as the bytes `tex` already put behind the guard of form, so a TEX off a patch
 or out of a file is drawn on the trusted body.
 
-    scene = figure.scene_of(kit, kit_set, figure, geometry_path=None, frame=None)
+    scene = figure.scene_of(kit, kit_set, figure, geometry_path=None, frame=None,
+                            armband=False, sleeves="short")
 
 `geometry_path=None` means `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry`
 says so in a sentence.  A disc the looks guard refuses is `GeometryRefused`.

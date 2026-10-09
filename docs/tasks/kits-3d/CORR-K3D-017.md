@@ -64,3 +64,11 @@ Os dois têm de não imprimir nada, e a §4.3 do plano (perto da linha 793) tem 
 nota da K3D-TASK-10.
 
 ## Log de Execução
+
+- 2026-10-09 — triagem inline: **REPRODUCED**. Os três `grep` da Evidência casavam
+  (`KITS-AJUSTES-3D.md:101`, `PLAN-KITS-PY.md:793`, `api.py:23` e `figure.py:10`).
+- G3 aponta `ARM_PIECES` para `tools/kits/core/figure.py`; a §4.3 do plano ganhou a nota datada da
+  K3D-TASK-10 logo abaixo do título do parágrafo; os docstrings de módulo de `api.py` e `figure.py`
+  trazem `armband=False, sleeves="short"`, como as assinaturas (`api.py:99`, `figure.py:84`).
+- Verificação: os dois `grep` não imprimem nada; `grep -n "K3D-TASK-10" docs/PLAN-KITS-PY.md` acha a
+  nota na §4.3.

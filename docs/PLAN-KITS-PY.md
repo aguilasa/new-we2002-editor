@@ -791,6 +791,10 @@ que refaz: `python tools/kits/oracle.py --match-pose 5`, com
 figuras de um quadro: a pose de um instante de corrida, não um ciclo.
 
 **A figura de partida na aba 3D, desde 2026-10-06 ([KITS-TASK-47](/docs/tasks/concluidos/kits/47-figura-partida-aba-3d.md)).**
+*Nota de 2026-10-08 ([K3D-TASK-10](/docs/tasks/kits-3d/10-duas-figuras.md)): a janela não desenha mais
+a figura de partida. A aba 3D mostra só `player` e `goalkeeper` do `EDT_MOD.BIN`, vestidos com as
+seções de manga e braçadeira do `MODEL.BIN` pela tabela `ARM_PIECES`. O núcleo (`api.match_figure`)
+e o `--match-silhouette` continuam; o que este parágrafo diz da aba é registro.*
 A pose que a aba lê é versionada em `tools/kits/core/match_pose.json`, escrita
 por `python tools/kits/oracle.py --match-pose 5 --write` e nunca à mão. O
 `work/kits-pose/` continua sendo a saída de cada corrida. O núcleo
