@@ -429,6 +429,52 @@ imprime.
 
 **Pedido também (usuário, 2026-10-08):** este trabalho vem antes de G3 e G4.
 
+## G7 — Tela EDIT PL. NUM: o jogo desenhando o número e o giro
+
+**Relato (usuário, 2026-10-09).** Em EDIT MODE → EDIT PL. NUM → uma seleção, o jogo abre a tela
+"背番号エディット" (captura do usuário em `/home/ingmar/Pictures/2026-10-09_14-34.png`): a lista
+dos 23 do time à esquerda, um boneco 3D no painel central e a grade de números à direita. O
+boneco abre **de frente**; ao confirmar um jogador ele **gira para as costas** e fica de costas com
+o **número à mostra**. O state está no **slot 8** do DuckStation (Brasil; Marcos, GK nº 1,
+selecionado e de frente). A cópia mestra vai para `work/kits-states/SLPM-87056_8.sav`.
+
+**O que a tela pode responder, e que hoje vem de fonte pior:**
+
+- **o número nas costas desenhado fora de partida**, com o painel 20×24. Hoje a regra do número
+  vem só do slot 5, uma partida (§4.7 do PLAN-KITS-PY, KITS-TASK-42);
+- **o giro frente→costas**, com matriz por quadro. A aba gira por conta própria; o jogo nunca foi
+  medido girando uma figura parada;
+- **uma pose parada**, de frente e de costas, das duas figuras. A `LOOKS SET` só dá a caminhada;
+- **qual família de modelo** a tela usa — `EDT_MOD.BIN`, como a `LOOKS SET`, ou o `MODEL.BIN` de
+  partida (torso 2, 56 ou 13) — e com que kit, paleta e mangas, no goleiro e no jogador de linha.
+  Se for `MODEL.BIN` com o goleiro em 56, esta tela pode ser onde a 91 ou a 94 (G4, "não visto")
+  aparecem.
+
+**Decidido (usuário, 2026-10-09): investigar primeiro, numa task só.** A task mede e escreve o
+que achou, inclusive as negativas; o que virar desenho na aba vira task nova, a partir do medido.
+
+**O que a task mede.** Cada número sai de uma opção versionada do `oracle.py`,
+`--edit-number SLOT [--player ROW]`, com `--plant-edit-number` como controle:
+
+1. **Carga e captura** do slot 8 pela cópia mestra (`load_slot`), com captura da tela.
+2. **Família do modelo e ordem das seções, de frente:** as paradas na carga de matriz
+   (`matrix_stops`), cortadas nas raízes do `MODEL.BIN` (2, 56, 13) e nas do `EDT_MOD.BIN`, com a
+   ordem `xN …` por figura, como o `--attach-matrix` imprime.
+3. **Kit, paleta e mangas:** a página de uniforme em VRAM e a linha de CLUT (486 jogador, 488
+   goleiro); as seções de braço na ordem dizem a manga e se há braçadeira (90, 93, 92 — ou 91, 94).
+4. **Pose parada e câmera:** a matriz por peça da parada de frente, em `work/kits-pose/`, e a
+   câmera por `camera_from_pieces`.
+5. **O giro:** confirmar o jogador e colher as paradas quadro a quadro até a figura parar de
+   costas — quantos quadros, o ângulo por quadro, e se a câmera muda. Em `work/kits-oracle/`.
+6. **O número nas costas:** com a figura de costas, os painéis da página de uniforme pelo leitor
+   de `--back … --panels` — o painel usado, os dígitos e as posições, contra `DIGIT_Y`,
+   `DIGIT_STEP` e `BACK_COPY` do `core/figure.py`. O esperado é o do slot 5; divergência é
+   resultado.
+7. **Jogador de linha:** `--player ROW` desce a lista ROW vezes antes de confirmar (Marcos é a
+   linha 0; Edmilson, CB 5, a linha 1) e repete os itens 2 a 6.
+
+O que não der para medir fica escrito como negativa, com o comando e a saída.
+
 ## Para o ciclo
 
 **Ordem sugerida:**

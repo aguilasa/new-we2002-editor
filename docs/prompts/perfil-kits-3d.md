@@ -20,12 +20,13 @@ which commands search instead of reading whole.
 - **Profundidade por pixel (z-buffer)** no desenho da aba 3D, não a ordem do jogo: a figura inteira em qualquer giro (usuário, 2026-10-08; [G6](/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel)).
 - **O rasterizador fica no núcleo**: z-buffer, UV interpolado por pixel a partir da tela (cobre o UV degenerado) e texel mais próximo. A vista e o `cli.py holes` usam o mesmo código (usuário, 2026-10-08; [G6](/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel)).
 - **A fase 5 (G6) roda antes da K3D-TASK-07** (usuário, 2026-10-08).
+- **A tela EDIT PL. NUM (slot 8) é investigada primeiro, numa task só**; o que virar desenho vira task nova a partir do medido (usuário, 2026-10-09; [G7](/docs/KITS-AJUSTES-3D.md#g7--tela-edit-pl-num-o-jogo-desenhando-o-número-e-o-giro)).
 
 ## Sources of truth
 
 <!-- Plan sections, specs, reference outputs. Items point here through `source_of_truth`. -->
 
-- [docs/KITS-AJUSTES-3D.md](/docs/KITS-AJUSTES-3D.md): o plano do ciclo, com as lacunas G1 a G5 encontradas na aba 3D.
+- [docs/KITS-AJUSTES-3D.md](/docs/KITS-AJUSTES-3D.md): o plano do ciclo, com as lacunas G1 a G6 encontradas na aba 3D e a investigação G7.
 - [docs/PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md): o plano do ciclo `kits`, já arquivado. Valem o [§0](/docs/PLAN-KITS-PY.md#0), o [§3.4](/docs/PLAN-KITS-PY.md#3.4) (interface), o [§4.3](/docs/PLAN-KITS-PY.md#4.3) (manga longa e braçadeira, medidas) e o [§4.7](/docs/PLAN-KITS-PY.md#4.7) (as costas e o número, medidos).
 
 ## Generated artifacts
@@ -85,3 +86,11 @@ which commands search instead of reading whole.
 - As decisões reabertas (KITS-TASK-37, 40 e 47) aparecem datadas no plano.
 - O `kits_ui` cobre as 8 combinações nas 2 figuras, com uma planta por caixa.
 - `ctest -R kits` 4/4 e `controls.py` todo vermelho.
+
+### Fase 6 — tela EDIT PL. NUM (G7)
+
+- Todo número escrito em G7 sai de `oracle.py --edit-number`, colado da HEAD, e não de sonda.
+- Negativa é resultado e não bloqueia a task; só a cópia mestra ausente bloqueia
+  (`rite mark … blocked --unblocked-by "test -f work/kits-states/SLPM-87056_8.sav"`).
+- `--plant-edit-number` visto saindo 1, e o controle novo no catálogo do `controls.py`, vermelho.
+- `ctest -R kits` 4/4 sem *skipped* e `controls.py` todo vermelho.
