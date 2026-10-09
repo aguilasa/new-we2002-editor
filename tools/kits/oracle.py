@@ -452,7 +452,8 @@ down (`--slot 5`, Norway against Ecuador).  A kit page in a match also holds
 4-bit graphics that are no kit, and the CLUT is what tells them apart."""
 KIT_BITS = 8
 STATES_DIR = os.path.join("work", "kits-states")
-"""The master copies of this cycle's match states (slots 3 to 5)."""
+"""The master copies of the game states that are not the LOOKS SET's: the
+match slots 3 to 7 and the EDIT PL. NUM screen in slot 8 (K3D-TASK-16)."""
 IMAGE_HEIGHT = 128
 TEXTURED_POLYGON_FAMILY = 1
 
@@ -1129,11 +1130,15 @@ def resident_models(game, image_path: str) -> dict:
     return out
 
 
-def matrix_stops(game, maps, count: int = MATRIX_STOPS) -> list:
+def matrix_stops(game, maps, count: int = MATRIX_STOPS, partial: bool = False,
+                 wait: int = None) -> list:
     """*count* stops at the per-piece matrix load, each as {"named": (file,
     section) or None, "rotation", "translation"}, in drawing order.  The name
     is what the live pointers say, which -- the `looks` measured -- is the
-    piece drawn BEFORE the matrix (`DRAW_LAG`)."""
+    piece drawn BEFORE the matrix (`DRAW_LAG`).  When the load stops firing
+    within *wait* seconds (`WATCH_SECONDS`), the run is refused -- or, with
+    *partial*, returned as far as it got (a screen that stops drawing the
+    figure this way is what `--edit-number` measures, G7)."""
     import who_writes
 
     import oracle as looks_oracle  # tools/looks
@@ -1147,7 +1152,9 @@ def matrix_stops(game, maps, count: int = MATRIX_STOPS) -> list:
     try:
         for _ in range(count):
             client.call("continue")
-            if not looks_oracle._wait_for_hit(game, looks_oracle.WATCH_SECONDS):
+            if not looks_oracle._wait_for_hit(game, wait or looks_oracle.WATCH_SECONDS):
+                if partial:
+                    break
                 raise RuntimeError("%s stopped %d time(s) and then stopped stopping"
                                    % (who_writes.hx(layout.POSE_PIECE_MATRIX), len(out)))
             registers = client.call("read_registers", group="gpr")
@@ -2492,6 +2499,402 @@ def run_keeper_armband(slot: int, cue: str, cache=None, plant=False) -> int:
     return 1 if failures else 0
 
 
+# --- G7: the EDIT PL. NUM screen -------------------------------------------
+
+EDIT_HEADS = (24, 34)
+"""The MODEL.BIN sections an EDT_MOD.BIN figure opens with: 24 is the head
+the LOOKS SET draws (`pieces.HEAD_SECTION`) and the EDIT PL. NUM screen's
+outfield player, 34 the one its goalkeeper opens with (slot 8, K3D-TASK-16)."""
+EDIT_STOPS = 180
+"""Matrix stops `--edit-number` takes of the still figure: 15 frames of 12."""
+EDIT_TURN_STOPS = 1200
+"""Matrix stops it takes after the confirming press, at most: 100 frames,
+which have to hold the whole turn and the settling after it.  The run ends
+earlier when the load stops firing for `EDIT_TURN_WAIT` seconds, and how
+many stops it got is reported: in slot 8 the per-piece matrix load stops
+once the figure has turned."""
+EDIT_TURN_WAIT = 20
+EDIT_YAW_STEP = 3.0
+"""Degrees of torso yaw a frame has to move before it counts as turning:
+the walk sways the torso by up to two degrees a frame (slot 8, front: -9.9
+to -11.4), the turn moves it by 5.6 (4.2 once)."""
+EDIT_BUTTONS = ("Circle", "Cross")
+"""The buttons tried to confirm a player, in this order, the state reloaded
+before each; the one that turns the figure is reported.  Measured first the
+other way round: on this disc Cross leaves the screen for the team list."""
+EDIT_TURN_LEAST = 90.0
+"""Degrees the torso has to turn, start to end, before a press counts as
+having turned the figure: the walk sways it by about a degree a frame."""
+PLANT_EDIT_HEAD = 103
+"""`--plant-edit-number` expects figures opened with this section, which
+nothing draws."""
+EDIT_ROW_MOVED = 0.005
+"""How much of the screen a row down the list has to change for the press to
+count: measured 0.0148 in slot 8 (the cursor's box and the row's colours),
+under the 0.02 the looks oracle asks of a press by default."""
+
+
+def edit_pieces(stops, lag: int = 1) -> list:
+    """`matrix_pieces` keeping the file: the matrix of stop k belongs to the
+    (file, section) the pointers name *lag* stops later, each as {"file",
+    "section", "matrix"}; a stop naming nothing or several is (None, None)."""
+    out = []
+    for k in range(len(stops) - lag):
+        named = stops[k + lag]["named"]
+        file, section = (named[0][0], named[0][1]) if len(named) == 1 else (None, None)
+        out.append({"file": file, "section": section,
+                    "matrix": (tuple(stops[k]["rotation"]), tuple(stops[k]["translation"]))})
+    return out
+
+
+def edit_figures(pieces, heads=EDIT_HEADS) -> list:
+    """The pieces cut into figures, each opening at a head section of
+    MODEL.BIN (*heads*) and running to the piece before the next head.  The
+    pieces before the first head and after the last are cut off."""
+    starts = [k for k, p in enumerate(pieces)
+              if p["file"] == layout.MODEL and p["section"] in heads]
+    return [pieces[a:b] for a, b in zip(starts, starts[1:])]
+
+
+def piece_yaw(matrix) -> float:
+    """The turn about the view's vertical of one piece, in degrees: where the
+    piece's own x axis points in the view's x-z plane (the rotation is row
+    major, so that axis is the first column)."""
+    import math
+
+    rotation = matrix[0]
+    return math.degrees(math.atan2(rotation[6], rotation[0]))
+
+
+def figure_family(figure, lists: dict) -> str:
+    """"player" or "goalkeeper" by which EDT_MOD.BIN list most of the figure's
+    sections belong to (`scene._figure_sections`), else "neither"."""
+    votes = {}
+    for p in figure:
+        if p["file"] != layout.EDT_MOD:
+            continue
+        for index, members in lists.items():
+            if p["section"] in members:
+                votes[index] = votes.get(index, 0) + 1
+    if not votes:
+        return "neither"
+    return ("player", "goalkeeper")[max(votes, key=votes.get)]
+
+
+def figure_torso(figure, names: dict):
+    """The piece `pieces.py` names the torso, else the first EDT_MOD.BIN piece."""
+    import pieces
+
+    for p in figure:
+        if names.get((p["file"], p["section"])) == pieces.TORSO:
+            return p
+    return next((p for p in figure if p["file"] == layout.EDT_MOD), figure[0])
+
+
+def edit_turn(yaws: list, step: float = EDIT_YAW_STEP) -> dict:
+    """What a run of torso yaws, one per frame, says about a turn: the first
+    unbroken run of frames moving *step* degrees or more -- the yaw it starts
+    and ends at, the frames it took and their steps.  What comes after the
+    run (the walk's sway, on the back) is not the turn."""
+    def delta(k):
+        return (yaws[k] - yaws[k - 1] + 180.0) % 360.0 - 180.0
+
+    moving = [k for k in range(1, len(yaws)) if abs(delta(k)) >= step]
+    if not moving:
+        return {"start": yaws[0] if yaws else None, "end": yaws[-1] if yaws else None,
+                "first": None, "last": None, "frames": 0, "steps": []}
+    run = [moving[0]]
+    for k in moving[1:]:
+        if k != run[-1] + 1:
+            break
+        run.append(k)
+    return {"start": yaws[run[0] - 1], "end": yaws[run[-1]], "first": run[0],
+            "last": run[-1], "frames": len(run), "steps": [delta(k) for k in run]}
+
+
+def turned_through(turn: dict, least: float = EDIT_TURN_LEAST) -> bool:
+    """Whether a run of yaws turned the torso by *least* degrees or more."""
+    if not turn["frames"]:
+        return False
+    return abs((turn["end"] - turn["start"] + 180.0) % 360.0 - 180.0) >= least
+
+
+def edit_panels(words, disc_words, width: int, height: int, shift: int = 0) -> list:
+    """The back panels of a kit page that is not a match's grid: every block
+    of pixels differing from the disc that is a panel's size is read as one,
+    at its own corner, against the shirt back of the figure its half of the
+    page belongs to.  *shift* moves the cell that many rows (the plant)."""
+    glyph_set, ground = glyphs(words, width)
+    out = []
+    for x0, y0, x1, y1, pixels in diff_blocks(words, disc_words, width, height):
+        if (x1 - x0 + 1, y1 - y0 + 1) != (PANEL_W, PANEL_H):
+            continue
+        figure = 0 if x0 < width else 1
+        cell = (figure, x0, y0 + shift)
+        sx, sy = BACK_COPY[figure]
+        back = [[v & 0x7F for v in row]
+                for row in back_indices(words, width, (sx, sy, PANEL_W, PANEL_H))]
+        one = read_panel(words, width, cell, back, glyph_set, ground)
+        one["pixels"] = pixels
+        out.append(one)
+    return out
+
+
+def edit_number_judge(report: dict, head: int, panels: list) -> list:
+    """Failures of what G7 asks: some figure opens at *head*; every figure
+    is one family and has its own translations; the turn moved the torso and
+    settled; and after it the panel of the family shown -- the torso gap of
+    that figure, `BACK_COPY`'s corner shifted down by the gap -- holds the
+    number, read by the match's rule (`panels_judge`).  The other figure's
+    panel is only reported: the screen writes its shirt back with no digit."""
+    out = []
+    if not any(f["head"] == head for f in report["figures"]):
+        out.append("no figure opened at section %d" % head)
+    out += ["figure %d: a translation %.0f from the figure's median, over %d"
+            % (f["figure"], f["spread"], FIGURE_SPREAD)
+            for f in report["figures"] if f["spread"] > FIGURE_SPREAD]
+    out += ["figure %d is of no family: %s" % (f["figure"], f["order"])
+            for f in report["figures"] if f["family"] == "neither"]
+    turn = report.get("turn")
+    if turn is not None:
+        if not turned_through(turn):
+            out.append("the torso did not turn %.0f degrees through the per-piece matrix "
+                       "load after the press" % EDIT_TURN_LEAST)
+        elif turn["last"] is not None and turn["last"] >= report["turn_frames"] - 1 \
+                and not report.get("turn_ended"):
+            out.append("the torso was still turning at the last frame captured")
+    families = {f["family"] for f in report["figures"]}
+    shown = [p for p in panels if ("player", "goalkeeper")[p["cell"][0]] in families]
+    if not shown:
+        out.append("no panel of %dx%d of the figure shown (%s) differs from the disc after "
+                   "the turn" % (PANEL_W, PANEL_H, ", ".join(sorted(families)) or "none"))
+    out += panels_judge(shown)
+    return out
+
+
+def edit_figure_report(figures, lists: dict, names: dict) -> dict:
+    """{figures, orders}: each figure's head, family, order, torso yaw and
+    translation spread, and the count of each order drawn."""
+    out, orders = [], {}
+    for number, figure in enumerate(figures):
+        order = " ".join("%s:%s" % (p["file"].rsplit("/", 1)[-1], p["section"])
+                         if p["file"] else "?" for p in figure)
+        orders[order] = orders.get(order, 0) + 1
+        translations = [p["matrix"][1] for p in figure]
+        median = [sorted(t[i] for t in translations)[len(translations) // 2] for i in range(3)]
+        spread = max(sum((t[i] - median[i]) ** 2 for i in range(3)) ** 0.5
+                     for t in translations)
+        torso = figure_torso(figure, names)
+        out.append({"figure": number, "head": figure[0]["section"], "order": order,
+                    "family": figure_family(figure, lists), "spread": spread,
+                    "yaw": piece_yaw(torso["matrix"]), "torso": torso["matrix"][1]})
+    return {"figures": out, "orders": orders}
+
+
+def _edit_page(game, page_x: int):
+    """The uniform page at *page_x* as 15-bit halfwords (`read_back`'s reading)."""
+    import oracle as looks_oracle  # tools/looks
+
+    record = records_of(_screen_body())[UNIFORM_RECORD]
+    rows = looks_oracle.vram_region(game, page_x, record.y, record.w, record.h)
+    return [(p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10 for row in rows for p in row]
+
+
+def _edit_kit(game, bodies: dict, label: str):
+    """(hits, tag, set, page x) of the kit the screen holds in VRAM, by the
+    same search `--slot` makes on a dump."""
+    path = os.path.join(game.out_dir, "%s-vram.png" % label)
+    if os.path.exists(path):
+        os.remove(path)
+    game.client.call("dump_vram", path=path, format="png")
+    hits = search(vram_rows(path), bodies)
+    for tag, index, at, flat, shared in hits:
+        if index in (0, 1, 4, 5) and not flat and not shared:
+            return hits, tag, SETS[index], at[0][0]
+    return hits, None, None, None
+
+
+def edit_capture(game, maps, bodies: dict, slot: int, player: int) -> dict:
+    """Everything `--edit-number` reads from the running screen: the still
+    figure's stops, the kit, the uniform page before the press, the press
+    that turned the figure and the stops through the turn, and the page
+    after it."""
+    import oracle as looks_oracle  # tools/looks
+
+    def arrive(label):
+        load_slot(game, slot, label)
+        for _ in range(player):
+            game.press("Down", least=EDIT_ROW_MOVED)
+        if player:
+            game.capture("edit-%d-%d-row" % (slot, player))
+
+    arrive("edit-%d-%d-front" % (slot, player))
+    out = {"front": matrix_stops(game, maps, EDIT_STOPS)}
+    hits, tag, kit_set, page_x = _edit_kit(game, bodies, "edit-%d-%d-front" % (slot, player))
+    out.update(hits=[list(h[:2]) + [list(h[2]), h[3], h[4]] for h in hits],
+               tag=tag, set=kit_set, page_x=page_x)
+    if page_x is not None:
+        out["page_front"] = _edit_page(game, page_x)
+    out["button"], out["turn"] = None, []
+    for n, button in enumerate(EDIT_BUTTONS):
+        if n:
+            arrive("edit-%d-%d-again" % (slot, player))
+        game.client.call("press_button", button=button,
+                         duration_frames=looks_oracle.CONFIRM_FRAMES)
+        stops = matrix_stops(game, maps, EDIT_TURN_STOPS, partial=True, wait=EDIT_TURN_WAIT)
+        yaws = [piece_yaw(figure_torso(f, {})["matrix"])
+                for f in edit_figures(edit_pieces(stops))]
+        out["turn"] = stops
+        if turned_through(edit_turn(yaws)):
+            out["button"] = button
+            break
+        out.setdefault("ignored", []).append(button)
+    game.capture("edit-%d-%d-back" % (slot, player))
+    if page_x is not None:
+        out["page_back"] = _edit_page(game, page_x)
+    return out
+
+
+def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: bool = False) -> int:
+    """`--edit-number SLOT [--player ROW]`: G7, what the EDIT PL. NUM screen
+    draws -- the family of the figure, its kit, its still pose, the turn a
+    confirming press makes, and the number panel written for the back."""
+    import json
+
+    import scene
+
+    import oracle as looks_oracle  # tools/looks
+    from core import figure as _figure
+
+    image = os.environ[IMAGE_VARIABLE]
+    path = cache or os.path.join(ATTACH_DIR, "edit-%d-%d.json" % (slot, player))
+    if cache and os.path.isfile(cache):
+        with open(cache) as fh:
+            kept = json.load(fh)
+        print("  capture read from %s, no emulator" % cache)
+    else:
+        maps = looks_oracle.model_maps(image)
+        bodies = read_kits(image)
+        with looks_oracle.Oracle(cue) as game:
+            kept = edit_capture(game, maps, bodies, slot, player)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump(kept, fh)
+        print("  capture kept at %s (--frame-json reads it back)" % path)
+    geometry = _figure.read_geometry(image)
+    lists = scene._figure_sections(geometry)
+    names = scene.piece_names(geometry)
+    head = PLANT_EDIT_HEAD if plant else None
+    reports = {}
+    for phase in ("front", "turn"):
+        figures = edit_figures(edit_pieces(kept[phase]))
+        report = edit_figure_report(figures, lists, names)
+        reports[phase] = report
+        print("  %s: %d stop(s), %d whole figure(s); the order each draws, head first:"
+              % (phase, len(kept[phase]), len(figures)))
+        for order, n in sorted(report["orders"].items(), key=lambda kv: -kv[1]):
+            family = next(f["family"] for f in report["figures"] if f["order"] == order)
+            print("    x%-3d %s  (%s)" % (n, order, family))
+        if report["figures"]:
+            spreads = [f["spread"] for f in report["figures"]]
+            yaws = [f["yaw"] for f in report["figures"]]
+            print("  %s: every figure's translations within %.0f to %.0f of its median "
+                  "(limit %d); torso yaw %.1f to %.1f degrees, torso at %s"
+                  % (phase, min(spreads), max(spreads), FIGURE_SPREAD, min(yaws), max(yaws),
+                     report["figures"][0]["torso"]))
+        if head is None and report["figures"]:
+            head = report["figures"][0]["head"]
+    print("  kit: %s" % (", ".join(
+        "TEX_%s record %d %s at (%d,%d)" % (tag, index, NAMES[index], at[0][0], at[0][1])
+        for tag, index, at, flat, shared in kept["hits"] if not flat) or "nothing found"))
+    print("  the screen wears TEX_%s set %s, uniform page at (%s,256)"
+          % (kept["tag"], kept["set"], kept["page_x"]))
+    turn_yaws = [f["yaw"] for f in reports["turn"]["figures"]]
+    turn = edit_turn(turn_yaws)
+    print("  torso yaw per frame after the press: %s"
+          % " ".join("%.0f" % v for v in turn_yaws))
+    if kept["button"]:
+        print("  %s turned the figure%s: torso yaw %.1f to %.1f in %d frame(s) (frames %s to %s "
+              "of %d), steps %s"
+              % (kept["button"],
+                 " (%s ignored)" % ", ".join(kept["ignored"]) if kept.get("ignored") else "",
+                 turn["start"], turn["end"], turn["frames"], turn["first"], turn["last"],
+                 len(turn_yaws),
+                 " ".join("%+.1f" % v for v in turn["steps"][:12])
+                 + (" …" if len(turn["steps"]) > 12 else "")))
+    else:
+        print("  no button of %s turned the figure through the per-piece matrix load; the "
+              "last press's torso yaw %s to %s"
+              % (", ".join(EDIT_BUTTONS), turn["start"], turn["end"]))
+    ended = len(kept["turn"]) < EDIT_TURN_STOPS
+    if ended:
+        print("  the per-piece matrix load stopped firing after %d stop(s), %d whole figure(s): "
+              "once turned, the figure is not drawn through it any more"
+              % (len(kept["turn"]), len(turn_yaws)))
+    report = dict(reports["front"], turn=turn, turn_frames=len(turn_yaws), turn_ended=ended)
+    report["figures"] = reports["front"]["figures"] + reports["turn"]["figures"]
+    disc_words = None
+    if kept.get("tag"):
+        body = _body(kept["tag"])
+        image_record = UNIFORM_RECORD if kept["set"] == 1 else UNIFORM_SET2
+        disc_words = [five(v) for v in payload(body, records_of(body)[image_record])]
+    record = records_of(_screen_body())[UNIFORM_RECORD]
+    panels = []
+    for when in ("page_front", "page_back"):
+        if disc_words is None or when not in kept:
+            print("  %s: not read" % when)
+            continue
+        blocks = diff_blocks(kept[when], disc_words, record.w, record.h)
+        print("  %s: %d block(s) differ from the disc: %s"
+              % (when, len(blocks), "; ".join("(%d,%d)-(%d,%d) %d px" % b for b in blocks[:6])
+                 or "none"))
+        shift = -1 if plant and when == "page_back" else 0
+        read = edit_panels(kept[when], disc_words, record.w, record.h, shift)
+        for one in read:
+            figure, cx, cy = one["cell"]
+            print("    %-10s panel (%3d,%3d): number %-4s digits %s; %d pixel(s) the rule "
+                  "does not explain"
+                  % (("player", "goalkeeper")[figure], cx, cy, one["number"],
+                     " ".join("%d at (%d,%d)" % (d, x, y) for x, y, d in one["digits"]) or "none",
+                     one["unexplained"]))
+        picture = os.path.join(ATTACH_DIR, "edit-%d-%d-%s.png" % (slot, player, when[5:]))
+        save_picture(picture, kept[when], record.w, record.h, _body(kept["tag"]), kept["set"])
+        print("    picture: %s" % picture)
+        if when == "page_back":
+            panels = read
+    for phase, kind in (("front", "front"), ("turn", "back")):
+        figures = reports[phase]["figures"]
+        if not figures:
+            continue
+        whole = edit_figures(edit_pieces(kept[phase]))[-1]
+        os.makedirs(POSE_DIR, exist_ok=True)
+        pose_path = os.path.join(POSE_DIR, "slot%d-row%d-%s.json" % (slot, player, kind))
+        with open(pose_path, "w") as fh:
+            json.dump({"slot": slot, "player": player, "pose": kind,
+                       "head": whole[0]["section"],
+                       "pieces": [{"file": p["file"], "section": p["section"],
+                                   "name": names.get((p["file"], p["section"])),
+                                   "rotation": list(p["matrix"][0]),
+                                   "translation": list(p["matrix"][1])} for p in whole]},
+                      fh, indent=1)
+        print("  %s pose kept at %s (%d pieces)" % (kind, pose_path, len(whole)))
+    if plant:
+        print("  PLANT  figures expected to open at section %d, and every panel read one row up"
+              % PLANT_EDIT_HEAD)
+    failures = edit_number_judge(report, head, panels)
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if not failures:
+        families = {f["family"] for f in report["figures"]}
+        print("  ok    the %s opens at section %d, %s turned it %.0f degrees in %d frame(s), "
+              "and its back panel holds number %s"
+              % (", ".join(sorted(families)), head, kept["button"],
+                 (turn["end"] - turn["start"] + 180.0) % 360.0 - 180.0, turn["frames"],
+                 ", ".join(str(p["number"]) for p in panels
+                           if ("player", "goalkeeper")[p["cell"][0]] in families)))
+    return 1 if failures else 0
+
+
 # --- G3: where MODEL.BIN's sleeves and armband go on the EDT_MOD.BIN figure ---
 
 ARM_NAMES = ("upper arm a", "upper arm b", "forearm a", "forearm b")
@@ -2676,6 +3079,16 @@ def main(argv=None) -> int:
                              "armband section stands in for, in that piece's frame (disc only)")
     source.add_argument("--back", type=int, metavar="SLOT",
                         help="section 4.7: does the LOOKS SET of this slot fill the torso gaps")
+    source.add_argument("--edit-number", type=int, metavar="SLOT",
+                        help="G7: what the EDIT PL. NUM screen of this slot draws -- the "
+                             "figure's family, kit, still pose, the turn a confirming press "
+                             "makes and the number panel written for the back")
+    parser.add_argument("--player", type=int, default=0, metavar="ROW",
+                        help="with --edit-number: rows to go down the list before confirming "
+                             "(default 0, the selected player)")
+    parser.add_argument("--plant-edit-number", action="store_true",
+                        help="with --edit-number: the control -- expect figures opened at "
+                             "section %d and read every panel one row up" % PLANT_EDIT_HEAD)
     parser.add_argument("--cue", help="the disc the state was saved on (default $%s)"
                         % DRIVE_VARIABLE)
     parser.add_argument("--out", default=os.path.join("work", "kits-oracle"),
@@ -2755,6 +3168,13 @@ def main(argv=None) -> int:
         return SKIP
     if args.edt_arms:
         return run_edt_arms(image, args.plant_edt_arms)
+    if args.edit_number is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue and not args.frame_json:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_edit_number(args.edit_number, cue, args.player, args.frame_json,
+                               args.plant_edit_number)
     if args.keeper_armband is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:

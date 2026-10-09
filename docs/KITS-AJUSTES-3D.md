@@ -475,6 +475,122 @@ que achou, inclusive as negativas; o que virar desenho na aba vira task nova, a 
 
 O que não der para medir fica escrito como negativa, com o comando e a saída.
 
+**Medido (K3D-TASK-16, 2026-10-09).** A cópia mestra é `work/kits-states/SLPM-87056_8.sav`
+(sha256 `ee349d74…b184`). Os dois comandos, com `WE2002_LOOKS_IMAGE` e `WE2002_LOOKS_DRIVE_IMAGE`,
+guardam a captura em `work/kits-oracle/edit-8-<linha>.json`, e a mesma leitura sai de lá com
+`--frame-json` (abaixo, colada da HEAD):
+
+```sh
+python3 tools/kits/oracle.py --edit-number 8            # Marcos, GK 1, a linha selecionada
+python3 tools/kits/oracle.py --edit-number 8 --player 1 # Edmilson, CB 5, uma linha abaixo
+```
+
+```text
+  capture read from work/kits-oracle/edit-8-0.json, no emulator
+  front: 180 stop(s), 14 whole figure(s); the order each draws, head first:
+    x14  MODEL.BIN:34 EDT_MOD.BIN:11 EDT_MOD.BIN:12 EDT_MOD.BIN:14 EDT_MOD.BIN:13 EDT_MOD.BIN:15 EDT_MOD.BIN:16 EDT_MOD.BIN:18 EDT_MOD.BIN:9 EDT_MOD.BIN:17 EDT_MOD.BIN:19 ?  (goalkeeper)
+  front: every figure's translations within 145 to 178 of its median (limit 500); torso yaw -11.4 to -9.9 degrees, torso at (3, -54, 3778)
+  turn: 1200 stop(s), 99 whole figure(s); the order each draws, head first:
+    x99  MODEL.BIN:34 EDT_MOD.BIN:11 EDT_MOD.BIN:12 EDT_MOD.BIN:14 EDT_MOD.BIN:13 EDT_MOD.BIN:15 EDT_MOD.BIN:16 EDT_MOD.BIN:18 EDT_MOD.BIN:9 EDT_MOD.BIN:17 EDT_MOD.BIN:19 ?  (goalkeeper)
+  turn: every figure's translations within 142 to 193 of its median (limit 500); torso yaw -179.9 to 180.0 degrees, torso at (-3, -53, 3779)
+  kit: TEX_41 record 1 sleeves at (576,384), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488)
+  the screen wears TEX_41 set 1, uniform page at (576,256)
+  torso yaw per frame after the press: -12 -18 -24 -29 -35 -41 -45 -51 -56 -62 -67 -73 -80 -86 -91 -97 -101 -105 -111 -117 -122 -128 -134 -141 -146 -152 -157 -163 -169 -173 -178 -178 -178 -180 179 178 178 178 178 178 180 180 180 180 180 180 178 178 178 178 180 -179 -178 -178 -178 -178 -178 -180 -180 -180 -180 -180 -180 -178 -178 -178 -178 -180 179 178 178 178 178 178 180 180 180 180 180 180 178 178 178 178 180 -179 -178 -178 -178 -178 -178 -180 -180 -180 -180 -180 -180 -178 -178
+  Circle turned the figure: torso yaw -12.0 to -178.5 in 30 frame(s) (frames 1 to 30 of 99), steps -6.2 -5.6 -5.7 -5.6 -5.6 -4.2 -5.6 -5.6 -5.6 -5.7 -5.6 -7.0 …
+  page_front: 2 block(s) differ from the disc: (0,80)-(19,103) 480 px; (100,104)-(119,127) 480 px
+    player     panel (  0, 80): number None digits none; 0 pixel(s) the rule does not explain
+    goalkeeper panel (100,104): number 1    digits 1 at (7,7); 0 pixel(s) the rule does not explain
+    picture: work/kits-oracle/edit-8-0-front.png
+  page_back: 2 block(s) differ from the disc: (0,80)-(19,103) 480 px; (100,104)-(119,127) 480 px
+    player     panel (  0, 80): number None digits none; 0 pixel(s) the rule does not explain
+    goalkeeper panel (100,104): number 1    digits 1 at (7,7); 0 pixel(s) the rule does not explain
+    picture: work/kits-oracle/edit-8-0-back.png
+  front pose kept at work/kits-pose/slot8-row0-front.json (12 pieces)
+  back pose kept at work/kits-pose/slot8-row0-back.json (12 pieces)
+  ok    the goalkeeper opens at section 34, Circle turned it -166 degrees in 30 frame(s), and its back panel holds number 1
+```
+
+```text
+  capture read from work/kits-oracle/edit-8-1.json, no emulator
+  front: 180 stop(s), 14 whole figure(s); the order each draws, head first:
+    x14  MODEL.BIN:24 EDT_MOD.BIN:0 EDT_MOD.BIN:1 EDT_MOD.BIN:3 EDT_MOD.BIN:2 EDT_MOD.BIN:4 EDT_MOD.BIN:5 EDT_MOD.BIN:7 EDT_MOD.BIN:9 EDT_MOD.BIN:6 EDT_MOD.BIN:8 ?  (player)
+  front: every figure's translations within 137 to 162 of its median (limit 500); torso yaw -12.7 to -10.0 degrees, torso at (-1, -44, 3778)
+  turn: 1200 stop(s), 99 whole figure(s); the order each draws, head first:
+    x99  MODEL.BIN:24 EDT_MOD.BIN:0 EDT_MOD.BIN:1 EDT_MOD.BIN:3 EDT_MOD.BIN:2 EDT_MOD.BIN:4 EDT_MOD.BIN:5 EDT_MOD.BIN:7 EDT_MOD.BIN:9 EDT_MOD.BIN:6 EDT_MOD.BIN:8 ?  (player)
+  turn: every figure's translations within 133 to 172 of its median (limit 500); torso yaw -179.9 to 180.0 degrees, torso at (-4, -47, 3778)
+  kit: TEX_41 record 1 sleeves at (576,384), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488)
+  the screen wears TEX_41 set 1, uniform page at (576,256)
+  torso yaw per frame after the press: -13 -18 -24 -28 -32 -38 -44 -49 -55 -61 -68 -73 -79 -84 -90 -96 -100 -105 -111 -117 -124 -131 -136 -142 -148 -153 -159 -163 -169 -174 180 180 180 178 178 178 178 180 -179 -178 -178 -178 -178 -178 -180 -180 -180 -180 -180 -180 -178 -178 -178 -178 -180 179 178 178 178 178 178 180 180 180 180 180 180 178 178 178 178 180 -179 -178 -178 -178 -178 -178 -180 -180 -180 -180 -180 -180 -178 -178 -178 -178 -180 179 178 178 178 178 178 180 180 180 180
+  Circle turned the figure: torso yaw -12.5 to 179.9 in 30 frame(s) (frames 1 to 30 of 99), steps -5.6 -5.6 -4.3 -4.3 -5.7 -5.6 -5.6 -5.6 -5.6 -7.0 -5.6 -5.6 …
+  page_front: 2 block(s) differ from the disc: (0,80)-(19,103) 480 px; (100,104)-(119,127) 480 px
+    player     panel (  0, 80): number 5    digits 5 at (7,7); 0 pixel(s) the rule does not explain
+    goalkeeper panel (100,104): number 1    digits 1 at (7,7); 0 pixel(s) the rule does not explain
+    picture: work/kits-oracle/edit-8-1-front.png
+  page_back: 2 block(s) differ from the disc: (0,80)-(19,103) 480 px; (100,104)-(119,127) 480 px
+    player     panel (  0, 80): number 5    digits 5 at (7,7); 0 pixel(s) the rule does not explain
+    goalkeeper panel (100,104): number 1    digits 1 at (7,7); 0 pixel(s) the rule does not explain
+    picture: work/kits-oracle/edit-8-1-back.png
+  front pose kept at work/kits-pose/slot8-row1-front.json (12 pieces)
+  back pose kept at work/kits-pose/slot8-row1-back.json (12 pieces)
+  ok    the player opens at section 24, Circle turned it -168 degrees in 30 frame(s), and its back panel holds number 5
+```
+
+As duas corridas saem 0. O controle `--plant-edit-number` espera figuras abertas na 103 e lê cada painel uma linha acima, e sai 1:
+
+```text
+  PLANT  figures expected to open at section 103, and every panel read one row up
+  FAIL  no figure opened at section 103
+  FAIL  panel (100,103): 290 pixel(s) are neither the shirt back nor a digit
+  FAIL  panel (100,103): digits at [(7, 8)], the rule puts them at [(7, 7)]
+```
+
+O que a saída diz, item por item:
+
+1. **Carga e captura.** O state carrega pela cópia mestra; as capturas ficam em
+   `work/looks-shots/edit-8-<linha>-front.png` e `-back.png` (de costas, com o número), e a página
+   de uniforme pintada em `work/kits-oracle/edit-8-<linha>-front.png` e `-back.png`.
+2. **Família do modelo: a da `LOOKS SET`, não a de partida.** As duas figuras são as do
+   `EDT_MOD.BIN`: o goleiro desenha a lista 1 (seções 11 a 19, mais a chuteira 9 compartilhada e a
+   outra, 10, que nenhuma parada nomeia — o `?`), o jogador de linha a lista 0 (0 a 9). Nenhuma seção
+   de braço, manga ou braçadeira do `MODEL.BIN` entra: a tela não é onde a 91 ou a 94 aparecem
+   (negativa). A única seção do `MODEL.BIN` é a cabeça, e ela **difere entre os dois**: 24 no
+   jogador (a que a `LOOKS SET` desenha, `pieces.HEAD_SECTION`) e **34 no goleiro**. É plausível que
+   a cabeça seja a do jogador, não a da figura — o `MODEL.BIN` tem várias cabeças e a `LOOKS SET`
+   troca cabelo —, mas isso não foi medido aqui; a aba desenha a 24 nas duas figuras.
+3. **Kit, paleta e mangas.** A tela veste o `TEX_41` (Brasil), conjunto 1, nas páginas da partida:
+   uniforme em (576,256) e mangas em (576,384), paletas nas linhas 486 (jogador) e 488 (goleiro). O
+   uniforme não é achado exato porque as duas lacunas do torso estão escritas (480 halfwords, item 6).
+   As mangas são as peças de braço de cada lista do `EDT_MOD.BIN`: o goleiro de manga longa, o
+   jogador de manga curta, como na `LOOKS SET`.
+4. **Pose parada e câmera: negativa.** A figura **não está parada**: de frente, as matrizes mudam a
+   cada quadro e a guinada do torso oscila entre −9,9° e −11,4° (a caminhada da `LOOKS SET`; na
+   captura, a perna levantada). Os arquivos `work/kits-pose/slot8-row<linha>-front.json` e
+   `-back.json` guardam a matriz por peça de um quadro dessa caminhada, não uma pose parada. A câmera
+   não foi derivada: a leitura não captura o par do `ANIME.BIN` de cada peça, que o
+   `camera_from_pieces` exige. O torso fica em (3, −54, 3778) no goleiro e (−1, −44, 3778) no
+   jogador, e não muda com o giro.
+5. **O giro.** Quem confirma é o **Circle**. A figura gira de −12° a −178° (goleiro) e de −12,5° a
+   +179,9° (jogador) em **30 quadros**, a −5,6° por quadro (−4,2 e −7,0 uma vez cada), e fica de
+   costas a ±180°, ainda caminhando (o balanço de ±2° por quadro que segue na linha "torso yaw per
+   frame"). A translação não muda: a câmera é a mesma de frente e de costas. O Cross não confirma:
+   na primeira corrida, com ele antes do Circle, a tela voltou para a lista de times e a carga de
+   matriz por peça parou de disparar — por isso a ordem de `EDIT_BUTTONS` e a recarga do state antes
+   de cada botão.
+6. **O número nas costas: a regra da partida, escrita ao selecionar a linha.** Na página de
+   uniforme só diferem do disco os dois painéis do torso, (0,80) e (100,104). O da figura mostrada tem
+   o número pela regra do §4.7: um dígito em (7,7) — `DIGIT_Y` 7, x 7 —, sobre as costas da camisa, e
+   zero pixel que a regra não explique. O da outra figura tem as costas sem dígito. E a página é a
+   **mesma antes e depois do giro**: o jogo escreve o painel quando a linha é selecionada, não ao
+   virar. O Number da aba já faz isso.
+7. **Jogador de linha.** `--player 1` desce para Edmilson (um `Down`, que move 0,0148 da tela) e
+   repete tudo: lista 0, cabeça 24, giro de 30 quadros, painel (0,80) com o 5.
+
+**O que isso dá à aba 3D.** Nada de geometria nova: a tela é a figura da `LOOKS SET`, com o mesmo
+uniforme, a mesma caminhada e o mesmo painel de número da partida. O que ela acrescenta e a aba não
+tem: o giro medido — 30 quadros a 5,6° por quadro, de frente para as costas, com a câmera parada —,
+que serve de regra se a aba ganhar um "virar de costas" animado; e a dúvida da cabeça 34, que uma
+task nova mede se quiser cabeça por jogador. Decisão de desenhar fica para o usuário.
+
 ## Para o ciclo
 
 **Ordem sugerida:**

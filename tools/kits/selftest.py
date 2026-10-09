@@ -1182,6 +1182,54 @@ def _oracle_checks(c) -> None:
          any("both" in f for f in oracle.keeper_armband_judge(both, 13, 92, 15, True)))
     c.ok("oracle --keeper-armband: an armband without the arm's vertices fails",
          len(oracle.keeper_armband_judge(keeper, 13, 92, 15, False)) == 1)
+    # --edit-number (K3D-TASK-16): figures cut at a MODEL.BIN head, the torso
+    # yaw read off a matrix, a turn counted in frames, and the judge asking for
+    # the head, the turn and a panel read by the match's rule.
+    edt, model = oracle.layout.EDT_MOD, oracle.layout.MODEL
+    still = ([4096, 0, 0, 0, 4096, 0, 0, 0, 4096], [0, 0, 0])
+    turned = ([-4096, 0, 0, 0, 4096, 0, 0, 0, -4096], [0, 0, 0])
+    stops = [{"named": [[model, 34]], "rotation": still[0], "translation": still[1]},
+             {"named": [[edt, 11]], "rotation": still[0], "translation": still[1]},
+             {"named": [], "rotation": still[0], "translation": still[1]},
+             {"named": [[model, 34]], "rotation": still[0], "translation": still[1]},
+             {"named": [[edt, 11]], "rotation": turned[0], "translation": turned[1]},
+             {"named": [], "rotation": still[0], "translation": still[1]}]
+    stops += stops[3:]       # a third frame, so the second figure has an end
+    figures = oracle.edit_figures(oracle.edit_pieces(stops))
+    c.ok("oracle --edit-number: the pieces cut into figures at the head, the ends dropped",
+         len(figures) == 1 and [p["section"] for p in figures[0]] == [34, 11, None],
+         "%s" % [[p["section"] for p in f] for f in figures])
+    c.ok("oracle --edit-number: a piece's yaw is 0 still and 180 turned about y",
+         (oracle.piece_yaw(still), oracle.piece_yaw(turned)) == (0.0, 180.0))
+    turn = oracle.edit_turn([10.0, 10.0, 30.0, 50.0, 70.0, 90.0, 90.0])
+    c.ok("oracle --edit-number: a turn of four 20-degree frames is counted as such",
+         (turn["frames"], turn["start"], turn["end"]) == (4, 10.0, 90.0), "%s" % turn)
+    c.ok("oracle --edit-number: a still torso is no turn",
+         oracle.edit_turn([10.0, 10.0, 10.2])["frames"] == 0)
+    panel = {"cell": (1, 100, 104), "digits": [(7, oracle.DIGIT_Y, 1)], "unexplained": 0,
+             "number": 1}
+    report = {"figures": [{"figure": 0, "head": 34, "family": "goalkeeper", "spread": 10.0,
+                           "order": "MODEL.BIN:34 EDT_MOD.BIN:11"}],
+              "turn": {"frames": 9, "first": 3, "last": 11, "start": 0.0, "end": 180.0},
+              "turn_frames": 100}
+    c.ok("oracle --edit-number: a figure at the head, a turn and a sound panel hold",
+         oracle.edit_number_judge(report, 34, [panel]) == [],
+         "; ".join(oracle.edit_number_judge(report, 34, [panel])))
+    c.ok("oracle --edit-number: no figure opened at the head fails",
+         any("opened at section 103" in f
+             for f in oracle.edit_number_judge(report, 103, [panel])))
+    c.ok("oracle --edit-number: a torso that never turned fails",
+         any("did not turn" in f for f in oracle.edit_number_judge(
+             dict(report, turn={"frames": 0, "first": None, "last": None, "start": 0.0,
+                                "end": 0.0}), 34, [panel])))
+    c.ok("oracle --edit-number: a torso swaying a degree, as the walk does, is no turn",
+         not oracle.turned_through(oracle.edit_turn([-11.4, -12.0, -11.2, -10.0, -11.0]))
+         and oracle.turned_through(oracle.edit_turn([0.0, 60.0, 120.0, 180.0, 180.0])))
+    c.ok("oracle --edit-number: a panel with pixels the rule does not explain fails",
+         any("neither" in f for f in oracle.edit_number_judge(
+             report, 34, [dict(panel, unexplained=5)])))
+    c.ok("oracle --edit-number: no panel after the turn fails",
+         any("no panel" in f for f in oracle.edit_number_judge(report, 34, [])))
     # --edt-arms (K3D-TASK-07): an arm laid on four EDT-like pieces -- two
     # cylinders a side, the upper arm over y -40..40 and the forearm over
     # 20..120, side a below z 0 and side b its mirror -- goes on its own piece,

@@ -277,6 +277,16 @@ CONTROLS = (
         "for it passes any section with 15's vertices, 103 as well as 92",
     ),
     Control(
+        "oracle-edit-number-head-unasked", "kits/oracle.py", "edit_number_judge",
+        "    if not any(f[\"head\"] == head for f in report[\"figures\"]):\n"
+        "        out.append(\"no figure opened at section %d\" % head)",
+        "    if False:\n"
+        "        out.append(\"no figure opened at section %d\" % head)",
+        "FAIL  oracle --edit-number: no figure opened at the head fails",
+        "which section the EDIT PL. NUM figure opens with is the first claim of G7 "
+        "(K3D-TASK-16); a judge that never asks for it passes the plant's 103",
+    ),
+    Control(
         "oracle-arm-side-flipped", "kits/oracle.py", "arm_side",
         '    return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"',
         '    return "a" if sum(p[2] for p in points) / len(points) > 0 else "b"',
