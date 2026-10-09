@@ -61,3 +61,16 @@ Gates:
 - `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
   `100% tests passed, 0 tests failed out of 4`, `kits_ui: 0 failure(s)`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 37 of 37 red`.
+- **Closed** — commit `1549f06` (2026-10-09): feat(kits): free the three dressing boxes on both figures
+  - Files (`git show --name-status 1549f06`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits-3d/11-caixas-livres.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`
