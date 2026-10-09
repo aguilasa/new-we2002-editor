@@ -37,4 +37,13 @@ Os 22 podem ser menos, se houver expulso; a volta à bola é o fim do laço. O t
 da página que o torso amostra (576 ou 640), e os números do Brasil e da Croácia se conferem contra
 o disco se o juiz precisar de mais do que o painel.
 
+Da K3D-TASK-17: a planta que segue a segunda figura não chega a ler painel nenhum, então "painéis
+uma linha acima" não muda a saída dela — a `--plant-replay` largou essa parte. Se a planta desta task
+juntar as duas coisas, confira que cada uma derruba um `FAIL` próprio. E o leitor do giro precisou
+de mais paradas quando a câmera vê o campo (`REPLAY_YAW_STOPS`): com L2 trocando o foco, o mesmo vale.
+E o "De frente basta" acima não vale: de frente o torso do goleiro não manda à GPU nenhum quad do
+painel; de costas, quatro, e eles são os texels do próprio torso 13 no disco — o painel do goleiro é
+fixo na seção. Para os 20 de linha, o painel pede as costas (R1) em cada foco, ou um argumento de
+que o UV é fixo também no torso 2.
+
 ## Log de Execução

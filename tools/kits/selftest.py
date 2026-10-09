@@ -1253,6 +1253,70 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --edit-number: another kit on the screen fails",
          any("TEX_41 set 1 expected" in f for f in oracle.edit_number_judge(
              dict(seen, tag="00"), 34, [panel], expect)))
+    # --replay (K3D-TASK-17): the followed figure is the nearest, a still pose
+    # differs by nothing, a shaded quad's corner colours and the drawing offset
+    # are read off the command list, the GPU's modulation explains a drawn
+    # pixel the bare texel does not, the back panel is found by texel, and the
+    # judge asks for root, head, armband, stillness, panel, number and frames.
+    def _piece(section, z, turn=0):
+        return {"section": section, "projection": {"H": 1, "OFX": 0, "OFY": 0},
+                "matrix": ((4096, 0, turn, 0, 4096, 0, 0, 0, 4096), (0, 0, z))}
+
+    near = [_piece(34, 4600), _piece(13, 4600), _piece(92, 4600)]
+    far = [_piece(46, 9000), _piece(2, 9000), _piece(3, 9000)]
+    cut = oracle.replay_figures(far + near)
+    c.ok("oracle --replay: the frame is cut at each root, head first",
+         [[p["section"] for p in f] for f in cut] == [[46, 2, 3], [34, 13, 92]],
+         "%s" % [[p["section"] for p in f] for f in cut])
+    c.ok("oracle --replay: the followed figure is the nearest, the plant the next",
+         (oracle.replay_focus(cut)[0]["section"], oracle.replay_focus(cut, 1)[0]["section"],
+          oracle.replay_focus(cut, 2)) == (34, 46, None))
+    c.ok("oracle --replay: one pose twice is still, a moved one is not",
+         (oracle.pose_change(near, near),
+          oracle.pose_change(near, [_piece(34, 4600), _piece(13, 4601), _piece(92, 4600)]))
+         == (0, 1))
+    page, clut = 0x99, (488 << 6)
+    colour = lambda r, g, b: r | g << 8 | b << 16  # noqa: E731
+    quad = [0x3C << 24 | colour(64, 64, 64), 0, (clut << 16) | 100 | 104 << 8,
+            colour(128, 128, 128), 4, (page << 16) | 104 | 104 << 8,
+            colour(64, 64, 64), 4 << 16, 100 | 108 << 8,
+            colour(128, 128, 128), 4 | 4 << 16, 104 | 108 << 8]
+    flat = [0x2C << 24 | colour(127, 127, 127), 0, (clut << 16), 1, (page << 16), 1 << 16, 0,
+            1 | 1 << 16, 0]
+    offset = 0xE5 << 24 | (256 << 11) | 0
+    read = oracle.textured_samples([quad, flat])
+    c.ok("oracle --replay: a shaded quad keeps its four corner colours, a flat one its one",
+         [s["rgb"] for s in read] == [[(64, 64, 64), (128, 128, 128), (64, 64, 64),
+                                       (128, 128, 128)], [(127, 127, 127)] * 4]
+         and read[0]["page"] == (576, 256) and read[0]["clut"] == (0, 488),
+         "%s" % [(s["rgb"], s["page"], s["clut"]) for s in read])
+    c.ok("oracle --replay: the drawing offset is read off its command, signed",
+         (oracle.draw_offset([[offset], quad]), oracle.draw_offset([[0xE5 << 24 | 0x7FF]]),
+          oracle.draw_offset([quad])) == ((0, 256), (-1, 0), None))
+    half = (lambda lo, hi: lo | hi << 8)(1, 1)
+    texture = {"pages": {"576,256,8": [half] * (oracle.TEXTURE_HALFWORDS * 256)},
+               "cluts": {"0,488": [(0, 0, 0), (20, 10, 30)]}}
+    drawn = dict(read[0], rgb=[(64, 64, 64)] * 4)
+    game = [[(10, 5, 15)] * 6 for _ in range(6)]
+    seen = oracle.colour_confront([drawn], {"origin": (0, 0), "rows": game}, texture,
+                                  {92: [drawn]})[92]
+    c.ok("oracle --replay: a pixel drawn at half colour is the modulated texel, not the bare one",
+         seen is not None and seen["shaded_far"] == 0.0 and seen["texel_far"] > 5.0,
+         "%s" % seen)
+    cells = oracle.panel_samples([read[0]])
+    c.ok("oracle --replay: a torso quad inside the goalkeeper's cell names that panel",
+         list(cells) == [(1, 100, 104)], "%s" % list(cells))
+    expect = {"root": 13, "head": 34, "armband": 92, "replaced": 15,
+              "panel": (576, 100, 104), "number": 1}
+    good = {"focus": near, "still": 0, "turned": "back", "panel": (576, 100, 104), "number": 1,
+            "panel_failures": [], "idle": 390, "front_frames": 9, "back_frames": 60}
+    c.ok("oracle --replay: the measured figure holds the judge",
+         oracle.replay_judge(good, expect) == [], "; ".join(oracle.replay_judge(good, expect)))
+    c.ok("oracle --replay: the plant's root fails",
+         any("not at section 103" in f for f in oracle.replay_judge(good, expect, plant=True)))
+    c.ok("oracle --replay: a pose that moved, another number and a capture past the idle fail",
+         len(oracle.replay_judge(dict(good, still=3, number=5, back_frames=400), expect)) == 3,
+         "; ".join(oracle.replay_judge(dict(good, still=3, number=5, back_frames=400), expect)))
     # --edt-arms (K3D-TASK-07): an arm laid on four EDT-like pieces -- two
     # cylinders a side, the upper arm over y -40..40 and the forearm over
     # 20..120, side a below z 0 and side b its mirror -- goes on its own piece,

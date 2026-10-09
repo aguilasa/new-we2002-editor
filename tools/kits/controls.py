@@ -303,6 +303,30 @@ CONTROLS = (
         "until CORR-K3D-020 any number the rule read passed",
     ),
     Control(
+        "oracle-replay-focus-unasked", "kits/oracle.py", "replay_focus",
+        "    ranked = sorted(figures, key=figure_depth)",
+        "    ranked = list(figures)",
+        "FAIL  oracle --replay: the followed figure is the nearest, the plant the next",
+        "the replay's camera follows one player, and the nearest figure is the one it "
+        "follows (G8, K3D-TASK-17); taking the frame's first figure measures another",
+    ),
+    Control(
+        "oracle-replay-colour-unread", "kits/oracle.py", "textured_samples",
+        "            rgb = [looks_oracle._packet_colour(words[per * i] if code & 16 else words[0])",
+        "            rgb = [looks_oracle._packet_colour(words[0])",
+        "FAIL  oracle --replay: a shaded quad keeps its four corner colours, a flat one its one",
+        "whether the GPU shades the figure is read off each quad's corner colours (G8, "
+        "K3D-TASK-17); reading only the first would call every quad flat",
+    ),
+    Control(
+        "oracle-replay-modulation-ignored", "kits/oracle.py", "colour_confront",
+        "                shaded = tuple(min(31, int(t * c / NEUTRAL)) for t, c in zip(texel, colour))",
+        "                shaded = texel",
+        "FAIL  oracle --replay: a pixel drawn at half colour is the modulated texel, not the bare one",
+        "the confront says whether the GPU's modulation is what the 3D tab lacks (G8, "
+        "K3D-TASK-17); a modulated column equal to the bare texel cannot tell",
+    ),
+    Control(
         "oracle-arm-side-flipped", "kits/oracle.py", "arm_side",
         '    return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"',
         '    return "a" if sum(p[2] for p in points) / len(points) > 0 else "b"',

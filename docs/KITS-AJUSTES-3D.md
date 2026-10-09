@@ -696,15 +696,19 @@ Roda nos dois slots — o segundo diz "nos dois", não "sempre":
 6. **Costas**: toques de R1 (ou L1) até o torso ficar a 150° ou mais da câmera, com o passo por
    toque; `pose_capture` de costas; o painel que o torso amostra (o UV em qual 20×24 das linhas 80 a
    127, páginas por `_edit_kit`) e o número lido por `read_panels` (o 1).
-7. **Confronto** por `--replay-confront`: (a) o `match_scene` da família medida, vista `camera`, com
-   a pose do item 5, só a seção da faixa e os braços, contra os quads deles na lista do jogo — IoU e
-   interseção de histograma nas caixas, e a mesma conta com o texel modulado pela cor de vértice; (b)
-   a aba (`app.py --figure 1 --armband --number 1 --tag <Brasil> --yaw <câmera> --export-3d`) contra o
-   quadro do jogo nas mesmas caixas. O confronto **registra** os números; não afirma limite — é
-   investigação, e o juiz afirma só os itens 3, 5 e 6.
+7. **Confronto**: (a) no `--replay`, cada seção da figura com as matrizes e a projeção do jogo
+   contra os quads dela no quadro — o erro em pixels por seção —, e o pixel do quadro sob cada seção
+   contra o texel que ele amostra, puro e modulado pela cor de canto (a pergunta "é sombreamento?");
+   (b) no `--replay-confront`, a aba (`app.py --figure 1 --armband --number 1 --export-3d`, de frente
+   e de costas) contra a figura do jogo por histograma de cor, e a paleta do disco contra o CLUT do
+   jogo. O confronto **registra** os números; não afirma limite — é investigação, e o juiz afirma só
+   os itens 3, 5 e 6. (Estava escrito "IoU do `match_scene`": o erro por seção mede o mesmo encaixe
+   sem precisar desenhar, e o histograma da aba ficou no lugar da IoU, porque as poses diferem.)
 
-O controle `--plant-replay` espera o foco na raiz 103 (`PLANT_KEEPER_ARMBAND`), lê os painéis uma
-linha acima e troca o focado pela segunda menor z: três `FAIL`, saída 1. No `selftest.py`, os casos
+O controle `--plant-replay` segue a segunda figura mais perto, de frente e de costas, e espera a raiz
+103 (`PLANT_REPLAY_ROOT`): os `FAIL` da figura, da pose, do painel e do número, saída 1. (Estava
+escrito "três `FAIL`, com os painéis lidos uma linha acima": seguindo a segunda figura, a planta nunca
+chega ao painel, e a leitura deslocada seria código sem efeito.) No `selftest.py`, os casos
 sintéticos do juiz (foco por z, família, painel por UV, pose igual e diferente, cor de vértice lida);
 no `controls.py`, os controles que os derrubam.
 
@@ -725,6 +729,223 @@ da família 2 com a pose do jogo e (b) na aba, `--figure 0 --armband --number 11
 slot 9 e com `--long-sleeves` no 10. Um jogador de linha sem braçadeira do slot 10 (foco da 18) entra
 como controle da manga longa sozinha. Plant e controles no padrão da 17; as diferenças listadas para
 o conserto, curta e longa separadas.
+
+**Medido (K3D-TASK-17, 2026-10-09).** As cópias mestras são `work/kits-states/SLPM-87056_9.sav`
+(sha256 `54c79792…d6d6`) e `SLPM-87056_10.sav` (sha256 `bdf47644…3b6e`). As corridas, com
+`WE2002_LOOKS_IMAGE` e `WE2002_LOOKS_DRIVE_IMAGE`, guardam a captura em
+`work/kits-oracle/replay-<slot>.json`, e a mesma leitura sai de lá com `--frame-json` (colada da
+HEAD, abaixo):
+
+```sh
+python3 tools/kits/oracle.py --replay-idle 9          # e 10
+python3 tools/kits/oracle.py --replay 9               # e 10; o giro é R1
+python3 tools/kits/oracle.py --replay-confront 9      # e 10, sobre a captura
+```
+
+```text
+  the paused replay of slot 9 left after 390 frame(s) with no input (stepped 30 at a time; its SAVE plate moved 0.1643, over 0.0200)
+  the paused replay of slot 10 left after 390 frame(s) with no input (stepped 30 at a time; its SAVE plate moved 0.1731, over 0.0200)
+```
+
+```text
+  capture read from work/kits-oracle/replay-9.json, no emulator
+  front: 3 frame(s) of 48 stop(s) in 9 emulator frame(s)
+    frame 0: 1 figure(s), depths 4681
+    frame 1: 1 figure(s), depths 4681
+    frame 2: 1 figure(s), depths 4681
+  followed figure, head first: 34 13 14 16 92 17 18 20 11 19 21  (one more piece the draw lag leaves unnamed)
+  still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
+  pose kept at work/kits-pose/slot9-keeper-front.json (projection H 1376, OFX 0.0, OFY 0.0)
+  85 quad(s) of the frame inside the figure's box (-55,-9)-(51,109); mean pixels off the frame, by section: 34:0.88 13:0.92 14:0.85 16:0.97 92:1.17 17:1.05 18:0.83 20:0.99 11:1.00 19:1.04 21:1.01
+  what the GPU is told, by section (shaded: a colour per corner; raw: texel not modulated):
+     34:  9 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (32,480) (160,480); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+     13: 14 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488) (32,480); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones shirt front; shirt front, collar; shirt front, collar tip, first; shirt front, collar tip, second; shirt side, second; shoulder, first; shoulder, second
+     14:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488); page (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones shoulder, first; sleeve, shoulder to elbow
+     16:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488); page (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones forearm; gloves
+     92:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488); page (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones armband, short sleeve; short sleeve, left, captain; short sleeve, left, captain, under the armband; shoulder, second
+     17:  6 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488); page (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones forearm; gloves
+     18:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,488); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones crotch; shorts
+     20:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,488); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+     11:  2 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,484); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+     19:  6 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,488); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones crotch; shorts
+     21:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,488); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+  the frame buffer under each section against its texels (five bits a channel; far: mean distance per channel):
+     34: no pixel of its own
+     13:  685 px; game (12.0 12.0 11.8), texel (12.0 12.1 11.9) (far 0.93), texel x colour/128 (11.0 11.1 10.9) (far 1.45)
+     14:  100 px; game (7.9 8.2 8.0), texel (7.9 7.9 7.9) (far 0.44), texel x colour/128 (6.9 6.9 6.9) (far 1.24)
+     16:   94 px; game (13.1 13.5 12.8), texel (13.9 13.9 13.9) (far 2.40), texel x colour/128 (12.9 12.9 12.9) (far 2.68)
+     92:  133 px; game (11.9 11.9 11.9), texel (12.2 12.2 12.2) (far 2.23), texel x colour/128 (11.2 11.2 11.2) (far 2.89)
+     17:  102 px; game (13.5 13.6 13.2), texel (13.8 13.8 13.8) (far 3.40), texel x colour/128 (12.8 12.8 12.8) (far 3.53)
+     18:  279 px; game (7.9 7.9 7.8), texel (7.8 7.8 7.8) (far 0.31), texel x colour/128 (6.8 6.8 6.8) (far 1.11)
+     20:  230 px; game (7.1 7.3 6.6), texel (6.1 6.1 6.1) (far 1.33), texel x colour/128 (5.1 5.1 5.1) (far 1.90)
+     11: no pixel of its own
+     19:  254 px; game (8.0 8.0 7.9), texel (7.9 7.9 7.9) (far 0.42), texel x colour/128 (6.9 6.9 6.9) (far 1.08)
+     21:  207 px; game (6.7 6.8 6.4), texel (6.3 6.3 6.3) (far 0.99), texel x colour/128 (5.3 5.3 5.3) (far 1.53)
+    picture: work/kits-oracle/replay-9-frame.png
+  kit: TEX_22 record 2 player palette at (0,487), TEX_22 record 3 goalkeeper palette at (0,489), TEX_22 record 8 flag at (704,320), TEX_22 record 9 flag palette at (256,495), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488), TEX_41 record 8 flag at (704,256), TEX_41 record 9 flag palette at (256,494), TEX_61 record 8 flag at (704,256), TEX_61 record 9 flag palette at (256,494)
+  turn: R1 tapped 18 time(s), torso yaw -17 -25 -33 -42 -50 -59 -67 -76 -84 -93 -101 -110 -118 -127 -135 -143 -151 -160; back; 599 emulator frame(s) from the load, 45 from the last tap to the end of the back capture
+    the figure each tap read, root and depth: 13@4693 13@4693 13@4689 13@4684 13@4680 13@4682 13@4682 13@4686 13@4690 13@4695 13@4693 13@4693 13@4698 13@4706 13@4682 13@4672 13@4602 13@4525
+  back: 4 primitive(s) of the figure sample panel (100,104) of page (576,256); 4 of them are torso 13's own texels on the disc
+    page 576 panel (  0, 80): number 5, digits 5 at (7,7), 0 unexplained
+    page 576 panel ( 20, 80): number 3, digits 3 at (7,7), 0 unexplained
+    page 576 panel ( 40, 80): number 4, digits 4 at (7,7), 0 unexplained
+    page 576 panel ( 60, 80): number 7, digits 7 at (7,7), 0 unexplained
+    page 576 panel ( 80, 80): number 16, digits 1 at (3,7) 6 at (11,7), 0 unexplained
+    page 576 panel (  0,104): number 6, digits 6 at (7,7), 0 unexplained
+    page 576 panel ( 20,104): number 2, digits 2 at (7,7), 0 unexplained
+    page 576 panel ( 40,104): number 10, digits 1 at (3,7) 0 at (11,7), 0 unexplained
+    page 576 panel ( 60,104): number 11, digits 1 at (3,7) 1 at (11,7), 0 unexplained
+    page 576 panel ( 80,104): number 9, digits 9 at (7,7), 0 unexplained
+    page 576 panel (100,104): number 1, digits 1 at (7,7), 0 unexplained
+  ok    the followed figure opens at section 13 with head 34, draws 92 in place of 15, holds still, and its back shows panel (576, 100, 104) with number 1
+```
+
+```text
+  capture read from work/kits-oracle/replay-10.json, no emulator
+  front: 3 frame(s) of 48 stop(s) in 8 emulator frame(s)
+    frame 0: 1 figure(s), depths 4682
+    frame 1: 1 figure(s), depths 4682
+    frame 2: 1 figure(s), depths 4682
+  followed figure, head first: 34 13 14 16 92 17 18 20 11 19 21  (one more piece the draw lag leaves unnamed)
+  still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
+  pose kept at work/kits-pose/slot10-keeper-front.json (projection H 1376, OFX 0.0, OFY 0.0)
+  137 quad(s) of the frame inside the figure's box (-51,-9)-(55,110); mean pixels off the frame, by section: 34:0.92 13:0.88 14:1.05 16:0.95 92:0.97 17:0.92 18:0.93 20:1.03 11:1.04 19:0.99 21:0.96
+  what the GPU is told, by section (shaded: a colour per corner; raw: texel not modulated):
+     34: 10 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (32,480) (160,480); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+     13: 14 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488) (32,480); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones shirt front; shirt front, collar; shirt front, collar tip, first; shirt front, collar tip, second; shirt side, first; shoulder, first; shoulder, second
+     14:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488); page (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones shoulder, first; sleeve, shoulder to elbow
+     16:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488); page (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones forearm; gloves
+     92:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488); page (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones armband, short sleeve; short sleeve, left, captain; short sleeve, left, captain, under the armband; shoulder, second
+     17:  6 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488); page (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones forearm; gloves
+     18:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,488); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones crotch; shorts
+     20:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,488); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+     11:  2 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,484); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+     19:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,488); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones crotch; shorts
+     21:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,488); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+  the frame buffer under each section against its texels (five bits a channel; far: mean distance per channel):
+     34: no pixel of its own
+     13:  692 px; game (12.1 12.1 11.8), texel (11.9 12.0 11.8) (far 1.05), texel x colour/128 (10.9 11.0 10.8) (far 1.61)
+     14:  139 px; game (8.2 8.5 7.9), texel (8.1 8.1 8.1) (far 0.54), texel x colour/128 (7.1 7.1 7.1) (far 1.30)
+     16:  112 px; game (12.9 13.5 12.3), texel (13.1 13.1 13.1) (far 2.82), texel x colour/128 (12.1 12.1 12.1) (far 3.28)
+     92:   96 px; game (12.7 12.7 12.6), texel (13.1 13.1 13.1) (far 2.27), texel x colour/128 (12.1 12.1 12.1) (far 2.88)
+     17:  101 px; game (13.0 13.4 12.7), texel (13.4 13.4 13.4) (far 3.01), texel x colour/128 (12.4 12.4 12.4) (far 3.20)
+     18:  281 px; game (8.3 8.5 8.0), texel (7.8 7.8 7.8) (far 0.72), texel x colour/128 (6.8 6.8 6.8) (far 1.44)
+     20:  210 px; game (7.1 7.2 6.7), texel (6.3 6.3 6.3) (far 1.09), texel x colour/128 (5.3 5.3 5.3) (far 1.75)
+     11: no pixel of its own
+     19:  280 px; game (7.7 7.8 7.7), texel (7.8 7.8 7.8) (far 0.42), texel x colour/128 (6.8 6.8 6.8) (far 0.99)
+     21:  221 px; game (6.5 6.5 6.2), texel (6.2 6.2 6.2) (far 0.90), texel x colour/128 (5.2 5.2 5.2) (far 1.44)
+    picture: work/kits-oracle/replay-10-frame.png
+  kit: TEX_22 record 2 player palette at (0,487), TEX_22 record 3 goalkeeper palette at (0,489), TEX_22 record 8 flag at (704,320), TEX_22 record 9 flag palette at (256,495), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488), TEX_41 record 8 flag at (704,256), TEX_41 record 9 flag palette at (256,494), TEX_61 record 8 flag at (704,256), TEX_61 record 9 flag palette at (256,494)
+  turn: R1 tapped 14 time(s), torso yaw -4 -15 -26 -38 -49 -60 -69 -77 -89 -100 -111 -123 -134 -145; back; 468 emulator frame(s) from the load, 40 from the last tap to the end of the back capture
+    the figure each tap read, root and depth: 13@4674 13@4694 13@4694 13@4688 13@4680 13@4675 13@4678 13@4678 13@4681 13@4686 13@4691 13@4700 13@4704 13@4711
+  back: 4 primitive(s) of the figure sample panel (100,104) of page (576,256); 4 of them are torso 13's own texels on the disc
+    page 576 panel (  0, 80): number 5, digits 5 at (7,7), 0 unexplained
+    page 576 panel ( 20, 80): number 3, digits 3 at (7,7), 0 unexplained
+    page 576 panel ( 40, 80): number 4, digits 4 at (7,7), 0 unexplained
+    page 576 panel ( 60, 80): number 7, digits 7 at (7,7), 0 unexplained
+    page 576 panel ( 80, 80): number 16, digits 1 at (3,7) 6 at (11,7), 0 unexplained
+    page 576 panel (  0,104): number 6, digits 6 at (7,7), 0 unexplained
+    page 576 panel ( 20,104): number 2, digits 2 at (7,7), 0 unexplained
+    page 576 panel ( 40,104): number 10, digits 1 at (3,7) 0 at (11,7), 0 unexplained
+    page 576 panel ( 60,104): number 11, digits 1 at (3,7) 1 at (11,7), 0 unexplained
+    page 576 panel ( 80,104): number 9, digits 9 at (7,7), 0 unexplained
+    page 576 panel (100,104): number 1, digits 1 at (7,7), 0 unexplained
+  ok    the followed figure opens at section 13 with head 34, draws 92 in place of 15, holds still, and its back shows panel (576, 100, 104) with number 1
+```
+
+```text
+  palette: TEX_41 record 3 (goalkeeper palette) against CLUT (0,488): 256 entries, 0 differ
+  tab back (yaw 0): histogram intersection with the game's figure 0.548, 0.710 over the colours the tab draws; picture work/kits-oracle/replay-9-tab-back.png
+  tab front (yaw 180): histogram intersection with the game's figure 0.501, 0.670 over the colours the tab draws; picture work/kits-oracle/replay-9-tab-front.png
+  the game's frame: work/kits-oracle/replay-9-frame.png (4440 pixel(s) under the figure's quads)
+```
+
+```text
+  palette: TEX_41 record 3 (goalkeeper palette) against CLUT (0,488): 256 entries, 0 differ
+  tab back (yaw 0): histogram intersection with the game's figure 0.544, 0.716 over the colours the tab draws; picture work/kits-oracle/replay-10-tab-back.png
+  tab front (yaw 180): histogram intersection with the game's figure 0.499, 0.677 over the colours the tab draws; picture work/kits-oracle/replay-10-tab-front.png
+  the game's frame: work/kits-oracle/replay-10-frame.png (4746 pixel(s) under the figure's quads)
+```
+
+As corridas saem 0. O controle `--plant-replay` segue a segunda figura mais perto, de frente e de
+costas, e espera a raiz 103; sai 1:
+
+```text
+  PLANT  the second-nearest figure followed, front and back, expected to open at section 103
+  FAIL  no second figure in the frame
+  FAIL  the pose changed by None between two frames, over 0
+  FAIL  the back samples panel None, not (576, 100, 104)
+  FAIL  the panel holds None, not 1
+```
+
+E a negativa: o `--keeper-armband`, que mediu o slot 7, não corta este quadro. O replay no zoom
+máximo desenha **só** o goleiro, doze paradas por quadro, e a última peça de cada quadro nunca é
+nomeada (a parada seguinte é a cabeça do quadro seguinte, sem ponteiro); toda figura sai "cortada",
+e o juiz dele não acha figura inteira:
+
+```sh
+python3 tools/kits/oracle.py --keeper-armband 9
+```
+
+```text
+  600 stop(s); 0 whole and 49 cut figure(s) opened at section 13; the whole ones in the order:
+  FAIL  no figure opened at section 13 draws section 92
+```
+
+Quem afirma a 92 no lugar da 15 nestes slots é o juiz do `--replay` (`REPLAY_EXPECT`), que corta o
+quadro pelas raízes de `KEEPER_ROOTS` e aceita a peça final sem nome.
+
+O que a saída diz, item por item (o mesmo nos dois slots — "nos dois", não "sempre"):
+
+1. **Cópias mestras e tela.** Os dois states carregam pela cópia mestra; as capturas da tela ficam em
+   `work/looks-shots/replay-<slot>-front.png` e `-back.png`, e o quadro do jogo sob a figura, em
+   quatro vezes o tamanho, em `work/kits-oracle/replay-<slot>-frame.png`.
+2. **O timeout do replay: 390 quadros sem comando**, nos dois (saiu entre 360 e 390, com passo de
+   30). A tela inteira não serve de assinatura — as bandeiras da torcida mexem no replay parado —, e
+   quem decide é a placa "SAVE" (`REPLAY_HUD`). **Cada toque conta como comando:** o giro levou 599 e
+   468 quadros desde a carga, mais que 390, e o replay seguiu de pé; o que fica abaixo do timeout é o
+   trecho do último toque ao fim da captura de costas (45 e 40 quadros).
+3. **A família é a 13 de novo, de perto: cabeça 34, torso 13, braços 14 16 15 17 com a 92 no lugar
+   da 15.** É a regra do slot 7 (G4), agora com o goleiro a 4.681 de profundidade em vez de longe.
+   Nos dois replays o Marcos não aparece pela família 56; a 91 e a 94 continuam sem ser vistas
+   (negativa). A projeção do GTE é `H` 1376 com `OFX` e `OFY` zero.
+4. **O GPU não sombreia a figura.** Todo quad do goleiro — cabeça, torso, braços, faixa, pernas,
+   chuteiras — sai **plano, com a cor (127,127,127)**: nenhum com cor por canto (Gouraud), nenhum
+   cru, nenhum semitransparente. A faixa 92 são cinco quads na página (576,256) com o CLUT (0,488),
+   a paleta do goleiro, nas zonas "armband, short sleeve" e "short sleeve, left, captain" do
+   goleiro. No quadro, **o pixel do jogo é o texel puro**: a distância média por canal ao texel fica
+   entre 0,31 e 3,40 (em cinco bits), e ao texel × cor/128 é maior em toda seção (0,99 a 3,53). A cor
+   127 deixa o texel como está. As distâncias maiores (16 e 17, luvas e antebraço, e a 92) têm por
+   cima a rede do gol, que não é textura e não entra na conta — suspeita, não medida.
+5. **Pose parada: sim.** As matrizes do goleiro são idênticas entre os quadros (diferença 0, em três
+   quadros); a pose fica em `work/kits-pose/slot<slot>-keeper-front.json`, com a projeção — a
+   primeira pose parada medida no jogo (o G7 deu negativa). Cada peça projetada cai a menos de 1,2 px
+   dos quads do quadro.
+6. **Costas, painel e número.** R1 gira a câmera de 8° a 12° por toque (18 toques no 9, 14 no 10)
+   até o torso passar de 150°. De costas, quatro quads do torso 13 amostram o painel (100,104) da
+   página do Brasil, e **os quatro são os texels do próprio torso 13 no disco**: o painel do goleiro
+   é fixo na seção, o jogo não troca o UV. O painel tem o 1 em (7,7), pela regra do §4.7, sem pixel
+   inexplicado. A página traz os onze painéis do Brasil: 5 3 4 7 16 na linha 80, 6 2 10 11 9 na
+   104, e o 1 do goleiro — a ordem da grade não é a dos números, como no slot 5.
+7. **O confronto com a aba.** A paleta do disco que a aba usa (`TEX_41`, registro 3) é a do jogo, 0
+   de 256 entradas diferentes. A figura da aba (`--figure 1 --armband --number 1`) contra a do jogo,
+   por histograma de cor: 0,50 de frente e 0,54 a 0,55 de costas (0,67 a 0,72 sobre as cores que a
+   aba desenha). Lado a lado (`replay-<slot>-frame.png` contra `replay-<slot>-tab-front.png`), o que
+   difere é o corpo: o jogo desenha o goleiro inteiro pela família 13 do `MODEL.BIN` — torso largo,
+   mangas e luvas dessa família, a faixa sobre o braço dela —, e a aba desenha o corpo do
+   `EDT_MOD.BIN` caminhando, com só a 92 posta no `upper arm b`.
+
+**As diferenças, para a task de conserto:**
+
+- **cor e paleta: nenhuma.** A paleta é a mesma (0 de 256), e o pixel do jogo é o texel;
+- **sombreamento: nenhum a acrescentar.** O jogo não sombreia a figura (cor plana 127 em todo quad),
+  e o `core/raster.py`, que pinta o texel puro, já faz o mesmo;
+- **corpo e pose: aí está a diferença.** A braçadeira do jogo é a 92 sobre o braço da família 13, na
+  pose daquela família; a da aba é a 92 sobre um braço do `EDT_MOD.BIN`, na caminhada da `LOOKS SET`.
+  A pose parada da família 13 agora está medida (`slot<slot>-keeper-front.json`, com a projeção),
+  como a do jogador de linha veio do slot 5 (`core/match_pose.json`); desenhar o goleiro da aba pela
+  família 13 é a mudança que aproxima o desenho do jogo, e reabre a decisão da K3D-TASK-10 (a figura
+  de partida fora do seletor). Decisão do usuário.
 
 ## Para o ciclo
 
