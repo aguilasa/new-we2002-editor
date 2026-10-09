@@ -248,6 +248,45 @@
       "depends_on": [],
       "done_on": "2026-10-09",
       "done_commit": "2b711d6"
+    },
+    {
+      "id": "CORR-K3D-020",
+      "file": "CORR-K3D-020.md",
+      "title": "edit_number_judge não afirma cabeça, número e giro medidos no G7",
+      "origin": "K3D-TASK-16",
+      "severity": "high",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-021",
+      "file": "CORR-K3D-021.md",
+      "title": "Docstring de EDIT_TURN_STOPS contradiz a corrida medida",
+      "origin": "K3D-TASK-16",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-022",
+      "file": "CORR-K3D-022.md",
+      "title": "Negativa do Cross no G7 sem comando que a meça",
+      "origin": "K3D-TASK-16",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

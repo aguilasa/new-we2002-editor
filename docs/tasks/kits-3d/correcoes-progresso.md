@@ -22,4 +22,7 @@
 | [CORR-K3D-017](/docs/tasks/kits-3d/CORR-K3D-017.md) | Documentos e docstrings ainda descrevem a figura de partida e o ARM_PIECES antigo | K3D-TASK-10 | medium | done | 2026-10-09 |
 | [CORR-K3D-018](/docs/tasks/kits-3d/CORR-K3D-018.md) | Corpo da K3D-TASK-11 não declara oracle.py, selftest.py e PLAN-KITS-PY.md | K3D-TASK-11 | medium | done | 2026-10-09 |
 | [CORR-K3D-019](/docs/tasks/kits-3d/CORR-K3D-019.md) | PLAN-KITS-PY ainda diz braçadeira do goleiro desligada e quatro plantas | K3D-TASK-11 | medium | done | 2026-10-09 |
+| [CORR-K3D-020](/docs/tasks/kits-3d/CORR-K3D-020.md) | edit_number_judge não afirma cabeça, número e giro medidos no G7 | K3D-TASK-16 | high | pending | — |
+| [CORR-K3D-021](/docs/tasks/kits-3d/CORR-K3D-021.md) | Docstring de EDIT_TURN_STOPS contradiz a corrida medida | K3D-TASK-16 | medium | pending | — |
+| [CORR-K3D-022](/docs/tasks/kits-3d/CORR-K3D-022.md) | Negativa do Cross no G7 sem comando que a meça | K3D-TASK-16 | medium | pending | — |
 <!-- rite:end -->

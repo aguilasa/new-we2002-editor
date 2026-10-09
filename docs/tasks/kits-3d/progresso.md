@@ -80,7 +80,7 @@ graph TD
 | [K3D-TASK-10](/docs/tasks/kits-3d/10-duas-figuras.md) | Seletor só com player e goalkeeper, vestidos pela regra medida | 4 | implementação | K3D-TASK-07 | done | 2026-10-08 | 2026-10-08 |
 | [K3D-TASK-11](/docs/tasks/kits-3d/11-caixas-livres.md) | Number, braçadeira e manga longa livres nas duas figuras | 4 | implementação | K3D-TASK-05, K3D-TASK-08, K3D-TASK-10 | done | 2026-10-09 | 2026-10-09 |
 | [K3D-TASK-12](/docs/tasks/kits-3d/12-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | closing | K3D-TASK-10, K3D-TASK-11 | done | 2026-10-09 | 2026-10-09 |
-| [K3D-TASK-16](/docs/tasks/kits-3d/16-medir-tela-edit-pl-num.md) | Medir a tela EDIT PL. NUM no slot 8: modelo, número nas costas e giro | 6 | investigação | K3D-TASK-12 | done | 2026-10-09 | pending |
+| [K3D-TASK-16](/docs/tasks/kits-3d/16-medir-tela-edit-pl-num.md) | Medir a tela EDIT PL. NUM no slot 8: modelo, número nas costas e giro | 6 | investigação | K3D-TASK-12 | done | 2026-10-09 | 2026-10-09 |
 <!-- rite:end -->
 
 ## Notes
