@@ -54,3 +54,9 @@ Hoje dá 0; depois, 3.
 - "In:" da K3D-TASK-11 com `oracle.py`, `selftest.py` e `PLAN-KITS-PY.md`, cada um com o motivo
   tirado do diff de `1549f06`, e uma linha dizendo que entraram no `files` no fechamento.
 - Verificação: o `sed … | grep -c` dá 3.
+- **Closed** — commit `bf76def` (2026-10-09): docs(kits): declare oracle.py, selftest.py and the plan in K3D-TASK-11
+  - Files (`git show --name-status bf76def`):
+    - `M docs/tasks/kits-3d/11-caixas-livres.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-018.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`

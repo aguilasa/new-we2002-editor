@@ -231,10 +231,10 @@
       "severity": "medium",
       "files": [],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-09",
+      "done_commit": "bf76def"
     },
     {
       "id": "CORR-K3D-019",
