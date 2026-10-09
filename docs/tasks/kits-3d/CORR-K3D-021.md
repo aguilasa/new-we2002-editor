@@ -61,3 +61,9 @@ O primeiro não pode imprimir nada; o segundo tem de mostrar uma linha de docstr
   `WATCH_SECONDS` de 90 do oráculo do `looks`).
 - Verificação: `grep -n 'once the figure has turned'` não imprime nada; `grep -n -A1
   '^EDIT_TURN_WAIT'` mostra a linha de docstring.
+- **Closed** — commit `aaa781b` (2026-10-09): docs(kits): say the matrix load keeps firing after Circle in slot 8
+  - Files (`git show --name-status aaa781b`):
+    - `M docs/tasks/kits-3d/CORR-K3D-021.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/oracle.py`
