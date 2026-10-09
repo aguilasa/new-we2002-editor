@@ -700,7 +700,7 @@ def _hole_checks(c) -> None:
 
 
 def _dress_checks(c) -> None:
-    """K3D-TASK-10: what dresses the player, read off the rule of G3
+    """K3D-TASK-10 and 11: what dresses each figure, read off the rule of G3
     (`figure.ARM_PIECES`, `LONG_TO_SHORT`, `SLEEVE_LENGTHS`): the long-sleeve
     arms on the four arm pieces, the armband of each length on upper arm b in
     place of the arm it replaces, and nothing for short sleeves alone."""
@@ -718,6 +718,21 @@ def _dress_checks(c) -> None:
         got = _figure.arm_dress(armband, sleeves)
         c.ok("arm_dress: armband %s, %s sleeves -> %s" % (armband, sleeves, expect or "nothing"),
              got == expect, "%s" % got)
+    # K3D-TASK-11: the goalkeeper keeps his own long arms and takes the armband
+    # measured in slot 7 on upper arm b; short sleeves he does not wear.
+    keeper = {(False, "long"): {}, (True, "long"): {"upper arm b": 92},
+              (False, None): {}, (True, None): {"upper arm b": 92}}
+    for (armband, sleeves), expect in sorted(keeper.items(), key=repr):
+        got = _figure.arm_dress(armband, sleeves, 1)
+        c.ok("arm_dress: the goalkeeper, armband %s, %s sleeves -> %s"
+             % (armband, sleeves or "his own", expect or "nothing"), got == expect, "%s" % got)
+    try:
+        _figure.arm_dress(False, "short", 1)
+        refused = None
+    except _figure.FigureError as exc:
+        refused = str(exc)
+    c.ok("arm_dress: the goalkeeper in short sleeves is refused", refused is not None,
+         "%s" % refused)
 
 
 def _language_checks(c) -> None:

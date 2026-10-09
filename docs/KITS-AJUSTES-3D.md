@@ -115,11 +115,16 @@ edt-arms: /BIN/MODEL.BIN and /BIN/EDT_MOD.BIN
   section   4 -> upper arm b (nearest EDT section  2 at 5.6, other part 8.2), frame offset 0.8 (+0.1,+0.8,+0.2)
   section   5 -> forearm a   (nearest EDT section 14 at 3.6, other part 10.9), frame offset 0.7 (-0.4,+0.6,+0.1)
   section   6 -> forearm b   (nearest EDT section 15 at 3.6, other part 10.9), frame offset 0.7 (-0.4,+0.6,-0.1)
+  section  14 -> upper arm a (nearest EDT section 12 at 6.0, other part 8.5), frame offset 0.9 (+0.6,+0.3,+0.6)
+  section  15 -> upper arm b (nearest EDT section 13 at 6.1, other part 8.5), frame offset 0.8 (+0.4,+0.3,-0.6)
+  section  16 -> forearm a   (nearest EDT section 14 at 5.1, other part 12.6), frame offset 1.2 (+0.9,-0.6,-0.6)
+  section  17 -> forearm b   (nearest EDT section 15 at 5.1, other part 12.6), frame offset 1.2 (+0.9,-0.6,+0.6)
   section  57 -> upper arm a (nearest EDT section  1 at 5.6, other part 7.9), frame offset 1.8 (+1.6,+0.8,+0.4)
   section  58 -> forearm a   (nearest EDT section  3 at 4.3, other part 13.5), frame offset 1.8 (-0.2,+1.8,+0.4)
   section  59 -> upper arm b (nearest EDT section  2 at 5.5, other part 8.2), frame offset 1.2 (+0.9,+0.8,-0.4)
   section  60 -> forearm b   (nearest EDT section  4 at 4.3, other part 13.5), frame offset 1.8 (-0.2,+1.8,-0.4)
   section  90 -> upper arm b (nearest EDT section  2 at 5.6, other part 8.2), frame offset 0.8 (+0.1,+0.8,+0.2)
+  section  92 -> upper arm b (nearest EDT section 13 at 6.1, other part 8.5), frame offset 0.8 (+0.4,+0.3,-0.6)
   section  93 -> upper arm b (nearest EDT section 13 at 6.1, other part 8.5), frame offset 0.8 (+0.4,+0.3,-0.6)
   section  95 -> upper arm a (nearest EDT section 12 at 6.1, other part 8.5), frame offset 0.8 (+0.4,+0.3,+0.6)
   section  96 -> forearm a   (nearest EDT section 14 at 3.5, other part 11.1), frame offset 0.8 (+0.3,+0.7,-0.3)
@@ -160,8 +165,8 @@ O que a saída diz:
   caem nas peças de 57/58/59/60.
 
 O controle `--plant-edt-arms` move todo braço do `MODEL.BIN` 8 unidades em x antes de medir. Toda
-seção continua com a mesma peça mais próxima, e a corrida sai 1 só pelo referencial: 18 linhas
-`FAIL`, todas `units out of` (até a CORR-K3D-013 o controle era 20 em y, que trocava a peça mais
+seção continua com a mesma peça mais próxima, e a corrida sai 1 só pelo referencial: 23 linhas
+`FAIL`, todas `units out of` (18 antes de a K3D-TASK-11 somar as cinco seções do goleiro; até a CORR-K3D-013 o controle era 20 em y, que trocava a peça mais
 próxima e saía com 21 `FAIL`). No catálogo do `controls.py`, `oracle-arm-side-flipped` e
 `oracle-arm-frame-blind` derrubam os casos sintéticos do `selftest.py`.
 
@@ -191,27 +196,35 @@ seletor e trocava o desenho para ela ao marcar Captain armband ou Long sleeves.
   - com manga longa, a braçadeira muda 369 px numa caixa de 30×19 no braço.
 - **A cópia das costas vale só para a imagem do uniforme:** o `numbered_scene` deixa de pintar a
   imagem das mangas, que as seções do `MODEL.BIN` amostram.
-- **O goleiro fica para a K3D-TASK-11:** `DRESSED_FIGURES` tem só o jogador. A braçadeira do
-  goleiro (92, G4) entra lá.
+- **O goleiro ficou para a K3D-TASK-11:** `DRESSED_FIGURES` tinha só o jogador. A braçadeira do
+  goleiro (92, G4) entrou lá (abaixo).
+
+**Estendido (K3D-TASK-11, 2026-10-09): o goleiro desenhado do torso 13.** As seções 14, 15, 16 e 17
+e a braçadeira 92 (G4) entraram em `ARM_PIECES`, e o mesmo `--edt-arms` as mede (saída acima). As
+cinco caem nas peças de braço do goleiro do `EDT_MOD.BIN` (12 a 15), com offset de 0,8 a 1,2:
+14→`upper arm a`, 15 e 92→`upper arm b`, 16→`forearm a`, 17→`forearm b`. É a mesma ordem da 95 a
+98, e a 92 cai onde a 15, cujos vértices ela tem.
 
 ## G4 — Number, Captain armband e Long sleeves em qualquer combinação, nas duas figuras
 
 **Pedido.** As três caixas valem para **player** e **goalkeeper** e combinam livremente: nenhuma,
 uma, duas ou as três ao mesmo tempo.
 
-**Hoje** (`dressings()` em `ui/app.py`; desde a K3D-TASK-10 a figura é sempre a do `EDT_MOD.BIN`, G3):
+**Hoje** (`dressings()` em `ui/app.py`; desde a K3D-TASK-10 a figura é sempre a do `EDT_MOD.BIN`, G3;
+o goleiro desde a K3D-TASK-11):
 
 | Caixa | Jogador | Goleiro |
 |---|---|---|
-| Number | funciona, com as outras caixas ou sem elas | funciona |
-| Captain armband | funciona: a 90 ou a 93 no `upper arm b` (`figure.arm_dress`) | desligado, com `armband_off` |
-| Long sleeves | funciona: 95-98 nos quatro braços | escondido |
+| Number | funciona, com as outras caixas ou sem elas | funciona, com a braçadeira ou sem ela |
+| Captain armband | funciona: a 90 ou a 93 no `upper arm b` (`figure.arm_dress`) | funciona: a 92 no `upper arm b` |
+| Long sleeves | funciona: 95-98 nos quatro braços | marcada e desligada, com `long_keeper`: ele só usa manga longa |
 
 Antes da K3D-TASK-10, o Number era recusado no jogador quando a braçadeira ou a manga longa
-trocavam o desenho para a figura de partida (`number_off`), e só essas duas combinavam entre si. A
-combinação livre nas duas figuras e a verificação das oito combinações são da K3D-TASK-11.
+trocavam o desenho para a figura de partida (`number_off`), e só essas duas combinavam entre si.
+Antes da K3D-TASK-11, a braçadeira ficava desligada no goleiro (`armband_off`) e a manga longa,
+escondida.
 
-**Em aberto:**
+**Era o que estava em aberto** (os três itens foram fechados; ver o fim desta seção):
 
 - A braçadeira do goleiro **foi medida pela K3D-TASK-08** (abaixo). Antes, não havia medida: `SLEEVE_LENGTHS` lista os braços do goleiro (99-102 e
   57-60), mas nenhuma braçadeira para ele. **Decidido (usuário, 2026-10-07): medir no emulador.** Se
@@ -292,6 +305,32 @@ nenhum quadro mostrou desenhados (`not drawn here`):
 
 A regra vale para o caso medido. Se um dia aparecer um state do goleiro capitão na família 56, ele é
 medido pelo mesmo `--keeper-armband`, com uma entrada nova em `KEEPER_ARMBANDS`.
+
+**Decidido e feito (K3D-TASK-11, 2026-10-09): as três caixas valem nas duas figuras.** Isto reabre a
+decisão da KITS-TASK-40, que escondia a manga longa no goleiro e desligava a braçadeira nele.
+
+- **A braçadeira do goleiro** é a 92 no `upper arm b` do goleiro do `EDT_MOD.BIN`, pela regra de G3
+  (`--edt-arms` mede a 92 nessa peça com offset 0,8). O `figure.arm_dress` a lê de
+  `KEEPER_ARMBAND`, e o `oracle.py` usa a mesma constante em `KEEPER_ARMBANDS`. Os outros braços do
+  goleiro continuam os dele, que já são de manga longa.
+- **O Long sleeves do goleiro aparece marcado e desligado,** com a frase `long_keeper` ("o goleiro
+  não usa outra"). É a decisão do usuário de 2026-10-08 (acima): não há manga curta de goleiro para
+  desenhar. O núcleo recusa `sleeves="short"` no goleiro, e `sleeves=None` quer dizer a manga própria
+  da figura (curta no jogador, longa no goleiro). Voltando ao jogador, a caixa volta ao que estava.
+- **Por isso as combinações são 8 no jogador e 4 no goleiro** (Number × braçadeira), não 8 × 2: a
+  terceira caixa do goleiro não tem o que mudar. O `kits_ui` mede assim, de costas (TEX_14):
+
+  ```text
+  figure 0 Number at least 1197 px, figure 0 Captain armband at least 315 px, figure 0 Long sleeves at least 3293 px, figure 0: 8 combinations, figure 1 Number at least 1196 px, figure 1 Captain armband at least 477 px, figure 1: 4 combinations
+  ```
+
+  O número é o menor efeito da caixa entre as combinações das outras. Cada caixa tem uma planta
+  vermelha: `Number ignored`, `Long sleeves ignored`, `armband never put on` e `goalkeeper's armband
+  ignored`. As duas da caixa do goleiro, `goalkeeper's Long sleeves box left on` e `… left
+  unticked`, também ficam vermelhas.
+- **A braçadeira do goleiro muda só o braço:** 740 px numa caixa de 32×61, com 353 px da cor da
+  faixa, medido em TEX_A4. Em TEX_14 a faixa do goleiro tem o cinza da camisa (57,57,57), e a tinta
+  não teria o que separar.
 
 ## G5 — Figura inteira em qualquer giro
 

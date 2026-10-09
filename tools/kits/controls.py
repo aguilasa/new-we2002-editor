@@ -260,6 +260,15 @@ CONTROLS = (
         "the figure it was ticked on",
     ),
     Control(
+        "figure-keeper-armband-on-the-player-arm", "kits/core/figure.py", "arm_dress",
+        "        return {ARM_PIECES[KEEPER_ARMBAND]: KEEPER_ARMBAND} if armband else {}",
+        "        return {ARM_PIECES[KEEPER_ARMBAND]: SLEEVE_LENGTHS[\"long\"][\"armband\"]} "
+        "if armband else {}",
+        "FAIL  arm_dress: the goalkeeper, armband True",
+        "the goalkeeper's armband is section 92, measured in slot 7 (G4, K3D-TASK-08 "
+        "and 11); the player's 93 in its place draws a band the game never put on him",
+    ),
+    Control(
         "oracle-keeper-armband-unasked", "kits/oracle.py", "keeper_armband_judge",
         "    if not captains:\n        out.append(\"no figure opened at section %d draws section %d\" % (root, armband))",
         "    if False:\n        out.append(\"no figure opened at section %d draws section %d\" % (root, armband))",

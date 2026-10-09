@@ -1194,7 +1194,7 @@ def matrix_passes(pieces, roots_of=ROOT_SECTIONS) -> list:
     return out
 
 
-from core.figure import ARM_PIECES, SLEEVE_LENGTHS  # noqa: E402,F401  (the core's tables)
+from core.figure import ARM_PIECES, KEEPER_ARMBAND, SLEEVE_LENGTHS  # noqa: E402,F401  (the core's tables)
 
 
 def matrix_report(passes, worn_sections=SLEEVE_LENGTHS["long"]["worn"]) -> dict:
@@ -2334,7 +2334,7 @@ KEEPER_ROOTS = ROOT_SECTIONS + (13,)
 """The roots a frame is cut at by `--keeper-armband`: 2 and 56 as in slot 5,
 and 13, the body of the goalkeeper slot 7 draws -- on the ball, in a close
 camera, with legs 18-21 and long arms 14 16 15 17 (K3D-TASK-08)."""
-KEEPER_ARMBANDS = {13: {"armband": 92, "replaced": 15}}
+KEEPER_ARMBANDS = {13: {"armband": KEEPER_ARMBAND, "replaced": 15}}
 """The rule `--keeper-armband 7` measures (KITS-AJUSTES-3D.md G4): the
 goalkeeper whose body is section 13 draws the captain's armband as section 92
 in place of 15, its upper arm b.  92 has 15's vertices, vertex for vertex,
@@ -2502,7 +2502,7 @@ frames are not the same.  Measured on the disc: 1.9 at most (`--edt-arms`).
 The fit runs against the rule's piece, not the nearest one: against the
 nearest, an arm moved 20 units in y settled on the other part at 2.0 to 2.2
 and passed (CORR-K3D-013).  Measured against the rule's piece with
-`--plant-edt-arms`, a move of 8 in x is refused at all 18 sections.  The fit
+`--plant-edt-arms`, a move of 8 in x is refused at all 23 sections.  The fit
 recovers part of a move, so the slack bounds a shift only roughly."""
 ARM_PLANT_SHIFT = (8.0, 0.0, 0.0)
 """`--plant-edt-arms` moves every MODEL.BIN arm by this before matching: each

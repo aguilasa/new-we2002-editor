@@ -21,7 +21,7 @@ build it.
     api.zone_at(x, y)                # the map's Zone at a work-bitmap pixel, or None
     api.confront_zones(uv_report)    # section 4.6: Confrontation, `ok` the verdict
     api.figure(kit, kit_set, figure, geometry_path=None, frame=None,
-               armband=False, sleeves="short")
+               armband=False, sleeves=None)
                                      # the looks Scene of the figure in the kit,
                                      # MODEL.BIN arms put on by ARM_PIECES;
                                      # geometry from WE2002_LOOKS_IMAGE when no path
@@ -99,10 +99,10 @@ FIGURE_TRIANGLES = _figure.TRIANGLES
 
 
 def figure(kit, kit_set=1, figure=0, geometry_path=None, frame=None, geometry=None,
-           armband=False, sleeves="short"):
+           armband=False, sleeves=None):
     """The looks `Scene` of *figure* (0 player, 1 goalkeeper) in set *kit_set*
-    of *kit*, with the captain's *armband* and *sleeves* ("short" or "long")
-    put on by the rule of G3.  The geometry comes from *geometry_path*, else
+    of *kit*, with the captain's *armband* and *sleeves* ("short" or "long";
+    None, the figure's own) put on by the rule of G3.  The geometry comes from *geometry_path*, else
     from `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry` (section 3.1)."""
     return _figure.scene_of(kit, kit_set, figure, geometry_path, frame, geometry,
                             armband, sleeves)

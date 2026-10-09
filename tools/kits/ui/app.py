@@ -390,15 +390,17 @@ class Window(QtWidgets.QMainWindow):
         # Two figures, both EDT_MOD.BIN's (G3): the match player is gone from
         # the window.  The three dressings each draw only what was measured:
         # the number on the figure's back (section 4.7), the armband and the
-        # long sleeves as MODEL.BIN sections on the player's own arm pieces
-        # (`figure.ARM_PIECES`, K3D-TASK-07).  What was not measured stays off,
-        # with the sentence in the box's own text.
+        # long sleeves as MODEL.BIN sections on the figure's own arm pieces
+        # (`figure.ARM_PIECES`, K3D-TASK-07 and 11).  All three combine freely
+        # on both figures; the goalkeeper's Long sleeves stays ticked and off,
+        # with the sentence in the box's own text: he wears no other (G4).
         self.number_box = QtWidgets.QCheckBox()
         self.number_spin = QtWidgets.QSpinBox()
         self.number_spin.setRange(*api.SHIRT_NUMBERS)
         self.number_spin.setValue(DEFAULT_NUMBER)
         self.armband_box = QtWidgets.QCheckBox()
         self.long_box = QtWidgets.QCheckBox()
+        self.player_long = False         # the player's Long sleeves while the goalkeeper shows
         for widget in (self.number_box, self.armband_box, self.long_box):
             widget.toggled.connect(self.draw_figure)
         self.number_spin.valueChanged.connect(self.draw_figure)
@@ -577,18 +579,20 @@ class Window(QtWidgets.QMainWindow):
             self.figure_note.setText(" ")
 
     def dressings(self) -> None:
-        """Which dressing the chosen figure can take, and the sentence for
-        the ones it cannot: the long sleeves only exist for the player, so
-        the goalkeeper hides the box; the armband is drawn on the player
-        only (`figure.DRESSED_FIGURES`); the number on both figures' backs."""
-        figure = self.figure_box.currentData()
-        self.long_box.setVisible(figure != 1)
-        self.long_box.setText(tr("long_sleeves"))
-        keeper = figure == 1
-        self.armband_box.setEnabled(not keeper)
-        self.armband_box.setText(tr("armband_off") if keeper else tr("armband"))
-        if keeper:
-            self.armband_box.setChecked(False)
+        """The dressing boxes of the chosen figure: all three on both
+        (`figure.DRESSED_FIGURES`).  The goalkeeper wears long sleeves only
+        (`figure.KEEPER_SLEEVES`, G4), so with him the box stays ticked and
+        off, and says why; the player gets it back as it was."""
+        keeper = self.figure_box.currentData() == 1
+        with QtCore.QSignalBlocker(self.long_box):
+            if keeper and self.long_box.isEnabled():
+                self.player_long = self.long_box.isChecked()
+                self.long_box.setChecked(True)
+            elif not keeper and not self.long_box.isEnabled():
+                self.long_box.setChecked(self.player_long)
+        self.long_box.setEnabled(not keeper)
+        self.long_box.setText(tr("long_keeper") if keeper else tr("long_sleeves"))
+        self.armband_box.setText(tr("armband"))
         self.number_box.setText(tr("number"))
 
     def draw_figure(self) -> None:
@@ -1004,7 +1008,10 @@ def main(argv=None) -> int:
     window.set_box.setCurrentIndex(args.kit_set - 1)
     window.figure_box.setCurrentIndex(args.figure)
     window.armband_box.setChecked(args.armband)
-    window.long_box.setChecked(args.long_sleeves)
+    if window.long_box.isEnabled():
+        window.long_box.setChecked(args.long_sleeves)
+    else:
+        window.player_long = args.long_sleeves  # the goalkeeper's box stays ticked
     if args.number is not None:
         window.number_spin.setValue(args.number)
         window.number_box.setChecked(True)

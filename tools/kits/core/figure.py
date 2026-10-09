@@ -8,7 +8,7 @@ as the bytes `tex` already put behind the guard of form, so a TEX off a patch
 or out of a file is drawn on the trusted body.
 
     scene = figure.scene_of(kit, kit_set, figure, geometry_path=None, frame=None,
-                            armband=False, sleeves="short")
+                            armband=False, sleeves=None)
 
 `geometry_path=None` means `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry`
 says so in a sentence.  A disc the looks guard refuses is `GeometryRefused`.
@@ -83,9 +83,10 @@ def read_geometry(path: str) -> dict:
 
 
 def scene_of(kit, kit_set: int = 1, figure: int = 0, geometry_path=None, frame=None,
-             geometry=None, armband: bool = False, sleeves: str = "short"):
+             geometry=None, armband: bool = False, sleeves: str = None):
     """The looks `Scene` of *figure* wearing set *kit_set* of *kit*, with the
-    captain's *armband* and *sleeves* ("short" or "long") put on by
+    captain's *armband* and *sleeves* ("short" or "long"; None, the
+    figure's own: short for the player, long for the goalkeeper) put on by
     `dressed_scene`.
 
     *geometry* is the dict `read_geometry` gives, for a caller drawing more
@@ -206,6 +207,8 @@ ARM_PIECES = {
     93: "upper arm b", 95: "upper arm a", 96: "forearm a", 97: "upper arm b", 98: "forearm b",
     57: "upper arm a", 58: "forearm a", 59: "upper arm b", 60: "forearm b",
     99: "upper arm a", 100: "upper arm b", 101: "forearm a", 102: "forearm b",
+    14: "upper arm a", 15: "upper arm b", 16: "forearm a", 17: "forearm b",
+    92: "upper arm b",
 }
 """The rule `oracle.py --edt-arms` measures and asserts (KITS-AJUSTES-3D.md G3,
 K3D-TASK-07), kept here so the drawing reads the same table: the
@@ -215,7 +218,15 @@ is drawn with the matrix and place the figure gives that piece (`scene.pose`,
 which is by name and the same for both figures).  The part -- upper arm or
 forearm -- is the EDT_MOD.BIN piece whose vertices lie nearest; the side, a
 or b, is the sign of the section's mean z, since each pair is the other one
-mirrored in z vertex for vertex."""
+mirrored in z vertex for vertex.  14 15 16 17 and 92 are the arms and the
+armband of the goalkeeper drawn from torso 13 (K3D-TASK-08, slot 7); they lie
+on the goalkeeper's own arm pieces (K3D-TASK-11)."""
+KEEPER_ARMBAND = 92
+"""The goalkeeper's captain's armband: drawn in slot 7 in place of 15, whose
+vertices it has (`oracle.py --keeper-armband 7`, G4 of KITS-AJUSTES-3D.md)."""
+KEEPER_SLEEVES = ("long",)
+"""The goalkeeper wears long sleeves only in this game (user, 2026-10-08, G4):
+his own EDT_MOD.BIN arms are long, and there is no short one to draw."""
 
 
 def read_match_pose(path=None) -> dict:
@@ -635,19 +646,28 @@ def planted_gap(drawn, kit, figure: int, zone_name: str = "shirt front"):
 
 # -- the dressings on the LOOKS SET figure (KITS-AJUSTES-3D.md G3, K3D-TASK-10) -------
 
-DRESSED_FIGURES = (0,)
-"""The figures the armband and the long sleeves dress: the outfield player.
-The goalkeeper's (K3D-TASK-08, G4) is K3D-TASK-11's to open."""
+DRESSED_FIGURES = (0, 1)
+"""The figures the armband and the long sleeves dress: the outfield player
+(K3D-TASK-10) and the goalkeeper (K3D-TASK-11)."""
 
 
-def arm_dress(armband: bool, sleeves: str) -> dict:
-    """{EDT_MOD.BIN piece name: MODEL.BIN section} that dress the player: the
-    long-sleeve arms (`LONG_TO_SHORT`'s 95 96 97 98) and the armband of the
-    sleeve length in place of the arm it replaces (`SLEEVE_LENGTHS`), each on
-    the piece `ARM_PIECES` gives it.  Short sleeves and no armband: none -- the
-    figure keeps its own arms."""
+def arm_dress(armband: bool, sleeves: str = None, figure: int = 0) -> dict:
+    """{EDT_MOD.BIN piece name: MODEL.BIN section} that dress *figure*, each
+    section on the piece `ARM_PIECES` gives it.  The player: the long-sleeve
+    arms (`LONG_TO_SHORT`'s 95 96 97 98) and the armband of the sleeve length
+    in place of the arm it replaces (`SLEEVE_LENGTHS`); short sleeves and no
+    armband are none -- the figure keeps its own arms.  The goalkeeper: his
+    own long arms, and `KEEPER_ARMBAND` on the upper arm it was drawn on;
+    sleeves that are not in `KEEPER_SLEEVES` are refused."""
+    if sleeves is None:
+        sleeves = KEEPER_SLEEVES[0] if figure == 1 else "short"
     if sleeves not in MATCH_SLEEVES:
         raise FigureError("Sleeves %r are not one of %s." % (sleeves, MATCH_SLEEVES))
+    if figure == 1:
+        if sleeves not in KEEPER_SLEEVES:
+            raise FigureError("The goalkeeper wears %s sleeves only, not %s."
+                              % (" or ".join(KEEPER_SLEEVES), sleeves))
+        return {ARM_PIECES[KEEPER_ARMBAND]: KEEPER_ARMBAND} if armband else {}
     out = {ARM_PIECES[s]: s for s in LONG_TO_SHORT} if sleeves == "long" else {}
     if armband:
         band = SLEEVE_LENGTHS[sleeves]["armband"]
@@ -656,7 +676,7 @@ def arm_dress(armband: bool, sleeves: str) -> dict:
 
 
 def dressed_scene(drawn, kit, kit_set: int, figure: int, geometry, frame=None,
-                  armband: bool = False, sleeves: str = "short"):
+                  armband: bool = False, sleeves: str = None):
     """*drawn* (a LOOKS SET figure of `scene_of`) with the armband and the
     long sleeves: each EDT_MOD.BIN arm piece `arm_dress` names is taken out
     and the MODEL.BIN section put in, through the matrix and place the frame
@@ -665,12 +685,12 @@ def dressed_scene(drawn, kit, kit_set: int, figure: int, geometry, frame=None,
     and texels, textured as `match_scene` textures them."""
     import section
 
-    dress = arm_dress(armband, sleeves)
-    if not dress:
-        return drawn
     if figure not in DRESSED_FIGURES:
         raise FigureError("The captain's armband and the long sleeves are not measured "
                           "on figure %d." % figure)
+    dress = arm_dress(armband, sleeves, figure)
+    if not dress:
+        return drawn
     members = scene._figure_sections(geometry)[figure]
     piece_of = {name: index for (file, index), name in scene.piece_names(geometry).items()
                 if file == layout.EDT_MOD and index in members}
