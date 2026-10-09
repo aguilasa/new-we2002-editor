@@ -273,10 +273,10 @@
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g8--replays-nos-slots-9-e-10-braçadeira-e-manga-longa-de-perto-o-goleiro-capitão-e-os-22-em-campo",
       "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md"],
       "resources": ["emulador", "save-states"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-09",
+      "done_commit": "f020577",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
