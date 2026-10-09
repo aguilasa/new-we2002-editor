@@ -257,10 +257,10 @@
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g7--tela-edit-pl-num-o-jogo-desenhando-o-número-e-o-giro",
       "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md"],
       "resources": ["emulador", "save-states"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-09",
+      "done_commit": "6409a49",
+      "reviewed_on": "pending",
       "review_commit": null
     }
   ]

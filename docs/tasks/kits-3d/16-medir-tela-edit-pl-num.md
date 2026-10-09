@@ -76,3 +76,10 @@ Gates:
   `100% tests passed, 0 tests failed out of 4`, `kits_ui: 0 failure(s)`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 38 of 38 red`.
 - Varredura (`rite sweep`): só texto desta task e o `STATES_DIR` do `oracle.py`, que dizia "slots 3 to 5" e agora diz 3 a 7 e o 8.
+- **Closed** — commit `6409a49` (2026-10-09): feat(kits): measure the EDIT PL. NUM screen in slot 8
+  - Files (`git show --name-status 6409a49`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/16-medir-tela-edit-pl-num.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
