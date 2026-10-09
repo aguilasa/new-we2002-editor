@@ -79,3 +79,10 @@ $ WE2002_LOOKS_IMAGE=… WE2002_LOOKS_DRIVE_IMAGE=$PWD/work/looks-disc/we2002-en
   work/kits-oracle/edit-8-0.json`; as capturas, com uma corrida ao vivo do Circle gravando em
   arquivo à parte, cuja captura saiu idêntica à guardada (`front`, `turn` e `page_back` iguais).
 - `selftest.py`: `kits_selftest: 0 failure(s)`; `controls.py`: `controls: 40 of 40 red`.
+- **Closed** — commit `7986d19` (2026-10-09): feat(kits): measure what Cross does on EDIT PL. NUM with --button
+  - Files (`git show --name-status 7986d19`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-022.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/oracle.py`
