@@ -239,12 +239,12 @@
       "phase": 4,
       "depends_on": ["K3D-TASK-10", "K3D-TASK-11"],
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#para-o-ciclo",
-      "files": ["docs/tasks/kits-3d/12-fechamento-fase-4.md"],
+      "files": ["docs/tasks/kits-3d/12-fechamento-fase-4.md", "docs/PLAN-KITS-PY.md"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-09",
+      "done_commit": "b9553a9",
+      "reviewed_on": "pending",
       "review_commit": null
     }
   ]

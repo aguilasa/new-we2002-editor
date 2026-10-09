@@ -56,3 +56,7 @@ Gates:
 - `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
   `100% tests passed, 0 tests failed out of 4`, `kits_ui: 0 failure(s)`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 37 of 37 red`.
+- **Closed** — commit `b9553a9` (2026-10-09): docs(kits): close phase 4 and date the KITS-TASK-37 reopening in the plan
+  - Files (`git show --name-status b9553a9`):
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits-3d/12-fechamento-fase-4.md`
