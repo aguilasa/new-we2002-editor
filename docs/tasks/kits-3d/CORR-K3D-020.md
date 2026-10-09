@@ -92,3 +92,11 @@ controls: 1 of 1 red
 ```
 
   `selftest.py`: `kits_selftest: 0 failure(s)`.
+- **Closed** — commit `fe188ba` (2026-10-09): fix(kits): assert G7's measured head, family, number, turn and kit in --edit-number
+  - Files (`git show --name-status fe188ba`):
+    - `M docs/tasks/kits-3d/CORR-K3D-020.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
