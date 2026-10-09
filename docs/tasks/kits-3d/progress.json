@@ -262,6 +262,54 @@
       "done_commit": "6409a49",
       "reviewed_on": "2026-10-09",
       "review_commit": "241b77a"
+    },
+    {
+      "id": "K3D-TASK-17",
+      "file": "17-medir-goleiro-capitao-replay.md",
+      "title": "Medir o goleiro capitão de perto nos replays dos slots 9 e 10: a braçadeira como o jogo a desenha, família, painel e pose parada",
+      "type": "investigação",
+      "phase": 7,
+      "depends_on": ["K3D-TASK-16"],
+      "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g8--replays-nos-slots-9-e-10-braçadeira-e-manga-longa-de-perto-o-goleiro-capitão-e-os-22-em-campo",
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md"],
+      "resources": ["emulador", "save-states"],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
+    },
+    {
+      "id": "K3D-TASK-18",
+      "file": "18-medir-os-22-replay.md",
+      "title": "Medir os 22 em campo por L2/R2 nos replays: time, cabeça, manga, braçadeira e painel por jogador",
+      "type": "investigação",
+      "phase": 7,
+      "depends_on": ["K3D-TASK-17"],
+      "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g8--replays-nos-slots-9-e-10-braçadeira-e-manga-longa-de-perto-o-goleiro-capitão-e-os-22-em-campo",
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md"],
+      "resources": ["emulador", "save-states"],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
+    },
+    {
+      "id": "K3D-TASK-19",
+      "file": "19-medir-capitao-linha-replay.md",
+      "title": "Medir o capitão de linha (Bokšić) de perto nos replays, manga curta no 9 e longa no 10, contra a aba",
+      "type": "investigação",
+      "phase": 7,
+      "depends_on": ["K3D-TASK-18"],
+      "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g8--replays-nos-slots-9-e-10-braçadeira-e-manga-longa-de-perto-o-goleiro-capitão-e-os-22-em-campo",
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md"],
+      "resources": ["emulador", "save-states"],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
     }
   ]
 }
