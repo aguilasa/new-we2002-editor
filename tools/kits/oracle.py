@@ -1137,8 +1137,9 @@ def matrix_stops(game, maps, count: int = MATRIX_STOPS, partial: bool = False,
     is what the live pointers say, which -- the `looks` measured -- is the
     piece drawn BEFORE the matrix (`DRAW_LAG`).  When the load stops firing
     within *wait* seconds (`WATCH_SECONDS`), the run is refused -- or, with
-    *partial*, returned as far as it got (a screen that stops drawing the
-    figure this way is what `--edit-number` measures, G7)."""
+    *partial*, returned as far as it got (`--edit-number` asks for that after
+    the press, G7; in slot 8 after Circle the load keeps firing through all of
+    `EDIT_TURN_STOPS`, so nothing is cut short there)."""
     import who_writes
 
     import oracle as looks_oracle  # tools/looks
@@ -2511,9 +2512,15 @@ EDIT_TURN_STOPS = 1200
 """Matrix stops it takes after the confirming press, at most: 100 frames,
 which have to hold the whole turn and the settling after it.  The run ends
 earlier when the load stops firing for `EDIT_TURN_WAIT` seconds, and how
-many stops it got is reported: in slot 8 the per-piece matrix load stops
-once the figure has turned."""
+many stops it got is reported.  Measured in slot 8 after Circle: the load
+keeps firing, all 1200 stops come in (99 whole figures), and no "stopped
+firing" line is printed (`--edit-number 8 --frame-json
+work/kits-oracle/edit-8-0.json`, CORR-K3D-021)."""
 EDIT_TURN_WAIT = 20
+"""Seconds `matrix_stops` waits for the next matrix load after the press
+before taking the capture as over: shorter than the looks oracle's
+`WATCH_SECONDS` (90), so a press that leaves the screen ends the capture
+without the long wait."""
 EDIT_YAW_STEP = 3.0
 """Degrees of torso yaw a frame has to move before it counts as turning:
 the walk sways the torso by up to two degrees a frame (slot 8, front: -9.9

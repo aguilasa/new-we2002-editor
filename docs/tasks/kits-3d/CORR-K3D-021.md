@@ -52,3 +52,12 @@ grep -n -A1 '^EDIT_TURN_WAIT' tools/kits/oracle.py
 O primeiro não pode imprimir nada; o segundo tem de mostrar uma linha de docstring.
 
 ## Log de Execução
+
+- 2026-10-09 — triagem inline: **REPRODUCED**. `oracle.py:2515` dizia "once the figure has turned";
+  a corrida sobre `edit-8-0.json` dá `turn: 1200 stop(s), 99 whole figure(s)` e nenhuma linha
+  "stopped firing".
+- `oracle.py`: docstrings de `EDIT_TURN_STOPS` e de `matrix_stops` dizem o medido (depois do Circle a
+  carga continua pelas 1200 paradas); `EDIT_TURN_WAIT` ganhou docstring (20 s, mais curto que o
+  `WATCH_SECONDS` de 90 do oráculo do `looks`).
+- Verificação: `grep -n 'once the figure has turned'` não imprime nada; `grep -n -A1
+  '^EDIT_TURN_WAIT'` mostra a linha de docstring.
