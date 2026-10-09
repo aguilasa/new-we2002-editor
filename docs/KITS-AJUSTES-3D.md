@@ -572,10 +572,23 @@ O que a saída diz, item por item:
 5. **O giro.** Quem confirma é o **Circle**. A figura gira de −12° a −178° (goleiro) e de −12,5° a
    +179,9° (jogador) em **30 quadros**, a −5,6° por quadro (−4,2 e −7,0 uma vez cada), e fica de
    costas a ±180°, ainda caminhando (o balanço de ±2° por quadro que segue na linha "torso yaw per
-   frame"). A translação não muda: a câmera é a mesma de frente e de costas. O Cross não confirma:
-   na primeira corrida, com ele antes do Circle, a tela voltou para a lista de times e a carga de
-   matriz por peça parou de disparar — por isso a ordem de `EDIT_BUTTONS` e a recarga do state antes
-   de cada botão.
+   frame"). A translação não muda: a câmera é a mesma de frente e de costas. **O Cross não
+   confirma**: a tela volta para a seleção de time (`Select Team`, captura
+   `work/looks-shots/edit-8-0-Cross-back.png`) e a carga de matriz por peça para de disparar. Medido
+   apertando só ele ([CORR-K3D-022](/docs/tasks/kits-3d/CORR-K3D-022.md)):
+
+   ```sh
+   WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin \
+   WE2002_LOOKS_DRIVE_IMAGE=$PWD/work/looks-disc/we2002-english.cue DISPLAY=:98 XAUTHORITY= \
+     python3 tools/kits/oracle.py --edit-number 8 --button Cross
+   ```
+
+   ```text
+     Cross pressed: did not turn the figure; the per-piece matrix load gave 313 of 1200 stop(s) (12 whole figure(s)), then stopped firing for 20 s
+   ```
+
+   A corrida sai 1, com os `FAIL` do giro e do número que esse botão não produz. Por isso a ordem de
+   `EDIT_BUTTONS` (Circle primeiro) e a recarga do state antes de cada botão.
 6. **O número nas costas: a regra da partida, escrita ao selecionar a linha.** Na página de
    uniforme só diferem do disco os dois painéis do torso, (0,80) e (100,104). O da figura mostrada tem
    o número pela regra do §4.7: um dígito em (7,7) — `DIGIT_Y` 7, x 7 —, sobre as costas da camisa, e

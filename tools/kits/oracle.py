@@ -2753,48 +2753,55 @@ def _edit_kit(game, bodies: dict, label: str):
     return hits, None, None, None
 
 
-def edit_capture(game, maps, bodies: dict, slot: int, player: int) -> dict:
+def edit_capture(game, maps, bodies: dict, slot: int, player: int,
+                 buttons=EDIT_BUTTONS) -> dict:
     """Everything `--edit-number` reads from the running screen: the still
     figure's stops, the kit, the uniform page before the press, the press
     that turned the figure and the stops through the turn, and the page
     after it."""
     import oracle as looks_oracle  # tools/looks
 
+    name = "edit-%d-%d%s" % (slot, player,
+                             "" if tuple(buttons) == EDIT_BUTTONS else "-" + "-".join(buttons))
+
     def arrive(label):
         load_slot(game, slot, label)
         for _ in range(player):
             game.press("Down", least=EDIT_ROW_MOVED)
         if player:
-            game.capture("edit-%d-%d-row" % (slot, player))
+            game.capture(name + "-row")
 
-    arrive("edit-%d-%d-front" % (slot, player))
+    arrive(name + "-front")
     out = {"front": matrix_stops(game, maps, EDIT_STOPS)}
-    hits, tag, kit_set, page_x = _edit_kit(game, bodies, "edit-%d-%d-front" % (slot, player))
+    hits, tag, kit_set, page_x = _edit_kit(game, bodies, name + "-front")
     out.update(hits=[list(h[:2]) + [list(h[2]), h[3], h[4]] for h in hits],
                tag=tag, set=kit_set, page_x=page_x)
     if page_x is not None:
         out["page_front"] = _edit_page(game, page_x)
-    out["button"], out["turn"] = None, []
-    for n, button in enumerate(EDIT_BUTTONS):
+    out["button"], out["turn"], out["pressed"] = None, [], {}
+    for n, button in enumerate(buttons):
         if n:
-            arrive("edit-%d-%d-again" % (slot, player))
+            arrive(name + "-again")
         game.client.call("press_button", button=button,
                          duration_frames=looks_oracle.CONFIRM_FRAMES)
         stops = matrix_stops(game, maps, EDIT_TURN_STOPS, partial=True, wait=EDIT_TURN_WAIT)
         yaws = [piece_yaw(figure_torso(f, {})["matrix"])
                 for f in edit_figures(edit_pieces(stops))]
         out["turn"] = stops
+        out["pressed"][button] = {"stops": len(stops), "figures": len(yaws),
+                                  "turned": turned_through(edit_turn(yaws))}
         if turned_through(edit_turn(yaws)):
             out["button"] = button
             break
         out.setdefault("ignored", []).append(button)
-    game.capture("edit-%d-%d-back" % (slot, player))
+    game.capture(name + "-back")
     if page_x is not None:
         out["page_back"] = _edit_page(game, page_x)
     return out
 
 
-def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: bool = False) -> int:
+def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: bool = False,
+                    button: str = None) -> int:
     """`--edit-number SLOT [--player ROW]`: G7, what the EDIT PL. NUM screen
     draws -- the family of the figure, its kit, its still pose, the turn a
     confirming press makes, and the number panel written for the back."""
@@ -2806,7 +2813,8 @@ def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: boo
     from core import figure as _figure
 
     image = os.environ[IMAGE_VARIABLE]
-    path = cache or os.path.join(ATTACH_DIR, "edit-%d-%d.json" % (slot, player))
+    suffix = "-" + button if button else ""
+    path = cache or os.path.join(ATTACH_DIR, "edit-%d-%d%s.json" % (slot, player, suffix))
     if cache and os.path.isfile(cache):
         with open(cache) as fh:
             kept = json.load(fh)
@@ -2815,7 +2823,8 @@ def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: boo
         maps = looks_oracle.model_maps(image)
         bodies = read_kits(image)
         with looks_oracle.Oracle(cue) as game:
-            kept = edit_capture(game, maps, bodies, slot, player)
+            kept = edit_capture(game, maps, bodies, slot, player,
+                                (button,) if button else EDIT_BUTTONS)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as fh:
             json.dump(kept, fh)
@@ -2869,10 +2878,16 @@ def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: boo
         print("  no button of %s turned the figure through the per-piece matrix load; the "
               "last press's torso yaw %s to %s"
               % (", ".join(EDIT_BUTTONS), turn["start"], turn["end"]))
+    for pressed, what in sorted(kept.get("pressed", {}).items()):
+        print("  %s pressed: %s the figure; the per-piece matrix load gave %d of %d stop(s) "
+              "(%d whole figure(s))%s"
+              % (pressed, "turned" if what["turned"] else "did not turn", what["stops"],
+                 EDIT_TURN_STOPS, what["figures"],
+                 ", then stopped firing for %d s" % EDIT_TURN_WAIT
+                 if what["stops"] < EDIT_TURN_STOPS else ""))
     ended = len(kept["turn"]) < EDIT_TURN_STOPS
     if ended:
-        print("  the per-piece matrix load stopped firing after %d stop(s), %d whole figure(s): "
-              "once turned, the figure is not drawn through it any more"
+        print("  the per-piece matrix load stopped firing after %d stop(s), %d whole figure(s)"
               % (len(kept["turn"]), len(turn_yaws)))
     report = dict(reports["front"], turn=turn, turn_frames=len(turn_yaws), turn_ended=ended,
                   tag=kept.get("tag"), set=kept.get("set"))
@@ -2901,7 +2916,8 @@ def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: boo
                   % (("player", "goalkeeper")[figure], cx, cy, one["number"],
                      " ".join("%d at (%d,%d)" % (d, x, y) for x, y, d in one["digits"]) or "none",
                      one["unexplained"]))
-        picture = os.path.join(ATTACH_DIR, "edit-%d-%d-%s.png" % (slot, player, when[5:]))
+        picture = os.path.join(ATTACH_DIR, "edit-%d-%d%s-%s.png"
+                               % (slot, player, suffix, when[5:]))
         save_picture(picture, kept[when], record.w, record.h, _body(kept["tag"]), kept["set"])
         print("    picture: %s" % picture)
         if when == "page_back":
@@ -2912,7 +2928,7 @@ def run_edit_number(slot: int, cue: str, player: int = 0, cache=None, plant: boo
             continue
         whole = edit_figures(edit_pieces(kept[phase]))[-1]
         os.makedirs(POSE_DIR, exist_ok=True)
-        pose_path = os.path.join(POSE_DIR, "slot%d-row%d-%s.json" % (slot, player, kind))
+        pose_path = os.path.join(POSE_DIR, "slot%d-row%d%s-%s.json" % (slot, player, suffix, kind))
         with open(pose_path, "w") as fh:
             json.dump({"slot": slot, "player": player, "pose": kind,
                        "head": whole[0]["section"],
@@ -3130,6 +3146,10 @@ def main(argv=None) -> int:
     parser.add_argument("--player", type=int, default=0, metavar="ROW",
                         help="with --edit-number: rows to go down the list before confirming "
                              "(default 0, the selected player)")
+    parser.add_argument("--button", choices=EDIT_BUTTONS,
+                        help="with --edit-number: press only this button after the still "
+                             "capture and report what it does (CORR-K3D-022); the capture "
+                             "is kept as edit-SLOT-ROW-BUTTON.json")
     parser.add_argument("--plant-edit-number", action="store_true",
                         help="with --edit-number: the control -- expect figures opened at "
                              "section %d and read every panel one row up" % PLANT_EDIT_HEAD)
@@ -3218,7 +3238,7 @@ def main(argv=None) -> int:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
         return run_edit_number(args.edit_number, cue, args.player, args.frame_json,
-                               args.plant_edit_number)
+                               args.plant_edit_number, args.button)
     if args.keeper_armband is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:
