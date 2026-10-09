@@ -389,18 +389,19 @@ devolve.
   jogador da `LOOKS SET`, marcar um dos dois passava a desenhar a figura de
   partida; desde a K3D-TASK-10, as seções vestem o próprio jogador (G3 do
   KITS-AJUSTES-3D), e o que segue sobre **match player** é registro. Com **match player**, a manga segue o checkbox: longa marcada,
-  curta desmarcada. O que não foi medido fica desligado, com a frase no texto
-  do próprio checkbox: a braçadeira no goleiro e o número na figura de
-  partida. O **Long sleeves** ficava **escondido** com o goleiro, que não tem
+  curta desmarcada. O que não foi medido ficava desligado, com a frase no texto
+  do próprio checkbox: a braçadeira no goleiro (até a K3D-TASK-11) e o número
+  na figura de partida. O **Long sleeves** ficava **escondido** com o goleiro, que não tem
   manga longa de jogador de linha. **Reaberto em 2026-10-09** (K3D-TASK-11, G4
   do [KITS-AJUSTES-3D](/docs/KITS-AJUSTES-3D.md#g4--number-captain-armband-e-long-sleeves-em-qualquer-combinação-nas-duas-figuras)):
   as três caixas aparecem nas duas figuras. No goleiro, a braçadeira é a seção
   92 medida no jogo, e o **Long sleeves** fica marcado e desligado, com a frase
   de que ele não usa outra manga. Na linha de comando, `ui/app.py --number N`,
   `--armband` e `--long-sleeves` marcam cada um, e `--list-3d` imprime o estado
-  dos três. O `kits_ui` julga a mudança de cada um vista das costas, os
-  checkboxes por figura e língua, e quatro plantas: cada checkbox ignorado e o
-  de manga sempre visível.
+  dos três. O `kits_ui` julga a mudança de cada um vista das costas, em toda
+  combinação das outras, e os checkboxes por figura e língua; as plantas que o
+  derrubam são as linhas `plant '…'` de
+  `DISPLAY=:98 WE2002_LOOKS_IMAGE=… python3 tools/kits/ui_check.py`.
 - **A vista não espelha mais** (KITS-TASK-40). A cena é o espaço do GTE, x à
   direita, y para baixo e z para longe da câmera, com o y invertido pelo
   `looks` (`UP`). Isso deixa um referencial de mão esquerda, e desenhado com x

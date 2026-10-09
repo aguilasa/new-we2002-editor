@@ -55,3 +55,10 @@ grep -c 'quatro plantas\|manga sempre visível' docs/PLAN-KITS-PY.md
 Hoje dá 2; depois, 0.
 
 ## Log de Execução
+
+- 2026-10-09 — triagem inline: **REPRODUCED**. Linhas 393 e 402-403 do plano; a planta "Long
+  sleeves always shown" não existe mais no `ui_check.py`.
+- §3.4 do `PLAN-KITS-PY.md`: o desligado da braçadeira no goleiro foi para o passado ("até a
+  K3D-TASK-11"), e "quatro plantas … manga sempre visível" virou o apontamento às linhas `plant '…'`
+  que o `ui_check.py` imprime, sem contagem à mão.
+- Verificação: `grep -c 'quatro plantas\|manga sempre visível' docs/PLAN-KITS-PY.md` dá 0.
