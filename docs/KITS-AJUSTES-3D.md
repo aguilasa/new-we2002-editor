@@ -604,6 +604,128 @@ tem: o giro medido — 30 quadros a 5,6° por quadro, de frente para as costas, 
 que serve de regra se a aba ganhar um "virar de costas" animado; e a dúvida da cabeça 34, que uma
 task nova mede se quiser cabeça por jogador. Decisão de desenhar fica para o usuário.
 
+## G8 — Replays nos slots 9 e 10: braçadeira e manga longa de perto, o goleiro capitão e os 22 em campo
+
+**Objetivo (usuário, 2026-10-09): melhorar o desenho do jogador na aba 3D como um todo, e
+principalmente com a braçadeira de capitão** — "meio estranha, não se parece muito com o jogo" — **e
+com manga longa** — "um pouco diferente do jogo". Para consertar é preciso antes medir o jogo
+desenhando as duas coisas **de perto**, e nenhum state dava isso: o slot 7 (goleiro capitão, G4) é
+câmera de longe; o slot 5 tem os dois capitães pequenos (§4.3 do PLAN-KITS-PY); o slot 8 (G7) não
+desenha braçadeira nem manga do `MODEL.BIN`.
+
+**Relato (usuário, 2026-10-09).** Dois **replays parados** de Brasil × Croácia, câmera focada em
+**Marcos** (goleiro, nº 1, capitão do Brasil), de frente, no **zoom mais próximo**: o **slot 9** e o
+**slot 10**, "nos mesmos moldes". O quadro dos dois states (`python3 tools/pes2/savestate.py shot
+<state>`, lido sem emulador) mostra o Marcos de corpo inteiro sob a trave, manga longa cinza, a faixa
+no braço esquerdo dele, ~60 px de altura em 256×192 — o maior que o jogo o desenha. **A diferença
+entre os dois é a manga dos jogadores de linha: no slot 9 estão de manga curta, no 10 de manga longa;
+os goleiros usam manga longa sempre.** **O capitão da Croácia é o nº 11, Bokšić.** Os controles do
+replay: **L2/R2** trocam o foco da câmera pelos 22 jogadores (menos os expulsos) e voltam à bola;
+**L1/R1** giram a câmera em volta do focado, por toque ou segurando; **Up/Down** aproximam e afastam
+o zoom; **Right/Left segurados** andam e voltam o replay; **sem comando por um tempo, o replay termina**
+e volta ao jogo. As cópias mestras vão para `work/kits-states/SLPM-87056_9.sav` e `_10.sav`.
+
+**O que a aba desenha hoje** (`ui/app.py --figure 1 --armband --export-3d`, e `--figure 0 --armband
+--long-sleeves`): a figura do `EDT_MOD.BIN` com as peças de braço trocadas por seções do `MODEL.BIN`
+— 92 no goleiro, 93 ou 90 no capitão de linha, 95 a 98 na manga longa —, cada seção com a **matriz
+da própria peça do EDT** (`core/figure.py`, `dressed_scene`; G3), texel mais próximo **sem
+sombreamento** (o `core/raster.py` não tem luz nem cor de vértice), e a faixa na zona "armband, …"
+do bitmap de mangas. O que pode estar diferente, e que só o jogo de perto decide:
+
+- **cor e paleta**: a zona e a linha de CLUT (486 jogador, 488 goleiro) que o jogo amostra na faixa
+  e nas mangas;
+- **sombreamento**: o console modula o texel pela cor de vértice (Gouraud), e nós não;
+- **pose e junção**: a seção do `MODEL.BIN` entra com a matriz de uma malha do EDT que não é a dela
+  (G3: "outra malha"); o jogo posa a 95-98 com as matrizes da figura de partida, família 2;
+- **a família do goleiro**: torso 56 com a 91 ou a 94, "não visto" (G4), ou torso 13 com a 92 de novo;
+- **ordem e profundidade**: a lista do jogo contra o nosso z-buffer (G6).
+
+**O que os dois slots respondem, e onde cada pergunta está aberta:**
+
+1. **Braçadeira e manga longa como o jogo as desenha, de perto**, por primitiva: página, CLUT, texels
+   (zona do bitmap), cor de vértice e modo (flat ou Gouraud, modulado ou não), posição na tela. A
+   KITS-TASK-39 só contou primitivas por zona, de longe, sem cor (§4.3 (c) do PLAN-KITS-PY).
+2. **A família do goleiro capitão** (G4: 56 com 91/94, ou 13 com 92), em dois states e não em um.
+3. **A nossa figura contra a do jogo**, mesma câmera e mesma pose: (a) as seções do `MODEL.BIN`
+   desenhadas por nós com as matrizes do jogo (`match_scene`, vista `camera`) contra os quads delas
+   na lista do jogo — IoU e histograma de cor por caixa (faixa, manga), com o texel modulado pela cor
+   de vértice como medição alternativa; (b) a figura **da aba** (EDT vestido) no mesmo giro contra o
+   quadro do jogo, nas mesmas caixas. (a) isola texel, paleta e sombra; (b) é o que o usuário vê, e
+   inclui a pose.
+4. **Uma pose parada** (negativa no G7): o replay parado redesenha o mesmo quadro.
+5. **Qual painel o torso amostra, e o número** (§4.7, "não medido"): o UV do torso, de costas (R1
+   até virar), e o painel 20×24 em que cai.
+6. **A cabeça por jogador** (G7: 34 no goleiro e 24 no jogador de linha, não medida): 22 cabeças.
+7. **A manga por slot, medida**: curta no 9 e longa no 10, nos dois times, pela lista do jogo (3-6 ou
+   95-98 por figura); e o Bokšić desenhando a 90 no 9 e a 93 no 10 — os dois casos de
+   `SLEEVE_LENGTHS` de perto.
+
+**Duas armadilhas do instrumento.** O **timeout do replay** conta ocioso em quadros do jogo: pausado
+ou parado em breakpoint o tempo não anda, mas cada `continue` entre paradas anda. Regra: todo aperto
+conta como comando, toda captura recarrega o state (`load_slot`) e corre um número limitado de
+paradas (~22 figuras × 12 por quadro); `--replay-idle SLOT` mede o timeout uma vez — quadros até a
+assinatura da tela mudar — e ele vira a guarda de toda captura. E **quem é o focado**: a translação
+das paradas é no espaço da vista, então o focado é a figura de **menor z**, com margem exigida pelo
+juiz; o `piece_yaw` do torso diz frente ou costas, e o passo de L1/R1 por toque é medição. Os botões
+são toques (`press_button` com `duration_frames`): sem a duração o botão fica preso (PLAN-PES2-PSX,
+armadilha 36).
+
+**Decidido (usuário, 2026-10-09): três tasks de investigação, 17 → 18 → 19, e nenhuma muda a aba;
+Right/Left (andar o replay) ficam fora.** O goleiro fecha sozinho nos dois slots; a navegação pelos
+22 tem task própria, acha o foco do Bokšić e confirma a manga por slot; o capitão de linha de perto
+vem nas duas mangas — a curta (90) no slot 9 e a longa (93, com a 95-98) no slot 10. O conserto —
+sombreamento por cor de vértice, zona e CLUT da faixa, pose das seções de braço, regra do goleiro 56
+se aparecer — vira task de implementação a partir das diferenças que as três listarem.
+
+**K3D-TASK-17 — o goleiro capitão de perto, nos slots 9 e 10.** Opções novas do `oracle.py`:
+`--replay SLOT [--rotate L1|R1]` (captura em `work/kits-oracle/replay-<slot>-<foco>.json`, relida
+por `--frame-json`), `--replay-idle SLOT` e `--replay-confront SLOT`; controle `--plant-replay`.
+Roda nos dois slots — o segundo diz "nos dois", não "sempre":
+
+1. **Cópias mestras**, sha256 de cada uma no Log; sem uma delas a task fica blocked.
+2. **Timeout** por `--replay-idle`, nos dois slots.
+3. **Família, ordem, cabeça e braçadeira** do focado: `matrix_stops` cortado em `KEEPER_ROOTS`
+   (2, 56, 13), a figura de menor z, a ordem `xN …`; família 13 confirma a 92; família 56 dá a seção
+   fora de 57-60 e 99-102 com os vértices de uma delas (91 ou 94), entrada nova em `KEEPER_ARMBANDS`
+   e o mesmo `keeper_armband_judge`.
+4. **A faixa e os braços na lista do jogo**: `pose_capture` de frente, com `textured_samples`
+   estendido para guardar as cores de vértice e o modo da primitiva; para a seção da faixa e os
+   quatro braços, xy na tela, página, CLUT, zona (`core/zones.py`), cor por vértice, modulado ou não.
+5. **Pose parada**: matrizes iguais em dois quadros, com limite em unidades do GTE;
+   `work/kits-pose/slot<N>-keeper-front.json` com a projeção.
+6. **Costas**: toques de R1 (ou L1) até o torso ficar a 150° ou mais da câmera, com o passo por
+   toque; `pose_capture` de costas; o painel que o torso amostra (o UV em qual 20×24 das linhas 80 a
+   127, páginas por `_edit_kit`) e o número lido por `read_panels` (o 1).
+7. **Confronto** por `--replay-confront`: (a) o `match_scene` da família medida, vista `camera`, com
+   a pose do item 5, só a seção da faixa e os braços, contra os quads deles na lista do jogo — IoU e
+   interseção de histograma nas caixas, e a mesma conta com o texel modulado pela cor de vértice; (b)
+   a aba (`app.py --figure 1 --armband --number 1 --tag <Brasil> --yaw <câmera> --export-3d`) contra o
+   quadro do jogo nas mesmas caixas. O confronto **registra** os números; não afirma limite — é
+   investigação, e o juiz afirma só os itens 3, 5 e 6.
+
+O controle `--plant-replay` espera o foco na raiz 103 (`PLANT_KEEPER_ARMBAND`), lê os painéis uma
+linha acima e troca o focado pela segunda menor z: três `FAIL`, saída 1. No `selftest.py`, os casos
+sintéticos do juiz (foco por z, família, painel por UV, pose igual e diferente, cor de vértice lida);
+no `controls.py`, os controles que os derrubam.
+
+**K3D-TASK-18 — os 22 por L2/R2.** `--replay-field SLOT`, controle `--plant-replay-field`. Para k de 1
+até voltar à bola: recarrega o state, toca L2 k vezes (`press` com o `least` ajustado, como
+`EDIT_ROW_MOVED`; sem mudança é a bola ou um expulso, impresso) e repete os itens 3 a 5 da 17 no
+focado, de frente. Tabela em `work/kits-oracle/replay-field-<slot>.json` e em texto: foco k → time
+(página 576 ou 640), família, cabeça, manga (3-6 ou 95-98), braçadeira (90, 93, 92, 91, 94 ou
+nenhuma), painel e número, nos dois slots. Sai dela o foco do Bokšić (nº 11: 90 no slot 9, 93 no 10,
+controle positivo do usuário) e o do Marcos; a manga por slot confirmada nos 20 de linha
+(divergência por jogador é resultado); a cabeça por jogador ou por figura; painel ↔ número dos 22
+contra a grade do §4.7; a ordem do L2/R2. Negativa possível: L2 não muda a tela no `press`.
+
+**K3D-TASK-19 — o capitão de linha de perto, manga curta e manga longa.** `--replay SLOT --focus K`,
+com o foco da tabela da 18, no Bokšić nos dois slots: no 9 a faixa 90 sobre a manga curta (3-6), no
+10 a 93 com as mangas 95-98 — os itens 4 a 7 da 17 em cada um, com o confronto (a) no `match_scene`
+da família 2 com a pose do jogo e (b) na aba, `--figure 0 --armband --number 11 --tag <Croácia>` no
+slot 9 e com `--long-sleeves` no 10. Um jogador de linha sem braçadeira do slot 10 (foco da 18) entra
+como controle da manga longa sozinha. Plant e controles no padrão da 17; as diferenças listadas para
+o conserto, curta e longa separadas.
+
 ## Para o ciclo
 
 **Ordem sugerida:**

@@ -21,12 +21,13 @@ which commands search instead of reading whole.
 - **O rasterizador fica no núcleo**: z-buffer, UV interpolado por pixel a partir da tela (cobre o UV degenerado) e texel mais próximo. A vista e o `cli.py holes` usam o mesmo código (usuário, 2026-10-08; [G6](/docs/KITS-AJUSTES-3D.md#g6--desenho-com-profundidade-por-pixel)).
 - **A fase 5 (G6) roda antes da K3D-TASK-07** (usuário, 2026-10-08).
 - **A tela EDIT PL. NUM (slot 8) é investigada primeiro, numa task só**; o que virar desenho vira task nova a partir do medido (usuário, 2026-10-09; [G7](/docs/KITS-AJUSTES-3D.md#g7--tela-edit-pl-num-o-jogo-desenhando-o-número-e-o-giro)).
+- **Os replays dos slots 9 e 10 (Brasil × Croácia, Marcos focado; manga curta no 9, longa no 10) são medidos em três tasks de investigação, 17 → 18 → 19, e nenhuma muda a aba**; andar o replay (Right/Left) fica fora; o conserto da braçadeira e da manga longa vira task a partir das diferenças listadas (usuário, 2026-10-09; [G8](/docs/KITS-AJUSTES-3D.md#g8--replays-nos-slots-9-e-10-braçadeira-e-manga-longa-de-perto-o-goleiro-capitão-e-os-22-em-campo)).
 
 ## Sources of truth
 
 <!-- Plan sections, specs, reference outputs. Items point here through `source_of_truth`. -->
 
-- [docs/KITS-AJUSTES-3D.md](/docs/KITS-AJUSTES-3D.md): o plano do ciclo, com as lacunas G1 a G6 encontradas na aba 3D e a investigação G7.
+- [docs/KITS-AJUSTES-3D.md](/docs/KITS-AJUSTES-3D.md): o plano do ciclo, com as lacunas G1 a G6 encontradas na aba 3D e as investigações G7 e G8.
 - [docs/PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md): o plano do ciclo `kits`, já arquivado. Valem o [§0](/docs/PLAN-KITS-PY.md#0), o [§3.4](/docs/PLAN-KITS-PY.md#3.4) (interface), o [§4.3](/docs/PLAN-KITS-PY.md#4.3) (manga longa e braçadeira, medidas) e o [§4.7](/docs/PLAN-KITS-PY.md#4.7) (as costas e o número, medidos).
 
 ## Generated artifacts
@@ -93,4 +94,16 @@ which commands search instead of reading whole.
 - Negativa é resultado e não bloqueia a task; só a cópia mestra ausente bloqueia
   (`rite mark … blocked --unblocked-by "test -f work/kits-states/SLPM-87056_8.sav"`).
 - `--plant-edit-number` visto saindo 1, e o controle novo no catálogo do `controls.py`, vermelho.
+- `ctest -R kits` 4/4 sem *skipped* e `controls.py` todo vermelho.
+
+### Fase 7 — replays nos slots 9 e 10 (G8)
+
+- Todo número escrito em G8 sai de `oracle.py --replay`, `--replay-idle`, `--replay-field` ou `--replay-confront`, colado da HEAD, e não de sonda.
+- Toda captura recarrega o state antes do aperto e corre menos quadros que o timeout medido por `--replay-idle`; os botões são toques com `duration_frames`.
+- Dois slots medidos dizem "nos dois", não "sempre". A manga é por slot (curta no 9, longa no 10, goleiro sempre longa) e a lista do jogo a confirma antes de qualquer confronto.
+- Negativa é resultado e não bloqueia a task; só a cópia mestra ausente bloqueia
+  (`rite mark … blocked --unblocked-by "test -f work/kits-states/SLPM-87056_9.sav -a -f work/kits-states/SLPM-87056_10.sav"`).
+- O confronto registra números; não afirma limite. Quem afirma é a task de conserto que vier depois.
+- A planta de cada opção vista saindo 1, e os controles novos no catálogo do `controls.py`, vermelhos.
+- Nada muda em `tools/kits/core/` nem em `tools/kits/ui/` nas três tasks.
 - `ctest -R kits` 4/4 sem *skipped* e `controls.py` todo vermelho.
