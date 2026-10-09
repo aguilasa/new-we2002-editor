@@ -72,3 +72,12 @@ nota da K3D-TASK-10.
   trazem `armband=False, sleeves="short"`, como as assinaturas (`api.py:99`, `figure.py:84`).
 - Verificação: os dois `grep` não imprimem nada; `grep -n "K3D-TASK-10" docs/PLAN-KITS-PY.md` acha a
   nota na §4.3.
+- **Closed** — commit `9918845` (2026-10-09): docs(kits): sweep the match figure and old ARM_PIECES home after K3D-TASK-10
+  - Files (`git show --name-status 9918845`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/PLAN-KITS-PY.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-017.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
