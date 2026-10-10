@@ -322,10 +322,10 @@
       "severity": "low",
       "files": [],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-10",
+      "done_commit": "a1b0a56"
     }
   ]
 }

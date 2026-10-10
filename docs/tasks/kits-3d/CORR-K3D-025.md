@@ -64,3 +64,12 @@ linhas estão coladas no G8, e a nota da K3D-TASK-18 remete a elas e a esta CORR
   `grep -ic "front.*panel"` dava 0). O arquivo da 18 entrou no `files` da K3D-TASK-17 por `rite set`,
   e o G8 ganhou o parágrafo "O painel do goleiro só se vê de costas". `selftest.py`:
   `kits_selftest: 0 failure(s)`; `controls.py`: `controls: 43 of 43 red`.
+- **Closed** — commit `a1b0a56` (2026-10-10): fix(kits): print the front panel samples in --replay and move the claim to G8
+  - Files (`git show --name-status a1b0a56`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/18-medir-os-22-replay.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-025.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M docs/tasks/kits-3d/progress.json`
+    - `M tools/kits/oracle.py`

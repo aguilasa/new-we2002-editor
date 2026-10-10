@@ -27,5 +27,5 @@
 | [CORR-K3D-022](/docs/tasks/kits-3d/CORR-K3D-022.md) | Negativa do Cross no G7 sem comando que a meça | K3D-TASK-16 | medium | done | 2026-10-09 |
 | [CORR-K3D-023](/docs/tasks/kits-3d/CORR-K3D-023.md) | --replay não imprime o limite de inatividade contra o qual compara | K3D-TASK-17 | medium | done | 2026-10-10 |
 | [CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md) | Planta e juiz de foco do replay não testam figura errada, e a margem do G8 não existe | K3D-TASK-17 | medium | done | 2026-10-10 |
-| [CORR-K3D-025](/docs/tasks/kits-3d/CORR-K3D-025.md) | Nota de passagem na K3D-TASK-18 fora do escopo e com afirmação sem saída | K3D-TASK-17 | low | in-progress | — |
+| [CORR-K3D-025](/docs/tasks/kits-3d/CORR-K3D-025.md) | Nota de passagem na K3D-TASK-18 fora do escopo e com afirmação sem saída | K3D-TASK-17 | low | done | 2026-10-10 |
 <!-- rite:end -->
