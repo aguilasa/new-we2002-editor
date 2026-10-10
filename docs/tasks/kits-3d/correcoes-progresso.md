@@ -25,7 +25,7 @@
 | [CORR-K3D-020](/docs/tasks/kits-3d/CORR-K3D-020.md) | edit_number_judge não afirma cabeça, número e giro medidos no G7 | K3D-TASK-16 | high | done | 2026-10-09 |
 | [CORR-K3D-021](/docs/tasks/kits-3d/CORR-K3D-021.md) | Docstring de EDIT_TURN_STOPS contradiz a corrida medida | K3D-TASK-16 | medium | done | 2026-10-09 |
 | [CORR-K3D-022](/docs/tasks/kits-3d/CORR-K3D-022.md) | Negativa do Cross no G7 sem comando que a meça | K3D-TASK-16 | medium | done | 2026-10-09 |
-| [CORR-K3D-023](/docs/tasks/kits-3d/CORR-K3D-023.md) | --replay não imprime o limite de inatividade contra o qual compara | K3D-TASK-17 | medium | pending | — |
+| [CORR-K3D-023](/docs/tasks/kits-3d/CORR-K3D-023.md) | --replay não imprime o limite de inatividade contra o qual compara | K3D-TASK-17 | medium | in-progress | — |
 | [CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md) | Planta e juiz de foco do replay não testam figura errada, e a margem do G8 não existe | K3D-TASK-17 | medium | pending | — |
 | [CORR-K3D-025](/docs/tasks/kits-3d/CORR-K3D-025.md) | Nota de passagem na K3D-TASK-18 fora do escopo e com afirmação sem saída | K3D-TASK-17 | low | pending | — |
 <!-- rite:end -->

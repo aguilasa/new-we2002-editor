@@ -749,7 +749,7 @@ python3 tools/kits/oracle.py --replay-confront 9      # e 10, sobre a captura
 
 ```text
   capture read from work/kits-oracle/replay-9.json, no emulator
-  front: 3 frame(s) of 48 stop(s) in 9 emulator frame(s)
+  front: 3 frame(s) of 48 stop(s) in 9 emulator frame(s) (idle 390, the replay's frames with no input: --replay-idle)
     frame 0: 1 figure(s), depths 4681
     frame 1: 1 figure(s), depths 4681
     frame 2: 1 figure(s), depths 4681
@@ -783,7 +783,7 @@ python3 tools/kits/oracle.py --replay-confront 9      # e 10, sobre a captura
      21:  207 px; game (6.7 6.8 6.4), texel (6.3 6.3 6.3) (far 0.99), texel x colour/128 (5.3 5.3 5.3) (far 1.53)
     picture: work/kits-oracle/replay-9-frame.png
   kit: TEX_22 record 2 player palette at (0,487), TEX_22 record 3 goalkeeper palette at (0,489), TEX_22 record 8 flag at (704,320), TEX_22 record 9 flag palette at (256,495), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488), TEX_41 record 8 flag at (704,256), TEX_41 record 9 flag palette at (256,494), TEX_61 record 8 flag at (704,256), TEX_61 record 9 flag palette at (256,494)
-  turn: R1 tapped 18 time(s), torso yaw -17 -25 -33 -42 -50 -59 -67 -76 -84 -93 -101 -110 -118 -127 -135 -143 -151 -160; back; 599 emulator frame(s) from the load, 45 from the last tap to the end of the back capture
+  turn: R1 tapped 18 time(s), torso yaw -17 -25 -33 -42 -50 -59 -67 -76 -84 -93 -101 -110 -118 -127 -135 -143 -151 -160; back; 599 emulator frame(s) from the load, 45 from the last tap to the end of the back capture (idle 390)
     the figure each tap read, root and depth: 13@4693 13@4693 13@4689 13@4684 13@4680 13@4682 13@4682 13@4686 13@4690 13@4695 13@4693 13@4693 13@4698 13@4706 13@4682 13@4672 13@4602 13@4525
   back: 4 primitive(s) of the figure sample panel (100,104) of page (576,256); 4 of them are torso 13's own texels on the disc
     page 576 panel (  0, 80): number 5, digits 5 at (7,7), 0 unexplained
@@ -802,7 +802,7 @@ python3 tools/kits/oracle.py --replay-confront 9      # e 10, sobre a captura
 
 ```text
   capture read from work/kits-oracle/replay-10.json, no emulator
-  front: 3 frame(s) of 48 stop(s) in 8 emulator frame(s)
+  front: 3 frame(s) of 48 stop(s) in 8 emulator frame(s) (idle 390, the replay's frames with no input: --replay-idle)
     frame 0: 1 figure(s), depths 4682
     frame 1: 1 figure(s), depths 4682
     frame 2: 1 figure(s), depths 4682
@@ -836,7 +836,7 @@ python3 tools/kits/oracle.py --replay-confront 9      # e 10, sobre a captura
      21:  221 px; game (6.5 6.5 6.2), texel (6.2 6.2 6.2) (far 0.90), texel x colour/128 (5.2 5.2 5.2) (far 1.44)
     picture: work/kits-oracle/replay-10-frame.png
   kit: TEX_22 record 2 player palette at (0,487), TEX_22 record 3 goalkeeper palette at (0,489), TEX_22 record 8 flag at (704,320), TEX_22 record 9 flag palette at (256,495), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488), TEX_41 record 8 flag at (704,256), TEX_41 record 9 flag palette at (256,494), TEX_61 record 8 flag at (704,256), TEX_61 record 9 flag palette at (256,494)
-  turn: R1 tapped 14 time(s), torso yaw -4 -15 -26 -38 -49 -60 -69 -77 -89 -100 -111 -123 -134 -145; back; 468 emulator frame(s) from the load, 40 from the last tap to the end of the back capture
+  turn: R1 tapped 14 time(s), torso yaw -4 -15 -26 -38 -49 -60 -69 -77 -89 -100 -111 -123 -134 -145; back; 468 emulator frame(s) from the load, 40 from the last tap to the end of the back capture (idle 390)
     the figure each tap read, root and depth: 13@4674 13@4694 13@4694 13@4688 13@4680 13@4675 13@4678 13@4678 13@4681 13@4686 13@4691 13@4700 13@4704 13@4711
   back: 4 primitive(s) of the figure sample panel (100,104) of page (576,256); 4 of them are torso 13's own texels on the disc
     page 576 panel (  0, 80): number 5, digits 5 at (7,7), 0 unexplained

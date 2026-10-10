@@ -3442,9 +3442,11 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
     index = model_index(image)
     nth = 1 if plant else 0
     frames = replay_frames(kept["front"], nth)
-    print("  front: %d frame(s) of %d stop(s) in %d emulator frame(s)"
+    idle = REPLAY_IDLE.get(slot)
+    print("  front: %d frame(s) of %d stop(s) in %d emulator frame(s) (idle %s, the replay's "
+          "frames with no input: --replay-idle)"
           % (len(frames), sum(1 for e in kept["front"]["events"] if e["kind"] == "matrix"),
-             kept["front_frames"]))
+             kept["front_frames"], idle))
     for k, frame in enumerate(frames):
         print("    frame %d: %d figure(s), depths %s" % (
             k, len(frame["figures"]),
@@ -3515,9 +3517,9 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
         "TEX_%s record %d %s at (%d,%d)" % (tag, i, NAMES[i], at[0][0], at[0][1])
         for tag, i, at, flat, shared in kept["hits"] if not flat) or "nothing found"))
     print("  turn: %s tapped %d time(s), torso yaw %s; %s; %d emulator frame(s) from the load, "
-          "%d from the last tap to the end of the back capture"
+          "%d from the last tap to the end of the back capture (idle %s)"
           % (kept["rotate"], len(kept["yaws"]), " ".join("%.0f" % y for y in kept["yaws"]),
-             kept["turned"], kept["turn_frames"], kept["back_frames"]))
+             kept["turned"], kept["turn_frames"], kept["back_frames"], idle))
     print("    the figure each tap read, root and depth: %s"
           % " ".join("%s@%.0f" % tuple(d) for d in kept.get("depths", [])))
     panel, number, panel_failures = None, None, []
@@ -3554,7 +3556,7 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
     expect = REPLAY_EXPECT.get(slot)
     report = {"focus": replay_frames(kept["front"], nth)[-1]["focus"] if frames else None,
               "still": still, "turned": kept["turned"], "panel": panel, "number": number,
-              "panel_failures": panel_failures, "idle": REPLAY_IDLE.get(slot),
+              "panel_failures": panel_failures, "idle": idle,
               "front_frames": kept["front_frames"], "back_frames": kept["back_frames"]}
     if plant:
         print("  PLANT  the second-nearest figure followed, front and back, expected to open "

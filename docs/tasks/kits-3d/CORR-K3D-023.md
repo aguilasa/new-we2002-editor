@@ -49,3 +49,9 @@ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py
 Hoje não casa; depois, casa nas linhas de frente e de giro.
 
 ## Log de Execução
+
+- 2026-10-10 — triagem inline: **REPRODUCED**. `--replay 9 --frame-json …` não trazia nem "390"
+  nem "idle" (`grep -c` → 0).
+- `oracle.py`: o `run_replay` imprime `idle N` na linha `front:` e na linha `turn:`, o mesmo valor
+  que o juiz recebe. Os dois blocos do G8 recolados da HEAD: só essas quatro linhas mudaram.
+- Verificação: `grep -E "idle 390"` casa nas linhas `front:` e `turn:` dos slots 9 e 10.
