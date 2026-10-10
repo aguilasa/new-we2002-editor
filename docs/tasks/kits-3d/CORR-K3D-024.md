@@ -74,3 +74,10 @@ afirmar uma.
   real).
 - Verificação: `grep -n "margem exigida" docs/KITS-AJUSTES-3D.md` não imprime nada; o G8 não afirma
   mais margem nenhuma.
+- **Closed** — commit `3d9811a` (2026-10-10): docs(kits): drop the replay focus margin G8 claimed, hand it to K3D-TASK-18
+  - Files (`git show --name-status 3d9811a`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/18-medir-os-22-replay.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-024.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
