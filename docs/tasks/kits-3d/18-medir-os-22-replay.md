@@ -41,6 +41,12 @@ Da K3D-TASK-17: a planta que segue a segunda figura não chega a ler painel nenh
 uma linha acima" não muda a saída dela — a `--plant-replay` largou essa parte. Se a planta desta task
 juntar as duas coisas, confira que cada uma derruba um `FAIL` próprio. E o leitor do giro precisou
 de mais paradas quando a câmera vê o campo (`REPLAY_YAW_STOPS`): com L2 trocando o foco, o mesmo vale.
+
+Da [CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md): o `replay_focus` escolhe a figura de menor z
+sem margem nenhuma até a segunda, e a planta da K3D-TASK-17 nunca teve uma figura errada presente para
+pegar. Aqui há várias figuras por quadro: meça a distância em z entre a mais próxima e a segunda em cada
+foco, ponha a margem no juiz (falha quando as duas estão mais perto que ela), com caso no `selftest.py`
+e entrada no `controls.py`, e veja a conferência de raiz ficar vermelha com uma figura real.
 E o "De frente basta" acima não vale: de frente o torso do goleiro não manda à GPU nenhum quad do
 painel; de costas, quatro, e eles são os texels do próprio torso 13 no disco — o painel do goleiro é
 fixo na seção. Para os 20 de linha, o painel pede as costas (R1) em cada foco, ou um argumento de

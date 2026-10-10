@@ -665,8 +665,10 @@ ou parado em breakpoint o tempo não anda, mas cada `continue` entre paradas and
 conta como comando, toda captura recarrega o state (`load_slot`) e corre um número limitado de
 paradas (~22 figuras × 12 por quadro); `--replay-idle SLOT` mede o timeout uma vez — quadros até a
 assinatura da tela mudar — e ele vira a guarda de toda captura. E **quem é o focado**: a translação
-das paradas é no espaço da vista, então o focado é a figura de **menor z**, com margem exigida pelo
-juiz; o `piece_yaw` do torso diz frente ou costas, e o passo de L1/R1 por toque é medição. Os botões
+das paradas é no espaço da vista, então o focado é a figura de **menor z** (`replay_focus` só ordena
+por profundidade; nenhuma margem entre a mais próxima e a segunda é conferida, porque os dois replays
+medidos desenham uma figura só e não há como calibrá-la — fica para a K3D-TASK-18, que tem os 22 em
+quadro: [CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md)); o `piece_yaw` do torso diz frente ou costas, e o passo de L1/R1 por toque é medição. Os botões
 são toques (`press_button` com `duration_frames`): sem a duração o botão fica preso (PLAN-PES2-PSX,
 armadilha 36).
 
@@ -706,7 +708,10 @@ Roda nos dois slots — o segundo diz "nos dois", não "sempre":
    sem precisar desenhar, e o histograma da aba ficou no lugar da IoU, porque as poses diferem.)
 
 O controle `--plant-replay` segue a segunda figura mais perto, de frente e de costas, e espera a raiz
-103 (`PLANT_REPLAY_ROOT`): os `FAIL` da figura, da pose, do painel e do número, saída 1. (Estava
+103 (`PLANT_REPLAY_ROOT`): os `FAIL` da figura, da pose, do painel e do número, saída 1. Nos slots 9 e
+10 todo quadro tem uma figura só, então a planta só prova o caminho "nenhuma segunda figura": a
+conferência de raiz (`opens at …, not at section 103`) nunca é alcançada com dado real, e só o caso
+sintético "the plant's root fails" do `selftest.py` a cobre (CORR-K3D-024). (Estava
 escrito "três `FAIL`, com os painéis lidos uma linha acima": seguindo a segunda figura, a planta nunca
 chega ao painel, e a leitura deslocada seria código sem efeito.) No `selftest.py`, os casos
 sintéticos do juiz (foco por z, família, painel por UV, pose igual e diferente, cor de vértice lida);

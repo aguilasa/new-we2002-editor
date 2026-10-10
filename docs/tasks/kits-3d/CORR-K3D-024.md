@@ -62,3 +62,15 @@ Hoje vazio; depois tem de nomear a conferência de margem — ou o G8 tem de par
 afirmar uma.
 
 ## Log de Execução
+
+- 2026-10-10 — triagem inline: **REPRODUCED**. A planta saía com `FAIL  no second figure in the
+  frame` e a cascata de `None`; nenhum `margin` no código do replay; o G8 afirmava "com margem exigida
+  pelo juiz".
+- Escolhido o caminho (b): os dois replays medidos desenham uma figura só por quadro (`frame k: 1
+  figure(s)` na saída do `--replay 9` e `10`), então não há dado para calibrar uma margem. O G8 diz
+  que o `replay_focus` só ordena por profundidade e que a planta nos slots 9 e 10 só prova o caminho
+  "nenhuma segunda figura". A margem foi passada para a K3D-TASK-18, que tem os 22 em quadro, como nota
+  nas Notes dela (juiz, caso no selftest, entrada no `controls.py`, raiz vista vermelha com figura
+  real).
+- Verificação: `grep -n "margem exigida" docs/KITS-AJUSTES-3D.md` não imprime nada; o G8 não afirma
+  mais margem nenhuma.
