@@ -3481,6 +3481,11 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
               % (len(group), "(%.0f,%.0f)-(%.0f,%.0f)" % fit["box"], " ".join("%s:%s" % (r["section"], "%.2f" % r["error"]
                                                     if r["error"] is not None else "-")
                                         for r in fit["rows"])))
+    if group is not None:
+        front_cells = panel_samples(group)
+        print("  front: %d primitive(s) of the figure sample a panel%s (the back is read after "
+              "the turn)" % (sum(len(v) for v in front_cells.values()),
+                             "".join(" (%d,%d)" % c[1:] for c in sorted(front_cells))))
     sections = {}
     if group is not None and focus is not None:
         for piece in focus:

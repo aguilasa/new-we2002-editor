@@ -707,6 +707,11 @@ Roda nos dois slots — o segundo diz "nos dois", não "sempre":
    os itens 3, 5 e 6. (Estava escrito "IoU do `match_scene`": o erro por seção mede o mesmo encaixe
    sem precisar desenhar, e o histograma da aba ficou no lugar da IoU, porque as poses diferem.)
 
+**O painel do goleiro só se vê de costas.** De frente, nenhuma primitiva da figura amostra um painel
+(`front: 0 primitive(s) of the figure sample a panel`); de costas, quatro, e são os texels do próprio
+torso 13 no disco (`back: 4 primitive(s) … 4 of them are torso 13's own texels on the disc`), nos dois
+slots — o painel do goleiro é fixo na seção (CORR-K3D-025).
+
 O controle `--plant-replay` segue a segunda figura mais perto, de frente e de costas, e espera a raiz
 103 (`PLANT_REPLAY_ROOT`): os `FAIL` da figura, da pose, do painel e do número, saída 1. Nos slots 9 e
 10 todo quadro tem uma figura só, então a planta só prova o caminho "nenhuma segunda figura": a
@@ -762,6 +767,7 @@ python3 tools/kits/oracle.py --replay-confront 9      # e 10, sobre a captura
   still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
   pose kept at work/kits-pose/slot9-keeper-front.json (projection H 1376, OFX 0.0, OFY 0.0)
   85 quad(s) of the frame inside the figure's box (-55,-9)-(51,109); mean pixels off the frame, by section: 34:0.88 13:0.92 14:0.85 16:0.97 92:1.17 17:1.05 18:0.83 20:0.99 11:1.00 19:1.04 21:1.01
+  front: 0 primitive(s) of the figure sample a panel (the back is read after the turn)
   what the GPU is told, by section (shaded: a colour per corner; raw: texel not modulated):
      34:  9 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (32,480) (160,480); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
      13: 14 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488) (32,480); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones shirt front; shirt front, collar; shirt front, collar tip, first; shirt front, collar tip, second; shirt side, second; shoulder, first; shoulder, second
@@ -815,6 +821,7 @@ python3 tools/kits/oracle.py --replay-confront 9      # e 10, sobre a captura
   still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
   pose kept at work/kits-pose/slot10-keeper-front.json (projection H 1376, OFX 0.0, OFY 0.0)
   137 quad(s) of the frame inside the figure's box (-51,-9)-(55,110); mean pixels off the frame, by section: 34:0.92 13:0.88 14:1.05 16:0.95 92:0.97 17:0.92 18:0.93 20:1.03 11:1.04 19:0.99 21:0.96
+  front: 0 primitive(s) of the figure sample a panel (the back is read after the turn)
   what the GPU is told, by section (shaded: a colour per corner; raw: texel not modulated):
      34: 10 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (32,480) (160,480); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
      13: 14 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,488) (32,480); page (512,256) (576,256); corner colours (127, 127, 127) to (127, 127, 127); zones shirt front; shirt front, collar; shirt front, collar tip, first; shirt front, collar tip, second; shirt side, first; shoulder, first; shoulder, second

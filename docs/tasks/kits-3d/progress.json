@@ -271,7 +271,7 @@
       "phase": 7,
       "depends_on": ["K3D-TASK-16"],
       "source_of_truth": "/docs/KITS-AJUSTES-3D.md#g8--replays-nos-slots-9-e-10-braçadeira-e-manga-longa-de-perto-o-goleiro-capitão-e-os-22-em-campo",
-      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md"],
+      "files": ["tools/kits/oracle.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/KITS-AJUSTES-3D.md", "docs/tasks/kits-3d/18-medir-os-22-replay.md"],
       "resources": ["emulador", "save-states"],
       "status": "done",
       "done_on": "2026-10-09",

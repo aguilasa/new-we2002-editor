@@ -47,9 +47,10 @@ sem margem nenhuma até a segunda, e a planta da K3D-TASK-17 nunca teve uma figu
 pegar. Aqui há várias figuras por quadro: meça a distância em z entre a mais próxima e a segunda em cada
 foco, ponha a margem no juiz (falha quando as duas estão mais perto que ela), com caso no `selftest.py`
 e entrada no `controls.py`, e veja a conferência de raiz ficar vermelha com uma figura real.
-E o "De frente basta" acima não vale: de frente o torso do goleiro não manda à GPU nenhum quad do
-painel; de costas, quatro, e eles são os texels do próprio torso 13 no disco — o painel do goleiro é
-fixo na seção. Para os 20 de linha, o painel pede as costas (R1) em cada foco, ou um argumento de
+E o "De frente basta" acima não vale: de frente nenhuma primitiva do goleiro amostra um painel, e de
+costas quatro, os texels do próprio torso 13 no disco — o painel do goleiro é fixo na seção. A medida
+são as linhas `front:` e `back:` de `oracle.py --replay 9` (e `10`), coladas no G8
+([CORR-K3D-025](/docs/tasks/kits-3d/CORR-K3D-025.md)). Para os 20 de linha, o painel pede as costas (R1) em cada foco, ou um argumento de
 que o UV é fixo também no torso 2.
 
 ## Log de Execução
