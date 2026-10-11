@@ -62,3 +62,9 @@ mede de perto.
 Verificação: `grep -n 'repete os itens 3 a 5' docs/KITS-AJUSTES-3D.md` não imprime nada (saída 1).
 Varredura: `grep -rn 'itens 3 a 5\|3 a 5 da' docs/ tools/kits/` só acha o título desta CORR no
 `fixes.json`.
+- **Closed** — commit `31ab322b` (2026-10-11): docs(kits): say K3D-TASK-18 repeats items 3 and 5, item 4 going to K3D-TASK-19
+  - Files (`git show --name-status 31ab322b`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-027.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
