@@ -57,3 +57,10 @@ registro do que aquele commit tocou contra o escopo de então.
 
 O precedente no perfil (`Pull-ahead precedents`) não entrou: a seção registra o que o usuário autorizou,
 e não há autorização dele para nota entre tasks.
+- **Closed** — commit `43c2129` (2026-10-11): docs(kits): declare the K3D-TASK-19 note in K3D-TASK-18's scope
+  - Files (`git show --name-status 43c2129`):
+    - `M docs/tasks/kits-3d/18-medir-os-22-replay.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-028.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M docs/tasks/kits-3d/progress.json`
