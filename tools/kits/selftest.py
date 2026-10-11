@@ -1317,6 +1317,64 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --replay: a pose that moved, another number and a capture past the idle fail",
          len(oracle.replay_judge(dict(good, still=3, number=5, back_frames=400), expect)) == 3,
          "; ".join(oracle.replay_judge(dict(good, still=3, number=5, back_frames=400), expect)))
+    # --replay-field (K3D-TASK-18): the sleeves and armband are read off the
+    # sections, and the judge asks for the followed figure clear of the next
+    # one, the camera back on the ball, the captain's armband and number, the
+    # goalkeeper's armband and every capture under the idle.
+    on_axis = [[_piece(46, 3600), dict(_piece(2, 3600), matrix=((4096, 0, 0, 0, 4096, 0, 0, 0, 4096),
+                                                                (600, 0, 3600)))],
+               [_piece(24, 4700), _piece(2, 4700)]]
+    c.ok("oracle --replay-field: the followed figure is on the axis, not the nearest",
+         (oracle.field_focus(on_axis)[0]["section"], oracle.field_focus(on_axis, 1)[0]["section"])
+         == (24, 46))
+    shared_rows = [{"follows": True, "root": 2, "page": 640, "cells": {"0,0,80": 2, "0,60,104": 2}},
+                   {"follows": True, "root": 2, "page": 640, "cells": {"0,0,80": 4}},
+                   {"follows": True, "root": 13, "page": 640, "cells": {"1,100,104": 4}}]
+    oracle.field_panels(shared_rows)
+    c.ok("oracle --replay-field: the panel is the cell left once the shared one is taken away",
+         [r["panel"] for r in shared_rows] == [(640, 60, 104), (640, 0, 80), (640, 100, 104)],
+         "%s" % [r["panel"] for r in shared_rows])
+    c.ok("oracle --replay-field: short and long sleeves and the armband are read off the sections",
+         (oracle.sleeves_of([46, 2, 3, 5, 90, 6]), oracle.sleeves_of([46, 2, 95, 97, 93, 98]),
+          oracle.sleeves_of([34, 13, 14, 16, 92]), oracle.armband_of([46, 2, 3, 5, 90, 6]),
+          oracle.armband_of([46, 2, 3, 5, 4, 6])) == ("short", "long", None, 90, None))
+
+    def _row(k, **kw):
+        base = {"k": k, "follows": True, "depth": 4695, "off": 1.0, "next": 80.0,
+                "next_depth": 4900, "root": 2,
+                "armband": None, "number": 7, "frames": 70}
+        base.update(kw)
+        return base
+
+    field = [_row(0, follows=False, root=13, armband=92, depth=4681, next=None),
+             _row(1, follows=False, root=13, armband=92, depth=6059, next=None),
+             _row(2), _row(3, armband=90, number=11),
+             _row(4, root=13, armband=92, number=1),
+             _row(5, follows=False, depth=6100, end="ball")]
+    fexpect = {"captain": {"armband": 90, "number": 11}, "keeper": {"k": 0, "root": 13, "armband": 92},
+               "sleeves": "short"}
+    c.ok("oracle --replay-field: the measured table holds the judge",
+         oracle.replay_field_judge(field, fexpect, 390) == [],
+         "; ".join(oracle.replay_field_judge(field, fexpect, 390)))
+    near_next = [dict(r, next=3.0) if r["k"] == 2 else r for r in field]
+    far_behind = [dict(r, next=1.5, next_depth=6802) if r["k"] == 2 else r for r in field]
+    c.ok("oracle --replay-field: a second figure on the axis but far behind holds",
+         oracle.replay_field_judge(far_behind, fexpect, 390) == [],
+         "; ".join(oracle.replay_field_judge(far_behind, fexpect, 390)))
+    c.ok("oracle --replay-field: a second figure inside the margin fails",
+         any("under the margin" in f for f in oracle.replay_field_judge(near_next, fexpect, 390)),
+         "; ".join(oracle.replay_field_judge(near_next, fexpect, 390)))
+    wrong = [dict(r, number=12) if r["k"] == 3 else r for r in field]
+    c.ok("oracle --replay-field: the captain on another number fails",
+         any("holds number 12, not 11" in f
+             for f in oracle.replay_field_judge(wrong, fexpect, 390)))
+    c.ok("oracle --replay-field: another armband, no ball at the end and a late capture fail",
+         len(oracle.replay_field_judge(
+             [dict(r, armband=93) if r["k"] == 3 else dict(r, frames=400) if r["k"] == 2 else r
+              for r in field[:-1]], fexpect, 390)) == 3,
+         "; ".join(oracle.replay_field_judge(
+             [dict(r, armband=93) if r["k"] == 3 else dict(r, frames=400) if r["k"] == 2 else r
+              for r in field[:-1]], fexpect, 390)))
     # --edt-arms (K3D-TASK-07): an arm laid on four EDT-like pieces -- two
     # cylinders a side, the upper arm over y -40..40 and the forearm over
     # 20..120, side a below z 0 and side b its mirror -- goes on its own piece,

@@ -42,6 +42,7 @@ Usage:
     python tools/kits/oracle.py --keeper-armband 7 [--frame-json <stops>] [--plant-keeper-armband]
     python tools/kits/oracle.py --replay-idle 9                    # frames the paused replay lasts
     python tools/kits/oracle.py --replay 9 [--rotate R1|L1] [--frame-json <capture>] [--plant-replay]
+    python tools/kits/oracle.py --replay-field 9 [--field-button L2|R2] [--frame-json <capture>] [--plant-replay-field [focus|panel]]
     python tools/kits/oracle.py --replay-confront 9                # the 3D tab against the capture
 
 `--lines` counts, for the uniform and the sleeves of each set, the lines of
@@ -3726,6 +3727,403 @@ def run_replay_idle(slot: int, cue: str) -> int:
     return 0
 
 
+
+# --- G8: the 22 on the pitch, one L2 tap at a time (K3D-TASK-18) ---
+
+REPLAY_FIELD_BUTTONS = ("L2", "R2")
+"""The buttons that move the replay's camera from player to player (the
+user's account, G8); `--field-button` picks one, L2 by default.  From the
+paused replay of the goalkeeper the first tap of L2 goes to the ball, each
+further one to a player."""
+REPLAY_FIELD_MOST = 30
+"""Taps of the `--field-button` a `--replay-field` run tries before it says
+the camera never came back to the ball: 22 players, the ball, and room."""
+REPLAY_FIELD_SUBMITS = POSE_SUBMITS
+"""Submits each focus's capture takes: two whole frames.  With the camera
+behind a player the frame holds up to a dozen figures, and the four frames of
+`REPLAY_SUBMITS` cost minutes of breakpoints a focus."""
+REPLAY_FIELD_SETTLE = 60
+"""Frames stepped after the last tap before the capture: the camera flies to
+the next player, and the capture waits for it to land.  Well under the
+replay's idle frames (`REPLAY_IDLE`), which every tap starts again."""
+REPLAY_FOLLOW_DEPTH = 5000
+"""View depth under which the figure on the camera's axis is one it follows.
+The camera stands at one distance behind every player it follows and nearer
+the goalkeeper; on the ball the figure nearest the axis is the goalkeeper,
+farther off (`--replay-field` prints the depth of each focus)."""
+REPLAY_FOLLOW_OFF = 8.0
+"""Pixels off the screen's centre the followed figure's root may lie: the
+camera keeps the player it follows on its axis."""
+REPLAY_FOCUS_MARGIN = (8.0, 1000)
+"""(pixels off the axis, view depth): how far apart the next figure has to
+lie from the followed one, in one or the other, for the figure on the axis to
+be taken as followed (CORR-K3D-024).  Behind a player another figure can sit
+on the axis too -- a fraction of a pixel off it in slot 9 -- but far nearer
+or farther: the closest such pair `--replay-field 9` printed lies 2108 apart
+in depth.  Depth alone will not do: a figure running between the followed
+one and the camera lies nearer than he does."""
+REPLAY_ARMBANDS = (90, 93, 92, 91, 94)
+"""MODEL.BIN sections that draw a captain's armband (G4, G8): 90 on a short
+sleeve, 93 on a long one, 92 on the goalkeeper of family 13, 91 and 94 on
+family 56."""
+SHORT_SLEEVES = (3, 4, 5, 6)
+"""The short sleeves of the starting figure, family 2."""
+LONG_SLEEVES = (95, 96, 97, 98)
+"""The long sleeves of family 2 (G3)."""
+REPLAY_FIELD_EXPECT = {
+    9: {"captain": {"armband": 90, "number": 11}, "keeper": {"k": 0, "root": 13, "armband": 92},
+        "sleeves": "short"},
+    10: {"captain": {"armband": 93, "number": 11}, "keeper": {"k": 0, "root": 13, "armband": 92},
+         "sleeves": "long"},
+}
+"""Slot -> the user's account of the replay (G8), the positive controls of
+`--replay-field`: Croatia's captain, Bokšić, wears 11 and the armband of his
+sleeve -- 90 on the short sleeves of slot 9, 93 on the long ones of slot 10 --
+and Brazil's, the goalkeeper Marcos the replay opens on (focus 0), the 92
+K3D-TASK-17 measured.  The
+sleeves of the outfield players are printed, not judged: a player who
+differs is a result."""
+
+
+def sleeves_of(order) -> str:
+    """"long" if a figure's sections hold a long sleeve, "short" if a short
+    one, else None."""
+    if any(s in LONG_SLEEVES for s in order):
+        return "long"
+    if any(s in SHORT_SLEEVES for s in order):
+        return "short"
+    return None
+
+
+def armband_of(order):
+    """The armband section a figure draws, or None."""
+    return next((s for s in order if s in REPLAY_ARMBANDS), None)
+
+
+def figure_off_axis(figure) -> float:
+    """Pixels the root of *figure* lies off the screen's centre, across: the
+    camera's axis."""
+    root = figure[1] if len(figure) > 1 else figure[0]
+    x, _y, z = root["matrix"][1]
+    return abs(root["projection"]["H"] * x / z) if z > 0 else float("inf")
+
+
+def field_focus(figures, nth: int = 0):
+    """The figure the camera follows behind a player: the *nth* nearest the
+    camera's axis (0, the followed one; the plant asks for the next).  None if
+    there is not that many."""
+    ranked = sorted(figures, key=figure_off_axis)
+    return ranked[nth] if nth < len(ranked) else None
+
+
+def field_row(capture: dict, index, nth: int = 0) -> dict:
+    """What one focus of `--replay-field` shows: the followed figure of the
+    last frame (the *nth* nearest), its depth and the next one's, its root,
+    head, sleeves and armband, and the panel its torso samples -- the cell
+    most of the figure's quads fall in, with its page."""
+    frames = replay_frames(capture)
+    if not frames:
+        return {"figures": 0, "focus": None, "order": [], "depth": None, "off": None,
+                "next": None, "head": None, "root": None, "sleeves": None, "armband": None,
+                "still": None, "cells": {}, "panel": None, "figure_cell": None}
+    last = frames[-1]
+    ranked = sorted(last["figures"], key=figure_off_axis)
+    focus = field_focus(last["figures"], nth)
+    order = [p["section"] for p in focus] if focus is not None else []
+    row = {"figures": len(ranked), "focus": focus, "order": order,
+           "depth": figure_depth(focus) if focus is not None else None,
+           "off": figure_off_axis(focus) if focus is not None else None,
+           "next": figure_off_axis(ranked[nth + 1]) if len(ranked) > nth + 1 else None,
+           "next_depth": figure_depth(ranked[nth + 1]) if len(ranked) > nth + 1 else None}
+    row["head"] = order[0] if order else None
+    row["root"] = order[1] if len(order) > 1 else None
+    row["sleeves"] = sleeves_of(order)
+    row["armband"] = armband_of(order)
+    before = field_focus(frames[-2]["figures"], nth) if len(frames) >= 2 else None
+    row["still"] = pose_change(before, focus) if before is not None and focus else None
+    samples = capture["lists"].get("%d" % last["head"], [])
+    group, _fit = figure_group(focus, samples, index)
+    torso = piece_box(focus[1], index) if focus is not None and len(focus) > 1 else None
+    on_torso = [one for one in (group or []) if torso is not None and all(
+        torso[0] <= x <= torso[2] and torso[1] <= y <= torso[3] for x, y in one["xy"])]
+    cells = panel_samples(on_torso)
+    row["cells"] = {"%d,%d,%d" % cell: len(found) for cell, found in cells.items()}
+    row["page"] = next((found[0]["page"][0] for found in cells.values()), None)
+    row["panel"] = None
+    return row
+
+
+TORSO_MARGIN = 2
+"""Pixels around the torso's own projected vertices within which a quad is
+taken as drawn on it: behind a player the box of the whole figure takes in
+the back of a neighbour a score of pixels off the axis (slot 10)."""
+
+
+def piece_box(piece, index):
+    """The screen box of one piece's MODEL.BIN vertices through its matrix,
+    grown by `TORSO_MARGIN`; None if the section has none."""
+    sec = index["sections"].get((layout.MODEL, piece["section"]))
+    points = [at for v in (sec.vertices if sec else [])
+              for at in [pose_project(piece["matrix"][0], piece["matrix"][1],
+                                      piece["projection"], (v.x, v.y, v.z))] if at is not None]
+    if not points:
+        return None
+    return (min(p[0] for p in points) - TORSO_MARGIN, min(p[1] for p in points) - TORSO_MARGIN,
+            max(p[0] for p in points) + TORSO_MARGIN, max(p[1] for p in points) + TORSO_MARGIN)
+
+
+def field_panels(rows: list) -> dict:
+    """Page x -> the cells every followed outfield figure of that page samples.
+    Behind a player the torso's back draws four panel quads: two in the
+    player's own cell and two in one cell all of them share; a figure's panel
+    is the cell left once the shared one is taken away, or the shared one when
+    nothing is left (its owner).  Sets each row's "panel"."""
+    shared = {}
+    for r in rows:
+        if r.get("follows") and r.get("cells") and r["root"] != 13:
+            held = set(r["cells"])
+            shared[r["page"]] = held if r["page"] not in shared else shared[r["page"]] & held
+    for r in rows:
+        r["panel"] = None
+        if not r.get("cells"):
+            continue
+        own = sorted(set(r["cells"]) - shared.get(r["page"], set())) or sorted(r["cells"])
+        if len(own) == 1:
+            r["panel"] = (r["page"],) + tuple(int(v) for v in own[0].split(",")[1:])
+    return shared
+
+
+def field_number(pages: dict, panel, shift: int = 0):
+    """The number in *panel* (page x, cell x, cell y) of the uniform pages
+    read off the emulator, by `read_panels`; *shift* moves every cell that
+    many rows, which only the plant does.  None if the page was not read."""
+    if panel is None or "%d" % panel[0] not in pages:
+        return None
+    record = records_of(_screen_body())[UNIFORM_RECORD]
+    for one in read_panels(pages["%d" % panel[0]], record.w, shift):
+        if (one["cell"][1], one["cell"][2] - shift) == tuple(panel[1:]):
+            return one["number"]
+    return None
+
+
+def replay_field_capture(game, maps, slot: int, button: str = REPLAY_FIELD_BUTTONS[0]) -> dict:
+    """`--replay-field`'s reading of the emulator: for k taps of *button*,
+    from 0 until a tap does not move the screen or the camera is back on the
+    ball after a player, the state reloaded, the k taps (each a `press` that
+    has to move the screen), `REPLAY_FIELD_SETTLE` frames, and a
+    `pose_capture`; the uniform pages each focus samples, read once."""
+    import oracle as looks_oracle  # tools/looks
+
+    foci, pages = [], {}
+    for k in range(REPLAY_FIELD_MOST + 1):
+        label = "replay-field-%d-%d" % (slot, k)
+        load_slot(game, slot, label)
+        moves, refused = [], None
+        for _tap in range(k):
+            before = game.capture()
+            try:
+                after = game.press(button)
+            except looks_oracle.NotArrived as exc:
+                refused = str(exc)
+                break
+            moves.append(before.difference(after, looks_oracle.pixels(before, None)))
+        if refused is not None:
+            foci.append({"k": k, "moves": moves, "refused": refused})
+            break
+        tapped = frame_now(game)
+        game.step(REPLAY_FIELD_SETTLE)
+        game.capture(label)
+        capture = pose_capture(game, maps, REPLAY_FIELD_SUBMITS)
+        frames = frame_now(game) - tapped
+        for x in sorted({one["page"][0] for v in capture["lists"].values() for one in v
+                         if is_figure(one)}):
+            if "%d" % x not in pages:
+                pages["%d" % x] = _edit_page(game, x)
+        foci.append({"k": k, "moves": moves, "refused": None, "frames": frames,
+                     "capture": capture})
+        frames_now = replay_frames(capture)
+        axis = field_focus(frames_now[-1]["figures"]) if frames_now else None
+        followed = (axis is not None and figure_depth(axis) < REPLAY_FOLLOW_DEPTH
+                    and figure_off_axis(axis) <= REPLAY_FOLLOW_OFF)
+        if k > 1 and not followed and any(f.get("followed") for f in foci[:-1]):
+            foci[-1]["followed"] = False
+            break
+        foci[-1]["followed"] = followed
+    return {"slot": slot, "button": button, "foci": foci, "pages": pages}
+
+
+def replay_field_judge(rows: list, expect: dict, idle) -> list:
+    """Failures of the table against the user's account: every focus that
+    follows a player has it on the camera's axis (`REPLAY_FOLLOW_OFF`), the
+    next figure `REPLAY_FOCUS_MARGIN` apart, under `REPLAY_FOLLOW_DEPTH`; the
+    camera came back to the ball; the outfield armband is the expected one, on
+    the player wearing the expected number; the figure the replay opens on is
+    the goalkeeper with his armband; and every capture stayed under the idle."""
+    out = []
+    followed = [r for r in rows if r.get("follows")]
+    if not followed:
+        out.append("no tap moved the camera to a player")
+    for r in followed:
+        if r["depth"] is None or r["depth"] >= REPLAY_FOLLOW_DEPTH:
+            out.append("focus %d: the followed figure lies at depth %s, not under %d"
+                       % (r["k"], r["depth"], REPLAY_FOLLOW_DEPTH))
+        if r["off"] is None or r["off"] > REPLAY_FOLLOW_OFF:
+            out.append("focus %d: the followed figure lies %s px off the axis, over %.0f"
+                       % (r["k"], r["off"], REPLAY_FOLLOW_OFF))
+        if r["off"] is not None and r["next"] is not None \
+                and r["next"] - r["off"] < REPLAY_FOCUS_MARGIN[0] \
+                and abs(r["next_depth"] - r["depth"]) < REPLAY_FOCUS_MARGIN[1]:
+            out.append("focus %d: the next figure lies %.1f px farther off the axis and %.0f "
+                       "apart in depth, under the margin %.0f px or %d"
+                       % ((r["k"], r["next"] - r["off"], abs(r["next_depth"] - r["depth"]))
+                          + REPLAY_FOCUS_MARGIN))
+    if not rows or rows[-1].get("end") != "ball":
+        out.append("the camera did not come back to the ball: %s"
+                   % (rows[-1].get("end") if rows else "no focus"))
+    captain = expect["captain"]
+    banded = [r for r in followed if r["armband"] in (90, 93)]
+    if len(banded) != 1:
+        out.append("%d focus(es) draw an outfield armband, not 1" % len(banded))
+    for r in banded:
+        if r["armband"] != captain["armband"]:
+            out.append("focus %d draws armband %d, not %d"
+                       % (r["k"], r["armband"], captain["armband"]))
+        if r["number"] != captain["number"]:
+            out.append("focus %d, the outfield captain, holds number %s, not %d"
+                       % (r["k"], r["number"], captain["number"]))
+    keeper = expect["keeper"]
+    opening = next((r for r in rows if r["k"] == keeper["k"]), None)
+    if opening is None or opening["root"] != keeper["root"] \
+            or opening["armband"] != keeper["armband"]:
+        out.append("focus %d opens at %s with armband %s, not family %d with %d"
+                   % (keeper["k"], opening and opening["root"], opening and opening["armband"],
+                      keeper["root"], keeper["armband"]))
+    for r in rows:
+        if r.get("frames") is not None and (idle is None or r["frames"] >= idle):
+            out.append("focus %d: %d frame(s) from the last tap, not under the replay's idle %s"
+                       % (r["k"], r["frames"], idle))
+    return out
+
+
+REPLAY_FIELD_PLANTS = ("both", "focus", "panel")
+"""What `--plant-replay-field` plants: the figure next off the camera's axis
+followed, every panel read a row up, or both (the default)."""
+
+
+def run_replay_field(slot: int, cue: str, cache=None, plant: str = None,
+                     button: str = None) -> int:
+    """`--replay-field SLOT`: G8, the 22 on the pitch one L2 tap at a time --
+    for each focus the team's page, the family, head, sleeves, armband, the
+    panel the torso samples and the number in it."""
+    import json
+
+    import oracle as looks_oracle  # tools/looks
+
+    image = os.environ[IMAGE_VARIABLE]
+    button = button or REPLAY_FIELD_BUTTONS[0]
+    tag = "%d%s" % (slot, "" if button == REPLAY_FIELD_BUTTONS[0] else "-" + button)
+    path = cache or os.path.join(ATTACH_DIR, "replay-field-%s-capture.json" % tag)
+    if cache and os.path.isfile(cache):
+        with open(cache) as fh:
+            kept = json.load(fh)
+        print("  capture read from %s, no emulator" % cache)
+    else:
+        maps = looks_oracle.model_maps(image)
+        with looks_oracle.Oracle(cue) as game:
+            kept = replay_field_capture(game, maps, slot, button)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump(kept, fh)
+        print("  capture kept at %s (--frame-json reads it back)" % path)
+    index = model_index(image)
+    nth = 1 if plant in ("both", "focus") else 0
+    shift = -PANEL_H if plant in ("both", "panel") else 0
+    idle = REPLAY_IDLE.get(slot)
+    rows = []
+    for focus in kept["foci"]:
+        if focus.get("refused"):
+            rows.append({"k": focus["k"], "end": "refused", "root": None,
+                         "moves": focus["moves"], "refused": focus["refused"]})
+            continue
+        _restore_samples(focus["capture"])
+        row = field_row(focus["capture"], index, nth)
+        row.update(k=focus["k"], moves=focus["moves"], frames=focus["frames"],
+                   follows=bool(focus["followed"]) and focus["k"] > 0)
+        if not focus["followed"] and focus["k"] > 1:
+            row["end"] = "ball"
+        rows.append(row)
+    shared = field_panels(rows)
+    for row in rows:
+        if not row.get("refused"):
+            row["number"] = field_number(kept["pages"], row["panel"], shift)
+    print("  %s tapped k times from the reloaded state, %d frame(s) to settle, idle %s; "
+          "off: px the followed figure's root lies off the axis; next, ndepth: the next "
+          "figure's off and depth"
+          % (kept["button"], REPLAY_FIELD_SETTLE, idle))
+    print("    k  moved   frames figs  depth    off   next ndepth  head root sleeves armband "
+          "panel            number  still")
+    for r in rows:
+        if r.get("refused"):
+            print("  %3d  the tap did not move the screen: %s" % (r["k"], r["refused"]))
+            continue
+        what = ("ball" if not r["follows"] and r["k"] > 0 else "") if r["focus"] is not None else "-"
+        print("  %3d  %-7s %6s %4d  %5s %6s %6s %6s  %4s %4s %-7s %-7s %-16s %-6s  %s  %s"
+              % (r["k"], "%.4f" % r["moves"][-1] if r["moves"] else "-", r["frames"],
+                 r["figures"], "%.0f" % r["depth"] if r["depth"] is not None else "-",
+                 "%.1f" % r["off"] if r["off"] is not None else "-",
+                 "%.1f" % r["next"] if r["next"] is not None else "-",
+                 "%.0f" % r["next_depth"] if r.get("next_depth") is not None else "-",
+                 r["head"], r["root"], r["sleeves"], r["armband"] or "none",
+                 "(%d,%d,%d)" % r["panel"] if r["panel"] else "none",
+                 r["number"], r["still"], what))
+    followed = [r for r in rows if r.get("follows")]
+    teams = {}
+    for r in followed:
+        teams.setdefault(r["panel"][0] if r["panel"] else None, []).append(r)
+    print("  the cell every outfield back of a page also samples: %s"
+          % "; ".join("page %s %s" % (page, " ".join(sorted(cells)))
+                      for page, cells in sorted(shared.items())))
+    for page, members in sorted(teams.items(), key=lambda t: (t[0] is None, t[0] or 0)):
+        print("  page %s: %d focus(es), numbers %s, heads %s, sleeves %s"
+              % (page, len(members), " ".join(str(r["number"]) for r in members),
+                 " ".join(str(r["head"]) for r in members),
+                 " ".join("%s:%s" % (r["root"], r["sleeves"]) for r in members)))
+    heads = {}
+    for r in followed:
+        heads.setdefault(r["head"], []).append((r["panel"][0] if r["panel"] else None,
+                                                r["number"]))
+    print("  heads: %s" % "; ".join("%s on %s" % (h, " ".join("%s/%s" % p for p in v))
+                                     for h, v in sorted(heads.items(),
+                                                        key=lambda t: (t[0] is None, t[0] or 0))))
+    table = os.path.join(ATTACH_DIR, "replay-field-%s%s.json"
+                         % ("%d-%s" % (slot, kept["button"]) if kept["button"] != REPLAY_FIELD_BUTTONS[0]
+                            else "%d" % slot, "-plant" if plant else ""))
+    with open(table, "w") as fh:
+        json.dump([{key: r.get(key) for key in ("k", "follows", "end", "depth", "off", "next", "next_depth",
+                                                "head", "root", "sleeves", "armband", "panel",
+                                                "number", "still", "frames", "cells")}
+                   for r in rows], fh, indent=1)
+    print("  table kept at %s" % table)
+    if plant:
+        print("  PLANT  %s" % "; ".join(
+            what for what, on in (("the figure next off the camera's axis followed", nth),
+                                  ("every panel read a row up", shift)) if on))
+    expect = REPLAY_FIELD_EXPECT.get(slot) if kept["button"] == REPLAY_FIELD_BUTTONS[0] else None
+    if expect is None:
+        print("  no measured expectation for slot %d with %s (REPLAY_FIELD_EXPECT is L2's): "
+              "printed, not judged" % (slot, kept["button"]))
+        return 0
+    failures = replay_field_judge(rows, expect, idle)
+    for line in failures:
+        print("  FAIL  %s" % line)
+    if not failures:
+        captain = next(r for r in followed if r["armband"] in (90, 93))
+        print("  ok    %d focus(es) follow a player and the camera comes back to the ball; the "
+              "outfield captain is focus %d, number %d with armband %d; the goalkeeper draws %d"
+              % (len(followed), captain["k"], captain["number"], captain["armband"],
+                 expect["keeper"]["armband"]))
+    return 1 if failures else 0
+
 # --- G3: where MODEL.BIN's sleeves and armband go on the EDT_MOD.BIN figure ---
 
 ARM_NAMES = ("upper arm a", "upper arm b", "forearm a", "forearm b")
@@ -3922,6 +4320,10 @@ def main(argv=None) -> int:
                         help="G8: the 3D tab's figure against the game's, on the capture "
                              "--replay kept: the palette, the colours front and back, and a "
                              "picture of each")
+    source.add_argument("--replay-field", type=int, metavar="SLOT",
+                        help="G8: the players a paused replay of this slot follows one L2 "
+                             "tap at a time -- team page, family, head, sleeves, armband, "
+                             "panel and number of each")
     source.add_argument("--replay-idle", type=int, metavar="SLOT",
                         help="G8: how many frames the paused replay of this slot lasts "
                              "with no input")
@@ -3932,6 +4334,14 @@ def main(argv=None) -> int:
                         help="with --replay: the control -- follow the second-nearest figure, "
                              "front and back, and expect it to open at section %d"
                              % PLANT_REPLAY_ROOT)
+    parser.add_argument("--field-button", choices=REPLAY_FIELD_BUTTONS,
+                        help="with --replay-field: the button tapped to move the camera "
+                             "(default %s)" % REPLAY_FIELD_BUTTONS[0])
+    parser.add_argument("--plant-replay-field", nargs="?", const="both",
+                        choices=REPLAY_FIELD_PLANTS,
+                        help="with --replay-field: the control -- follow the figure next off "
+                             "the camera's axis (focus), read every panel a row up (panel), "
+                             "or both (the default)")
     parser.add_argument("--player", type=int, default=0, metavar="ROW",
                         help="with --edit-number: rows to go down the list before confirming "
                              "(default 0, the selected player)")
@@ -4027,6 +4437,13 @@ def main(argv=None) -> int:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
         return run_replay(args.replay, cue, args.rotate, args.frame_json, args.plant_replay)
+    if args.replay_field is not None:
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue and not args.frame_json:
+            print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
+            return SKIP
+        return run_replay_field(args.replay_field, cue, args.frame_json,
+                                args.plant_replay_field, args.field_button)
     if args.replay_confront is not None:
         return run_replay_confront(args.replay_confront, None, args.frame_json)
     if args.replay_idle is not None:

@@ -327,6 +327,31 @@ CONTROLS = (
         "K3D-TASK-17); a modulated column equal to the bare texel cannot tell",
     ),
     Control(
+        "oracle-replay-field-margin-unasked", "kits/oracle.py", "replay_field_judge",
+        '                and abs(r["next_depth"] - r["depth"]) < REPLAY_FOCUS_MARGIN[1]:',
+        "                and False:",
+        "FAIL  oracle --replay-field: a second figure inside the margin fails",
+        "behind a player the frame holds a dozen figures, and the one on the camera's axis "
+        "is the followed one only if the next lies a margin off it (G8, K3D-TASK-18, "
+        "CORR-K3D-024)",
+    ),
+    Control(
+        "oracle-replay-field-shared-panel", "kits/oracle.py", "field_panels",
+        '        own = sorted(set(r["cells"]) - shared.get(r["page"], set())) or sorted(r["cells"])',
+        '        own = sorted(r["cells"])',
+        "FAIL  oracle --replay-field: the panel is the cell left once the shared one is taken away",
+        "every outfield back also samples one cell all of a page share (G8, K3D-TASK-18); "
+        "keeping every cell names no single panel for the player",
+    ),
+    Control(
+        "oracle-replay-field-nearest-followed", "kits/oracle.py", "field_focus",
+        "    ranked = sorted(figures, key=figure_off_axis)",
+        "    ranked = sorted(figures, key=figure_depth)",
+        "FAIL  oracle --replay-field: the followed figure is on the axis, not the nearest",
+        "behind a player a figure running between him and the camera lies nearer than he "
+        "does; the camera keeps the followed one on its axis (G8, K3D-TASK-18)",
+    ),
+    Control(
         "oracle-arm-side-flipped", "kits/oracle.py", "arm_side",
         '    return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"',
         '    return "a" if sum(p[2] for p in points) / len(points) > 0 else "b"',

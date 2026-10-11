@@ -35,4 +35,12 @@ tag da Croácia sai da tabela de times (`cli.py teams`) ou da página que o tors
 O controle da manga longa sozinha (um jogador sem braçadeira do slot 10) separa o que é da manga
 do que é da faixa nas diferenças listadas.
 
+Da K3D-TASK-18 (G8, "Medido (K3D-TASK-18)"): o Bokšić é o foco **k = 3** do L2 nos dois slots, e o
+jogador de linha sem braçadeira para o controle da manga longa pode ser o k = 2 (Balaban, nº 20). Com
+L2 a câmera segue **de costas** a ~4700 de profundidade, e não no zoom máximo: as costas e o painel
+saem sem girar, e é a frente que pede o giro. O focado atrás de um jogador é a figura **no eixo**
+(`field_focus`), não a de menor z (`replay_focus`), que no slot 9 erra quando um vizinho passa entre
+ele e a câmera; o `--replay --focus K` tem de usar a regra do eixo, com a margem `REPLAY_FOCUS_MARGIN`.
+Cada foco recarrega o state e precisa de `REPLAY_FIELD_SETTLE` quadros depois do último toque.
+
 ## Log de Execução
