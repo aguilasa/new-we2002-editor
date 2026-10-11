@@ -42,3 +42,18 @@ O fechamento do Rite para a K3D-TASK-18 não traz entrada "Outside declared file
 perfil registra o precedente.
 
 ## Log de Execução
+
+### 2026-10-11 — arquivo da K3D-TASK-19 declarado no escopo da 18
+
+Triagem inline (`rite reproduce --all --cycle kits-3d`): **REPRODUCED**. As duas linhas da Evidência saem
+iguais na HEAD `75ae037`: ` .../tasks/kits-3d/19-medir-capitao-linha-replay.md |   8 +` e a entrada
+`Outside declared files` na linha 100 da task.
+
+O remédio é o da [CORR-K3D-025](/docs/tasks/kits-3d/CORR-K3D-025.md) para a K3D-TASK-17: declarar o
+arquivo. O "In" da K3D-TASK-18 ganhou `docs/tasks/kits-3d/19-medir-capitao-linha-replay.md`, e
+`rite set K3D-TASK-18 --files tools/kits/oracle.py,tools/kits/selftest.py,tools/kits/controls.py,docs/KITS-AJUSTES-3D.md,docs/tasks/kits-3d/19-medir-capitao-linha-replay.md`
+gravou o mesmo no estado. A entrada `Outside declared files` do fechamento de `27f2565` fica como está: é
+registro do que aquele commit tocou contra o escopo de então.
+
+O precedente no perfil (`Pull-ahead precedents`) não entrou: a seção registra o que o usuário autorizou,
+e não há autorização dele para nota entre tasks.

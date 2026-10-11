@@ -14,6 +14,7 @@ Fica medida, nos dois replays, uma tabela dos 22 em campo andada por L2: para ca
   - `tools/kits/oracle.py` (`--replay-field SLOT`, `--plant-replay-field`; a tabela em `work/kits-oracle/replay-field-<slot>.json`)
   - `tools/kits/selftest.py`, `tools/kits/controls.py`
   - `docs/KITS-AJUSTES-3D.md` (G8: as duas tabelas, coladas da HEAD)
+  - `docs/tasks/kits-3d/19-medir-capitao-linha-replay.md` (a nota de passagem: o foco do Bokšić e o que a 19 herda; declarada pela CORR-K3D-028)
 - Out: `tools/kits/core/*`, `tools/kits/ui/*`; o confronto de perto do Bokšić (K3D-TASK-19); andar o replay com Right/Left
 
 ## Done criteria
