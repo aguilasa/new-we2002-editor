@@ -99,3 +99,4 @@ Gates:
     - `M tools/kits/selftest.py`
   - **Outside declared files** (`tools/kits/oracle.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/KITS-AJUSTES-3D.md`):
     - `docs/tasks/kits-3d/19-medir-capitao-linha-replay.md`
+- **Reviewed** (2026-10-11) at `1a90142`: CORR-K3D-026, CORR-K3D-027, CORR-K3D-028, CORR-K3D-029

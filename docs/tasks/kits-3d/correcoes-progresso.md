@@ -28,4 +28,8 @@
 | [CORR-K3D-023](/docs/tasks/kits-3d/CORR-K3D-023.md) | --replay não imprime o limite de inatividade contra o qual compara | K3D-TASK-17 | medium | done | 2026-10-10 |
 | [CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md) | Planta e juiz de foco do replay não testam figura errada, e a margem do G8 não existe | K3D-TASK-17 | medium | done | 2026-10-10 |
 | [CORR-K3D-025](/docs/tasks/kits-3d/CORR-K3D-025.md) | Nota de passagem na K3D-TASK-18 fora do escopo e com afirmação sem saída | K3D-TASK-17 | low | done | 2026-10-10 |
+| [CORR-K3D-026](/docs/tasks/kits-3d/CORR-K3D-026.md) | Coluna still do --replay-field sai None em 23 de 25 focos | K3D-TASK-18 | high | pending | — |
+| [CORR-K3D-027](/docs/tasks/kits-3d/CORR-K3D-027.md) | G8 diz que a K3D-TASK-18 repete os itens 3 a 5, mas o item 4 não é medido | K3D-TASK-18 | medium | pending | — |
+| [CORR-K3D-028](/docs/tasks/kits-3d/CORR-K3D-028.md) | Nota de passagem na K3D-TASK-19 fora do escopo da K3D-TASK-18 | K3D-TASK-18 | medium | pending | — |
+| [CORR-K3D-029](/docs/tasks/kits-3d/CORR-K3D-029.md) | Números das conclusões do G8 escritos à mão, e "onze painéis" errado | K3D-TASK-18 | low | pending | — |
 <!-- rite:end -->

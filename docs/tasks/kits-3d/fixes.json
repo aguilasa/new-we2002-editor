@@ -326,6 +326,58 @@
       "depends_on": [],
       "done_on": "2026-10-10",
       "done_commit": "a1b0a56"
+    },
+    {
+      "id": "CORR-K3D-026",
+      "file": "CORR-K3D-026.md",
+      "title": "Coluna still do --replay-field sai None em 23 de 25 focos",
+      "origin": "K3D-TASK-18",
+      "severity": "high",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-027",
+      "file": "CORR-K3D-027.md",
+      "title": "G8 diz que a K3D-TASK-18 repete os itens 3 a 5, mas o item 4 não é medido",
+      "origin": "K3D-TASK-18",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-028",
+      "file": "CORR-K3D-028.md",
+      "title": "Nota de passagem na K3D-TASK-19 fora do escopo da K3D-TASK-18",
+      "origin": "K3D-TASK-18",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-029",
+      "file": "CORR-K3D-029.md",
+      "title": "Números das conclusões do G8 escritos à mão, e \"onze painéis\" errado",
+      "origin": "K3D-TASK-18",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
