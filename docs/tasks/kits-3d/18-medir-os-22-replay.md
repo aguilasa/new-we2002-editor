@@ -89,3 +89,13 @@ Gates:
 - `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
   `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 46 of 46 red`.
+- **Closed** — commit `27f2565` (2026-10-10): feat(kits): walk the 22 on the pitch with L2 in the slot 9 and 10 replays
+  - Files (`git show --name-status 27f2565`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/18-medir-os-22-replay.md`
+    - `M docs/tasks/kits-3d/19-medir-capitao-linha-replay.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
+  - **Outside declared files** (`tools/kits/oracle.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/KITS-AJUSTES-3D.md`):
+    - `docs/tasks/kits-3d/19-medir-capitao-linha-replay.md`

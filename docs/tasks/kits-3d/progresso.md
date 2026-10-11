@@ -90,7 +90,7 @@ graph TD
 | [K3D-TASK-12](/docs/tasks/kits-3d/12-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | closing | K3D-TASK-10, K3D-TASK-11 | done | 2026-10-09 | 2026-10-09 |
 | [K3D-TASK-16](/docs/tasks/kits-3d/16-medir-tela-edit-pl-num.md) | Medir a tela EDIT PL. NUM no slot 8: modelo, número nas costas e giro | 6 | investigação | K3D-TASK-12 | done | 2026-10-09 | 2026-10-09 |
 | [K3D-TASK-17](/docs/tasks/kits-3d/17-medir-goleiro-capitao-replay.md) | Medir o goleiro capitão de perto nos replays dos slots 9 e 10: a braçadeira como o jogo a desenha, família, painel e pose parada | 7 | investigação | K3D-TASK-16 | done | 2026-10-09 | 2026-10-09 |
-| [K3D-TASK-18](/docs/tasks/kits-3d/18-medir-os-22-replay.md) | Medir os 22 em campo por L2/R2 nos replays: time, cabeça, manga, braçadeira e painel por jogador | 7 | investigação | K3D-TASK-17 | pending | — | — |
+| [K3D-TASK-18](/docs/tasks/kits-3d/18-medir-os-22-replay.md) | Medir os 22 em campo por L2/R2 nos replays: time, cabeça, manga, braçadeira e painel por jogador | 7 | investigação | K3D-TASK-17 | done | 2026-10-10 | pending |
 | [K3D-TASK-19](/docs/tasks/kits-3d/19-medir-capitao-linha-replay.md) | Medir o capitão de linha (Bokšić) de perto nos replays, manga curta no 9 e longa no 10, contra a aba | 7 | investigação | K3D-TASK-18 | pending | — | — |
 <!-- rite:end -->
 
