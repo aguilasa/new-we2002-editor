@@ -724,8 +724,10 @@ no `controls.py`, os controles que os derrubam.
 
 **K3D-TASK-18 — os 22 por L2/R2.** `--replay-field SLOT`, controle `--plant-replay-field`. Para k de 1
 até voltar à bola: recarrega o state, toca L2 k vezes (`press` com o `least` ajustado, como
-`EDIT_ROW_MOVED`; sem mudança é a bola ou um expulso, impresso) e repete os itens 3 a 5 da 17 no
-focado. (Estava "de frente": com L2 a câmera segue de costas, e o `press` padrão bastou — os toques
+`EDIT_ROW_MOVED`; sem mudança é a bola ou um expulso, impresso) e repete os itens 3 e 5 da 17 no
+focado. O item 4 — a braçadeira e os braços na lista do jogo, com xy, página, CLUT, zona e cor por
+vértice — fica com a K3D-TASK-19, que o mede de perto no Bokšić; o `--replay-field` não imprime dado de
+primitiva (CORR-K3D-027). (Estava "de frente": com L2 a câmera segue de costas, e o `press` padrão bastou — os toques
 mexem a tela de 0,07 a 0,14; medido na K3D-TASK-18, abaixo.) Tabela em `work/kits-oracle/replay-field-<slot>.json` e em texto: foco k → time
 (página 576 ou 640), família, cabeça, manga (3-6 ou 95-98), braçadeira (90, 93, 92, 91, 94 ou
 nenhuma), painel e número, nos dois slots. Sai dela o foco do Bokšić (nº 11: 90 no slot 9, 93 no 10,

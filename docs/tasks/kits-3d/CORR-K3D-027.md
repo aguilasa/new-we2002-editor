@@ -47,3 +47,18 @@ Hoje imprime a linha 727; depois, nada — ou a saída do `--replay-field` traz 
 por foco.
 
 ## Log de Execução
+
+### 2026-10-11 — G8 diz itens 3 e 5, e o 4 vai para a K3D-TASK-19
+
+Triagem inline (`rite reproduce --all --cycle kits-3d`): **REPRODUCED**. Na HEAD `75ae037`,
+`grep -n 'repete os itens 3 a 5' docs/KITS-AJUSTES-3D.md` imprime a linha 727, e
+`git show 27f2565 -- tools/kits/oracle.py | grep -c 'shading_of\|section_samples\|zone'` imprime `0`.
+
+Caminho escolhido: o primeiro da CORR. O parágrafo da K3D-TASK-18 no G8 diz agora "itens 3 e 5" e
+passa o item 4 à K3D-TASK-19, cujo parágrafo no mesmo G8 já pede "os itens 4 a 7 da 17" no Bokšić.
+Acrescentar o item 4 ao `--replay-field` mediria primitivas de 22 figuras de costas e longe, o que a 19
+mede de perto.
+
+Verificação: `grep -n 'repete os itens 3 a 5' docs/KITS-AJUSTES-3D.md` não imprime nada (saída 1).
+Varredura: `grep -rn 'itens 3 a 5\|3 a 5 da' docs/ tools/kits/` só acha o título desta CORR no
+`fixes.json`.
