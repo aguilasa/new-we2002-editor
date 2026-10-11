@@ -378,6 +378,32 @@
       "depends_on": [],
       "done_on": null,
       "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-030",
+      "file": "CORR-K3D-030.md",
+      "title": "Juiz do --replay-field aceita tabela curta: 3 focos dão ok",
+      "origin": "CORR-K3D-026",
+      "severity": "high",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-031",
+      "file": "CORR-K3D-031.md",
+      "title": "Controle físico ligado entra no emulador do oráculo e suja as corridas ao vivo",
+      "origin": "CORR-K3D-026",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
