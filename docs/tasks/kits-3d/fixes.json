@@ -374,10 +374,10 @@
       "severity": "low",
       "files": [],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-11",
+      "done_commit": "2d21fd7f"
     },
     {
       "id": "CORR-K3D-030",
