@@ -76,3 +76,8 @@ Controle: `harness.run("replay", selftest._replay_checks)` dá `replay: 0 failur
 Gates (`rite gates --cycle kits-replay --id CORR-KRP-001`): `ctest --test-dir build -R kits` —
 `100% tests passed, 0 tests failed out of 4` (`kits_image` e `kits_ui` *skipped*); `python3
 tools/kits/controls.py` — `controls: 55 of 55 red`.
+- **Closed** — commit `6bdf17d2` (2026-10-12): fix(kits): Figure.pieces, the §2.1 member the replay reader left out
+  - Files (`git show --name-status 6bdf17d2`):
+    - `M docs/tasks/kits-replay/CORR-KRP-001.md`
+    - `M tools/kits/core/replay.py`
+    - `M tools/kits/selftest.py`
