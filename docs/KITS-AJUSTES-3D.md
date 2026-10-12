@@ -964,7 +964,9 @@ O que a saída diz, item por item (o mesmo nos dois slots — "nos dois", não "
 
 **Medido (K3D-TASK-18, 2026-10-10).** `--replay-field SLOT` recarrega o state, toca L2 k vezes (cada
 toque um `press` que tem de mexer a tela), espera 60 quadros a câmera pousar e faz uma `pose_capture`
-de dois quadros, de k = 0 até a câmera voltar à bola. A captura fica em
+de nove submissões à GPU (`REPLAY_FIELD_SUBMITS`) — dois quadros inteiros depois do primeiro, cortado —,
+de k = 0 até a câmera voltar à bola. (Eram sete, e 23 dos 25 focos do slot 9 saíam com um quadro só e
+`still` em `None`: CORR-K3D-026.) A captura fica em
 `work/kits-oracle/replay-field-<slot>-capture.json` (relida por `--frame-json`), e a tabela em
 `replay-field-<slot>.json`.
 
@@ -972,35 +974,36 @@ de dois quadros, de k = 0 até a câmera voltar à bola. A captura fica em
 $ python3 tools/kits/oracle.py --replay-field 9
   L2 tapped k times from the reloaded state, 60 frame(s) to settle, idle 390; off: px the followed figure's root lies off the axis; next, ndepth: the next figure's off and depth
     k  moved   frames figs  depth    off   next ndepth  head root sleeves armband panel            number  still
-    0  -           65    1   4681    1.5      -      -    34   13 None    92      none             None    None  
-    1  0.1383      64    1   6059   13.6      -      -    34   13 None    92      none             None    None  ball
-    2  0.1341      65    4   4695    0.6   40.8   7148    46    2 short   none    (640,80,104)     20      None  
-    3  0.0775      64    3   4694    0.6    4.0   6802    46    2 short   90      (640,60,104)     11      None  
-    4  0.0884      63    5   4695    0.9   13.2   8969    24    2 short   none    (640,40,104)     10      None  
-    5  0.0730      65    4   4676    0.6   54.6   4923    47    2 short   none    (640,20,104)     8       None  
-    6  0.0715      64    5   4696    2.3  136.2  11334    34    2 short   none    (640,0,104)      7       None  
-    7  0.0756      65    3   4700    1.2  152.9   6307    24    2 short   none    (640,80,80)      3       None  
-    8  0.0840      64    6   4701    0.0  121.0  18007    34    2 short   none    (640,60,80)      4       None  
-    9  0.0851      63    9   4701    1.5    1.9  20692    24    2 short   none    (640,40,80)      14      0  
-   10  0.0737      65   11   4702    0.0   61.7  11829    28    2 short   none    (640,20,80)      5       None  
-   11  0.0920      64   10   4704    0.0    3.3  10744    46    2 short   none    (640,0,80)       2       None  
-   12  0.0840      65   17   4714    0.6   27.3  14357    24   13 None    none    (640,100,104)    1       None  
-   13  0.0927      64    4   4709    0.9   58.3   4462    34    2 short   none    (576,80,104)     9       None  
-   14  0.0887      63    7   4701    0.9   32.4   7519    34    2 short   none    (576,60,104)     11      None  
-   15  0.0794      65    5   4698    0.6   41.7   9202    34    2 short   none    (576,40,104)     10      None  
-   16  0.0687      64    1   4701    0.0      -      -    34    2 short   none    (576,20,104)     2       None  
-   17  0.0753      65    3   4715    2.0  245.6   9837    32    2 short   none    (576,0,104)      6       None  
-   18  0.0883      64    2   4686    0.6  248.2  14062    34    2 short   none    (576,80,80)      16      None  
-   19  0.0798      63    5   4701    0.0  123.1  14784    34    2 short   none    (576,60,80)      7       0  
-   20  0.0839      64    1   4698    0.3      -      -    34    2 short   none    (576,40,80)      4       None  
-   21  0.0907      64    3   4692    0.6   10.7   2584    34    2 short   none    (576,20,80)      3       None  
-   22  0.0957      65    2   4696    1.2  255.7  12534    24    2 short   none    (576,0,80)       5       None  
-   23  0.1368      64    1   4681    1.5      -      -    34   13 None    92      none             None    None  
-   24  0.1366      65    1   6059   13.6      -      -    34   13 None    92      none             None    None  ball
+    0  -           65    1   4681    1.5      -      -    34   13 None    92      none             None    0  
+    1  0.1383      64    1   6059   13.6      -      -    34   13 None    92      none             None    0  ball
+    2  0.1341      65    4   4695    0.6   40.8   7148    46    2 short   none    (640,80,104)     20      0  
+    3  0.0775      65    3   4694    0.6    4.0   6802    46    2 short   90      (640,60,104)     11      0  
+    4  0.0884      64    5   4695    0.9   13.2   8969    24    2 short   none    (640,40,104)     10      0  
+    5  0.0730      65    4   4676    0.6   54.6   4923    47    2 short   none    (640,20,104)     8       0  
+    6  0.0715      64    5   4696    2.3  136.2  11334    34    2 short   none    (640,0,104)      7       0  
+    7  0.0756      65    3   4700    1.2  152.9   6307    24    2 short   none    (640,80,80)      3       0  
+    8  0.0840      64    6   4701    0.0  121.0  18007    34    2 short   none    (640,60,80)      4       0  
+    9  0.0851      65    9   4701    1.5    1.9  20692    24    2 short   none    (640,40,80)      14      0  
+   10  0.0737      65   11   4702    0.0   61.7  11829    28    2 short   none    (640,20,80)      5       0  
+   11  0.0920      64   10   4704    0.0    3.3  10744    46    2 short   none    (640,0,80)       2       0  
+   12  0.0840      66   17   4714    0.6   27.3  14357    24   13 None    none    (640,100,104)    1       0  
+   13  0.0927      65    4   4709    0.9   58.3   4462    34    2 short   none    (576,80,104)     9       0  
+   14  0.0887      64    7   4701    0.9   32.4   7519    34    2 short   none    (576,60,104)     11      0  
+   15  0.0794      65    5   4698    0.6   41.7   9202    34    2 short   none    (576,40,104)     10      0  
+   16  0.0687      64    1   4701    0.0      -      -    34    2 short   none    (576,20,104)     2       0  
+   17  0.0753      65    3   4715    2.0  245.6   9837    32    2 short   none    (576,0,104)      6       0  
+   18  0.0883      64    2   4686    0.6  248.2  14062    34    2 short   none    (576,80,80)      16      0  
+   19  0.0798      65    5   4701    0.0  123.1  14784    34    2 short   none    (576,60,80)      7       0  
+   20  0.0839      65    1   4698    0.3      -      -    34    2 short   none    (576,40,80)      4       0  
+   21  0.0907      64    3   4692    0.6   10.7   2584    34    2 short   none    (576,20,80)      3       0  
+   22  0.0957      65    2   4696    1.2  255.7  12534    24    2 short   none    (576,0,80)       5       0  
+   23  0.1368      64    1   4681    1.5      -      -    34   13 None    92      none             None    0  
+   24  0.1366      65    1   6059   13.6      -      -    34   13 None    92      none             None    0  ball
   the cell every outfield back of a page also samples: page 576 0,0,80; page 640 0,0,80
   page 576: 10 focus(es), numbers 9 11 10 2 6 16 7 4 3 5, heads 34 34 34 34 32 34 34 34 34 24, sleeves 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short
   page 640: 11 focus(es), numbers 20 11 10 8 7 3 4 14 5 2 1, heads 46 46 24 47 34 24 34 24 28 46 24, sleeves 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 13:None
   page None: 1 focus(es), numbers None, heads 34, sleeves 13:None
+  whole frames per capture: 2 to 2, from 9 submit(s); still pose: 0
   heads: 24 on 640/10 640/3 640/14 640/1 576/5; 28 on 640/5; 32 on 576/6; 34 on 640/7 640/4 576/9 576/11 576/10 576/2 576/16 576/7 576/4 576/3 None/None; 46 on 640/20 640/11 640/2; 47 on 640/8
   ok    22 focus(es) follow a player and the camera comes back to the ball; the outfield captain is focus 3, number 11 with armband 90; the goalkeeper draws 92
 ```
@@ -1009,35 +1012,36 @@ $ python3 tools/kits/oracle.py --replay-field 9
 $ python3 tools/kits/oracle.py --replay-field 10
   L2 tapped k times from the reloaded state, 60 frame(s) to settle, idle 390; off: px the followed figure's root lies off the axis; next, ndepth: the next figure's off and depth
     k  moved   frames figs  depth    off   next ndepth  head root sleeves armband panel            number  still
-    0  -           65    1   4682    0.9      -      -    34   13 None    92      none             None    None  
-    1  0.1176      64    1   5012    4.4      -      -    34   13 None    92      none             None    None  ball
-    2  0.1363      65    2   4699    4.4  119.9   3886    46    2 long    none    (640,80,104)     20      None  
-    3  0.1031      64    3   4699    1.2   63.6   9241    46    2 long    93      (640,60,104)     11      None  
-    4  0.1040      65    5   4702    0.6   26.6   4086    24    2 long    none    (640,40,104)     10      None  
-    5  0.1019      64    2   4707    1.2  155.9  10064    47    2 long    none    (640,20,104)     8       None  
-    6  0.0852      63    2   4685    0.9  113.9   6899    34    2 long    none    (640,0,104)      7       None  
-    7  0.0772      65    6   4696    1.5   93.5  13597    24    2 long    none    (640,80,80)      3       None  
-    8  0.0716      64    6   4694    0.6   24.0   6001    34    2 long    none    (640,60,80)      4       None  
-    9  0.0751      65    5   4712    1.2  100.8   7286    24    2 long    none    (640,40,80)      14      None  
-   10  0.0927      64    6   4702    0.6   95.7  10909    28    2 long    none    (640,20,80)      5       None  
-   11  0.0910      63    7   4714    4.4   16.0  12269    46    2 long    none    (640,0,80)       2       0  
-   12  0.0826      64    3   4706    1.5  192.3  18474    24   13 None    none    (640,100,104)    1       None  
-   13  0.0779      64    8   4706    0.6   16.9  13454    34    2 long    none    (576,80,104)     9       None  
-   14  0.0826      65    2   4696    0.3  239.3   9603    34    2 long    none    (576,60,104)     11      None  
-   15  0.0746      64    6   4723    1.5   43.2   3416    34    2 long    none    (576,40,104)     10      None  
-   16  0.0929      65    2   4696    1.2  181.6  13188    34    2 long    none    (576,20,104)     2       None  
-   17  0.0811      64    1   4689    0.9      -      -    32    2 long    none    (576,0,104)      6       None  
-   18  0.0868      64    4   4692    1.8  186.4  13089    34    2 long    none    (576,80,80)      16      0  
-   19  0.0795      64    2   4729    1.8   78.4   5542    34    2 long    none    (576,60,80)      7       None  
-   20  0.0846      64    5   4696    0.9   19.2   5312    34    2 long    none    (576,40,80)      4       None  
-   21  0.0935      65    3   4702    0.6   33.9  10036    34    2 long    none    (576,20,80)      3       None  
-   22  0.0855      64    1   4703    0.9      -      -    24    2 long    none    (576,0,80)       5       None  
-   23  0.1416      65    1   4682    0.9      -      -    34   13 None    92      none             None    None  
-   24  0.1019      64    1   5012    4.4      -      -    34   13 None    92      none             None    None  ball
+    0  -           65    1   4682    0.9      -      -    34   13 None    92      none             None    0  
+    1  0.1176      64    1   5012    4.4      -      -    34   13 None    92      none             None    0  ball
+    2  0.1363      65    2   4699    4.4  119.9   3886    46    2 long    none    (640,80,104)     20      0  
+    3  0.1031      64    3   4699    1.2   63.6   9241    46    2 long    93      (640,60,104)     11      0  
+    4  0.1040      65    5   4702    0.6   26.6   4086    24    2 long    none    (640,40,104)     10      0  
+    5  0.1019      65    2   4707    1.2  155.9  10064    47    2 long    none    (640,20,104)     8       0  
+    6  0.0852      64    2   4685    0.9  113.9   6899    34    2 long    none    (640,0,104)      7       0  
+    7  0.0772      65    6   4696    1.5   93.5  13597    24    2 long    none    (640,80,80)      3       0  
+    8  0.0716      64    6   4694    0.6   24.0   6001    34    2 long    none    (640,60,80)      4       0  
+    9  0.0751      65    5   4712    1.2  100.8   7286    24    2 long    none    (640,40,80)      14      0  
+   10  0.0927      64    6   4702    0.6   95.7  10909    28    2 long    none    (640,20,80)      5       0  
+   11  0.0910      65    7   4714    4.4   16.0  12269    46    2 long    none    (640,0,80)       2       0  
+   12  0.0826      65    3   4706    1.5  192.3  18474    24   13 None    none    (640,100,104)    1       0  
+   13  0.0779      64    8   4706    0.6   16.9  13454    34    2 long    none    (576,80,104)     9       0  
+   14  0.0826      65    2   4696    0.3  239.3   9603    34    2 long    none    (576,60,104)     11      0  
+   15  0.0746      64    6   4723    1.5   43.2   3416    34    2 long    none    (576,40,104)     10      0  
+   16  0.0929      65    2   4696    1.2  181.6  13188    34    2 long    none    (576,20,104)     2       0  
+   17  0.0811      64    1   4689    0.9      -      -    32    2 long    none    (576,0,104)      6       0  
+   18  0.0868      65    4   4692    1.8  186.4  13089    34    2 long    none    (576,80,80)      16      0  
+   19  0.0795      65    2   4729    1.8   78.4   5542    34    2 long    none    (576,60,80)      7       0  
+   20  0.0846      64    5   4696    0.9   19.2   5312    34    2 long    none    (576,40,80)      4       0  
+   21  0.0935      65    3   4702    0.6   33.9  10036    34    2 long    none    (576,20,80)      3       0  
+   22  0.0855      64    1   4703    0.9      -      -    24    2 long    none    (576,0,80)       5       0  
+   23  0.1416      65    1   4682    0.9      -      -    34   13 None    92      none             None    0  
+   24  0.1019      64    1   5012    4.4      -      -    34   13 None    92      none             None    0  ball
   the cell every outfield back of a page also samples: page 576 0,0,80; page 640 0,0,80
   page 576: 10 focus(es), numbers 9 11 10 2 6 16 7 4 3 5, heads 34 34 34 34 32 34 34 34 34 24, sleeves 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long
   page 640: 11 focus(es), numbers 20 11 10 8 7 3 4 14 5 2 1, heads 46 46 24 47 34 24 34 24 28 46 24, sleeves 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long 13:None
   page None: 1 focus(es), numbers None, heads 34, sleeves 13:None
+  whole frames per capture: 2 to 2, from 9 submit(s); still pose: 0
   heads: 24 on 640/10 640/3 640/14 640/1 576/5; 28 on 640/5; 32 on 576/6; 34 on 640/7 640/4 576/9 576/11 576/10 576/2 576/16 576/7 576/4 576/3 None/None; 46 on 640/20 640/11 640/2; 47 on 640/8
   ok    22 focus(es) follow a player and the camera comes back to the ball; the outfield captain is focus 3, number 11 with armband 93; the goalkeeper draws 92
 ```
@@ -1071,32 +1075,33 @@ O que as duas tabelas dizem, uma conclusão por vez:
    $ python3 tools/kits/oracle.py --replay-field 9 --field-button R2
      R2 tapped k times from the reloaded state, 60 frame(s) to settle, idle 390; off: px the followed figure's root lies off the axis; next, ndepth: the next figure's off and depth
        k  moved   frames figs  depth    off   next ndepth  head root sleeves armband panel            number  still
-       0  -           65    1   4681    1.5      -      -    34   13 None    92      none             None    None  
-       1  0.1338      64    2   4696    1.2  255.7  12534    24    2 short   none    (576,0,80)       5       None  
-       2  0.0900      65    3   4692    0.6   10.7   2584    34    2 short   none    (576,20,80)      3       None  
-       3  0.0863      64    1   4698    0.3      -      -    34    2 short   none    (576,40,80)      4       None  
-       4  0.0796      63    5   4701    0.0  123.1  14784    34    2 short   none    (576,60,80)      7       None  
-       5  0.0746      65    2   4686    0.6  248.2  14062    34    2 short   none    (576,80,80)      16      None  
-       6  0.0844      64    3   4715    2.0  245.6   9837    32    2 short   none    (576,0,104)      6       None  
-       7  0.0737      65    1   4701    0.0      -      -    34    2 short   none    (576,20,104)     2       None  
-       8  0.0694      64    5   4698    0.6   41.7   9202    34    2 short   none    (576,40,104)     10      None  
-       9  0.0790      63    7   4701    0.9   32.4   7519    34    2 short   none    (576,60,104)     11      0  
-      10  0.0891      64    4   4709    0.9   58.3   4462    34    2 short   none    (576,80,104)     9       None  
-      11  0.0929      66   17   4714    0.6   27.3  14357    24   13 None    none    (640,100,104)    1       None  
-      12  0.0836      65   10   4704    0.0    3.3  10744    46    2 short   none    (640,0,80)       2       None  
-      13  0.0918      65   11   4702    0.0   61.7  11829    28    2 short   none    (640,20,80)      5       None  
-      14  0.0736      64    9   4701    1.5    1.9  20692    24    2 short   none    (640,40,80)      14      0  
-      15  0.0856      64    6   4701    0.0  121.0  18007    34    2 short   none    (640,60,80)      4       None  
-      16  0.0830      64    3   4700    1.2  152.9   6307    24    2 short   none    (640,80,80)      3       None  
-      17  0.0762      65    5   4696    2.3  136.2  11334    34    2 short   none    (640,0,104)      7       None  
-      18  0.0744      64    4   4676    0.6   54.6   4923    47    2 short   none    (640,20,104)     8       None  
-      19  0.0784      65    5   4695    0.9   13.2   8969    24    2 short   none    (640,40,104)     10      None  
-      20  0.0951      64    3   4694    0.6    4.0   6802    46    2 short   90      (640,60,104)     11      None  
-      21  0.0831      63    4   4695    0.6   40.8   7148    46    2 short   none    (640,80,104)     20      None  
-      22  0.1378      64    1   6059   13.6      -      -    34   13 None    92      none             None    None  ball
+       0  -           65    1   4681    1.5      -      -    34   13 None    92      none             None    0  
+       1  0.1338      64    2   4696    1.2  255.7  12534    24    2 short   none    (576,0,80)       5       0  
+       2  0.0900      65    3   4692    0.6   10.7   2584    34    2 short   none    (576,20,80)      3       0  
+       3  0.0863      65    1   4698    0.3      -      -    34    2 short   none    (576,40,80)      4       0  
+       4  0.0796      64    5   4701    0.0  123.1  14784    34    2 short   none    (576,60,80)      7       0  
+       5  0.0746      65    2   4686    0.6  248.2  14062    34    2 short   none    (576,80,80)      16      0  
+       6  0.0844      64    3   4715    2.0  245.6   9837    32    2 short   none    (576,0,104)      6       0  
+       7  0.0737      65    1   4701    0.0      -      -    34    2 short   none    (576,20,104)     2       0  
+       8  0.0694      64    5   4698    0.6   41.7   9202    34    2 short   none    (576,40,104)     10      0  
+       9  0.0790      65    7   4701    0.9   32.4   7519    34    2 short   none    (576,60,104)     11      0  
+      10  0.0891      65    4   4709    0.9   58.3   4462    34    2 short   none    (576,80,104)     9       0  
+      11  0.0929      67   17   4714    0.6   27.3  14357    24   13 None    none    (640,100,104)    1       0  
+      12  0.0836      65   10   4704    0.0    3.3  10744    46    2 short   none    (640,0,80)       2       0  
+      13  0.0918      65   11   4702    0.0   61.7  11829    28    2 short   none    (640,20,80)      5       0  
+      14  0.0736      65    9   4701    1.5    1.9  20692    24    2 short   none    (640,40,80)      14      0  
+      15  0.0856      65    6   4701    0.0  121.0  18007    34    2 short   none    (640,60,80)      4       0  
+      16  0.0830      64    3   4700    1.2  152.9   6307    24    2 short   none    (640,80,80)      3       0  
+      17  0.0762      65    5   4696    2.3  136.2  11334    34    2 short   none    (640,0,104)      7       0  
+      18  0.0744      64    4   4676    0.6   54.6   4923    47    2 short   none    (640,20,104)     8       0  
+      19  0.0784      65    5   4695    0.9   13.2   8969    24    2 short   none    (640,40,104)     10      0  
+      20  0.0951      64    3   4694    0.6    4.0   6802    46    2 short   90      (640,60,104)     11      0  
+      21  0.0831      65    4   4695    0.6   40.8   7148    46    2 short   none    (640,80,104)     20      0  
+      22  0.1378      65    1   6059   13.6      -      -    34   13 None    92      none             None    0  ball
      the cell every outfield back of a page also samples: page 576 0,0,80; page 640 0,0,80
      page 576: 10 focus(es), numbers 5 3 4 7 16 6 2 10 11 9, heads 24 34 34 34 34 32 34 34 34 34, sleeves 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short
      page 640: 11 focus(es), numbers 1 2 5 14 4 3 7 8 10 11 20, heads 24 46 28 24 34 24 34 47 24 46 46, sleeves 13:None 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short
+     whole frames per capture: 2 to 2, from 9 submit(s); still pose: 0
      heads: 24 on 576/5 640/1 640/14 640/3 640/10; 28 on 640/5; 32 on 576/6; 34 on 576/3 576/4 576/7 576/16 576/2 576/10 576/11 576/9 640/4 640/7; 46 on 640/2 640/11 640/20; 47 on 640/8
      no measured expectation for slot 9 with R2 (REPLAY_FIELD_EXPECT is L2's): printed, not judged
    ```
@@ -1120,11 +1125,18 @@ O que as duas tabelas dizem, uma conclusão por vez:
    **Croácia** (640) 2 5 14 4 3 na linha 80, 7 8 10 11 20 na 104, e o 1 do goleiro em (100,104).
    (O painel do Marcos não aparece com L2, que nunca o mostra de costas; a K3D-TASK-17 o mediu
    girando a câmera: (100,104), número 1.)
-8. **O tempo.** Cada foco corre de 63 a 65 quadros do último toque ao fim da captura, sob os 390 de
-   `--replay-idle`.
+8. **O tempo.** Cada foco corre de 64 a 66 quadros do último toque ao fim da captura (até 67 no R2),
+   sob os 390 de `--replay-idle`.
+9. **A pose parada.** Toda captura fecha dois quadros inteiros, e em todo foco dos três passeios as
+   matrizes da figura seguida são iguais nos dois (`whole frames per capture: 2 to 2, from 9 submit(s);
+   still pose: 0`, nas três saídas acima): com o replay pausado, nenhum dos 22 se mexe. O juiz falha
+   num foco com `still` acima de `REPLAY_STILL` (0) ou em `None`. Uma corrida com um controle físico
+   ligado à máquina mostrou que ele pega movimento de verdade: o `[Pad1]` do DuckStation é `SDL-0`, os
+   toques do controle chegaram ao replay, e o k = 0 do slot 9 saiu `still 282` sem toque nenhum
+   (CORR-K3D-031).
 
-O controle `--plant-replay-field` (as duas metades) sai 1 com 42 `FAIL`; sozinha, cada metade derruba
-o seu: `--plant-replay-field focus` (a figura seguinte do eixo) sai 1 com os `FAIL` de eixo e de
+O controle `--plant-replay-field` (as duas metades) sai 1 com 48 `FAIL`; sozinha, cada metade derruba
+o seu: `--plant-replay-field focus` (a figura seguinte do eixo) sai 1 com os `FAIL` de eixo, de pose parada e de
 profundidade em cada foco, e `--plant-replay-field panel` (todo painel lido uma linha acima) sai 1
 com `FAIL  focus 3, the outfield captain, holds number 4, not 11`.
 

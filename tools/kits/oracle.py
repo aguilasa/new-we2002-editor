@@ -3738,8 +3738,13 @@ further one to a player."""
 REPLAY_FIELD_MOST = 30
 """Taps of the `--field-button` a `--replay-field` run tries before it says
 the camera never came back to the ball: 22 players, the ball, and room."""
-REPLAY_FIELD_SUBMITS = POSE_SUBMITS
-"""Submits each focus's capture takes: two whole frames.  With the camera
+REPLAY_FIELD_SUBMITS = 9
+"""Submits each focus's capture takes: three a frame, one of them the list
+with the figures, and the capture begins at any of the three, so nine always
+hold three figure submits -- two whole frames after the cut-off one, the
+least `pose_change` needs.  `POSE_SUBMITS` (seven) held two figure submits in
+23 of 25 foci of slot 9, one whole frame and no still pose (CORR-K3D-026;
+`--replay-field` prints the whole frames of each capture).  With the camera
 behind a player the frame holds up to a dozen figures, and the four frames of
 `REPLAY_SUBMITS` cost minutes of breakpoints a focus."""
 REPLAY_FIELD_SETTLE = 60
@@ -3825,12 +3830,12 @@ def field_row(capture: dict, index, nth: int = 0) -> dict:
     if not frames:
         return {"figures": 0, "focus": None, "order": [], "depth": None, "off": None,
                 "next": None, "head": None, "root": None, "sleeves": None, "armband": None,
-                "still": None, "cells": {}, "panel": None, "figure_cell": None}
+                "still": None, "cells": {}, "panel": None, "figure_cell": None, "whole": 0}
     last = frames[-1]
     ranked = sorted(last["figures"], key=figure_off_axis)
     focus = field_focus(last["figures"], nth)
     order = [p["section"] for p in focus] if focus is not None else []
-    row = {"figures": len(ranked), "focus": focus, "order": order,
+    row = {"figures": len(ranked), "focus": focus, "order": order, "whole": len(frames),
            "depth": figure_depth(focus) if focus is not None else None,
            "off": figure_off_axis(focus) if focus is not None else None,
            "next": figure_off_axis(ranked[nth + 1]) if len(ranked) > nth + 1 else None,
@@ -3958,7 +3963,9 @@ def replay_field_judge(rows: list, expect: dict, idle) -> list:
     next figure `REPLAY_FOCUS_MARGIN` apart, under `REPLAY_FOLLOW_DEPTH`; the
     camera came back to the ball; the outfield armband is the expected one, on
     the player wearing the expected number; the figure the replay opens on is
-    the goalkeeper with his armband; and every capture stayed under the idle."""
+    the goalkeeper with his armband; every capture holds one still pose
+    (`REPLAY_STILL`) over its last two frames; and every capture stayed under
+    the idle."""
     out = []
     followed = [r for r in rows if r.get("follows")]
     if not followed:
@@ -3999,6 +4006,9 @@ def replay_field_judge(rows: list, expect: dict, idle) -> list:
                    % (keeper["k"], opening and opening["root"], opening and opening["armband"],
                       keeper["root"], keeper["armband"]))
     for r in rows:
+        if r.get("frames") is not None and (r.get("still") is None or r["still"] > REPLAY_STILL):
+            out.append("focus %d: the figure's matrices differ by %s between the last two "
+                       "frames, not within %d" % (r["k"], r.get("still"), REPLAY_STILL))
         if r.get("frames") is not None and (idle is None or r["frames"] >= idle):
             out.append("focus %d: %d frame(s) from the last tap, not under the replay's idle %s"
                        % (r["k"], r["frames"], idle))
@@ -4092,6 +4102,12 @@ def run_replay_field(slot: int, cue: str, cache=None, plant: str = None,
     for r in followed:
         heads.setdefault(r["head"], []).append((r["panel"][0] if r["panel"] else None,
                                                 r["number"]))
+    whole = [r["whole"] for r in rows if not r.get("refused")]
+    submits = sorted({sum(e["kind"] == "submit" for e in f["capture"]["events"])
+                      for f in kept["foci"] if not f.get("refused")})
+    print("  whole frames per capture: %d to %d, from %s submit(s); still pose: %s"
+          % (min(whole), max(whole), " ".join("%d" % n for n in submits),
+             " ".join(sorted({"%s" % r["still"] for r in rows if not r.get("refused")}))))
     print("  heads: %s" % "; ".join("%s on %s" % (h, " ".join("%s/%s" % p for p in v))
                                      for h, v in sorted(heads.items(),
                                                         key=lambda t: (t[0] is None, t[0] or 0))))
@@ -4101,7 +4117,7 @@ def run_replay_field(slot: int, cue: str, cache=None, plant: str = None,
     with open(table, "w") as fh:
         json.dump([{key: r.get(key) for key in ("k", "follows", "end", "depth", "off", "next", "next_depth",
                                                 "head", "root", "sleeves", "armband", "panel",
-                                                "number", "still", "frames", "cells")}
+                                                "number", "still", "whole", "frames", "cells")}
                    for r in rows], fh, indent=1)
     print("  table kept at %s" % table)
     if plant:

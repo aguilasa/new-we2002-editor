@@ -1342,7 +1342,7 @@ def _oracle_checks(c) -> None:
     def _row(k, **kw):
         base = {"k": k, "follows": True, "depth": 4695, "off": 1.0, "next": 80.0,
                 "next_depth": 4900, "root": 2,
-                "armband": None, "number": 7, "frames": 70}
+                "armband": None, "number": 7, "frames": 70, "still": 0}
         base.update(kw)
         return base
 
@@ -1364,6 +1364,12 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --replay-field: a second figure inside the margin fails",
          any("under the margin" in f for f in oracle.replay_field_judge(near_next, fexpect, 390)),
          "; ".join(oracle.replay_field_judge(near_next, fexpect, 390)))
+    unstill = [dict(r, still=None) if r["k"] == 2 else dict(r, still=3) if r["k"] == 3 else r
+               for r in field]
+    c.ok("oracle --replay-field: a focus with no still pose, or one that moved, fails",
+         sum("between the last two frames" in f
+             for f in oracle.replay_field_judge(unstill, fexpect, 390)) == 2,
+         "; ".join(oracle.replay_field_judge(unstill, fexpect, 390)))
     wrong = [dict(r, number=12) if r["k"] == 3 else r for r in field]
     c.ok("oracle --replay-field: the captain on another number fails",
          any("holds number 12, not 11" in f

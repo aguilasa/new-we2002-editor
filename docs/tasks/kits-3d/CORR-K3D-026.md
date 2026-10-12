@@ -56,3 +56,63 @@ conclusão sobre a pose parada.
 o comando de cima conta 23 `None`.
 
 ## Log de Execução
+
+### 2026-10-11 — nove submissões por foco, e o juiz pede a pose parada
+
+Triagem inline (`rite reproduce --all --cycle kits-3d`): **REPRODUCED** na HEAD `75ae037`. A contagem
+da Evidência saiu `2 0` e `23 None`, e o `grep` mostrou `REPLAY_FIELD_SUBMITS = POSE_SUBMITS` com o
+docstring "two whole frames".
+
+**Causa, medida.** Cada quadro manda três listas à GPU, e só uma tem as figuras. A captura começa
+em qualquer uma das três. Com sete submissões, só dois submits com figura caem na janela na maior
+parte das fases. O `pose_frames` descarta o primeiro bloco, que começou no meio do quadro, e sobra
+um quadro inteiro. A hipótese da CORR (mais de três submits por quadro em campo) não se confirmou:
+são três, como na `LOOKS SET`. O que falhava era a conta das sete.
+
+**Conserto** (`tools/kits/oracle.py`):
+- `REPLAY_FIELD_SUBMITS = 9`, com o docstring refeito: nove sempre trazem três submits com figura,
+  e portanto dois quadros inteiros.
+- O `field_row` guarda `whole`, os quadros inteiros da captura.
+- O `--replay-field` imprime a linha `whole frames per capture: …, from N submit(s); still pose: …`,
+  com os submits contados nos eventos da captura, não tirados da constante.
+- O `replay_field_judge` falha num foco com `still` em `None` ou acima de `REPLAY_STILL` (0).
+- Caso novo no `selftest.py`: `oracle --replay-field: a focus with no still pose, or one that moved,
+  fails`.
+- Controle novo no `controls.py`: `oracle-replay-field-still-unasked`.
+
+**Medido ao vivo**, com `WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE2002_LOOKS_DRIVE_IMAGE=$PWD/work/looks-disc/we2002-english.cue DISPLAY=:98 XAUTHORITY=`
+e as cópias mestras `54c79792…` e `bdf47644…`:
+- `python3 tools/kits/oracle.py --replay-field 9`: saída 0, `whole frames per capture: 2 to 2, from 9 submit(s); still pose: 0`
+  e `ok    22 focus(es) follow a player …`;
+- `--replay-field 10`: saída 0, a mesma linha de quadros e `ok    22 focus(es) …`;
+- `--replay-field 9 --field-button R2`: saída 0, a mesma linha de quadros, só impresso.
+
+A Verificação vale: o comando da Evidência, agora na captura nova, conta `25 0` e nenhum `None`. A
+captura antiga, de sete submissões, ficou guardada em
+`work/kits-oracle/replay-field-9-seven-capture.json`. Relida pela HEAD nova
+(`--replay-field 9 --frame-json work/kits-oracle/replay-field-9-seven-capture.json`), ela sai 1 com
+23 `FAIL  focus …: the figure's matrices differ by None between the last two frames, not within 0`
+e com `whole frames per capture: 1 to 2, from 7 submit(s)`: o vermelho do juiz com dado real.
+
+**G8:** as três saídas foram recoladas da HEAD, a frase "pose_capture de dois quadros" foi
+corrigida, e entrou a conclusão 9, sobre a pose parada.
+
+Varredura: a planta inteira passou de 42 `FAIL` para 48, porque a figura plantada também cai no juiz
+da pose. A conclusão 8 do tempo passou a "64 a 66 quadros (até 67 no R2)". A forma impressa desses
+dois números é trabalho da [CORR-K3D-029](/docs/tasks/kits-3d/CORR-K3D-029.md).
+
+**No caminho.** As quatro primeiras corridas deram quatro tabelas diferentes:
+- quadro preto no k = 8 do slot 9;
+- MCP sem resposta no slot 10;
+- câmera voando no R2;
+- o k = 0 do slot 9 com `still 282`.
+
+A causa era um controle sem fio ligado (`Wireless Controller`, js0), que o `[Pad1]` (`SDL-0`) lia.
+O usuário o desligou, e as três corridas acima foram feitas sem ele. Abri duas fixes:
+- [CORR-K3D-030](/docs/tasks/kits-3d/CORR-K3D-030.md): o juiz aceitou tabelas de 3 e 7 focos;
+- [CORR-K3D-031](/docs/tasks/kits-3d/CORR-K3D-031.md): nenhuma guarda contra o controle.
+
+Gates:
+- `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
+  `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
+- `python3 tools/kits/controls.py`: `controls: 47 of 47 red`.

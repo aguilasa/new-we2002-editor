@@ -336,6 +336,14 @@ CONTROLS = (
         "CORR-K3D-024)",
     ),
     Control(
+        "oracle-replay-field-still-unasked", "kits/oracle.py", "replay_field_judge",
+        '        if r.get("frames") is not None and (r.get("still") is None or r["still"] > REPLAY_STILL):',
+        "        if False:",
+        "FAIL  oracle --replay-field: a focus with no still pose, or one that moved, fails",
+        "the table asks each focus for the still pose of the paused replay; a capture of "
+        "one whole frame prints None there, and nothing judged it (G8, CORR-K3D-026)",
+    ),
+    Control(
         "oracle-replay-field-shared-panel", "kits/oracle.py", "field_panels",
         '        own = sorted(set(r["cells"]) - shared.get(r["page"], set())) or sorted(r["cells"])',
         '        own = sorted(r["cells"])',
