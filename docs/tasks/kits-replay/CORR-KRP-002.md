@@ -95,3 +95,7 @@ $ grep -c 'o() {' docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-m
 Gates (`rite gates --cycle kits-replay --id CORR-KRP-002`): `ctest --test-dir build -R kits` —
 `100% tests passed, 0 tests failed out of 4` (`kits_image` e `kits_ui` *skipped*); `python3
 tools/kits/controls.py` — `controls: 56 of 56 red`.
+- **Closed** — commit `98853b84` (2026-10-12): docs(kits): the KRP-TASK-02 before/after comparison, runnable from its Log
+  - Files (`git show --name-status 98853b84`):
+    - `M docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-002.md`
