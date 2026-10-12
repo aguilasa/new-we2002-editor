@@ -1,10 +1,10 @@
 # Tela EDIT PL. NUM — o que ela mostra sobre o boneco 3D
 
-Relatório da investigação [K3D-TASK-16](/docs/tasks/kits-3d/16-medir-tela-edit-pl-num.md),
+Relatório da investigação [K3D-TASK-16](/docs/tasks/concluidos/kits-3d/16-medir-tela-edit-pl-num.md),
 fechada em 2026-10-09 (commits `6409a49` e `241b77a`) e revisada no mesmo dia, com três correções
-([CORR-K3D-020](/docs/tasks/kits-3d/CORR-K3D-020.md),
-[CORR-K3D-021](/docs/tasks/kits-3d/CORR-K3D-021.md),
-[CORR-K3D-022](/docs/tasks/kits-3d/CORR-K3D-022.md)). A saída completa das ferramentas, colada da
+([CORR-K3D-020](/docs/tasks/concluidos/kits-3d/CORR-K3D-020.md),
+[CORR-K3D-021](/docs/tasks/concluidos/kits-3d/CORR-K3D-021.md),
+[CORR-K3D-022](/docs/tasks/concluidos/kits-3d/CORR-K3D-022.md)). A saída completa das ferramentas, colada da
 HEAD, está em [G7 do KITS-AJUSTES-3D](/docs/KITS-AJUSTES-3D.md#g7--tela-edit-pl-num-o-jogo-desenhando-o-número-e-o-giro).
 Este documento resume o que foi medido e responde a uma pergunta: **a tela traz algo que a aba 3D
 possa usar?**
@@ -114,7 +114,7 @@ então a câmera é a mesma de frente e de costas. Depois do giro o boneco conti
 costas, com um balanço de ±2° por quadro.
 
 O **Cross não confirma**. Ele volta para a seleção de time, e a carga de matriz por peça para de
-disparar ([CORR-K3D-022](/docs/tasks/kits-3d/CORR-K3D-022.md)):
+disparar ([CORR-K3D-022](/docs/tasks/concluidos/kits-3d/CORR-K3D-022.md)):
 
 ```text
 Cross pressed: did not turn the figure; the per-piece matrix load gave 313 of 1200 stop(s) (12 whole figure(s)), then stopped firing for 20 s

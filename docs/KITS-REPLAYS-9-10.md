@@ -1,20 +1,20 @@
 # Replays nos slots 9 e 10 — o jogador de perto, e o que a aba 3D pode aproveitar
 
 Relatório das três investigações da fase 7 do ciclo `kits-3d`:
-[K3D-TASK-17](/docs/tasks/kits-3d/17-medir-goleiro-capitao-replay.md) (o goleiro capitão de perto,
+[K3D-TASK-17](/docs/tasks/concluidos/kits-3d/17-medir-goleiro-capitao-replay.md) (o goleiro capitão de perto,
 fechada em 2026-10-09, commits `f020577` e `4cf6a39`),
-[K3D-TASK-18](/docs/tasks/kits-3d/18-medir-os-22-replay.md) (os 22 em campo por L2/R2, 2026-10-10,
+[K3D-TASK-18](/docs/tasks/concluidos/kits-3d/18-medir-os-22-replay.md) (os 22 em campo por L2/R2, 2026-10-10,
 `27f2565` e `1a90142`) e
-[K3D-TASK-19](/docs/tasks/kits-3d/19-medir-capitao-linha-replay.md) (o capitão de linha, manga curta e
+[K3D-TASK-19](/docs/tasks/concluidos/kits-3d/19-medir-capitao-linha-replay.md) (o capitão de linha, manga curta e
 longa, 2026-10-12, `d8f8e7df` e `23fb593e`). As revisões abriram treze correções, todas fechadas:
-[CORR-K3D-023](/docs/tasks/kits-3d/CORR-K3D-023.md),
-[024](/docs/tasks/kits-3d/CORR-K3D-024.md), [025](/docs/tasks/kits-3d/CORR-K3D-025.md),
-[026](/docs/tasks/kits-3d/CORR-K3D-026.md), [027](/docs/tasks/kits-3d/CORR-K3D-027.md),
-[028](/docs/tasks/kits-3d/CORR-K3D-028.md), [029](/docs/tasks/kits-3d/CORR-K3D-029.md),
-[030](/docs/tasks/kits-3d/CORR-K3D-030.md), [031](/docs/tasks/kits-3d/CORR-K3D-031.md),
-[032](/docs/tasks/kits-3d/CORR-K3D-032.md), [033](/docs/tasks/kits-3d/CORR-K3D-033.md),
-[034](/docs/tasks/kits-3d/CORR-K3D-034.md) e [035](/docs/tasks/kits-3d/CORR-K3D-035.md). O retro do
-ciclo está em [retro.md](/docs/tasks/kits-3d/retro.md). A saída completa das ferramentas, colada da
+[CORR-K3D-023](/docs/tasks/concluidos/kits-3d/CORR-K3D-023.md),
+[024](/docs/tasks/concluidos/kits-3d/CORR-K3D-024.md), [025](/docs/tasks/concluidos/kits-3d/CORR-K3D-025.md),
+[026](/docs/tasks/concluidos/kits-3d/CORR-K3D-026.md), [027](/docs/tasks/concluidos/kits-3d/CORR-K3D-027.md),
+[028](/docs/tasks/concluidos/kits-3d/CORR-K3D-028.md), [029](/docs/tasks/concluidos/kits-3d/CORR-K3D-029.md),
+[030](/docs/tasks/concluidos/kits-3d/CORR-K3D-030.md), [031](/docs/tasks/concluidos/kits-3d/CORR-K3D-031.md),
+[032](/docs/tasks/concluidos/kits-3d/CORR-K3D-032.md), [033](/docs/tasks/concluidos/kits-3d/CORR-K3D-033.md),
+[034](/docs/tasks/concluidos/kits-3d/CORR-K3D-034.md) e [035](/docs/tasks/concluidos/kits-3d/CORR-K3D-035.md). O retro do
+ciclo está em [retro.md](/docs/tasks/concluidos/kits-3d/retro.md). A saída completa das ferramentas, colada da
 HEAD, está em
 [G8 do KITS-AJUSTES-3D](/docs/KITS-AJUSTES-3D.md#g8--replays-nos-slots-9-e-10-braçadeira-e-manga-longa-de-perto-o-goleiro-capitão-e-os-22-em-campo).
 Este documento resume o que foi medido e responde a uma pergunta: **o que dos replays muda o desenho
@@ -187,7 +187,7 @@ os quads da figura) registra, sem afirmar limite:
 | Balaban, slot 10 | 0,393 | 0,375 | `--figure 0 --long-sleeves --number 20` |
 
 (Nos focos de linha as duas abas são comparadas com **as costas** do jogo, a primeira captura; a
-frente do jogo nunca foi comparada com a frente da aba — [CORR-K3D-034](/docs/tasks/kits-3d/CORR-K3D-034.md).)
+frente do jogo nunca foi comparada com a frente da aba — [CORR-K3D-034](/docs/tasks/concluidos/kits-3d/CORR-K3D-034.md).)
 
 Lado a lado (`replay-<slot>[-<K>]-frame.png` contra `-tab-*.png`), o que difere:
 
@@ -253,7 +253,7 @@ O que a tabela diz:
   **R2 é o mesmo laço ao contrário** (`--field-button R2`): do Marcos direto ao Brasil de (0,80) a
   (80,104), o goleiro croata, a Croácia de (0,80) a (80,104), e só no fim a bola (k = 22). São 22
   jogadores, nenhum expulso; o juiz exige 20 de linha, 2 goleiros e 0 outras figuras
-  ([CORR-K3D-030](/docs/tasks/kits-3d/CORR-K3D-030.md)).
+  ([CORR-K3D-030](/docs/tasks/concluidos/kits-3d/CORR-K3D-030.md)).
 - **Painel ↔ número**, pelas páginas de uniforme lidas da VRAM (`read_panels`): Brasil (576):
   `5 3 4 7 16` na linha 80, `6 2 10 11 9` na 104, e o 1 do goleiro em (100,104); Croácia (640):
   `2 5 14 4 3` na linha 80, `7 8 10 11 20` na 104, e o 1 em (100,104). A ordem da grade não é a dos
@@ -311,7 +311,7 @@ de cabelo escuro, nas duas figuras.
 
 ## O que as treze correções mudaram no instrumento
 
-Os grupos de causa raiz estão no [retro](/docs/tasks/kits-3d/retro.md): 13 das 35 correções do
+Os grupos de causa raiz estão no [retro](/docs/tasks/concluidos/kits-3d/retro.md): 13 das 35 correções do
 ciclo caíram na fase 7, e as três de severidade alta (020, 026, 030) nas investigações no emulador;
 as armadilhas K1 a K5 que o retro gravou em
 [perfil-kits-3d.armadilhas.md](/docs/prompts/perfil-kits-3d.armadilhas.md) e a quinta regra de
@@ -396,7 +396,7 @@ Torso 13, braços 14/16 e 15→92/17, pernas 18/20/19/21, cabeça por jogador. A
 do `EDT_MOD.BIN` com só a 92 trocada, e é a maior diferença visível das três tasks (item 5).
 Desenhar o goleiro pela família 13, com a pose `slot9-keeper-front.json` e a projeção medida, é a
 mudança que aproxima o desenho do jogo — e reabre a decisão da
-[K3D-TASK-10](/docs/tasks/kits-3d/10-duas-figuras.md), que tirou a figura de partida do seletor. É
+[K3D-TASK-10](/docs/tasks/concluidos/kits-3d/10-duas-figuras.md), que tirou a figura de partida do seletor. É
 decisão do usuário, já registrada no G8.
 
 ### (e) Dois kits na VRAM ao mesmo tempo, e o kit pela paleta
@@ -479,8 +479,8 @@ O que aperta, para um agente de IA e para quem lê na linha de comando:
   schema é implícito — chaves `focus/front/back/events/lists/offsets/buffer/texture/pages/hits/
   yaws/depths/turned/front_frames/back_frames/turn_frames` — e cujas tuplas viram listas no JSON
   (`_restore_samples` as repõe). Cada pergunta nova sobre uma figura é reler 300 linhas de saída ou
-  escrever uma sonda — e sonda foi a origem das [CORR-K3D-029](/docs/tasks/kits-3d/CORR-K3D-029.md)
-  e [035](/docs/tasks/kits-3d/CORR-K3D-035.md);
+  escrever uma sonda — e sonda foi a origem das [CORR-K3D-029](/docs/tasks/concluidos/kits-3d/CORR-K3D-029.md)
+  e [035](/docs/tasks/concluidos/kits-3d/CORR-K3D-035.md);
 - **o custo está na captura, não na análise**: minutos de emulador por foco, segundos para reler.
   Uma ferramenta que separe as duas coisas deixa o agente perguntar quantas vezes quiser sobre uma
   captura já feita;

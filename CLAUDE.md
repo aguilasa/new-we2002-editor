@@ -1308,7 +1308,7 @@ todos (retros do `looks`,
 do `port-mcr`,
 [docs/tasks/concluidos/port-mcr/retro.md](docs/tasks/concluidos/port-mcr/retro.md),
 do `kits`, [docs/tasks/concluidos/kits/retro.md](docs/tasks/concluidos/kits/retro.md),
-e do `kits-3d`, [docs/tasks/kits-3d/retro.md](docs/tasks/kits-3d/retro.md)):
+e do `kits-3d`, [docs/tasks/kits-3d/retro.md](docs/tasks/concluidos/kits-3d/retro.md)):
 
 - **Número em Log ou documento é colado da ferramenta, na HEAD entregue.** Não
   se reescreve de memória, não sai de sonda descartável — sonda que produziu um

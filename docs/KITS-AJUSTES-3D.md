@@ -145,7 +145,7 @@ O que a saída diz:
 - **A seção do `MODEL.BIN` está no referencial da peça.** A translação que melhor deita cada
   seção sobre a peça que a regra lhe dá (`ARM_PIECES`, não a mais próxima) fica entre 0,7 e 1,9
   unidade (`FRAME_SLACK` 3,0). Por isso a matriz certa para desenhá-la é a da própria peça, sem
-  matriz nova. Até a [CORR-K3D-013](/docs/tasks/kits-3d/CORR-K3D-013.md) o ajuste corria contra a
+  matriz nova. Até a [CORR-K3D-013](/docs/tasks/concluidos/kits-3d/CORR-K3D-013.md) o ajuste corria contra a
   peça mais próxima, e aí um resíduo pequeno só dizia "está sobre alguma peça de braço": um braço
   movido 20 em y assentava na outra parte com 2,0 a 2,2 e passava.
 - **A parte (braço ou antebraço) é a peça mais perto.** A outra parte fica sempre mais longe
@@ -157,7 +157,7 @@ O que a saída diz:
   `piece_names`). A conferência compara essa tabela com ela mesma e não pode imprimir "posed apart".
   Que o jogo pose a seção 12 do goleiro como a 1 do jogador é suposição herdada do ciclo `looks`, não
   medida aqui; medir pede a matriz do GTE por peça de cada figura, lida do jogo
-  ([CORR-K3D-012](/docs/tasks/kits-3d/CORR-K3D-012.md)). O braço longo cabe melhor no braço do
+  ([CORR-K3D-012](/docs/tasks/concluidos/kits-3d/CORR-K3D-012.md)). O braço longo cabe melhor no braço do
   goleiro (12 e 13); no jogador, ele vai no slot de mesmo nome (1 e 2), com a mesma matriz.
 - **Concorda com a ordem medida no jogo** (`SLEEVE_LENGTHS`, `LONG_TO_SHORT`). 95→3 e 97→4 caem nos
   mesmos `upper arm a` e `upper arm b`; 96→5 e 98→6 nos mesmos antebraços. A braçadeira (93 no lugar
@@ -275,7 +275,7 @@ O que a saída diz:
   `shoulder, second` e `sleeve, shoulder to elbow`. O "no lugar da 15" se apoia nesses dois fatos;
   nenhum goleiro da família 13 desenhando a 15 foi visto, porque o slot 7 só tem o goleiro capitão
   nessa família, e por isso o `keeper_armband_judge` não exige a ordem simples como o
-  `matrix_judge` faz ([CORR-K3D-015](/docs/tasks/kits-3d/CORR-K3D-015.md)). Pela regra de G3, a 92 vai
+  `matrix_judge` faz ([CORR-K3D-015](/docs/tasks/concluidos/kits-3d/CORR-K3D-015.md)). Pela regra de G3, a 92 vai
   no `upper arm b` da figura do `EDT_MOD.BIN`.
 - **Os texels da 92 são as linhas de capitão do goleiro** na imagem das mangas, as zonas de
   `zones.py` marcadas como goleiro: `short sleeve, left, captain`, `armband, short sleeve` e
@@ -283,7 +283,7 @@ O que a saída diz:
   goleiro medido usa manga longa.
 - **Cada peça tem matriz própria**, e as translações de cada figura inteira ficam entre 153 e 184 da
   mediana (limite 500). As 4 cortadas (a última peça de um quadro, sem parada que a nomeie) ficam fora
-  da ordem e da faixa; até a [CORR-K3D-014](/docs/tasks/kits-3d/CORR-K3D-014.md) a saída as contava como
+  da ordem e da faixa; até a [CORR-K3D-014](/docs/tasks/concluidos/kits-3d/CORR-K3D-014.md) a saída as contava como
   inteiras ("27 whole") e a faixa ia a 196.
 
 O controle `--plant-keeper-armband` espera a 103, que também tem os vértices da 15, e a corrida sai 1 com
@@ -575,7 +575,7 @@ O que a saída diz, item por item:
    frame"). A translação não muda: a câmera é a mesma de frente e de costas. **O Cross não
    confirma**: a tela volta para a seleção de time (`Select Team`, captura
    `work/looks-shots/edit-8-0-Cross-back.png`) e a carga de matriz por peça para de disparar. Medido
-   apertando só ele ([CORR-K3D-022](/docs/tasks/kits-3d/CORR-K3D-022.md)):
+   apertando só ele ([CORR-K3D-022](/docs/tasks/concluidos/kits-3d/CORR-K3D-022.md)):
 
    ```sh
    WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin \
@@ -668,7 +668,7 @@ assinatura da tela mudar — e ele vira a guarda de toda captura. E **quem é o 
 das paradas é no espaço da vista, então o focado é a figura de **menor z** no
 replay de perto do goleiro (`replay_focus`, uma figura só no quadro), e a figura **no eixo da câmera**
 atrás de um jogador (`field_focus`, com a margem da
-[CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md) no juiz — medido na K3D-TASK-18, item 2); o `piece_yaw` do torso diz frente ou costas, e o passo de L1/R1 por toque é medição. Os botões
+[CORR-K3D-024](/docs/tasks/concluidos/kits-3d/CORR-K3D-024.md) no juiz — medido na K3D-TASK-18, item 2); o `piece_yaw` do torso diz frente ou costas, e o passo de L1/R1 por toque é medição. Os botões
 são toques (`press_button` com `duration_frames`): sem a duração o botão fica preso (PLAN-PES2-PSX,
 armadilha 36).
 
@@ -1066,7 +1066,7 @@ O que as duas tabelas dizem, uma conclusão por vez:
    mais apertado é o do Bokšić no slot 9 (k = 3 com L2, k = 20 com R2): `closest next figure inside
    8 px: focus 3, 3.46 px farther off the axis and 2108 apart in depth`; no slot 10, `no next figure
    inside 8 px of any followed one`. A margem que a
-   [CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md) deixou para cá está no juiz, com caso no
+   [CORR-K3D-024](/docs/tasks/concluidos/kits-3d/CORR-K3D-024.md) deixou para cá está no juiz, com caso no
    `selftest.py` e controle no `controls.py`.
 3. **A ordem do L2.** Do Marcos (k = 0), o primeiro toque vai à **bola** (k = 1: a figura mais perto
    do eixo é o Marcos, a 6059 no slot 9 e 5012 no 10, fora do seguimento). Depois vêm os **dez de
@@ -1414,7 +1414,7 @@ Os itens 4 a 7 da K3D-TASK-17, para o capitão de linha:
 A planta (`--plant-replay` com `--focus 3`) segue a figura seguinte do eixo e sai 1 com seis `FAIL`,
 entre eles `the followed figure opens at 2, not at section 103`: é a primeira vez que a conferência de
 raiz fica vermelha com uma figura real no quadro, o que a K3D-TASK-17 não alcançava
-([CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md)).
+([CORR-K3D-024](/docs/tasks/concluidos/kits-3d/CORR-K3D-024.md)).
 
 **As diferenças do capitão de linha, para a task de conserto** (lado a lado em
 `replay-<slot>-<K>-frame.png` contra `replay-<slot>-<K>-tab-back.png` e `-tab-front.png`):
@@ -1457,4 +1457,4 @@ decisão nova, datada:
 **O insumo do ciclo seguinte (2026-10-12).** G7 e G8 foram investigações; o que delas vira desenho
 — goleiro pela família 13, cabeça por jogador, pose de corrida — e o projeto de uma ferramenta de
 leitura do jogador no replay estão resumidos em [KITS-REPLAYS-9-10](/docs/KITS-REPLAYS-9-10.md),
-com o retro do ciclo em [retro.md](/docs/tasks/kits-3d/retro.md).
+com o retro do ciclo em [retro.md](/docs/tasks/concluidos/kits-3d/retro.md).
