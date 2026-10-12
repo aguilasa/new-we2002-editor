@@ -1370,6 +1370,17 @@ def _oracle_checks(c) -> None:
          sum("between the last two frames" in f
              for f in oracle.replay_field_judge(unstill, fexpect, 390)) == 2,
          "; ".join(oracle.replay_field_judge(unstill, fexpect, 390)))
+    counted = dict(fexpect, players={"outfield": 2, "keepers": 1})
+    c.ok("oracle --replay-field: the walk follows the expected players",
+         oracle.replay_field_judge(field, counted, 390) == [],
+         "; ".join(oracle.replay_field_judge(field, counted, 390)))
+    cut = [r for r in field if r["k"] != 2]
+    other = [dict(r, root=56) if r["k"] == 2 else r for r in field]
+    c.ok("oracle --replay-field: a walk cut short or onto another figure fails",
+         all(any("the walk follows" in f for f in oracle.replay_field_judge(t, counted, 390))
+             for t in (cut, other)),
+         "; ".join(oracle.replay_field_judge(cut, counted, 390)
+                   + oracle.replay_field_judge(other, counted, 390)))
     wrong = [dict(r, number=12) if r["k"] == 3 else r for r in field]
     c.ok("oracle --replay-field: the captain on another number fails",
          any("holds number 12, not 11" in f

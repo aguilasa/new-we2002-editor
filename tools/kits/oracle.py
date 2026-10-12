@@ -3777,17 +3777,20 @@ LONG_SLEEVES = (95, 96, 97, 98)
 """The long sleeves of family 2 (G3)."""
 REPLAY_FIELD_EXPECT = {
     9: {"captain": {"armband": 90, "number": 11}, "keeper": {"k": 0, "root": 13, "armband": 92},
-        "sleeves": "short"},
+        "sleeves": "short", "players": {"outfield": 20, "keepers": 2}},
     10: {"captain": {"armband": 93, "number": 11}, "keeper": {"k": 0, "root": 13, "armband": 92},
-         "sleeves": "long"},
+         "sleeves": "long", "players": {"outfield": 20, "keepers": 2}},
 }
 """Slot -> the user's account of the replay (G8), the positive controls of
 `--replay-field`: Croatia's captain, Bokšić, wears 11 and the armband of his
 sleeve -- 90 on the short sleeves of slot 9, 93 on the long ones of slot 10 --
 and Brazil's, the goalkeeper Marcos the replay opens on (focus 0), the 92
-K3D-TASK-17 measured.  The
-sleeves of the outfield players are printed, not judged: a player who
-differs is a result."""
+K3D-TASK-17 measured.  "players" is what the walk has to follow before the
+camera comes back to the ball: the 20 outfield players (family 2) and the two
+goalkeepers (family 13), no other figure -- K3D-TASK-18 measured no one sent
+off, and a walk that ends early, or follows another figure, is not the table
+(CORR-K3D-030).  The sleeves of the outfield players are printed, not judged:
+a player who differs is a result."""
 
 
 def sleeves_of(order) -> str:
@@ -3963,7 +3966,8 @@ def replay_field_judge(rows: list, expect: dict, idle) -> list:
     next figure `REPLAY_FOCUS_MARGIN` apart, under `REPLAY_FOLLOW_DEPTH`; the
     camera came back to the ball; the outfield armband is the expected one, on
     the player wearing the expected number; the figure the replay opens on is
-    the goalkeeper with his armband; every capture holds one still pose
+    the goalkeeper with his armband; the walk follows the expected outfield
+    players and goalkeepers and no other figure; every capture holds one still pose
     (`REPLAY_STILL`) over its last two frames; and every capture stayed under
     the idle."""
     out = []
@@ -3998,6 +4002,15 @@ def replay_field_judge(rows: list, expect: dict, idle) -> list:
         if r["number"] != captain["number"]:
             out.append("focus %d, the outfield captain, holds number %s, not %d"
                        % (r["k"], r["number"], captain["number"]))
+    players = expect.get("players")
+    if players:
+        outfield = sum(r["root"] == 2 for r in followed)
+        keepers = sum(r["root"] == 13 for r in followed)
+        others = len(followed) - outfield - keepers
+        if (outfield, keepers, others) != (players["outfield"], players["keepers"], 0):
+            out.append("the walk follows %d outfield player(s), %d goalkeeper(s) and %d other "
+                       "figure(s), not %d, %d and 0"
+                       % (outfield, keepers, others, players["outfield"], players["keepers"]))
     keeper = expect["keeper"]
     opening = next((r for r in rows if r["k"] == keeper["k"]), None)
     if opening is None or opening["root"] != keeper["root"] \

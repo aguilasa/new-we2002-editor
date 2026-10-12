@@ -1070,7 +1070,10 @@ O que as duas tabelas dizem, uma conclusão por vez:
    do eixo é o Marcos, a 6059 no slot 9 e 5012 no 10, fora do seguimento). Depois vêm os **dez de
    linha da Croácia** (k = 2 a 11), o **goleiro croata** (k = 12), os **dez de linha do Brasil** (k = 13
    a 22), o **Marcos** de novo (k = 23, de frente e no zoom máximo, como no k = 0) e a bola (k = 24).
-   São **22 jogadores**, nenhum expulso, e a volta à bola fecha o laço. Dentro de cada time o L2 anda
+   São **22 jogadores**, nenhum expulso, e a volta à bola fecha o laço. O juiz pede isso
+   (`REPLAY_FIELD_EXPECT`, "players"): 20 de linha e 2 goleiros seguidos e nenhuma outra figura, senão
+   `FAIL  the walk follows …`. Um laço que acaba cedo, com um toque que leva a câmera a outra
+   figura fora do eixo, passava com `ok` (CORR-K3D-030). Dentro de cada time o L2 anda
    a grade de painéis **de trás para frente**: (80,104), (60,104), … (0,104), (80,80), … (0,80) e
    por fim o goleiro em (100,104). O **R2** é o mesmo laço ao contrário (`--replay-field 9
    --field-button R2`, abaixo): do Marcos vai direto ao Brasil, de (0,80) a (80,104), depois o goleiro
@@ -1145,7 +1148,7 @@ O que as duas tabelas dizem, uma conclusão por vez:
    toques do controle chegaram ao replay, e o k = 0 do slot 9 saiu `still 282` sem toque nenhum
    (CORR-K3D-031).
 
-O controle `--plant-replay-field` (as duas metades) sai 1 com 48 `FAIL`; sozinha, cada metade derruba
+O controle `--plant-replay-field` (as duas metades) sai 1 com 49 `FAIL`; sozinha, cada metade derruba
 o seu: `--plant-replay-field focus` (a figura seguinte do eixo) sai 1 com os `FAIL` de eixo, de pose parada e de
 profundidade em cada foco, e `--plant-replay-field panel` (todo painel lido uma linha acima) sai 1
 com `FAIL  focus 3, the outfield captain, holds number 4, not 11`.

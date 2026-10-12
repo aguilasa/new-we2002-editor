@@ -344,6 +344,14 @@ CONTROLS = (
         "one whole frame prints None there, and nothing judged it (G8, CORR-K3D-026)",
     ),
     Control(
+        "oracle-replay-field-players-unasked", "kits/oracle.py", "replay_field_judge",
+        '        if (outfield, keepers, others) != (players["outfield"], players["keepers"], 0):',
+        "        if False:",
+        "FAIL  oracle --replay-field: a walk cut short or onto another figure fails",
+        "a tap that lands the camera on another figure off the axis reads as the ball, and "
+        "the walk ends early with an ok (G8, CORR-K3D-030)",
+    ),
+    Control(
         "oracle-replay-field-shared-panel", "kits/oracle.py", "field_panels",
         '        own = sorted(set(r["cells"]) - shared.get(r["page"], set())) or sorted(r["cells"])',
         '        own = sorted(r["cells"])',
