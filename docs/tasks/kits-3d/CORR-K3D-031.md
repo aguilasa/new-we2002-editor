@@ -53,3 +53,46 @@ Com `/dev/input/js0` presente, `python3 tools/kits/oracle.py --replay-field 9` s
 emulador e diz por quê; sem ele, corre.
 
 ## Log de Execução
+
+### 2026-10-12 — o oráculo recusa correr com controle ligado
+
+Triagem inline (`rite reproduce --all --cycle kits-3d`): **REPRODUCED** na HEAD `677e37d`:
+- as duas linhas `SDL-0` do `settings.ini`;
+- o `grep -rln` sem nada;
+- o k = 0 com `5197` e `282`.
+
+Conserto:
+- `tools/pes2/fork.py` ganhou `joysticks(root)`, que lista os nós `js<N>` de `/dev/input`, e
+  `refuse_joysticks(root)`, que levanta `Fail` (não `Skip`: corrida que não mede não passa) com a
+  mensagem do que fazer.
+- O `self_check` do `fork.py` ganhou dois casos: diretório sem joystick passa, e `js0` recusa.
+- `tools/looks/oracle.py` chama `fork.refuse_joysticks()` no `Oracle.__enter__`, antes do
+  `fork.launch`. É por ali que entra toda medição ao vivo do `kits` e do `looks`.
+- A configuração do DuckStation continua intocada.
+- O `make pes2-play` e o `pad.py`, que o usuário dirige com o próprio controle, não passam pelo
+  `Oracle` e não são afetados.
+
+Selftest e controles:
+- Casos novos no `tools/kits/selftest.py` (bloco `live guard`):
+  - `live runs: a plugged-in controller refuses the run`;
+  - `live runs: the oracle refuses before it boots the fork`, com `fork.joysticks` trocado por um que
+    devolve `js0` e `fork.launch` por um que acusa ter sido chamado.
+- Dois controles no `controls.py`, ambos `RED` com `--only`:
+  - `fork-joystick-let-through`;
+  - `looks-oracle-joystick-unasked`.
+
+Verificação:
+- O vermelho com o controle de verdade não pôde ser visto: o usuário o desligou a pedido
+  (2026-10-11), e `ls /dev/input/js*` não acha nada. Quem o cobre é o caso do selftest, que passa
+  pelo mesmo `Oracle.__enter__`.
+- Sem controle, a corrida passa da guarda e sobe o fork:
+  `timeout 40 python3 tools/kits/oracle.py --replay-field 9 …` imprimiu `fork 939827 on :98` e
+  `duckstation-mcp 1.0.0 answering`. Depois o fork foi derrubado com `tools/pes2/fork.py kill`.
+- `python3 tools/pes2/fork.py --self-check`: `SELF-CHECK OK`.
+- `ctest --test-dir build -R 'pes2_selftest|looks_selftest|tasks'`:
+  `100% tests passed, 0 tests failed out of 3`.
+
+Gates:
+- `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
+  `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
+- `python3 tools/kits/controls.py`: `controls: 50 of 50 red`.

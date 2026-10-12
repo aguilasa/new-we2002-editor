@@ -352,6 +352,22 @@ CONTROLS = (
         "the walk ends early with an ok (G8, CORR-K3D-030)",
     ),
     Control(
+        "fork-joystick-let-through", "pes2/fork.py", "refuse_joysticks",
+        "    if found:\n        raise Fail(\"a game controller is plugged in",
+        "    if False:\n        raise Fail(\"a game controller is plugged in",
+        "FAIL  live runs: a plugged-in controller refuses the run",
+        "the fork reads SDL-0, and a controller in use elsewhere presses buttons in the "
+        "game under test (CORR-K3D-031)",
+    ),
+    Control(
+        "looks-oracle-joystick-unasked", "looks/oracle.py", "Oracle.__enter__",
+        "        fork.refuse_joysticks()\n",
+        "",
+        "FAIL  live runs: the oracle refuses before it boots the fork",
+        "the guard has to run before the fork boots, in the one place every live "
+        "measurement enters (CORR-K3D-031)",
+    ),
+    Control(
         "oracle-replay-field-shared-panel", "kits/oracle.py", "field_panels",
         '        own = sorted(set(r["cells"]) - shared.get(r["page"], set())) or sorted(r["cells"])',
         '        own = sorted(r["cells"])',

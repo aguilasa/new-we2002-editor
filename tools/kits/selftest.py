@@ -1427,6 +1427,42 @@ def _oracle_checks(c) -> None:
          len(oracle.arms_judge(seen, rule, {"upper arm a": False})) == 1)
 
 
+def _live_guard_checks(c) -> None:
+    """A game controller plugged in refuses a measuring run, before the fork
+    boots (CORR-K3D-031): its buttons would reach the game under test."""
+    import fork  # tools/pes2
+
+    import oracle as looks_oracle  # tools/looks
+
+    with tempfile.TemporaryDirectory() as root:
+        open(os.path.join(root, "js0"), "w").close()
+        try:
+            fork.refuse_joysticks(root)
+            refused = ""
+        except fork.Fail as exc:
+            refused = str(exc)
+    c.ok("live runs: a plugged-in controller refuses the run", "js0" in refused,
+         refused or "let through")
+
+    def no_launch(*_args, **_kwargs):
+        raise AssertionError("the fork was launched")
+
+    saved = fork.joysticks, fork.launch
+    fork.joysticks, fork.launch = (lambda root=None: ["/dev/input/js0"]), no_launch
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".cue") as cue:
+            try:
+                with looks_oracle.Oracle(cue.name, verbose=False):
+                    stopped = "entered"
+            except fork.Fail:
+                stopped = "refused"
+            except AssertionError as exc:
+                stopped = str(exc)
+    finally:
+        fork.joysticks, fork.launch = saved
+    c.ok("live runs: the oracle refuses before it boots the fork", stopped == "refused", stopped)
+
+
 def _negative(c) -> None:
     controls = c.attempt("import tools/kits/controls.py", _kits_controls)
     if controls is None:
@@ -1453,6 +1489,7 @@ def run(verbose: bool = True, plant: bool = True) -> int:
         total += harness.run("dressings", _dress_checks, verbose)
         total += harness.run("confront 2", _confront2_checks, verbose)
         total += harness.run("oracle", _oracle_checks, verbose)
+        total += harness.run("live guard", _live_guard_checks, verbose)
         if plant:
             total += harness.run("controls", _negative, verbose)
         else:

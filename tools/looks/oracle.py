@@ -688,6 +688,7 @@ class Oracle:
         cue = self.cue or drive_image()
         if not os.path.isfile(cue):
             raise Unavailable("no disc image at %s" % cue)
+        fork.refuse_joysticks()
         try:
             self.pid, self.window, self.client = fork.launch(
                 cue, verbose=self.verbose, match=fork.ANY_WINDOW)

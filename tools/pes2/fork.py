@@ -499,6 +499,40 @@ def _dismiss_dialogs(display, deadline):
     return dismissed
 
 
+JOYSTICK_DIR = "/dev/input"
+"""Where the kernel puts joystick nodes (`js0`, `js1`, ...)."""
+
+
+def joysticks(root=JOYSTICK_DIR):
+    """The joystick nodes under *root*; none on Windows, where the check has
+    not been measured."""
+    if WINDOWS:
+        return []
+    try:
+        return sorted(os.path.join(root, name) for name in os.listdir(root)
+                      if re.fullmatch(r"js\d+", name))
+    except OSError:
+        return []
+
+
+def refuse_joysticks(root=JOYSTICK_DIR):
+    """Refuse a measuring run while a game controller is plugged in.
+
+    The fork reads this machine's DuckStation settings (no launcher writes
+    them, by the decision of 2026-09-02), whose `[Pad1]` is `SDL-0`, and SDL
+    hands a controller to every process that opens it, whatever the display.
+    A controller in use elsewhere then presses buttons in the game under
+    test: on 2026-10-11 four `--replay-field` runs gave four tables -- a black
+    frame, a mute MCP server, a camera still flying, a replay moving with no
+    tap at all (CORR-K3D-031).  Raises `Fail`, not `Skip`: a run that
+    cannot measure is not one that passes."""
+    found = joysticks(root)
+    if found:
+        raise Fail("a game controller is plugged in (%s): the fork's [Pad1] is SDL-0 and "
+                   "reads it on any display, so its buttons reach the game under test -- "
+                   "unplug or switch it off and run again" % ", ".join(found))
+
+
 def wait_for_mcp(deadline, host=None, port=None):
     """Poll `initialize` until the server answers. Returns the server info."""
     last = None
@@ -807,6 +841,18 @@ def self_check(verbose=True):
     else:
         check("the binary is bin/duckstation-qt",
               binary().endswith(os.path.join("bin", "duckstation-qt")))
+
+    # Red case: a joystick node refuses a measuring run, and none lets it go.
+    import tempfile
+    with tempfile.TemporaryDirectory() as root:
+        check("no joystick node lets a run go", joysticks(root) == [])
+        open(os.path.join(root, "js0"), "w").close()
+        open(os.path.join(root, "event3"), "w").close()
+        try:
+            refuse_joysticks(root)
+            check("a joystick node refuses the run", WINDOWS, "it was let through")
+        except Fail as e:
+            check("a joystick node refuses the run and names it", "js0" in str(e), str(e))
 
     check("the recipe names the licence", "CC-BY-NC-ND" in RECIPE)
     check("the recipe names the install directory",
