@@ -33,10 +33,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#2.2",
       "files": ["tools/kits/oracle.py", "tools/kits/core/replay.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-12",
+      "done_commit": "09203255",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
