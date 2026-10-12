@@ -1164,7 +1164,7 @@ que mostra a frente. A captura fica em `work/kits-oracle/replay-<slot>-<K>.json`
 Balaban (K = 2, nº 20, sem faixa) no slot 10, o controle da manga longa sozinha.
 
 ```text
-$ python3 tools/kits/oracle.py --replay 9 --focus 3
+$ python3 tools/kits/oracle.py --replay 9 --focus 3 --frame-json work/kits-oracle/replay-9-3.json
   capture read from work/kits-oracle/replay-9-3.json, no emulator
   focus 3: L2 tapped 3 time(s) from the reloaded state, 60 frame(s) to settle; the followed figure is the one on the camera's axis (field_focus); 'front' below is the first capture, 'back' the turned one
   front: 2 frame(s) of 72 stop(s) in 65 emulator frame(s) (idle 390, the replay's frames with no input: --replay-idle)
@@ -1220,7 +1220,7 @@ $ python3 tools/kits/oracle.py --replay 9 --focus 3
 ```
 
 ```text
-$ python3 tools/kits/oracle.py --replay 10 --focus 3
+$ python3 tools/kits/oracle.py --replay 10 --focus 3 --frame-json work/kits-oracle/replay-10-3.json
   capture read from work/kits-oracle/replay-10-3.json, no emulator
   focus 3: L2 tapped 3 time(s) from the reloaded state, 60 frame(s) to settle; the followed figure is the one on the camera's axis (field_focus); 'front' below is the first capture, 'back' the turned one
   front: 2 frame(s) of 72 stop(s) in 64 emulator frame(s) (idle 390, the replay's frames with no input: --replay-idle)
@@ -1276,7 +1276,7 @@ $ python3 tools/kits/oracle.py --replay 10 --focus 3
 ```
 
 ```text
-$ python3 tools/kits/oracle.py --replay 10 --focus 2
+$ python3 tools/kits/oracle.py --replay 10 --focus 2 --frame-json work/kits-oracle/replay-10-2.json
   capture read from work/kits-oracle/replay-10-2.json, no emulator
   focus 2: L2 tapped 2 time(s) from the reloaded state, 60 frame(s) to settle; the followed figure is the one on the camera's axis (field_focus); 'front' below is the first capture, 'back' the turned one
   front: 2 frame(s) of 48 stop(s) in 65 emulator frame(s) (idle 390, the replay's frames with no input: --replay-idle)

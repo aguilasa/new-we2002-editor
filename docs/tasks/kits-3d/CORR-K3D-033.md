@@ -56,3 +56,20 @@ grep -n '^\$ python3 tools/kits/oracle.py --replay [0-9]* --focus [0-9]*$' docs/
 Hoje imprime três linhas; depois, nada.
 
 ## Log de Execução
+
+### 2026-10-12 — `--frame-json` nas três linhas `$`
+
+Triagem inline (`rite reproduce --all --cycle kits-3d`): **REPRODUCED** na HEAD `d348951`. O `grep`
+achou as linhas 1167, 1223 e 1279 sem `--frame-json`, e o `sed` mostrou o `if cache and
+os.path.isfile(cache)`.
+
+Conserto: as três linhas `$` do G8 agora levam
+`--frame-json work/kits-oracle/replay-<slot>-<K>.json`. Com `WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`,
+rodei cada uma como está escrita e comparei, com `diff`, contra o bloco colado embaixo dela. As três
+saídas são idênticas.
+
+O Log da K3D-TASK-19 (itens 56 a 58) ficou como está. Ali estão as corridas ao vivo, que de fato
+subiram o emulador, e o que o Log cita delas é a linha `ok`, que é a mesma com ou sem `--frame-json`.
+
+Verificação: `grep -n '^\$ python3 tools/kits/oracle.py --replay [0-9]* --focus [0-9]*$' docs/KITS-AJUSTES-3D.md`
+não imprime nada.
