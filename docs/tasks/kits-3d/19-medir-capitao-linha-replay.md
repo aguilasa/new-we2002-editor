@@ -80,3 +80,10 @@ Gates:
 - `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
   `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 53 of 53 red`.
+- **Closed** — commit `d8f8e7df` (2026-10-12): feat(kits): measure the outfield captain up close in the slot 9 and 10 replays
+  - Files (`git show --name-status d8f8e7df`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/19-medir-capitao-linha-replay.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
