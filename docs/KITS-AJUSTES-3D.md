@@ -741,7 +741,9 @@ com o foco da tabela da 18, no Bokšić nos dois slots: no 9 a faixa 90 sobre a 
 da família 2 com a pose do jogo e (b) na aba, `--figure 0 --armband --number 11 --tag <Croácia>` no
 slot 9 e com `--long-sleeves` no 10. Um jogador de linha sem braçadeira do slot 10 (foco da 18) entra
 como controle da manga longa sozinha. Plant e controles no padrão da 17; as diferenças listadas para
-o conserto, curta e longa separadas.
+o conserto, curta e longa separadas. (Medido na K3D-TASK-19, abaixo: o (a) saiu, como na 17, pelo erro de
+encaixe por seção com as matrizes do jogo, sem desenhar o `match_scene`; e "de perto" é a câmera do L2,
+de costas a ~4700, não o zoom máximo da 17.)
 
 **Medido (K3D-TASK-17, 2026-10-09).** As cópias mestras são `work/kits-states/SLPM-87056_9.sav`
 (sha256 `54c79792…d6d6`) e `SLPM-87056_10.sav` (sha256 `bdf47644…3b6e`). As corridas, com
@@ -1152,6 +1154,264 @@ O controle `--plant-replay-field` (as duas metades) sai 1 com 49 `FAIL`; sozinha
 o seu: `--plant-replay-field focus` (a figura seguinte do eixo) sai 1 com os `FAIL` de eixo, de pose parada e de
 profundidade em cada foco, e `--plant-replay-field panel` (todo painel lido uma linha acima) sai 1
 com `FAIL  focus 3, the outfield captain, holds number 4, not 11`.
+
+**Medido (K3D-TASK-19, 2026-10-12).** `--replay SLOT --focus K` é o `--replay` da K3D-TASK-17 com a
+câmera levada antes ao jogador K da tabela do `--replay-field`: recarrega o state, toca L2 K vezes,
+espera 60 quadros a câmera pousar, e o seguido é a figura no eixo (`field_focus`), não a mais perto.
+Como a câmera segue de costas, a primeira captura é a das costas (o painel sai dela) e o giro de R1 é o
+que mostra a frente. A captura fica em `work/kits-oracle/replay-<slot>-<K>.json`, a pose em
+`work/kits-pose/slot<slot>-focus<K>-first.json`. Os três focos: o Bokšić (K = 3) nos dois slots, e o
+Balaban (K = 2, nº 20, sem faixa) no slot 10, o controle da manga longa sozinha.
+
+```text
+$ python3 tools/kits/oracle.py --replay 9 --focus 3
+  capture read from work/kits-oracle/replay-9-3.json, no emulator
+  focus 3: L2 tapped 3 time(s) from the reloaded state, 60 frame(s) to settle; the followed figure is the one on the camera's axis (field_focus); 'front' below is the first capture, 'back' the turned one
+  front: 2 frame(s) of 72 stop(s) in 65 emulator frame(s) (idle 390, the replay's frames with no input: --replay-idle)
+    frame 0: 3 figure(s), depths 4694 6802 13057; followed at 4694, 0.6 px off the axis
+    frame 1: 3 figure(s), depths 4694 6802 13057; followed at 4694, 0.6 px off the axis
+  followed figure, head first: 46 2 3 5 90 6 7 9 11 8 10  (one more piece the draw lag leaves unnamed)
+  still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
+  pose kept at work/kits-pose/slot9-focus3-first.json (projection H 1376, OFX 0.0, OFY 0.0)
+  113 quad(s) of the frame inside the figure's box (-43,-13)-(41,115); mean pixels off the frame, by section: 46:0.95 2:0.89 3:1.07 5:9.35 90:0.93 6:1.08 7:12.74 9:1.06 11:21.95 8:13.13 10:10.86
+  what the GPU is told, by section (shaded: a colour per corner; raw: texel not modulated):
+     46: 14 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (128,480); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+      2:  8 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,486) (0,487) (128,480); page (512,256) (576,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones shirt back; shirt side, second
+      3:  3 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487); page (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones short sleeve, right; shoulder, first
+      5: 11 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,482); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+     90:  2 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487); page (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones armband, short sleeve; short sleeve, left, captain; short sleeve, left, captain, under the armband
+      6:  9 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,482); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+      7: 14 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,482) (0,486) (0,487); page (512,256) (576,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones crotch; shorts back; shorts front; shorts side, first
+      9:  8 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,486) (0,487); page (576,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+     11:  4 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,484); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+      8: 12 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,482) (0,486) (0,487); page (512,256) (576,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones crotch; shorts back; shorts front; shorts side, second
+     10:  9 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,482) (0,486) (0,487); page (512,256) (576,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+  the frame buffer under each section against its texels (five bits a channel; far: mean distance per channel):
+     46: no pixel of its own
+      2:  134 px; game (19.9 18.0 17.6), texel (21.0 18.6 19.4) (far 2.53), texel x colour/128 (20.0 17.6 18.4) (far 2.83)
+      3:   96 px; game (12.4 13.2 16.7), texel (12.5 13.2 17.1) (far 1.62), texel x colour/128 (11.5 12.2 16.1) (far 1.94)
+      5: no pixel of its own
+     90:  113 px; game (10.2 7.8 8.1), texel (10.3 6.9 8.1) (far 2.27), texel x colour/128 (9.3 5.9 7.3) (far 2.55)
+      6: no pixel of its own
+      7:  551 px; game (16.1 16.7 18.2), texel (16.2 16.9 18.8) (far 1.57), texel x colour/128 (15.2 15.9 17.8) (far 1.79)
+      9:  209 px; game (4.4 5.5 9.8), texel (3.5 4.8 10.6) (far 1.09), texel x colour/128 (2.5 3.8 9.6) (far 1.70)
+     11: no pixel of its own
+      8:  319 px; game (15.2 16.1 17.5), texel (15.1 16.0 18.1) (far 1.44), texel x colour/128 (14.1 15.0 17.1) (far 1.89)
+     10:  208 px; game (9.9 10.7 13.3), texel (9.4 10.2 13.9) (far 1.37), texel x colour/128 (8.4 9.2 12.9) (far 1.97)
+    picture: work/kits-oracle/replay-9-3-frame.png
+  kit: TEX_22 record 2 player palette at (0,487), TEX_22 record 3 goalkeeper palette at (0,489), TEX_22 record 8 flag at (704,320), TEX_22 record 9 flag palette at (256,495), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488), TEX_41 record 8 flag at (704,256), TEX_41 record 9 flag palette at (256,494), TEX_61 record 8 flag at (704,256), TEX_61 record 9 flag palette at (256,494)
+  turn: R1 tapped 17 time(s), torso yaw 172 164 156 147 139 130 122 113 104 96 87 79 70 61 53 44 33; back; 610 emulator frame(s) from the load, 44 from the last tap to the end of the back capture (idle 390)
+    the figure each tap read, root and depth: 2@4685 2@4691 2@4691 2@4691 2@4686 2@4686 2@4683 2@4684 2@4686 2@4672 2@4719 2@4718 2@4716 2@4712 2@4707 2@4703 2@4709
+  front: 4 primitive(s) of the followed figure's torso sample a panel (0,80) (60,104)
+  front: 2 primitive(s) of the figure sample panel (0,80) of page (640,256); 2 of them are torso 2's own texels on the disc
+  front: 2 primitive(s) of the figure sample panel (60,104) of page (640,256); 0 of them are torso 2's own texels on the disc
+    page 640 panel (  0, 80): number 2, digits 2 at (7,7), 0 unexplained
+    page 640 panel ( 20, 80): number 5, digits 5 at (7,7), 0 unexplained
+    page 640 panel ( 40, 80): number 14, digits 1 at (3,7) 4 at (11,7), 0 unexplained
+    page 640 panel ( 60, 80): number 4, digits 4 at (7,7), 0 unexplained
+    page 640 panel ( 80, 80): number 3, digits 3 at (7,7), 0 unexplained
+    page 640 panel (  0,104): number 7, digits 7 at (7,7), 0 unexplained
+    page 640 panel ( 20,104): number 8, digits 8 at (7,7), 0 unexplained
+    page 640 panel ( 40,104): number 10, digits 1 at (3,7) 0 at (11,7), 0 unexplained
+    page 640 panel ( 60,104): number 11, digits 1 at (3,7) 1 at (11,7), 0 unexplained
+    page 640 panel ( 80,104): number 20, digits 2 at (3,7) 0 at (11,7), 0 unexplained
+    page 640 panel (100,104): number 1, digits 1 at (7,7), 0 unexplained
+  ok    the followed figure opens at section 2 with head 46, draws 90 in place of 4, holds still, and its back shows panel (640, 60, 104) with number 11
+```
+
+```text
+$ python3 tools/kits/oracle.py --replay 10 --focus 3
+  capture read from work/kits-oracle/replay-10-3.json, no emulator
+  focus 3: L2 tapped 3 time(s) from the reloaded state, 60 frame(s) to settle; the followed figure is the one on the camera's axis (field_focus); 'front' below is the first capture, 'back' the turned one
+  front: 2 frame(s) of 72 stop(s) in 64 emulator frame(s) (idle 390, the replay's frames with no input: --replay-idle)
+    frame 0: 3 figure(s), depths 3907 4699 9241; followed at 4699, 1.2 px off the axis
+    frame 1: 3 figure(s), depths 3907 4699 9241; followed at 4699, 1.2 px off the axis
+  followed figure, head first: 46 2 95 96 93 98 7 9 11 8 10  (one more piece the draw lag leaves unnamed)
+  still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
+  pose kept at work/kits-pose/slot10-focus3-first.json (projection H 1376, OFX 0.0, OFY 0.0)
+  85 quad(s) of the frame inside the figure's box (-46,-9)-(43,102); mean pixels off the frame, by section: 46:0.92 2:0.82 95:14.86 96:18.14 93:0.97 98:0.91 7:0.92 9:0.81 11:1.10 8:0.98 10:0.78
+  what the GPU is told, by section (shaded: a colour per corner; raw: texel not modulated):
+     46: 15 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (128,480); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+      2:  6 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487) (128,480); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones shirt back; shirt side, second
+     95:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,486) (0,487); page (576,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones long sleeve, right
+     96: 12 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,482) (0,486) (0,487); page (512,256) (576,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones elbow, right; long sleeve, right forearm
+     93:  4 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487); page (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones armband, long sleeve; long sleeve, left, captain; long sleeve, left, captain, under the armband
+     98:  8 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,487); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones elbow, left; long sleeve, left forearm
+      7:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,487); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones crotch; shorts back; shorts side, first
+      9:  4 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487); page (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+     11:  2 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,484); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+      8:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,487); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones shorts back; shorts front; shorts side, second
+     10:  4 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487); page (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+  the frame buffer under each section against its texels (five bits a channel; far: mean distance per channel):
+     46: no pixel of its own
+      2:  202 px; game (12.4 11.4 13.4), texel (13.1 12.1 14.5) (far 1.50), texel x colour/128 (12.1 11.1 13.5) (far 1.76)
+     95:  129 px; game (10.2 11.0 13.4), texel (9.2 10.2 13.4) (far 2.00), texel x colour/128 (8.2 9.2 12.4) (far 2.42)
+     96:   55 px; game (9.4 9.5 12.8), texel (8.8 9.6 13.9) (far 3.76), texel x colour/128 (7.8 8.6 12.9) (far 4.10)
+     93:  103 px; game (13.8 8.2 6.4), texel (13.6 7.4 6.5) (far 2.18), texel x colour/128 (12.6 6.4 5.8) (far 2.59)
+     98:   63 px; game (12.6 7.0 8.3), texel (12.0 6.4 9.0) (far 2.20), texel x colour/128 (11.0 5.4 8.0) (far 2.76)
+      7:  314 px; game (20.1 20.5 21.0), texel (20.3 20.7 21.2) (far 1.49), texel x colour/128 (19.3 19.7 20.2) (far 1.70)
+      9:   77 px; game (2.9 4.0 9.2), texel (2.9 4.2 10.4) (far 0.81), texel x colour/128 (1.9 3.2 9.4) (far 1.27)
+     11: no pixel of its own
+      8:  297 px; game (19.3 19.9 20.2), texel (20.1 20.6 21.2) (far 1.89), texel x colour/128 (19.1 19.6 20.2) (far 2.08)
+     10:  222 px; game (3.5 4.7 10.0), texel (3.0 4.3 10.4) (far 0.59), texel x colour/128 (2.0 3.3 9.4) (far 1.32)
+    picture: work/kits-oracle/replay-10-3-frame.png
+  kit: TEX_22 record 2 player palette at (0,487), TEX_22 record 3 goalkeeper palette at (0,489), TEX_22 record 8 flag at (704,320), TEX_22 record 9 flag palette at (256,495), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488), TEX_41 record 8 flag at (704,256), TEX_41 record 9 flag palette at (256,494), TEX_61 record 8 flag at (704,256), TEX_61 record 9 flag palette at (256,494)
+  turn: R1 tapped 16 time(s), torso yaw -166 -178 171 160 149 140 132 123 115 106 97 89 80 68 57 48; back; 581 emulator frame(s) from the load, 45 from the last tap to the end of the back capture (idle 390)
+    the figure each tap read, root and depth: 2@4703 2@4708 2@4708 2@4715 2@4711 2@4706 2@4697 2@4691 2@4705 2@4725 2@4725 2@4742 2@4740 2@4734 2@4724 2@4718
+  front: 4 primitive(s) of the followed figure's torso sample a panel (0,80) (60,104)
+  front: 2 primitive(s) of the figure sample panel (0,80) of page (640,256); 2 of them are torso 2's own texels on the disc
+  front: 2 primitive(s) of the figure sample panel (60,104) of page (640,256); 0 of them are torso 2's own texels on the disc
+    page 640 panel (  0, 80): number 2, digits 2 at (7,7), 0 unexplained
+    page 640 panel ( 20, 80): number 5, digits 5 at (7,7), 0 unexplained
+    page 640 panel ( 40, 80): number 14, digits 1 at (3,7) 4 at (11,7), 0 unexplained
+    page 640 panel ( 60, 80): number 4, digits 4 at (7,7), 0 unexplained
+    page 640 panel ( 80, 80): number 3, digits 3 at (7,7), 0 unexplained
+    page 640 panel (  0,104): number 7, digits 7 at (7,7), 0 unexplained
+    page 640 panel ( 20,104): number 8, digits 8 at (7,7), 0 unexplained
+    page 640 panel ( 40,104): number 10, digits 1 at (3,7) 0 at (11,7), 0 unexplained
+    page 640 panel ( 60,104): number 11, digits 1 at (3,7) 1 at (11,7), 0 unexplained
+    page 640 panel ( 80,104): number 20, digits 2 at (3,7) 0 at (11,7), 0 unexplained
+    page 640 panel (100,104): number 1, digits 1 at (7,7), 0 unexplained
+  ok    the followed figure opens at section 2 with head 46, draws 93 in place of 97, holds still, and its back shows panel (640, 60, 104) with number 11
+```
+
+```text
+$ python3 tools/kits/oracle.py --replay 10 --focus 2
+  capture read from work/kits-oracle/replay-10-2.json, no emulator
+  focus 2: L2 tapped 2 time(s) from the reloaded state, 60 frame(s) to settle; the followed figure is the one on the camera's axis (field_focus); 'front' below is the first capture, 'back' the turned one
+  front: 2 frame(s) of 48 stop(s) in 65 emulator frame(s) (idle 390, the replay's frames with no input: --replay-idle)
+    frame 0: 2 figure(s), depths 3886 4699; followed at 4699, 4.4 px off the axis
+    frame 1: 2 figure(s), depths 3886 4699; followed at 4699, 4.4 px off the axis
+  followed figure, head first: 46 2 95 96 97 98 7 9 11 8 10  (one more piece the draw lag leaves unnamed)
+  still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
+  pose kept at work/kits-pose/slot10-focus2-first.json (projection H 1376, OFX 0.0, OFY 0.0)
+  89 quad(s) of the frame inside the figure's box (-41,-9)-(41,103); mean pixels off the frame, by section: 46:1.04 2:0.94 95:1.03 96:0.97 97:0.97 98:0.92 7:0.86 9:0.91 11:0.98 8:1.07 10:1.02
+  what the GPU is told, by section (shaded: a colour per corner; raw: texel not modulated):
+     46: 18 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (32,480) (160,480); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+      2:  8 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487) (32,480); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones shirt front; shirt side, second; shoulder, first; shoulder, second
+     95:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487); page (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones long sleeve, right; shoulder, first
+     96:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,487); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones elbow, right; long sleeve, right forearm
+     97:  4 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487); page (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones long sleeve, left
+     98:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,487); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones elbow, left; long sleeve, left forearm
+      7:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,487); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones crotch; shorts back; shorts front
+      9:  4 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,487); page (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+     11:  3 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,484); page (512,256); corner colours (127, 127, 127) to (127, 127, 127); zones -
+      8:  7 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,487); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones shorts back; shorts front; shorts side, second
+     10:  5 prim(s),  0 shaded, 0 raw, 0 semi; CLUT (0,480) (0,487); page (512,256) (640,256); corner colours (127, 127, 127) to (127, 127, 127); zones socks
+  the frame buffer under each section against its texels (five bits a channel; far: mean distance per channel):
+     46: no pixel of its own
+      2:  136 px; game (14.4 12.7 13.6), texel (15.1 13.0 15.2) (far 2.91), texel x colour/128 (14.1 12.0 14.2) (far 3.25)
+     95:   30 px; game (6.4 7.4 12.2), texel (8.7 9.5 14.3) (far 3.08), texel x colour/128 (7.7 8.5 13.3) (far 3.10)
+     96:    9 px; game (6.1 7.2 12.0), texel (13.4 13.8 16.6) (far 8.07), texel x colour/128 (12.4 12.8 15.6) (far 7.67)
+     97:  111 px; game (14.2 6.8 9.2), texel (13.3 5.5 8.6) (far 1.76), texel x colour/128 (12.3 4.5 7.6) (far 2.50)
+     98:   81 px; game (12.0 5.0 7.3), texel (12.2 5.7 8.0) (far 2.35), texel x colour/128 (11.2 4.7 7.0) (far 2.82)
+      7:  149 px; game (18.3 18.8 19.4), texel (18.6 19.1 19.8) (far 1.49), texel x colour/128 (17.6 18.1 18.8) (far 1.60)
+      9:  186 px; game (3.2 4.2 9.0), texel (2.5 3.6 9.1) (far 0.66), texel x colour/128 (1.5 2.6 8.1) (far 1.53)
+     11: no pixel of its own
+      8:  341 px; game (19.5 20.1 20.3), texel (20.0 20.5 21.1) (far 2.55), texel x colour/128 (19.0 19.5 20.1) (far 2.72)
+     10:  205 px; game (3.2 4.4 9.3), texel (2.6 3.8 9.6) (far 0.87), texel x colour/128 (1.6 2.8 8.6) (far 1.36)
+    picture: work/kits-oracle/replay-10-2-frame.png
+  kit: TEX_22 record 2 player palette at (0,487), TEX_22 record 3 goalkeeper palette at (0,489), TEX_22 record 8 flag at (704,320), TEX_22 record 9 flag palette at (256,495), TEX_41 record 2 player palette at (0,486), TEX_41 record 3 goalkeeper palette at (0,488), TEX_41 record 8 flag at (704,256), TEX_41 record 9 flag palette at (256,494), TEX_61 record 8 flag at (704,256), TEX_61 record 9 flag palette at (256,494)
+  turn: R1 tapped 15 time(s), torso yaw -138 -149 -160 -171 -180 169 158 147 136 127 116 107 96 84 76; back; 601 emulator frame(s) from the load, 35 from the last tap to the end of the back capture (idle 390)
+    the figure each tap read, root and depth: 2@4721 2@4705 2@4711 2@4715 2@4710 2@4705 2@4700 2@4709 2@4705 2@4692 2@4699 2@4689 2@4695 2@4706 2@4715
+  front: 4 primitive(s) of the followed figure's torso sample a panel (0,80) (80,104)
+  front: 2 primitive(s) of the figure sample panel (0,80) of page (640,256); 2 of them are torso 2's own texels on the disc
+  front: 2 primitive(s) of the figure sample panel (80,104) of page (640,256); 0 of them are torso 2's own texels on the disc
+    page 640 panel (  0, 80): number 2, digits 2 at (7,7), 0 unexplained
+    page 640 panel ( 20, 80): number 5, digits 5 at (7,7), 0 unexplained
+    page 640 panel ( 40, 80): number 14, digits 1 at (3,7) 4 at (11,7), 0 unexplained
+    page 640 panel ( 60, 80): number 4, digits 4 at (7,7), 0 unexplained
+    page 640 panel ( 80, 80): number 3, digits 3 at (7,7), 0 unexplained
+    page 640 panel (  0,104): number 7, digits 7 at (7,7), 0 unexplained
+    page 640 panel ( 20,104): number 8, digits 8 at (7,7), 0 unexplained
+    page 640 panel ( 40,104): number 10, digits 1 at (3,7) 0 at (11,7), 0 unexplained
+    page 640 panel ( 60,104): number 11, digits 1 at (3,7) 1 at (11,7), 0 unexplained
+    page 640 panel ( 80,104): number 20, digits 2 at (3,7) 0 at (11,7), 0 unexplained
+    page 640 panel (100,104): number 1, digits 1 at (7,7), 0 unexplained
+  ok    the followed figure opens at section 2 with head 46, draws no armband, holds still, and its back shows panel (640, 80, 104) with number 20
+```
+
+```text
+$ python3 tools/kits/oracle.py --replay-confront 9 --focus 3
+  the followed figure's uniform CLUTs: (0,486) (0,487); kit TEX_22 set 1
+  palette: TEX_22 record 2 (player palette) against CLUT (0,486): 256 entries, 104 differ
+  palette: TEX_22 record 2 (player palette) against CLUT (0,487): 256 entries, 0 differ
+  tab back (yaw 0, --figure 0 --yaw 0 --armband --number 11): histogram intersection with the game's figure 0.406, 0.666 over the colours the tab draws; picture work/kits-oracle/replay-9-3-tab-back.png
+  tab front (yaw 180, --figure 0 --yaw 180 --armband --number 11): histogram intersection with the game's figure 0.365, 0.522 over the colours the tab draws; picture work/kits-oracle/replay-9-3-tab-front.png
+  the game's frame (the first capture, the player's back): work/kits-oracle/replay-9-3-frame.png (3520 pixel(s) under the figure's quads)
+
+$ python3 tools/kits/oracle.py --replay-confront 10 --focus 3
+  the followed figure's uniform CLUTs: (0,487); kit TEX_22 set 1
+  palette: TEX_22 record 2 (player palette) against CLUT (0,486): 256 entries, 104 differ
+  palette: TEX_22 record 2 (player palette) against CLUT (0,487): 256 entries, 0 differ
+  tab back (yaw 0, --figure 0 --yaw 0 --armband --long-sleeves --number 11): histogram intersection with the game's figure 0.413, 0.625 over the colours the tab draws; picture work/kits-oracle/replay-10-3-tab-back.png
+  tab front (yaw 180, --figure 0 --yaw 180 --armband --long-sleeves --number 11): histogram intersection with the game's figure 0.385, 0.512 over the colours the tab draws; picture work/kits-oracle/replay-10-3-tab-front.png
+  the game's frame (the first capture, the player's back): work/kits-oracle/replay-10-3-frame.png (3117 pixel(s) under the figure's quads)
+
+$ python3 tools/kits/oracle.py --replay-confront 10 --focus 2
+  the followed figure's uniform CLUTs: (0,487); kit TEX_22 set 1
+  palette: TEX_22 record 2 (player palette) against CLUT (0,487): 256 entries, 0 differ
+  tab back (yaw 0, --figure 0 --yaw 0 --long-sleeves --number 20): histogram intersection with the game's figure 0.393, 0.569 over the colours the tab draws; picture work/kits-oracle/replay-10-2-tab-back.png
+  tab front (yaw 180, --figure 0 --yaw 180 --long-sleeves --number 20): histogram intersection with the game's figure 0.375, 0.504 over the colours the tab draws; picture work/kits-oracle/replay-10-2-tab-front.png
+  the game's frame (the first capture, the player's back): work/kits-oracle/replay-10-2-frame.png (2777 pixel(s) under the figure's quads)
+
+$ python3 tools/kits/oracle.py --replay 9 --focus 3 --frame-json work/kits-oracle/replay-9-3.json --plant-replay
+  PLANT  the figure next on the camera's axis followed, front and back, expected to open at section 103
+  FAIL  the followed figure opens at 2, not at section 103
+  FAIL  the followed figure's head is section 34, not 46
+  FAIL  the followed figure does not draw section 90
+  FAIL  the followed figure draws section 4 beside the armband
+  FAIL  the back samples panel (576, 20, 80), not (640, 60, 104)
+  FAIL  the panel holds 3, not 11
+```
+
+Os itens 4 a 7 da K3D-TASK-17, para o capitão de linha:
+
+4. **A faixa e os braços na lista do jogo.** Manga curta (slot 9): a faixa é a **90**, no lugar da
+   seção **4** (a ordem do Bokšić é `46 2 3 5 90 6 …`, a de um jogador sem faixa `46 2 3 5 4 6 …`), dois
+   quads na zona "armband, short sleeve" do bitmap de mangas, CLUT (0,487), página (640,256). Manga
+   longa (slot 10): a faixa é a **93**, no lugar da **97** (`46 2 95 96 93 98 …`, contra
+   `46 2 95 96 97 98 …` do Balaban), quatro quads na zona "armband, long sleeve", mesma CLUT e página;
+   as mangas 95, 96 e 98 amostram as zonas "long sleeve, right", "long sleeve, right forearm" e
+   "long sleeve, left forearm". Todo quad das três figuras é plano, cor (127,127,127), sem Gouraud,
+   sem textura crua, sem semitransparência — como no goleiro.
+5. **Pose parada.** As matrizes do seguido diferem por 0 entre os dois quadros nos três focos; as poses
+   ficam com a projeção (H 1376, OFX 0, OFY 0). É a pose de corrida do replay, de costas.
+6. **Costas, painel e número.** O torso 2 de costas amostra quatro quads de painel: dois na célula
+   própria e dois na (0,80), a compartilhada (K3D-TASK-18). O Bokšić mostra (640,60,104) com o **11**
+   nos dois slots, e o Balaban (640,80,104) com o **20**. A frente aparece depois do giro: 15 a 17
+   toques de R1, de 8 a 12 graus cada, com o seguido sempre a 4672–4742 de profundidade.
+7. **O confronto.** (a) No quadro do jogo, o pixel é o texel puro: a distância ao texel é menor que ao
+   texel modulado em toda seção com pixel próprio (faixa 90: 2,27 contra 2,55; faixa 93: 2,18 contra
+   2,59). O erro de encaixe por seção fica perto de 1 px no Balaban, inclusive nas mangas 95 a 98 (1,03
+   0,97 0,97 0,92), e passa de 9 px em seções do Bokšić (5, 7, 8, 10, 11 no slot 9; 95 e 96 no 10). Isso
+   **não é da geometria**: nos dois quadros do Bokšić há um vizinho brasileiro sobre ele na tela (slot
+   9: a 4,0 px do eixo, 6802 de profundidade; slot 10: a 3907, à frente dele), e os quads do vizinho
+   entram na caixa da figura; é a mesma razão de a CLUT (0,486), a paleta do TEX_41 (Brasil), aparecer
+   nas seções dele — o Balaban, sozinho no quadro, só amostra a (0,487). (b) A paleta do disco que a
+   aba usa (`TEX_22`, registro 2) é a do jogo: 0 de 256 diferentes na (0,487). A figura da aba contra a
+   do jogo, por histograma: 0,41 de costas e 0,37 de frente (Bokšić, slot 9), 0,41 e 0,39 (Bokšić, slot
+   10, `--long-sleeves`), 0,39 e 0,38 (Balaban, slot 10).
+
+A planta (`--plant-replay` com `--focus 3`) segue a figura seguinte do eixo e sai 1 com seis `FAIL`,
+entre eles `the followed figure opens at 2, not at section 103`: é a primeira vez que a conferência de
+raiz fica vermelha com uma figura real no quadro, o que a K3D-TASK-17 não alcançava
+([CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md)).
+
+**As diferenças do capitão de linha, para a task de conserto** (lado a lado em
+`replay-<slot>-<K>-frame.png` contra `replay-<slot>-<K>-tab-back.png` e `-tab-front.png`):
+
+- **manga curta (slot 9, faixa 90):** cor e paleta, nenhuma (0 de 256; pixel = texel); sombreamento,
+  nenhum a acrescentar (plano 127). A seção que a faixa substitui é a 4, e a aba põe a 90 nesse braço;
+  o que difere é a **pose** (a corrida do replay contra a caminhada da `LOOKS SET`) e a **cabeça**;
+- **manga longa (slot 10, faixa 93 com 95-98):** o mesmo — cor, paleta e sombra iguais; a 93 entra no
+  lugar da 97, e o Balaban mostra que as mangas 95 a 98 sozinhas encaixam a 1 px com as matrizes do
+  jogo. A diferença é a **pose** e a **cabeça**;
+- **a cabeça é por jogador** (K3D-TASK-18), e a aba desenha uma só, de cabelo escuro: no jogo o Bokšić
+  e o Balaban usam a mesma seção 46, mas um de cabelo loiro e outro castanho, pela mesma CLUT
+  (128,480) — o que pinta o cabelo de cada um não está medido aqui;
+- nada nas três capturas pede mudar a faixa ou a manga em si: posição na lista, zona do bitmap, CLUT e
+  modo de desenho batem com o que a aba já faz desde G3.
 
 ## Para o ciclo
 

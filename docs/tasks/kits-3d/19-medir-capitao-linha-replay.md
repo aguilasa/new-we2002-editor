@@ -18,12 +18,12 @@ Fica medido como o jogo desenha o capitão de linha de perto, nas duas mangas: o
 
 ## Done criteria
 
-- [ ] G8 tem a saída de `oracle.py --replay 9 --focus <k do Bokšić>`, `--replay 10 --focus <k>`, `--replay-confront` dos dois, e `--replay 10 --focus <k de um jogador sem braçadeira>` coladas da HEAD, com os itens 4 a 7 da K3D-TASK-17 respondidos para a faixa 90 e a manga curta (slot 9) e para a faixa 93 e as mangas 95-98 (slot 10), toda negativa com comando e saída, e a lista das diferenças que o confronto apontou, curta e longa separadas
-- [ ] o focado nos dois slots amostra a página da Croácia e tem o 11 no painel das costas; a faixa é a 90 no 9 e a 93 no 10 (controle positivo do relato do usuário); divergência é resultado, escrita
-- [ ] `--replay 9 --focus <k> --plant-replay` sai 1 com os `FAIL` da planta; os controles novos dão `RED` em `python3 tools/kits/controls.py --only <nome>`, e os casos novos do `selftest.py` dão `ok`
-- [ ] sem uma das cópias mestras: `rite mark K3D-TASK-19 blocked --unblocked-by "test -f work/kits-states/SLPM-87056_9.sav -a -f work/kits-states/SLPM-87056_10.sav"` e o pedido ao usuário
-- [ ] `ctest --test-dir build -R kits` com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`: `100% tests passed, 0 tests failed out of 4`, sem *skipped*
-- [ ] `python3 tools/kits/controls.py`: última linha `controls: N of N red`
+- [x] G8 tem a saída de `oracle.py --replay 9 --focus <k do Bokšić>`, `--replay 10 --focus <k>`, `--replay-confront` dos dois, e `--replay 10 --focus <k de um jogador sem braçadeira>` coladas da HEAD, com os itens 4 a 7 da K3D-TASK-17 respondidos para a faixa 90 e a manga curta (slot 9) e para a faixa 93 e as mangas 95-98 (slot 10), toda negativa com comando e saída, e a lista das diferenças que o confronto apontou, curta e longa separadas
+- [x] o focado nos dois slots amostra a página da Croácia e tem o 11 no painel das costas; a faixa é a 90 no 9 e a 93 no 10 (controle positivo do relato do usuário); divergência é resultado, escrita
+- [x] `--replay 9 --focus <k> --plant-replay` sai 1 com os `FAIL` da planta; os controles novos dão `RED` em `python3 tools/kits/controls.py --only <nome>`, e os casos novos do `selftest.py` dão `ok`
+- [x] sem uma das cópias mestras (não se aplicou: as duas existem, sha256 no Log): `rite mark K3D-TASK-19 blocked --unblocked-by "test -f work/kits-states/SLPM-87056_9.sav -a -f work/kits-states/SLPM-87056_10.sav"` e o pedido ao usuário
+- [x] `ctest --test-dir build -R kits` com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`: `100% tests passed, 0 tests failed out of 4`, sem *skipped*
+- [x] `python3 tools/kits/controls.py`: última linha `controls: N of N red`
 
 ## Notes
 
@@ -44,3 +44,39 @@ ele e a câmera; o `--replay --focus K` tem de usar a regra do eixo, com a marge
 Cada foco recarrega o state e precisa de `REPLAY_FIELD_SETTLE` quadros depois do último toque.
 
 ## Log de Execução
+
+### 2026-10-12 — o capitão de linha de perto, manga curta e longa
+
+As cópias mestras existem, com os sha256 da K3D-TASK-17 (`54c79792…d6d6` e `bdf47644…3b6e`).
+
+**Medido**, com `WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE2002_LOOKS_DRIVE_IMAGE=$PWD/work/looks-disc/we2002-english.cue DISPLAY=:98 XAUTHORITY=`,
+e colado em [G8](/docs/KITS-AJUSTES-3D.md#g8--replays-nos-slots-9-e-10-braçadeira-e-manga-longa-de-perto-o-goleiro-capitão-e-os-22-em-campo)
+("Medido (K3D-TASK-19)"):
+
+- `python3 tools/kits/oracle.py --replay 9 --focus 3`: saída 0, `ok    the followed figure opens at section 2 with head 46, draws 90 in place of 4, holds still, and its back shows panel (640, 60, 104) with number 11`;
+- `python3 tools/kits/oracle.py --replay 10 --focus 3`: saída 0, `… draws 93 in place of 97, … panel (640, 60, 104) with number 11`;
+- `python3 tools/kits/oracle.py --replay 10 --focus 2` (Balaban, sem faixa): saída 0, `… draws no armband, … panel (640, 80, 104) with number 20`;
+- `python3 tools/kits/oracle.py --replay-confront 9|10 --focus 3` e `10 --focus 2`: paleta `TEX_22` contra (0,487) `0 differ`; histograma 0,41/0,37, 0,41/0,39 e 0,39/0,38 (costas/frente).
+
+A página da Croácia é a 640 e a CLUT (0,487) nos três; a faixa é a 90 no 9 e a 93 no 10, e o painel
+tem o 11 — os controles do relato. A seção substituída (4 na manga curta, 97 na longa) é medida, pela
+ordem que o `--replay` imprime.
+
+A K3D-TASK-19 dizia "de perto" no zoom da 17; com L2 a câmera segue a ~4700 de costas, e é a captura
+que esta task faz (a fonte, G8 da K3D-TASK-18, ganha).
+
+**Instrumento, no caminho:** as paradas do giro não leem o GTE, e `figure_off_axis` precisa da
+projeção: o giro usa a da primeira captura. O kit do jogador não se acha pelo corpo do uniforme (nenhum
+registro 0, 1, 4 ou 5 na VRAM do replay), e sim pela paleta de jogador que ele amostra
+(`figure_tag`).
+
+**Controle:** `--replay 9 --focus 3 --frame-json work/kits-oracle/replay-9-3.json --plant-replay` sai 1
+com seis `FAIL`, entre eles `FAIL  the followed figure opens at 2, not at section 103`. No catálogo,
+`controls.py --only` dá `RED` em `oracle-replay-focus-nearest`, `oracle-replay-shared-cell-kept` e
+`oracle-replay-sleeves-unjudged`. No `selftest.py`, os cinco casos `oracle --replay --focus: …` dão
+`ok`.
+
+Gates:
+- `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
+  `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
+- `python3 tools/kits/controls.py`: `controls: 53 of 53 red`.

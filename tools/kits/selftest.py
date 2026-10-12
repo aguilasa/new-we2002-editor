@@ -1317,6 +1317,35 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --replay: a pose that moved, another number and a capture past the idle fail",
          len(oracle.replay_judge(dict(good, still=3, number=5, back_frames=400), expect)) == 3,
          "; ".join(oracle.replay_judge(dict(good, still=3, number=5, back_frames=400), expect)))
+    # --replay --focus K (K3D-TASK-19): behind a player the followed figure is
+    # the one on the axis, his panel is the cell beside the shared one, the
+    # kit is the one whose player palette he samples, and the judge asks for
+    # no armband and the slot's sleeves when the expectation says so.
+    c.ok("oracle --replay --focus: the replay as saved follows the nearest, a focus the axis",
+         (oracle.replay_chooser(0), oracle.replay_chooser(3))
+         == (oracle.replay_focus, oracle.field_focus))
+    two = {(0, 0, 80): [1, 2], (0, 60, 104): [3, 4]}
+    c.ok("oracle --replay --focus: an outfield back shows the cell beside the shared one",
+         (oracle.panel_cell(two, True), oracle.panel_cell({(0, 0, 80): [1, 2, 3, 4]}, True),
+          oracle.panel_cell({(1, 100, 104): [1, 2, 3, 4]}, False))
+         == ((0, 60, 104), (0, 0, 80), (1, 100, 104)),
+         "%s" % (oracle.panel_cell(two, True),))
+    hits = [("41", 2, [[0, 486], [0, 490]], False, False),
+            ("22", 2, [[0, 487], [0, 491]], False, False)]
+    c.ok("oracle --replay --focus: the kit is the one whose player palette the figure samples",
+         (oracle.figure_tag(hits, {(0, 487)}), oracle.figure_tag(hits, {(0, 486)}),
+          oracle.figure_tag(hits, {(0, 499)})) == (("22", 1), ("41", 1), (None, None)))
+    outfield = [_piece(46, 4694), _piece(2, 4694), _piece(3, 4694), _piece(4, 4694)]
+    plain = {"root": 2, "head": 46, "armband": None, "replaced": None, "sleeves": "short",
+             "panel": (640, 80, 104), "number": 20}
+    seen = dict(good, focus=outfield, panel=(640, 80, 104), number=20)
+    c.ok("oracle --replay --focus: a player without the armband holds the judge",
+         oracle.replay_judge(seen, plain) == [], "; ".join(oracle.replay_judge(seen, plain)))
+    banded = dict(seen, focus=[_piece(46, 4694), _piece(2, 4694), _piece(3, 4694),
+                               _piece(90, 4694)])
+    c.ok("oracle --replay --focus: an armband where none is expected, and long sleeves, fail",
+         len(oracle.replay_judge(banded, dict(plain, sleeves="long"))) == 2,
+         "; ".join(oracle.replay_judge(banded, dict(plain, sleeves="long"))))
     # --replay-field (K3D-TASK-18): the sleeves and armband are read off the
     # sections, and the judge asks for the followed figure clear of the next
     # one, the camera back on the ball, the captain's armband and number, the

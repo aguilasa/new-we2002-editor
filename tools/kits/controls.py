@@ -384,6 +384,30 @@ CONTROLS = (
         "does; the camera keeps the followed one on its axis (G8, K3D-TASK-18)",
     ),
     Control(
+        "oracle-replay-focus-nearest", "kits/oracle.py", "replay_chooser",
+        "    return replay_focus if not focus else field_focus",
+        "    return replay_focus",
+        "FAIL  oracle --replay --focus: the replay as saved follows the nearest, a focus the axis",
+        "behind a player a neighbour can lie nearer than the one the camera follows "
+        "(K3D-TASK-18); --replay --focus takes the figure on the axis (G8, K3D-TASK-19)",
+    ),
+    Control(
+        "oracle-replay-shared-cell-kept", "kits/oracle.py", "panel_cell",
+        "    own = [c for c in cells if c != REPLAY_SHARED_CELL] if outfield else []",
+        "    own = []",
+        "FAIL  oracle --replay --focus: an outfield back shows the cell beside the shared one",
+        "an outfield back samples the shared cell as much as its own (two quads each); "
+        "the most quads names no single panel (G8, K3D-TASK-19)",
+    ),
+    Control(
+        "oracle-replay-sleeves-unjudged", "kits/oracle.py", "replay_judge",
+        '    if expect.get("sleeves") and sleeves_of(order) != expect["sleeves"]:',
+        "    if False:",
+        "FAIL  oracle --replay --focus: an armband where none is expected, and long sleeves, fail",
+        "the sleeves are per slot -- short in 9, long in 10 -- and the judge holds the "
+        "followed player to them (G8, K3D-TASK-19)",
+    ),
+    Control(
         "oracle-arm-side-flipped", "kits/oracle.py", "arm_side",
         '    return "a" if sum(p[2] for p in points) / len(points) < 0 else "b"',
         '    return "a" if sum(p[2] for p in points) / len(points) > 0 else "b"',

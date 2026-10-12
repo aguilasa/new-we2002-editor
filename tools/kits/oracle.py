@@ -41,7 +41,7 @@ Usage:
     python tools/kits/oracle.py --edt-arms [--plant-edt-arms]      # disc only
     python tools/kits/oracle.py --keeper-armband 7 [--frame-json <stops>] [--plant-keeper-armband]
     python tools/kits/oracle.py --replay-idle 9                    # frames the paused replay lasts
-    python tools/kits/oracle.py --replay 9 [--rotate R1|L1] [--frame-json <capture>] [--plant-replay]
+    python tools/kits/oracle.py --replay 9 [--focus K] [--rotate R1|L1] [--frame-json <capture>] [--plant-replay]
     python tools/kits/oracle.py --replay-field 9 [--field-button L2|R2] [--frame-json <capture>] [--plant-replay-field [focus|panel]]
     python tools/kits/oracle.py --replay-confront 9                # the 3D tab against the capture
 
@@ -3025,12 +3025,27 @@ REPLAY_IDLE = {9: 390, 10: 390}
 """Slot -> the frames the paused replay lasts with no input, as `--replay-idle`
 measured it (K3D-TASK-17: left between 360 and 390 in both, stepped 30 at a
 time); a capture has to stay under it."""
-REPLAY_EXPECT = {slot: {"root": 13, "head": 34, "armband": KEEPER_ARMBAND, "replaced": 15,
-                        "panel": (576, 100, 104), "number": 1} for slot in (9, 10)}
-"""Slot -> what G8 measured of the followed figure (K3D-TASK-17, Marcos in
-both, `work/kits-oracle/replay-9.json` and `replay-10.json`): its root and head, the
-armband in place of what, the panel cell its back samples and the number in
-it.  `replay_judge` asserts them; a slot with no entry is printed, not
+REPLAY_EXPECT = {(slot, 0): {"root": 13, "head": 34, "armband": KEEPER_ARMBAND, "replaced": 15,
+                             "panel": (576, 100, 104), "number": 1} for slot in (9, 10)}
+REPLAY_EXPECT.update({
+    (9, 3): {"root": 2, "head": 46, "armband": 90, "replaced": 4, "sleeves": "short",
+             "panel": (640, 60, 104), "number": 11},
+    (10, 3): {"root": 2, "head": 46, "armband": 93, "replaced": 97, "sleeves": "long",
+              "panel": (640, 60, 104), "number": 11},
+    (10, 2): {"root": 2, "head": 46, "armband": None, "replaced": None, "sleeves": "long",
+              "panel": (640, 80, 104), "number": 20},
+})
+"""(slot, focus) -> what G8 measured of the followed figure: its root and
+head, the armband in place of what, the panel cell its back samples and the
+number in it.  Focus 0 is the replay as saved, Marcos in both slots
+(K3D-TASK-17, `work/kits-oracle/replay-9.json` and `replay-10.json`); a focus
+K is the player K taps of L2 lead to (K3D-TASK-19): Bokšić at 3 in both
+slots, with the armband of the user's account -- 90 on the short sleeves of
+slot 9, 93 on the long ones of slot 10 -- in place of the arm piece it
+replaces (4, and 97, as `--replay 9 --focus 3` and `--replay 10 --focus 3`
+printed the order), his head, panel and number as `--replay-field` listed
+them; and Balaban at 2 in slot 10, the long sleeve with no armband.
+`replay_judge` asserts them; a (slot, focus) with no entry is printed, not
 judged."""
 PLANT_REPLAY_ROOT = 103
 """`--plant-replay` expects the followed figure to open at this section, which
@@ -3069,9 +3084,11 @@ def replay_focus(figures, nth: int = 0):
     return ranked[nth] if nth < len(ranked) else None
 
 
-def replay_frames(capture: dict, nth: int = 0) -> list:
+def replay_frames(capture: dict, nth: int = 0, choose=None) -> list:
     """[{"head", "figures", "focus"}] of every frame of a `pose_capture`, the
-    pieces named one stop late as `matrix_pieces` does within the frame."""
+    pieces named one stop late as `matrix_pieces` does within the frame; the
+    focus is picked by *choose* (`replay_focus` by default)."""
+    choose = choose or replay_focus
     out = []
     for frame in pose_frames(capture):
         pieces = matrix_pieces(frame["stops"], 1)
@@ -3079,7 +3096,7 @@ def replay_frames(capture: dict, nth: int = 0) -> list:
             piece["projection"] = stop["projection"]
         figures = replay_figures(pieces)
         out.append({"head": frame["head"], "figures": figures,
-                    "focus": replay_focus(figures, nth)})
+                    "focus": choose(figures, nth)})
     return out
 
 
@@ -3227,22 +3244,49 @@ def panel_samples(group) -> dict:
     return out
 
 
-def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str) -> dict:
-    """Everything `--replay` reads from the paused replay: the front capture
+def replay_chooser(focus: int):
+    """How `--replay` picks the followed figure: the nearest in the replay as
+    saved (focus 0, the goalkeeper alone in the frame), the one on the
+    camera's axis once L2 has moved the camera behind a player (K3D-TASK-18:
+    there a neighbour can lie nearer than him)."""
+    return replay_focus if not focus else field_focus
+
+
+def replay_arrive(game, slot: int, focus: int, label: str) -> int:
+    """Load *slot* and tap `REPLAY_FIELD_BUTTONS[0]` *focus* times, each a
+    `press` that has to move the screen, then let the camera land
+    (`REPLAY_FIELD_SETTLE`).  The frame counter at the last tap: the replay's
+    idle starts again there."""
+    load_slot(game, slot, label)
+    for _tap in range(focus):
+        game.press(REPLAY_FIELD_BUTTONS[0])
+    tapped = frame_now(game)
+    if focus:
+        game.step(REPLAY_FIELD_SETTLE)
+    return tapped
+
+
+def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
+                   focus: int = 0) -> dict:
+    """Everything `--replay` reads from the paused replay: the first capture
     (`pose_capture`) with the frame buffer under the followed figure and the
     texture pages and CLUTs it samples; the kit pages; then, from the state
     reloaded, taps of *rotate* until the torso has turned `REPLAY_BACK`, and
-    the back capture.  Each run counts the frames it spends."""
+    the turned capture.  With *focus* the camera is first moved K taps of L2
+    to a player (`replay_arrive`), which it follows from behind: the first
+    capture is then his back and the turned one his front.  Each run counts
+    the frames it spends since its last tap."""
     import oracle as looks_oracle  # tools/looks
 
-    label = "replay-%d" % slot
-    load_slot(game, slot, label)
-    start = frame_now(game)
-    front = pose_capture(game, maps, REPLAY_SUBMITS)
+    label = "replay-%d" % slot + ("-%d" % focus if focus else "")
+    choose = replay_chooser(focus)
+    submits = REPLAY_FIELD_SUBMITS if focus else REPLAY_SUBMITS
+    start = replay_arrive(game, slot, focus, label)
+    front = pose_capture(game, maps, submits)
     front_frames = frame_now(game) - start
     game.step(REPLAY_SETTLE)
     hits, tag, kit_set, page_x = _edit_kit(game, bodies, label)
-    frames = replay_frames(front)
+    frames = replay_frames(front, choose=choose)
     head = frames[-1]["head"] if frames else None
     samples = front["lists"].get("%d" % head, []) if head is not None else []
     figure, fit = figure_group(frames[-1]["focus"] if frames else None, samples, index)
@@ -3269,10 +3313,10 @@ def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str) -> d
     for x in sorted({one["page"][0] for one in samples if is_figure(one)}):
         pages["%d" % x] = _edit_page(game, x)
     game.capture(label + "-front")
-    load_slot(game, slot, label + "-turn")
-    start = frame_now(game)
+    start = replay_arrive(game, slot, focus, label + "-turn")
     yaws, depths, turned, tapped = [], [], None, start
     root = frames[-1]["focus"][1]["section"] if frames and frames[-1]["focus"] else None
+    projection = frames[-1]["focus"][0]["projection"] if frames and frames[-1]["focus"] else None
     for _tap in range(REPLAY_ROTATE_MOST):
         try:
             tapped = frame_now(game)
@@ -3282,34 +3326,45 @@ def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str) -> d
             break
         # the followed figure's own family: past the goal line the camera
         # sees another goalkeeper nearer than a cut-off frame's own one
-        focus = None
+        # behind a player the camera turns about him and keeps him on its
+        # axis: the figure on the axis, within the depth it follows at
+        followed = None
         for count in REPLAY_YAW_STOPS:
             stops = matrix_stops(game, maps, count, partial=True)
-            focus = replay_focus([f for f in replay_figures(matrix_pieces(stops, 1))
-                                  if f[1]["section"] == root])
-            if focus is not None:
+            pieces = matrix_pieces(stops, 1)
+            for piece in pieces:
+                # these stops do not read the GTE: the first capture's projection
+                piece.setdefault("projection", projection)
+            figures = replay_figures(pieces)
+            if focus:
+                followed = field_focus([f for f in figures
+                                        if figure_depth(f) < REPLAY_FOLLOW_DEPTH
+                                        and figure_off_axis(f) <= REPLAY_FOLLOW_OFF])
+            else:
+                followed = replay_focus([f for f in figures if f[1]["section"] == root])
+            if followed is not None:
                 break
-        if focus is None:
+        if followed is None:
             turned = "no figure in the stops after the tap"
             break
-        yaws.append(piece_yaw(focus[1]["matrix"]))
-        depths.append([focus[1]["section"], figure_depth(focus)])
+        yaws.append(piece_yaw(followed[1]["matrix"]))
+        depths.append([followed[1]["section"], figure_depth(followed)])
         front_yaw = piece_yaw(frames[-1]["focus"][1]["matrix"]) if frames else yaws[0]
         if abs((yaws[-1] - front_yaw + 180.0) % 360.0 - 180.0) >= REPLAY_BACK:
             turned = "back"
             break
-    back = pose_capture(game, maps, REPLAY_SUBMITS) if turned == "back" else None
+    back = pose_capture(game, maps, submits) if turned == "back" else None
     turn_frames = frame_now(game) - start
     back_frames = frame_now(game) - tapped
     back_samples = []
     if back is not None:
-        back_frames_list = replay_frames(back)
+        back_frames_list = replay_frames(back, choose=choose)
         if back_frames_list:
             back_samples = back["lists"].get("%d" % back_frames_list[-1]["head"], [])
         for x in sorted({one["page"][0] for one in back_samples if is_figure(one)}):
             pages.setdefault("%d" % x, _edit_page(game, x))
     game.capture(label + "-back")
-    return {"front": front, "back": back, "front_frames": front_frames,
+    return {"focus": focus, "front": front, "back": back, "front_frames": front_frames,
             "back_frames": back_frames, "turn_frames": turn_frames, "rotate": rotate, "yaws": yaws, "depths": depths, "turned": turned,
             "hits": hits, "tag": tag, "set": kit_set, "page_x": page_x, "pages": pages,
             "buffer": buffer, "texture": texture}
@@ -3393,10 +3448,15 @@ def replay_judge(report: dict, expect: dict, plant: bool = False) -> list:
                    % (order[1] if len(order) > 1 else None, root))
     if focus is not None and order[0] != expect["head"]:
         out.append("the followed figure's head is section %s, not %d" % (order[0], expect["head"]))
-    if focus is not None and expect["armband"] not in order:
+    if focus is not None and expect["armband"] is not None and expect["armband"] not in order:
         out.append("the followed figure does not draw section %d" % expect["armband"])
-    if expect["replaced"] in order:
+    if focus is not None and expect["armband"] is None and armband_of(order) is not None:
+        out.append("the followed figure draws armband %d, none expected" % armband_of(order))
+    if expect["replaced"] is not None and expect["replaced"] in order:
         out.append("the followed figure draws section %d beside the armband" % expect["replaced"])
+    if expect.get("sleeves") and sleeves_of(order) != expect["sleeves"]:
+        out.append("the followed figure's sleeves are %s, not %s"
+                   % (sleeves_of(order), expect["sleeves"]))
     if report["still"] is None or report["still"] > REPLAY_STILL:
         out.append("the pose changed by %s between two frames, over %d"
                    % (report["still"], REPLAY_STILL))
@@ -3414,17 +3474,75 @@ def replay_judge(report: dict, expect: dict, plant: bool = False) -> list:
     return out
 
 
-def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool = False) -> int:
-    """`--replay SLOT`: G8, the followed figure of a paused replay up close --
-    its family and armband, the GPU's colours for its arms, its still pose,
-    the panel its back shows and the number in it."""
+REPLAY_SHARED_CELL = (0, 0, 80)
+"""The panel cell every outfield back of a page samples beside its own
+(`--replay-field`, K3D-TASK-18: "the cell every outfield back of a page also
+samples"); a player's panel is the other cell, or this one when it is his."""
+
+
+def replay_name(slot: int, focus: int) -> str:
+    """The file stem of a `--replay` capture: `replay-<slot>`, and
+    `-<focus>` after it for a player L2 led to."""
+    return "replay-%d" % slot + ("-%d" % focus if focus else "")
+
+
+def replay_panel(capture, index, nth: int, choose, on_torso: bool):
+    """(followed figure, panel cell -> primitives) of the last frame of
+    *capture*: the panel quads of the followed figure's group, and with
+    *on_torso* only those inside its torso's own box (`piece_box`) -- behind
+    a player the figure's box takes in a neighbour's back."""
+    if capture is None:
+        return None, {}
+    frames = replay_frames(capture, nth, choose)
+    if not frames:
+        return None, {}
+    focus = frames[-1]["focus"]
+    samples = capture["lists"].get("%d" % frames[-1]["head"], [])
+    group, _fit = figure_group(focus, samples, index)
+    group = group or []
+    if on_torso and focus is not None and len(focus) > 1:
+        torso = piece_box(focus[1], index)
+        group = [one for one in group if torso is not None and all(
+            torso[0] <= x <= torso[2] and torso[1] <= y <= torso[3] for x, y in one["xy"])]
+    return focus, panel_samples(group)
+
+
+def panel_cell(cells: dict, outfield: bool):
+    """The panel cell a figure's back shows, of the cells its torso samples:
+    the one with the most quads -- or, for an outfield player, the one left
+    once `REPLAY_SHARED_CELL` is taken away, when exactly one is."""
+    own = [c for c in cells if c != REPLAY_SHARED_CELL] if outfield else []
+    return own[0] if len(own) == 1 else max(cells, key=lambda c: len(cells[c]))
+
+
+def figure_tag(hits, cluts):
+    """(tag, set) of the kit whose player palette sits at one of *cluts*, of
+    the hits `_edit_kit` found; (None, None) if none does.  In the replay the
+    uniform bodies are not in VRAM as the disc holds them (no hit of record 0,
+    1, 4 or 5 in slots 9 and 10), but each team's player palette is, one CLUT
+    row apiece: TEX_41 at (0,486), TEX_22 at (0,487)."""
+    for tag, index, at, flat, shared in hits or []:
+        for kit_set, record in PLAYER_PALETTE.items():
+            if index == record and any(tuple(a) in cluts for a in at):
+                return tag, kit_set
+    return None, None
+
+
+def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool = False,
+               focus_k: int = 0) -> int:
+    """`--replay SLOT [--focus K]`: G8, the followed figure of a paused replay
+    up close -- its family and armband, the GPU's colours for its arms, its
+    still pose, the panel its back shows and the number in it.  With K the
+    camera is first moved K taps of L2 to a player (K3D-TASK-19)."""
     import json
 
     import oracle as looks_oracle  # tools/looks
 
     image = os.environ[IMAGE_VARIABLE]
     rotate = rotate or REPLAY_ROTATE[0]
-    path = cache or os.path.join(ATTACH_DIR, "replay-%d.json" % slot)
+    name = replay_name(slot, focus_k)
+    choose = replay_chooser(focus_k)
+    path = cache or os.path.join(ATTACH_DIR, name + ".json")
     if cache and os.path.isfile(cache):
         with open(cache) as fh:
             kept = json.load(fh)
@@ -3433,7 +3551,8 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
         maps = looks_oracle.model_maps(image)
         bodies = read_kits(image)
         with looks_oracle.Oracle(cue) as game:
-            kept = replay_capture(game, maps, bodies, model_index(image), slot, rotate)
+            kept = replay_capture(game, maps, bodies, model_index(image), slot, rotate,
+                                  focus_k)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as fh:
             json.dump(kept, fh)
@@ -3442,17 +3561,25 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
     _restore_samples(kept["back"])
     index = model_index(image)
     nth = 1 if plant else 0
-    frames = replay_frames(kept["front"], nth)
+    frames = replay_frames(kept["front"], nth, choose)
     idle = REPLAY_IDLE.get(slot)
+    if focus_k:
+        print("  focus %d: %s tapped %d time(s) from the reloaded state, %d frame(s) to settle; "
+              "the followed figure is the one on the camera's axis (field_focus); 'front' "
+              "below is the first capture, 'back' the turned one"
+              % (focus_k, REPLAY_FIELD_BUTTONS[0], focus_k, REPLAY_FIELD_SETTLE))
     print("  front: %d frame(s) of %d stop(s) in %d emulator frame(s) (idle %s, the replay's "
           "frames with no input: --replay-idle)"
           % (len(frames), sum(1 for e in kept["front"]["events"] if e["kind"] == "matrix"),
              kept["front_frames"], idle))
     for k, frame in enumerate(frames):
-        print("    frame %d: %d figure(s), depths %s" % (
+        print("    frame %d: %d figure(s), depths %s%s" % (
             k, len(frame["figures"]),
             " ".join("%.0f" % figure_depth(f) for f in sorted(frame["figures"],
-                                                             key=figure_depth))))
+                                                             key=figure_depth)),
+            "; followed at %.0f, %.1f px off the axis" % (figure_depth(frame["focus"]),
+                                                         figure_off_axis(frame["focus"]))
+            if focus_k and frame["focus"] is not None else ""))
     focus = frames[-1]["focus"] if frames else None
     if focus is not None:
         print("  followed figure, head first: %s  (one more piece the draw lag leaves unnamed)"
@@ -3463,10 +3590,13 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
     print("  still pose: the followed figure's matrices differ by %s between the last two "
           "frames (limit %d)" % (still, REPLAY_STILL))
     if focus is not None:
-        pose_path = os.path.join(POSE_DIR, "slot%d-keeper-front.json" % slot)
+        pose_path = os.path.join(POSE_DIR, "slot%d-keeper-front.json" % slot if not focus_k
+                                 else "slot%d-focus%d-first.json" % (slot, focus_k))
         os.makedirs(POSE_DIR, exist_ok=True)
         with open(pose_path, "w") as fh:
-            json.dump({"slot": slot, "source": "python3 tools/kits/oracle.py --replay %d" % slot,
+            json.dump({"slot": slot, "focus": focus_k,
+                       "source": "python3 tools/kits/oracle.py --replay %d%s"
+                       % (slot, " --focus %d" % focus_k if focus_k else ""),
                        "projection": focus[0]["projection"],
                        "pieces": [{"section": p["section"], "rotation": list(p["matrix"][0]),
                                    "translation": list(p["matrix"][1])} for p in focus]},
@@ -3482,7 +3612,7 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
               % (len(group), "(%.0f,%.0f)-(%.0f,%.0f)" % fit["box"], " ".join("%s:%s" % (r["section"], "%.2f" % r["error"]
                                                     if r["error"] is not None else "-")
                                         for r in fit["rows"])))
-    if group is not None:
+    if group is not None and not focus_k:
         front_cells = panel_samples(group)
         print("  front: %d primitive(s) of the figure sample a panel%s (the back is read after "
               "the turn)" % (sum(len(v) for v in front_cells.values()),
@@ -3517,8 +3647,8 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
                                   "(%.1f %.1f %.1f)" % c["game"], "(%.1f %.1f %.1f)" % c["texel"],
                                   c["texel_far"], "(%.1f %.1f %.1f)" % c["shaded"],
                                   c["shaded_far"]))
-        save_buffer(os.path.join(ATTACH_DIR, "replay-%d-frame.png" % slot), kept["buffer"])
-        print("    picture: %s" % os.path.join(ATTACH_DIR, "replay-%d-frame.png" % slot))
+        save_buffer(os.path.join(ATTACH_DIR, name + "-frame.png"), kept["buffer"])
+        print("    picture: %s" % os.path.join(ATTACH_DIR, name + "-frame.png"))
     print("  kit: %s" % (", ".join(
         "TEX_%s record %d %s at (%d,%d)" % (tag, i, NAMES[i], at[0][0], at[0][1])
         for tag, i, at, flat, shared in kept["hits"] if not flat) or "nothing found"))
@@ -3529,21 +3659,25 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
     print("    the figure each tap read, root and depth: %s"
           % " ".join("%s@%.0f" % tuple(d) for d in kept.get("depths", [])))
     panel, number, panel_failures = None, None, []
-    if kept["back"] is not None:
-        back_frames = replay_frames(kept["back"], nth)
-        back_focus = back_frames[-1]["focus"] if back_frames else None
-        back_samples = (kept["back"]["lists"].get("%d" % back_frames[-1]["head"], [])
-                        if back_frames else [])
-        back_group, _fit = figure_group(back_focus, back_samples, index)
-        cells = panel_samples(back_group or [])
+    views = [("back", kept["back"])] if not focus_k else [("front", kept["front"]),
+                                                          ("back", kept["back"])]
+    for side, capture in views:
+        back_focus, cells = replay_panel(capture, index, nth, choose, bool(focus_k))
+        if focus_k:
+            print("  %s: %d primitive(s) of the followed figure's torso sample a panel%s"
+                  % (side, sum(len(v) for v in cells.values()),
+                     "".join(" (%d,%d)" % c[1:] for c in sorted(cells))))
+        if cells:
+            break
+    if cells:
         for cell, found in sorted(cells.items()):
             held = section_samples(found, index, back_focus[1]["section"]) if back_focus else []
-            print("  back: %d primitive(s) of the figure sample panel (%d,%d) of page (%d,%d); "
+            print("  %s: %d primitive(s) of the figure sample panel (%d,%d) of page (%d,%d); "
                   "%d of them are torso %s's own texels on the disc"
-                  % (len(found), cell[1], cell[2], found[0]["page"][0], found[0]["page"][1],
+                  % (side, len(found), cell[1], cell[2], found[0]["page"][0], found[0]["page"][1],
                      len(held), back_focus[1]["section"] if back_focus else "-"))
         if cells:
-            cell = max(cells, key=lambda c: len(cells[c]))
+            cell = panel_cell(cells, bool(focus_k))
             page_x = cells[cell][0]["page"][0]
             panel = (page_x,) + cell[1:]
             words = kept["pages"].get("%d" % page_x)
@@ -3559,24 +3693,28 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
                 if shown:
                     number = shown[0]["number"]
                     panel_failures = panels_judge(shown)
-    expect = REPLAY_EXPECT.get(slot)
-    report = {"focus": replay_frames(kept["front"], nth)[-1]["focus"] if frames else None,
+    expect = REPLAY_EXPECT.get((slot, focus_k))
+    report = {"focus": replay_frames(kept["front"], nth, choose)[-1]["focus"] if frames else None,
               "still": still, "turned": kept["turned"], "panel": panel, "number": number,
               "panel_failures": panel_failures, "idle": idle,
               "front_frames": kept["front_frames"], "back_frames": kept["back_frames"]}
     if plant:
-        print("  PLANT  the second-nearest figure followed, front and back, expected to open "
-              "at section %d" % PLANT_REPLAY_ROOT)
+        print("  PLANT  the figure %s followed, front and back, expected to open at section %d"
+              % ("second nearest" if not focus_k else "next on the camera's axis",
+                 PLANT_REPLAY_ROOT))
     if expect is None:
-        print("  no measured expectation for slot %d (REPLAY_EXPECT): printed, not judged" % slot)
+        print("  no measured expectation for slot %d focus %d (REPLAY_EXPECT): printed, not "
+              "judged" % (slot, focus_k))
         return 0
     failures = replay_judge(report, expect, plant)
     for line in failures:
         print("  FAIL  %s" % line)
     if not failures:
-        print("  ok    the followed figure opens at section %d with head %d, draws %d in place "
-              "of %d, holds still, and its back shows panel %s with number %d"
-              % (expect["root"], expect["head"], expect["armband"], expect["replaced"],
+        print("  ok    the followed figure opens at section %d with head %d, %s, holds still, "
+              "and its back shows panel %s with number %d"
+              % (expect["root"], expect["head"],
+                 "draws %d in place of %d" % (expect["armband"], expect["replaced"])
+                 if expect["armband"] is not None else "draws no armband",
                  expect["panel"], expect["number"]))
     return 1 if failures else 0
 
@@ -3625,7 +3763,12 @@ def palette_check(texture: dict, tag: str, clut, record: int) -> tuple:
     return n, sum(1 for a, b in zip(disc[:n], row[:n]) if tuple(a) != tuple(b))
 
 
-def run_replay_confront(slot: int, cue: str, cache=None) -> int:
+REPLAY_LONG_SLOTS = (10,)
+"""Slots whose outfield players wear long sleeves (`--replay-field`,
+K3D-TASK-18): the tab is asked for `--long-sleeves` there."""
+
+
+def run_replay_confront(slot: int, cue: str, cache=None, focus_k: int = 0) -> int:
     """`--replay-confront SLOT`: the 3D tab's figure against the game's, on the
     capture `--replay` kept -- whether the tab paints with the palette the game
     uses, the colours of the whole figure by histogram (front and back), and a
@@ -3644,24 +3787,34 @@ def run_replay_confront(slot: int, cue: str, cache=None) -> int:
     sys.modules[spec.name] = confront       # its dataclasses look themselves up there
     spec.loader.exec_module(confront)
     image = os.environ[IMAGE_VARIABLE]
-    path = cache or os.path.join(ATTACH_DIR, "replay-%d.json" % slot)
+    name = replay_name(slot, focus_k)
+    choose = replay_chooser(focus_k)
+    path = cache or os.path.join(ATTACH_DIR, name + ".json")
     if not os.path.isfile(path):
-        print("  no capture at %s: run --replay %d first" % (path, slot))
+        print("  no capture at %s: run --replay %d%s first"
+              % (path, slot, " --focus %d" % focus_k if focus_k else ""))
         return 1
     with open(path) as fh:
         kept = json.load(fh)
     _restore_samples(kept["front"])
     index = model_index(image)
-    frames = replay_frames(kept["front"])
+    frames = replay_frames(kept["front"], 0, choose)
     focus = frames[-1]["focus"] if frames else None
     samples = kept["front"]["lists"].get("%d" % frames[-1]["head"], []) if frames else []
     group, _fit = figure_group(focus, samples, index)
     if not group or not kept.get("buffer"):
         print("  FAIL  the capture has no figure or no frame buffer under it")
         return 1
-    tag = "41" if kept.get("tag") is None else kept["tag"]
+    tag, kit_set = kept.get("tag"), kept.get("set")
+    if focus_k:
+        # the kit of the followed player's own page, not the first one found
+        cluts = {tuple(one["clut"]) for one in group if kit_image_of(one) == "uniform"}
+        tag, kit_set = figure_tag(kept.get("hits"), cluts)
+        print("  the followed figure's uniform CLUTs: %s; kit TEX_%s set %s"
+              % (" ".join("(%d,%d)" % c for c in sorted(cluts)) or "none", tag, kit_set))
+    tag = "41" if tag is None else tag
     figure = 1 if focus[1]["section"] in KEEPER_ARMBANDS or focus[1]["section"] == 56 else 0
-    record = (PLAYER_PALETTE if figure == 0 else KEEPER_PALETTE)[kept.get("set") or 1]
+    record = (PLAYER_PALETTE if figure == 0 else KEEPER_PALETTE)[kit_set or 1]
     cluts = sorted({tuple(one["clut"]) for one in group if is_figure(one)})
     for clut in cluts:
         n, wrong = palette_check(kept["texture"], tag, clut, record)
@@ -3676,7 +3829,10 @@ def run_replay_confront(slot: int, cue: str, cache=None) -> int:
     game = [tuple(v << 3 for v in rows[py - y0][px - x0]) for (px, py) in owners
             if 0 <= py - y0 < len(rows) and 0 <= px - x0 < len(rows[0])]
     shown = confront.histogram(game)
-    number = REPLAY_EXPECT.get(slot, {}).get("number")
+    expect = REPLAY_EXPECT.get((slot, focus_k), {})
+    number = expect.get("number")
+    armband = expect.get("armband", KEEPER_ARMBAND) is not None
+    long_sleeves = figure == 0 and slot in REPLAY_LONG_SLOTS
     out_dir = tempfile.mkdtemp(prefix="replay-confront-")
     python = os.path.join("work", "venv-looks", "bin", "python")
     if not os.path.isfile(python):
@@ -3684,9 +3840,11 @@ def run_replay_confront(slot: int, cue: str, cache=None) -> int:
         return 1
     scores = {}
     for side, yaw in sorted(REPLAY_TAB.items()):
-        out = os.path.join(ATTACH_DIR, "replay-%d-tab-%s.png" % (slot, side))
+        out = os.path.join(ATTACH_DIR, "%s-tab-%s.png" % (name, side))
         args = [python, confront.APP, image, "--tag", tag, "--tab", "3d", "--figure",
-                str(figure), "--armband", "--yaw", "%g" % yaw, "--export-3d", out]
+                str(figure), "--yaw", "%g" % yaw, "--export-3d", out]
+        args += ["--armband"] if armband else []
+        args += ["--long-sleeves"] if long_sleeves else []
         if number is not None:
             args += ["--number", str(number)]
         done = subprocess.run(args, env=confront.environment(), capture_output=True, text=True,
@@ -3697,13 +3855,15 @@ def run_replay_confront(slot: int, cue: str, cache=None) -> int:
         ours = confront.histogram(confront.figure_pixels(confront.read_rgb(out)))
         scores[side] = (confront.intersection(shown, ours),
                         confront.intersection(confront.restrict(shown, set(ours)), ours))
-        print("  tab %s (yaw %g): histogram intersection with the game's figure %.3f, "
+        print("  tab %s (yaw %g, %s): histogram intersection with the game's figure %.3f, "
               "%.3f over the colours the tab draws; picture %s"
-              % (side, yaw, scores[side][0],
-                 scores[side][1], out))
-    save_buffer(os.path.join(ATTACH_DIR, "replay-%d-frame.png" % slot), kept["buffer"])
-    print("  the game's frame: %s (%d pixel(s) under the figure's quads)"
-          % (os.path.join(ATTACH_DIR, "replay-%d-frame.png" % slot), len(game)))
+              % (side, yaw, " ".join(args[args.index("--figure"):args.index("--export-3d")]
+                                     + args[args.index("--export-3d") + 2:]),
+                 scores[side][0], scores[side][1], out))
+    save_buffer(os.path.join(ATTACH_DIR, name + "-frame.png"), kept["buffer"])
+    print("  the game's frame (the first capture%s): %s (%d pixel(s) under the figure's quads)"
+          % (", the player's back" if focus_k else "", os.path.join(ATTACH_DIR, name + "-frame.png"),
+             len(game)))
     return 0
 
 
@@ -4369,6 +4529,10 @@ def main(argv=None) -> int:
     source.add_argument("--replay-idle", type=int, metavar="SLOT",
                         help="G8: how many frames the paused replay of this slot lasts "
                              "with no input")
+    parser.add_argument("--focus", type=int, default=0, metavar="K",
+                        help="with --replay or --replay-confront: tap L2 K times first, to "
+                             "follow the player --replay-field lists as focus K (default 0, "
+                             "the replay as saved)")
     parser.add_argument("--rotate", choices=REPLAY_ROTATE,
                         help="with --replay: the button tapped to turn the camera to the "
                              "figure's back (default %s)" % REPLAY_ROTATE[0])
@@ -4478,7 +4642,8 @@ def main(argv=None) -> int:
         if not cue and not args.frame_json:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
-        return run_replay(args.replay, cue, args.rotate, args.frame_json, args.plant_replay)
+        return run_replay(args.replay, cue, args.rotate, args.frame_json, args.plant_replay,
+                          args.focus)
     if args.replay_field is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:
@@ -4487,7 +4652,7 @@ def main(argv=None) -> int:
         return run_replay_field(args.replay_field, cue, args.frame_json,
                                 args.plant_replay_field, args.field_button)
     if args.replay_confront is not None:
-        return run_replay_confront(args.replay_confront, None, args.frame_json)
+        return run_replay_confront(args.replay_confront, None, args.frame_json, args.focus)
     if args.replay_idle is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue:
