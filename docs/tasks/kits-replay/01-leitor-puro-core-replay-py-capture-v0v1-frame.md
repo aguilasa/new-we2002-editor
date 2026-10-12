@@ -129,3 +129,15 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE
 $ python3 tools/kits/controls.py
 controls: 55 of 55 red
 ```
+- **Closed** — commit `a51525f0` (2026-10-12): feat(kits): pure replay reader core/replay.py
+  - Files (`git show --name-status a51525f0`):
+    - `M docs/tasks/kits-replay/01-leitor-puro-core-replay-py-capture-v0v1-frame.md`
+    - `M docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md`
+    - `M docs/tasks/kits-replay/progress.json`
+    - `M docs/tasks/kits-replay/progresso.md`
+    - `M tools/kits/controls.py`
+    - `A tools/kits/core/replay.py`
+    - `M tools/kits/selftest.py`
+  - **Outside declared files** (`tools/kits/core/replay.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md`):
+    - `docs/tasks/kits-replay/progress.json`
+    - `docs/tasks/kits-replay/progresso.md`

@@ -17,10 +17,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#2.1",
       "files": ["tools/kits/core/replay.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md"],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-12",
+      "done_commit": "a51525f0",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
