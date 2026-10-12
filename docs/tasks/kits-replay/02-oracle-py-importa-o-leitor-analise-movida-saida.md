@@ -32,4 +32,6 @@ As dezenove funções de análise do bloco G8 listadas no [§2.2](/docs/PLAN-KIT
 
 Capture a saída de antes **antes** de mover (arquivos em `work/`), e compare depois. Se o `--replay-confront` sem emulador exigir a aba, registre só a parte que roda sem ela e diga isso no Log.
 
+Da KRP-TASK-01: além das dezenove, o `core/replay.py` já traz cópias dos auxiliares que elas usam — `is_figure`, `kit_image_of`, `sample_zones`, `matrix_pieces`, `pose_frames`, `pose_project`, `piece_error` (sem o `pair`), `triangle_pixels`, `sample_pixels`, `texel_colour`, `panel_cells`, `pixel_index`, `back_indices`, `glyphs`, `read_panel`, `read_panels`, `field_row`, as constantes `KIT_PAGES`, `KIT_CLUTS`, `POSE_MARGIN`, `TORSO_MARGIN`, `PANEL_W/H`, `PLAYER_PALETTE`, `REPLAY_STILL`, `REPLAY_FOLLOW_*`, `REPLAY_FOCUS_MARGIN`, `REPLAY_ARMBANDS`, `*_SLEEVES`, `REPLAY_SHARED_CELL` — e os juízes `judge`/`judge_walk`. Para não sobrar cópia, o oracle passa a importá-los também. Duas assinaturas mudaram: `field_number(pages, panel, width, shift)` recebe a largura do registro do uniforme, e `judge(report, expect, plant_root=None)` troca o `plant=True` pela raiz plantada.
+
 ## Log de Execução

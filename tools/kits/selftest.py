@@ -1253,174 +1253,6 @@ def _oracle_checks(c) -> None:
     c.ok("oracle --edit-number: another kit on the screen fails",
          any("TEX_41 set 1 expected" in f for f in oracle.edit_number_judge(
              dict(seen, tag="00"), 34, [panel], expect)))
-    # --replay (K3D-TASK-17): the followed figure is the nearest, a still pose
-    # differs by nothing, a shaded quad's corner colours and the drawing offset
-    # are read off the command list, the GPU's modulation explains a drawn
-    # pixel the bare texel does not, the back panel is found by texel, and the
-    # judge asks for root, head, armband, stillness, panel, number and frames.
-    def _piece(section, z, turn=0):
-        return {"section": section, "projection": {"H": 1, "OFX": 0, "OFY": 0},
-                "matrix": ((4096, 0, turn, 0, 4096, 0, 0, 0, 4096), (0, 0, z))}
-
-    near = [_piece(34, 4600), _piece(13, 4600), _piece(92, 4600)]
-    far = [_piece(46, 9000), _piece(2, 9000), _piece(3, 9000)]
-    cut = oracle.replay_figures(far + near)
-    c.ok("oracle --replay: the frame is cut at each root, head first",
-         [[p["section"] for p in f] for f in cut] == [[46, 2, 3], [34, 13, 92]],
-         "%s" % [[p["section"] for p in f] for f in cut])
-    c.ok("oracle --replay: the followed figure is the nearest, the plant the next",
-         (oracle.replay_focus(cut)[0]["section"], oracle.replay_focus(cut, 1)[0]["section"],
-          oracle.replay_focus(cut, 2)) == (34, 46, None))
-    c.ok("oracle --replay: one pose twice is still, a moved one is not",
-         (oracle.pose_change(near, near),
-          oracle.pose_change(near, [_piece(34, 4600), _piece(13, 4601), _piece(92, 4600)]))
-         == (0, 1))
-    page, clut = 0x99, (488 << 6)
-    colour = lambda r, g, b: r | g << 8 | b << 16  # noqa: E731
-    quad = [0x3C << 24 | colour(64, 64, 64), 0, (clut << 16) | 100 | 104 << 8,
-            colour(128, 128, 128), 4, (page << 16) | 104 | 104 << 8,
-            colour(64, 64, 64), 4 << 16, 100 | 108 << 8,
-            colour(128, 128, 128), 4 | 4 << 16, 104 | 108 << 8]
-    flat = [0x2C << 24 | colour(127, 127, 127), 0, (clut << 16), 1, (page << 16), 1 << 16, 0,
-            1 | 1 << 16, 0]
-    offset = 0xE5 << 24 | (256 << 11) | 0
-    read = oracle.textured_samples([quad, flat])
-    c.ok("oracle --replay: a shaded quad keeps its four corner colours, a flat one its one",
-         [s["rgb"] for s in read] == [[(64, 64, 64), (128, 128, 128), (64, 64, 64),
-                                       (128, 128, 128)], [(127, 127, 127)] * 4]
-         and read[0]["page"] == (576, 256) and read[0]["clut"] == (0, 488),
-         "%s" % [(s["rgb"], s["page"], s["clut"]) for s in read])
-    c.ok("oracle --replay: the drawing offset is read off its command, signed",
-         (oracle.draw_offset([[offset], quad]), oracle.draw_offset([[0xE5 << 24 | 0x7FF]]),
-          oracle.draw_offset([quad])) == ((0, 256), (-1, 0), None))
-    half = (lambda lo, hi: lo | hi << 8)(1, 1)
-    texture = {"pages": {"576,256,8": [half] * (oracle.TEXTURE_HALFWORDS * 256)},
-               "cluts": {"0,488": [(0, 0, 0), (20, 10, 30)]}}
-    drawn = dict(read[0], rgb=[(64, 64, 64)] * 4)
-    game = [[(10, 5, 15)] * 6 for _ in range(6)]
-    seen = oracle.colour_confront([drawn], {"origin": (0, 0), "rows": game}, texture,
-                                  {92: [drawn]})[92]
-    c.ok("oracle --replay: a pixel drawn at half colour is the modulated texel, not the bare one",
-         seen is not None and seen["shaded_far"] == 0.0 and seen["texel_far"] > 5.0,
-         "%s" % seen)
-    cells = oracle.panel_samples([read[0]])
-    c.ok("oracle --replay: a torso quad inside the goalkeeper's cell names that panel",
-         list(cells) == [(1, 100, 104)], "%s" % list(cells))
-    expect = {"root": 13, "head": 34, "armband": 92, "replaced": 15,
-              "panel": (576, 100, 104), "number": 1}
-    good = {"focus": near, "still": 0, "turned": "back", "panel": (576, 100, 104), "number": 1,
-            "panel_failures": [], "idle": 390, "front_frames": 9, "back_frames": 60}
-    c.ok("oracle --replay: the measured figure holds the judge",
-         oracle.replay_judge(good, expect) == [], "; ".join(oracle.replay_judge(good, expect)))
-    c.ok("oracle --replay: the plant's root fails",
-         any("not at section 103" in f for f in oracle.replay_judge(good, expect, plant=True)))
-    c.ok("oracle --replay: a pose that moved, another number and a capture past the idle fail",
-         len(oracle.replay_judge(dict(good, still=3, number=5, back_frames=400), expect)) == 3,
-         "; ".join(oracle.replay_judge(dict(good, still=3, number=5, back_frames=400), expect)))
-    # --replay --focus K (K3D-TASK-19): behind a player the followed figure is
-    # the one on the axis, his panel is the cell beside the shared one, the
-    # kit is the one whose player palette he samples, and the judge asks for
-    # no armband and the slot's sleeves when the expectation says so.
-    c.ok("oracle --replay --focus: the replay as saved follows the nearest, a focus the axis",
-         (oracle.replay_chooser(0), oracle.replay_chooser(3))
-         == (oracle.replay_focus, oracle.field_focus))
-    two = {(0, 0, 80): [1, 2], (0, 60, 104): [3, 4]}
-    c.ok("oracle --replay --focus: an outfield back shows the cell beside the shared one",
-         (oracle.panel_cell(two, True), oracle.panel_cell({(0, 0, 80): [1, 2, 3, 4]}, True),
-          oracle.panel_cell({(1, 100, 104): [1, 2, 3, 4]}, False))
-         == ((0, 60, 104), (0, 0, 80), (1, 100, 104)),
-         "%s" % (oracle.panel_cell(two, True),))
-    hits = [("41", 2, [[0, 486], [0, 490]], False, False),
-            ("22", 2, [[0, 487], [0, 491]], False, False)]
-    c.ok("oracle --replay --focus: the kit is the one whose player palette the figure samples",
-         (oracle.figure_tag(hits, {(0, 487)}), oracle.figure_tag(hits, {(0, 486)}),
-          oracle.figure_tag(hits, {(0, 499)})) == (("22", 1), ("41", 1), (None, None)))
-    outfield = [_piece(46, 4694), _piece(2, 4694), _piece(3, 4694), _piece(4, 4694)]
-    plain = {"root": 2, "head": 46, "armband": None, "replaced": None, "sleeves": "short",
-             "panel": (640, 80, 104), "number": 20}
-    seen = dict(good, focus=outfield, panel=(640, 80, 104), number=20)
-    c.ok("oracle --replay --focus: a player without the armband holds the judge",
-         oracle.replay_judge(seen, plain) == [], "; ".join(oracle.replay_judge(seen, plain)))
-    banded = dict(seen, focus=[_piece(46, 4694), _piece(2, 4694), _piece(3, 4694),
-                               _piece(90, 4694)])
-    c.ok("oracle --replay --focus: an armband where none is expected, and long sleeves, fail",
-         len(oracle.replay_judge(banded, dict(plain, sleeves="long"))) == 2,
-         "; ".join(oracle.replay_judge(banded, dict(plain, sleeves="long"))))
-    # --replay-field (K3D-TASK-18): the sleeves and armband are read off the
-    # sections, and the judge asks for the followed figure clear of the next
-    # one, the camera back on the ball, the captain's armband and number, the
-    # goalkeeper's armband and every capture under the idle.
-    on_axis = [[_piece(46, 3600), dict(_piece(2, 3600), matrix=((4096, 0, 0, 0, 4096, 0, 0, 0, 4096),
-                                                                (600, 0, 3600)))],
-               [_piece(24, 4700), _piece(2, 4700)]]
-    c.ok("oracle --replay-field: the followed figure is on the axis, not the nearest",
-         (oracle.field_focus(on_axis)[0]["section"], oracle.field_focus(on_axis, 1)[0]["section"])
-         == (24, 46))
-    shared_rows = [{"follows": True, "root": 2, "page": 640, "cells": {"0,0,80": 2, "0,60,104": 2}},
-                   {"follows": True, "root": 2, "page": 640, "cells": {"0,0,80": 4}},
-                   {"follows": True, "root": 13, "page": 640, "cells": {"1,100,104": 4}}]
-    oracle.field_panels(shared_rows)
-    c.ok("oracle --replay-field: the panel is the cell left once the shared one is taken away",
-         [r["panel"] for r in shared_rows] == [(640, 60, 104), (640, 0, 80), (640, 100, 104)],
-         "%s" % [r["panel"] for r in shared_rows])
-    c.ok("oracle --replay-field: short and long sleeves and the armband are read off the sections",
-         (oracle.sleeves_of([46, 2, 3, 5, 90, 6]), oracle.sleeves_of([46, 2, 95, 97, 93, 98]),
-          oracle.sleeves_of([34, 13, 14, 16, 92]), oracle.armband_of([46, 2, 3, 5, 90, 6]),
-          oracle.armband_of([46, 2, 3, 5, 4, 6])) == ("short", "long", None, 90, None))
-
-    def _row(k, **kw):
-        base = {"k": k, "follows": True, "depth": 4695, "off": 1.0, "next": 80.0,
-                "next_depth": 4900, "root": 2,
-                "armband": None, "number": 7, "frames": 70, "still": 0}
-        base.update(kw)
-        return base
-
-    field = [_row(0, follows=False, root=13, armband=92, depth=4681, next=None),
-             _row(1, follows=False, root=13, armband=92, depth=6059, next=None),
-             _row(2), _row(3, armband=90, number=11),
-             _row(4, root=13, armband=92, number=1),
-             _row(5, follows=False, depth=6100, end="ball")]
-    fexpect = {"captain": {"armband": 90, "number": 11}, "keeper": {"k": 0, "root": 13, "armband": 92},
-               "sleeves": "short"}
-    c.ok("oracle --replay-field: the measured table holds the judge",
-         oracle.replay_field_judge(field, fexpect, 390) == [],
-         "; ".join(oracle.replay_field_judge(field, fexpect, 390)))
-    near_next = [dict(r, next=3.0) if r["k"] == 2 else r for r in field]
-    far_behind = [dict(r, next=1.5, next_depth=6802) if r["k"] == 2 else r for r in field]
-    c.ok("oracle --replay-field: a second figure on the axis but far behind holds",
-         oracle.replay_field_judge(far_behind, fexpect, 390) == [],
-         "; ".join(oracle.replay_field_judge(far_behind, fexpect, 390)))
-    c.ok("oracle --replay-field: a second figure inside the margin fails",
-         any("under the margin" in f for f in oracle.replay_field_judge(near_next, fexpect, 390)),
-         "; ".join(oracle.replay_field_judge(near_next, fexpect, 390)))
-    unstill = [dict(r, still=None) if r["k"] == 2 else dict(r, still=3) if r["k"] == 3 else r
-               for r in field]
-    c.ok("oracle --replay-field: a focus with no still pose, or one that moved, fails",
-         sum("between the last two frames" in f
-             for f in oracle.replay_field_judge(unstill, fexpect, 390)) == 2,
-         "; ".join(oracle.replay_field_judge(unstill, fexpect, 390)))
-    counted = dict(fexpect, players={"outfield": 2, "keepers": 1})
-    c.ok("oracle --replay-field: the walk follows the expected players",
-         oracle.replay_field_judge(field, counted, 390) == [],
-         "; ".join(oracle.replay_field_judge(field, counted, 390)))
-    cut = [r for r in field if r["k"] != 2]
-    other = [dict(r, root=56) if r["k"] == 2 else r for r in field]
-    c.ok("oracle --replay-field: a walk cut short or onto another figure fails",
-         all(any("the walk follows" in f for f in oracle.replay_field_judge(t, counted, 390))
-             for t in (cut, other)),
-         "; ".join(oracle.replay_field_judge(cut, counted, 390)
-                   + oracle.replay_field_judge(other, counted, 390)))
-    wrong = [dict(r, number=12) if r["k"] == 3 else r for r in field]
-    c.ok("oracle --replay-field: the captain on another number fails",
-         any("holds number 12, not 11" in f
-             for f in oracle.replay_field_judge(wrong, fexpect, 390)))
-    c.ok("oracle --replay-field: another armband, no ball at the end and a late capture fail",
-         len(oracle.replay_field_judge(
-             [dict(r, armband=93) if r["k"] == 3 else dict(r, frames=400) if r["k"] == 2 else r
-              for r in field[:-1]], fexpect, 390)) == 3,
-         "; ".join(oracle.replay_field_judge(
-             [dict(r, armband=93) if r["k"] == 3 else dict(r, frames=400) if r["k"] == 2 else r
-              for r in field[:-1]], fexpect, 390)))
     # --edt-arms (K3D-TASK-07): an arm laid on four EDT-like pieces -- two
     # cylinders a side, the upper arm over y -40..40 and the forearm over
     # 20..120, side a below z 0 and side b its mirror -- goes on its own piece,
@@ -1454,6 +1286,226 @@ def _oracle_checks(c) -> None:
     # arm apart (CORR-K3D-012), so only the judge is exercised here.
     c.ok("oracle --edt-arms: the judge refuses an arm reported posed apart",
          len(oracle.arms_judge(seen, rule, {"upper arm a": False})) == 1)
+
+
+def _replay_checks(c) -> None:
+    """core/replay.py on figures built here, and the parts of `oracle.py
+    --replay` that read the GPU command list (KRP-TASK-01: the analysis moved to
+    the reader, the capture stays with the oracle)."""
+    oracle = c.attempt("import tools/kits/oracle.py", lambda: _kits_module("oracle"))
+    replay = c.attempt("import core/replay.py", lambda: importlib.import_module("core.replay"))
+    if oracle is None or replay is None:
+        return
+    # --replay (K3D-TASK-17): the followed figure is the nearest, a still pose
+    # differs by nothing, a shaded quad's corner colours and the drawing offset
+    # are read off the command list, the GPU's modulation explains a drawn
+    # pixel the bare texel does not, the back panel is found by texel, and the
+    # judge asks for root, head, armband, stillness, panel, number and frames.
+    def _piece(section, z, turn=0):
+        return {"section": section, "projection": {"H": 1, "OFX": 0, "OFY": 0},
+                "matrix": ((4096, 0, turn, 0, 4096, 0, 0, 0, 4096), (0, 0, z))}
+
+    near = [_piece(34, 4600), _piece(13, 4600), _piece(92, 4600)]
+    far = [_piece(46, 9000), _piece(2, 9000), _piece(3, 9000)]
+    cut = replay.replay_figures(far + near)
+    c.ok("core/replay: the frame is cut at each root, head first",
+         [[p["section"] for p in f] for f in cut] == [[46, 2, 3], [34, 13, 92]],
+         "%s" % [[p["section"] for p in f] for f in cut])
+    c.ok("core/replay: the followed figure is the nearest, the plant the next",
+         (replay.replay_focus(cut)[0]["section"], replay.replay_focus(cut, 1)[0]["section"],
+          replay.replay_focus(cut, 2)) == (34, 46, None))
+    c.ok("core/replay: one pose twice is still, a moved one is not",
+         (replay.pose_change(near, near),
+          replay.pose_change(near, [_piece(34, 4600), _piece(13, 4601), _piece(92, 4600)]))
+         == (0, 1))
+    page, clut = 0x99, (488 << 6)
+    colour = lambda r, g, b: r | g << 8 | b << 16  # noqa: E731
+    quad = [0x3C << 24 | colour(64, 64, 64), 0, (clut << 16) | 100 | 104 << 8,
+            colour(128, 128, 128), 4, (page << 16) | 104 | 104 << 8,
+            colour(64, 64, 64), 4 << 16, 100 | 108 << 8,
+            colour(128, 128, 128), 4 | 4 << 16, 104 | 108 << 8]
+    flat = [0x2C << 24 | colour(127, 127, 127), 0, (clut << 16), 1, (page << 16), 1 << 16, 0,
+            1 | 1 << 16, 0]
+    offset = 0xE5 << 24 | (256 << 11) | 0
+    read = oracle.textured_samples([quad, flat])
+    c.ok("oracle --replay: a shaded quad keeps its four corner colours, a flat one its one",
+         [s["rgb"] for s in read] == [[(64, 64, 64), (128, 128, 128), (64, 64, 64),
+                                       (128, 128, 128)], [(127, 127, 127)] * 4]
+         and read[0]["page"] == (576, 256) and read[0]["clut"] == (0, 488),
+         "%s" % [(s["rgb"], s["page"], s["clut"]) for s in read])
+    c.ok("oracle --replay: the drawing offset is read off its command, signed",
+         (oracle.draw_offset([[offset], quad]), oracle.draw_offset([[0xE5 << 24 | 0x7FF]]),
+          oracle.draw_offset([quad])) == ((0, 256), (-1, 0), None))
+    half = (lambda lo, hi: lo | hi << 8)(1, 1)
+    texture = {"pages": {"576,256,8": [half] * (replay.TEXTURE_HALFWORDS * 256)},
+               "cluts": {"0,488": [(0, 0, 0), (20, 10, 30)]}}
+    drawn = dict(read[0], rgb=[(64, 64, 64)] * 4)
+    game = [[(10, 5, 15)] * 6 for _ in range(6)]
+    seen = replay.colour_confront([drawn], {"origin": (0, 0), "rows": game}, texture,
+                                  {92: [drawn]})[92]
+    c.ok("core/replay: a pixel drawn at half colour is the modulated texel, not the bare one",
+         seen is not None and seen["shaded_far"] == 0.0 and seen["texel_far"] > 5.0,
+         "%s" % seen)
+    cells = replay.panel_samples([read[0]])
+    c.ok("core/replay: a torso quad inside the goalkeeper's cell names that panel",
+         list(cells) == [(1, 100, 104)], "%s" % list(cells))
+    expect = {"root": 13, "head": 34, "armband": 92, "replaced": 15,
+              "panel": (576, 100, 104), "number": 1}
+    good = {"focus": near, "still": 0, "turned": "back", "panel": (576, 100, 104), "number": 1,
+            "panel_failures": [], "idle": 390, "front_frames": 9, "back_frames": 60}
+    c.ok("core/replay: the measured figure holds the judge",
+         replay.judge(good, expect) == [], "; ".join(replay.judge(good, expect)))
+    c.ok("core/replay: the plant's root fails",
+         any("not at section 103" in f for f in replay.judge(good, expect, plant_root=103)))
+    c.ok("core/replay: a pose that moved, another number and a capture past the idle fail",
+         len(replay.judge(dict(good, still=3, number=5, back_frames=400), expect)) == 3,
+         "; ".join(replay.judge(dict(good, still=3, number=5, back_frames=400), expect)))
+    # --replay --focus K (K3D-TASK-19): behind a player the followed figure is
+    # the one on the axis, his panel is the cell beside the shared one, the
+    # kit is the one whose player palette he samples, and the judge asks for
+    # no armband and the slot's sleeves when the expectation says so.
+    c.ok("oracle --replay --focus: the replay as saved follows the nearest, a focus the axis",
+         (oracle.replay_chooser(0), oracle.replay_chooser(3))
+         == (oracle.replay_focus, oracle.field_focus))
+    two = {(0, 0, 80): [1, 2], (0, 60, 104): [3, 4]}
+    c.ok("core/replay: an outfield back shows the cell beside the shared one",
+         (replay.panel_cell(two, True), replay.panel_cell({(0, 0, 80): [1, 2, 3, 4]}, True),
+          replay.panel_cell({(1, 100, 104): [1, 2, 3, 4]}, False))
+         == ((0, 60, 104), (0, 0, 80), (1, 100, 104)),
+         "%s" % (replay.panel_cell(two, True),))
+    hits = [("41", 2, [[0, 486], [0, 490]], False, False),
+            ("22", 2, [[0, 487], [0, 491]], False, False)]
+    c.ok("core/replay: the kit is the one whose player palette the figure samples",
+         (replay.figure_tag(hits, {(0, 487)}), replay.figure_tag(hits, {(0, 486)}),
+          replay.figure_tag(hits, {(0, 499)})) == (("22", 1), ("41", 1), (None, None)))
+    outfield = [_piece(46, 4694), _piece(2, 4694), _piece(3, 4694), _piece(4, 4694)]
+    plain = {"root": 2, "head": 46, "armband": None, "replaced": None, "sleeves": "short",
+             "panel": (640, 80, 104), "number": 20}
+    seen = dict(good, focus=outfield, panel=(640, 80, 104), number=20)
+    c.ok("core/replay: a player without the armband holds the judge",
+         replay.judge(seen, plain) == [], "; ".join(replay.judge(seen, plain)))
+    banded = dict(seen, focus=[_piece(46, 4694), _piece(2, 4694), _piece(3, 4694),
+                               _piece(90, 4694)])
+    c.ok("core/replay: an armband where none is expected, and long sleeves, fail",
+         len(replay.judge(banded, dict(plain, sleeves="long"))) == 2,
+         "; ".join(replay.judge(banded, dict(plain, sleeves="long"))))
+    # --replay-field (K3D-TASK-18): the sleeves and armband are read off the
+    # sections, and the judge asks for the followed figure clear of the next
+    # one, the camera back on the ball, the captain's armband and number, the
+    # goalkeeper's armband and every capture under the idle.
+    on_axis = [[_piece(46, 3600), dict(_piece(2, 3600), matrix=((4096, 0, 0, 0, 4096, 0, 0, 0, 4096),
+                                                                (600, 0, 3600)))],
+               [_piece(24, 4700), _piece(2, 4700)]]
+    c.ok("core/replay: the followed figure is on the axis, not the nearest",
+         (replay.field_focus(on_axis)[0]["section"], replay.field_focus(on_axis, 1)[0]["section"])
+         == (24, 46))
+    shared_rows = [{"follows": True, "root": 2, "page": 640, "cells": {"0,0,80": 2, "0,60,104": 2}},
+                   {"follows": True, "root": 2, "page": 640, "cells": {"0,0,80": 4}},
+                   {"follows": True, "root": 13, "page": 640, "cells": {"1,100,104": 4}}]
+    replay.field_panels(shared_rows)
+    c.ok("core/replay: the panel is the cell left once the shared one is taken away",
+         [r["panel"] for r in shared_rows] == [(640, 60, 104), (640, 0, 80), (640, 100, 104)],
+         "%s" % [r["panel"] for r in shared_rows])
+    c.ok("core/replay: short and long sleeves and the armband are read off the sections",
+         (replay.sleeves_of([46, 2, 3, 5, 90, 6]), replay.sleeves_of([46, 2, 95, 97, 93, 98]),
+          replay.sleeves_of([34, 13, 14, 16, 92]), replay.armband_of([46, 2, 3, 5, 90, 6]),
+          replay.armband_of([46, 2, 3, 5, 4, 6])) == ("short", "long", None, 90, None))
+
+    def _row(k, **kw):
+        base = {"k": k, "follows": True, "depth": 4695, "off": 1.0, "next": 80.0,
+                "next_depth": 4900, "root": 2,
+                "armband": None, "number": 7, "frames": 70, "still": 0}
+        base.update(kw)
+        return base
+
+    field = [_row(0, follows=False, root=13, armband=92, depth=4681, next=None),
+             _row(1, follows=False, root=13, armband=92, depth=6059, next=None),
+             _row(2), _row(3, armband=90, number=11),
+             _row(4, root=13, armband=92, number=1),
+             _row(5, follows=False, depth=6100, end="ball")]
+    fexpect = {"captain": {"armband": 90, "number": 11}, "keeper": {"k": 0, "root": 13, "armband": 92},
+               "sleeves": "short"}
+    c.ok("core/replay: the measured table holds the judge",
+         replay.judge_walk(field, fexpect, 390) == [],
+         "; ".join(replay.judge_walk(field, fexpect, 390)))
+    near_next = [dict(r, next=3.0) if r["k"] == 2 else r for r in field]
+    far_behind = [dict(r, next=1.5, next_depth=6802) if r["k"] == 2 else r for r in field]
+    c.ok("core/replay: a second figure on the axis but far behind holds",
+         replay.judge_walk(far_behind, fexpect, 390) == [],
+         "; ".join(replay.judge_walk(far_behind, fexpect, 390)))
+    c.ok("core/replay: a second figure inside the margin fails",
+         any("under the margin" in f for f in replay.judge_walk(near_next, fexpect, 390)),
+         "; ".join(replay.judge_walk(near_next, fexpect, 390)))
+    unstill = [dict(r, still=None) if r["k"] == 2 else dict(r, still=3) if r["k"] == 3 else r
+               for r in field]
+    c.ok("core/replay: a focus with no still pose, or one that moved, fails",
+         sum("between the last two frames" in f
+             for f in replay.judge_walk(unstill, fexpect, 390)) == 2,
+         "; ".join(replay.judge_walk(unstill, fexpect, 390)))
+    counted = dict(fexpect, players={"outfield": 2, "keepers": 1})
+    c.ok("core/replay: the walk follows the expected players",
+         replay.judge_walk(field, counted, 390) == [],
+         "; ".join(replay.judge_walk(field, counted, 390)))
+    cut = [r for r in field if r["k"] != 2]
+    other = [dict(r, root=56) if r["k"] == 2 else r for r in field]
+    c.ok("core/replay: a walk cut short or onto another figure fails",
+         all(any("the walk follows" in f for f in replay.judge_walk(t, counted, 390))
+             for t in (cut, other)),
+         "; ".join(replay.judge_walk(cut, counted, 390)
+                   + replay.judge_walk(other, counted, 390)))
+    wrong = [dict(r, number=12) if r["k"] == 3 else r for r in field]
+    c.ok("core/replay: the captain on another number fails",
+         any("holds number 12, not 11" in f
+             for f in replay.judge_walk(wrong, fexpect, 390)))
+    c.ok("core/replay: another armband, no ball at the end and a late capture fail",
+         len(replay.judge_walk(
+             [dict(r, armband=93) if r["k"] == 3 else dict(r, frames=400) if r["k"] == 2 else r
+              for r in field[:-1]], fexpect, 390)) == 3,
+         "; ".join(replay.judge_walk(
+             [dict(r, armband=93) if r["k"] == 3 else dict(r, frames=400) if r["k"] == 2 else r
+              for r in field[:-1]], fexpect, 390)))
+    # Capture.load (KRP-TASK-01): a v0 close capture names its slot and focus
+    # only in its file name, and comes back as v1 with typed tuples; one
+    # lacking a key the analysis reads is refused on that key.
+    sample = {"code": 0x3C, "page": [576, 256], "bits": 8, "clut": [0, 488],
+              "uv": [[100, 104]] * 4, "xy": [[1, 2]] * 4, "rgb": [[64, 64, 64]] * 4}
+    pose = {"events": [], "lists": {"7": [sample]}, "offsets": {"7": [0, 256]}}
+    v0 = {"front": pose, "back": None, "front_frames": 9, "back_frames": 60,
+          "turn_frames": 80, "rotate": "R1", "yaws": [], "turned": "back",
+          "hits": [["41", 2, [[0, 486]], False, False]], "pages": {},
+          "buffer": {"origin": [0, 0], "offset": [0, 256], "rows": [[[1, 2, 3]]]},
+          "texture": {"pages": {}, "cluts": {"0,488": [[1, 2, 3]]}}}
+    import copy as _copy
+    got = replay.Capture.from_dict(_copy.deepcopy(v0), "replay-10-3.json")
+    c.ok("core/replay: a v0 close capture comes back as v1, slot and focus off its name",
+         (got.schema, got.kind, got.slot, got.focus, got.button, got.taps)
+         == (1, "close", 10, 3, "L2", 3)
+         and got.data["front"]["lists"]["7"][0]["page"] == (576, 256)
+         and got.data["hits"][0][2] == [(0, 486)] and got.data["buffer"]["origin"] == (0, 0),
+         "%s" % ((got.schema, got.kind, got.slot, got.focus, got.button, got.taps),))
+    walk = replay.Capture.from_dict({"slot": 9, "button": "L2", "pages": {}, "foci": [
+        {"k": 0, "moves": [], "refused": None, "frames": 70, "capture": _copy.deepcopy(pose),
+         "followed": False},
+        {"k": 1, "moves": [0.5], "refused": "the screen did not move"}]}, "walk.json")
+    c.ok("core/replay: a walk capture comes back as v1, its taps the last k",
+         (walk.schema, walk.kind, walk.slot, walk.focus, walk.button, walk.taps)
+         == (1, "walk", 9, None, "L2", 1))
+    lacking = _copy.deepcopy(v0)
+    del lacking["turned"]
+    c.refuses("core/replay: a capture lacking a key is refused, naming the key",
+              lambda: replay.Capture.from_dict(lacking, "replay-9.json"),
+              "lacks the key 'turned'", replay.ReplayError)
+    seen_figure = replay.replay_figures([_piece(46, 4694), _piece(2, 4694), _piece(95, 4694),
+                                         _piece(93, 4694), _piece(46, 9000),
+                                         _piece(13, 9000)])
+    c.ok("core/replay: a figure says its family, sleeves, armband and pose",
+         [(f.head, f.root, f.family, f.sleeves, f.armband) for f in seen_figure]
+         == [(46, 2, "outfield", "long", 93), (46, 13, "goalkeeper", None, None)]
+         and seen_figure[0].pose()["pieces"][3] == {"section": 93,
+                                                    "rotation": [4096, 0, 0, 0, 4096, 0,
+                                                                 0, 0, 4096],
+                                                    "translation": [0, 0, 4694]},
+         "%s" % [(f.head, f.root, f.family, f.sleeves, f.armband) for f in seen_figure])
 
 
 def _live_guard_checks(c) -> None:
@@ -1518,6 +1570,7 @@ def run(verbose: bool = True, plant: bool = True) -> int:
         total += harness.run("dressings", _dress_checks, verbose)
         total += harness.run("confront 2", _confront2_checks, verbose)
         total += harness.run("oracle", _oracle_checks, verbose)
+        total += harness.run("replay", _replay_checks, verbose)
         total += harness.run("live guard", _live_guard_checks, verbose)
         if plant:
             total += harness.run("controls", _negative, verbose)
@@ -1787,6 +1840,50 @@ def _figure_cli_checks(c, image_path, kit, geometry) -> None:
          and by_name["--kit", "home"] != by_name["--kit", "away"], str(by_name))
 
 
+REPLAY_DIR_VARIABLE = "WE2002_KITS_REPLAY_DIR"
+"""The folder the replay captures of the kits-3d cycle were kept in
+(`work/kits-oracle/`)."""
+REPLAY_CAPTURES = {
+    "replay-9.json": ("close", 9, 0, None, 0),
+    "replay-9-3.json": ("close", 9, 3, "L2", 3),
+    "replay-10.json": ("close", 10, 0, None, 0),
+    "replay-10-2.json": ("close", 10, 2, "L2", 2),
+    "replay-10-3.json": ("close", 10, 3, "L2", 3),
+    "replay-field-9-capture.json": ("walk", 9, None, "L2", 24),
+    "replay-field-10-capture.json": ("walk", 10, None, "L2", 24),
+}
+"""File -> (kind, slot, focus, button, taps) `Capture.load` has to give on
+the seven captures: five up close (`oracle.py --replay SLOT [--focus K]`) and
+the two walks (`--replay-field SLOT`, 25 foci, k 0 to 24).  Constants, not
+read off the captures (K1)."""
+
+
+def _replay_capture_checks(c, folder) -> None:
+    """Capture.load on the captures kept in *folder*: schema 1 and the fixed
+    keys of PLAN-KITS-REPLAY section 2.1, with each file's sha256."""
+    import hashlib
+
+    from core import replay
+
+    for name, want in REPLAY_CAPTURES.items():
+        path = os.path.join(folder, name)
+        if not os.path.isfile(path):
+            c.fail("%s: no capture at %s" % (name, path))
+            continue
+        with open(path, "rb") as fh:
+            digest = hashlib.sha256(fh.read()).hexdigest()
+        got = c.attempt("Capture.load(%s)" % name, lambda p=path: replay.Capture.load(p))
+        if got is None:
+            continue
+        seen = (got.kind, got.slot, got.focus, got.button, got.taps)
+        c.ok("Capture.load(%s): schema 1, %s" % (name, " ".join(map(str, want))),
+             got.schema == 1 and seen == want
+             and all(k in got.data for k in ("schema", "kind", "slot", "focus", "button",
+                                             "taps")),
+             "schema %s, %s" % (got.schema, seen))
+        print("  ..... %s sha256 %s" % (name, digest))
+
+
 def run_image(verbose: bool = True) -> int:
     """`kits_image`: 77 when the variable is not set, else the failure count
     (as 0 or 1).  Set and pointing at no file is a failure, not a skip: the
@@ -1802,6 +1899,11 @@ def run_image(verbose: bool = True) -> int:
         return 1
     total = harness.run("kits_image", _image_checks, verbose, image_path=image_path)
     total += harness.run("figure", _figure_checks, verbose, image_path=image_path)
+    folder = os.environ.get(REPLAY_DIR_VARIABLE)
+    if folder:
+        total += harness.run("replay captures", _replay_capture_checks, verbose, folder=folder)
+    else:
+        print("replay captures: not read -- %s is not set" % REPLAY_DIR_VARIABLE)
     return 1 if total else 0
 
 

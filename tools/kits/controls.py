@@ -303,10 +303,10 @@ CONTROLS = (
         "until CORR-K3D-020 any number the rule read passed",
     ),
     Control(
-        "oracle-replay-focus-unasked", "kits/oracle.py", "replay_focus",
+        "replay-focus-unasked", "kits/core/replay.py", "replay_focus",
         "    ranked = sorted(figures, key=figure_depth)",
         "    ranked = list(figures)",
-        "FAIL  oracle --replay: the followed figure is the nearest, the plant the next",
+        "FAIL  core/replay: the followed figure is the nearest, the plant the next",
         "the replay's camera follows one player, and the nearest figure is the one it "
         "follows (G8, K3D-TASK-17); taking the frame's first figure measures another",
     ),
@@ -319,35 +319,35 @@ CONTROLS = (
         "K3D-TASK-17); reading only the first would call every quad flat",
     ),
     Control(
-        "oracle-replay-modulation-ignored", "kits/oracle.py", "colour_confront",
+        "replay-modulation-ignored", "kits/core/replay.py", "colour_confront",
         "                shaded = tuple(min(31, int(t * c / NEUTRAL)) for t, c in zip(texel, colour))",
         "                shaded = texel",
-        "FAIL  oracle --replay: a pixel drawn at half colour is the modulated texel, not the bare one",
+        "FAIL  core/replay: a pixel drawn at half colour is the modulated texel, not the bare one",
         "the confront says whether the GPU's modulation is what the 3D tab lacks (G8, "
         "K3D-TASK-17); a modulated column equal to the bare texel cannot tell",
     ),
     Control(
-        "oracle-replay-field-margin-unasked", "kits/oracle.py", "replay_field_judge",
+        "replay-field-margin-unasked", "kits/core/replay.py", "judge_walk",
         '                and abs(r["next_depth"] - r["depth"]) < REPLAY_FOCUS_MARGIN[1]:',
         "                and False:",
-        "FAIL  oracle --replay-field: a second figure inside the margin fails",
+        "FAIL  core/replay: a second figure inside the margin fails",
         "behind a player the frame holds a dozen figures, and the one on the camera's axis "
         "is the followed one only if the next lies a margin off it (G8, K3D-TASK-18, "
         "CORR-K3D-024)",
     ),
     Control(
-        "oracle-replay-field-still-unasked", "kits/oracle.py", "replay_field_judge",
+        "replay-field-still-unasked", "kits/core/replay.py", "judge_walk",
         '        if r.get("frames") is not None and (r.get("still") is None or r["still"] > REPLAY_STILL):',
         "        if False:",
-        "FAIL  oracle --replay-field: a focus with no still pose, or one that moved, fails",
+        "FAIL  core/replay: a focus with no still pose, or one that moved, fails",
         "the table asks each focus for the still pose of the paused replay; a capture of "
         "one whole frame prints None there, and nothing judged it (G8, CORR-K3D-026)",
     ),
     Control(
-        "oracle-replay-field-players-unasked", "kits/oracle.py", "replay_field_judge",
+        "replay-field-players-unasked", "kits/core/replay.py", "judge_walk",
         '        if (outfield, keepers, others) != (players["outfield"], players["keepers"], 0):',
         "        if False:",
-        "FAIL  oracle --replay-field: a walk cut short or onto another figure fails",
+        "FAIL  core/replay: a walk cut short or onto another figure fails",
         "a tap that lands the camera on another figure off the axis reads as the ball, and "
         "the walk ends early with an ok (G8, CORR-K3D-030)",
     ),
@@ -368,18 +368,18 @@ CONTROLS = (
         "measurement enters (CORR-K3D-031)",
     ),
     Control(
-        "oracle-replay-field-shared-panel", "kits/oracle.py", "field_panels",
+        "replay-field-shared-panel", "kits/core/replay.py", "field_panels",
         '        own = sorted(set(r["cells"]) - shared.get(r["page"], set())) or sorted(r["cells"])',
         '        own = sorted(r["cells"])',
-        "FAIL  oracle --replay-field: the panel is the cell left once the shared one is taken away",
+        "FAIL  core/replay: the panel is the cell left once the shared one is taken away",
         "every outfield back also samples one cell all of a page share (G8, K3D-TASK-18); "
         "keeping every cell names no single panel for the player",
     ),
     Control(
-        "oracle-replay-field-nearest-followed", "kits/oracle.py", "field_focus",
+        "replay-field-nearest-followed", "kits/core/replay.py", "field_focus",
         "    ranked = sorted(figures, key=figure_off_axis)",
         "    ranked = sorted(figures, key=figure_depth)",
-        "FAIL  oracle --replay-field: the followed figure is on the axis, not the nearest",
+        "FAIL  core/replay: the followed figure is on the axis, not the nearest",
         "behind a player a figure running between him and the camera lies nearer than he "
         "does; the camera keeps the followed one on its axis (G8, K3D-TASK-18)",
     ),
@@ -392,18 +392,18 @@ CONTROLS = (
         "(K3D-TASK-18); --replay --focus takes the figure on the axis (G8, K3D-TASK-19)",
     ),
     Control(
-        "oracle-replay-shared-cell-kept", "kits/oracle.py", "panel_cell",
+        "replay-shared-cell-kept", "kits/core/replay.py", "panel_cell",
         "    own = [c for c in cells if c != REPLAY_SHARED_CELL] if outfield else []",
         "    own = []",
-        "FAIL  oracle --replay --focus: an outfield back shows the cell beside the shared one",
+        "FAIL  core/replay: an outfield back shows the cell beside the shared one",
         "an outfield back samples the shared cell as much as its own (two quads each); "
         "the most quads names no single panel (G8, K3D-TASK-19)",
     ),
     Control(
-        "oracle-replay-sleeves-unjudged", "kits/oracle.py", "replay_judge",
+        "replay-sleeves-unjudged", "kits/core/replay.py", "judge",
         '    if expect.get("sleeves") and sleeves_of(order) != expect["sleeves"]:',
         "    if False:",
-        "FAIL  oracle --replay --focus: an armband where none is expected, and long sleeves, fail",
+        "FAIL  core/replay: an armband where none is expected, and long sleeves, fail",
         "the sleeves are per slot -- short in 9, long in 10 -- and the judge holds the "
         "followed player to them (G8, K3D-TASK-19)",
     ),
@@ -488,6 +488,22 @@ CONTROLS = (
         "FAIL  ui/app.py shows no text outside tr()",
         "a literal in a setText is window text that no language switch reaches: "
         "the AST sweep is the only thing that says so (KITS-TASK-36)",
+    ),
+    Control(
+        "replay-key-check", "kits/core/replay.py", "_require",
+        "        if key not in data:\n",
+        "        if False:\n",
+        "FAIL  core/replay: a capture lacking a key is refused, naming the key",
+        "a capture without a key the analysis reads has to be refused on that key, not "
+        "fail three calls later on a KeyError (KRP-TASK-01)",
+    ),
+    Control(
+        "replay-v0-slot", "kits/core/replay.py", "Capture.from_dict",
+        "            slot = int(found.group(1))\n",
+        "            slot = int(found.group(1)) - 1\n",
+        "FAIL  core/replay: a v0 close capture comes back as v1, slot and focus off its name",
+        "a v0 close capture says its slot only in its file name; the migration to v1 "
+        "is what puts it in the capture (KRP-TASK-01)",
     ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
