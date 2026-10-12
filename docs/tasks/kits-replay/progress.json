@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "cycle": "kits-replay",
+  "prefix": "KRP",
+  "plan": "/docs/PLAN-KITS-REPLAY.md",
+  "ticket": null,
+  "local": false,
+  "tasks": []
+}
