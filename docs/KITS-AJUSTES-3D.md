@@ -1453,3 +1453,8 @@ decisão nova, datada:
 - o §0: nada de geometria inventada nem de UV remapeado à mão;
 - o desenho por `QPainter` em software;
 - o catálogo i18n como fonte única de texto da interface.
+
+**O insumo do ciclo seguinte (2026-10-12).** G7 e G8 foram investigações; o que delas vira desenho
+— goleiro pela família 13, cabeça por jogador, pose de corrida — e o projeto de uma ferramenta de
+leitura do jogador no replay estão resumidos em [KITS-REPLAYS-9-10](/docs/KITS-REPLAYS-9-10.md),
+com o retro do ciclo em [retro.md](/docs/tasks/kits-3d/retro.md).
