@@ -64,3 +64,34 @@ grep -c 'git archive fffa211a' docs/tasks/kits-replay/02-oracle-py-importa-o-lei
 Hoje dá 0. Depois do conserto dá ≥1, e o heredoc com a função `o()` aparece junto.
 
 ## Log de Execução
+
+2026-10-12 — reproduzida (`rite reproduce CORR-KRP-002`): `git ls-files work/krp02 | wc -l` dá
+`0`, e `grep -c 'git archive fffa211a'` no arquivo da KRP-TASK-02 dá `0`.
+
+Caminho escolhido: o primeiro, sem versionar o harness. Adendo "Adendo (CORR-KRP-002): como a
+comparação se refaz" no Log da KRP-TASK-02, antes da linha `Closed`, com o corpo do `run.sh` num
+heredoc e os passos que montam as duas árvores (`git archive fffa211a` e `git archive 09203255`,
+com `work/` e `roms/` ligados para dentro).
+
+Antes de escrever, refiz a comparação no scratchpad: o `run.sh` reescrito é idêntico ao de
+`work/krp02/` (`cmp` sem saída), e as duas árvores rodaram com ele, saindo `same` nos 14. `grep -c
+FAIL` dá 4 (`plant-9`), 6 (`plant-9-3`), 49 (`plant-field-9`), 47 (`focus`) e 1 (`panel`), com
+`exit 1`; as nove leituras saem `exit 0`, sem `FAIL`. Os passos dessa corrida usavam um laço sobre
+`before:fffa211a after:09203255`; no adendo eles aparecem como duas linhas de `git archive`
+explícitas, que dão a mesma árvore (o `oracle.py` de `09203255` é igual ao da HEAD, por `cmp`; o
+`--stat` entre as duas árvores dá `22 insertions(+), 749 deletions(-)`, o mesmo do Log).
+Controle do laço de `diff`: acrescentar um `x` a uma cópia de `out-after/replay-9.txt` dá uma linha
+`DIFF`, a de `replay-9.txt`.
+
+Verificação:
+
+```text
+$ grep -c 'git archive fffa211a' docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md
+1
+$ grep -c 'o() {' docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md
+1
+```
+
+Gates (`rite gates --cycle kits-replay --id CORR-KRP-002`): `ctest --test-dir build -R kits` —
+`100% tests passed, 0 tests failed out of 4` (`kits_image` e `kits_ui` *skipped*); `python3
+tools/kits/controls.py` — `controls: 56 of 56 red`.

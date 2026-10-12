@@ -124,6 +124,57 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE
 $ python3 tools/kits/controls.py
 controls: 56 of 56 red
 ```
+#### Adendo (CORR-KRP-002): como a comparação se refaz
+
+As linhas `$` acima são os argumentos; quem as roda e grava um `.txt` por comando é o script
+abaixo (era `work/krp02/run.sh`, fora do git). Cada arquivo leva stdout e stderr do oracle e,
+no fim, a linha `exit N`.
+
+```sh
+cat > run.sh <<'EOF'
+#!/bin/sh
+# KRP-TASK-02: the oracle's replay readings off the kept captures, one file each, into $1
+out=$1; mkdir -p "$out"
+export WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin DISPLAY=:98 XAUTHORITY=
+D=work/kits-oracle
+o() { name=$1; shift; python3 tools/kits/oracle.py "$@" > "$out/$name.txt" 2>&1; echo "exit $?" >> "$out/$name.txt"; }
+o replay-9 --replay 9 --frame-json $D/replay-9.json
+o replay-10 --replay 10 --frame-json $D/replay-10.json
+o replay-9-3 --replay 9 --focus 3 --frame-json $D/replay-9-3.json
+o replay-10-3 --replay 10 --focus 3 --frame-json $D/replay-10-3.json
+o replay-10-2 --replay 10 --focus 2 --frame-json $D/replay-10-2.json
+o field-9 --replay-field 9 --frame-json $D/replay-field-9-capture.json
+o field-10 --replay-field 10 --frame-json $D/replay-field-10-capture.json
+o confront-9 --replay-confront 9 --frame-json $D/replay-9.json
+o confront-10 --replay-confront 10 --frame-json $D/replay-10.json
+o plant-9 --replay 9 --frame-json $D/replay-9.json --plant-replay
+o plant-9-3 --replay 9 --focus 3 --frame-json $D/replay-9-3.json --plant-replay
+o plant-field-9 --replay-field 9 --frame-json $D/replay-field-9-capture.json --plant-replay-field
+o plant-field-9-focus --replay-field 9 --frame-json $D/replay-field-9-capture.json --plant-replay-field focus
+o plant-field-9-panel --replay-field 9 --frame-json $D/replay-field-9-capture.json --plant-replay-field panel
+EOF
+```
+
+As duas árvores saem do git, cada uma com `work/` e `roms/` do clone ligados para dentro (as
+capturas `work/kits-oracle/*.json` e a imagem não são versionadas), e o script roda de dentro de
+cada uma — "antes" é `fffa211a`, "depois" é `09203255`, o commit da task (`git diff --stat
+09203255 HEAD -- tools/` vazio quando isto foi escrito):
+
+```sh
+T=<scratch>; R=$PWD
+mkdir -p $T/before $T/after
+git archive fffa211a | tar -x -C $T/before
+git archive 09203255 | tar -x -C $T/after
+for n in before after; do ln -s $R/work $T/$n/work; ln -s $R/roms $T/$n/roms; done
+(cd $T/before && sh $R/run.sh $T/out-before)
+(cd $T/after && sh $R/run.sh $T/out-after)
+for f in $T/out-before/*.txt; do n=$(basename $f); diff -q $f $T/out-after/$n >/dev/null && echo "same $n" || echo "DIFF $n"; done
+```
+
+Refeito assim em 2026-10-12, com o `run.sh` acima idêntico ao de `work/krp02/` (`cmp`): "same"
+nos 14, e `grep -c FAIL` dá 4, 6, 49, 47 e 1 nas cinco plantas, como no texto acima. Controle do
+laço: um `x` acrescentado a uma cópia de `out-after/replay-9.txt` dá `DIFF replay-9.txt`, só ele.
+
 - **Closed** — commit `09203255` (2026-10-12): refactor(kits): oracle.py imports the replay reader, analysis moved
   - Files (`git show --name-status 09203255`):
     - `M docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md`
