@@ -1171,6 +1171,10 @@ $ python3 tools/kits/oracle.py --replay 9 --focus 3 --frame-json work/kits-oracl
     frame 0: 3 figure(s), depths 4694 6802 13057; followed at 4694, 0.6 px off the axis
     frame 1: 3 figure(s), depths 4694 6802 13057; followed at 4694, 0.6 px off the axis
   followed figure, head first: 46 2 3 5 90 6 7 9 11 8 10  (one more piece the draw lag leaves unnamed)
+  every figure of the last frame, nearest the axis first:
+    depth  4694,   0.6 px off the axis: 46 2 3 5 90 6 7 9 11 8 10  (followed)
+    depth  6802,   4.0 px off the axis: 34 2 3 5 4 6 7 9 11 8 10 12
+    depth 13057,  34.2 px off the axis: 34 13 14 16 92 17 18 20 11 19 21 12
   still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
   pose kept at work/kits-pose/slot9-focus3-first.json (projection H 1376, OFX 0.0, OFY 0.0)
   113 quad(s) of the frame inside the figure's box (-43,-13)-(41,115); mean pixels off the frame, by section: 46:0.95 2:0.89 3:1.07 5:9.35 90:0.93 6:1.08 7:12.74 9:1.06 11:21.95 8:13.13 10:10.86
@@ -1227,6 +1231,10 @@ $ python3 tools/kits/oracle.py --replay 10 --focus 3 --frame-json work/kits-orac
     frame 0: 3 figure(s), depths 3907 4699 9241; followed at 4699, 1.2 px off the axis
     frame 1: 3 figure(s), depths 3907 4699 9241; followed at 4699, 1.2 px off the axis
   followed figure, head first: 46 2 95 96 93 98 7 9 11 8 10  (one more piece the draw lag leaves unnamed)
+  every figure of the last frame, nearest the axis first:
+    depth  4699,   1.2 px off the axis: 46 2 95 96 93 98 7 9 11 8 10  (followed)
+    depth  9241,  63.6 px off the axis: 34 13 14 16 92 17 18 20 11 19 21 12
+    depth  3907,  63.9 px off the axis: 34 2 95 96 97 98 7 9 11 8 10 12
   still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
   pose kept at work/kits-pose/slot10-focus3-first.json (projection H 1376, OFX 0.0, OFY 0.0)
   85 quad(s) of the frame inside the figure's box (-46,-9)-(43,102); mean pixels off the frame, by section: 46:0.92 2:0.82 95:14.86 96:18.14 93:0.97 98:0.91 7:0.92 9:0.81 11:1.10 8:0.98 10:0.78
@@ -1283,6 +1291,9 @@ $ python3 tools/kits/oracle.py --replay 10 --focus 2 --frame-json work/kits-orac
     frame 0: 2 figure(s), depths 3886 4699; followed at 4699, 4.4 px off the axis
     frame 1: 2 figure(s), depths 3886 4699; followed at 4699, 4.4 px off the axis
   followed figure, head first: 46 2 95 96 97 98 7 9 11 8 10  (one more piece the draw lag leaves unnamed)
+  every figure of the last frame, nearest the axis first:
+    depth  4699,   4.4 px off the axis: 46 2 95 96 97 98 7 9 11 8 10  (followed)
+    depth  3886, 119.9 px off the axis: 34 2 95 96 97 98 7 9 11 8 10 12
   still pose: the followed figure's matrices differ by 0 between the last two frames (limit 0)
   pose kept at work/kits-pose/slot10-focus2-first.json (projection H 1376, OFX 0.0, OFY 0.0)
   89 quad(s) of the frame inside the figure's box (-41,-9)-(41,103); mean pixels off the frame, by section: 46:1.04 2:0.94 95:1.03 96:0.97 97:0.97 98:0.92 7:0.86 9:0.91 11:0.98 8:1.07 10:1.02
@@ -1368,7 +1379,8 @@ $ python3 tools/kits/oracle.py --replay 9 --focus 3 --frame-json work/kits-oracl
 Os itens 4 a 7 da K3D-TASK-17, para o capitão de linha:
 
 4. **A faixa e os braços na lista do jogo.** Manga curta (slot 9): a faixa é a **90**, no lugar da
-   seção **4** (a ordem do Bokšić é `46 2 3 5 90 6 …`, a de um jogador sem faixa `46 2 3 5 4 6 …`), dois
+   seção **4** (a ordem do Bokšić é `46 2 3 5 90 6 …`; a do vizinho brasileiro sem faixa, a única outra figura de
+   linha do quadro, é `34 2 3 5 4 6 …`, na linha `every figure of the last frame` acima), dois
    quads na zona "armband, short sleeve" do bitmap de mangas, CLUT (0,487), página (640,256). Manga
    longa (slot 10): a faixa é a **93**, no lugar da **97** (`46 2 95 96 93 98 …`, contra
    `46 2 95 96 97 98 …` do Balaban), quatro quads na zona "armband, long sleeve", mesma CLUT e página;
@@ -1386,7 +1398,8 @@ Os itens 4 a 7 da K3D-TASK-17, para o capitão de linha:
    2,59). O erro de encaixe por seção fica perto de 1 px no Balaban, inclusive nas mangas 95 a 98 (1,03
    0,97 0,97 0,92), e passa de 9 px em seções do Bokšić (5, 7, 8, 10, 11 no slot 9; 95 e 96 no 10). Isso
    **não é da geometria**: nos dois quadros do Bokšić há um vizinho brasileiro sobre ele na tela (slot
-   9: a 4,0 px do eixo, 6802 de profundidade; slot 10: a 3907, à frente dele), e os quads do vizinho
+   9: a 4,0 px do eixo, 6802 de profundidade; slot 10: a 3907, à frente dele — as linhas `every figure
+   of the last frame` das duas saídas), e os quads do vizinho
    entram na caixa da figura; é a mesma razão de a CLUT (0,486), a paleta do TEX_41 (Brasil), aparecer
    nas seções dele — o Balaban, sozinho no quadro, só amostra a (0,487). (b) A paleta do disco que a
    aba usa (`TEX_22`, registro 2) é a do jogo: 0 de 256 diferentes na (0,487). A figura da aba contra a

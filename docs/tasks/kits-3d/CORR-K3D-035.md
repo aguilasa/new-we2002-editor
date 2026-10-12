@@ -55,3 +55,34 @@ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/oracle.py
 Hoje falha nas duas metades; depois, passa.
 
 ## Log de Execução
+
+### 2026-10-12 — toda figura do quadro impressa pelo `--replay --focus`
+
+Triagem inline (`rite reproduce --all --cycle kits-3d`): **REPRODUCED** na HEAD `d348951`. O `grep`
+achou as linhas 1371 (`46 2 3 5 4 6`) e 1389 (`4,0 px`), e o `--replay 9 --focus 3` contou `0` linhas
+com `4.0 px`.
+
+Conserto: com `--focus`, o `run_replay` de `tools/kits/oracle.py` imprime `every figure of the last
+frame, nearest the axis first:`, uma linha por figura com profundidade, px fora do eixo e seções a
+partir da cabeça, e marca a seguida. É a sonda do revisor, agora como saída da opção.
+
+Medido, com `WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin` e `--frame-json work/kits-oracle/replay-<slot>-<K>.json`:
+- `--replay 9 --focus 3`: `depth  6802,   4.0 px off the axis: 34 2 3 5 4 6 7 9 11 8 10 12`;
+- `--replay 10 --focus 3`: `depth  3907,  63.9 px off the axis: 34 2 95 96 97 98 7 9 11 8 10 12`;
+- `--replay 10 --focus 2`: `depth  3886, 119.9 px off the axis: 34 2 95 96 97 98 …`.
+
+O vizinho sem faixa do slot 9 tem cabeça **34**, não 46.
+
+G8:
+- as três saídas foram recoladas;
+- o bloco da planta continua só com as linhas `PLANT` e `FAIL`, como era;
+- o item 4 diz `34 2 3 5 4 6 …` do vizinho brasileiro e remete à linha impressa;
+- o item 7 cita as linhas `every figure of the last frame` para os 4,0 px e os 3907.
+
+Verificação: o comando da CORR (`… | grep -q '4.0 px' && ! grep -q '46 2 3 5 4 6' docs/KITS-AJUSTES-3D.md`)
+sai 0.
+
+Gates:
+- `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
+  `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
+- `python3 tools/kits/controls.py`: `controls: 53 of 53 red`.

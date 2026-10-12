@@ -3584,6 +3584,12 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
     if focus is not None:
         print("  followed figure, head first: %s  (one more piece the draw lag leaves unnamed)"
               % " ".join(str(p["section"]) for p in focus))
+    if focus_k and frames:
+        print("  every figure of the last frame, nearest the axis first:")
+        for figure in sorted(frames[-1]["figures"], key=figure_off_axis):
+            print("    depth %5.0f, %5.1f px off the axis: %s%s" % (figure_depth(figure), figure_off_axis(figure),
+                                            " ".join(str(p["section"]) for p in figure),
+                                            "  (followed)" if figure is focus else ""))
     still = None
     if len(frames) >= 2 and frames[-2]["focus"] is not None and focus is not None:
         still = pose_change(frames[-2]["focus"], focus)
