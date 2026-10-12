@@ -1145,8 +1145,8 @@ O que as duas tabelas dizem, uma conclusão por vez:
    still pose: 0`, nas três saídas acima): com o replay pausado, nenhum dos 22 se mexe. O juiz falha
    num foco com `still` acima de `REPLAY_STILL` (0) ou em `None`. Uma corrida com um controle físico
    ligado à máquina mostrou que ele pega movimento de verdade: o `[Pad1]` do DuckStation é `SDL-0`, os
-   toques do controle chegaram ao replay, e o k = 0 do slot 9 saiu `still 282` sem toque nenhum
-   (CORR-K3D-031).
+   toques do controle chegaram ao replay, e o k = 0 do slot 9 saiu `still 282` sem toque nenhum.
+   Desde a CORR-K3D-031 o oráculo recusa correr com um controle ligado (`fork.refuse_joysticks`).
 
 O controle `--plant-replay-field` (as duas metades) sai 1 com 49 `FAIL`; sozinha, cada metade derruba
 o seu: `--plant-replay-field focus` (a figura seguinte do eixo) sai 1 com os `FAIL` de eixo, de pose parada e de
