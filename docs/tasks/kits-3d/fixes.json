@@ -404,6 +404,58 @@
       "depends_on": [],
       "done_on": "2026-10-12",
       "done_commit": "bfda5b23"
+    },
+    {
+      "id": "CORR-K3D-032",
+      "file": "CORR-K3D-032.md",
+      "title": "G8 diz que Bokšić e Balaban pintam a cabeça pela mesma CLUT, e a saída mostra CLUTs diferentes",
+      "origin": "K3D-TASK-19",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-033",
+      "file": "CORR-K3D-033.md",
+      "title": "Linhas $ do --replay --focus no G8 sem --frame-json não produzem a saída colada",
+      "origin": "K3D-TASK-19",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-034",
+      "file": "CORR-K3D-034.md",
+      "title": "Item 7 do G8 generaliza \"texel puro em toda seção\" e chama de frente a comparação com as costas",
+      "origin": "K3D-TASK-19",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K3D-035",
+      "file": "CORR-K3D-035.md",
+      "title": "Deslocamento e ordem do vizinho no G8 saem de sonda, e a ordem está errada",
+      "origin": "K3D-TASK-19",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

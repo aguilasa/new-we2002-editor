@@ -308,8 +308,8 @@
       "status": "done",
       "done_on": "2026-10-12",
       "done_commit": "d8f8e7df",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-12",
+      "review_commit": "23fb593e"
     }
   ]
 }
