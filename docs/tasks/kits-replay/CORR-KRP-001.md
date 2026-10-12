@@ -53,3 +53,26 @@ Hoje dá vermelho (`AssertionError`). No caminho da documentação, a verificaç
 não listar mais `pieces`.
 
 ## Log de Execução
+
+2026-10-12 — reproduzida (`rite reproduce CORR-KRP-001`): o primeiro comando da Evidência imprime
+`['pieces']`, e a §2.1 do plano lista `pieces` (linha 11 do recorte 70-91).
+
+Caminho escolhido: o primeiro. `Figure.pieces` em `tools/kits/core/replay.py` devolve
+`list(self)` — as peças, cabeça primeiro, como lista simples; a §2.1 continua certa e não muda.
+Caso novo em `_replay_checks` do `tools/kits/selftest.py`: as duas figuras do caso de família
+devolvem `list` com `[46, 2, 95, 93]` e `[46, 13]`.
+
+Verificação:
+
+```text
+$ cd tools/kits && python3 -c "import sys; sys.path.insert(0,'.'); from core.replay import Figure; assert hasattr(Figure,'pieces'); print('ok')"
+ok
+```
+
+Controle: `harness.run("replay", selftest._replay_checks)` dá `replay: 0 failure(s)`; com
+`del replay.Figure.pieces` plantado antes, dá 1 falha —
+`AttributeError at selftest.py:1510 in _replay_checks  'Figure' object has no attribute 'pieces'`.
+
+Gates (`rite gates --cycle kits-replay --id CORR-KRP-001`): `ctest --test-dir build -R kits` —
+`100% tests passed, 0 tests failed out of 4` (`kits_image` e `kits_ui` *skipped*); `python3
+tools/kits/controls.py` — `controls: 55 of 55 red`.

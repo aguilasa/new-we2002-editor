@@ -344,6 +344,11 @@ class Figure(list):
     samples: list = None
 
     @property
+    def pieces(self) -> list:
+        """The pieces as a plain list, head first: the figure itself."""
+        return list(self)
+
+    @property
     def order(self) -> list:
         return [p["section"] for p in self]
 

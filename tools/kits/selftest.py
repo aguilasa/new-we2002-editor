@@ -1506,6 +1506,10 @@ def _replay_checks(c) -> None:
                                                                  0, 0, 4096],
                                                     "translation": [0, 0, 4694]},
          "%s" % [(f.head, f.root, f.family, f.sleeves, f.armband) for f in seen_figure])
+    c.ok("core/replay: a figure's pieces are its own, head first, as a plain list",
+         [(type(f.pieces), [p["section"] for p in f.pieces]) for f in seen_figure]
+         == [(list, [46, 2, 95, 93]), (list, [46, 13])],
+         "%s" % [[p["section"] for p in f.pieces] for f in seen_figure])
 
 
 def _live_guard_checks(c) -> None:
