@@ -86,3 +86,10 @@ Gates:
 - `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
   `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 53 of 53 red`.
+- **Closed** — commit `3bfae0c7` (2026-10-12): fix(kits): print every figure of the frame in --replay --focus and correct the neighbour's order
+  - Files (`git show --name-status 3bfae0c7`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-035.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/oracle.py`
