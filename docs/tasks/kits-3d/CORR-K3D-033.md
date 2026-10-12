@@ -73,3 +73,9 @@ subiram o emulador, e o que o Log cita delas é a linha `ok`, que é a mesma com
 
 Verificação: `grep -n '^\$ python3 tools/kits/oracle.py --replay [0-9]* --focus [0-9]*$' docs/KITS-AJUSTES-3D.md`
 não imprime nada.
+- **Closed** — commit `43810978` (2026-10-12): docs(kits): give the G8 --replay --focus commands the --frame-json they were run with
+  - Files (`git show --name-status 43810978`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-033.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
