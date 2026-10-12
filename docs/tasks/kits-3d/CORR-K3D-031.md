@@ -96,3 +96,12 @@ Gates:
 - `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
   `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 50 of 50 red`.
+- **Closed** — commit `bfda5b23` (2026-10-12): fix(kits): refuse a live oracle run while a game controller is plugged in
+  - Files (`git show --name-status bfda5b23`):
+    - `M docs/tasks/kits-3d/CORR-K3D-031.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/looks/oracle.py`
+    - `M tools/pes2/fork.py`

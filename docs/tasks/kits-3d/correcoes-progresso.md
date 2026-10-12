@@ -33,5 +33,5 @@
 | [CORR-K3D-028](/docs/tasks/kits-3d/CORR-K3D-028.md) | Nota de passagem na K3D-TASK-19 fora do escopo da K3D-TASK-18 | K3D-TASK-18 | medium | done | 2026-10-11 |
 | [CORR-K3D-029](/docs/tasks/kits-3d/CORR-K3D-029.md) | Números das conclusões do G8 escritos à mão, e "onze painéis" errado | K3D-TASK-18 | low | done | 2026-10-11 |
 | [CORR-K3D-030](/docs/tasks/kits-3d/CORR-K3D-030.md) | Juiz do --replay-field aceita tabela curta: 3 focos dão ok | CORR-K3D-026 | high | done | 2026-10-12 |
-| [CORR-K3D-031](/docs/tasks/kits-3d/CORR-K3D-031.md) | Controle físico ligado entra no emulador do oráculo e suja as corridas ao vivo | CORR-K3D-026 | medium | in-progress | — |
+| [CORR-K3D-031](/docs/tasks/kits-3d/CORR-K3D-031.md) | Controle físico ligado entra no emulador do oráculo e suja as corridas ao vivo | CORR-K3D-026 | medium | done | 2026-10-12 |
 <!-- rite:end -->
