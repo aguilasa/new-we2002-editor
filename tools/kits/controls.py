@@ -214,7 +214,7 @@ CONTROLS = (
         "map swapped it named Scotland's set 2 and exited 0 (CORR-KITS-047)",
     ),
     Control(
-        "oracle-back-byte-order", "kits/oracle.py", "pixel_index",
+        "oracle-back-byte-order", "kits/core/replay.py", "pixel_index",
         "    return word & 0xFF if x % 2 == 0 else word >> 8\n",
         "    return word >> 8 if x % 2 == 0 else word & 0xFF\n",
         "FAIL  oracle --back: the copy is found at (44,6), inside the shirt back",
@@ -223,7 +223,7 @@ CONTROLS = (
         "CORR-KITS-067)",
     ),
     Control(
-        "oracle-pose-texel-order", "kits/oracle.py", "piece_error",
+        "oracle-pose-texel-order", "kits/core/replay.py", "piece_error",
         '        order = prim.indices if pair == "indices" else prim.corners\n',
         "        order = prim.corners\n",
         "FAIL  oracle --match-pose: a piece's own matrix lands within the limit, paired by texel",
@@ -504,6 +504,14 @@ CONTROLS = (
         "FAIL  core/replay: a v0 close capture comes back as v1, slot and focus off its name",
         "a v0 close capture says its slot only in its file name; the migration to v1 "
         "is what puts it in the capture (KRP-TASK-01)",
+    ),
+    Control(
+        "replay-copy-in-oracle", "kits/oracle.py", "module constant",
+        "PLANT_REPLAY_ROOT = 103\n",
+        "PLANT_REPLAY_ROOT = 103\n\n\ndef figure_depth(figure):\n    return 0\n",
+        "FAIL  oracle.py defines none of the analysis core/replay.py holds",
+        "the analysis moved to core/replay.py by move, not copy; a second figure_depth "
+        "in the oracle is the copy section 2.2 forbids (KRP-TASK-02)",
     ),
 )
 BY_ID = {c.id: c for c in CONTROLS}

@@ -250,11 +250,15 @@ def kit_image_of(sample) -> str:
     return halves.pop() if len(halves) == 1 else "both"
 
 
+def work_point(u: int, v: int) -> tuple:
+    """A texel of the kit page in work-bitmap pixels: the uniform on the left,
+    the sleeves image on the right (core/flat.py)."""
+    return (u, v) if v < IMAGE_HEIGHT else (IMAGE_HEIGHT + u, v - IMAGE_HEIGHT)
+
+
 def sample_zones(sample) -> set:
-    """The names of the zones the texel box of one primitive touches, the
-    uniform on the left of the work bitmap and the sleeves on the right."""
-    points = [(u, v) if v < IMAGE_HEIGHT else (IMAGE_HEIGHT + u, v - IMAGE_HEIGHT)
-              for u, v in sample["uv"]]
+    """The names of the zones the texel box of one primitive touches."""
+    points = [work_point(u, v) for u, v in sample["uv"]]
     x0, y0 = min(p[0] for p in points), min(p[1] for p in points)
     x1, y1 = max(p[0] for p in points), max(p[1] for p in points)
     return {z.name for z in ZONES
@@ -308,10 +312,17 @@ def pose_project(rotation, translation, projection, vertex):
     return (projection["OFX"] + h * cx / cz, projection["OFY"] + h * cy / cz)
 
 
-def piece_error(piece, projection, sec, group) -> tuple:
+PAIRINGS = ("indices", "corners")
+"""How a primitive's texels are paired with its vertices: `indices`, the
+stored order, is the one the game uses; `corners` is what `--pair-by
+corners` shows it is not (CORR-KITS-083)."""
+
+
+def piece_error(piece, projection, sec, group, pair: str = "indices") -> tuple:
     """(mean pixel distance, primitives matched) of one piece: each primitive
     of its section projected with the piece's matrix and matched, by its four
-    texels, to the nearest primitive of *group* that carries them."""
+    texels, to the nearest primitive of *group* that carries them.  *pair*
+    says which vertex each texel goes with (`PAIRINGS`)."""
     by_uv = {}
     for one in group:
         if len(one["uv"]) == 4:
@@ -323,7 +334,10 @@ def piece_error(piece, projection, sec, group) -> tuple:
         if not drawn:
             continue        # culled, or a texel quad the frame does not draw
         points = {}
-        for vi, texel in zip(prim.indices, prim.texcoords):
+        # texcoords follow the STORED order, not `corners`: `--pair-by
+        # corners` prints what the other pairing gives
+        order = prim.indices if pair == "indices" else prim.corners
+        for vi, texel in zip(order, prim.texcoords):
             v = sec.vertices[vi]
             points[tuple(texel)] = pose_project(rotation, translation, projection,
                                                 (v.x, v.y, v.z))

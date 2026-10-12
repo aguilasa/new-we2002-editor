@@ -784,7 +784,28 @@ def scene_importers(folder: str = CORE_DIR) -> list:
     return out
 
 
+REPLAY_MOVED = ("replay_figures", "figure_depth", "figure_off_axis", "replay_focus",
+                "field_focus", "pose_change", "figure_group", "piece_box", "section_samples",
+                "shading_of", "colour_confront", "panel_samples", "panel_cell", "field_panels",
+                "field_number", "sleeves_of", "armband_of", "figure_tag", "_restore_samples")
+"""The analysis functions of G8 that moved from oracle.py to core/replay.py
+(PLAN-KITS-REPLAY section 2.2, KRP-TASK-02): defined there, never again here."""
+
+
+def replay_copies(path: str = os.path.join(KITS_DIR, "oracle.py")) -> list:
+    """The `REPLAY_MOVED` functions *path* defines at top level."""
+    import ast
+
+    with open(path, encoding="utf-8") as fh:
+        tree = ast.parse(fh.read())
+    return sorted(n.name for n in tree.body
+                  if isinstance(n, ast.FunctionDef) and n.name in REPLAY_MOVED)
+
+
 def _rule_checks(c) -> None:
+    copies = c.attempt("sweep oracle.py for the replay analysis", replay_copies, default=None)
+    c.ok("oracle.py defines none of the analysis core/replay.py holds (section 2.2)",
+         copies == [], "%s" % copies)
     importers = c.attempt("sweep core/ for the scene", scene_importers, default=None)
     c.ok("only core/figure.py imports the looks scene (section 3.1)",
          importers == [SCENE_BRIDGE], "%s" % importers)

@@ -137,6 +137,19 @@ import layout  # noqa: E402
 import lzss  # noqa: E402  (tools/pes2)
 import texture  # noqa: E402
 
+from core.replay import (  # noqa: E402,F401  (the reader: KRP-TASK-02 moved the analysis there)
+    IMAGE_HEIGHT, KIT_BITS, KIT_CLUTS, KIT_PAGES, LONG_SLEEVES, NEUTRAL, PAIRINGS, PANEL_H, PANEL_W,
+    PLAYER_PALETTE, POSE_MARGIN, REPLAY_ARMBANDS, REPLAY_FOCUS_MARGIN, REPLAY_FOLLOW_DEPTH,
+    REPLAY_FOLLOW_OFF, REPLAY_SHARED_CELL, REPLAY_STILL, SHORT_SLEEVES, TEXTURE_HALFWORDS,
+    TORSO_MARGIN, armband_of, back_indices, colour_confront, field_focus, field_number,
+    field_panels, field_row, figure_depth, figure_group, figure_off_axis, figure_tag, glyphs,
+    is_figure, judge as replay_judge, judge_walk, kit_image_of, matrix_pieces, panel_cell, panel_cells,
+    panel_samples, piece_box, piece_error, pixel_index, pose_change, pose_frames, pose_project,
+    read_panel, read_panels, replay_figures, replay_focus, restore_samples, sample_pixels,
+    sample_zones, section_samples, shading_of, sleeves_of, texel_colour, triangle_pixels,
+    work_point,
+)
+
 IMAGE_VARIABLE = "WE2002_LOOKS_IMAGE"
 DRIVE_VARIABLE = "WE2002_LOOKS_DRIVE_IMAGE"
 VRAM_W, VRAM_H = 1024, 512
@@ -446,20 +459,10 @@ def dump_slot(slot: int, cue: str, out_dir: str) -> list:
 KIT_PAGE = (576, 256)
 """The VRAM page both kit images sit in on the LOOKS SET: the uniform at v
 0-127, the sleeves at v 128-255 (section 1.1)."""
-KIT_PAGES = tuple((x, 256) for x in KIT_AREA[0])
-"""Every page a kit can sit in: a match puts the second team's beside the
-first's -- (640,256) in slot 5 -- so the reading takes the whole kit area."""
-KIT_CLUTS = tuple((0, y) for y in range(486, 494))
-"""The kit palettes' VRAM rows: player and goalkeeper of the first team at
-486 and 488, of the second at 487 and 489, and their set-2 twins four rows
-down (`--slot 5`, Norway against Ecuador).  A kit page in a match also holds
-4-bit graphics that are no kit, and the CLUT is what tells them apart."""
-KIT_BITS = 8
 STATES_DIR = os.path.join("work", "kits-states")
 """The master copies of the game states that are not the LOOKS SET's: the
 match slots 3 to 7, the EDIT PL. NUM screen in slot 8 (K3D-TASK-16) and the
 paused replays of slots 9 and 10 (K3D-TASK-17)."""
-IMAGE_HEIGHT = 128
 TEXTURED_POLYGON_FAMILY = 1
 
 
@@ -531,36 +534,6 @@ def draw_offset(commands):
             x, y = words[0] & 0x7FF, (words[0] >> 11) & 0x7FF
             found = (x - 0x800 if x & 0x400 else x, y - 0x800 if y & 0x400 else y)
     return found
-
-
-def kit_image_of(sample) -> str:
-    """Which kit image a primitive samples: "uniform", "sleeves", "both" or
-    None when its page is not the kit's."""
-    if (sample["page"] not in KIT_PAGES or sample["bits"] != KIT_BITS
-            or sample["clut"] not in KIT_CLUTS):
-        return None
-    halves = {"uniform" if v < IMAGE_HEIGHT else "sleeves" for _u, v in sample["uv"]}
-    return halves.pop() if len(halves) == 1 else "both"
-
-
-def work_point(u: int, v: int) -> tuple:
-    """A texel of the kit page in work-bitmap pixels: the uniform on the left,
-    the sleeves image on the right (core/flat.py)."""
-    return (u, v) if v < IMAGE_HEIGHT else (IMAGE_HEIGHT + u, v - IMAGE_HEIGHT)
-
-
-def sample_zones(sample) -> set:
-    """The names of the zones the texel box of one primitive touches."""
-    if KITS_DIR not in sys.path:
-        sys.path.insert(0, KITS_DIR)
-    from core import api
-
-    points = [work_point(u, v) for u, v in sample["uv"]]
-    x0, y0 = min(p[0] for p in points), min(p[1] for p in points)
-    x1, y1 = max(p[0] for p in points), max(p[1] for p in points)
-    return {z.name for z in api.ZONES
-            if z.x <= x1 and x0 < z.x + z.w and z.y <= y1 and y0 < z.y + z.h}
-
 
 def sleeves_kind(names) -> str:
     """One primitive on the sleeves image, by the zones it touches, armband
@@ -834,12 +807,6 @@ def model_index(image_path: str) -> dict:
                     by_uv.setdefault(tuple(tuple(t) for t in prim.texcoords), []).append(
                         (name, i, k))
     return {"sections": sections, "by_uv": by_uv}
-
-
-def is_figure(sample) -> bool:
-    """A primitive of a kit: 8 bits, a kit CLUT, a kit page."""
-    return kit_image_of(sample) is not None
-
 
 def players(samples, gap: int = 2) -> list:
     """The figure primitives grouped into players: two primitives are one
@@ -1200,20 +1167,6 @@ def matrix_stops(game, maps, count: int = MATRIX_STOPS, partial: bool = False,
             pass
     return out
 
-
-def matrix_pieces(stops, lag: int = 1) -> list:
-    """The stops turned into drawn pieces: the matrix of stop k belongs to the
-    section the pointers name *lag* stops later (`looks` DRAW_LAG, 1), each as
-    {"section", "matrix"}; a stop naming no section, or several, is a None
-    section."""
-    out = []
-    for k in range(len(stops) - lag):
-        named = stops[k + lag]["named"]
-        out.append({"section": named[0][1] if len(named) == 1 else None,
-                    "matrix": (tuple(stops[k]["rotation"]), tuple(stops[k]["translation"]))})
-    return out
-
-
 def matrix_passes(pieces, roots_of=ROOT_SECTIONS) -> list:
     """The pieces cut into figures: a figure opens at its root, section 2
     (outfield) or 56 (goalkeeper) unless *roots_of* says otherwise, and takes
@@ -1427,85 +1380,6 @@ def pose_capture(game, maps, submits: int = POSE_SUBMITS) -> dict:
             offsets[one["head"]] = draw_offset(commands)
     return {"events": events, "lists": {"%d" % k: v for k, v in lists.items()},
             "offsets": {"%d" % k: v for k, v in offsets.items()}}
-
-
-def pose_frames(capture: dict) -> list:
-    """The frames of a capture: for each submit of a list with figure
-    primitives, the matrix stops since the previous such submit.  The first
-    is left out, its stops having begun mid-frame."""
-    blocks, current, out = [], [], []
-    for one in capture["events"]:
-        if one["kind"] == "matrix":
-            current.append(one)
-            continue
-        samples = capture["lists"].get("%d" % one["head"])
-        if not samples or not any(is_figure(s) for s in samples):
-            continue
-        blocks.append((one["head"], current))
-        current = []
-    for k, (head, stops) in enumerate(blocks):
-        if k == 0:
-            continue        # its stops began mid-frame
-        out.append({"head": head, "stops": stops})
-    return out
-
-
-def pose_project(rotation, translation, projection, vertex):
-    """A model vertex through one piece's GTE matrix and the projection:
-    RTPS, `SX = OFX + H * X / Z`, rotation in 4.12."""
-    x, y, z = vertex
-    r = rotation
-    cx = (r[0] * x + r[1] * y + r[2] * z) / 4096.0 + translation[0]
-    cy = (r[3] * x + r[4] * y + r[5] * z) / 4096.0 + translation[1]
-    cz = (r[6] * x + r[7] * y + r[8] * z) / 4096.0 + translation[2]
-    if cz <= 0:
-        return None
-    h = projection["H"]
-    return (projection["OFX"] + h * cx / cz, projection["OFY"] + h * cy / cz)
-
-
-PAIRINGS = ("indices", "corners")
-"""How a primitive's texels are paired with its vertices: `indices`, the
-stored order, is the one the game uses; `corners` is what `--pair-by
-corners` shows it is not (CORR-KITS-083)."""
-
-
-def piece_error(piece, projection, sec, group, pair: str = "indices") -> tuple:
-    """(mean pixel distance, primitives matched) of one piece: each primitive
-    of its section projected with the piece's matrix and matched, by its four
-    texels, to the nearest primitive of *group* that carries them.  *pair*
-    says which vertex each texel goes with (`PAIRINGS`)."""
-    by_uv = {}
-    for one in group:
-        if len(one["uv"]) == 4:
-            by_uv.setdefault(tuple(tuple(t) for t in one["uv"]), []).append(one)
-    total, corners, matched = 0.0, 0, 0
-    rotation, translation = piece["matrix"]
-    for prim in sec.primitives:
-        drawn = by_uv.get(tuple(tuple(t) for t in prim.texcoords))
-        if not drawn:
-            continue        # culled, or a texel quad the frame does not draw
-        points = {}
-        # texcoords follow the STORED order, not `corners`: `--pair-by
-        # corners` prints what the other pairing gives
-        order = prim.indices if pair == "indices" else prim.corners
-        for vi, texel in zip(order, prim.texcoords):
-            v = sec.vertices[vi]
-            points[tuple(texel)] = pose_project(rotation, translation, projection,
-                                                (v.x, v.y, v.z))
-        if None in points.values() or len(points) != 4:
-            continue        # behind the eye, or a quad two corners of which share a texel
-        best = min(sum(((points[uv][0] - xy[0]) ** 2 + (points[uv][1] - xy[1]) ** 2) ** 0.5
-                       for uv, xy in zip(one["uv"], one["xy"])) for one in drawn)
-        total += best
-        corners += len(points)
-        matched += 1
-    return ((total / corners) if corners else None, matched)
-
-
-POSE_MARGIN = 16
-"""Pixels around a player's kit primitives within which the frame's other
-textured primitives -- head, boots, skin -- are taken as that player's."""
 
 
 def pose_groups(samples, margin: int = POSE_MARGIN) -> list:
@@ -1937,15 +1811,6 @@ def numbers_rect() -> tuple:
     zone = next(z for z in api.ZONES if z.name == "numbers 0-9")
     return (zone.x, zone.y, zone.w, zone.h)
 
-
-def pixel_index(words, width: int, x: int, y: int) -> int:
-    """The 8-bit index of pixel (x, y) of an 8 bpp page held as 15-bit
-    halfwords, *width* halfwords a row: the low byte for an even pixel, the
-    high byte -- seven bits, the STP bit lost -- for an odd one."""
-    word = words[y * width + x // 2] & 0x7FFF
-    return word & 0xFF if x % 2 == 0 else word >> 8
-
-
 def back_count(vram_words, disc_words, width: int, rect, disc_rect=None) -> dict:
     """One gap: pixels whose index is not 0 in VRAM and on the disc, and
     pixels where the two differ.  *disc_rect* reads the disc elsewhere, which
@@ -1961,13 +1826,6 @@ def back_count(vram_words, disc_words, width: int, rect, disc_rect=None) -> dict
             disc_set += d != 0
             differ += v != d
     return {"pixels": w * h, "vram": vram_set, "disc": disc_set, "differ": differ}
-
-
-def back_indices(words, width: int, rect) -> list:
-    """The rows of indices of one rectangle of an 8 bpp page."""
-    x0, y0, w, h = rect
-    return [[pixel_index(words, width, x0 + x, y0 + y) for x in range(w)] for y in range(h)]
-
 
 def back_sources(words, width: int, height: int, rect) -> list:
     """Every other place of the page whose pixels equal *rect*'s, straight
@@ -2108,8 +1966,6 @@ def block_zones(block) -> list:
 
 # --- section 4.7 in a match: the back panels ------------------------------
 
-PANEL_W, PANEL_H = 20, 24
-"""A back panel: the torso gap's size, (0,80) 20x24 (core/zones.py GAPS)."""
 from core.figure import DIGIT_STEP, DIGIT_Y, GLYPH_W  # noqa: E402,F401  (the core's rule)
 from core.figure import BACK_COPY, digit_xs as _digit_xs  # noqa: E402
 PANEL_TOP = 80
@@ -2141,86 +1997,6 @@ def panels_judge(panels: list) -> list:
         if at != want:
             out.append("%s: digits at %s, the rule puts them at %s" % (where, at, want))
     return out
-
-
-def panel_cells() -> list:
-    """(figure, x, y) of every 20x24 cell under the map: the two torso gaps
-    start the two rows, and the rows run on to the right in steps of 20."""
-    out = []
-    for _name, x, y, w, h, figure in back_rects():
-        if figure == 0:
-            for row in range(2):
-                for k in range(5):
-                    out.append((0, x + k * w, y + row * h))
-        else:
-            out.append((1, x, y))
-    return out
-
-
-def glyphs(words, width: int) -> tuple:
-    """The ten digit glyphs of the numbers zone as rows of 7-bit indices, and
-    the zone's background index (its commonest value)."""
-    zx, zy, zw, zh = numbers_rect()
-    rows = back_indices(words, width, (zx, zy, zw, zh))
-    tally = {}
-    for row in rows:
-        for v in row:
-            tally[v & 0x7F] = tally.get(v & 0x7F, 0) + 1
-    ground = max(tally, key=tally.get)
-    out = [[[v & 0x7F for v in row[d * GLYPH_W:(d + 1) * GLYPH_W]] for row in rows]
-           for d in range(zw // GLYPH_W)]
-    return out, ground
-
-
-def read_panel(words, width: int, cell, back, glyph_set, ground) -> dict:
-    """One panel against the rule: the figure's shirt back underneath, digits
-    of the numbers zone on top.  Says which digit sits where, how many pixels
-    neither explains."""
-    _figure, cx, cy = cell
-    panel = [[v & 0x7F for v in row]
-             for row in back_indices(words, width, (cx, cy, PANEL_W, PANEL_H))]
-    found = []
-    for gy in range(PANEL_H - len(glyph_set[0]) + 1):
-        for gx in range(PANEL_W - GLYPH_W + 1):
-            for digit, glyph in enumerate(glyph_set):
-                ink = [(x, y) for y, row in enumerate(glyph) for x, v in enumerate(row)
-                       if v != ground]
-                if ink and all(panel[gy + y][gx + x] == glyph[y][x] for x, y in ink):
-                    found.append((gx, gy, digit, len(ink)))
-    # a narrow glyph (the 1) also fits inside wider ones: keep the placements
-    # whose ink no other placement covers more of
-    found.sort(key=lambda f: -f[3])
-    kept, covered = [], set()
-    for gx, gy, digit, n in found:
-        ink = {(gx + x, gy + y) for y, row in enumerate(glyph_set[digit])
-               for x, v in enumerate(row) if v != ground}
-        if ink & covered:
-            continue
-        kept.append((gx, gy, digit))
-        covered |= ink
-    kept.sort()
-    unexplained = sum(1 for y in range(PANEL_H) for x in range(PANEL_W)
-                      if (x, y) not in covered and panel[y][x] != back[y][x])
-    return {"cell": cell, "digits": kept, "unexplained": unexplained,
-            "number": int("".join(str(d) for _x, _y, d in kept)) if kept else None}
-
-
-def read_panels(words, width: int, shift: int = 0) -> list:
-    """Every back panel of a match page, read against the rule; *shift*
-    moves every cell that many rows (negative is up), which only the plant does."""
-    glyph_set, ground = glyphs(words, width)
-    out = []
-    for figure, x, y in panel_cells():
-        cell = (figure, x, y + shift)
-        sx, sy = BACK_COPY[cell[0]]
-        back = [[v & 0x7F for v in row]
-                for row in back_indices(words, width, (sx, sy, PANEL_W, PANEL_H))]
-        out.append(read_panel(words, width, cell, back, glyph_set, ground))
-    return out
-
-
-PLAYER_PALETTE = {1: 2, 2: 6}
-"""Set -> the record of its player palette (section 1.1)."""
 
 
 def save_picture(path: str, words, width: int, height: int, body: bytes, kit_set: int) -> None:
@@ -3006,9 +2782,6 @@ draws the other players too, and in slot 9 the 36 stops of three lone frames
 no longer reached the goalkeeper at the 18th tap of R1.  Reading 300 after
 every tap is no answer either: some 75 frames a tap, and by the 14th tap of
 slot 10 the camera had drawn back to 12636 and R1 no longer moved it."""
-REPLAY_STILL = 0
-"""GTE units the followed figure's matrices may differ by between two frames
-of the paused replay and still count as one still pose."""
 REPLAY_SETTLE = 2
 """Frames stepped after a capture before the frame buffer is read: both
 buffers then hold a frame of the still pose."""
@@ -3045,7 +2818,7 @@ slot 9, 93 on the long ones of slot 10 -- in place of the arm piece it
 replaces (4, and 97, as `--replay 9 --focus 3` and `--replay 10 --focus 3`
 printed the order), his head, panel and number as `--replay-field` listed
 them; and Balaban at 2 in slot 10, the long sleeve with no armband.
-`replay_judge` asserts them; a (slot, focus) with no entry is printed, not
+`core.replay.judge` (`replay_judge` here) asserts them; a (slot, focus) with no entry is printed, not
 judged."""
 PLANT_REPLAY_ROOT = 103
 """`--plant-replay` expects the followed figure to open at this section, which
@@ -3055,34 +2828,6 @@ nothing draws."""
 def frame_now(game) -> int:
     """The emulator's frame counter."""
     return game.client.call("get_status").get("frame_number")
-
-
-def replay_figures(pieces, roots=KEEPER_ROOTS) -> list:
-    """One frame's pieces cut into figures: each opens at a root and takes the
-    piece before it, its head, up to the head of the next.  The last piece of
-    the frame is the one the draw lag leaves unnamed, so the last figure is
-    one piece short."""
-    starts = [k for k, p in enumerate(pieces) if p["section"] in roots and k > 0]
-    out = []
-    for at, start in enumerate(starts):
-        end = starts[at + 1] - 1 if at + 1 < len(starts) else len(pieces)
-        out.append(pieces[start - 1:end])
-    return out
-
-
-def figure_depth(figure) -> float:
-    """The median z of a figure's translations: the view's depth of it."""
-    zs = sorted(p["matrix"][1][2] for p in figure)
-    return zs[len(zs) // 2]
-
-
-def replay_focus(figures, nth: int = 0):
-    """The figure the camera follows: the *nth* nearest by `figure_depth`
-    (0, the nearest; the plant asks for the next one).  None if there is not
-    that many."""
-    ranked = sorted(figures, key=figure_depth)
-    return ranked[nth] if nth < len(ranked) else None
-
 
 def replay_frames(capture: dict, nth: int = 0, choose=None) -> list:
     """[{"head", "figures", "focus"}] of every frame of a `pose_capture`, the
@@ -3098,151 +2843,6 @@ def replay_frames(capture: dict, nth: int = 0, choose=None) -> list:
         out.append({"head": frame["head"], "figures": figures,
                     "focus": choose(figures, nth)})
     return out
-
-
-def pose_change(one, other) -> int:
-    """The largest difference, entry by entry, between two figures' matrices;
-    None when they are not the same pieces."""
-    if [p["section"] for p in one] != [p["section"] for p in other]:
-        return None
-    return max(abs(a - b) for p, q in zip(one, other)
-               for a, b in zip(p["matrix"][0] + p["matrix"][1], q["matrix"][0] + q["matrix"][1]))
-
-
-def section_samples(group, index, section: int) -> list:
-    """The primitives of a player group whose four texels are a primitive of
-    MODEL.BIN section *section* on the disc."""
-    sec = index["sections"].get((layout.MODEL, section))
-    if sec is None:
-        return []
-    held = {tuple(tuple(t) for t in prim.texcoords) for prim in sec.primitives}
-    return [one for one in group if tuple(tuple(t) for t in one["uv"]) in held]
-
-
-def shading_of(samples) -> dict:
-    """What the GPU is told to do with the texels of *samples*: how many are
-    shaded per corner, how many raw (texture not modulated), the CLUTs and
-    pages, and the range of the corner colours."""
-    colours = [c for one in samples for c in (one.get("rgb") or [])]
-    return {"n": len(samples),
-            "shaded": sum(1 for one in samples if one["code"] & 16),
-            "raw": sum(1 for one in samples if one["code"] & 1),
-            "semi": sum(1 for one in samples if one["code"] & 2),
-            "cluts": sorted({tuple(one["clut"]) for one in samples}),
-            "pages": sorted({tuple(one["page"]) for one in samples}),
-            "low": tuple(min(c[i] for c in colours) for i in range(3)) if colours else None,
-            "high": tuple(max(c[i] for c in colours) for i in range(3)) if colours else None}
-
-
-NEUTRAL = 128
-"""The colour a modulated texel is drawn unchanged under: the GPU multiplies
-by colour / 128."""
-
-
-def triangle_pixels(xy, uv, rgb):
-    """[(x, y, u, v, (r, g, b))] of the pixel centres inside one triangle, with
-    texel and colour interpolated the way `core/raster.py` interpolates UV."""
-    (x0, y0), (x1, y1), (x2, y2) = xy
-    area = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0)
-    if area == 0:
-        return []
-    out = []
-    for py in range(min(y0, y1, y2), max(y0, y1, y2) + 1):
-        for px in range(min(x0, x1, x2), max(x0, x1, x2) + 1):
-            sx, sy = px + 0.5, py + 0.5
-            a = ((x1 - sx) * (y2 - sy) - (x2 - sx) * (y1 - sy)) / area
-            b = ((x2 - sx) * (y0 - sy) - (x0 - sx) * (y2 - sy)) / area
-            g = 1.0 - a - b
-            if a < 0 or b < 0 or g < 0:
-                continue
-            u = a * uv[0][0] + b * uv[1][0] + g * uv[2][0]
-            v = a * uv[0][1] + b * uv[1][1] + g * uv[2][1]
-            colour = tuple(a * rgb[0][i] + b * rgb[1][i] + g * rgb[2][i] for i in range(3))
-            out.append((px, py, int(u), int(v), colour))
-    return out
-
-
-def sample_pixels(one) -> list:
-    """`triangle_pixels` of a quad as the GPU splits it, (0 1 2) and (1 2 3)."""
-    rgb = one.get("rgb") or [(NEUTRAL,) * 3] * len(one["xy"])
-    out = triangle_pixels(one["xy"][:3], one["uv"][:3], rgb[:3])
-    if len(one["xy"]) == 4:
-        out += triangle_pixels(one["xy"][1:], one["uv"][1:], rgb[1:])
-    return out
-
-
-def texel_colour(texture: dict, page, clut, u: int, v: int):
-    """The 15-bit texel at (u, v) of an 8-bit page, through its CLUT, as five-
-    bit (r, g, b); None if the capture did not keep that page or CLUT.  Odd
-    texels lose bit 7 on the way through the PNG, as `save_picture` says."""
-    words = texture["pages"].get("%d,%d,%d" % (tuple(page) + (KIT_BITS,)))
-    row = texture["cluts"].get("%d,%d" % tuple(clut))
-    if words is None or row is None:
-        return None
-    half = words[v * TEXTURE_HALFWORDS + u // 2]
-    index = (half >> (8 * (u & 1))) & 0xFF
-    if u & 1:
-        index &= 0x7F
-    return row[index] if index < len(row) else None
-
-
-TEXTURE_HALFWORDS = 128
-"""Halfwords across an 8-bit texture page: 256 texels."""
-
-
-def colour_confront(group, buffer, texture: dict, sections: dict) -> dict:
-    """Section -> the game's drawn pixels against the texels they sample:
-    the mean frame-buffer colour, the mean texel (what the 3D tab paints), the
-    mean texel times the corner colour / 128 (what the GPU's modulation
-    gives), and the mean distance of the game's to each.  A pixel counts for
-    the primitive of the group drawn last over it -- the list's order is the
-    GPU's -- so what a later quad covers is not read as an earlier one's."""
-    owners = {}
-    for k, one in enumerate(group):
-        for px, py, _u, _v, _c in sample_pixels(one):
-            owners[(px, py)] = k
-    x0, y0 = buffer["origin"]
-    out = {}
-    for section, samples in sections.items():
-        rows = []
-        for one in samples:
-            if one["bits"] != KIT_BITS:
-                continue        # only 8-bit pages are kept (`replay_capture`)
-            k = next(i for i, g in enumerate(group) if g is one)
-            for px, py, u, v, colour in sample_pixels(one):
-                if owners.get((px, py)) != k:
-                    continue
-                by, bx = py - y0, px - x0
-                if not (0 <= by < len(buffer["rows"]) and 0 <= bx < len(buffer["rows"][0])):
-                    continue
-                texel = texel_colour(texture, one["page"], one["clut"], u, v)
-                if texel is None:
-                    continue
-                game = buffer["rows"][by][bx]
-                shaded = tuple(min(31, int(t * c / NEUTRAL)) for t, c in zip(texel, colour))
-                rows.append((game, texel, shaded))
-        if not rows:
-            out[section] = None
-            continue
-        mean = lambda i: tuple(sum(r[i][c] for r in rows) / len(rows) for c in range(3))  # noqa: E731
-        far = lambda i: sum(abs(r[0][c] - r[i][c]) for r in rows for c in range(3)) / (3.0 * len(rows))  # noqa: E731
-        out[section] = {"pixels": len(rows), "game": mean(0), "texel": mean(1),
-                        "shaded": mean(2), "texel_far": far(1), "shaded_far": far(2)}
-    return out
-
-
-def panel_samples(group) -> dict:
-    """Panel cell -> the primitives of *group* whose four texels lie in it:
-    which back panel of the page the figure's torso shows."""
-    out = {}
-    for one in group:
-        if kit_image_of(one) != "uniform":
-            continue
-        for figure, cx, cy in panel_cells():
-            if all(cx <= u < cx + PANEL_W and cy <= v < cy + PANEL_H for u, v in one["uv"]):
-                out.setdefault((figure, cx, cy), []).append(one)
-    return out
-
 
 def replay_chooser(focus: int):
     """How `--replay` picks the followed figure: the nearest in the replay as
@@ -3390,96 +2990,6 @@ def replay_idle(game, slot: int) -> dict:
     return {"frames": None, "moved": moved}
 
 
-def _restore_samples(capture) -> None:
-    """The tuples a JSON round trip turned into lists, put back."""
-    if capture is None:
-        return
-    for one in capture["lists"].values():
-        for s in one:
-            s.update(page=tuple(s["page"]), clut=tuple(s["clut"]),
-                     uv=[tuple(t) for t in s["uv"]], xy=[tuple(t) for t in s["xy"]],
-                     rgb=[tuple(c) for c in s["rgb"]] if s.get("rgb") else None)
-
-
-def figure_group(figure, samples, index):
-    """The textured quads of a frame that fall inside the screen box of
-    *figure*'s own vertices, each through its piece's matrix, grown by
-    `POSE_MARGIN`; and each piece's mean pixel error there (`piece_error`).
-    Grouping by touching kit primitives (`players`) splits a figure drawn this
-    close, and the box needs no kit at all."""
-    if figure is None:
-        return None, None
-    projection = figure[0]["projection"]
-    points = []
-    for piece in figure:
-        sec = index["sections"].get((layout.MODEL, piece["section"]))
-        for v in (sec.vertices if sec else []):
-            at = pose_project(piece["matrix"][0], piece["matrix"][1], projection, (v.x, v.y, v.z))
-            if at is not None:
-                points.append(at)
-    if not points:
-        return None, None
-    box = (min(p[0] for p in points) - POSE_MARGIN, min(p[1] for p in points) - POSE_MARGIN,
-           max(p[0] for p in points) + POSE_MARGIN, max(p[1] for p in points) + POSE_MARGIN)
-    group = [one for one in samples if len(one["uv"]) == 4 and all(
-        box[0] <= x <= box[2] and box[1] <= y <= box[3] for x, y in one["xy"])]
-    rows = []
-    for piece in figure:
-        sec = index["sections"].get((layout.MODEL, piece["section"]))
-        error, matched = (piece_error(piece, projection, sec, group) if sec else (None, 0))
-        rows.append({"section": piece["section"], "error": error, "matched": matched})
-    return group, {"box": box, "rows": rows}
-
-
-def replay_judge(report: dict, expect: dict, plant: bool = False) -> list:
-    """Failures of what G8 measured: the followed figure opens at the expected
-    root with the expected head, draws the armband and not the arm it
-    replaces, holds one still pose, turned its back, shows the expected panel
-    and number there, and every capture stayed under the replay's idle
-    frames."""
-    out = []
-    focus = report["focus"]
-    order = [p["section"] for p in focus] if focus is not None else []
-    root = PLANT_REPLAY_ROOT if plant else expect["root"]
-    if focus is None:
-        out.append("no %s figure in the frame" % ("second" if plant else "followed"))
-    elif len(order) < 2 or order[1] != root:
-        out.append("the followed figure opens at %s, not at section %d"
-                   % (order[1] if len(order) > 1 else None, root))
-    if focus is not None and order[0] != expect["head"]:
-        out.append("the followed figure's head is section %s, not %d" % (order[0], expect["head"]))
-    if focus is not None and expect["armband"] is not None and expect["armband"] not in order:
-        out.append("the followed figure does not draw section %d" % expect["armband"])
-    if focus is not None and expect["armband"] is None and armband_of(order) is not None:
-        out.append("the followed figure draws armband %d, none expected" % armband_of(order))
-    if expect["replaced"] is not None and expect["replaced"] in order:
-        out.append("the followed figure draws section %d beside the armband" % expect["replaced"])
-    if expect.get("sleeves") and sleeves_of(order) != expect["sleeves"]:
-        out.append("the followed figure's sleeves are %s, not %s"
-                   % (sleeves_of(order), expect["sleeves"]))
-    if report["still"] is None or report["still"] > REPLAY_STILL:
-        out.append("the pose changed by %s between two frames, over %d"
-                   % (report["still"], REPLAY_STILL))
-    if report["turned"] != "back":
-        out.append("the back was not reached: %s" % report["turned"])
-    if report["panel"] != expect["panel"]:
-        out.append("the back samples panel %s, not %s" % (report["panel"], expect["panel"]))
-    if report["number"] != expect["number"]:
-        out.append("the panel holds %s, not %d" % (report["number"], expect["number"]))
-    out += ["panel %s: %s" % (report["panel"], line) for line in report["panel_failures"]]
-    idle = report["idle"]
-    for what in ("front_frames", "back_frames"):
-        if idle is None or report[what] >= idle:
-            out.append("%s %d, not under the replay's idle %s" % (what, report[what], idle))
-    return out
-
-
-REPLAY_SHARED_CELL = (0, 0, 80)
-"""The panel cell every outfield back of a page samples beside its own
-(`--replay-field`, K3D-TASK-18: "the cell every outfield back of a page also
-samples"); a player's panel is the other cell, or this one when it is his."""
-
-
 def replay_name(slot: int, focus: int) -> str:
     """The file stem of a `--replay` capture: `replay-<slot>`, and
     `-<focus>` after it for a player L2 led to."""
@@ -3505,28 +3015,6 @@ def replay_panel(capture, index, nth: int, choose, on_torso: bool):
         group = [one for one in group if torso is not None and all(
             torso[0] <= x <= torso[2] and torso[1] <= y <= torso[3] for x, y in one["xy"])]
     return focus, panel_samples(group)
-
-
-def panel_cell(cells: dict, outfield: bool):
-    """The panel cell a figure's back shows, of the cells its torso samples:
-    the one with the most quads -- or, for an outfield player, the one left
-    once `REPLAY_SHARED_CELL` is taken away, when exactly one is."""
-    own = [c for c in cells if c != REPLAY_SHARED_CELL] if outfield else []
-    return own[0] if len(own) == 1 else max(cells, key=lambda c: len(cells[c]))
-
-
-def figure_tag(hits, cluts):
-    """(tag, set) of the kit whose player palette sits at one of *cluts*, of
-    the hits `_edit_kit` found; (None, None) if none does.  In the replay the
-    uniform bodies are not in VRAM as the disc holds them (no hit of record 0,
-    1, 4 or 5 in slots 9 and 10), but each team's player palette is, one CLUT
-    row apiece: TEX_41 at (0,486), TEX_22 at (0,487)."""
-    for tag, index, at, flat, shared in hits or []:
-        for kit_set, record in PLAYER_PALETTE.items():
-            if index == record and any(tuple(a) in cluts for a in at):
-                return tag, kit_set
-    return None, None
-
 
 def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool = False,
                focus_k: int = 0) -> int:
@@ -3557,8 +3045,8 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
         with open(path, "w") as fh:
             json.dump(kept, fh)
         print("  capture kept at %s (--frame-json reads it back)" % path)
-    _restore_samples(kept["front"])
-    _restore_samples(kept["back"])
+    restore_samples(kept["front"])
+    restore_samples(kept["back"])
     index = model_index(image)
     nth = 1 if plant else 0
     frames = replay_frames(kept["front"], nth, choose)
@@ -3712,7 +3200,7 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
         print("  no measured expectation for slot %d focus %d (REPLAY_EXPECT): printed, not "
               "judged" % (slot, focus_k))
         return 0
-    failures = replay_judge(report, expect, plant)
+    failures = replay_judge(report, expect, PLANT_REPLAY_ROOT if plant else None)
     for line in failures:
         print("  FAIL  %s" % line)
     if not failures:
@@ -3802,7 +3290,7 @@ def run_replay_confront(slot: int, cue: str, cache=None, focus_k: int = 0) -> in
         return 1
     with open(path) as fh:
         kept = json.load(fh)
-    _restore_samples(kept["front"])
+    restore_samples(kept["front"])
     index = model_index(image)
     frames = replay_frames(kept["front"], 0, choose)
     focus = frames[-1]["focus"] if frames else None
@@ -3893,7 +3381,6 @@ def run_replay_idle(slot: int, cue: str) -> int:
     return 0
 
 
-
 # --- G8: the 22 on the pitch, one L2 tap at a time (K3D-TASK-18) ---
 
 REPLAY_FIELD_BUTTONS = ("L2", "R2")
@@ -3917,30 +3404,6 @@ REPLAY_FIELD_SETTLE = 60
 """Frames stepped after the last tap before the capture: the camera flies to
 the next player, and the capture waits for it to land.  Well under the
 replay's idle frames (`REPLAY_IDLE`), which every tap starts again."""
-REPLAY_FOLLOW_DEPTH = 5000
-"""View depth under which the figure on the camera's axis is one it follows.
-The camera stands at one distance behind every player it follows and nearer
-the goalkeeper; on the ball the figure nearest the axis is the goalkeeper,
-farther off (`--replay-field` prints the depth of each focus)."""
-REPLAY_FOLLOW_OFF = 8.0
-"""Pixels off the screen's centre the followed figure's root may lie: the
-camera keeps the player it follows on its axis."""
-REPLAY_FOCUS_MARGIN = (8.0, 1000)
-"""(pixels off the axis, view depth): how far apart the next figure has to
-lie from the followed one, in one or the other, for the figure on the axis to
-be taken as followed (CORR-K3D-024).  Behind a player another figure can sit
-on the axis too -- a fraction of a pixel off it in slot 9 -- but far nearer
-or farther: the closest such pair `--replay-field 9` printed lies 2108 apart
-in depth.  Depth alone will not do: a figure running between the followed
-one and the camera lies nearer than he does."""
-REPLAY_ARMBANDS = (90, 93, 92, 91, 94)
-"""MODEL.BIN sections that draw a captain's armband (G4, G8): 90 on a short
-sleeve, 93 on a long one, 92 on the goalkeeper of family 13, 91 and 94 on
-family 56."""
-SHORT_SLEEVES = (3, 4, 5, 6)
-"""The short sleeves of the starting figure, family 2."""
-LONG_SLEEVES = (95, 96, 97, 98)
-"""The long sleeves of family 2 (G3)."""
 REPLAY_FIELD_EXPECT = {
     9: {"captain": {"armband": 90, "number": 11}, "keeper": {"k": 0, "root": 13, "armband": 92},
         "sleeves": "short", "players": {"outfield": 20, "keepers": 2}},
@@ -3957,128 +3420,6 @@ goalkeepers (family 13), no other figure -- K3D-TASK-18 measured no one sent
 off, and a walk that ends early, or follows another figure, is not the table
 (CORR-K3D-030).  The sleeves of the outfield players are printed, not judged:
 a player who differs is a result."""
-
-
-def sleeves_of(order) -> str:
-    """"long" if a figure's sections hold a long sleeve, "short" if a short
-    one, else None."""
-    if any(s in LONG_SLEEVES for s in order):
-        return "long"
-    if any(s in SHORT_SLEEVES for s in order):
-        return "short"
-    return None
-
-
-def armband_of(order):
-    """The armband section a figure draws, or None."""
-    return next((s for s in order if s in REPLAY_ARMBANDS), None)
-
-
-def figure_off_axis(figure) -> float:
-    """Pixels the root of *figure* lies off the screen's centre, across: the
-    camera's axis."""
-    root = figure[1] if len(figure) > 1 else figure[0]
-    x, _y, z = root["matrix"][1]
-    return abs(root["projection"]["H"] * x / z) if z > 0 else float("inf")
-
-
-def field_focus(figures, nth: int = 0):
-    """The figure the camera follows behind a player: the *nth* nearest the
-    camera's axis (0, the followed one; the plant asks for the next).  None if
-    there is not that many."""
-    ranked = sorted(figures, key=figure_off_axis)
-    return ranked[nth] if nth < len(ranked) else None
-
-
-def field_row(capture: dict, index, nth: int = 0) -> dict:
-    """What one focus of `--replay-field` shows: the followed figure of the
-    last frame (the *nth* nearest), its depth and the next one's, its root,
-    head, sleeves and armband, and the panel its torso samples -- the cell
-    most of the figure's quads fall in, with its page."""
-    frames = replay_frames(capture)
-    if not frames:
-        return {"figures": 0, "focus": None, "order": [], "depth": None, "off": None,
-                "next": None, "head": None, "root": None, "sleeves": None, "armband": None,
-                "still": None, "cells": {}, "panel": None, "figure_cell": None, "whole": 0}
-    last = frames[-1]
-    ranked = sorted(last["figures"], key=figure_off_axis)
-    focus = field_focus(last["figures"], nth)
-    order = [p["section"] for p in focus] if focus is not None else []
-    row = {"figures": len(ranked), "focus": focus, "order": order, "whole": len(frames),
-           "depth": figure_depth(focus) if focus is not None else None,
-           "off": figure_off_axis(focus) if focus is not None else None,
-           "next": figure_off_axis(ranked[nth + 1]) if len(ranked) > nth + 1 else None,
-           "next_depth": figure_depth(ranked[nth + 1]) if len(ranked) > nth + 1 else None}
-    row["head"] = order[0] if order else None
-    row["root"] = order[1] if len(order) > 1 else None
-    row["sleeves"] = sleeves_of(order)
-    row["armband"] = armband_of(order)
-    before = field_focus(frames[-2]["figures"], nth) if len(frames) >= 2 else None
-    row["still"] = pose_change(before, focus) if before is not None and focus else None
-    samples = capture["lists"].get("%d" % last["head"], [])
-    group, _fit = figure_group(focus, samples, index)
-    torso = piece_box(focus[1], index) if focus is not None and len(focus) > 1 else None
-    on_torso = [one for one in (group or []) if torso is not None and all(
-        torso[0] <= x <= torso[2] and torso[1] <= y <= torso[3] for x, y in one["xy"])]
-    cells = panel_samples(on_torso)
-    row["cells"] = {"%d,%d,%d" % cell: len(found) for cell, found in cells.items()}
-    row["page"] = next((found[0]["page"][0] for found in cells.values()), None)
-    row["panel"] = None
-    return row
-
-
-TORSO_MARGIN = 2
-"""Pixels around the torso's own projected vertices within which a quad is
-taken as drawn on it: behind a player the box of the whole figure takes in
-the back of a neighbour a score of pixels off the axis (slot 10)."""
-
-
-def piece_box(piece, index):
-    """The screen box of one piece's MODEL.BIN vertices through its matrix,
-    grown by `TORSO_MARGIN`; None if the section has none."""
-    sec = index["sections"].get((layout.MODEL, piece["section"]))
-    points = [at for v in (sec.vertices if sec else [])
-              for at in [pose_project(piece["matrix"][0], piece["matrix"][1],
-                                      piece["projection"], (v.x, v.y, v.z))] if at is not None]
-    if not points:
-        return None
-    return (min(p[0] for p in points) - TORSO_MARGIN, min(p[1] for p in points) - TORSO_MARGIN,
-            max(p[0] for p in points) + TORSO_MARGIN, max(p[1] for p in points) + TORSO_MARGIN)
-
-
-def field_panels(rows: list) -> dict:
-    """Page x -> the cells every followed outfield figure of that page samples.
-    Behind a player the torso's back draws four panel quads: two in the
-    player's own cell and two in one cell all of them share; a figure's panel
-    is the cell left once the shared one is taken away, or the shared one when
-    nothing is left (its owner).  Sets each row's "panel"."""
-    shared = {}
-    for r in rows:
-        if r.get("follows") and r.get("cells") and r["root"] != 13:
-            held = set(r["cells"])
-            shared[r["page"]] = held if r["page"] not in shared else shared[r["page"]] & held
-    for r in rows:
-        r["panel"] = None
-        if not r.get("cells"):
-            continue
-        own = sorted(set(r["cells"]) - shared.get(r["page"], set())) or sorted(r["cells"])
-        if len(own) == 1:
-            r["panel"] = (r["page"],) + tuple(int(v) for v in own[0].split(",")[1:])
-    return shared
-
-
-def field_number(pages: dict, panel, shift: int = 0):
-    """The number in *panel* (page x, cell x, cell y) of the uniform pages
-    read off the emulator, by `read_panels`; *shift* moves every cell that
-    many rows, which only the plant does.  None if the page was not read."""
-    if panel is None or "%d" % panel[0] not in pages:
-        return None
-    record = records_of(_screen_body())[UNIFORM_RECORD]
-    for one in read_panels(pages["%d" % panel[0]], record.w, shift):
-        if (one["cell"][1], one["cell"][2] - shift) == tuple(panel[1:]):
-            return one["number"]
-    return None
-
 
 def replay_field_capture(game, maps, slot: int, button: str = REPLAY_FIELD_BUTTONS[0]) -> dict:
     """`--replay-field`'s reading of the emulator: for k taps of *button*,
@@ -4125,75 +3466,6 @@ def replay_field_capture(game, maps, slot: int, button: str = REPLAY_FIELD_BUTTO
         foci[-1]["followed"] = followed
     return {"slot": slot, "button": button, "foci": foci, "pages": pages}
 
-
-def replay_field_judge(rows: list, expect: dict, idle) -> list:
-    """Failures of the table against the user's account: every focus that
-    follows a player has it on the camera's axis (`REPLAY_FOLLOW_OFF`), the
-    next figure `REPLAY_FOCUS_MARGIN` apart, under `REPLAY_FOLLOW_DEPTH`; the
-    camera came back to the ball; the outfield armband is the expected one, on
-    the player wearing the expected number; the figure the replay opens on is
-    the goalkeeper with his armband; the walk follows the expected outfield
-    players and goalkeepers and no other figure; every capture holds one still pose
-    (`REPLAY_STILL`) over its last two frames; and every capture stayed under
-    the idle."""
-    out = []
-    followed = [r for r in rows if r.get("follows")]
-    if not followed:
-        out.append("no tap moved the camera to a player")
-    for r in followed:
-        if r["depth"] is None or r["depth"] >= REPLAY_FOLLOW_DEPTH:
-            out.append("focus %d: the followed figure lies at depth %s, not under %d"
-                       % (r["k"], r["depth"], REPLAY_FOLLOW_DEPTH))
-        if r["off"] is None or r["off"] > REPLAY_FOLLOW_OFF:
-            out.append("focus %d: the followed figure lies %s px off the axis, over %.0f"
-                       % (r["k"], r["off"], REPLAY_FOLLOW_OFF))
-        if r["off"] is not None and r["next"] is not None \
-                and r["next"] - r["off"] < REPLAY_FOCUS_MARGIN[0] \
-                and abs(r["next_depth"] - r["depth"]) < REPLAY_FOCUS_MARGIN[1]:
-            out.append("focus %d: the next figure lies %.1f px farther off the axis and %.0f "
-                       "apart in depth, under the margin %.0f px or %d"
-                       % ((r["k"], r["next"] - r["off"], abs(r["next_depth"] - r["depth"]))
-                          + REPLAY_FOCUS_MARGIN))
-    if not rows or rows[-1].get("end") != "ball":
-        out.append("the camera did not come back to the ball: %s"
-                   % (rows[-1].get("end") if rows else "no focus"))
-    captain = expect["captain"]
-    banded = [r for r in followed if r["armband"] in (90, 93)]
-    if len(banded) != 1:
-        out.append("%d focus(es) draw an outfield armband, not 1" % len(banded))
-    for r in banded:
-        if r["armband"] != captain["armband"]:
-            out.append("focus %d draws armband %d, not %d"
-                       % (r["k"], r["armband"], captain["armband"]))
-        if r["number"] != captain["number"]:
-            out.append("focus %d, the outfield captain, holds number %s, not %d"
-                       % (r["k"], r["number"], captain["number"]))
-    players = expect.get("players")
-    if players:
-        outfield = sum(r["root"] == 2 for r in followed)
-        keepers = sum(r["root"] == 13 for r in followed)
-        others = len(followed) - outfield - keepers
-        if (outfield, keepers, others) != (players["outfield"], players["keepers"], 0):
-            out.append("the walk follows %d outfield player(s), %d goalkeeper(s) and %d other "
-                       "figure(s), not %d, %d and 0"
-                       % (outfield, keepers, others, players["outfield"], players["keepers"]))
-    keeper = expect["keeper"]
-    opening = next((r for r in rows if r["k"] == keeper["k"]), None)
-    if opening is None or opening["root"] != keeper["root"] \
-            or opening["armband"] != keeper["armband"]:
-        out.append("focus %d opens at %s with armband %s, not family %d with %d"
-                   % (keeper["k"], opening and opening["root"], opening and opening["armband"],
-                      keeper["root"], keeper["armband"]))
-    for r in rows:
-        if r.get("frames") is not None and (r.get("still") is None or r["still"] > REPLAY_STILL):
-            out.append("focus %d: the figure's matrices differ by %s between the last two "
-                       "frames, not within %d" % (r["k"], r.get("still"), REPLAY_STILL))
-        if r.get("frames") is not None and (idle is None or r["frames"] >= idle):
-            out.append("focus %d: %d frame(s) from the last tap, not under the replay's idle %s"
-                       % (r["k"], r["frames"], idle))
-    return out
-
-
 REPLAY_FIELD_PLANTS = ("both", "focus", "panel")
 """What `--plant-replay-field` plants: the figure next off the camera's axis
 followed, every panel read a row up, or both (the default)."""
@@ -4234,7 +3506,7 @@ def run_replay_field(slot: int, cue: str, cache=None, plant: str = None,
             rows.append({"k": focus["k"], "end": "refused", "root": None,
                          "moves": focus["moves"], "refused": focus["refused"]})
             continue
-        _restore_samples(focus["capture"])
+        restore_samples(focus["capture"])
         row = field_row(focus["capture"], index, nth)
         row.update(k=focus["k"], moves=focus["moves"], frames=focus["frames"],
                    follows=bool(focus["followed"]) and focus["k"] > 0)
@@ -4242,9 +3514,10 @@ def run_replay_field(slot: int, cue: str, cache=None, plant: str = None,
             row["end"] = "ball"
         rows.append(row)
     shared = field_panels(rows)
+    width = records_of(_screen_body())[UNIFORM_RECORD].w
     for row in rows:
         if not row.get("refused"):
-            row["number"] = field_number(kept["pages"], row["panel"], shift)
+            row["number"] = field_number(kept["pages"], row["panel"], width, shift)
     print("  %s tapped k times from the reloaded state, %d frame(s) to settle, idle %s; "
           "off: px the followed figure's root lies off the axis; next, ndepth: the next "
           "figure's off and depth"
@@ -4321,7 +3594,7 @@ def run_replay_field(slot: int, cue: str, cache=None, plant: str = None,
         print("  no measured expectation for slot %d with %s (REPLAY_FIELD_EXPECT is L2's): "
               "printed, not judged" % (slot, kept["button"]))
         return 0
-    failures = replay_field_judge(rows, expect, idle)
+    failures = judge_walk(rows, expect, idle)
     for line in failures:
         print("  FAIL  %s" % line)
     if not failures:
