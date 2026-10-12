@@ -116,3 +116,10 @@ Gates:
 - `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin ctest --test-dir build -R kits`:
   `100% tests passed, 0 tests failed out of 4`, nenhum *skipped*.
 - `python3 tools/kits/controls.py`: `controls: 47 of 47 red`.
+- **Closed** — commit `37b9761c` (2026-10-11): fix(kits): capture two whole frames per --replay-field focus and judge the still pose
+  - Files (`git show --name-status 37b9761c`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-026.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
