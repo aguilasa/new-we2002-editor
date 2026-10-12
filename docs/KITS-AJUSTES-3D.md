@@ -1004,6 +1004,8 @@ $ python3 tools/kits/oracle.py --replay-field 9
   page 640: 11 focus(es), numbers 20 11 10 8 7 3 4 14 5 2 1, heads 46 46 24 47 34 24 34 24 28 46 24, sleeves 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 13:None
   page None: 1 focus(es), numbers None, heads 34, sleeves 13:None
   whole frames per capture: 2 to 2, from 9 submit(s); still pose: 0
+  closest next figure inside 8 px: focus 3, 3.46 px farther off the axis and 2108 apart in depth (the margin asks 1000)
+  frames from the last tap to the end of each capture: 64 to 66, under the idle 390
   heads: 24 on 640/10 640/3 640/14 640/1 576/5; 28 on 640/5; 32 on 576/6; 34 on 640/7 640/4 576/9 576/11 576/10 576/2 576/16 576/7 576/4 576/3 None/None; 46 on 640/20 640/11 640/2; 47 on 640/8
   ok    22 focus(es) follow a player and the camera comes back to the ball; the outfield captain is focus 3, number 11 with armband 90; the goalkeeper draws 92
 ```
@@ -1042,6 +1044,8 @@ $ python3 tools/kits/oracle.py --replay-field 10
   page 640: 11 focus(es), numbers 20 11 10 8 7 3 4 14 5 2 1, heads 46 46 24 47 34 24 34 24 28 46 24, sleeves 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long 2:long 13:None
   page None: 1 focus(es), numbers None, heads 34, sleeves 13:None
   whole frames per capture: 2 to 2, from 9 submit(s); still pose: 0
+  no next figure inside 8 px of any followed one
+  frames from the last tap to the end of each capture: 64 to 65, under the idle 390
   heads: 24 on 640/10 640/3 640/14 640/1 576/5; 28 on 640/5; 32 on 576/6; 34 on 640/7 640/4 576/9 576/11 576/10 576/2 576/16 576/7 576/4 576/3 None/None; 46 on 640/20 640/11 640/2; 47 on 640/8
   ok    22 focus(es) follow a player and the camera comes back to the ball; the outfield captain is focus 3, number 11 with armband 93; the goalkeeper draws 92
 ```
@@ -1057,7 +1061,9 @@ O que as duas tabelas dizem, uma conclusão por vez:
    mais perto da câmera (slot 9, k = 21: a seguinte a 2584, contra 4692 do seguido) ou no mesmo eixo
    (k = 9: 1,9 px, mas a 20692). O seguido é a figura mais perto do eixo (`field_focus`), e a margem
    pede a seguinte a 8 px a mais do eixo **ou** a 1000 de profundidade (`REPLAY_FOCUS_MARGIN`). O par
-   mais apertado dos dois slots é o k = 3 do slot 9: 3,4 px a mais, mas 2108 atrás. A margem que a
+   mais apertado é o do Bokšić no slot 9 (k = 3 com L2, k = 20 com R2): `closest next figure inside
+   8 px: focus 3, 3.46 px farther off the axis and 2108 apart in depth`; no slot 10, `no next figure
+   inside 8 px of any followed one`. A margem que a
    [CORR-K3D-024](/docs/tasks/kits-3d/CORR-K3D-024.md) deixou para cá está no juiz, com caso no
    `selftest.py` e controle no `controls.py`.
 3. **A ordem do L2.** Do Marcos (k = 0), o primeiro toque vai à **bola** (k = 1: a figura mais perto
@@ -1102,6 +1108,8 @@ O que as duas tabelas dizem, uma conclusão por vez:
      page 576: 10 focus(es), numbers 5 3 4 7 16 6 2 10 11 9, heads 24 34 34 34 34 32 34 34 34 34, sleeves 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short
      page 640: 11 focus(es), numbers 1 2 5 14 4 3 7 8 10 11 20, heads 24 46 28 24 34 24 34 47 24 46 46, sleeves 13:None 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short 2:short
      whole frames per capture: 2 to 2, from 9 submit(s); still pose: 0
+     closest next figure inside 8 px: focus 20, 3.46 px farther off the axis and 2108 apart in depth (the margin asks 1000)
+     frames from the last tap to the end of each capture: 64 to 67, under the idle 390
      heads: 24 on 576/5 640/1 640/14 640/3 640/10; 28 on 640/5; 32 on 576/6; 34 on 576/3 576/4 576/7 576/16 576/2 576/10 576/11 576/9 640/4 640/7; 46 on 640/2 640/11 640/20; 47 on 640/8
      no measured expectation for slot 9 with R2 (REPLAY_FIELD_EXPECT is L2's): printed, not judged
    ```
@@ -1119,14 +1127,16 @@ O que as duas tabelas dizem, uma conclusão por vez:
 7. **Painel ↔ número contra a grade do §4.7.** De costas, o torso de todo jogador de linha manda à GPU
    quatro quads de painel: dois na **célula própria** e dois na célula (0,80), que todos os de linha
    da página amostram (`the cell every outfield back of a page also samples`). O painel de cada um é
-   a célula que sobra — ou a (0,80), para quem a ocupa (k = 11 e k = 22). Os onze painéis de cada
-   página saem distintos, um por jogador, e o número lido em cada um bate com a grade: **Brasil**
+   a célula que sobra — ou a (0,80), para quem a ocupa (k = 11 e k = 22). Os painéis saem
+   distintos, um por jogador seguido — dez na página do Brasil (o do Marcos, pela K3D-TASK-17, abaixo)
+   e onze na da Croácia —, e o número lido em cada um bate com a grade: **Brasil**
    (576) 5 3 4 7 16 na linha 80 e 6 2 10 11 9 na 104, o que a K3D-TASK-17 leu na mesma página;
    **Croácia** (640) 2 5 14 4 3 na linha 80, 7 8 10 11 20 na 104, e o 1 do goleiro em (100,104).
    (O painel do Marcos não aparece com L2, que nunca o mostra de costas; a K3D-TASK-17 o mediu
    girando a câmera: (100,104), número 1.)
-8. **O tempo.** Cada foco corre de 64 a 66 quadros do último toque ao fim da captura (até 67 no R2),
-   sob os 390 de `--replay-idle`.
+8. **O tempo.** Do último toque ao fim da captura, cada foco corre `64 to 66` quadros no slot 9,
+   `64 to 65` no 10 e `64 to 67` no R2 (`frames from the last tap to the end of each capture: …,
+   under the idle 390`, nas três saídas acima): sob os 390 de `--replay-idle`.
 9. **A pose parada.** Toda captura fecha dois quadros inteiros, e em todo foco dos três passeios as
    matrizes da figura seguida são iguais nos dois (`whole frames per capture: 2 to 2, from 9 submit(s);
    still pose: 0`, nas três saídas acima): com o replay pausado, nenhum dos 22 se mexe. O juiz falha

@@ -4108,6 +4108,19 @@ def run_replay_field(slot: int, cue: str, cache=None, plant: str = None,
     print("  whole frames per capture: %d to %d, from %s submit(s); still pose: %s"
           % (min(whole), max(whole), " ".join("%d" % n for n in submits),
              " ".join(sorted({"%s" % r["still"] for r in rows if not r.get("refused")}))))
+    near = [r for r in followed if r["next"] is not None
+            and r["next"] - r["off"] < REPLAY_FOCUS_MARGIN[0]]
+    if near:
+        close = min(near, key=lambda r: abs(r["next_depth"] - r["depth"]))
+        print("  closest next figure inside %.0f px: focus %d, %.2f px farther off the axis and "
+              "%.0f apart in depth (the margin asks %d)"
+              % (REPLAY_FOCUS_MARGIN[0], close["k"], close["next"] - close["off"],
+                 abs(close["next_depth"] - close["depth"]), REPLAY_FOCUS_MARGIN[1]))
+    else:
+        print("  no next figure inside %.0f px of any followed one" % REPLAY_FOCUS_MARGIN[0])
+    spent = [r["frames"] for r in rows if r.get("frames") is not None]
+    print("  frames from the last tap to the end of each capture: %d to %d, under the idle %s"
+          % (min(spent), max(spent), idle))
     print("  heads: %s" % "; ".join("%s on %s" % (h, " ".join("%s/%s" % p for p in v))
                                      for h, v in sorted(heads.items(),
                                                         key=lambda t: (t[0] is None, t[0] or 0))))
