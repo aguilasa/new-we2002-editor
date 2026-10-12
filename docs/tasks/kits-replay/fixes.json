@@ -1,5 +1,19 @@
 {
   "schema": 1,
   "cycle": "kits-replay",
-  "fixes": []
+  "fixes": [
+    {
+      "id": "CORR-KRP-001",
+      "file": "CORR-KRP-001.md",
+      "title": "Figure sem o membro pieces de §2.1, e a ausência fora da lista de desvios",
+      "origin": "KRP-TASK-01",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    }
+  ]
 }

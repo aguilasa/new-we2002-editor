@@ -141,3 +141,4 @@ controls: 55 of 55 red
   - **Outside declared files** (`tools/kits/core/replay.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md`):
     - `docs/tasks/kits-replay/progress.json`
     - `docs/tasks/kits-replay/progresso.md`
+- **Reviewed** (2026-10-12) at `edd0dfb2`: CORR-KRP-001

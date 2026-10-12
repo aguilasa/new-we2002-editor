@@ -3,5 +3,5 @@
 <!-- rite:begin fixes -->
 | ID | Title | Origin | Severity | Status | Done on |
 | --- | --- | --- | --- | --- | --- |
-| — | *(no fixes)* | | | | |
+| [CORR-KRP-001](/docs/tasks/kits-replay/CORR-KRP-001.md) | Figure sem o membro pieces de §2.1, e a ausência fora da lista de desvios | KRP-TASK-01 | low | pending | — |
 <!-- rite:end -->
