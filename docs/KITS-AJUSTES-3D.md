@@ -1394,8 +1394,11 @@ Os itens 4 a 7 da K3D-TASK-17, para o capitão de linha:
    nos dois slots, e o Balaban (640,80,104) com o **20**. A frente aparece depois do giro: 15 a 17
    toques de R1, de 8 a 12 graus cada, com o seguido sempre a 4672–4742 de profundidade.
 7. **O confronto.** (a) No quadro do jogo, o pixel é o texel puro: a distância ao texel é menor que ao
-   texel modulado em toda seção com pixel próprio (faixa 90: 2,27 contra 2,55; faixa 93: 2,18 contra
-   2,59). O erro de encaixe por seção fica perto de 1 px no Balaban, inclusive nas mangas 95 a 98 (1,03
+   texel modulado em toda seção com pixel próprio do Bokšić, nos dois slots (faixa 90: 2,27 contra 2,55;
+   faixa 93: 2,18 contra 2,59), e em todas as do Balaban menos duas: a manga 95 empata (30 px, `far`
+   3,08 contra 3,10), e a 96, com só 9 px próprios, fica mais perto do modulado (`far` 8,07 contra 7,67,
+   na saída do `--replay 10 --focus 2` acima). São as seções de menos pixel da captura.
+   O erro de encaixe por seção fica perto de 1 px no Balaban, inclusive nas mangas 95 a 98 (1,03
    0,97 0,97 0,92), e passa de 9 px em seções do Bokšić (5, 7, 8, 10, 11 no slot 9; 95 e 96 no 10). Isso
    **não é da geometria**: nos dois quadros do Bokšić há um vizinho brasileiro sobre ele na tela (slot
    9: a 4,0 px do eixo, 6802 de profundidade; slot 10: a 3907, à frente dele — as linhas `every figure
@@ -1403,8 +1406,10 @@ Os itens 4 a 7 da K3D-TASK-17, para o capitão de linha:
    entram na caixa da figura; é a mesma razão de a CLUT (0,486), a paleta do TEX_41 (Brasil), aparecer
    nas seções dele — o Balaban, sozinho no quadro, só amostra a (0,487). (b) A paleta do disco que a
    aba usa (`TEX_22`, registro 2) é a do jogo: 0 de 256 diferentes na (0,487). A figura da aba contra a
-   do jogo, por histograma: 0,41 de costas e 0,37 de frente (Bokšić, slot 9), 0,41 e 0,39 (Bokšić, slot
-   10, `--long-sleeves`), 0,39 e 0,38 (Balaban, slot 10).
+   do jogo, por histograma: a aba de costas e a aba de frente, as duas contra **as costas** do jogo — a
+   primeira captura, a única comparada (`the game's frame (the first capture, the player's back)`); não
+   há frente do jogo contra frente da aba. As notas: 0,41 de costas e 0,37 de frente (Bokšić, slot 9),
+   0,41 e 0,39 (Bokšić, slot 10, `--long-sleeves`), 0,39 e 0,38 (Balaban, slot 10).
 
 A planta (`--plant-replay` com `--focus 3`) segue a figura seguinte do eixo e sai 1 com seis `FAIL`,
 entre eles `the followed figure opens at 2, not at section 103`: é a primeira vez que a conferência de

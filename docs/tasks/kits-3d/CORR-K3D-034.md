@@ -51,3 +51,29 @@ grep -n 'em toda seção com pixel próprio' docs/KITS-AJUSTES-3D.md
 Depois, ou não imprime nada, ou a frase vem seguida da exceção da 96.
 
 ## Log de Execução
+
+### 2026-10-12 — a afirmação do texel puro restrita, e as costas do jogo nomeadas
+
+Triagem inline (`rite reproduce --all --cycle kits-3d`): **REPRODUCED** na HEAD `d348951`. Saíram as
+linhas `95:` (`far 3.08`, `3.10`) e `96:` (`far 8.07`, `7.67`), e o `grep` achou a linha 1385.
+
+Medido, com `WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin` e as linhas `far` de
+`--replay <slot> --focus <K> --frame-json work/kits-oracle/replay-<slot>-<K>.json`:
+- Bokšić, slot 9 e slot 10: o texel puro fica mais perto do pixel do jogo em todas as seções com
+  pixel próprio (slot 9: 2, 3, 90, 7, 9, 8, 10; slot 10: 2, 95, 96, 93, 98, 7, 9, 8, 10).
+- Balaban: o texel puro também fica mais perto, menos em duas seções.
+  - A 95 empata (30 px, 3,08 contra 3,10).
+  - A 96 vira (9 px, 8,07 contra 7,67).
+
+Conserto, no item 7 do G8:
+- (a) Restrito ao que vale, com a 95 e a 96 do Balaban nomeadas como exceção. São as seções de menos
+  pixel da captura.
+- (b) Diz que a aba de costas e a de frente são as duas comparadas contra **as costas** do jogo, a
+  primeira captura. É a linha `the game's frame (the first capture, the player's back)` que o
+  `--replay-confront … --focus` imprime, no bloco colado do G8. As notas não mudaram.
+
+Verificação: `grep -n 'em toda seção com pixel próprio' docs/KITS-AJUSTES-3D.md` imprime a linha
+1397, agora seguida da exceção da 96.
+
+Varredura: `grep -n 'texel puro\|0,37 de frente'` no G8 e na task 19. A linha 933 é o goleiro da
+K3D-TASK-17, outra medição, e a 959 é sobre o `core/raster.py`. Nenhuma muda.
