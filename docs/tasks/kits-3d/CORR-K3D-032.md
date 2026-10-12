@@ -50,3 +50,20 @@ grep -n 'pela mesma CLUT' docs/KITS-AJUSTES-3D.md
 Hoje imprime a linha 1411; depois, nada.
 
 ## Log de Execução
+
+### 2026-10-12 — a cabeça 46 em linhas de CLUT diferentes
+
+Triagem inline (`rite reproduce --all --cycle kits-3d`): **REPRODUCED** na HEAD `d348951`. O `grep`
+achou a linha 1411 ("pela mesma CLUT"), e a linha `46:` do `--replay 10 --focus 2` saiu `CLUT (32,480) (160,480)`.
+
+Medido, com `WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`:
+- `oracle.py --replay 9 --focus 3 --frame-json work/kits-oracle/replay-9-3.json`: `46: 14 prim(s), … CLUT (128,480) …`;
+- `--replay 10 --focus 3 --frame-json work/kits-oracle/replay-10-3.json`: `46: 15 prim(s), … CLUT (128,480) …`;
+- `--replay 10 --focus 2 --frame-json work/kits-oracle/replay-10-2.json`: `46: 18 prim(s), … CLUT (32,480) (160,480) …`.
+
+Conserto: no G8, em "As diferenças do capitão de linha", a cabeça é a mesma seção 46, em linhas de
+CLUT diferentes. A cor do cabelo passa por essa CLUT, e quem escolhe a linha por jogador fica dito
+como não medido.
+
+Verificação: `grep -n 'pela mesma CLUT' docs/KITS-AJUSTES-3D.md` não imprime nada (saída 1).
+Varredura: `grep -rn 'mesma CLUT (128' docs/` só acha esta CORR.

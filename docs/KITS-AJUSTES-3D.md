@@ -1408,8 +1408,10 @@ raiz fica vermelha com uma figura real no quadro, o que a K3D-TASK-17 não alcan
   lugar da 97, e o Balaban mostra que as mangas 95 a 98 sozinhas encaixam a 1 px com as matrizes do
   jogo. A diferença é a **pose** e a **cabeça**;
 - **a cabeça é por jogador** (K3D-TASK-18), e a aba desenha uma só, de cabelo escuro: no jogo o Bokšić
-  e o Balaban usam a mesma seção 46, mas um de cabelo loiro e outro castanho, pela mesma CLUT
-  (128,480) — o que pinta o cabelo de cada um não está medido aqui;
+  e o Balaban usam a mesma seção 46, mas um de cabelo loiro e outro castanho, e a 46 de cada um
+  amostra outra linha de CLUT: (128,480) no Bokšić, nos dois slots, e (32,480) (160,480) no Balaban
+  (as linhas `46:` das três saídas acima). A cor do cabelo de cada jogador passa por essa CLUT, e
+  quem escolhe a linha por jogador não está medido aqui;
 - nada nas três capturas pede mudar a faixa ou a manga em si: posição na lista, zona do bitmap, CLUT e
   modo de desenho batem com o que a aba já faz desde G3.
 
