@@ -77,3 +77,9 @@ Verificação: `grep -n 'em toda seção com pixel próprio' docs/KITS-AJUSTES-3
 
 Varredura: `grep -n 'texel puro\|0,37 de frente'` no G8 e na task 19. A linha 933 é o goleiro da
 K3D-TASK-17, outra medição, e a 959 é sobre o `core/raster.py`. Nenhuma muda.
+- **Closed** — commit `6fafdf41` (2026-10-12): docs(kits): restrict the pure-texel claim in G8 and say the tab is held against the game's back
+  - Files (`git show --name-status 6fafdf41`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-034.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`

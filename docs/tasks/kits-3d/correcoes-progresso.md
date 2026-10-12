@@ -36,6 +36,6 @@
 | [CORR-K3D-031](/docs/tasks/kits-3d/CORR-K3D-031.md) | Controle físico ligado entra no emulador do oráculo e suja as corridas ao vivo | CORR-K3D-026 | medium | done | 2026-10-12 |
 | [CORR-K3D-032](/docs/tasks/kits-3d/CORR-K3D-032.md) | G8 diz que Bokšić e Balaban pintam a cabeça pela mesma CLUT, e a saída mostra CLUTs diferentes | K3D-TASK-19 | medium | done | 2026-10-12 |
 | [CORR-K3D-033](/docs/tasks/kits-3d/CORR-K3D-033.md) | Linhas $ do --replay --focus no G8 sem --frame-json não produzem a saída colada | K3D-TASK-19 | medium | done | 2026-10-12 |
-| [CORR-K3D-034](/docs/tasks/kits-3d/CORR-K3D-034.md) | Item 7 do G8 generaliza "texel puro em toda seção" e chama de frente a comparação com as costas | K3D-TASK-19 | low | in-progress | — |
+| [CORR-K3D-034](/docs/tasks/kits-3d/CORR-K3D-034.md) | Item 7 do G8 generaliza "texel puro em toda seção" e chama de frente a comparação com as costas | K3D-TASK-19 | low | done | 2026-10-12 |
 | [CORR-K3D-035](/docs/tasks/kits-3d/CORR-K3D-035.md) | Deslocamento e ordem do vizinho no G8 saem de sonda, e a ordem está errada | K3D-TASK-19 | medium | done | 2026-10-12 |
 <!-- rite:end -->
