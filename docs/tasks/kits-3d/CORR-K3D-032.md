@@ -67,3 +67,9 @@ como não medido.
 
 Verificação: `grep -n 'pela mesma CLUT' docs/KITS-AJUSTES-3D.md` não imprime nada (saída 1).
 Varredura: `grep -rn 'mesma CLUT (128' docs/` só acha esta CORR.
+- **Closed** — commit `7693fafa` (2026-10-12): docs(kits): say head 46 samples a different CLUT row per player in G8
+  - Files (`git show --name-status 7693fafa`):
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/tasks/kits-3d/CORR-K3D-032.md`
+    - `M docs/tasks/kits-3d/correcoes-progresso.md`
+    - `M docs/tasks/kits-3d/fixes.json`
