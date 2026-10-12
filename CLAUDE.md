@@ -1302,11 +1302,13 @@ Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há duas:
   alvo; no resto de `docs/`, alvo fora de `docs/` (`../NOTICE.md`) continua
   relativo.
 
-Quatro regras que custaram correção em mais de um ciclo, e por isso valem para
+Cinco regras que custaram correção em mais de um ciclo, e por isso valem para
 todos (retros do `looks`,
-[docs/tasks/concluidos/looks/retro.md](docs/tasks/concluidos/looks/retro.md), e
+[docs/tasks/concluidos/looks/retro.md](docs/tasks/concluidos/looks/retro.md),
 do `port-mcr`,
-[docs/tasks/concluidos/port-mcr/retro.md](docs/tasks/concluidos/port-mcr/retro.md)):
+[docs/tasks/concluidos/port-mcr/retro.md](docs/tasks/concluidos/port-mcr/retro.md),
+do `kits`, [docs/tasks/concluidos/kits/retro.md](docs/tasks/concluidos/kits/retro.md),
+e do `kits-3d`, [docs/tasks/kits-3d/retro.md](docs/tasks/kits-3d/retro.md)):
 
 - **Número em Log ou documento é colado da ferramenta, na HEAD entregue.** Não
   se reescreve de memória, não sai de sonda descartável — sonda que produziu um
@@ -1331,6 +1333,13 @@ do `port-mcr`,
   conteúdo** (digest), não por arquivo nem pelos que a task usou — três dos
   "sete cartões independentes" do `port-mcr` eram o mesmo cartão. Foram 22
   correções no `looks` e 8 no `port-mcr`.
+- **Nota de passagem não vai no arquivo da task seguinte.** O que uma task
+  descobre para a próxima mora no Log dela ou no plano; editar outro arquivo de
+  task, o plano ou o perfil sem `rite set <ID> --files …` e uma linha em
+  "Arquivos a criar ou modificar" **no mesmo commit** é escopo não declarado. O
+  `rite close` só anota "Outside declared files" e fecha assim mesmo, então
+  quem pega é o revisor. Foram 14 correções no `kits` e 5 no `kits-3d`, com a
+  armadilha já no arquivo do ciclo.
 
 <!-- rite:begin -->
 Este repositório usa o plugin **Rite** (<https://github.com/aguilasa/rite>); a configuração está em
