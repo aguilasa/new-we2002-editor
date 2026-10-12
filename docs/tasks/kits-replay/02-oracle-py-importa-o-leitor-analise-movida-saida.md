@@ -136,3 +136,4 @@ controls: 56 of 56 red
   - **Outside declared files** (`tools/kits/oracle.py`, `tools/kits/core/replay.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
     - `docs/tasks/kits-replay/progress.json`
     - `docs/tasks/kits-replay/progresso.md`
+- **Reviewed** (2026-10-12) at `c9a47700`: CORR-KRP-002

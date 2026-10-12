@@ -36,8 +36,8 @@
       "status": "done",
       "done_on": "2026-10-12",
       "done_commit": "09203255",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-12",
+      "review_commit": "c9a47700"
     },
     {
       "id": "KRP-TASK-03",
