@@ -68,8 +68,8 @@
       "status": "done",
       "done_on": "2026-10-13",
       "done_commit": "28f0b702",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-13",
+      "review_commit": "81039436"
     },
     {
       "id": "KRP-TASK-05",

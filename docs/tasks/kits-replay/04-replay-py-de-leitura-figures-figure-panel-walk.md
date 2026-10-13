@@ -144,3 +144,4 @@ controls: 57 of 57 red
   - **Outside declared files** (`tools/kits/replay.py`, `tools/kits/core/replay.py`, `tests/CMakeLists.txt`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/PLAN-KITS-REPLAY.md`):
     - `docs/tasks/kits-replay/progress.json`
     - `docs/tasks/kits-replay/progresso.md`
+- **Reviewed** (2026-10-13) at `81039436`: CORR-KRP-004, CORR-KRP-005
