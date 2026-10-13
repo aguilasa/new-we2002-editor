@@ -93,3 +93,15 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE
 $ python3 tools/kits/controls.py
 controls: 63 of 63 red
 ```
+- **Closed** — commit `f6fda52f` (2026-10-13): feat(kits): replay.py show and confront on a kept capture
+  - Files (`git show --name-status f6fda52f`):
+    - `M docs/tasks/kits-replay/05-show-png-e-confront-puro-sobre-a-captura.md`
+    - `M docs/tasks/kits-replay/progress.json`
+    - `M docs/tasks/kits-replay/progresso.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/replay.py`
+    - `M tools/kits/replay.py`
+    - `M tools/kits/selftest.py`
+  - **Outside declared files** (`tools/kits/replay.py`, `tools/kits/core/replay.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
+    - `docs/tasks/kits-replay/progress.json`
+    - `docs/tasks/kits-replay/progresso.md`
