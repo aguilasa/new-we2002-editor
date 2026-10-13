@@ -168,8 +168,10 @@ segundos.
 ### 2.6 O gate: `kits_replay`
 
 Alvo novo de `ctest`, **`kits_replay`**: roda os leitores sobre as capturas da pasta apontada por
-`WE2002_KITS_REPLAY_DIR` (default `work/kits-oracle/`), confere o digest de cada uma contra o
-registrado, e sai 77 (*skipped*) sem elas. A contagem de alvos `kits` mora só no [§9](#9).
+`WE2002_KITS_REPLAY_DIR` (hoje `work/kits-oracle/`), confere o digest de cada uma contra o
+registrado, e sai 77 (*skipped*) sem a variável ou sem `WE2002_LOOKS_IMAGE`. Não há pasta default:
+o `ctest` roda de `build/tests`, e um default relativo pularia em silêncio
+([KRP-TASK-04](/docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md)). A contagem de alvos `kits` mora só no [§9](#9).
 
 ## 3. Cabeça por jogador
 

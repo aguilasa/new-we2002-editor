@@ -29,7 +29,7 @@ import re
 
 from . import tex  # noqa: F401  (tex puts tools/pes2 and tools/looks on sys.path)
 from .errors import KitsError
-from .figure import BACK_COPY, GLYPH_W
+from .figure import BACK_COPY, GLYPH_W, KEEPER_ARMBAND, SLEEVE_LENGTHS
 from .zones import GAPS, ZONES
 
 import layout  # noqa: E402  (tools/looks)
@@ -89,6 +89,15 @@ PANEL_W, PANEL_H = 20, 24
 """A back panel: the torso gap's size (core/zones.py GAPS)."""
 PLAYER_PALETTE = {1: 2, 2: 6}
 """Set -> the record of its player palette."""
+UNIFORM_WIDTH = tex.EXPECTED_SHAPE[0][3]
+"""Halfwords across the uniform image (record 0 of a kit, section 1.1): the
+row width `field_number` and `Figure.panel` read a uniform page with."""
+ARMBAND_REPLACES = {SLEEVE_LENGTHS["short"]["armband"]: SLEEVE_LENGTHS["short"]["replaced"],
+                    SLEEVE_LENGTHS["long"]["armband"]: SLEEVE_LENGTHS["long"]["replaced"],
+                    KEEPER_ARMBAND: 15}
+"""Armband -> the arm section it is drawn in place of: 90 for 4 on the short
+sleeve, 93 for 97 on the long one (`core.figure.SLEEVE_LENGTHS`), 92 for 15
+on the goalkeeper of family 13 (KITS-REPLAYS-9-10 items 3 and 4)."""
 REPLAY_STILL = 0
 """The most a followed figure's matrices may differ between the last two
 frames of a capture: the replay is paused."""
@@ -387,6 +396,11 @@ class Figure(list):
         return armband_of(self.order)
 
     @property
+    def replaces(self):
+        """The arm section the figure's armband stands in for, or None."""
+        return ARMBAND_REPLACES.get(self.armband)
+
+    @property
     def depth(self) -> float:
         return figure_depth(self)
 
@@ -437,12 +451,13 @@ class Figure(list):
             out[section] = row
         return out
 
-    def panel(self, index, pages: dict = None, width: int = None,
+    def panel(self, index, pages: dict = None, width: int = UNIFORM_WIDTH,
               on_torso: bool = False) -> dict:
         """The back panel the figure samples: the cells (cell -> quads), the
         figure's own cell (`panel_cell`, the shared one taken away when
         *on_torso*: behind a player), its page, and with the uniform pages
-        and their width the number in it."""
+        the number in it and that panel as `read_panels` reads it ("read":
+        digits and unexplained pixels)."""
         group, _fit = self.group(index)
         group = group or []
         if on_torso and len(self) > 1:
@@ -451,14 +466,18 @@ class Figure(list):
                 torso[0] <= x <= torso[2] and torso[1] <= y <= torso[3] for x, y in one["xy"])]
         cells = panel_samples(group)
         out = {"cells": {cell: len(found) for cell, found in cells.items()}, "own": None,
-               "page": None, "panel": None, "number": None}
+               "page": None, "panel": None, "number": None, "read": None}
         if cells:
             cell = panel_cell(cells, on_torso)
             out["own"] = cell
             out["page"] = cells[cell][0]["page"][0]
             out["panel"] = (out["page"],) + cell[1:]
-            if pages is not None and width is not None:
-                out["number"] = field_number(pages, out["panel"], width)
+            words = (pages or {}).get("%d" % out["page"])
+            if words is not None:
+                shown = [one for one in read_panels(words, width) if one["cell"][1:] == cell[1:]]
+                if shown:
+                    out["read"] = shown[0]
+                    out["number"] = shown[0]["number"]
         return out
 
 
@@ -827,6 +846,19 @@ def read_panels(words, width: int, shift: int = 0) -> list:
     return out
 
 
+def model_index(image_path: str) -> dict:
+    """{"sections": {(MODEL.BIN, i): Section}} of the Japanese disc at
+    *image_path*, read through the looks disc guard (`core.figure`): what
+    `figure_group`, `piece_box` and `section_samples` look sections up in."""
+    import section
+
+    from .figure import read_geometry
+
+    data = read_geometry(image_path)[layout.MODEL]
+    return {"sections": {(layout.MODEL, i): sec for i, sec in
+                         enumerate(section.scan(data, layout.MODEL_GEOMETRY_START).sections)}}
+
+
 def field_number(pages: dict, panel, width: int, shift: int = 0):
     """The number in *panel* (page x, cell x, cell y) of the uniform pages
     read off the emulator, *width* halfwords a row; *shift* moves every cell
@@ -918,7 +950,7 @@ class Walk:
         self.shared = shared
 
     @classmethod
-    def load(cls, path: str, index, width: int = None, nth: int = 0,
+    def load(cls, path: str, index, width: int = UNIFORM_WIDTH, nth: int = 0,
              shift: int = 0) -> "Walk":
         """Read a `replay-field-*-capture.json` into its table; *nth* and
         *shift* are the plant's (the next figure off the axis, every panel a
@@ -926,7 +958,7 @@ class Walk:
         return cls.of(Capture.load(path), index, width, nth, shift)
 
     @classmethod
-    def of(cls, capture: Capture, index, width: int = None, nth: int = 0,
+    def of(cls, capture: Capture, index, width: int = UNIFORM_WIDTH, nth: int = 0,
            shift: int = 0) -> "Walk":
         if capture.kind != KIND_WALK:
             raise ReplayError("%s is not a walk capture" % (capture.path or "the capture"))

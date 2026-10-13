@@ -332,4 +332,16 @@ if(Python3_FOUND)
     set_tests_properties(kits_ui PROPERTIES
         SKIP_RETURN_CODE 77
         TIMEOUT 600)
+
+    # The replay reader (PLAN-KITS-REPLAY section 2.6): the readers of
+    # tools/kits/replay.py on the captures in WE2002_KITS_REPLAY_DIR
+    # (work/kits-oracle), each checked against the digest it was kept with and
+    # judged by the oracle's measured expectations.  77 without the folder or
+    # WE2002_LOOKS_IMAGE.
+    add_test(NAME kits_replay
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/kits/replay.py check)
+    set_tests_properties(kits_replay PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 300)
 endif()

@@ -1532,6 +1532,32 @@ def _replay_checks(c) -> None:
          == [(list, [46, 2, 95, 93]), (list, [46, 13])],
          "%s" % [[p["section"] for p in f.pieces] for f in seen_figure])
 
+    # replay.py (KRP-TASK-04): a capture whose bytes are not the ones it was
+    # kept with is refused before any reader looks at it, and every --json
+    # object carries the schema.
+    cli = c.attempt("import tools/kits/replay.py", lambda: _kits_module("replay"))
+    if cli is None:
+        return
+    import json as _json
+    import tempfile as _tempfile
+    with _tempfile.TemporaryDirectory(prefix="kits-replay-") as tmp:
+        kept = os.path.join(tmp, "replay-9.json")
+        with open(kept, "w") as fh:
+            _json.dump(v0, fh)
+        digest = cli.sha256_of(kept)
+        c.ok("replay.py: a capture holding the digest it was kept with passes",
+             cli.digest_problem(kept, digest) is None, "%s" % cli.digest_problem(kept, digest))
+        swapped = "0" * 64
+        c.ok("replay.py: a capture with another digest is refused",
+             "not the %s" % swapped in (cli.digest_problem(kept, swapped) or ""),
+             "%s" % cli.digest_problem(kept, swapped))
+        doc = cli.describe_report(replay.Capture.load(kept))
+    c.ok("replay.py: --json carries the kits-replay/1 schema and its fixed keys",
+         doc["schema"] == "kits-replay/1"
+         and sorted(doc) == sorted(("schema", "capture", "front", "back", "turned", "rotate",
+                                    "front_frames", "back_frames", "turn_frames", "foci")),
+         "%s" % sorted(doc))
+
 
 def _live_guard_checks(c) -> None:
     """A game controller plugged in refuses a measuring run, before the fork

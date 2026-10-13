@@ -513,6 +513,14 @@ CONTROLS = (
         "the analysis moved to core/replay.py by move, not copy; a second figure_depth "
         "in the oracle is the copy section 2.2 forbids (KRP-TASK-02)",
     ),
+    Control(
+        "replay-digest-unasked", "kits/replay.py", "digest_problem",
+        "    if got != want:\n",
+        "    if False:\n",
+        "FAIL  replay.py: a capture with another digest is refused",
+        "kits_replay judges the captures it was given by their bytes; one with another "
+        "digest is another capture, and its ok means nothing (KRP-TASK-04)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 
