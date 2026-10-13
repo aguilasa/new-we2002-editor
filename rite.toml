@@ -5,6 +5,7 @@ name = "new-we2002-editor"
 docs_language   = "pt-BR"
 code_language   = "en-US"
 commit_language = "en-US"
+session_language   = "pt-BR"
 
 [paths]
 cycles_root  = "docs/tasks"
