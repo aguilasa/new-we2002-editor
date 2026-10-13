@@ -60,3 +60,21 @@ grep -n "<pasta\|(campos" docs/tasks/kits-replay/04-replay-py-de-leitura-figures
 Hoje imprime 2 linhas. Depois do conserto não pode imprimir nada.
 
 ## Log de Execução
+
+### 2026-10-13
+
+No Log da KRP-TASK-04, os blocos das cinco capturas de perto, da seção 90 e do `walk` foram trocados
+pela saída humana dos próprios leitores (`replay.py figure`, `figure --section 90`, `walk`, sem
+`--json`), rodada de novo e colada inteira, com `WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`
+em toda linha `$`. A corrida vermelha do `kits_replay` virou passos que a remontam: `mktemp -d`,
+symlink das seis capturas boas de `work/kits-oracle/`, symlink de `replay-10-3.json` como
+`replay-10-2.json`, `replay.py check <pasta>` (rc=1, `kits_replay: 1 failure(s)`, o `FAIL` de
+sha256 `d362…6ace8` contra `e9b7…2a7b`) e o mesmo pelo `ctest` com `WE2002_KITS_REPLAY_DIR` na pasta
+(`***Failed`). A corrida *skipped* também foi refeita e colada inteira. O Log diz que esses blocos são
+desta CORR. A prosa em volta ficou com o mesmo sentido; a menção a `far 2.27 e 2.55` saiu da frase da
+seção 90, porque a saída humana não imprime esses campos.
+
+```
+$ grep -n "<pasta\|(campos" docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md; echo "grep rc=$?"
+grep rc=1
+```
