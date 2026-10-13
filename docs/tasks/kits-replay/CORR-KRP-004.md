@@ -62,3 +62,74 @@ O primeiro tem de imprimir `RED` para cada controle novo. O segundo tem de termi
 `controls: N of N red`, com N > 57. Hoje o primeiro `grep` da Evidência dá 0.
 
 ## Log de Execução
+
+2026-10-13 — reproduzida: `grep -c "figure_report\|walk_report\|figures_report\|panel_of"
+tools/kits/selftest.py` dava `0`, e o único controle com alvo em `kits/replay.py` era o
+`replay-digest-unasked`.
+
+Conserto em `tools/kits/selftest.py`: `_replay_reader_capture` monta, sem imagem, uma captura
+`close` e uma `walk` com duas passadas de uma figura de linha (cabeça 46, raiz 2), um vértice por
+seção num índice sintético e um quad de uniforme no torso dentro da célula `(0, 20, 80)`.
+`_replay_reader_checks` confere, sobre ela:
+
+- o `--json` de `figure`, `figures`, `walk` e `panel`, pela própria `main` (com `_index` trocado
+  pelo índice sintético): `schema` `kits-replay/1`, o conjunto exato de chaves e as chaves de
+  `capture`;
+- que `figure_report`, `figures_report` e `walk_report` têm as mesmas chaves que a CLI imprime;
+- as chaves fixas de uma figura, do documento de painel e de cada linha da caminhada;
+- o caminho de leitura do gate, `panel_of`: atrás de um jogador (`replay-9-3.json`, `focus` 3) o
+  painel sai da primeira captura, `side` `front` e `[576, 20, 80]`; no replay como salvo
+  (`replay-9.json`) só da virada, que aqui não existe, e `side` sai `None`.
+
+Conserto em `tools/kits/controls.py`: cinco controles novos, um por leitor e um no caminho do gate
+— `replay-figure-key-dropped` (tira `turned` do `figure_report`), `replay-figures-schema-dropped`
+(tira `schema` do `figures_report`), `replay-walk-key-dropped` (tira `shared` do `walk_report`),
+`replay-panel-key-dropped` (tira `nth` do documento de `panel`, montado na `main`) e
+`replay-behind-inverted` (`behind = not bool(capture.focus)` no `panel_of`).
+
+O controle do caminho do gate mira o selftest, não o `replay.py check`: o `controls.py` só roda o
+selftest numa sandbox sem `WE2002_LOOKS_IMAGE` nem as capturas de `work/kits-oracle`, então o
+vermelho do `check` sobre as capturas guardadas (6 falhas, na Evidência) continua fora do catálogo;
+o que o catálogo registra é a mesma inversão derrubando as duas asserções de `panel_of` acima. A
+asserção que cai, numa cópia das cinco pastas que o `controls.py` copia:
+
+```text
+$ d=$(mktemp -d); for p in tools/kits tools/looks tools/pes2 src/core data; do mkdir -p "$d/$(dirname $p)"; cp -r $p "$d/$p"; done; sed -i 's/    behind = bool(capture.focus)$/    behind = not bool(capture.focus)/' "$d/tools/kits/replay.py"; env -u WE2002_LOOKS_IMAGE python3 "$d/tools/kits/selftest.py" --no-plant --quiet | grep -E 'FAIL|kits_selftest'
+  FAIL  replay.py: behind a player the panel is read off the first capture's torso  {'side': None, 'cells': {}, 'panel': None, 'number': None, 'read': None}
+  FAIL  replay.py: in the replay as saved the panel is read off the turned capture only  {'side': 'front', 'cells': {'0,20,80': 1}, 'panel': [576, 20, 80], 'number': None, 'read': None}
+kits_selftest: 2 failure(s)
+```
+
+Nos outros quatro o `RED` do `controls.py` já exige a linha `FAIL` declarada em `expect`, que é a
+asserção de chaves do `--json` daquele leitor (`figure`, `figures`, `walk`, `panel`).
+
+Verificação:
+
+```text
+$ python3 tools/kits/controls.py --only replay-figure-key-dropped
+  base   unplanted sandbox            selftest exit 0
+  RED    replay-figure-key-dropped    kits/replay.py :: figure_report
+controls: 1 of 1 red
+$ python3 tools/kits/controls.py --only replay-figures-schema-dropped
+  base   unplanted sandbox            selftest exit 0
+  RED    replay-figures-schema-dropped kits/replay.py :: figures_report
+controls: 1 of 1 red
+$ python3 tools/kits/controls.py --only replay-walk-key-dropped
+  base   unplanted sandbox            selftest exit 0
+  RED    replay-walk-key-dropped      kits/replay.py :: walk_report
+controls: 1 of 1 red
+$ python3 tools/kits/controls.py --only replay-panel-key-dropped
+  base   unplanted sandbox            selftest exit 0
+  RED    replay-panel-key-dropped     kits/replay.py :: main
+controls: 1 of 1 red
+$ python3 tools/kits/controls.py --only replay-behind-inverted
+  base   unplanted sandbox            selftest exit 0
+  RED    replay-behind-inverted       kits/replay.py :: panel_of
+controls: 1 of 1 red
+$ python3 tools/kits/controls.py | tail -1
+controls: 62 of 62 red
+$ python3 tools/kits/selftest.py | tail -1
+kits_selftest: 0 failure(s)
+$ grep -c "figure_report\|walk_report\|figures_report\|panel_of" tools/kits/selftest.py
+5
+```

@@ -521,6 +521,49 @@ CONTROLS = (
         "kits_replay judges the captures it was given by their bytes; one with another "
         "digest is another capture, and its ok means nothing (KRP-TASK-04)",
     ),
+    Control(
+        "replay-figure-key-dropped", "kits/replay.py", "figure_report",
+        '            "turned": capture.data["turned"], "front_frames": '
+        'capture.data["front_frames"],\n',
+        '            "front_frames": capture.data["front_frames"],\n',
+        "FAIL  replay.py: figure --json carries the kits-replay/1 schema and its fixed keys",
+        "the --json keys are the contract with an agent: a key that does not apply is "
+        "null, never missing (CORR-KRP-004)",
+    ),
+    Control(
+        "replay-figures-schema-dropped", "kits/replay.py", "figures_report",
+        '    return {"schema": SCHEMA, "capture": _capture_doc(capture), "side": side,\n',
+        '    return {"capture": _capture_doc(capture), "side": side,\n',
+        "FAIL  replay.py: figures --json carries the kits-replay/1 schema and its fixed keys",
+        "an object without the schema is one an agent cannot tell from another "
+        "command's (CORR-KRP-004)",
+    ),
+    Control(
+        "replay-walk-key-dropped", "kits/replay.py", "walk_report",
+        '            "shared": {"%d" % page: sorted(cells) for page, cells in '
+        'sorted(walk.shared.items())},\n',
+        "",
+        "FAIL  replay.py: walk --json carries the kits-replay/1 schema and its fixed keys",
+        "the walk's shared cells are a fixed key of its --json; dropping it breaks the "
+        "contract with no judge seeing it (CORR-KRP-004)",
+    ),
+    Control(
+        "replay-panel-key-dropped", "kits/replay.py", "main",
+        '                   "nth": doc["nth"], "panel": doc["panel"]}\n',
+        '                   "panel": doc["panel"]}\n',
+        "FAIL  replay.py: panel --json carries the kits-replay/1 schema and its fixed keys",
+        "the panel document is built in main, apart from every report; its keys need "
+        "their own check (CORR-KRP-004)",
+    ),
+    Control(
+        "replay-behind-inverted", "kits/replay.py", "panel_of",
+        "    behind = bool(capture.focus)\n",
+        "    behind = not bool(capture.focus)\n",
+        "FAIL  replay.py: behind a player the panel is read off the first capture's torso",
+        "the gate reads the panel through panel_of; behind a player it is the first "
+        "capture's torso, and the inversion sends kits_replay to 6 failures on the kept "
+        "captures (CORR-KRP-004)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

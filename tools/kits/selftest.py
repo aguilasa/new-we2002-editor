@@ -1557,6 +1557,132 @@ def _replay_checks(c) -> None:
          and sorted(doc) == sorted(("schema", "capture", "front", "back", "turned", "rotate",
                                     "front_frames", "back_frames", "turn_frames", "foci")),
          "%s" % sorted(doc))
+    _replay_reader_checks(c, cli, replay)
+
+
+def _replay_reader_capture(replay, cell) -> tuple:
+    """(close capture, walk capture, index) built here: two frames of one
+    outfield figure, head 46 and root 2, a vertex each at the axis, and one
+    uniform quad on its torso inside the panel *cell*.  The index holds the
+    two sections' vertices and no primitive -- enough for `Figure.panel`."""
+    from types import SimpleNamespace
+
+    projection = {"H": 1, "OFX": 0, "OFY": 0}
+
+    def stop(section):
+        return {"kind": "matrix", "named": [[0, section]], "projection": projection,
+                "rotation": [4096, 0, 0, 0, 4096, 0, 0, 0, 4096],
+                "translation": [0, 0, 4694]}
+
+    _figure, x, y = cell
+    quad = {"code": 0x2C, "page": [576, 256], "bits": 8, "clut": [0, 488],
+            "uv": [[x + 1, y + 1], [x + 5, y + 1], [x + 1, y + 5], [x + 5, y + 5]],
+            "xy": [[0, 0], [1, 0], [0, 1], [1, 1]], "rgb": None}
+    frame = [stop(None), stop(46), stop(2)]
+    events = [{"kind": "submit", "head": 7}] + frame + [{"kind": "submit", "head": 7}] \
+        + frame + [{"kind": "submit", "head": 7}]
+
+    def pose():
+        return {"events": [dict(e) for e in events], "lists": {"7": [dict(quad)]},
+                "offsets": {"7": [0, 256]}}
+
+    close = {"front": pose(), "back": None, "front_frames": 9, "back_frames": 60,
+             "turn_frames": 80, "rotate": "R1", "yaws": [], "turned": "back", "hits": [],
+             "pages": {}, "buffer": None, "texture": None}
+    walk = {"slot": 9, "button": "L2", "pages": {}, "foci": [
+        {"k": 0, "moves": [], "refused": None, "frames": 70, "capture": pose(),
+         "followed": False},
+        {"k": 1, "moves": [0.5], "refused": None, "frames": 70, "capture": pose(),
+         "followed": True}]}
+    vertex = SimpleNamespace(x=0, y=0, z=0)
+    index = {"sections": {(replay.layout.MODEL, s): SimpleNamespace(vertices=[vertex],
+                                                                    primitives=[])
+                          for s in (46, 2)}}
+    return close, walk, index
+
+
+def _replay_reader_checks(c, cli, replay) -> None:
+    """replay.py (CORR-KRP-004): `figure`, `figures`, `walk` and `panel` each
+    print the kits-replay/1 schema and their fixed keys, and the panel behind
+    a player is read off the first capture's torso, as the gate reads it."""
+    import contextlib
+    import json as _json
+    import tempfile as _tempfile
+
+    cell = (0, 20, 80)
+    close, walk, index = _replay_reader_capture(replay, cell)
+    capture_keys = ["button", "focus", "kind", "path", "sha256", "slot", "taps"]
+    with _tempfile.TemporaryDirectory(prefix="kits-replay-") as tmp:
+        behind_path = os.path.join(tmp, "replay-9-3.json")
+        saved_path = os.path.join(tmp, "replay-9.json")
+        walk_path = os.path.join(tmp, "replay-field-9-capture.json")
+        for path, data in ((behind_path, close), (saved_path, close), (walk_path, walk)):
+            with open(path, "w") as fh:
+                _json.dump(data, fh)
+        behind = replay.Capture.load(behind_path)
+        saved = replay.Capture.load(saved_path)
+        docs = c.attempt("replay.py: the readers answer on a capture built here", lambda: {
+            "figure": cli.figure_report(behind, index, True),
+            "figures": cli.figures_report(behind, "front", -1),
+            "walk": cli.walk_report(replay.Capture.load(walk_path), index),
+            "panel_behind": cli.panel_of(behind, index, True, 0),
+            "panel_saved": cli.panel_of(saved, index, False, 0)})
+        printed = {}
+        saved_index = cli._index
+        cli._index = lambda: index
+        try:
+            for name, path in (("figure", behind_path), ("figures", behind_path),
+                               ("walk", walk_path), ("panel", behind_path)):
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out):
+                    code = c.attempt("replay.py %s --json" % name,
+                                     lambda: cli.main([name, path, "--json"]))
+                printed[name] = (code, _json.loads(out.getvalue()) if code == 0 else None)
+        finally:
+            cli._index = saved_index
+    if docs is None:
+        return
+    want = {
+        "figure": ("schema", "capture", "pick", "nth", "frames", "figure", "still", "box",
+                   "panel", "turned", "front_frames", "back_frames", "section"),
+        "figures": ("schema", "capture", "side", "frame", "frames", "head", "offset",
+                    "figures"),
+        "walk": ("schema", "capture", "foci", "follows", "shared", "rows"),
+        "panel": ("schema", "capture", "pick", "nth", "panel"),
+    }
+    for name, keys in want.items():
+        code, doc = printed.get(name, (None, None))
+        c.ok("replay.py: %s --json carries the kits-replay/1 schema and its fixed keys" % name,
+             code == 0 and doc is not None and doc.get("schema") == "kits-replay/1"
+             and sorted(doc) == sorted(keys) and sorted(doc["capture"]) == capture_keys,
+             "exit %s, %s" % (code, sorted(doc) if doc else None))
+    for name in ("figure", "figures", "walk"):
+        doc = docs[name]
+        c.ok("replay.py: %s_report holds the same keys the CLI prints" % name,
+             doc.get("schema") == "kits-replay/1" and sorted(doc) == sorted(want[name]),
+             "%s" % sorted(doc))
+    panel_keys = ["cells", "number", "panel", "read", "side"]
+    figure_keys = ["armband", "depth", "family", "head", "off_axis", "order", "replaces",
+                   "root", "sleeves"]
+    row_keys = ["armband", "depth", "end", "figures", "follows", "frames", "head", "k",
+                "next", "next_depth", "number", "off", "panel", "refused", "root", "sleeves",
+                "still", "whole"]
+    c.ok("replay.py: a figure, a panel and a walk row each hold their fixed keys",
+         sorted(docs["figure"]["figure"]) == figure_keys
+         and sorted(docs["figures"]["figures"][0]) == figure_keys
+         and sorted(docs["panel_behind"]) == panel_keys
+         and sorted(printed["panel"][1]["panel"]) == panel_keys
+         and [sorted(r) for r in docs["walk"]["rows"]] == [row_keys, row_keys],
+         "%s; %s; %s" % (sorted(docs["figure"]["figure"] or {}), sorted(docs["panel_behind"]),
+                         [sorted(r) for r in docs["walk"]["rows"]]))
+    page = 576
+    c.ok("replay.py: behind a player the panel is read off the first capture's torso",
+         (docs["panel_behind"]["side"], docs["panel_behind"]["panel"])
+         == ("front", [page, cell[1], cell[2]]),
+         "%s" % docs["panel_behind"])
+    c.ok("replay.py: in the replay as saved the panel is read off the turned capture only",
+         docs["panel_saved"]["side"] is None,
+         "%s" % docs["panel_saved"])
 
 
 def _live_guard_checks(c) -> None:
