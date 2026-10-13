@@ -73,12 +73,12 @@
       "title": "Selftest do show não pega desenho espelhado nem sem rotação",
       "origin": "KRP-TASK-05",
       "severity": "medium",
-      "files": [],
+      "files": ["tools/kits/selftest.py", "tools/kits/controls.py", "tools/kits/replay.py", "tools/kits/core/replay.py"],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-13",
+      "done_commit": "64ff1d2d"
     },
     {
       "id": "CORR-KRP-007",

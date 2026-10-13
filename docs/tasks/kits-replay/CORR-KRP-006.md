@@ -178,3 +178,8 @@ kits_selftest: 0 failure(s)
 Um controle `RED` exige que o selftest do sandbox saia diferente de zero **e** imprima a linha
 `FAIL  show draws the figure in its captured pose, on the frame buffer's pixels`
 (campo `expect`). Na HEAD eram 63 controles; com os dois novos, 65.
+- **Closed** — commit `64ff1d2d` (2026-10-13): test(kits): asymmetric show fixture and mirror/unrotated controls
+  - Files (`git show --name-status 64ff1d2d`):
+    - `M docs/tasks/kits-replay/CORR-KRP-006.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
