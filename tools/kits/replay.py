@@ -14,6 +14,8 @@ Usage:
                                        [--section S] [--json]
     python tools/kits/replay.py panel <capture.json> [--on-axis | --nearest] [--nth N] [--json]
     python tools/kits/replay.py walk <replay-field-*-capture.json> [--json]
+    python tools/kits/replay.py show <capture.json> --png out.png [--section S | --box]
+    python tools/kits/replay.py confront <capture.json> [--section S] [--json]
     python tools/kits/replay.py check [<folder>]        # the kits_replay gate
 
 The geometry comes from `WE2002_LOOKS_IMAGE`, the Japanese data track.
@@ -214,6 +216,114 @@ def figures_report(capture, side: str, frame: int) -> dict:
             if one else []}
 
 
+# -- show and confront -------------------------------------------------------
+
+SHOW_SCALE = 4
+"""Each frame-buffer pixel is a SHOW_SCALE x SHOW_SCALE block in `show`'s PNG,
+as `oracle.save_buffer` writes the crop."""
+SHOW_GAP = 4
+"""Pixels of black between the game's half and the drawn one, before scaling."""
+BOX_COLOUR = (255, 255, 0)
+"""The outline `show --box` draws round a piece's screen box."""
+
+
+def write_png(path: str, width: int, height: int, rgb: bytes) -> None:
+    """An RGB PNG, stdlib only."""
+    import struct
+    import zlib
+
+    raw = bytearray()
+    for y in range(height):
+        raw.append(0)
+        raw += rgb[y * width * 3:(y + 1) * width * 3]
+
+    def chunk(tag, data):
+        return (struct.pack(">I", len(data)) + tag + data
+                + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF))
+
+    with open(path, "wb") as fh:
+        fh.write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height,
+                                                                     8, 2, 0, 0, 0))
+                 + chunk(b"IDAT", zlib.compress(bytes(raw))) + chunk(b"IEND", b""))
+
+
+def show_picture(capture, index, section: int = None, box: bool = False) -> dict:
+    """The game's frame-buffer crop under the followed figure (left) beside
+    the figure `core/raster` draws in the captured pose on the same pixels
+    (right): {"width", "height", "rgb", "drawn", "box"}, at SHOW_SCALE."""
+    figure = followed(capture, "front", default_axis_of(capture), 0)[1]
+    buffer = capture.data.get("buffer")
+    if figure is None or buffer is None:
+        raise SystemExit("replay.py: %s has no followed figure or no frame buffer under it"
+                         % capture.path)
+    rows = buffer["rows"]
+    h, w = len(rows), len(rows[0])
+    x0, y0 = buffer["origin"]
+    dw, dh, rgba = replay.pose_picture(figure, index, capture.data.get("texture"),
+                                       (x0, y0, x0 + w - 1, y0 + h - 1), section)
+    full_w = 2 * w + SHOW_GAP
+    pixels = [[(0, 0, 0)] * full_w for _ in range(h)]
+    drawn = 0
+    for y in range(h):
+        for x in range(w):
+            pixels[y][x] = tuple(v << 3 for v in rows[y][x][:3])
+            k = (y * dw + x) * 4
+            if rgba[k + 3]:
+                pixels[y][w + SHOW_GAP + x] = tuple(rgba[k:k + 3])
+                drawn += 1
+    outline = None
+    if box:
+        target = next((p for p in figure if p["section"] == section), None) \
+            if section is not None else (figure[1] if len(figure) > 1 else None)
+        found = replay.piece_box(target, index) if target is not None else None
+        if found is not None:
+            outline = [int(round(found[0])) - x0, int(round(found[1])) - y0,
+                       int(round(found[2])) - x0, int(round(found[3])) - y0]
+            for half in (0, w + SHOW_GAP):
+                for x in range(outline[0], outline[2] + 1):
+                    for y in (outline[1], outline[3]):
+                        if 0 <= x < w and 0 <= y < h:
+                            pixels[y][half + x] = BOX_COLOUR
+                for y in range(outline[1], outline[3] + 1):
+                    for x in (outline[0], outline[2]):
+                        if 0 <= x < w and 0 <= y < h:
+                            pixels[y][half + x] = BOX_COLOUR
+    out = bytearray()
+    for y in range(h * SHOW_SCALE):
+        row = pixels[y // SHOW_SCALE]
+        for x in range(full_w * SHOW_SCALE):
+            out += bytes(row[x // SHOW_SCALE])
+    return {"width": full_w * SHOW_SCALE, "height": h * SHOW_SCALE, "rgb": bytes(out),
+            "drawn": drawn, "box": outline}
+
+
+def default_axis_of(capture) -> bool:
+    """`default_axis` with no flags: the nearest as saved, the axis behind a player."""
+    return bool(capture.focus)
+
+
+def confront_report(capture, index, section: int = None) -> dict:
+    """Per section of the followed figure, the game's pixels against the bare
+    texel and the modulated one (`colour_confront`)."""
+    figure = followed(capture, "front", default_axis_of(capture), 0)[1]
+    group, _fit = figure.group(index) if figure is not None else (None, None)
+    rows = []
+    buffer, texture = capture.data.get("buffer"), capture.data.get("texture")
+    if group is not None and buffer is not None and texture is not None:
+        found = {p["section"]: replay.section_samples(group, index, p["section"])
+                 for p in figure if p["section"] is not None
+                 and (section is None or p["section"] == section)}
+        for sec, c in replay.colour_confront(group, buffer, texture, found).items():
+            rows.append({"section": sec, "pixels": c["pixels"] if c else 0,
+                         "game": list(c["game"]) if c else None,
+                         "texel": list(c["texel"]) if c else None,
+                         "shaded": list(c["shaded"]) if c else None,
+                         "far": c["texel_far"] if c else None,
+                         "far_shaded": c["shaded_far"] if c else None})
+    return {"schema": SCHEMA, "capture": _capture_doc(capture),
+            "figure": figure_doc(figure), "section": section, "sections": rows}
+
+
 # -- the gate ----------------------------------------------------------------
 
 def _kits_oracle():
@@ -320,6 +430,16 @@ def main(argv=None) -> int:
         if name == "figures":
             one.add_argument("--side", choices=("front", "back"), default="front")
             one.add_argument("--frame", type=int, default=-1)
+    show = sub.add_parser("show")
+    show.add_argument("capture")
+    show.add_argument("--png", required=True)
+    show.add_argument("--section", type=int)
+    show.add_argument("--box", action="store_true")
+    show.add_argument("--json", action="store_true")
+    confront = sub.add_parser("confront")
+    confront.add_argument("capture")
+    confront.add_argument("--section", type=int)
+    confront.add_argument("--json", action="store_true")
     gate = sub.add_parser("check")
     gate.add_argument("folder", nargs="?")
     gate.add_argument("--quiet", action="store_true")
@@ -341,6 +461,34 @@ def main(argv=None) -> int:
     except replay.ReplayError as exc:
         print("replay.py: %s" % exc, file=sys.stderr)
         return 1
+    if args.command in ("show", "confront") and capture.kind != replay.KIND_CLOSE:
+        print("replay.py: %s is a walk; show and confront read a close capture"
+              % args.capture, file=sys.stderr)
+        return 1
+    if args.command == "show":
+        picture = show_picture(capture, _index(), args.section, args.box)
+        write_png(args.png, picture["width"], picture["height"], picture["rgb"])
+        doc = {"schema": SCHEMA, "capture": _capture_doc(capture), "png": args.png,
+               "width": picture["width"], "height": picture["height"],
+               "sha256": sha256_of(args.png), "drawn": picture["drawn"],
+               "section": args.section, "box": picture["box"]}
+        if args.json:
+            print(json.dumps(doc, indent=1, sort_keys=True))
+        else:
+            print("%s: %dx%d, the game's frame left, the captured pose drawn right "
+                  "(%d px drawn)" % (args.png, doc["width"], doc["height"], doc["drawn"]))
+        return 0
+    if args.command == "confront":
+        doc = confront_report(capture, _index(), args.section)
+        if args.json:
+            print(json.dumps(doc, indent=1, sort_keys=True))
+        else:
+            for r in doc["sections"]:
+                print("  %3d: %4d px; far %s bare texel, %s modulated" % (
+                    r["section"], r["pixels"],
+                    "%.2f" % r["far"] if r["far"] is not None else "-",
+                    "%.2f" % r["far_shaded"] if r["far_shaded"] is not None else "-"))
+        return 0
     if args.command == "describe":
         doc = describe_report(capture)
     elif args.command == "figures":

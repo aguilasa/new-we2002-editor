@@ -1684,6 +1684,27 @@ def _replay_reader_checks(c, cli, replay) -> None:
          docs["panel_saved"]["side"] is None,
          "%s" % docs["panel_saved"])
 
+    # show (KRP-TASK-05): the figure is drawn by core/raster on the frame
+    # buffer's own pixels, through the captured matrix and projection -- a
+    # square of side 20 at z 1000 seen with H 1000 covers the middle 21x21 of
+    # a 41x41 box, and nothing at its corners.
+    from types import SimpleNamespace as _ns2
+    square = _ns2(vertices=[_ns2(x=x, y=y, z=0) for x, y in ((-10, -10), (10, -10),
+                                                               (-10, 10), (10, 10))],
+                  primitives=[_ns2(indices=(0, 1, 2, 3), texcoords=((0, 0), (8, 0),
+                                                                    (0, 8), (8, 8)))])
+    posed = replay.Figure([{"section": 5, "projection": {"H": 1000, "OFX": 0, "OFY": 0},
+                            "matrix": ((4096, 0, 0, 0, 4096, 0, 0, 0, 4096),
+                                       (0, 0, 1000))}])
+    posed.samples = []
+    pw, ph, picture = replay.pose_picture(posed, {"sections": {(replay.layout.MODEL, 5): square}},
+                                          None, (-20, -20, 20, 20))
+    painted = [(x, y) for y in range(ph) for x in range(pw) if picture[(y * pw + x) * 4 + 3]]
+    c.ok("show draws the figure in its captured pose, on the frame buffer's pixels",
+         (pw, ph) == (41, 41) and (20, 20) in painted and (1, 1) not in painted
+         and 400 <= len(painted) <= 484,
+         "%dx%d, %d px painted, first %s" % (pw, ph, len(painted), painted[:3]))
+
 
 def _live_guard_checks(c) -> None:
     """A game controller plugged in refuses a measuring run, before the fork

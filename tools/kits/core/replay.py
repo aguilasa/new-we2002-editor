@@ -24,9 +24,11 @@ is passed in.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 
+from . import raster
 from . import tex  # noqa: F401  (tex puts tools/pes2 and tools/looks on sys.path)
 from .errors import KitsError
 from .figure import BACK_COPY, GLYPH_W, KEEPER_ARMBAND, SLEEVE_LENGTHS
@@ -730,6 +732,117 @@ def colour_confront(group, buffer, texture: dict, sections: dict) -> dict:
         out[section] = {"pixels": len(rows), "game": mean(0), "texel": mean(1),
                         "shaded": mean(2), "texel_far": far(1), "shaded_far": far(2)}
     return out
+
+
+
+# -- the figure drawn in the captured pose -----------------------------------
+
+class _Picture:
+    """What `raster.draw` reads of a looks Scene: parts, notes and a centre."""
+
+    def __init__(self, parts, fit):
+        self.parts = parts
+        self.notes = {raster.FIT: fit}
+
+    def centre(self):
+        return tuple(sum(p[i] for p in self.notes[raster.FIT]) / 4.0 for i in range(3))
+
+
+class _Part:
+    """One quad for `raster.draw`: four points, four (u, v), a surface."""
+
+    def __init__(self, points, uvs, surface):
+        self.points, self.uvs, self.surface = points, uvs, surface
+
+
+class _Surface:
+    """One 256x256 texture page read through one CLUT, as RGBA bytes; a
+    texel whose colour is 0 is transparent, as the GPU leaves it."""
+
+    def __init__(self, texture: dict, page, clut):
+        self.width = self.height = 256
+        out = bytearray(256 * 256 * 4)
+        for v in range(256):
+            for u in range(256):
+                texel = texel_colour(texture, page, clut, u, v)
+                if texel is None or tuple(texel[:3]) == (0, 0, 0):
+                    continue
+                k = (v * 256 + u) * 4
+                out[k:k + 4] = bytes((texel[0] << 3, texel[1] << 3, texel[2] << 3, 255))
+        self.rgba = bytes(out)
+
+
+def section_source(group, index, section: int):
+    """(page, clut) the game draws *section* with in *group*: the commonest
+    of the quads that carry its texels; None if none does."""
+    tally = {}
+    for one in section_samples(group, index, section):
+        key = (tuple(one["page"]), tuple(one["clut"]))
+        tally[key] = tally.get(key, 0) + 1
+    return max(tally, key=tally.get) if tally else None
+
+
+def pose_picture(figure, index, texture: dict, box, only=None) -> tuple:
+    """(width, height, rgba) of *figure* drawn by `core/raster` in its
+    captured pose: every MODEL.BIN section of it through its piece's matrix
+    and the projection, on the screen pixels of *box* (x0, y0, x1, y1) --
+    the frame buffer the capture kept -- so the two pictures line up pixel
+    for pixel.  Each section is textured from the page and CLUT the game's
+    own quads of it sample, when the capture kept them; else it is drawn
+    untextured.  *only* draws one section."""
+    group, _fit = figure_group(figure, figure.samples or [], index)
+    surfaces, parts = {}, []
+    for piece in figure:
+        if piece["section"] is None or (only is not None and piece["section"] != only):
+            continue
+        sec = index["sections"].get((layout.MODEL, piece["section"]))
+        if sec is None:
+            continue
+        source = section_source(group or [], index, piece["section"])
+        surface = None
+        if source is not None and texture is not None \
+                and texel_colour(texture, source[0], source[1], 0, 0) is not None:
+            surface = surfaces.get(source) or surfaces.setdefault(
+                source, _Surface(texture, source[0], source[1]))
+        rotation, translation = piece["matrix"]
+        for prim in sec.primitives:
+            points = []
+            for vi in prim.indices:
+                v = sec.vertices[vi]
+                r = rotation
+                cz = (r[6] * v.x + r[7] * v.y + r[8] * v.z) / 4096.0 + translation[2]
+                at = pose_project(rotation, translation, figure[0]["projection"],
+                                  (v.x, v.y, v.z))
+                if at is None:
+                    break
+                # raster.draw's orthographic view: screen x is minus model x,
+                # screen y minus model y, and the nearest has the largest z
+                points.append((-at[0], -at[1], -cz))
+            if len(points) != len(prim.indices):
+                continue
+            parts.append(_Part(points, [(u / 256.0, v / 256.0) for u, v in prim.texcoords],
+                               surface))
+    x0, y0, x1, y1 = box
+    w, h = int(x1 - x0) + 1, int(y1 - y0) + 1
+    if not parts:
+        return w, h, bytes(w * h * 4)
+    # a square target whose fit leaves scale 1: the box's span is its drawn size
+    span = max(w, h)
+    side = int(math.ceil(span / (1.0 - 2 * raster.MARGIN))) + 2
+    fit = [(-x0, -y0, 0.0), (-(x0 + span), -y0, 0.0), (-x0, -(y0 + span), 0.0),
+           (-(x0 + span), -(y0 + span), 0.0)]
+    drawn = raster.draw(_Picture(parts, fit), 0.0, 0.0, side, side, ((0, 1, 2), (1, 2, 3)))
+    # raster.draw puts screen pixel x at side/2 + (x + 0.5 - span/2) * scale
+    scale = side * (1.0 - 2 * raster.MARGIN) / span
+    origin = side / 2.0 - span * scale / 2.0
+    out = bytearray(w * h * 4)
+    for y in range(h):
+        for x in range(w):
+            sx, sy = int(origin + (x + 0.5) * scale), int(origin + (y + 0.5) * scale)
+            if 0 <= sx < side and 0 <= sy < side:
+                k = (sy * side + sx) * 4
+                out[(y * w + x) * 4:(y * w + x) * 4 + 4] = drawn.rgba[k:k + 4]
+    return w, h, bytes(out)
 
 
 # -- the back panel ----------------------------------------------------------

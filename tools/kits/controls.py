@@ -564,6 +564,15 @@ CONTROLS = (
         "capture's torso, and the inversion sends kits_replay to 6 failures on the kept "
         "captures (CORR-KRP-004)",
     ),
+    Control(
+        "replay-show-unposed", "kits/core/replay.py", "pose_picture",
+        '        rotation, translation = piece["matrix"]\n        for prim in sec.primitives:\n',
+        "        rotation, translation = (4096, 0, 0, 0, 4096, 0, 0, 0, 4096), (0, 0, 0)\n"
+        "        for prim in sec.primitives:\n",
+        "FAIL  show draws the figure in its captured pose, on the frame buffer's pixels",
+        "show puts the drawn figure beside the game's frame to compare the two; drawn "
+        "without the captured matrices it lands elsewhere, or nowhere (KRP-TASK-05)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

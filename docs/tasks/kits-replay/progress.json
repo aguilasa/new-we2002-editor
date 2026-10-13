@@ -81,7 +81,7 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#2.4",
       "files": ["tools/kits/replay.py", "tools/kits/core/replay.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,
