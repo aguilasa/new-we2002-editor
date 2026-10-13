@@ -64,3 +64,35 @@ diff <(git show a51525f0^:tools/kits/controls.py | grep -oE '^\s*"[^"]+", "kits/
 Ele dá 13: os 11 movidos mais os 2 novos.
 
 ## Log de Execução
+
+2026-10-13 — reproduzida (`rite reproduce CORR-KRP-003`): a contagem por commit dá `a51525f0^: 0`,
+`a51525f0: 11`, `09203255^: 11`, `HEAD: 13`, e `grep -c 'nove controles passaram'` dá `1`.
+
+Recontagem por task, com as linhas controle→alvo de `tools/kits/controls.py` ordenadas e
+comparadas (`git show "${c}:tools/kits/controls.py" | grep -oE '^\s*"[^"]+", "kits/[^"]+"'`):
+
+- `a51525f0^` → `a51525f0` (KRP-TASK-01): nove saem de `kits/oracle.py` com prefixo `oracle-replay-`
+  e voltam em `kits/core/replay.py` sem o `oracle-`; entram `replay-key-check` e `replay-v0-slot`;
+- `a51525f0` → `09203255^`: nada;
+- `09203255^` → HEAD (KRP-TASK-02): `oracle-back-byte-order` e `oracle-pose-texel-order` trocam
+  `kits/oracle.py` por `kits/core/replay.py`; entra `replay-copy-in-oracle`, com alvo no oracle.
+
+Conserto: o item da §2.2 diz onze movidos (nove mais dois, com os nomes dos dois) e dois novos, e
+remete ao `grep` que conta os 13. Varredura: `grep -rniE "nove controles|9 controles|nine
+controls"` em plano, perfil, ciclo e `tools/kits/` só acha o Log da KRP-TASK-01, que fala dos nove
+dela e está certo.
+
+Verificação:
+
+```text
+$ grep -c 'nove controles passaram' docs/PLAN-KITS-REPLAY.md
+0
+$ grep -cE '^\s*"[^"]+", "kits/core/replay.py"' tools/kits/controls.py
+13
+$ diff <(git show a51525f0^:tools/kits/controls.py | grep -oE '^\s*"[^"]+", "kits/[^"]+"') <(grep -oE '^\s*"[^"]+", "kits/[^"]+"' tools/kits/controls.py) | grep -c '^>.*kits/core/replay.py'
+13
+```
+
+Gates (`rite gates --cycle kits-replay --id CORR-KRP-003`): `ctest --test-dir build -R kits` —
+`100% tests passed, 0 tests failed out of 4` (`kits_image` e `kits_ui` *skipped*); `python3
+tools/kits/controls.py` — `controls: 56 of 56 red`.

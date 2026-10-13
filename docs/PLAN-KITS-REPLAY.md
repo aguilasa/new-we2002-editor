@@ -120,7 +120,11 @@ capturas existentes.
   do `selftest.py` recusa qualquer das dezenove definida de novo no oracle, com o controle
   `replay-copy-in-oracle`;
 - os casos sintéticos de replay migraram (23 de 26; os 3 restantes testam a leitura da lista da GPU
-  e o `replay_chooser`, que ficam no oracle), e nove controles passaram a plantar no leitor.
+  e o `replay_chooser`, que ficam no oracle). Onze controles que plantavam no oracle passaram a
+  plantar no leitor — nove na KRP-TASK-01, renomeados sem o prefixo `oracle-`, e dois na
+  KRP-TASK-02 (`oracle-back-byte-order`, `oracle-pose-texel-order`) — e dois novos plantam nele
+  (`replay-key-check`, `replay-v0-slot`): 13 com alvo `kits/core/replay.py`, contados por
+  `grep -cE '^\s*"[^"]+", "kits/core/replay.py"' tools/kits/controls.py`.
 
 ### 2.3 A linha de comando de leitura: `tools/kits/replay.py`
 
