@@ -68,3 +68,12 @@ KRP-TASK-01 (26 = 23 + 3) e coberto pelo `kits_selftest` acima.
 Escrituração: o plano não dizia o que a fase entregou diferente do texto; entrou um parágrafo
 "Feito na fase 1" no fim do [§2.2](/docs/PLAN-KITS-REPLAY.md#2.2), com o plano declarado nos
 arquivos desta task.
+- **Closed** — commit `74018c42` (2026-10-13): docs(kits): close phase 1 of kits-replay
+  - Files (`git show --name-status 74018c42`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/03-fechamento-da-fase-1.md`
+    - `M docs/tasks/kits-replay/progress.json`
+    - `M docs/tasks/kits-replay/progresso.md`
+  - **Outside declared files** (`docs/PLAN-KITS-REPLAY.md`):
+    - `docs/tasks/kits-replay/progress.json`
+    - `docs/tasks/kits-replay/progresso.md`

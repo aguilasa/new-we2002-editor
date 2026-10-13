@@ -49,10 +49,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#9",
       "files": ["docs/PLAN-KITS-REPLAY.md"],
       "resources": ["tela"],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-13",
+      "done_commit": "74018c42",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
