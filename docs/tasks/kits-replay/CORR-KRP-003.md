@@ -96,3 +96,7 @@ $ diff <(git show a51525f0^:tools/kits/controls.py | grep -oE '^\s*"[^"]+", "kit
 Gates (`rite gates --cycle kits-replay --id CORR-KRP-003`): `ctest --test-dir build -R kits` —
 `100% tests passed, 0 tests failed out of 4` (`kits_image` e `kits_ui` *skipped*); `python3
 tools/kits/controls.py` — `controls: 56 of 56 red`.
+- **Closed** — commit `ee00001f` (2026-10-13): docs(kits): eleven controls moved to the replay reader in phase 1, not nine
+  - Files (`git show --name-status ee00001f`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-003.md`
