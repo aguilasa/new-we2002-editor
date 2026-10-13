@@ -47,12 +47,12 @@
       "title": "Leitores figure, figures, walk e panel sem asserção de chaves nem controle plantado",
       "origin": "KRP-TASK-04",
       "severity": "medium",
-      "files": [],
+      "files": ["tools/kits/selftest.py", "tools/kits/controls.py"],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-13",
+      "done_commit": "d883e37e"
     },
     {
       "id": "CORR-KRP-005",
@@ -60,9 +60,9 @@
       "title": "Log da KRP-TASK-04 cola resumo de extrator não versionado e pasta placeholder",
       "origin": "KRP-TASK-04",
       "severity": "medium",
-      "files": [],
+      "files": ["docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md"],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "depends_on": [],
       "done_on": null,
       "done_commit": null

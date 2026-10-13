@@ -133,3 +133,8 @@ kits_selftest: 0 failure(s)
 $ grep -c "figure_report\|walk_report\|figures_report\|panel_of" tools/kits/selftest.py
 5
 ```
+- **Closed** — commit `d883e37e` (2026-10-13): test(kits): assert replay.py figure/figures/walk/panel --json keys and plant five controls
+  - Files (`git show --name-status d883e37e`):
+    - `M docs/tasks/kits-replay/CORR-KRP-004.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
