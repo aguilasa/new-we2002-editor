@@ -4,7 +4,7 @@ id: CORR-KRP-003
 
 # CORR-KRP-003 — PLAN §2.2 diz nove controles movidos para o leitor; na fase 1 foram onze
 
-Origin: [KRP-TASK-03](/docs/tasks/kits-replay/03-fecha-a-fase-1.md)
+Origin: [KRP-TASK-03](/docs/tasks/kits-replay/03-fechamento-da-fase-1.md)
 
 ## Problem
 
