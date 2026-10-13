@@ -78,3 +78,7 @@ seção 90, porque a saída humana não imprime esses campos.
 $ grep -n "<pasta\|(campos" docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md; echo "grep rc=$?"
 grep rc=1
 ```
+- **Closed** — commit `5ebdd3fd` (2026-10-13): docs(kits-replay): paste real replay.py output and a rebuildable red run in KRP-TASK-04 Log
+  - Files (`git show --name-status 5ebdd3fd`):
+    - `M docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-005.md`

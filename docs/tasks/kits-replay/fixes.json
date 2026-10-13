@@ -62,10 +62,10 @@
       "severity": "medium",
       "files": ["docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md"],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-13",
+      "done_commit": "5ebdd3fd"
     }
   ]
 }
