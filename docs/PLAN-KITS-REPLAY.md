@@ -101,6 +101,27 @@ O critério do move é **saída idêntica**: `oracle.py --replay … --frame-jso
 `--replay-field … --frame-json` e `--replay-confront` dão o mesmo texto antes e depois, sobre as
 capturas existentes.
 
+**Feito na fase 1** ([KRP-TASK-01](/docs/tasks/kits-replay/01-leitor-puro-core-replay-py-capture-v0v1-frame.md),
+[02](/docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md) e
+[03](/docs/tasks/kits-replay/03-fechamento-da-fase-1.md)), e o que difere do texto acima:
+
+- o leitor não lê o disco: o índice do MODEL.BIN (`oracle.model_index`) e a largura do registro do
+  uniforme entram como parâmetro — `Figure.box(index)`, `Figure.sections(index, buffer, texture)`,
+  `Figure.panel(index, pages, width, on_torso)`, `Walk.load(path, index, width)`,
+  `field_number(pages, panel, width, shift)`;
+- o v1 traz também `kind` (`close` ou `walk`); `Capture.frames(side)` lê a frente ou as costas de
+  uma captura de perto, e a de laço se lê por `Walk`; uma chave que a análise lê e falta é
+  `ReplayError` nomeando a chave;
+- `judge(report, expect, plant_root=None)`: a planta passa a raiz plantada em vez de `plant=True`;
+  no oracle o juiz entra como `replay_judge`, porque o `judge` dele é o do `--expect`;
+- além das dezenove, saíram do oracle os auxiliares de que elas dependem (`pose_frames`,
+  `matrix_pieces`, `pose_project`, `piece_error`, `kit_image_of`, `read_panels`, `field_row`…), os
+  dois juízes e as constantes deles; o oracle os importa de `core.replay`. A regra `REPLAY_MOVED`
+  do `selftest.py` recusa qualquer das dezenove definida de novo no oracle, com o controle
+  `replay-copy-in-oracle`;
+- os casos sintéticos de replay migraram (23 de 26; os 3 restantes testam a leitura da lista da GPU
+  e o `replay_chooser`, que ficam no oracle), e nove controles passaram a plantar no leitor.
+
 ### 2.3 A linha de comando de leitura: `tools/kits/replay.py`
 
 Subcomandos, na convenção do `tools/kits/cli.py`, todos sem emulador: `figures`, `figure
