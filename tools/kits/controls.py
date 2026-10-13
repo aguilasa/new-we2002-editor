@@ -573,6 +573,24 @@ CONTROLS = (
         "show puts the drawn figure beside the game's frame to compare the two; drawn "
         "without the captured matrices it lands elsewhere, or nowhere (KRP-TASK-05)",
     ),
+    Control(
+        "replay-show-mirrored", "kits/core/replay.py", "pose_picture",
+        "                points.append((-at[0], -at[1], -cz))\n",
+        "                points.append((at[0], at[1], -cz))\n",
+        "FAIL  show draws the figure in its captured pose, on the frame buffer's pixels",
+        "raster.draw's view negates x and y, and pose_picture negates them back; without "
+        "that the figure is drawn turned half round about the box's centre, and on "
+        "replay-9-3 drawn goes from 2349 to 136 px (CORR-KRP-006)",
+    ),
+    Control(
+        "replay-show-unrotated", "kits/core/replay.py", "pose_picture",
+        '        rotation, translation = piece["matrix"]\n        for prim in sec.primitives:\n',
+        '        rotation, translation = (4096, 0, 0, 0, 4096, 0, 0, 0, 4096), '
+        'piece["matrix"][1]\n        for prim in sec.primitives:\n',
+        "FAIL  show draws the figure in its captured pose, on the frame buffer's pixels",
+        "the captured translation alone puts each piece in place but not turned; on "
+        "replay-9-3 drawn goes from 2349 to 2636 px (CORR-KRP-006)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

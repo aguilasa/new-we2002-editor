@@ -1685,25 +1685,32 @@ def _replay_reader_checks(c, cli, replay) -> None:
          "%s" % docs["panel_saved"])
 
     # show (KRP-TASK-05): the figure is drawn by core/raster on the frame
-    # buffer's own pixels, through the captured matrix and projection -- a
-    # square of side 20 at z 1000 seen with H 1000 covers the middle 21x21 of
-    # a 41x41 box, and nothing at its corners.
+    # buffer's own pixels, through the captured matrix and projection.  The
+    # fixture is asymmetric (CORR-KRP-006) so that a mirrored drawing or a
+    # dropped rotation lands elsewhere: a 16x8 bar along model x, turned 90
+    # degrees about z (screen x = -model y, screen y = model x) and moved 8
+    # to the right, seen at z 1000 with H 1000, covers screen x 4..12 and
+    # y 0..16 -- box pixels x 24..32, y 20..36 of the 41x41 box.  Mirrored it
+    # would cover x 8..16, y 4..20; unrotated, x 28..40, y 16..24.
     from types import SimpleNamespace as _ns2
-    square = _ns2(vertices=[_ns2(x=x, y=y, z=0) for x, y in ((-10, -10), (10, -10),
-                                                               (-10, 10), (10, 10))],
-                  primitives=[_ns2(indices=(0, 1, 2, 3), texcoords=((0, 0), (8, 0),
-                                                                    (0, 8), (8, 8)))])
+    bar = _ns2(vertices=[_ns2(x=x, y=y, z=0) for x, y in ((0, -4), (16, -4),
+                                                            (0, 4), (16, 4))],
+               primitives=[_ns2(indices=(0, 1, 2, 3), texcoords=((0, 0), (8, 0),
+                                                                 (0, 8), (8, 8)))])
     posed = replay.Figure([{"section": 5, "projection": {"H": 1000, "OFX": 0, "OFY": 0},
-                            "matrix": ((4096, 0, 0, 0, 4096, 0, 0, 0, 4096),
-                                       (0, 0, 1000))}])
+                            "matrix": ((0, -4096, 0, 4096, 0, 0, 0, 0, 4096),
+                                       (8, 0, 1000))}])
     posed.samples = []
-    pw, ph, picture = replay.pose_picture(posed, {"sections": {(replay.layout.MODEL, 5): square}},
+    pw, ph, picture = replay.pose_picture(posed, {"sections": {(replay.layout.MODEL, 5): bar}},
                                           None, (-20, -20, 20, 20))
     painted = [(x, y) for y in range(ph) for x in range(pw) if picture[(y * pw + x) * 4 + 3]]
+    outside = [p for p in painted if not (23 <= p[0] <= 33 and 19 <= p[1] <= 37)]
+    mirrored = [p for p in painted if 8 <= p[0] <= 16 and 4 <= p[1] <= 20]
     c.ok("show draws the figure in its captured pose, on the frame buffer's pixels",
-         (pw, ph) == (41, 41) and (20, 20) in painted and (1, 1) not in painted
-         and 400 <= len(painted) <= 484,
-         "%dx%d, %d px painted, first %s" % (pw, ph, len(painted), painted[:3]))
+         (pw, ph) == (41, 41) and (28, 28) in painted and len(painted) >= 100
+         and not outside and not mirrored,
+         "%dx%d, %d px painted, %d outside x 23..33 y 19..37 (first %s), %d mirrored"
+         % (pw, ph, len(painted), len(outside), outside[:3], len(mirrored)))
 
 
 def _live_guard_checks(c) -> None:
