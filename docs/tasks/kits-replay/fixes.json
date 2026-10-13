@@ -66,6 +66,32 @@
       "depends_on": [],
       "done_on": "2026-10-13",
       "done_commit": "5ebdd3fd"
+    },
+    {
+      "id": "CORR-KRP-006",
+      "file": "CORR-KRP-006.md",
+      "title": "Selftest do show não pega desenho espelhado nem sem rotação",
+      "origin": "KRP-TASK-05",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-007",
+      "file": "CORR-KRP-007.md",
+      "title": "Comentário do selftest do show diz 21x21; o quadrado pinta 20x20",
+      "origin": "KRP-TASK-05",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
