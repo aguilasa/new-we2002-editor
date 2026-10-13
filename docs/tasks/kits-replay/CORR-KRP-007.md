@@ -55,3 +55,5 @@ grep -n '21x21' tools/kits/selftest.py
 Não pode imprimir nada. A sonda acima continua dando 400, agora dentro dos limites novos.
 
 ## Log de Execução
+
+- **Stale** (2026-10-13) at `3d92791b`: grep -n '21x21' tools/kits/selftest.py now prints nothing (rc=1): CORR-KRP-006 (64ff1d2d) replaced the symmetric-square fixture and its comment

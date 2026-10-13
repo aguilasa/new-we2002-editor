@@ -88,10 +88,10 @@
       "severity": "low",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "stale",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-13",
+      "done_commit": "3d92791b"
     }
   ]
 }
