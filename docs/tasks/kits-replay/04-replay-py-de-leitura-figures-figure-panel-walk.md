@@ -130,3 +130,17 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE
 $ python3 tools/kits/controls.py
 controls: 57 of 57 red
 ```
+- **Closed** — commit `28f0b702` (2026-10-13): feat(kits): replay.py readers with --json kits-replay/1, and kits_replay
+  - Files (`git show --name-status 28f0b702`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md`
+    - `M docs/tasks/kits-replay/progress.json`
+    - `M docs/tasks/kits-replay/progresso.md`
+    - `M tests/CMakeLists.txt`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/replay.py`
+    - `A tools/kits/replay.py`
+    - `M tools/kits/selftest.py`
+  - **Outside declared files** (`tools/kits/replay.py`, `tools/kits/core/replay.py`, `tests/CMakeLists.txt`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/PLAN-KITS-REPLAY.md`):
+    - `docs/tasks/kits-replay/progress.json`
+    - `docs/tasks/kits-replay/progresso.md`

@@ -65,10 +65,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#2.3",
       "files": ["tools/kits/replay.py", "tools/kits/core/replay.py", "tests/CMakeLists.txt", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-13",
+      "done_commit": "28f0b702",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
