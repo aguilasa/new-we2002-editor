@@ -77,3 +77,4 @@ arquivos desta task.
   - **Outside declared files** (`docs/PLAN-KITS-REPLAY.md`):
     - `docs/tasks/kits-replay/progress.json`
     - `docs/tasks/kits-replay/progresso.md`
+- **Reviewed** (2026-10-13) at `ef0133f2`: CORR-KRP-003

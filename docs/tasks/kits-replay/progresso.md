@@ -86,7 +86,7 @@ A ferramenta vem primeiro (fases 1 e 2), porque toda melhoria começa lendo uma 
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [KRP-TASK-01](/docs/tasks/kits-replay/01-leitor-puro-core-replay-py-capture-v0v1-frame.md) | Leitor puro core/replay.py: Capture v0→v1, Frame, Figure e Walk, com os casos sintéticos migrados | 1 | ferramenta | — | done | 2026-10-12 | 2026-10-12 |
 | [KRP-TASK-02](/docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md) | oracle.py importa o leitor: análise movida, saída de --frame-json idêntica nas capturas existentes | 1 | ferramenta | KRP-TASK-01 | done | 2026-10-12 | 2026-10-12 |
-| [KRP-TASK-03](/docs/tasks/kits-replay/03-fechamento-da-fase-1.md) | Fechamento da fase 1 | 1 | closing | KRP-TASK-01, KRP-TASK-02 | done | 2026-10-13 | pending |
+| [KRP-TASK-03](/docs/tasks/kits-replay/03-fechamento-da-fase-1.md) | Fechamento da fase 1 | 1 | closing | KRP-TASK-01, KRP-TASK-02 | done | 2026-10-13 | 2026-10-13 |
 | [KRP-TASK-04](/docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md) | replay.py de leitura: figures, figure, panel, walk e describe com --json kits-replay/1, e o alvo kits_replay | 2 | ferramenta | KRP-TASK-03 | pending | — | — |
 | [KRP-TASK-05](/docs/tasks/kits-replay/05-show-png-e-confront-puro-sobre-a-captura.md) | show --png e confront puro sobre a captura | 2 | ferramenta | KRP-TASK-04 | pending | — | — |
 | [KRP-TASK-07](/docs/tasks/kits-replay/07-replay-py-capture-com-as-guardas-medidas-e-o.md) | replay.py capture com as guardas medidas, e o oracle capturando por ela | 2 | ferramenta | KRP-TASK-04 | pending | — | — |
