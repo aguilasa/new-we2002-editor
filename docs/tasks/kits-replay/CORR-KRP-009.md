@@ -78,3 +78,7 @@ controls: 67 of 67 red
 ```
 
 Sob carga o `kits_selftest` levou 306,99 s: com o `TIMEOUT 300` antigo teria estourado.
+- **Closed** — commit `b4e97c79` (2026-10-14): test(kits): raise kits_selftest timeout to 900 s
+  - Files (`git show --name-status b4e97c79`):
+    - `M docs/tasks/kits-replay/CORR-KRP-009.md`
+    - `M tests/CMakeLists.txt`
