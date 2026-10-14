@@ -121,3 +121,9 @@ $ python3 -c "import json;d=json.load(open('work/kits-replay/replay-10-2-R1.json
 O maior intervalo é, nas três, o primeiro: ele inclui os `REPLAY_FIELD_SETTLE` (60) quadros de
 assentamento da câmera depois do último L2. Entre toques de R1 os intervalos ficam entre 28 e 43
 quadros. Os totais de virada (610, 581, 601) e os `back` (44, 45, 35) repetem os da KRP-TASK-07.
+- **Closed** — commit `41f3fc2f` (2026-10-14): fix(kits): keep and judge the gaps between turn taps against the replay timeout
+  - Files (`git show --name-status 41f3fc2f`):
+    - `M docs/tasks/kits-replay/CORR-KRP-008.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/replay.py`
+    - `M tools/kits/selftest.py`

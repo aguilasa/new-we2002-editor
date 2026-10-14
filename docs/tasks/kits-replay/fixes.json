@@ -99,12 +99,12 @@
       "title": "Intervalos entre toques de R1 na virada não são guardados nem julgados contra os 390 quadros",
       "origin": "KRP-TASK-07",
       "severity": "low",
-      "files": [],
-      "resources": [],
-      "status": "pending",
+      "files": ["tools/kits/replay.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
+      "resources": ["emulador", "save-states", "tela"],
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-14",
+      "done_commit": "41f3fc2f"
     },
     {
       "id": "CORR-KRP-009",
