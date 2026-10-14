@@ -300,7 +300,10 @@ if(Python3_FOUND)
     add_test(NAME kits_selftest
         COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/kits/selftest.py --quiet)
-    set_tests_properties(kits_selftest PROPERTIES TIMEOUT 300)
+    # 900 s, three times the measured run: it took 221.9 to 274.65 s alone
+    # over the kits-replay cycle (CORR-KRP-009) and grows with every control,
+    # and 300 s timed out with tools/kits/controls.py running beside it.
+    set_tests_properties(kits_selftest PROPERTIES TIMEOUT 900)
 
     # The disc gate: WE2002_LOOKS_IMAGE (the Japanese data track) through the
     # facade -- every kit passes the guard of form, control 4 holds on a real

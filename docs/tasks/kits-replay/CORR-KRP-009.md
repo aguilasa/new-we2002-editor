@@ -50,3 +50,31 @@ Rodar o gate `ctest -R kits` com `python3 tools/kits/controls.py` em paralelo: o
 pode estourar o tempo.
 
 ## Log de Execução
+
+### 2026-10-14
+
+Reprodução (`rite reproduce`, HEAD `9e008868`): o comando da Evidência estourou os 300 s do próprio
+reprodutor, sem o `controls.py` em paralelo, e dentro dele o `kits_selftest` sozinho deu
+`Passed  270.96 sec` contra `TIMEOUT 300` — 90% do orçamento. Sintoma presente.
+
+Conserto: `tests/CMakeLists.txt` sobe o `TIMEOUT` do `kits_selftest` de 300 para 900 s, com o
+motivo num comentário (três vezes a corrida medida; separar as asserções lentas ficou de fora, porque
+o crescimento é cumulativo e não de um caso só).
+
+Verificação, com `python3 tools/kits/controls.py` rodando em paralelo:
+
+```text
+$ cmake -S . -B build >/dev/null && grep -n "kits_selftest" build/tests/CTestTestfile.cmake | grep -o 'TIMEOUT "[0-9]*"'
+TIMEOUT "900"
+$ (python3 tools/kits/controls.py > ctl009.txt 2>&1 &); DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE2002_KITS_REPLAY_DIR=$PWD/work/kits-oracle ctest --test-dir build -R kits
+1/5 Test #18: kits_selftest ....................   Passed  306.99 sec
+2/5 Test #19: kits_image .......................   Passed   28.67 sec
+3/5 Test #20: kits_gen .........................   Passed    0.03 sec
+4/5 Test #21: kits_ui ..........................   Passed  211.89 sec
+5/5 Test #22: kits_replay ......................   Passed    7.59 sec
+100% tests passed, 0 tests failed out of 5
+$ tail -1 ctl009.txt
+controls: 67 of 67 red
+```
+
+Sob carga o `kits_selftest` levou 306,99 s: com o `TIMEOUT 300` antigo teria estourado.
