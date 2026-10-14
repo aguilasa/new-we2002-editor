@@ -361,7 +361,10 @@ def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
     the turned capture.  With *focus* the camera is first moved K taps of L2
     to a player (`replay_arrive`), which it follows from behind: the first
     capture is then his back and the turned one his front.  Each run counts
-    the frames it spends since its last tap.  With *rotate* None there is
+    the frames it spends since its last tap, and the turn keeps in `tap_gaps`
+    the frames between one tap of *rotate* and the next, the first from the
+    reload's last L2 tap: each is an idle the replay has to outlast
+    (CORR-KRP-008).  With *rotate* None there is
     no turn: the first capture alone, `turned` `NOT_TURNED`."""
     O = _kits_oracle()
     import oracle as looks_oracle  # tools/looks
@@ -407,12 +410,14 @@ def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
                 "depths": [], "turned": NOT_TURNED, "hits": hits, "tag": tag, "set": kit_set,
                 "page_x": page_x, "pages": pages, "buffer": buffer, "texture": texture}
     start = replay_arrive(game, slot, focus, label + "-turn")
-    yaws, depths, turned, tapped = [], [], None, start
+    yaws, depths, gaps, turned, tapped = [], [], [], None, start
     root = frames[-1]["focus"][1]["section"] if frames and frames[-1]["focus"] else None
     projection = frames[-1]["focus"][0]["projection"] if frames and frames[-1]["focus"] else None
     for _tap in range(O.REPLAY_ROTATE_MOST):
         try:
-            tapped = O.frame_now(game)
+            now = O.frame_now(game)
+            gaps.append(now - tapped)
+            tapped = now
             game.press(rotate)
         except looks_oracle.NotArrived as exc:
             turned = "refused: %s" % exc
@@ -458,7 +463,7 @@ def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
             pages.setdefault("%d" % x, O._edit_page(game, x))
     game.capture(label + "-back")
     return {"focus": focus, "front": front, "back": back, "front_frames": front_frames,
-            "back_frames": back_frames, "turn_frames": turn_frames, "rotate": rotate, "yaws": yaws, "depths": depths, "turned": turned,
+            "back_frames": back_frames, "turn_frames": turn_frames, "tap_gaps": gaps, "rotate": rotate, "yaws": yaws, "depths": depths, "turned": turned,
             "hits": hits, "tag": tag, "set": kit_set, "page_x": page_x, "pages": pages,
             "buffer": buffer, "texture": texture}
 
@@ -523,13 +528,19 @@ def sequences(data: dict) -> list:
     """(name, frames, judged) of every sequence of a capture.  A judged one
     counts from its last tap to the end of its capture -- the replay's idle,
     which every tap starts again, has to outlast it; the turn counts from the
-    reload across all its taps, and is printed, not judged."""
+    reload across all its taps, and is printed, not judged; its largest gap
+    between two taps (`tap_gaps`, CORR-KRP-008) is judged as "turn gap".  A
+    capture taken before `tap_gaps` existed has no gap to judge, and says so
+    by leaving the sequence out."""
     if data.get("kind") == replay.KIND_WALK:
         return [("focus %d" % f["k"], f["frames"], True) for f in data["foci"]
                 if not f.get("refused")]
     out = [("front", data["front_frames"], True)]
     if data.get("back_frames") is not None:
-        out += [("turn", data["turn_frames"], False), ("back", data["back_frames"], True)]
+        out += [("turn", data["turn_frames"], False)]
+        if data.get("tap_gaps"):
+            out += [("turn gap", max(data["tap_gaps"]), True)]
+        out += [("back", data["back_frames"], True)]
     return out
 
 
@@ -720,7 +731,9 @@ def main(argv=None) -> int:
         idle = _kits_oracle().REPLAY_IDLE.get(args.slot)
         for name, n, judged in sequences(data):
             print("  %-9s %s frame(s) %s" % (
-                name, n, "from its last tap to the end of its capture; timeout %s" % idle
+                name, n, "the largest between two taps of the turn; timeout %s" % idle
+                if name == "turn gap" else
+                "from its last tap to the end of its capture; timeout %s" % idle
                 if judged else "from the reload, across its taps (each starts the idle "
                 "again): not judged"))
         print("  capture kept at %s (schema v1, sha256 %s)" % (path, sha256_of(path)))

@@ -1781,6 +1781,21 @@ def _live_guard_checks(c) -> None:
     c.ok("replay.py capture: a sequence that reaches the replay's timeout fails",
          [f.split(":")[0] for f in cli.timeout_failures(late, 390)] == ["back"],
          "%s" % cli.timeout_failures(late, 390))
+    gapped = dict(kept, tap_gaps=[36, 41, 389])
+    c.ok("replay.py capture: the turn's largest gap between taps is judged, and under the "
+         "replay's timeout it holds (CORR-KRP-008)",
+         ("turn gap", 389, True) in cli.sequences(gapped)
+         and cli.timeout_failures(gapped, 390) == [],
+         "%s; %s" % (cli.sequences(gapped), cli.timeout_failures(gapped, 390)))
+    long_gap = dict(kept, tap_gaps=[36, 390, 41])
+    c.ok("replay.py capture: a gap between two taps of the turn that reaches the replay's "
+         "timeout fails (CORR-KRP-008)",
+         [f.split(":")[0] for f in cli.timeout_failures(long_gap, 390)] == ["turn gap"],
+         "%s" % cli.timeout_failures(long_gap, 390))
+    c.ok("replay.py capture: a turned capture kept before tap_gaps existed still reads, "
+         "with no gap to judge",
+         [name for name, _n, _j in cli.sequences(kept)] == ["front", "turn", "back"],
+         "%s" % cli.sequences(kept))
 
 
 def _negative(c) -> None:

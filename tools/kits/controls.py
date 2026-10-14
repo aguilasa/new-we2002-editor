@@ -608,6 +608,16 @@ CONTROLS = (
         "past 390 frames the paused replay leaves by itself, and what the capture read is "
         "another screen (PLAN-KITS-REPLAY section 2.5)",
     ),
+    Control(
+        "replay-capture-tap-gap-unjudged", "kits/replay.py", "sequences",
+        '            out += [("turn gap", max(data["tap_gaps"]), True)]\n',
+        '            out += [("turn gap", max(data["tap_gaps"]), False)]\n',
+        "FAIL  replay.py capture: a gap between two taps of the turn that reaches the "
+        "replay's timeout fails",
+        "every tap of the turn starts the replay's idle again, so what has to stay under 390 "
+        "frames is the gap between two taps; left unjudged, the turn's claim rests on an "
+        "average (CORR-KRP-008, PLAN-KITS-REPLAY section 2.5)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 
