@@ -134,3 +134,15 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE
 $ python3 tools/kits/controls.py
 controls: 67 of 67 red
 ```
+- **Closed** — commit `9bc2d8ee` (2026-10-14): feat(kits): replay.py capture, and the oracle capturing through it
+  - Files (`git show --name-status 9bc2d8ee`):
+    - `M docs/tasks/kits-replay/07-replay-py-capture-com-as-guardas-medidas-e-o.md`
+    - `M docs/tasks/kits-replay/progress.json`
+    - `M docs/tasks/kits-replay/progresso.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/replay.py`
+    - `M tools/kits/selftest.py`
+  - **Outside declared files** (`tools/kits/replay.py`, `tools/kits/oracle.py`, `tools/kits/core/replay.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
+    - `docs/tasks/kits-replay/progress.json`
+    - `docs/tasks/kits-replay/progresso.md`
