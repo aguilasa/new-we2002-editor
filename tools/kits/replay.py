@@ -16,6 +16,8 @@ Usage:
     python tools/kits/replay.py walk <replay-field-*-capture.json> [--json]
     python tools/kits/replay.py show <capture.json> --png out.png [--section S | --box]
     python tools/kits/replay.py confront <capture.json> [--section S] [--json]
+    python tools/kits/replay.py capture --slot S [--focus K] [--turn R1|L1] [--walk L2|R2]
+                                        [--out DIR] [--cue CUE]   # boots the emulator
     python tools/kits/replay.py check [<folder>]        # the kits_replay gate
 
 The geometry comes from `WE2002_LOOKS_IMAGE`, the Japanese data track.
@@ -324,13 +326,265 @@ def confront_report(capture, index, section: int = None) -> dict:
             "figure": figure_doc(figure), "section": section, "sections": rows}
 
 
+# -- the capture (the only reader that boots the emulator) -------------------
+
+DRIVE_VARIABLE = "WE2002_LOOKS_DRIVE_IMAGE"
+"""The English cue the replay states were saved on."""
+CAPTURE_DIR = os.path.join("work", "kits-replay")
+"""Where `capture` writes by default: not `work/kits-oracle/`, whose captures
+`check` holds to their digests."""
+NOT_TURNED = "not asked"
+"""`turned` of a capture taken without `--turn`."""
+
+
+def replay_arrive(game, slot: int, focus: int, label: str) -> int:
+    """Load *slot* and tap `REPLAY_FIELD_BUTTONS[0]` *focus* times, each a
+    `press` that has to move the screen, then let the camera land
+    (`REPLAY_FIELD_SETTLE`).  The frame counter at the last tap: the replay's
+    idle starts again there."""
+    O = _kits_oracle()
+    O.load_slot(game, slot, label)
+    for _tap in range(focus):
+        game.press(O.REPLAY_FIELD_BUTTONS[0])
+    tapped = O.frame_now(game)
+    if focus:
+        game.step(O.REPLAY_FIELD_SETTLE)
+    return tapped
+
+
+def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
+                   focus: int = 0) -> dict:
+    """Everything `--replay` reads from the paused replay: the first capture
+    (`pose_capture`) with the frame buffer under the followed figure and the
+    texture pages and CLUTs it samples; the kit pages; then, from the state
+    reloaded, taps of *rotate* until the torso has turned `REPLAY_BACK`, and
+    the turned capture.  With *focus* the camera is first moved K taps of L2
+    to a player (`replay_arrive`), which it follows from behind: the first
+    capture is then his back and the turned one his front.  Each run counts
+    the frames it spends since its last tap.  With *rotate* None there is
+    no turn: the first capture alone, `turned` `NOT_TURNED`."""
+    O = _kits_oracle()
+    import oracle as looks_oracle  # tools/looks
+
+    label = "replay-%d" % slot + ("-%d" % focus if focus else "")
+    choose = O.replay_chooser(focus)
+    submits = O.REPLAY_FIELD_SUBMITS if focus else O.REPLAY_SUBMITS
+    start = replay_arrive(game, slot, focus, label)
+    front = O.pose_capture(game, maps, submits)
+    front_frames = O.frame_now(game) - start
+    game.step(O.REPLAY_SETTLE)
+    hits, tag, kit_set, page_x = O._edit_kit(game, bodies, label)
+    frames = O.replay_frames(front, choose=choose)
+    head = frames[-1]["head"] if frames else None
+    samples = front["lists"].get("%d" % head, []) if head is not None else []
+    figure, fit = O.figure_group(frames[-1]["focus"] if frames else None, samples, index)
+    buffer, texture = None, {"pages": {}, "cluts": {}}
+    # the drawing offset rides in the one-node list submitted before each
+    # ordering table, not in the table the figure is in: the last one set
+    offsets = [front["offsets"].get("%d" % e["head"]) for e in front["events"]
+               if e["kind"] == "submit"]
+    offset = next((o for o in reversed(offsets) if o is not None), None)
+    if figure and offset is not None:
+        box = tuple(int(round(v)) for v in fit["box"])
+        rows = looks_oracle.vram_region(game, offset[0] + box[0], offset[1] + box[1],
+                                        box[2] - box[0] + 1, box[3] - box[1] + 1)
+        buffer = {"origin": box[:2], "offset": offset,
+                  "rows": [[looks_oracle._five_bits(p) for p in row] for row in rows]}
+        for page in sorted({tuple(one["page"]) for one in figure if one["bits"] == O.KIT_BITS}):
+            rows = looks_oracle.vram_region(game, page[0], page[1], O.TEXTURE_HALFWORDS, 256)
+            texture["pages"]["%d,%d,%d" % (page + (O.KIT_BITS,))] = [
+                (p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10 for row in rows for p in row]
+        for clut in sorted({tuple(one["clut"]) for one in figure}):
+            row = looks_oracle.vram_region(game, clut[0], clut[1], 256, 1)[0]
+            texture["cluts"]["%d,%d" % clut] = [looks_oracle._five_bits(p) for p in row]
+    pages = {}
+    for x in sorted({one["page"][0] for one in samples if O.is_figure(one)}):
+        pages["%d" % x] = O._edit_page(game, x)
+    game.capture(label + "-front")
+    if rotate is None:
+        return {"focus": focus, "front": front, "back": None, "front_frames": front_frames,
+                "back_frames": None, "turn_frames": None, "rotate": None, "yaws": [],
+                "depths": [], "turned": NOT_TURNED, "hits": hits, "tag": tag, "set": kit_set,
+                "page_x": page_x, "pages": pages, "buffer": buffer, "texture": texture}
+    start = replay_arrive(game, slot, focus, label + "-turn")
+    yaws, depths, turned, tapped = [], [], None, start
+    root = frames[-1]["focus"][1]["section"] if frames and frames[-1]["focus"] else None
+    projection = frames[-1]["focus"][0]["projection"] if frames and frames[-1]["focus"] else None
+    for _tap in range(O.REPLAY_ROTATE_MOST):
+        try:
+            tapped = O.frame_now(game)
+            game.press(rotate)
+        except looks_oracle.NotArrived as exc:
+            turned = "refused: %s" % exc
+            break
+        # the followed figure's own family: past the goal line the camera
+        # sees another goalkeeper nearer than a cut-off frame's own one
+        # behind a player the camera turns about him and keeps him on its
+        # axis: the figure on the axis, within the depth it follows at
+        followed = None
+        for count in O.REPLAY_YAW_STOPS:
+            stops = O.matrix_stops(game, maps, count, partial=True)
+            pieces = O.matrix_pieces(stops, 1)
+            for piece in pieces:
+                # these stops do not read the GTE: the first capture's projection
+                piece.setdefault("projection", projection)
+            figures = O.replay_figures(pieces)
+            if focus:
+                followed = O.field_focus([f for f in figures
+                                        if O.figure_depth(f) < O.REPLAY_FOLLOW_DEPTH
+                                        and O.figure_off_axis(f) <= O.REPLAY_FOLLOW_OFF])
+            else:
+                followed = O.replay_focus([f for f in figures if f[1]["section"] == root])
+            if followed is not None:
+                break
+        if followed is None:
+            turned = "no figure in the stops after the tap"
+            break
+        yaws.append(O.piece_yaw(followed[1]["matrix"]))
+        depths.append([followed[1]["section"], O.figure_depth(followed)])
+        front_yaw = O.piece_yaw(frames[-1]["focus"][1]["matrix"]) if frames else yaws[0]
+        if abs((yaws[-1] - front_yaw + 180.0) % 360.0 - 180.0) >= O.REPLAY_BACK:
+            turned = "back"
+            break
+    back = O.pose_capture(game, maps, submits) if turned == "back" else None
+    turn_frames = O.frame_now(game) - start
+    back_frames = O.frame_now(game) - tapped
+    back_samples = []
+    if back is not None:
+        back_frames_list = O.replay_frames(back, choose=choose)
+        if back_frames_list:
+            back_samples = back["lists"].get("%d" % back_frames_list[-1]["head"], [])
+        for x in sorted({one["page"][0] for one in back_samples if O.is_figure(one)}):
+            pages.setdefault("%d" % x, O._edit_page(game, x))
+    game.capture(label + "-back")
+    return {"focus": focus, "front": front, "back": back, "front_frames": front_frames,
+            "back_frames": back_frames, "turn_frames": turn_frames, "rotate": rotate, "yaws": yaws, "depths": depths, "turned": turned,
+            "hits": hits, "tag": tag, "set": kit_set, "page_x": page_x, "pages": pages,
+            "buffer": buffer, "texture": texture}
+
+
+def replay_field_capture(game, maps, slot: int, button: str = None) -> dict:
+    """`--replay-field`'s reading of the emulator: for k taps of *button*,
+    from 0 until a tap does not move the screen or the camera is back on the
+    ball after a player, the state reloaded, the k taps (each a `press` that
+    has to move the screen), `REPLAY_FIELD_SETTLE` frames, and a
+    `pose_capture`; the uniform pages each focus samples, read once."""
+    O = _kits_oracle()
+    import oracle as looks_oracle  # tools/looks
+
+    button = button or O.REPLAY_FIELD_BUTTONS[0]
+    foci, pages = [], {}
+    for k in range(O.REPLAY_FIELD_MOST + 1):
+        label = "replay-field-%d-%d" % (slot, k)
+        O.load_slot(game, slot, label)
+        moves, refused = [], None
+        for _tap in range(k):
+            before = game.capture()
+            try:
+                after = game.press(button)
+            except looks_oracle.NotArrived as exc:
+                refused = str(exc)
+                break
+            moves.append(before.difference(after, looks_oracle.pixels(before, None)))
+        if refused is not None:
+            foci.append({"k": k, "moves": moves, "refused": refused})
+            break
+        tapped = O.frame_now(game)
+        game.step(O.REPLAY_FIELD_SETTLE)
+        game.capture(label)
+        capture = O.pose_capture(game, maps, O.REPLAY_FIELD_SUBMITS)
+        frames = O.frame_now(game) - tapped
+        for x in sorted({one["page"][0] for v in capture["lists"].values() for one in v
+                         if O.is_figure(one)}):
+            if "%d" % x not in pages:
+                pages["%d" % x] = O._edit_page(game, x)
+        foci.append({"k": k, "moves": moves, "refused": None, "frames": frames,
+                     "capture": capture})
+        frames_now = O.replay_frames(capture)
+        axis = O.field_focus(frames_now[-1]["figures"]) if frames_now else None
+        followed = (axis is not None and O.figure_depth(axis) < O.REPLAY_FOLLOW_DEPTH
+                    and O.figure_off_axis(axis) <= O.REPLAY_FOLLOW_OFF)
+        if k > 1 and not followed and any(f.get("followed") for f in foci[:-1]):
+            foci[-1]["followed"] = False
+            break
+        foci[-1]["followed"] = followed
+    return {"slot": slot, "button": button, "foci": foci, "pages": pages}
+
+
+
+def v1(data: dict, kind: str, slot: int, focus, button, taps) -> dict:
+    """*data* with the fixed keys of schema v1 (`core.replay.Capture`)."""
+    data.update(schema=replay.SCHEMA, kind=kind, slot=slot, focus=focus, button=button,
+                taps=taps)
+    return data
+
+
+def sequences(data: dict) -> list:
+    """(name, frames, judged) of every sequence of a capture.  A judged one
+    counts from its last tap to the end of its capture -- the replay's idle,
+    which every tap starts again, has to outlast it; the turn counts from the
+    reload across all its taps, and is printed, not judged."""
+    if data.get("kind") == replay.KIND_WALK:
+        return [("focus %d" % f["k"], f["frames"], True) for f in data["foci"]
+                if not f.get("refused")]
+    out = [("front", data["front_frames"], True)]
+    if data.get("back_frames") is not None:
+        out += [("turn", data["turn_frames"], False), ("back", data["back_frames"], True)]
+    return out
+
+
+def timeout_failures(data: dict, idle) -> list:
+    """The judged sequences that reached the replay's timeout *idle* (or any,
+    when the slot has no measured timeout): past it the replay has left."""
+    return ["%s: %s frame(s), not under the timeout %s" % (name, n, idle)
+            for name, n, judged in sequences(data)
+            if judged and (idle is None or n is None or n >= idle)]
+
+
+def run_capture(slot: int, focus: int = 0, turn: str = None, walk: str = None,
+                out: str = CAPTURE_DIR, cue: str = None) -> tuple:
+    """Boot the fork on *cue* and capture: the walk (`walk`, L2 or R2) or the
+    figure *focus* taps of L2 lead to, turned by *turn* when asked.  Refuses
+    a plugged-in controller before booting (CORR-K3D-031).  Returns (path,
+    data); the capture is written in schema v1."""
+    import fork  # tools/pes2
+
+    O = _kits_oracle()
+    import oracle as looks_oracle  # tools/looks
+
+    fork.refuse_joysticks()
+    image = os.environ[IMAGE_VARIABLE]
+    maps = looks_oracle.model_maps(image)
+    with looks_oracle.Oracle(cue) as game:
+        if walk:
+            data = v1(replay_field_capture(game, maps, slot, walk), replay.KIND_WALK, slot,
+                      None, walk, None)
+            data["taps"] = max((f["k"] for f in data["foci"]), default=0)
+        else:
+            data = v1(replay_capture(game, maps, O.read_kits(image), O.model_index(image),
+                                     slot, turn, focus),
+                      replay.KIND_CLOSE, slot, focus, replay.WALK_BUTTON if focus else None,
+                      focus)
+    name = ("replay-field-%d-%s" % (slot, walk) if walk
+            else "replay-%d" % slot + ("-%d" % focus if focus else "")
+            + ("-%s" % turn if turn else ""))
+    os.makedirs(out, exist_ok=True)
+    path = os.path.join(out, name + ".json")
+    with open(path, "w") as fh:
+        json.dump(data, fh)
+    return path, data
+
+
 # -- the gate ----------------------------------------------------------------
 
 def _kits_oracle():
     """tools/kits/oracle.py, by path: `import oracle` finds the looks one,
-    which `core.tex` put first on sys.path."""
+    which `core.tex` put first on sys.path.  Loaded once; when the oracle is
+    the running script it registers itself here, and that one is used."""
     import importlib.util
 
+    if "kits_oracle" in sys.modules:
+        return sys.modules["kits_oracle"]
     spec = importlib.util.spec_from_file_location("kits_oracle",
                                                   os.path.join(KITS_DIR, "oracle.py"))
     module = importlib.util.module_from_spec(spec)
@@ -440,11 +694,40 @@ def main(argv=None) -> int:
     confront.add_argument("capture")
     confront.add_argument("--section", type=int)
     confront.add_argument("--json", action="store_true")
+    take = sub.add_parser("capture")
+    take.add_argument("--slot", type=int, required=True)
+    take.add_argument("--focus", type=int, default=0)
+    take.add_argument("--turn", choices=("R1", "L1"))
+    take.add_argument("--walk", choices=("L2", "R2"))
+    take.add_argument("--out", default=CAPTURE_DIR)
+    take.add_argument("--cue")
     gate = sub.add_parser("check")
     gate.add_argument("folder", nargs="?")
     gate.add_argument("--quiet", action="store_true")
     args = parser.parse_args(argv)
 
+    if args.command == "capture":
+        cue = args.cue or os.environ.get(DRIVE_VARIABLE)
+        if not cue or not os.environ.get(IMAGE_VARIABLE):
+            print("replay.py capture: needs %s (the Japanese data track) and --cue or %s "
+                  "(the English cue the states were saved on)" % (IMAGE_VARIABLE,
+                                                                  DRIVE_VARIABLE))
+            return 1
+        if args.walk and (args.focus or args.turn):
+            print("replay.py capture: --walk takes neither --focus nor --turn")
+            return 1
+        path, data = run_capture(args.slot, args.focus, args.turn, args.walk, args.out, cue)
+        idle = _kits_oracle().REPLAY_IDLE.get(args.slot)
+        for name, n, judged in sequences(data):
+            print("  %-9s %s frame(s) %s" % (
+                name, n, "from its last tap to the end of its capture; timeout %s" % idle
+                if judged else "from the reload, across its taps (each starts the idle "
+                "again): not judged"))
+        print("  capture kept at %s (schema v1, sha256 %s)" % (path, sha256_of(path)))
+        failures = timeout_failures(data, idle)
+        for line in failures:
+            print("  FAIL  %s" % line)
+        return 1 if failures else 0
     if args.command == "check":
         folder = args.folder or os.environ.get(REPLAY_DIR_VARIABLE)
         if not folder:

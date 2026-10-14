@@ -591,6 +591,23 @@ CONTROLS = (
         "the captured translation alone puts each piece in place but not turned; on "
         "replay-9-3 drawn goes from 2349 to 2636 px (CORR-KRP-006)",
     ),
+    Control(
+        "replay-capture-joystick-late", "kits/replay.py", "run_capture",
+        "    fork.refuse_joysticks()\n    image = os.environ[IMAGE_VARIABLE]\n",
+        "    image = os.environ[IMAGE_VARIABLE]\n",
+        "FAIL  replay.py capture refuses a plugged-in controller before it reads or boots anything",
+        "the controller guard has to run before the capture reads the disc or boots the "
+        "fork; left to the Oracle it still refuses, but only after the work it was meant to "
+        "spare (CORR-K3D-031, KRP-TASK-07)",
+    ),
+    Control(
+        "replay-capture-timeout-unasked", "kits/replay.py", "timeout_failures",
+        "            if judged and (idle is None or n is None or n >= idle)]\n",
+        "            if judged and (idle is None or n is None)]\n",
+        "FAIL  replay.py capture: a sequence that reaches the replay's timeout fails",
+        "past 390 frames the paused replay leaves by itself, and what the capture read is "
+        "another screen (PLAN-KITS-REPLAY section 2.5)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

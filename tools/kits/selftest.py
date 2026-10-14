@@ -1748,6 +1748,40 @@ def _live_guard_checks(c) -> None:
         fork.joysticks, fork.launch = saved
     c.ok("live runs: the oracle refuses before it boots the fork", stopped == "refused", stopped)
 
+    # replay.py capture (KRP-TASK-07): the controller is refused before
+    # anything is read or booted, and a capture's sequences are held under
+    # the replay's timeout.
+    cli = c.attempt("import tools/kits/replay.py", lambda: _kits_module("replay"))
+    if cli is None:
+        return
+
+    def no_maps(*_args, **_kwargs):
+        raise AssertionError("the disc was read before the controller guard")
+
+    saved = fork.joysticks, fork.launch, looks_oracle.model_maps
+    fork.joysticks, fork.launch = (lambda root=None: ["/dev/input/js0"]), no_launch
+    looks_oracle.model_maps = no_maps
+    try:
+        try:
+            cli.run_capture(9, 3, cue="nowhere.cue")
+            stopped = "captured"
+        except fork.Fail:
+            stopped = "refused"
+        except Exception as exc:  # noqa: BLE001
+            stopped = "%s: %s" % (type(exc).__name__, exc)
+    finally:
+        fork.joysticks, fork.launch, looks_oracle.model_maps = saved
+    c.ok("replay.py capture refuses a plugged-in controller before it reads or boots anything",
+         stopped == "refused", stopped)
+    kept = {"kind": "close", "front_frames": 70, "turn_frames": 610, "back_frames": 120}
+    c.ok("replay.py capture: every sequence under the replay's timeout holds, the turn "
+         "across its taps not judged",
+         cli.timeout_failures(kept, 390) == [], "%s" % cli.timeout_failures(kept, 390))
+    late = dict(kept, back_frames=390)
+    c.ok("replay.py capture: a sequence that reaches the replay's timeout fails",
+         [f.split(":")[0] for f in cli.timeout_failures(late, 390)] == ["back"],
+         "%s" % cli.timeout_failures(late, 390))
+
 
 def _negative(c) -> None:
     controls = c.attempt("import tools/kits/controls.py", _kits_controls)
