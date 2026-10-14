@@ -92,6 +92,32 @@
       "depends_on": [],
       "done_on": "2026-10-13",
       "done_commit": "3d92791b"
+    },
+    {
+      "id": "CORR-KRP-008",
+      "file": "CORR-KRP-008.md",
+      "title": "Intervalos entre toques de R1 na virada não são guardados nem julgados contra os 390 quadros",
+      "origin": "KRP-TASK-07",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-009",
+      "file": "CORR-KRP-009.md",
+      "title": "kits_selftest leva 260-275 s contra TIMEOUT 300 e estoura sob carga",
+      "origin": "KRP-TASK-07",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
