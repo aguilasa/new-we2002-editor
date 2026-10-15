@@ -140,10 +140,10 @@
       "severity": "medium",
       "files": ["tools/kits/replay.py"],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-15",
+      "done_commit": "8a0ffc09"
     },
     {
       "id": "CORR-KRP-012",

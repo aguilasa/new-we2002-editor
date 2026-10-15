@@ -13,7 +13,7 @@
 | [CORR-KRP-008](/docs/tasks/kits-replay/CORR-KRP-008.md) | Intervalos entre toques de R1 na virada não são guardados nem julgados contra os 390 quadros | KRP-TASK-07 | low | done | 2026-10-14 |
 | [CORR-KRP-009](/docs/tasks/kits-replay/CORR-KRP-009.md) | kits_selftest leva 260-275 s contra TIMEOUT 300 e estoura sob carga | KRP-TASK-07 | low | done | 2026-10-14 |
 | [CORR-KRP-010](/docs/tasks/kits-replay/CORR-KRP-010.md) | confront --tab só guarda game_side; a escolha de buffer em game_pixels não tem asserção nem controle | KRP-TASK-06 | medium | done | 2026-10-15 |
-| [CORR-KRP-011](/docs/tasks/kits-replay/CORR-KRP-011.md) | confront --tab não passa --kit-set ao app.py e o JSON declara um set que a aba não desenhou | KRP-TASK-06 | medium | in-progress | — |
+| [CORR-KRP-011](/docs/tasks/kits-replay/CORR-KRP-011.md) | confront --tab não passa --kit-set ao app.py e o JSON declara um set que a aba não desenhou | KRP-TASK-06 | medium | done | 2026-10-15 |
 | [CORR-KRP-012](/docs/tasks/kits-replay/CORR-KRP-012.md) | Log da KRP-TASK-06 traz resumo feito à mão e placeholder replay-<f> em vez da saída do confront --tab | KRP-TASK-06 | medium | pending | — |
 | [CORR-KRP-013](/docs/tasks/kits-replay/CORR-KRP-013.md) | confront_tab fixa work/venv-looks/bin/python em vez de reusar confront.VENV_PYTHON | KRP-TASK-06 | low | pending | — |
 | [CORR-KRP-014](/docs/tasks/kits-replay/CORR-KRP-014.md) | KITS-REPLAYS-9-10.md item 5 ainda diz que a frente nunca foi comparada | KRP-TASK-06 | low | in-progress | — |

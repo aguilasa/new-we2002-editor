@@ -81,3 +81,7 @@ $ grep -n -A3 -- '"--kit-set"' tools/kits/replay.py
 
 O `confront --tab` não foi rodado aqui: ele sobe o `app.py` no `:98`. Nas cinco capturas da task o
 `set` é 1 ou `None`, então os números do Log da KRP-TASK-06 não mudam.
+- **Closed** — commit `8a0ffc09` (2026-10-15): fix(kits): confront --tab passes the measured --kit-set to app.py
+  - Files (`git show --name-status 8a0ffc09`):
+    - `M docs/tasks/kits-replay/CORR-KRP-011.md`
+    - `M tools/kits/replay.py`
