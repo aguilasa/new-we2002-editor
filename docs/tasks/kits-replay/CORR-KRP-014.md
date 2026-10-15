@@ -68,3 +68,7 @@ KRP-TASK-06, … não era comparada", com a mesma nota e o mesmo link.
 A nota repassada da CORR-KRP-008 (linha ~46, "o giro nunca alcança o timeout" justificado por
 média) não se aplica ao texto atual: a linha 46 diz só que cada toque reinicia a contagem, sem
 média, e o item 9 fala do último toque de cada foco. Ficou como estava.
+- **Closed** — commit `52ac902e` (2026-10-15): docs(kits): point the replay report at confront --tab for same-side numbers
+  - Files (`git show --name-status 52ac902e`):
+    - `M docs/KITS-REPLAYS-9-10.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-014.md`
