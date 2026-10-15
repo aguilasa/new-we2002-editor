@@ -85,3 +85,7 @@ work/kits-oracle/replay-10-2.json, on_axis: outfield 2, head 46, sleeves long, a
 ```
 
 Campo a campo iguais. O "its back shows" do oracle é texto fixo; o `from the … capture` do `figure` diz de qual captura o painel saiu (atrás de um jogador a primeira captura é as costas, que o `replay.py` chama `front` por ser a primeira — `game_side`).
+- **Closed** — commit `9998ece1` (2026-10-15): docs(kits): close phase 2 of kits-replay with the gates rerun at HEAD
+  - Files (`git show --name-status 9998ece1`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/08-fechamento-da-fase-2.md`
