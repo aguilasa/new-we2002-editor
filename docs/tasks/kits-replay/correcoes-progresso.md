@@ -17,5 +17,5 @@
 | [CORR-KRP-012](/docs/tasks/kits-replay/CORR-KRP-012.md) | Log da KRP-TASK-06 traz resumo feito à mão e placeholder replay-<f> em vez da saída do confront --tab | KRP-TASK-06 | medium | done | 2026-10-15 |
 | [CORR-KRP-013](/docs/tasks/kits-replay/CORR-KRP-013.md) | confront_tab fixa work/venv-looks/bin/python em vez de reusar confront.VENV_PYTHON | KRP-TASK-06 | low | done | 2026-10-15 |
 | [CORR-KRP-014](/docs/tasks/kits-replay/CORR-KRP-014.md) | KITS-REPLAYS-9-10.md item 5 ainda diz que a frente nunca foi comparada | KRP-TASK-06 | low | done | 2026-10-15 |
-| [CORR-KRP-015](/docs/tasks/kits-replay/CORR-KRP-015.md) | PLAN-KITS-REPLAY.md:60 aponta para âncora que não existe no KITS-REPLAYS-9-10.md | CORR-KRP-012 | low | pending | — |
+| [CORR-KRP-015](/docs/tasks/kits-replay/CORR-KRP-015.md) | PLAN-KITS-REPLAY.md:60 aponta para âncora que não existe no KITS-REPLAYS-9-10.md | CORR-KRP-012 | low | done | 2026-10-15 |
 <!-- rite:end -->

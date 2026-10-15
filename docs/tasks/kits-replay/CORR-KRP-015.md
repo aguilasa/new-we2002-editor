@@ -82,3 +82,7 @@ check: 0 error(s), 1 warning(s) in 2 cycle(s)
 O aviso que sobra é do PES2-TASK-16, anterior e alheio. A Evidência e a Verificação acima chamavam o
 CLI pelo caminho da versão instalada, o que o `rite check` acusava como aviso neste arquivo; passaram
 a usar `$RITE_HOME`, que o `reproduce` define. O comando é o mesmo.
+- **Closed** — commit `c50b1a39` (2026-10-15): docs(kits): fix the plan's anchor to the ANIME.BIN heading of the replay report
+  - Files (`git show --name-status c50b1a39`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-015.md`

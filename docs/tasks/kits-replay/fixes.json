@@ -192,10 +192,10 @@
       "severity": "low",
       "files": ["docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-15",
+      "done_commit": "c50b1a39"
     }
   ]
 }
