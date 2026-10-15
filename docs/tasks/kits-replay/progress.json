@@ -113,10 +113,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#2.4",
       "files": ["tools/kits/replay.py", "tools/kits/confront.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
       "resources": ["tela", "emulador", "save-states"],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-15",
+      "done_commit": "91f81ee2",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

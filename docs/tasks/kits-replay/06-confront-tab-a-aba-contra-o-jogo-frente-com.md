@@ -116,3 +116,14 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE
 $ python3 tools/kits/controls.py
 controls: 69 of 69 red
 ```
+- **Closed** — commit `91f81ee2` (2026-10-15): feat(kits): confront --tab, the tab against the game side by side
+  - Files (`git show --name-status 91f81ee2`):
+    - `M docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md`
+    - `M docs/tasks/kits-replay/progress.json`
+    - `M docs/tasks/kits-replay/progresso.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/replay.py`
+    - `M tools/kits/selftest.py`
+  - **Outside declared files** (`tools/kits/replay.py`, `tools/kits/confront.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
+    - `docs/tasks/kits-replay/progress.json`
+    - `docs/tasks/kits-replay/progresso.md`
