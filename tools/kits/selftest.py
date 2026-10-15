@@ -1605,6 +1605,14 @@ def _replay_reader_checks(c, cli, replay) -> None:
     """replay.py (CORR-KRP-004): `figure`, `figures`, `walk` and `panel` each
     print the kits-replay/1 schema and their fixed keys, and the panel behind
     a player is read off the first capture's torso, as the gate reads it."""
+    # confront --tab (KRP-TASK-06): front with front and back with back.  The
+    # replay as saved faces the goalkeeper (its first capture is his front);
+    # behind a player the first capture is his back (CORR-K3D-034).
+    pairs = {(focus, side): cli.game_side(side, focus) for focus in (0, 3)
+             for side in cli.TAB_SIDES}
+    c.ok("confront --tab compares the tab's front with the game's front, back with back",
+         pairs == {(0, "front"): "front", (0, "back"): "back",
+                   (3, "front"): "back", (3, "back"): "front"}, "%s" % pairs)
     import contextlib
     import json as _json
     import tempfile as _tempfile

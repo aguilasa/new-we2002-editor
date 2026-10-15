@@ -16,6 +16,7 @@ Usage:
     python tools/kits/replay.py walk <replay-field-*-capture.json> [--json]
     python tools/kits/replay.py show <capture.json> --png out.png [--section S | --box]
     python tools/kits/replay.py confront <capture.json> [--section S] [--json]
+    python tools/kits/replay.py confront <capture.json> --tab [--out DIR] [--json]
     python tools/kits/replay.py capture --slot S [--focus K] [--turn R1|L1] [--walk L2|R2]
                                         [--out DIR] [--cue CUE]   # boots the emulator
     python tools/kits/replay.py check [<folder>]        # the kits_replay gate
@@ -326,6 +327,127 @@ def confront_report(capture, index, section: int = None) -> dict:
             "figure": figure_doc(figure), "section": section, "sections": rows}
 
 
+# -- the tab against the game: confront --tab --------------------------------
+
+TAB_SIDES = ("front", "back")
+"""The two views `confront --tab` compares, each against the same view of
+the game."""
+
+
+def game_side(side: str, focus: int) -> str:
+    """The capture of a close capture ("front": the first, "back": the turned
+    one) that holds the game's *side* ("front" or "back") of its figure.  The
+    replay as saved faces the goalkeeper, so its first capture is his front;
+    behind a player (*focus*) the first capture is his back, and his front is
+    the turned one (PLAN-KITS-REPLAY section 2.4, CORR-K3D-034)."""
+    if not focus:
+        return side
+    return "back" if side == "front" else "front"
+
+
+def _kits_confront():
+    """tools/kits/confront.py, by path (the looks one has the same name)."""
+    import importlib.util
+
+    if "kits_confront" not in sys.modules:
+        spec = importlib.util.spec_from_file_location("kits_confront",
+                                                      os.path.join(KITS_DIR, "confront.py"))
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+    return sys.modules["kits_confront"]
+
+
+def game_pixels(capture, index, which: str, on_axis: bool):
+    """The game's pixels (eight bits a channel) under the quads of the
+    followed figure of capture *which*, read off its frame buffer; None when
+    the capture kept no frame buffer for it."""
+    buffer = capture.data.get("buffer" if which == "front" else "back_buffer")
+    frames = capture.frames(which)
+    figure = frames[-1].focus(0, on_axis) if frames else None
+    if buffer is None or figure is None:
+        return None
+    group, _fit = figure.group(index)
+    owners = set()
+    for one in group or []:
+        for px, py, _u, _v, _c in replay.sample_pixels(one):
+            owners.add((px, py))
+    x0, y0 = buffer["origin"]
+    rows = buffer["rows"]
+    return [tuple(v << 3 for v in rows[py - y0][px - x0][:3]) for (px, py) in sorted(owners)
+            if 0 <= py - y0 < len(rows) and 0 <= px - x0 < len(rows[0])]
+
+
+def tab_args(capture, index) -> dict:
+    """What the tab is asked to draw for the capture's figure: the kit (the
+    one whose player palette the figure samples, behind a player), figure 0
+    or 1, the armband, the long sleeves and the number of the measured
+    expectation (`oracle.REPLAY_EXPECT`)."""
+    O = _kits_oracle()
+    frames, figure = followed(capture, "front", bool(capture.focus), 0)
+    tag, kit_set = capture.data.get("tag"), capture.data.get("set")
+    if capture.focus and figure is not None:
+        group, _fit = figure.group(index)
+        cluts = {tuple(one["clut"]) for one in group or []
+                 if replay.kit_image_of(one) == "uniform"}
+        tag, kit_set = replay.figure_tag(capture.data.get("hits"), cluts)
+    tag = "41" if tag is None else tag
+    keeper = figure is not None and figure.root in (13, 56)
+    expect = O.REPLAY_EXPECT.get((capture.slot, capture.focus), {})
+    return {"tag": tag, "set": kit_set, "figure": 1 if keeper else 0,
+            "armband": expect.get("armband", replay.KEEPER_ARMBAND) is not None,
+            "long_sleeves": not keeper and capture.slot in O.REPLAY_LONG_SLOTS,
+            "number": expect.get("number")}
+
+
+def confront_tab(capture, index, out_dir: str) -> dict:
+    """The tab's figure against the game's, front with front and back with
+    back (`game_side`), by colour histogram: the intersection over all the
+    game's colours and over the colours the tab draws.  It records; it asserts
+    no limit."""
+    import subprocess
+
+    O = _kits_oracle()
+    confront = _kits_confront()
+    image = os.environ[IMAGE_VARIABLE]
+    asked = tab_args(capture, index)
+    python = os.path.join("work", "venv-looks", "bin", "python")
+    if not os.path.isfile(python):
+        raise SystemExit("replay.py: no venv python at %s (make looks-venv)" % python)
+    os.makedirs(out_dir, exist_ok=True)
+    stem = os.path.splitext(os.path.basename(capture.path))[0]
+    sides = {}
+    for side in TAB_SIDES:
+        which = game_side(side, capture.focus)
+        shown = game_pixels(capture, index, which, bool(capture.focus))
+        out = os.path.join(out_dir, "%s-tab-%s.png" % (stem, side))
+        args = [python, confront.APP, image, "--tag", asked["tag"], "--tab", "3d",
+                "--figure", str(asked["figure"]), "--yaw", "%g" % O.REPLAY_TAB[side],
+                "--export-3d", out]
+        args += ["--armband"] if asked["armband"] else []
+        args += ["--long-sleeves"] if asked["long_sleeves"] else []
+        args += ["--number", str(asked["number"])] if asked["number"] is not None else []
+        if shown is None:
+            sides[side] = {"game_capture": which, "game_pixels": 0, "intersection": None,
+                           "intersection_tab_colours": None, "tab_png": None,
+                           "yaw": O.REPLAY_TAB[side]}
+            continue
+        done = subprocess.run(args, env=confront.environment(), capture_output=True,
+                              text=True, timeout=confront.TIMEOUT)
+        if done.returncode or not os.path.isfile(out):
+            raise SystemExit("replay.py: app.py exited %s: %s"
+                             % (done.returncode, done.stderr[-300:]))
+        game = confront.histogram(shown)
+        ours = confront.histogram(confront.figure_pixels(confront.read_rgb(out)))
+        sides[side] = {"game_capture": which, "game_pixels": len(shown),
+                       "intersection": confront.intersection(game, ours),
+                       "intersection_tab_colours": confront.intersection(
+                           confront.restrict(game, set(ours)), ours),
+                       "tab_png": out, "yaw": O.REPLAY_TAB[side]}
+    return {"schema": SCHEMA, "capture": _capture_doc(capture), "tab": asked,
+            "sides": sides}
+
+
 # -- the capture (the only reader that boots the emulator) -------------------
 
 DRIVE_VARIABLE = "WE2002_LOOKS_DRIVE_IMAGE"
@@ -350,6 +472,26 @@ def replay_arrive(game, slot: int, focus: int, label: str) -> int:
     if focus:
         game.step(O.REPLAY_FIELD_SETTLE)
     return tapped
+
+
+def frame_buffer(game, capture: dict, fit):
+    """The frame buffer under a followed figure's screen box *fit* (from
+    `figure_group`) of *capture*, read off VRAM at five bits a channel:
+    {"origin", "offset", "rows"}; None without a figure or a drawing offset.
+    The drawing offset rides in the one-node list submitted before each
+    ordering table, not in the table the figure is in: the last one set."""
+    import oracle as looks_oracle  # tools/looks
+
+    offsets = [capture["offsets"].get("%d" % e["head"]) for e in capture["events"]
+               if e["kind"] == "submit"]
+    offset = next((o for o in reversed(offsets) if o is not None), None)
+    if fit is None or offset is None:
+        return None
+    box = tuple(int(round(v)) for v in fit["box"])
+    rows = looks_oracle.vram_region(game, offset[0] + box[0], offset[1] + box[1],
+                                    box[2] - box[0] + 1, box[3] - box[1] + 1)
+    return {"origin": box[:2], "offset": offset,
+            "rows": [[looks_oracle._five_bits(p) for p in row] for row in rows]}
 
 
 def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
@@ -381,18 +523,9 @@ def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
     head = frames[-1]["head"] if frames else None
     samples = front["lists"].get("%d" % head, []) if head is not None else []
     figure, fit = O.figure_group(frames[-1]["focus"] if frames else None, samples, index)
-    buffer, texture = None, {"pages": {}, "cluts": {}}
-    # the drawing offset rides in the one-node list submitted before each
-    # ordering table, not in the table the figure is in: the last one set
-    offsets = [front["offsets"].get("%d" % e["head"]) for e in front["events"]
-               if e["kind"] == "submit"]
-    offset = next((o for o in reversed(offsets) if o is not None), None)
-    if figure and offset is not None:
-        box = tuple(int(round(v)) for v in fit["box"])
-        rows = looks_oracle.vram_region(game, offset[0] + box[0], offset[1] + box[1],
-                                        box[2] - box[0] + 1, box[3] - box[1] + 1)
-        buffer = {"origin": box[:2], "offset": offset,
-                  "rows": [[looks_oracle._five_bits(p) for p in row] for row in rows]}
+    texture = {"pages": {}, "cluts": {}}
+    buffer = frame_buffer(game, front, fit if figure else None)
+    if buffer is not None:
         for page in sorted({tuple(one["page"]) for one in figure if one["bits"] == O.KIT_BITS}):
             rows = looks_oracle.vram_region(game, page[0], page[1], O.TEXTURE_HALFWORDS, 256)
             texture["pages"]["%d,%d,%d" % (page + (O.KIT_BITS,))] = [
@@ -408,7 +541,8 @@ def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
         return {"focus": focus, "front": front, "back": None, "front_frames": front_frames,
                 "back_frames": None, "turn_frames": None, "rotate": None, "yaws": [],
                 "depths": [], "turned": NOT_TURNED, "hits": hits, "tag": tag, "set": kit_set,
-                "page_x": page_x, "pages": pages, "buffer": buffer, "texture": texture}
+                "page_x": page_x, "pages": pages, "buffer": buffer, "back_buffer": None,
+                "texture": texture}
     start = replay_arrive(game, slot, focus, label + "-turn")
     yaws, depths, gaps, turned, tapped = [], [], [], None, start
     root = frames[-1]["focus"][1]["section"] if frames and frames[-1]["focus"] else None
@@ -454,18 +588,21 @@ def replay_capture(game, maps, bodies: dict, index, slot: int, rotate: str,
     back = O.pose_capture(game, maps, submits) if turned == "back" else None
     turn_frames = O.frame_now(game) - start
     back_frames = O.frame_now(game) - tapped
-    back_samples = []
+    back_samples, back_buffer = [], None
     if back is not None:
         back_frames_list = O.replay_frames(back, choose=choose)
         if back_frames_list:
             back_samples = back["lists"].get("%d" % back_frames_list[-1]["head"], [])
+            back_figure, back_fit = O.figure_group(back_frames_list[-1]["focus"], back_samples,
+                                                   index)
+            back_buffer = frame_buffer(game, back, back_fit if back_figure else None)
         for x in sorted({one["page"][0] for one in back_samples if O.is_figure(one)}):
             pages.setdefault("%d" % x, O._edit_page(game, x))
     game.capture(label + "-back")
     return {"focus": focus, "front": front, "back": back, "front_frames": front_frames,
             "back_frames": back_frames, "turn_frames": turn_frames, "tap_gaps": gaps, "rotate": rotate, "yaws": yaws, "depths": depths, "turned": turned,
             "hits": hits, "tag": tag, "set": kit_set, "page_x": page_x, "pages": pages,
-            "buffer": buffer, "texture": texture}
+            "buffer": buffer, "back_buffer": back_buffer, "texture": texture}
 
 
 def replay_field_capture(game, maps, slot: int, button: str = None) -> dict:
@@ -704,6 +841,8 @@ def main(argv=None) -> int:
     confront = sub.add_parser("confront")
     confront.add_argument("capture")
     confront.add_argument("--section", type=int)
+    confront.add_argument("--tab", action="store_true")
+    confront.add_argument("--out", default=os.path.join("work", "kits-replay", "tab"))
     confront.add_argument("--json", action="store_true")
     take = sub.add_parser("capture")
     take.add_argument("--slot", type=int, required=True)
@@ -773,6 +912,21 @@ def main(argv=None) -> int:
         else:
             print("%s: %dx%d, the game's frame left, the captured pose drawn right "
                   "(%d px drawn)" % (args.png, doc["width"], doc["height"], doc["drawn"]))
+        return 0
+    if args.command == "confront" and args.tab:
+        doc = confront_tab(capture, _index(), args.out)
+        if args.json:
+            print(json.dumps(doc, indent=1, sort_keys=True))
+        else:
+            for side in TAB_SIDES:
+                one = doc["sides"][side]
+                print("  tab %s (yaw %g) against the game's %s capture: %s px, histogram "
+                      "intersection %s, %s over the colours the tab draws" % (
+                          side, one["yaw"], one["game_capture"], one["game_pixels"],
+                          "%.3f" % one["intersection"] if one["intersection"] is not None
+                          else "-",
+                          "%.3f" % one["intersection_tab_colours"]
+                          if one["intersection_tab_colours"] is not None else "-"))
         return 0
     if args.command == "confront":
         doc = confront_report(capture, _index(), args.section)

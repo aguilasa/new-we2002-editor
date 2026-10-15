@@ -618,6 +618,14 @@ CONTROLS = (
         "frames is the gap between two taps; left unjudged, the turn's claim rests on an "
         "average (CORR-KRP-008, PLAN-KITS-REPLAY section 2.5)",
     ),
+    Control(
+        "replay-tab-sides-crossed", "kits/replay.py", "game_side",
+        '    return "back" if side == "front" else "front"\n',
+        "    return side\n",
+        "FAIL  confront --tab compares the tab's front with the game's front, back with back",
+        "behind a player the first capture is his back: taking it as his front compares the "
+        "tab's front with the game's back, the gap CORR-K3D-034 left (KRP-TASK-06)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 
