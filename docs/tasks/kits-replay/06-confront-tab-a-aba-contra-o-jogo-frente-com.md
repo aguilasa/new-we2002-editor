@@ -65,17 +65,27 @@ $ python3 tools/kits/replay.py capture --slot 10 --focus 2 --turn R1 --out work/
 
 As cinco saem 0 (logs em `work/krp06/`, de 11:39 a 12:03).
 
-O confronto, cada uma com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`:
+O confronto das cinco, no modo sem `--json` (o `--out` é o default, `work/kits-replay/tab/`):
 
 ```
-$ python3 tools/kits/replay.py confront work/kits-replay/tab/replay-<f>.json --tab --json
-(schema; tab: tag, figura, faixa, manga longa, número | lado da aba <- captura do jogo, px, interseção / sobre as cores da aba)
-9-R1 kits-replay/1 tag 41 fig 1 armband True long False num 1 | back<-back 7381 px 0.403/0.720 front<-front 4440 px 0.501/0.670
-10-R1 kits-replay/1 tag 41 fig 1 armband True long False num 1 | back<-back 4642 px 0.557/0.739 front<-front 4746 px 0.499/0.677
-9-3-R1 kits-replay/1 tag 22 fig 0 armband True long False num 11 | back<-front 3520 px 0.406/0.666 front<-back 3200 px 0.439/0.612
-10-3-R1 kits-replay/1 tag 22 fig 0 armband True long True num 11 | back<-front 3117 px 0.413/0.625 front<-back 3538 px 0.362/0.556
-10-2-R1 kits-replay/1 tag 22 fig 0 armband False long True num 20 | back<-front 2777 px 0.393/0.569 front<-back 3401 px 0.326/0.476
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/replay-9-R1.json --tab
+  tab front (yaw 180) against the game's front capture: 4440 px, histogram intersection 0.501, 0.670 over the colours the tab draws
+  tab back (yaw 0) against the game's back capture: 7381 px, histogram intersection 0.403, 0.720 over the colours the tab draws
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/replay-9-3-R1.json --tab
+  tab front (yaw 180) against the game's back capture: 3200 px, histogram intersection 0.439, 0.612 over the colours the tab draws
+  tab back (yaw 0) against the game's front capture: 3520 px, histogram intersection 0.406, 0.666 over the colours the tab draws
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/replay-10-R1.json --tab
+  tab front (yaw 180) against the game's front capture: 4746 px, histogram intersection 0.499, 0.677 over the colours the tab draws
+  tab back (yaw 0) against the game's back capture: 4642 px, histogram intersection 0.557, 0.739 over the colours the tab draws
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/replay-10-3-R1.json --tab
+  tab front (yaw 180) against the game's back capture: 3538 px, histogram intersection 0.362, 0.556 over the colours the tab draws
+  tab back (yaw 0) against the game's front capture: 3117 px, histogram intersection 0.413, 0.625 over the colours the tab draws
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/replay-10-2-R1.json --tab
+  tab front (yaw 180) against the game's back capture: 3401 px, histogram intersection 0.326, 0.476 over the colours the tab draws
+  tab back (yaw 0) against the game's front capture: 2777 px, histogram intersection 0.393, 0.569 over the colours the tab draws
 ```
+
+Bloco refeito em 2026-10-15 pela CORR-KRP-012 na HEAD `0a120f9a`, depois das CORR-KRP-011 e CORR-KRP-013: os trinta números (px e as duas interseções, nos dois lados das cinco figuras) são os mesmos do resumo à mão que estava aqui.
 
 Ao lado do [item 5](/docs/KITS-REPLAYS-9-10.md#5), que comparava as duas vistas da aba com **um**
 lado do jogo:

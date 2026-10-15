@@ -51,3 +51,44 @@ grep -c 'replay-<f>' docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-
 Hoje dá 1. Depois do conserto tem de dar 0.
 
 ## Log de Execução
+
+Reproduzido na HEAD `0a120f9a` (2026-10-15):
+
+```text
+$ grep -c 'replay-<f>' docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md
+1
+```
+
+O bloco de confronto do Log da KRP-TASK-06 virou cinco linhas `$` completas, uma por captura de
+`work/kits-replay/tab/`, cada uma com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin`
+na própria linha, seguidas da saída literal do modo sem `--json`, recapturada agora. O `--out` ficou no
+default (`work/kits-replay/tab/`), o mesmo da corrida original; as cinco saem 0. A frase que trazia
+as flags na prosa passou a só apresentar o bloco, e uma linha datada no Log da task diz que ele foi
+refeito por esta correção.
+
+Antigo contra novo, depois das CORR-KRP-011 (`--kit-set`) e CORR-KRP-013 (caminho do venv), que
+mexeram no `confront_tab` depois do fechamento da task:
+
+| Captura | Lado da aba <- jogo | Resumo à mão | Saída na HEAD |
+|---|---|---|---|
+| 9-R1 | back <- back | 7381 px 0.403/0.720 | 7381 px 0.403, 0.720 |
+| 9-R1 | front <- front | 4440 px 0.501/0.670 | 4440 px 0.501, 0.670 |
+| 10-R1 | back <- back | 4642 px 0.557/0.739 | 4642 px 0.557, 0.739 |
+| 10-R1 | front <- front | 4746 px 0.499/0.677 | 4746 px 0.499, 0.677 |
+| 9-3-R1 | back <- front | 3520 px 0.406/0.666 | 3520 px 0.406, 0.666 |
+| 9-3-R1 | front <- back | 3200 px 0.439/0.612 | 3200 px 0.439, 0.612 |
+| 10-3-R1 | back <- front | 3117 px 0.413/0.625 | 3117 px 0.413, 0.625 |
+| 10-3-R1 | front <- back | 3538 px 0.362/0.556 | 3538 px 0.362, 0.556 |
+| 10-2-R1 | back <- front | 2777 px 0.393/0.569 | 2777 px 0.393, 0.569 |
+| 10-2-R1 | front <- back | 3401 px 0.326/0.476 | 3401 px 0.326, 0.476 |
+
+Nenhum número mudou; a tabela da task contra o item 5 continua valendo sem edição. O que o resumo à
+mão trazia e o modo sem `--json` não imprime — tag, figura, faixa, manga longa e número de cada aba —
+saiu do Log junto com ele; continua no documento do `--json` de cada corrida.
+
+Verificação, depois da edição:
+
+```text
+$ grep -c 'replay-<f>' docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md
+0
+```
