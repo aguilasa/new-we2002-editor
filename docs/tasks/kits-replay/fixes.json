@@ -166,10 +166,10 @@
       "severity": "low",
       "files": ["tools/kits/replay.py"],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-15",
+      "done_commit": "40d610c2"
     },
     {
       "id": "CORR-KRP-014",

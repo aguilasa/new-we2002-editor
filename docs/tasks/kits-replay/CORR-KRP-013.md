@@ -66,3 +66,7 @@ $ grep -n 'VENV_PYTHON' tools/kits/replay.py
 O caminho `confront --tab` inteiro, no Linux, é exercitado pela corrida da
 [CORR-KRP-012](/docs/tasks/kits-replay/CORR-KRP-012.md), feita sobre este commit. O caminho do
 Windows não foi rodado: não há Windows nesta máquina.
+- **Closed** — commit `40d610c2` (2026-10-15): fix(kits): confront --tab finds the venv python through confront.VENV_PYTHON
+  - Files (`git show --name-status 40d610c2`):
+    - `M docs/tasks/kits-replay/CORR-KRP-013.md`
+    - `M tools/kits/replay.py`
