@@ -129,7 +129,8 @@ capturas existentes.
 ### 2.3 A linha de comando de leitura: `tools/kits/replay.py`
 
 Subcomandos, na convenção do `tools/kits/cli.py`, todos sem emulador: `figures`, `figure
-[--on-axis|--nearest|--nth N] [--section S]`, `panel`, `walk`, `describe`. **`--json` em todo
+[--on-axis|--nearest|--nth N] [--section S]`, `panel`, `walk`, `describe` e, desde a
+[§3.1](#3.1), `head [--player all|N]`. **`--json` em todo
 leitor**, com `"schema": "kits-replay/1"` e chaves fixas — é o contrato com o agente; saída humana
 curta por padrão.
 
@@ -203,6 +204,36 @@ cabelo e barba da captura, e com `--player` confronta com o registro de 12 bytes
 (time e número pelo painel, [item 7](/docs/KITS-REPLAYS-9-10.md#7)) faz parte da medição.
 
 Resultado negativo é resultado: se a regra não fechar, a §3.2 desenha só o que fechou.
+
+**Medido** ([KRP-TASK-09](/docs/tasks/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md)):
+a regra **fecha nos 22 dos dois laços**, e nas três capturas de perto.
+`replay.py head <captura> --player all` dá `22 of 22 distinct player(s) match their disc record` em
+`replay-field-9-capture.json` e em `-10-`. O jogador se acha pela página e pelo número do painel:
+página 576 é o Brasil (time 41) e 640 a Croácia (22), `HEAD_TEAMS`. O número de camisa sai de
+`OFS_SQUAD_NUMBERS_NATIONAL` (cinco bits por vaga, gravado menos um), e o registro é o
+`time * 23 + vaga` do `/SELECT.BIN`. O foco 0 não mostra painel: é o goleiro em que o replay abre,
+e o painel dele é o da captura de perto do mesmo slot, (576, 100, 104) número 1.
+
+O que a medição fixa:
+
+- **seção = estilo**: a seção desenhada é a do `assembly.HAIR_MAP` para o `hair_style` do
+  registro. Barba F ou G troca pela gêmea do `FACE_TWINS`: a 47 do número 8 da Croácia é
+  `A-L3-H-F-C`. Aparecem seis seções: 24 (A), 28 (G), 32 (K), 34 (I), 46 (L) e 47 (L gêmea);
+- **linha da CLUT = pele**, `480 + skin_colour`: aparecem as peles A, C e D (Brasil 10, 2, 6, 16,
+  7, 3 em 482; 11 e 4 em 483);
+- **coluna = cabelo ou barba**: a coluna `1 + hair_colour` está em toda cabeça. A coluna
+  `9 + beard_colour` só aparece quando a vista mostra a barba. Nos dois slots aparece no Marcos e
+  no 8 da Croácia; só no slot 10, no 20 e no 7 da Croácia e no 11, no 6, no 7 e no 5 do Brasil.
+  Por isso a barba só se julga quando aparece;
+- **a cabeça se lê dentro do box da própria peça** (`core/replay.py head_samples`): o box da figura
+  inteira pega a cabeça de um vizinho. No slot 10 isso daria (16,482) no 4 da Croácia e (32,480) no
+  10 do Brasil.
+
+O esperado por jogador é a constante `HEAD_EXPECT` do `replay.py` (K1), e o `kits_replay` confere
+duas coisas: que o disco ainda a diz, e que cada cabeça seguida a lê. A planta
+`replay.py check --plant-hair-column`, que move toda CLUT uma coluna, derruba o gate com dado real
+(saída no Log da task).
+Dois slots medidos dizem "nos dois", não "sempre".
 
 ### 3.2 Desenhar
 

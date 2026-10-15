@@ -635,6 +635,32 @@ CONTROLS = (
         "for both sides compares the tab's back with the game's front, in silence "
         "(CORR-KRP-010)",
     ),
+    Control(
+        "replay-head-hair-column", "kits/core/replay.py", "head_reading",
+        "            hairs.add(column - layout.HAIR_COLUMN)\n",
+        "            hairs.add(column - layout.HAIR_COLUMN + 1)\n",
+        "FAIL  replay.py head: the CLUT column 1 + n reads hair colour n",
+        "a hair colour read one column off still names a letter, and every head of the walk "
+        "would carry the next player's colour without a stray CLUT to show it "
+        "(KRP-TASK-09, PLAN-KITS-REPLAY section 3.1)",
+    ),
+    Control(
+        "replay-head-twin-unasked", "kits/core/replay.py", "head_expected",
+        '    if values["beard_style"] >= assembly.FACE_TWIN_FROM:\n',
+        '    if values["beard_style"] > assembly.FACE_TWIN_FROM:\n',
+        "FAIL  replay.py head: head_expected draws the twin for beard F",
+        "beard F draws the twin (47 for 46) as G does (`assembly.FACE_TWINS`); an off-by-one "
+        "there sends Croatia's 8 to the plain head (KRP-TASK-09)",
+    ),
+    Control(
+        "replay-head-squad-unbiased", "kits/replay.py", "squad_numbers",
+        "             & ((1 << SQUAD_BITS) - 1)) + 1 for s in range(SQUAD_SIZE)]\n",
+        "             & ((1 << SQUAD_BITS) - 1)) for s in range(SQUAD_SIZE)]\n",
+        "FAIL  replay.py head: shirt numbers unpack five bits per slot, stored minus one",
+        "the disc stores each shirt number minus one (`TeamView.cpp`); read raw, every panel "
+        "names the player one slot over, and his head is judged against another's record "
+        "(KRP-TASK-09)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

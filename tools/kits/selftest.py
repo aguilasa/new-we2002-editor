@@ -1558,6 +1558,70 @@ def _replay_checks(c) -> None:
                                     "front_frames", "back_frames", "turn_frames", "foci")),
          "%s" % sorted(doc))
     _replay_reader_checks(c, cli, replay)
+    _replay_head_checks(c, cli, replay)
+
+
+def _replay_head_checks(c, cli, replay) -> None:
+    """replay.py head (KRP-TASK-09): the CLUTs of a head read by the LOOKS SET
+    rule, the record's head, the judge between them, and the shirt numbers
+    unpacked from `OFS_SQUAD_NUMBERS_NATIONAL` as `SquadNumbers` packs them."""
+    import looks
+    import ofs_map
+
+    # Balaban (Croatia 20, focus 2 of the walk): section 46, CLUT (32,480)
+    # and (160,480), KITS-REPLAYS-9-10 item (a).
+    balaban = replay.head_reading(46, [(32, 480), (160, 480)])
+    c.ok("replay.py head: the CLUT column 1 + n reads hair colour n, 9 + n beard colour n",
+         (balaban["styles"], balaban["skin"], balaban["hair"], balaban["beard"],
+          balaban["stray"]) == (["L"], ["A"], ["B"], ["B"], []), "%s" % balaban)
+    skins = replay.head_reading(34, [(16, 483)])
+    c.ok("replay.py head: the CLUT row 480 + n reads skin n",
+         (skins["skin"], skins["hair"]) == (["D"], ["A"]), "%s" % skins)
+    # Croatia 8: beard F, so the game draws 47, the twin of 46.
+    twin = replay.head_expected(looks.parse_tuple("A-L3-H-F-C"))
+    c.ok("replay.py head: head_expected draws the twin for beard F",
+         twin == {"section": 47, "skin": "A", "hair": "H", "beard": "C"}, "%s" % twin)
+    eight = replay.head_reading(47, [(128, 480), (176, 480)])
+    c.ok("replay.py head: section 47 reads as the twin of the L style",
+         eight["twin"] and eight["styles"] == ["L"], "%s" % eight)
+    c.ok("replay.py head: a head that reads its record is judged clean",
+         replay.head_judge(eight, twin) == [], "%s" % replay.head_judge(eight, twin))
+    moved = replay.head_reading(47, cli.shifted_cluts([(128, 480), (176, 480)], True))
+    c.ok("replay.py head: the hair-column plant reads another hair colour",
+         any("hair colour" in line for line in replay.head_judge(moved, twin)),
+         "%s" % replay.head_judge(moved, twin))
+    beardless = replay.head_reading(46, [(128, 480)])
+    c.ok("replay.py head: a head showing no beard column is not judged on the beard",
+         replay.head_judge(beardless, replay.head_expected(looks.parse_tuple("A-L3-H-A-A")))
+         == [], "%s" % beardless)
+    stray = replay.head_reading(46, [(32, 480), (32, 490)])
+    c.ok("replay.py head: a CLUT off the skin records is stray",
+         replay.head_judge(stray, replay.head_expected(looks.parse_tuple("A-L3-B-A-A")))
+         == ["CLUT(s) [(32, 490)] fit no skin, hair or beard column"], "%s" % stray)
+    # The shirt numbers: slot s holds s (number s + 1) in a sparse image.
+    offset = dict(ofs_map.read_offsets())["OFS_SQUAD_NUMBERS_NATIONAL"]
+    words = [0, 0, 0, 0]
+    for slot in range(cli.SQUAD_SIZE):
+        words[slot // cli.SQUAD_PER_WORD] |= slot << (cli.SQUAD_BITS
+                                                     * (slot % cli.SQUAD_PER_WORD))
+    with tempfile.TemporaryDirectory(prefix="kits-head-") as tmp:
+        image = os.path.join(tmp, "squad.bin")
+        with open(image, "wb") as fh:
+            fh.seek(offset + 3 * cli.SQUAD_NUMBERS_SIZE)
+            fh.write(b"".join(w.to_bytes(4, "little") for w in words))
+        numbers = c.attempt("replay.py head: the shirt numbers of team 3",
+                            lambda: cli.squad_numbers(image, 3))
+        found = c.attempt("replay.py head: the player wearing 11",
+                          lambda: cli.player_of(image, 3, 11))
+    c.ok("replay.py head: shirt numbers unpack five bits per slot, stored minus one",
+         numbers == list(range(1, 24)), "%s" % numbers)
+    c.ok("replay.py head: team t slot s is player record t * 23 + s",
+         found == (3 * 23 + 10, 10), "%s" % (found,))
+    teams = sorted({team for team, _n in cli.HEAD_EXPECT})
+    c.ok("replay.py head: HEAD_EXPECT holds the 22, eleven of each team of HEAD_TEAMS",
+         len(cli.HEAD_EXPECT) == cli.HEAD_PLAYERS and teams == sorted(cli.HEAD_TEAMS.values())
+         and all(sum(t == team for t, _n in cli.HEAD_EXPECT) == 11 for team in teams),
+         "%d, %s" % (len(cli.HEAD_EXPECT), teams))
 
 
 def _replay_reader_capture(replay, cell) -> tuple:

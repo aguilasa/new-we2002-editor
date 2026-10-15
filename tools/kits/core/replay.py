@@ -1207,3 +1207,111 @@ def judge_walk(rows: list, expect: dict, idle) -> list:
             out.append("focus %d: %d frame(s) from the last tap, not under the replay's idle %s"
                        % (r["k"], r["frames"], idle))
     return out
+
+
+# -- the head ----------------------------------------------------------------
+
+HEAD_CLUT_STEP = layout.HAIR_MATRIX_KIND_STEP // 2
+"""CLUT x per column of a skin record: 16 entries (32 bytes, two per entry),
+the window `skin.grid` calls a column."""
+
+HEAD_SKINS = len(layout.SKIN_PALETTES)
+"""The skin records, VRAM rows `layout.CLUT_ROW_FIRST` onwards, one per value
+of `skin_colour`."""
+
+HEAD_HAIRS = layout.HAIR_MATRIX_KINDS
+"""Columns `layout.HAIR_COLUMN` onwards: one per value of `hair_colour`."""
+
+HEAD_BEARDS = 7
+"""Columns `layout.BEARD_COLUMN` onwards: the seven values of `beard_colour`
+the LOOKS SET reaches (`layout.BEARD_COLUMN`'s docstring)."""
+
+
+def head_samples(figure, samples, index) -> list:
+    """The primitives of *figure*'s head section, of the frame's *samples*,
+    that lie inside the head piece's own screen box (`piece_box`): the box of
+    the whole figure takes in a neighbour's head (slot 10, focus 8)."""
+    if figure is None or not figure:
+        return []
+    group, _fit = figure_group(figure, samples, index)
+    box = piece_box(figure[0], index)
+    if group is None or box is None:
+        return []
+    return [one for one in section_samples(group, index, figure.head)
+            if all(box[0] <= x <= box[2] and box[1] <= y <= box[3] for x, y in one["xy"])]
+
+
+def head_styles(section: int) -> tuple:
+    """(the HAIR letters whose style draws *section*, whether it is the twin
+    beard F and G draw instead): `assembly.HAIR_MAP` and `FACE_TWINS`."""
+    import assembly  # noqa: E402  (tools/looks)
+    import looks  # noqa: E402  (tools/looks)
+    twins = {twin: base for base, twin in assembly.FACE_TWINS[assembly.HEAD_FIGURE].items()}
+    base = twins.get(section, section)
+    letters = sorted({looks.HAIR_STYLES[value][0]
+                      for value, (drawn, _bands) in enumerate(assembly.HAIR_MAP)
+                      if drawn == base})
+    return tuple(letters), section in twins
+
+
+def head_reading(section, cluts) -> dict:
+    """What a head's CLUTs say by the LOOKS SET rule (KITS-REPLAYS-9-10 item
+    (a)): the row is the skin, column `layout.HAIR_COLUMN` + n the hair colour
+    n, column `layout.BEARD_COLUMN` + n the beard colour n; and the section the
+    style (`head_styles`).  A CLUT off the skin records or in another column
+    is `stray`; two skins, two hairs or two beards are kept as read."""
+    import looks  # noqa: E402  (tools/looks)
+    skins, hairs, beards, stray = set(), set(), set(), []
+    for clut in cluts:
+        x, y = clut
+        row, column = y - layout.CLUT_ROW_FIRST, x // HEAD_CLUT_STEP
+        if x % HEAD_CLUT_STEP or not 0 <= row < HEAD_SKINS:
+            stray.append(tuple(clut))
+            continue
+        skins.add(row)
+        if layout.HAIR_COLUMN <= column < layout.HAIR_COLUMN + HEAD_HAIRS:
+            hairs.add(column - layout.HAIR_COLUMN)
+        elif layout.BEARD_COLUMN <= column < layout.BEARD_COLUMN + HEAD_BEARDS:
+            beards.add(column - layout.BEARD_COLUMN)
+        else:
+            stray.append(tuple(clut))
+    styles, twin = head_styles(section) if section is not None else ((), False)
+    letter = lambda values: [looks.LETTERS[v] for v in sorted(values)]  # noqa: E731
+    return {"section": section, "styles": list(styles), "twin": twin,
+            "cluts": sorted(tuple(c) for c in cluts), "skin": letter(skins),
+            "hair": letter(hairs), "beard": letter(beards), "stray": sorted(stray)}
+
+
+def head_expected(values: dict) -> dict:
+    """The head a player record says the game draws: the section of his HAIR
+    style (`assembly.HAIR_MAP`), its twin when his beard is F or G
+    (`FACE_TWINS`, from `FACE_TWIN_FROM`), and his skin, hair colour and beard
+    colour as letters."""
+    import assembly  # noqa: E402  (tools/looks)
+    import looks  # noqa: E402  (tools/looks)
+    section = assembly.HAIR_MAP[values["hair_style"]][0]
+    if values["beard_style"] >= assembly.FACE_TWIN_FROM:
+        section = assembly.FACE_TWINS[assembly.HEAD_FIGURE][section]
+    return {"section": section, "skin": looks.LETTERS[values["skin_colour"]],
+            "hair": looks.LETTERS[values["hair_colour"]],
+            "beard": looks.LETTERS[values["beard_colour"]]}
+
+
+def head_judge(reading: dict, expected: dict) -> list:
+    """What of *reading* the record *expected* does not say: the section, the
+    one skin, the one hair colour, and the beard colour when the head shows
+    one (a beardless view samples no beard column: Bokšić, slots 9 and 10);
+    and any stray CLUT."""
+    out = []
+    if reading["section"] != expected["section"]:
+        out.append("head section %s, not %d" % (reading["section"], expected["section"]))
+    if reading["skin"] != [expected["skin"]]:
+        out.append("skin %s, not %s" % ("/".join(reading["skin"]) or "none", expected["skin"]))
+    if reading["hair"] != [expected["hair"]]:
+        out.append("hair colour %s, not %s"
+                   % ("/".join(reading["hair"]) or "none", expected["hair"]))
+    if reading["beard"] and reading["beard"] != [expected["beard"]]:
+        out.append("beard colour %s, not %s" % ("/".join(reading["beard"]), expected["beard"]))
+    if reading["stray"]:
+        out.append("CLUT(s) %s fit no skin, hair or beard column" % reading["stray"])
+    return out

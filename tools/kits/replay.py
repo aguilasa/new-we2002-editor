@@ -14,12 +14,14 @@ Usage:
                                        [--section S] [--json]
     python tools/kits/replay.py panel <capture.json> [--on-axis | --nearest] [--nth N] [--json]
     python tools/kits/replay.py walk <replay-field-*-capture.json> [--json]
+    python tools/kits/replay.py head <capture.json> [--player all|RECORD]
+                                     [--plant-hair-column] [--json]
     python tools/kits/replay.py show <capture.json> --png out.png [--section S | --box]
     python tools/kits/replay.py confront <capture.json> [--section S] [--json]
     python tools/kits/replay.py confront <capture.json> --tab [--out DIR] [--json]
     python tools/kits/replay.py capture --slot S [--focus K] [--turn R1|L1] [--walk L2|R2]
                                         [--out DIR] [--cue CUE]   # boots the emulator
-    python tools/kits/replay.py check [<folder>]        # the kits_replay gate
+    python tools/kits/replay.py check [<folder>] [--plant-hair-column]  # the kits_replay gate
 
 The geometry comes from `WE2002_LOOKS_IMAGE`, the Japanese data track.
 `check` reads `WE2002_KITS_REPLAY_DIR` when no folder is given, and exits 77
@@ -726,6 +728,204 @@ def run_capture(slot: int, focus: int = 0, turn: str = None, walk: str = None,
 
 # -- the gate ----------------------------------------------------------------
 
+# -- head: the head of each player against his disc record ---------------------
+
+HEAD_TEAMS = {576: 41, 640: 22}
+"""Uniform page -> team index (`core/teams.py`): Brazil wears the page at x
+576 and Croatia the one at 640 in both replays (KITS-REPLAYS-9-10 item 7).
+Constant per slot, never read from the capture (K1); the 22 of 22 below are
+what confirms it, since the other way round no number lands on its player."""
+
+HEAD_EXPECT = {
+    (41, 1): "A-I1-B-A-B", (41, 2): "C-I1-A-A-A", (41, 3): "C-I1-A-A-A",
+    (41, 4): "D-I1-A-A-A", (41, 5): "A-A1-B-A-A", (41, 6): "C-K1-B-A-A",
+    (41, 7): "C-I1-A-A-B", (41, 9): "A-I1-A-A-A", (41, 10): "C-I1-A-A-A",
+    (41, 11): "D-I3-A-A-A", (41, 16): "C-I1-A-B-A",
+    (22, 1): "A-A1-B-A-A", (22, 2): "A-L3-B-A-A", (22, 3): "A-A1-B-A-A",
+    (22, 4): "A-I2-B-A-B", (22, 5): "A-G1-B-A-B", (22, 7): "A-I1-B-A-B",
+    (22, 8): "A-L3-H-F-C", (22, 10): "A-A1-B-A-A", (22, 11): "A-L3-H-A-A",
+    (22, 14): "A-A1-B-A-A", (22, 20): "A-L3-B-A-B",
+}
+"""(team, shirt number) -> the five looks the disc records for him, as the
+corpus tuple spells them (`looks.TUPLE_ORDER`): the 22 of the two replays.
+The gate judges the captured heads against these constants (K1), and checks
+that the disc still says them; `head --player all` is the measurement that
+reads the disc instead (PLAN-KITS-REPLAY section 3.1)."""
+
+HEAD_PLAYERS = 22
+"""Players on the pitch in both replays: 20 outfield and 2 goalkeepers."""
+
+SQUAD_NUMBERS_SIZE = 16
+"""Bytes of one team's shirt numbers at `OFS_SQUAD_NUMBERS_NATIONAL`: 23 of
+five bits, six to a little-endian word (`SquadNumbers` of Types.hpp)."""
+
+SQUAD_PER_WORD = 6
+SQUAD_BITS = 5
+SQUAD_SIZE = 23
+"""The `SquadNumbers` packing, and the 23 slots of a national team: player
+record `team * 23 + slot` of `/SELECT.BIN` (`Database::Load`, PLAYERS_NC on)."""
+
+RAW_SECTOR, SECTOR_HEADER, SECTOR_DATA = 2352, 24, 2048
+"""A raw MODE2 sector: where its 2048 data bytes start and how many."""
+
+
+def squad_numbers(image_path: str, team: int) -> list:
+    """The shirt numbers of national *team*'s 23 slots, as `Database::Load`
+    reads `OFS_SQUAD_NUMBERS_NATIONAL` (stored minus one) from the raw image."""
+    import ofs_map  # noqa: E402  (tools/pes2: Offsets.hpp read, never typed here)
+
+    offset = dict(ofs_map.read_offsets())["OFS_SQUAD_NUMBERS_NATIONAL"] \
+        + team * SQUAD_NUMBERS_SIZE
+    inside = offset % RAW_SECTOR
+    if not SECTOR_HEADER <= inside <= SECTOR_HEADER + SECTOR_DATA - SQUAD_NUMBERS_SIZE:
+        raise replay.ReplayError("team %d's shirt numbers cross a sector boundary" % team)
+    with open(image_path, "rb") as fh:
+        fh.seek(offset)
+        raw = fh.read(SQUAD_NUMBERS_SIZE)
+    words = [int.from_bytes(raw[i:i + 4], "little") for i in range(0, SQUAD_NUMBERS_SIZE, 4)]
+    return [((words[s // SQUAD_PER_WORD] >> (SQUAD_BITS * (s % SQUAD_PER_WORD)))
+             & ((1 << SQUAD_BITS) - 1)) + 1 for s in range(SQUAD_SIZE)]
+
+
+def disc_records(image_path: str) -> list:
+    """The 1,449 player records of `/SELECT.BIN`, decoded (`looks.decode`)."""
+    import iso  # noqa: E402  (tools/pes2)
+    import layout  # noqa: E402  (tools/looks)
+    import looks  # noqa: E402  (tools/looks)
+
+    data = iso.Image(image_path).read_file(layout.SELECT)
+    return [looks.decode(raw) for raw in looks.records(data)]
+
+
+def player_of(image_path: str, team: int, number: int):
+    """(record index, slot) of the player of *team* wearing *number*, or
+    (None, None)."""
+    numbers = squad_numbers(image_path, team)
+    if numbers.count(number) != 1:
+        return None, None
+    slot = numbers.index(number)
+    return team * SQUAD_SIZE + slot, slot
+
+
+def head_rows(capture, index) -> list:
+    """One row per figure the capture follows: its k (None up close), the
+    page and number of its back panel, and the head read off its CLUTs.  The
+    walk's focus 0 shows no panel: it is the goalkeeper the replay opens on,
+    whose panel the close capture of the same slot reads
+    (`oracle.REPLAY_EXPECT[(slot, 0)]`, K1)."""
+    rows = []
+    if capture.kind == replay.KIND_WALK:
+        walk = replay.Walk.of(capture, index)
+        foci = {f["k"]: f for f in capture.data["foci"]}
+        opening = _kits_oracle().REPLAY_EXPECT.get((capture.slot, 0), {})
+        for r in walk.rows:
+            if r.get("refused") or r.get("end") == "ball" or r.get("focus") is None:
+                continue
+            last = replay.capture_frames(foci[r["k"]]["capture"])[-1]
+            panel, number = r.get("panel"), r.get("number")
+            if panel is None and r["root"] == 13 and opening.get("panel"):
+                panel, number = opening["panel"], opening.get("number")
+            rows.append({"k": r["k"], "figure": r["focus"], "samples": last.samples,
+                         "page": panel[0] if panel else None, "number": number})
+    else:
+        on_axis = bool(capture.focus)
+        frames, figure = followed(capture, "front", on_axis, 0)
+        p = panel_of(capture, index, on_axis, 0)
+        rows.append({"k": None, "figure": figure, "samples": frames[-1].samples if frames else [],
+                     "page": p["panel"][0] if p["panel"] else None, "number": p["number"]})
+    return rows
+
+
+def shifted_cluts(cluts, plant: bool) -> list:
+    """The CLUTs as read, or with *plant* one column to the right: the plant
+    that takes every hair colour to the next (K2)."""
+    return [(x + replay.HEAD_CLUT_STEP, y) if plant else (x, y) for x, y in cluts]
+
+
+def head_report(capture, index, player=None, image_path=None, plant: bool = False) -> dict:
+    """`head`: per followed figure, its section, CLUTs and the head they read;
+    with *player* "all" the record each locates by page and number, or with a
+    record index that one record, decoded and judged; and the summary of how
+    many distinct players match."""
+    import looks  # noqa: E402  (tools/looks)
+
+    records = disc_records(image_path) if player is not None else None
+    out = []
+    for row in head_rows(capture, index):
+        samples = replay.head_samples(row["figure"], row["samples"], index)
+        cluts = shifted_cluts(sorted({tuple(one["clut"]) for one in samples}), plant)
+        reading = replay.head_reading(row["figure"].head if row["figure"] else None, cluts)
+        team = HEAD_TEAMS.get(row["page"])
+        doc = {"k": row["k"], "page": row["page"], "team": team, "number": row["number"],
+               "primitives": len(samples), "reading": reading, "record": None, "slot": None,
+               "disc": None, "expected": None, "failures": None}
+        if player is not None:
+            if player == "all":
+                record, slot = (player_of(image_path, team, row["number"])
+                                if team is not None and row["number"] is not None
+                                else (None, None))
+            else:
+                record, slot = int(player), None
+            if record is not None:
+                values = records[record]
+                expected = replay.head_expected(values)
+                doc.update(record=record, slot=slot, expected=expected,
+                           disc=looks.format_tuple({k: values[k] for k in looks.TUPLE_ORDER}),
+                           failures=replay.head_judge(reading, expected))
+            else:
+                doc["failures"] = ["no record for page %s number %s"
+                                   % (row["page"], row["number"])]
+        out.append(doc)
+    players = {}
+    for doc in out:
+        if doc["failures"] is not None:
+            key = (doc["team"], doc["number"]) if doc["record"] is not None else ("k", doc["k"])
+            players[key] = players.get(key, True) and not doc["failures"]
+    return {"schema": SCHEMA, "capture": _capture_doc(capture), "player": player,
+            "plant": plant, "rows": out, "players": len(players),
+            "match": sum(players.values()) if players else None}
+
+
+def head_constant_failures(image_path: str) -> list:
+    """Where `HEAD_EXPECT` and the disc disagree: a constant the disc no
+    longer says, or a player the disc no longer holds."""
+    import looks  # noqa: E402  (tools/looks)
+
+    records = disc_records(image_path)
+    out = []
+    for (team, number), want in sorted(HEAD_EXPECT.items()):
+        record, _slot = player_of(image_path, team, number)
+        if record is None:
+            out.append("team %d has no single player wearing %d" % (team, number))
+            continue
+        have = looks.format_tuple({k: records[record][k] for k in looks.TUPLE_ORDER})
+        if have != want:
+            out.append("team %d number %d: the disc records %s, HEAD_EXPECT says %s"
+                       % (team, number, have, want))
+    return out
+
+
+def head_gate_failures(capture, index, plant: bool = False) -> list:
+    """The gate's head judgement: every followed figure whose page and number
+    name a player of `HEAD_EXPECT` reads his head (K1)."""
+    import looks  # noqa: E402  (tools/looks)
+
+    out = []
+    for doc in head_report(capture, index, plant=plant)["rows"]:
+        want = HEAD_EXPECT.get((doc["team"], doc["number"]))
+        if want is None:
+            out.append("%s: page %s number %s is none of HEAD_EXPECT"
+                       % ("focus %s" % doc["k"] if doc["k"] is not None else "up close",
+                          doc["page"], doc["number"]))
+            continue
+        for line in replay.head_judge(doc["reading"],
+                                      replay.head_expected(looks.parse_tuple(want))):
+            out.append("%s, team %d number %d: %s"
+                       % ("focus %s" % doc["k"] if doc["k"] is not None else "up close",
+                          doc["team"], doc["number"], line))
+    return out
+
+
 def _kits_oracle():
     """tools/kits/oracle.py, by path: `import oracle` finds the looks one,
     which `core.tex` put first on sys.path.  Loaded once; when the oracle is
@@ -742,7 +942,7 @@ def _kits_oracle():
     return module
 
 
-def check(folder: str, verbose: bool = True) -> int:
+def check(folder: str, verbose: bool = True, plant_head: bool = False) -> int:
     """`kits_replay`: every capture of `CAPTURES` in *folder* holds its digest,
     and the readers' answer on it holds the oracle's judges against the
     measured expectations (`REPLAY_EXPECT`, `REPLAY_FIELD_EXPECT`).  Returns
@@ -750,6 +950,12 @@ def check(folder: str, verbose: bool = True) -> int:
     oracle = _kits_oracle()
     index = _index()
     failures = []
+    for line in head_constant_failures(os.environ[IMAGE_VARIABLE]):
+        failures.append("HEAD_EXPECT: %s" % line)
+        print("  FAIL  HEAD_EXPECT: %s" % line)
+    if not failures and verbose:
+        print("  ok    HEAD_EXPECT: the disc records the %d players' looks it says"
+              % len(HEAD_EXPECT))
     for name, want in CAPTURES.items():
         path = os.path.join(folder, name)
         problem = digest_problem(path, want)
@@ -786,6 +992,9 @@ def check(folder: str, verbose: bool = True) -> int:
             said = "root %s head %s armband %s for %s, still %s, panel %s number %s" % (
                 f["root"], f["head"], f["armband"], f["replaces"], doc["still"],
                 doc["panel"]["panel"], doc["panel"]["number"])
+        heads = head_gate_failures(capture, index, plant_head)
+        got = got + ["head of %s" % line for line in heads]
+        said += "; every head reads its player's HEAD_EXPECT"
         for line in got:
             failures.append("%s: %s" % (name, line))
             print("  FAIL  %s: %s" % (name, line))
@@ -816,6 +1025,31 @@ def _print_figure(doc) -> None:
                  s["pages"], s["error"]))
 
 
+def _print_head(doc) -> None:
+    for r in doc["rows"]:
+        h = r["reading"]
+        print("  %-8s page %-4s team %-4s number %-4s section %-3s %s%s, %d prim(s), CLUT %s: "
+              "skin %s hair %s beard %s%s" % (
+                  "up close" if r["k"] is None else "focus %d" % r["k"], r["page"], r["team"],
+                  r["number"], h["section"], "/".join(h["styles"]) or "-",
+                  " twin" if h["twin"] else "", r["primitives"],
+                  " ".join("(%d,%d)" % tuple(c) for c in h["cluts"]),
+                  "/".join(h["skin"]) or "-", "/".join(h["hair"]) or "-",
+                  "/".join(h["beard"]) or "-",
+                  "; stray %s" % h["stray"] if h["stray"] else ""))
+        if r["disc"] is not None:
+            e = r["expected"]
+            print("           record %s (slot %s) %s: section %d skin %s hair %s beard %s -- %s"
+                  % (r["record"], r["slot"], r["disc"], e["section"], e["skin"], e["hair"],
+                     e["beard"], "; ".join(r["failures"]) or "ok"))
+        elif r["failures"]:
+            print("           %s" % "; ".join(r["failures"]))
+    if doc["player"] is not None:
+        print("%s of %s distinct player(s) match their disc record%s" % (
+            doc["match"], doc["players"], " (plant: every CLUT a column right)"
+            if doc["plant"] else ""))
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -833,6 +1067,11 @@ def main(argv=None) -> int:
         if name == "figures":
             one.add_argument("--side", choices=("front", "back"), default="front")
             one.add_argument("--frame", type=int, default=-1)
+    head = sub.add_parser("head")
+    head.add_argument("capture")
+    head.add_argument("--player")
+    head.add_argument("--plant-hair-column", action="store_true")
+    head.add_argument("--json", action="store_true")
     show = sub.add_parser("show")
     show.add_argument("capture")
     show.add_argument("--png", required=True)
@@ -855,6 +1094,7 @@ def main(argv=None) -> int:
     gate = sub.add_parser("check")
     gate.add_argument("folder", nargs="?")
     gate.add_argument("--quiet", action="store_true")
+    gate.add_argument("--plant-hair-column", action="store_true")
     args = parser.parse_args(argv)
 
     if args.command == "capture":
@@ -890,7 +1130,7 @@ def main(argv=None) -> int:
         if not os.environ.get(IMAGE_VARIABLE):
             print("kits_replay: skipped -- %s is not set" % IMAGE_VARIABLE)
             return SKIP
-        return 1 if check(folder, not args.quiet) else 0
+        return 1 if check(folder, not args.quiet, args.plant_hair_column) else 0
 
     try:
         capture = replay.Capture.load(args.capture)
@@ -901,6 +1141,21 @@ def main(argv=None) -> int:
         print("replay.py: %s is a walk; show and confront read a close capture"
               % args.capture, file=sys.stderr)
         return 1
+    if args.command == "head":
+        if args.player not in (None, "all") and not args.player.isdigit():
+            print("replay.py head: --player takes all or a record index", file=sys.stderr)
+            return 1
+        doc = head_report(capture, _index(), args.player, os.environ.get(IMAGE_VARIABLE),
+                          args.plant_hair_column)
+        for row in doc["rows"]:
+            row["reading"]["cluts"] = [list(c) for c in row["reading"]["cluts"]]
+            row["reading"]["stray"] = [list(c) for c in row["reading"]["stray"]]
+        if args.json:
+            print(json.dumps(doc, indent=1, sort_keys=True))
+        else:
+            _print_head(doc)
+        failed = [r for r in doc["rows"] if r["failures"]]
+        return 1 if failed else 0
     if args.command == "show":
         picture = show_picture(capture, _index(), args.section, args.box)
         write_png(args.png, picture["width"], picture["height"], picture["rgb"])
