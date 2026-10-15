@@ -173,6 +173,20 @@ registrado, e sai 77 (*skipped*) sem a variável ou sem `WE2002_LOOKS_IMAGE`. N�
 o `ctest` roda de `build/tests`, e um default relativo pularia em silêncio
 ([KRP-TASK-04](/docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md)). A contagem de alvos `kits` mora só no [§9](#9).
 
+**Feito na fase 2** ([KRP-TASK-04](/docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md)
+a [08](/docs/tasks/kits-replay/08-fechamento-da-fase-2.md)), e o que difere do texto acima:
+
+- o `check` confere cada captura contra a tabela `CAPTURES` do `replay.py` (nome e sha256) e julga
+  com as constantes do oracle, importado **por caminho** — o `oracle.py` e o `confront.py` da looks
+  têm o mesmo nome e vêm antes no `sys.path`;
+- a captura de perto guarda o frame buffer das **duas** capturas (`buffer` e `back_buffer`): sem o
+  segundo o `confront --tab` não tinha o jogo da captura girada para comparar;
+- qual captura tem a frente do jogo é `game_side(side, focus)`: sem foco a primeira é a frente do
+  goleiro; atrás de um jogador (`--focus K`) a primeira é as costas e a frente é a girada;
+- `capture` grava em `work/kits-replay/` por padrão (`--out`), e o giro **não** é julgado contra os
+  390: ele conta da recarga através de todos os toques, cada um reinicia o ocioso, e o que se julga
+  é o maior intervalo entre dois toques (`turn gap`); sem `--turn` o campo `turned` sai `not asked`.
+
 ## 3. Cabeça por jogador
 
 ### 3.1 Medir a regra
