@@ -42,3 +42,27 @@ grep -c '"venv-looks", "bin", "python"' tools/kits/replay.py
 Hoje dá 1. Depois do conserto tem de dar 0.
 
 ## Log de Execução
+
+### 2026-10-15
+
+Reprodução na HEAD `355f3849` (`rite reproduce`, inline):
+
+```text
+$ grep -n 'venv-looks' tools/kits/replay.py tools/kits/confront.py
+tools/kits/confront.py:268:VENV_PYTHON = os.path.join("work", "venv-looks",
+tools/kits/replay.py:414:    python = os.path.join("work", "venv-looks", "bin", "python")
+```
+
+Conserto: `confront_tab` passa a usar `confront.VENV_PYTHON`, que já trata `os.name == "nt"`
+(`Scripts/python.exe`). O `confront` já estava importado na função (`_kits_confront()`).
+
+```text
+$ grep -c '"venv-looks", "bin", "python"' tools/kits/replay.py
+0
+$ grep -n 'VENV_PYTHON' tools/kits/replay.py
+414:    python = confront.VENV_PYTHON
+```
+
+O caminho `confront --tab` inteiro, no Linux, é exercitado pela corrida da
+[CORR-KRP-012](/docs/tasks/kits-replay/CORR-KRP-012.md), feita sobre este commit. O caminho do
+Windows não foi rodado: não há Windows nesta máquina.

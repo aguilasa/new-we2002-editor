@@ -411,7 +411,7 @@ def confront_tab(capture, index, out_dir: str) -> dict:
     confront = _kits_confront()
     image = os.environ[IMAGE_VARIABLE]
     asked = tab_args(capture, index)
-    python = os.path.join("work", "venv-looks", "bin", "python")
+    python = confront.VENV_PYTHON
     if not os.path.isfile(python):
         raise SystemExit("replay.py: no venv python at %s (make looks-venv)" % python)
     os.makedirs(out_dir, exist_ok=True)
