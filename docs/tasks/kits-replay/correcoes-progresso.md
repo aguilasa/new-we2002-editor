@@ -18,5 +18,5 @@
 | [CORR-KRP-013](/docs/tasks/kits-replay/CORR-KRP-013.md) | confront_tab fixa work/venv-looks/bin/python em vez de reusar confront.VENV_PYTHON | KRP-TASK-06 | low | done | 2026-10-15 |
 | [CORR-KRP-014](/docs/tasks/kits-replay/CORR-KRP-014.md) | KITS-REPLAYS-9-10.md item 5 ainda diz que a frente nunca foi comparada | KRP-TASK-06 | low | done | 2026-10-15 |
 | [CORR-KRP-015](/docs/tasks/kits-replay/CORR-KRP-015.md) | PLAN-KITS-REPLAY.md:60 aponta para âncora que não existe no KITS-REPLAYS-9-10.md | CORR-KRP-012 | low | done | 2026-10-15 |
-| [CORR-KRP-016](/docs/tasks/kits-replay/CORR-KRP-016.md) | Filtro de caixa da peça em head_samples sem controle; as CLUTs vizinhas da §3.1 não se reproduzem por ferramenta | KRP-TASK-09 | medium | pending | — |
+| [CORR-KRP-016](/docs/tasks/kits-replay/CORR-KRP-016.md) | Filtro de caixa da peça em head_samples sem controle; as CLUTs vizinhas da §3.1 não se reproduzem por ferramenta | KRP-TASK-09 | medium | done | 2026-10-15 |
 <!-- rite:end -->

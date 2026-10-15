@@ -143,3 +143,9 @@ figura e fora do box da peça. A asserção exige que `head_samples` devolva só
 
 O controle prova o filtro pelo caso sintético. As CLUTs reais da §3.1 vêm da corrida acima, e a
 §3.1 do plano agora remete a esta CORR e ao controle.
+- **Closed** — commit `c5b4a783` (2026-10-15): test(kits): plant the head piece-box filter of head_samples as a control
+  - Files (`git show --name-status c5b4a783`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-016.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`

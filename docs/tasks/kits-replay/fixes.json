@@ -203,12 +203,12 @@
       "title": "Filtro de caixa da peça em head_samples sem controle; as CLUTs vizinhas da §3.1 não se reproduzem por ferramenta",
       "origin": "KRP-TASK-09",
       "severity": "medium",
-      "files": [],
+      "files": ["tools/kits/controls.py", "tools/kits/selftest.py", "docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-15",
+      "done_commit": "c5b4a783"
     }
   ]
 }
