@@ -110,3 +110,8 @@ A HEAD tinha 69 entradas em `CONTROLS` (`git show HEAD:tools/kits/controls.py | 
 **Não rodado:** a corrida `replay.py confront … --tab` da evidência precisa do `:98` e de
 `work/kits-replay/tab/`, e ficou fora deste item por instrução; a asserção nova mede o mesmo
 cruzamento sobre captura sintética, sem janela.
+- **Closed** — commit `73cc5cac` (2026-10-15): test(kits): assert game_pixels reads each capture's own buffer, with a planted control
+  - Files (`git show --name-status 73cc5cac`):
+    - `M docs/tasks/kits-replay/CORR-KRP-010.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
