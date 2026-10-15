@@ -661,6 +661,15 @@ CONTROLS = (
         "names the player one slot over, and his head is judged against another's record "
         "(KRP-TASK-09)",
     ),
+    Control(
+        "replay-head-piece-box", "kits/core/replay.py", "head_samples",
+        '            if all(box[0] <= x <= box[2] and box[1] <= y <= box[3] for x, y in one["xy"])]\n',
+        "            ]\n",
+        "FAIL  replay.py head: head_samples keeps the head piece's box, not a neighbour's head",
+        "the box of the whole figure takes in a neighbour's head: on slot 10, focus 8 reads "
+        "CLUT (16,482) (32,480) and Croatia's 4 is judged skin A/C (CORR-KRP-016, "
+        "PLAN-KITS-REPLAY section 3.1)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

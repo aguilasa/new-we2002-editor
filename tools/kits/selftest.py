@@ -1598,6 +1598,38 @@ def _replay_head_checks(c, cli, replay) -> None:
     c.ok("replay.py head: a CLUT off the skin records is stray",
          replay.head_judge(stray, replay.head_expected(looks.parse_tuple("A-L3-B-A-A")))
          == ["CLUT(s) [(32, 490)] fit no skin, hair or beard column"], "%s" % stray)
+    # head_samples keeps the head piece's own screen box (CORR-KRP-016): the
+    # box of the whole figure takes in a neighbour's head, as on slot 10,
+    # focus 8.  Seen straight on at z 1000 with H 1000, model x, y is screen
+    # x, y: head 34 spans 0..4 (box -2..6), root 2 runs down to y 40.  Two
+    # quads with head 34's texels: the own one at the head with CLUT
+    # (32,480), a neighbour's at y 20..24 with CLUT (16,482) -- inside the
+    # figure's box, outside the head's.
+    from types import SimpleNamespace
+
+    texels = ((0, 0), (8, 0), (0, 8), (8, 8))
+    head_section = SimpleNamespace(
+        vertices=[SimpleNamespace(x=x, y=y, z=0) for x, y in ((0, 0), (4, 0), (0, 4), (4, 4))],
+        primitives=[SimpleNamespace(indices=(0, 1, 2, 3), texcoords=texels)])
+    body_section = SimpleNamespace(
+        vertices=[SimpleNamespace(x=x, y=y, z=0) for x, y in ((0, 0), (4, 40))], primitives=[])
+    head_index = {"sections": {(replay.layout.MODEL, 34): head_section,
+                               (replay.layout.MODEL, 2): body_section}}
+    straight = ((4096, 0, 0, 0, 4096, 0, 0, 0, 4096), (0, 0, 1000))
+    headed = replay.Figure([{"section": s, "matrix": straight,
+                             "projection": {"H": 1000, "OFX": 0, "OFY": 0}} for s in (34, 2)])
+
+    def head_quad(clut, top):
+        return {"code": 0x2C, "page": [640, 256], "bits": 8, "clut": list(clut),
+                "uv": texels, "rgb": None,
+                "xy": [[0, top], [4, top], [0, top + 4], [4, top + 4]]}
+
+    kept = c.attempt("replay.py head: head_samples on a figure built here",
+                     lambda: replay.head_samples(headed, [head_quad((32, 480), 0),
+                                                         head_quad((16, 482), 20)], head_index))
+    kept_cluts = sorted(tuple(one["clut"]) for one in (kept or []))
+    c.ok("replay.py head: head_samples keeps the head piece's box, not a neighbour's head",
+         kept_cluts == [(32, 480)], "%s" % kept_cluts)
     # The shirt numbers: slot s holds s (number s + 1) in a sparse image.
     offset = dict(ofs_map.read_offsets())["OFS_SQUAD_NUMBERS_NATIONAL"]
     words = [0, 0, 0, 0]

@@ -227,7 +227,12 @@ O que a medição fixa:
   Por isso a barba só se julga quando aparece;
 - **a cabeça se lê dentro do box da própria peça** (`core/replay.py head_samples`): o box da figura
   inteira pega a cabeça de um vizinho. No slot 10 isso daria (16,482) no 4 da Croácia e (32,480) no
-  10 do Brasil.
+  10 do Brasil: o `replay.py head` lê os dois com as duas CLUTs, (16,482) e (32,480), e o
+  `kits_replay` cai em 4 falhas. Esses números são de uma corrida remontável, com script e saída no
+  Log da [CORR-KRP-016](/docs/tasks/kits-replay/CORR-KRP-016.md). O que fica no gate é o controle
+  `replay-head-piece-box` do `controls.py`. Ele tira a condição e derruba uma asserção sintética do
+  selftest, sem dado real: uma figura e um quad da cabeça de um vizinho, dentro do box da figura e fora do box
+  da peça.
 
 O esperado por jogador é a constante `HEAD_EXPECT` do `replay.py` (K1), e o `kits_replay` confere
 duas coisas: que o disco ainda a diz, e que cada cabeça seguida a lê. A planta
