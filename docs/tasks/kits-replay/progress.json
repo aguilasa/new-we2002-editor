@@ -145,10 +145,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#3.1",
       "files": ["tools/kits/replay.py", "tools/kits/core/replay.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-15",
+      "done_commit": "9303ddc9",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

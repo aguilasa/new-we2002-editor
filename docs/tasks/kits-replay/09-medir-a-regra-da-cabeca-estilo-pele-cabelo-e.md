@@ -222,3 +222,11 @@ $ python3 tools/kits/controls.py
   RED    replay-head-squad-unbiased   kits/replay.py :: squad_numbers
 controls: 73 of 73 red
 ```
+- **Closed** — commit `9303ddc9` (2026-10-15): feat(kits): measure the head rule of the replay against the disc records
+  - Files (`git show --name-status 9303ddc9`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/replay.py`
+    - `M tools/kits/replay.py`
+    - `M tools/kits/selftest.py`
