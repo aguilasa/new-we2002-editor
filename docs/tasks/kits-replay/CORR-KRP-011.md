@@ -54,3 +54,30 @@ grep -q -- '"--kit-set"' tools/kits/replay.py
 Hoje sai 1. Depois do conserto tem de sair 0.
 
 ## Log de Execução
+
+**2026-10-15.** Reproduzido na HEAD antes do conserto: a lista `args` de `confront_tab` não tinha
+`--kit-set`, e o `app.py` cai no default, set 1.
+
+```text
+$ grep -c -- '"--kit-set"' tools/kits/replay.py
+0
+$ grep -n -- '--kit-set' tools/kits/replay.py tools/kits/ui/app.py
+tools/kits/ui/app.py:935:    parser.add_argument("--kit-set", type=int, choices=(1, 2), default=1,
+```
+
+Conserto: em `confront_tab` (`tools/kits/replay.py`) a lista de argumentos do `app.py` passa a levar
+`--kit-set` com o `set` que `tab_args` devolveu, quando ele não é `None` — o mesmo set que o JSON
+declara em `tab.set`. Com `None` o argumento fica de fora e o `app.py` segue no default, como antes.
+
+```text
+$ grep -q -- '"--kit-set"' tools/kits/replay.py; echo $?
+0
+$ grep -n -A3 -- '"--kit-set"' tools/kits/replay.py
+427:        args += ["--kit-set", str(asked["set"])] if asked["set"] is not None else []
+428-        args += ["--armband"] if asked["armband"] else []
+429-        args += ["--long-sleeves"] if asked["long_sleeves"] else []
+430-        args += ["--number", str(asked["number"])] if asked["number"] is not None else []
+```
+
+O `confront --tab` não foi rodado aqui: ele sobe o `app.py` no `:98`. Nas cinco capturas da task o
+`set` é 1 ou `None`, então os números do Log da KRP-TASK-06 não mudam.

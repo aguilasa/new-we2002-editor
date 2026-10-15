@@ -424,6 +424,7 @@ def confront_tab(capture, index, out_dir: str) -> dict:
         args = [python, confront.APP, image, "--tag", asked["tag"], "--tab", "3d",
                 "--figure", str(asked["figure"]), "--yaw", "%g" % O.REPLAY_TAB[side],
                 "--export-3d", out]
+        args += ["--kit-set", str(asked["set"])] if asked["set"] is not None else []
         args += ["--armband"] if asked["armband"] else []
         args += ["--long-sleeves"] if asked["long_sleeves"] else []
         args += ["--number", str(asked["number"])] if asked["number"] is not None else []
