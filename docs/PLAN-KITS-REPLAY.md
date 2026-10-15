@@ -57,7 +57,7 @@ fase deste plano usa:
 | [§2](#2) ferramenta | o bloco G8 do `oracle.py`, as capturas em `work/kits-oracle/` e o [projeto](/docs/KITS-REPLAYS-9-10.md#projeto) | projeto pronto |
 | [§3](#3) cabeça | itens [8](/docs/KITS-REPLAYS-9-10.md#8), [(a)](/docs/KITS-REPLAYS-9-10.md#a-cabelo-barba-e-pele-do-jogador-vêm-da-clut-da-cabeça-pela-regra-da-looks-set) e [(b)](/docs/KITS-REPLAYS-9-10.md#b-a-seção-da-cabeça-é-o-estilo-de-cabelo-e-a-tabela-já-existe) | **hipótese**, a medir |
 | [§4](#4) goleiro | itens [3](/docs/KITS-REPLAYS-9-10.md#3) e [(d)](/docs/KITS-REPLAYS-9-10.md#d-o-goleiro-do-jogo-é-a-família-13-inteira) | medido |
-| [§5](#5) corrida | itens [6](/docs/KITS-REPLAYS-9-10.md#6) e [(c)](/docs/KITS-REPLAYS-9-10.md#c-a-pose-de-corrida-está-gravada-e-o--pode-ser-a-fonte-dela) | pose capturada; par do `ANIME.BIN` a medir |
+| [§5](#5) corrida | itens [6](/docs/KITS-REPLAYS-9-10.md#6) e [(c)](/docs/KITS-REPLAYS-9-10.md#c-a-pose-de-corrida-está-gravada-e-o-animebin-pode-ser-a-fonte-dela) | pose capturada; par do `ANIME.BIN` a medir |
 | [§6](#6) jogador real | item [7](/docs/KITS-REPLAYS-9-10.md#7) e o §4.7 do PLAN-KITS-PY | painel e número medidos |
 | [§7](#7) dois times | item [(e)](/docs/KITS-REPLAYS-9-10.md#e-dois-kits-na-vram-ao-mesmo-tempo-e-o-kit-pela-paleta) | medido |
 | [§8](#8) câmera | itens [9](/docs/KITS-REPLAYS-9-10.md#9) e [(g)](/docs/KITS-REPLAYS-9-10.md#g-a-câmera-replay-como-preset-da-aba) | medido |

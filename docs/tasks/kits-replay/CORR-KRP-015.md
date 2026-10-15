@@ -20,7 +20,7 @@ vem do `79ac6bc0` (o plano do ciclo). Quem o viu foi o worker da CORR-KRP-012, r
 ## Evidência
 
 ```text
-$ sh ~/.claude/plugins/cache/rite/rite/0.20.0/bin/rite check 2>&1 | grep PLAN-KITS
+$ sh "$RITE_HOME/bin/rite" check 2>&1 | grep PLAN-KITS
 ERROR docs/PLAN-KITS-REPLAY.md:60: link '/docs/KITS-REPLAYS-9-10.md#c-a-pose-de-corrida-está-gravada-e-o--pode-ser-a-fonte-dela': no heading/anchor '#c-a-pose-de-corrida-está-gravada-e-o--pode-ser-a-fonte-dela' in KITS-REPLAYS-9-10.md
 $ grep -n "pose de corrida está gravada" docs/KITS-REPLAYS-9-10.md
 391:### (c) A pose de corrida está gravada, e o `ANIME.BIN` pode ser a fonte dela
@@ -43,9 +43,42 @@ lista para o cabeçalho da linha 391.
 ## Verificação
 
 ```sh
-sh ~/.claude/plugins/cache/rite/rite/0.20.0/bin/rite check 2>&1 | grep -c 'PLAN-KITS-REPLAY.md:60'
+sh "$RITE_HOME/bin/rite" check 2>&1 | grep -c 'PLAN-KITS-REPLAY.md:60'
 ```
 
 Hoje dá 1. Depois do conserto tem de dar 0.
 
 ## Log de Execução
+
+### 2026-10-15
+
+Reprodução (`rite reproduce CORR-KRP-015 --cycle kits-replay`, HEAD `d7c7ea75`):
+
+```text
+$ sh "$RITE_HOME/bin/rite" check 2>&1 | grep PLAN-KITS
+ERROR docs/PLAN-KITS-REPLAY.md:60: link '/docs/KITS-REPLAYS-9-10.md#c-a-pose-de-corrida-está-gravada-e-o--pode-ser-a-fonte-dela': no heading/anchor '#c-a-pose-de-corrida-está-gravada-e-o--pode-ser-a-fonte-dela' in KITS-REPLAYS-9-10.md
+$ grep -n "pose de corrida está gravada" docs/KITS-REPLAYS-9-10.md
+391:### (c) A pose de corrida está gravada, e o `ANIME.BIN` pode ser a fonte dela
+```
+
+A âncora certa, do próprio Rite:
+
+```text
+$ sh "$RITE_HOME/bin/rite" anchors docs/KITS-REPLAYS-9-10.md | grep -i pose-de-corrida
+    (c) A pose de corrida está gravada, e o `ANIME.BIN` pode ser a fonte dela  ->  /docs/KITS-REPLAYS-9-10.md#c-a-pose-de-corrida-está-gravada-e-o-animebin-pode-ser-a-fonte-dela
+```
+
+Conserto: em `docs/PLAN-KITS-REPLAY.md:60`, `e-o--pode` virou `e-o-animebin-pode`.
+
+Verificação:
+
+```text
+$ sh "$RITE_HOME/bin/rite" check 2>&1 | grep -c 'PLAN-KITS-REPLAY.md:60'
+0
+$ sh "$RITE_HOME/bin/rite" check 2>&1 | tail -1
+check: 0 error(s), 1 warning(s) in 2 cycle(s)
+```
+
+O aviso que sobra é do PES2-TASK-16, anterior e alheio. A Evidência e a Verificação acima chamavam o
+CLI pelo caminho da versão instalada, o que o `rite check` acusava como aviso neste arquivo; passaram
+a usar `$RITE_HOME`, que o `reproduce` define. O comando é o mesmo.
