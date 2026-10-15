@@ -127,3 +127,4 @@ controls: 69 of 69 red
   - **Outside declared files** (`tools/kits/replay.py`, `tools/kits/confront.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`):
     - `docs/tasks/kits-replay/progress.json`
     - `docs/tasks/kits-replay/progresso.md`
+- **Reviewed** (2026-10-15) at `d24d2c43`: CORR-KRP-010, CORR-KRP-011, CORR-KRP-012, CORR-KRP-013, CORR-KRP-014

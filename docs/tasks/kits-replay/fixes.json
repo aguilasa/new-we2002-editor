@@ -118,6 +118,71 @@
       "depends_on": [],
       "done_on": "2026-10-14",
       "done_commit": "b4e97c79"
+    },
+    {
+      "id": "CORR-KRP-010",
+      "file": "CORR-KRP-010.md",
+      "title": "confront --tab só guarda game_side; a escolha de buffer em game_pixels não tem asserção nem controle",
+      "origin": "KRP-TASK-06",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-011",
+      "file": "CORR-KRP-011.md",
+      "title": "confront --tab não passa --kit-set ao app.py e o JSON declara um set que a aba não desenhou",
+      "origin": "KRP-TASK-06",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-012",
+      "file": "CORR-KRP-012.md",
+      "title": "Log da KRP-TASK-06 traz resumo feito à mão e placeholder replay-<f> em vez da saída do confront --tab",
+      "origin": "KRP-TASK-06",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-013",
+      "file": "CORR-KRP-013.md",
+      "title": "confront_tab fixa work/venv-looks/bin/python em vez de reusar confront.VENV_PYTHON",
+      "origin": "KRP-TASK-06",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-014",
+      "file": "CORR-KRP-014.md",
+      "title": "KITS-REPLAYS-9-10.md item 5 ainda diz que a frente nunca foi comparada",
+      "origin": "KRP-TASK-06",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
