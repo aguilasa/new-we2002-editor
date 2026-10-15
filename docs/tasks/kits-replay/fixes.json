@@ -196,6 +196,19 @@
       "depends_on": [],
       "done_on": "2026-10-15",
       "done_commit": "c50b1a39"
+    },
+    {
+      "id": "CORR-KRP-016",
+      "file": "CORR-KRP-016.md",
+      "title": "Filtro de caixa da peça em head_samples sem controle; as CLUTs vizinhas da §3.1 não se reproduzem por ferramenta",
+      "origin": "KRP-TASK-09",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

@@ -230,3 +230,4 @@ controls: 73 of 73 red
     - `M tools/kits/core/replay.py`
     - `M tools/kits/replay.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-15) at `15ec8757`: CORR-KRP-016
