@@ -38,7 +38,7 @@ Achar o registro de cada um dos 22 (time e número pelo painel, item 7 do relat�
 
 O que entrou:
 
-- `core/replay.py`: `head_samples`, só as primitivas da seção da cabeça dentro do box da própria peça. O box da figura inteira pega a cabeça do vizinho: no slot 10, (16,482) no 4 da Croácia e (32,480) no 10 do Brasil. Também `head_styles`, `head_reading` (linha da CLUT → pele, coluna → cabelo ou barba), `head_expected` (estilo pelo `HAIR_MAP`, gêmea pelo `FACE_TWINS` desde `FACE_TWIN_FROM`) e `head_judge`;
+- `core/replay.py`: `head_samples`, só as primitivas da seção da cabeça dentro do box da própria peça. O box da figura inteira pega a cabeça do vizinho: no slot 10, (16,482) no 4 da Croácia e (32,480) no 10 do Brasil (corrida remontável e controle `replay-head-piece-box` na [CORR-KRP-016](/docs/tasks/kits-replay/CORR-KRP-016.md), de 2026-10-15). Também `head_styles`, `head_reading` (linha da CLUT → pele, coluna → cabelo ou barba), `head_expected` (estilo pelo `HAIR_MAP`, gêmea pelo `FACE_TWINS` desde `FACE_TWIN_FROM`) e `head_judge`;
 - `replay.py head <captura> [--player all|N] [--plant-hair-column] [--json]`. O número de camisa vem de `OFS_SQUAD_NUMBERS_NATIONAL` (`ofs_map.read_offsets`, nunca digitado), e o registro é `time * 23 + vaga`. Também `HEAD_TEAMS` (576 → 41 Brasil, 640 → 22 Croácia) e `HEAD_EXPECT`, as 22 tuplas como constante (K1);
 - `check`: confere `HEAD_EXPECT` contra o disco e julga a cabeça de toda figura seguida nas sete capturas; `--plant-hair-column` é a planta com dado real (K2);
 - `selftest.py` `_replay_head_checks`: 11 casos sintéticos. Três controles: `replay-head-hair-column`, `replay-head-twin-unasked` e `replay-head-squad-unbiased`.
