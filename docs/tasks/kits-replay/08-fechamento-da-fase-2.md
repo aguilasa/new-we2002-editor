@@ -28,3 +28,5 @@ A fase 2 (a linha de comando, a captura e o confronto) fica fechada: os gates do
 Task de fechamento: não implementa; reroda e corrige escrituração. Toda saída colada da HEAD (armadilha K3).
 
 ## Log de Execução
+
+- **pending** (2026-10-15): phase 2 still has open fixes CORR-KRP-010..014 from the KRP-TASK-06 review; the closing task runs after /rite:fix-all, by the user's choice
