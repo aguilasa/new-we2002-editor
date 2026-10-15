@@ -626,6 +626,15 @@ CONTROLS = (
         "behind a player the first capture is his back: taking it as his front compares the "
         "tab's front with the game's back, the gap CORR-K3D-034 left (KRP-TASK-06)",
     ),
+    Control(
+        "replay-tab-buffer-crossed", "kits/replay.py", "game_pixels",
+        '    buffer = capture.data.get("buffer" if which == "front" else "back_buffer")\n',
+        '    buffer = capture.data.get("buffer")\n',
+        "FAIL  confront --tab reads the first capture's buffer, and the second's back_buffer",
+        "the second capture's pixels live in back_buffer: reading the first capture's buffer "
+        "for both sides compares the tab's back with the game's front, in silence "
+        "(CORR-KRP-010)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 

@@ -66,3 +66,47 @@ python3 tools/kits/controls.py --only replay-tab-buffer-crossed
 Hoje falha com escolha desconhecida. Depois do conserto tem de imprimir `RED`.
 
 ## Log de Execução
+
+### 2026-10-15
+
+**Reprodução na HEAD** (antes do conserto, um shell só): plantar
+`buffer = capture.data.get("buffer")` em `game_pixels` deixa a asserção de `game_side` do selftest
+em `True`, e o controle pedido não existia — o argparse o recusava como escolha desconhecida
+(lista de escolhas cortada aqui):
+
+```text
+$ python3 tools/kits/controls.py --only replay-tab-buffer-crossed
+controls.py: error: argument --only: invalid choice: 'replay-tab-buffer-crossed' (choose from …)
+```
+
+**Conserto.**
+
+- `tools/kits/selftest.py`, em `_replay_reader_checks`, logo depois da asserção de `game_side`:
+  monta a captura sintética de `_replay_reader_capture` com as duas poses e dois buffers sob a
+  mesma figura, `buffer` em (1, 2, 3) e `back_buffer` em (4, 5, 6), e chama `game_pixels` com
+  cada `which` de `TAB_SIDES`. A asserção nova (`confront --tab reads the first capture's buffer,
+  and the second's back_buffer`) exige `front` → `[(8, 16, 24)]` e `back` → `[(32, 40, 48)]`.
+- `tools/kits/controls.py`: controle `replay-tab-buffer-crossed`, que planta exatamente a linha
+  da evidência (`buffer = capture.data.get("buffer")`) em `game_pixels`.
+
+**Verificação.**
+
+```text
+$ python3 tools/kits/controls.py --only replay-tab-buffer-crossed
+  base   unplanted sandbox            selftest exit 0
+  RED    replay-tab-buffer-crossed    kits/replay.py :: game_pixels
+controls: 1 of 1 red
+$ python3 tools/kits/selftest.py | grep back_buffer
+  ok    confront --tab reads the first capture's buffer, and the second's back_buffer
+$ python3 tools/kits/selftest.py | tail -1
+kits_selftest: 0 failure(s)
+$ python3 tools/kits/controls.py | tail -1
+controls: 70 of 70 red
+```
+
+A HEAD tinha 69 entradas em `CONTROLS` (`git show HEAD:tools/kits/controls.py | grep -c
+"^    Control("` → 69); com esta, 70.
+
+**Não rodado:** a corrida `replay.py confront … --tab` da evidência precisa do `:98` e de
+`work/kits-replay/tab/`, e ficou fora deste item por instrução; a asserção nova mede o mesmo
+cruzamento sobre captura sintética, sem janela.

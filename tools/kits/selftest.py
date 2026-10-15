@@ -1613,6 +1613,24 @@ def _replay_reader_checks(c, cli, replay) -> None:
     c.ok("confront --tab compares the tab's front with the game's front, back with back",
          pairs == {(0, "front"): "front", (0, "back"): "back",
                    (3, "front"): "back", (3, "back"): "front"}, "%s" % pairs)
+    # The other half of the pairing (CORR-KRP-010): inside the capture
+    # `game_pixels` reads "buffer" for the first capture and "back_buffer" for
+    # the second.  Two buffers of different colours under the same figure.
+    import copy as _copy
+
+    tab, _walk, tab_index = _replay_reader_capture(replay, (0, 20, 80))
+    tab["back"] = _copy.deepcopy(tab["front"])
+    for key, rgb in (("buffer", [1, 2, 3]), ("back_buffer", [4, 5, 6])):
+        tab[key] = {"origin": [-4, -4], "offset": [0, 0],
+                    "rows": [[list(rgb) for _x in range(12)] for _y in range(12)]}
+    tab_capture = c.attempt("replay.py: a capture with a front and a back buffer",
+                            lambda: replay.Capture.from_dict(tab, "replay-9-3.json"))
+    read = {which: c.attempt("game_pixels on the %s capture" % which,
+                             lambda which=which: cli.game_pixels(tab_capture, tab_index,
+                                                                 which, True))
+            for which in cli.TAB_SIDES}
+    c.ok("confront --tab reads the first capture's buffer, and the second's back_buffer",
+         read == {"front": [(8, 16, 24)], "back": [(32, 40, 48)]}, "%s" % read)
     import contextlib
     import json as _json
     import tempfile as _tempfile
