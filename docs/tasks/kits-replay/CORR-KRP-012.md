@@ -92,3 +92,7 @@ Verificação, depois da edição:
 $ grep -c 'replay-<f>' docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md
 0
 ```
+- **Closed** — commit `98f27616` (2026-10-15): docs(kits): paste the confront --tab output into the KRP-TASK-06 Log
+  - Files (`git show --name-status 98f27616`):
+    - `M docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-012.md`

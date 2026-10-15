@@ -153,10 +153,10 @@
       "severity": "medium",
       "files": ["docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md"],
       "resources": ["tela"],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-15",
+      "done_commit": "98f27616"
     },
     {
       "id": "CORR-KRP-013",
