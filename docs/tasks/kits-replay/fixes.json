@@ -183,6 +183,19 @@
       "depends_on": [],
       "done_on": "2026-10-15",
       "done_commit": "52ac902e"
+    },
+    {
+      "id": "CORR-KRP-015",
+      "file": "CORR-KRP-015.md",
+      "title": "PLAN-KITS-REPLAY.md:60 aponta para âncora que não existe no KITS-REPLAYS-9-10.md",
+      "origin": "CORR-KRP-012",
+      "severity": "low",
+      "files": ["docs/PLAN-KITS-REPLAY.md"],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
