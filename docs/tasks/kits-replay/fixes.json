@@ -231,10 +231,10 @@
       "severity": "medium",
       "files": ["tools/kits/controls.py", "tools/kits/selftest.py", "tools/kits/core/figure.py", "tools/kits/replay.py", "docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-16",
+      "done_commit": "34430857"
     }
   ]
 }

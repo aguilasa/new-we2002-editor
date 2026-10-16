@@ -247,3 +247,9 @@ figure: 0 failure(s)
 
 O `--image` acima correu sem `WE2002_KITS_REPLAY_DIR` (última linha `replay captures: not read`);
 o conserto não toca no `replay.py`.
+- **Closed** — commit `34430857` (2026-10-16): test(kits): plant the beard column and match_scene's player head; head --drawn is a report
+  - Files (`git show --name-status 34430857`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-018.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
