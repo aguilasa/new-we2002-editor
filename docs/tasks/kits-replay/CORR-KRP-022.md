@@ -61,3 +61,7 @@ Verificação:
 $ awk '/^## Arquivos a criar/,/^## Done/' docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md | grep -c PLAN-KITS-REPLAY
 1
 ```
+- **Closed** — commit `1c46f1fe` (2026-10-16): docs(kits): KRP-TASK-22 lists the plan among the files it modifies
+  - Files (`git show --name-status 1c46f1fe`):
+    - `M docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-022.md`
