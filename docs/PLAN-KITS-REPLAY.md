@@ -276,6 +276,13 @@ as asserções do `kits_selftest` sobre `player_head_clut` e sobre o `match_scen
 num disco de faz-de-conta), cada uma com o seu controle, e a do `kits_image` que desenha a 46 do
 Balaban com as CLUTs (32,480) e (160,480).
 
+**Feito na fase 3** ([KRP-TASK-09](/docs/tasks/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md)
+a [11](/docs/tasks/kits-replay/11-fechamento-da-fase-3.md)). A regra fechou inteira, e por isso a
+§3.2 desenha tudo o que a §3.1 mediu, sem parte deixada no default. O que difere do texto de cima:
+o `replay.py` ganhou `head` (`--player`, `--drawn`, `--plant-hair-column`), o `check` passou a
+julgar a cabeça de toda figura seguida contra `HEAD_EXPECT`, e o `confront --tab` ganhou
+`--player`. O jogador real no seletor continua no [§6](#6).
+
 ## 4. Goleiro pela família 13
 
 Medido ([item 3](/docs/KITS-REPLAYS-9-10.md#3)): o goleiro do jogo é a família 13 inteira — torso
