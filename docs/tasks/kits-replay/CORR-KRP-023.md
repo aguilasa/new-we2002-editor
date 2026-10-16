@@ -126,3 +126,7 @@ Verificação, depois da edição:
 $ grep -nE '^\$ .*(…|\.\.\.|\$f)' docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md; echo "grep exit $?"
 grep exit 1
 ```
+- **Closed** — commit `d13e1b1e` (2026-10-16): docs(kits): KRP-TASK-22 Log spells out the digest, PNG and confront commands
+  - Files (`git show --name-status d13e1b1e`):
+    - `M docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-023.md`

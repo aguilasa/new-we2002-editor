@@ -294,12 +294,12 @@
       "title": "Linhas $ do Log da KRP-TASK-22 encurtadas e o lado antes (ca147a8e) não mostrado",
       "origin": "KRP-TASK-22",
       "severity": "medium",
-      "files": [],
-      "resources": [],
-      "status": "pending",
+      "files": ["docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md"],
+      "resources": ["tela"],
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-16",
+      "done_commit": "d13e1b1e"
     },
     {
       "id": "CORR-KRP-024",
