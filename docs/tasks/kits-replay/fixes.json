@@ -216,12 +216,12 @@
       "title": "Log da KRP-TASK-10 explica a frente de Marcos e as colunas de barba com o que a medição desmente",
       "origin": "KRP-TASK-10",
       "severity": "medium",
-      "files": [],
+      "files": ["docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md"],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-16",
+      "done_commit": "c336026e"
     },
     {
       "id": "CORR-KRP-018",
@@ -229,9 +229,9 @@
       "title": "Coluna de barba, match_scene com player e head --drawn sem controle plantado",
       "origin": "KRP-TASK-10",
       "severity": "medium",
-      "files": [],
+      "files": ["tools/kits/controls.py", "tools/kits/selftest.py", "tools/kits/core/figure.py", "tools/kits/replay.py", "docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "depends_on": [],
       "done_on": null,
       "done_commit": null
