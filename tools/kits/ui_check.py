@@ -326,6 +326,10 @@ PLANTS = (
     ("invalid player looks accepted", HEAD,
      '            print("--player-looks: %s" % exc, file=sys.stderr)\n            return 2\n',
      "            pass  # planted: an invalid tuple accepted\n"),
+    ("the body's skin not moved", PLAYER,
+     '        values["skin_colour"] = player_values(player)["skin_colour"]\n',
+     "        pass  # planted: the body keeps the reference skin\n",
+     "../core/figure.py"),
     ("the player's hair colour not moved", PLAYER,
      '        column += values["hair_colour"]\n',
      "        column += 0  # planted: the hair colour not moved\n",
@@ -1010,10 +1014,35 @@ def dress_judge(python, image, env, tmp, app=APP) -> tuple:
     return bad, ", ".join(seen)
 
 
-PLAYER_LOOKS = (("Croatia 11", "A-L3-H-A-A"), ("Croatia 2", "A-L3-B-A-A"))
+PLAYER_LOOKS = (("Croatia 11", "A-L3-H-A-A"), ("Croatia 2", "A-L3-B-A-A"),
+                ("Croatia 11 skin D", "D-L3-H-A-A"))
 """Two heads the replays measured (`replay.py` HEAD_EXPECT, KRP-TASK-09): the
 same style, skin and beard, and only the hair colour apart -- H against B --
-so a hair colour left where the disc has it draws the two the same."""
+so a hair colour left where the disc has it draws the two the same.  The
+third is the first with skin D: the body below the head has to change with
+it (KRP-TASK-24, PLAN-KITS-REPLAY section 3.3)."""
+REFERENCE_LOOKS = "A-A1-A-A-A"
+"""The tuple the figure wears without a player (`api.PLAYER_REFERENCE`),
+written here and not read from the core."""
+BODY_FROM = 0.3
+"""Where the body starts, as a fraction of the figure's height from its top:
+below the head, which ends near an eighth; the arms and the knees are below."""
+
+
+def differing_in_body(one: tuple, two: tuple) -> int:
+    """Pixels that differ inside the 3D view of *one*, below `BODY_FROM` of the
+    figure's height (the rows where *one* draws anything but the backdrop)."""
+    box = view_box(one)
+    if box is None or one[:2] != two[:2]:
+        return -1
+    w = one[0]
+    rows = [y for y in range(box[1], box[3] + 1)
+            if any(one[2][y * w + x] != BACKDROP_3D for x in range(box[0], box[2] + 1))]
+    if not rows:
+        return -1
+    top = rows[0] + int((rows[-1] - rows[0]) * BODY_FROM)
+    return sum(1 for y in range(top, box[3] + 1) for x in range(box[0], box[2] + 1)
+               if one[2][y * w + x] != two[2][y * w + x])
 
 
 def player_judge(python, image, env, tmp, app=APP) -> tuple:
@@ -1021,12 +1050,14 @@ def player_judge(python, image, env, tmp, app=APP) -> tuple:
     the reference head, and two players apart only in hair colour are drawn
     apart (PLAN-KITS-REPLAY section 3.2)."""
     bad, seen, shots = [], [], {}
-    for name, looks_tuple in (("reference", None),) + PLAYER_LOOKS:
+    # The reference is captured with the box ticked too, on the reference
+    # tuple: unticked the head panel is hidden and the view wider, and the two
+    # captures differ by the panel whatever the head does (KRP-TASK-24).
+    for name, looks_tuple in (("reference", REFERENCE_LOOKS),) + PLAYER_LOOKS:
         out = os.path.join(tmp, "player-%s.png" % name.replace(" ", "-"))
         shot, more, _ = capture(python, app, image,
-                                ["--tag", MATCH_TAG, "--tab", "3d"]
-                                + (["--player-looks", looks_tuple] if looks_tuple else []),
-                                out, env)
+                                ["--tag", MATCH_TAG, "--tab", "3d",
+                                 "--player-looks", looks_tuple], out, env)
         bad += ["%s: %s" % (name, m) for m in more]
         shots[name] = shot
     if any(shot is None for shot in shots.values()):
@@ -1036,6 +1067,11 @@ def player_judge(python, image, env, tmp, app=APP) -> tuple:
         seen.append("%s against %s %d px" % (one, two, n))
         if n <= 0:
             bad.append("%s and %s draw the same 3D view" % (one, two))
+    one, two = PLAYER_LOOKS[0][0], PLAYER_LOOKS[2][0]
+    n = differing_in_body(shots[one], shots[two])
+    seen.append("%s against %s %d px below the head" % (one, two, n))
+    if n <= 0:
+        bad.append("%s and %s draw the same body: the skin stayed on the head" % (one, two))
     return bad, ", ".join(seen)
 
 

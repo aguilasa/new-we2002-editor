@@ -2245,6 +2245,7 @@ def _figure_checks(c, image_path) -> None:
          "kind %r" % (lone and lone.kind))
     _figure_cli_checks(c, image_path, src.kit("00"), geometry)
     _player_match_image_checks(c, src.kit("00"), geometry)
+    _player_skin_image_checks(c, src.kit("22"), geometry)
     for tag in ("A4", "00"):
         kit = src.kit(tag)
         for figure in (0, 1):
@@ -2257,6 +2258,33 @@ def _figure_checks(c, image_path) -> None:
                       % (tag, kit_set, figure, swap.rows, swap.surfaces, len(swap.wrong)))
                 c.ok("TEX_%s set %d figure %d: 486/488 swapped draws the other figure's colours"
                      % (tag, kit_set, figure), swap.ok, "; ".join(swap.wrong[:3]))
+
+
+def _player_skin_image_checks(c, kit, geometry) -> None:
+    """`api.figure` with a player, on the disc (KRP-TASK-24, PLAN-KITS-REPLAY
+    section 3.3): the body's bare skin follows the player's SKIN.  Skin D
+    against skin A, the rest of the tuple the same: some primitive outside
+    the MODEL.BIN head changes CLUT on both figures, and every one that does
+    is three rows down (the looks rule, CORR-LOOKS-103)."""
+    for figure in api.FIGURES:
+        drawn = {}
+        for looks_tuple in ("A-L3-H-A-A", "D-L3-H-A-A"):
+            scene = c.attempt("figure %d with player %s" % (figure, looks_tuple),
+                              lambda t=looks_tuple: api.figure(kit, 1, figure,
+                                                               frame=api.FIGURE_POSE,
+                                                               geometry=geometry, player=t))
+            if scene is None:
+                return
+            drawn[looks_tuple] = {(p.file, p.section, p.primitive): p.clut
+                                  for p in scene.parts if p.file != api.MODEL_FILE}
+        light, dark = drawn["A-L3-H-A-A"], drawn["D-L3-H-A-A"]
+        moved = [k for k in light if light[k] != dark.get(k)]
+        rows = sorted({(dark[k] >> api.CLUT_COLUMN_BITS) - (light[k] >> api.CLUT_COLUMN_BITS)
+                       for k in moved if k in dark})
+        print("  ..... figure %d, skin A to D: %d of %d body primitive(s) move, by %s row(s)"
+              % (figure, len(moved), len(light), rows))
+        c.ok("figure %d, player skin A to D: the body's skin moves, three rows down" % figure,
+             bool(moved) and rows == [3], "%d moved, rows %s" % (len(moved), rows))
 
 
 def _player_match_image_checks(c, kit, geometry) -> None:

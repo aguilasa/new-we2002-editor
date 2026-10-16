@@ -103,8 +103,14 @@ def scene_of(kit, kit_set: int = 1, figure: int = 0, geometry_path=None, frame=N
     kit.require()
     files = dict(geometry)
     files[SLOT] = kit.data
+    values = looks.parse_tuple(TUPLE)
+    if player is not None:
+        # The body's bare skin takes the player's SKIN, by the rule the looks
+        # cycle measured on LOOKS SET (CORR-LOOKS-103): the user's decision of
+        # 2026-10-16, PLAN-KITS-REPLAY section 3.3.  His head comes after.
+        values["skin_colour"] = player_values(player)["skin_colour"]
     try:
-        built = scene.build(files, looks.parse_tuple(TUPLE), figure, frame,
+        built = scene.build(files, values, figure, frame,
                             layout.KIT_ON_SCREEN, kit_set)
     except (scene.BadScene, assembly.BadAssembly, texture.BadTable) as exc:
         raise FigureError("%s cannot be drawn on the figure: %s" % (kit.label, exc)) from exc
