@@ -17,6 +17,7 @@ A aba 3D não tem mais o campo de texto da tupla: com "Cabeça do jogador" marca
   - `tools/kits/ui_check.py` (juiz do painel e das larguras, e as plantas)
   - `tools/kits/selftest.py`
   - `tools/kits/controls.py`
+  - `docs/PLAN-KITS-REPLAY.md` (§3.3: o 940×409 → 786×409 medido e os números de confronto inalterados; declarado pela [CORR-KRP-022](/docs/tasks/kits-replay/CORR-KRP-022.md))
 - Out:
   - o sexto campo (`boots`), altura e corpo (§3.3)
   - o seletor de jogador real (KRP-TASK-17)

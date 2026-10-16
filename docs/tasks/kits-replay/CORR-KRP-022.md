@@ -46,3 +46,18 @@ awk '/^## Arquivos a criar/,/^## Done/' docs/tasks/kits-replay/22-painel-de-cont
 Hoje imprime 0. Depois do conserto tem de imprimir pelo menos 1.
 
 ## Log de Execução
+
+### 2026-10-16
+
+Reprodução (`rite reproduce`, HEAD `804d7280`): `git show --stat c74ba1cb | grep PLAN` dá
+`docs/PLAN-KITS-REPLAY.md | 6 +-`, e o `awk … | grep -c PLAN-KITS-REPLAY` dá 0.
+
+Conserto: em "In:", a linha `docs/PLAN-KITS-REPLAY.md` (§3.3), com o texto do Fix e o link desta
+correção.
+
+Verificação:
+
+```text
+$ awk '/^## Arquivos a criar/,/^## Done/' docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md | grep -c PLAN-KITS-REPLAY
+1
+```
