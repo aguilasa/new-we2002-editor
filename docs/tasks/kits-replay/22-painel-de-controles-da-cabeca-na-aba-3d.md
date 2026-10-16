@@ -151,3 +151,18 @@ $ python3 tools/kits/controls.py
   RED    api-player-tuple-drops-a-field kits/core/api.py :: player_tuple
 controls: 81 of 81 red
 ```
+- **Closed** — commit `c74ba1cb` (2026-10-16): feat(kits): head panel of combos in place of the looks tuple text field
+  - Files (`git show --name-status c74ba1cb`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md`
+    - `M docs/tasks/kits-replay/progress.json`
+    - `M docs/tasks/kits-replay/progresso.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`
+  - **Outside declared files** (`tools/kits/core/api.py`, `tools/kits/ui/app.py`, `tools/kits/ui/i18n.py`, `tools/kits/ui_check.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/PLAN-KITS-REPLAY.md`):
+    - `docs/tasks/kits-replay/progress.json`
+    - `docs/tasks/kits-replay/progresso.md`
