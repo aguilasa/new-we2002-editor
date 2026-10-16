@@ -71,3 +71,9 @@ docs/tasks/kits-replay/23-fechamento-da-fase-3a.md:43:$ sh "$RITE_HOME/bin/rite"
 ```
 
 O primeiro não imprime nada (sai 1).
+- **Closed** — commit `e92e6353` (2026-10-16): docs(kits): closing Logs call rite check by its runnable path
+  - Files (`git show --name-status e92e6353`):
+    - `M docs/tasks/kits-replay/08-fechamento-da-fase-2.md`
+    - `M docs/tasks/kits-replay/11-fechamento-da-fase-3.md`
+    - `M docs/tasks/kits-replay/23-fechamento-da-fase-3a.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-026.md`
