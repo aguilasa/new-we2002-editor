@@ -319,6 +319,13 @@ PLANTS = (
      "        self.fit_head_panel()\n",
      "        if self.head_panel.maximumWidth() >= 16777215:  # planted: width fixed\n"
      "            self.fit_head_panel()\n"),
+    ("head panel width oversized", HEAD,
+     "        self.head_panel.setFixedWidth(self.head_panel.sizeHint().width())\n",
+     "        self.head_panel.setFixedWidth(self.head_panel.sizeHint().width() + 60)"
+     "  # planted\n"),
+    ("invalid player looks accepted", HEAD,
+     '            print("--player-looks: %s" % exc, file=sys.stderr)\n            return 2\n',
+     "            pass  # planted: an invalid tuple accepted\n"),
     ("the player's hair colour not moved", PLAYER,
      '        column += values["hair_colour"]\n',
      "        column += 0  # planted: the hair colour not moved\n",
@@ -1048,14 +1055,27 @@ HEAD_WANT = {
 user's (2026-10-16), written here and not read from ui/i18n.py."""
 HEAD_LOOKS = ("A-L3-H-A-A", {"hair_style": "L3", "hair_colour": "H"})
 """A tuple --player-looks puts on the combos, and what two of them then show."""
+HEAD_BAD_LOOKS = ("X-Y", "--player-looks: 'X-Y' is not a looks tuple like A-A1-A-A-A: ")
+"""A --player-looks that is not a tuple, and the start of the sentence it has
+to be refused with, exit 2 (CORR-KRP-024)."""
 
 
 def head_judge(python, image, env, app=APP) -> tuple:
     """(failures, what was seen): the 3D tab has no text field; the head panel
     is hidden with Player's head unticked and shown ticked, with the five combos
-    of HEAD_WANT set by --player-looks; and after each live switch every label
-    is as wide as its text and the panel's width follows the language."""
+    of HEAD_WANT set by --player-looks; a --player-looks that is not a tuple is
+    refused with the sentence and exit 2; and after each live switch every
+    label is as wide as its text and the panel is as wide as its contents need
+    -- not cut, not left wide -- so its width follows the language."""
     bad, seen = [], []
+    # --list-3d so that a window which accepts the tuple exits 0 at once
+    # instead of waiting out TIMEOUT on screen.
+    code, output = run_app(python, app, [image, "--player-looks", HEAD_BAD_LOOKS[0],
+                                         "--list-3d"], env)
+    if code != 2 or HEAD_BAD_LOOKS[1] not in output:
+        bad.append("--player-looks %s: exit %s, %r, not exit 2 with %r"
+                   % (HEAD_BAD_LOOKS[0], code, output.strip()[-200:], HEAD_BAD_LOOKS[1]))
+    seen.append("--player-looks %s exit %s" % (HEAD_BAD_LOOKS[0], code))
     for lang, (title, rows) in sorted(HEAD_WANT.items()):
         for ticked in (False, True):
             args = [image, "--tag", MATCH_TAG, "--tab", "3d", "--lang", lang, "--list-3d"]
@@ -1094,7 +1114,12 @@ def head_judge(python, image, env, app=APP) -> tuple:
             if line.startswith("head panel: "):
                 if "shown True" not in line:
                     bad.append("%s to %s: %s" % (first, then, line))
-                widths[then] = int(line.rsplit("width ", 1)[1])
+                width, fits = (int(line.rsplit(word + " ", 1)[1].split(",")[0])
+                               for word in ("width", "fits"))
+                widths[then] = width
+                if width != fits:
+                    bad.append("%s to %s: the head panel is %d px and its contents need %d"
+                               % (first, then, width, fits))
             elif line.startswith("head label "):
                 name, rest = line[len("head label "):].split(": ", 1)
                 width, needs = (int(part.split()[1]) for part in rest.split(", ")[:2])

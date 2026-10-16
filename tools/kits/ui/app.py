@@ -1175,10 +1175,12 @@ def main(argv=None) -> int:
         for name, box in window.combos().items():
             field, longest, text = combo_fit(box)
             print("  combo %s: field %d, longest %d, %r" % (name, field, longest, text))
-        # The head panel after the switch (section 3.3): its width, and each
-        # label's laid-out width against the width its text needs.
-        print("  head panel: shown %s, width %d" % (not window.head_panel.isHidden(),
-                                                  window.head_panel.width()))
+        # The head panel after the switch (section 3.3): its width against the
+        # width its contents need (the size hint, so a panel left wide shows),
+        # and each label's laid-out width against the width its text needs.
+        print("  head panel: shown %s, width %d, fits %d"
+              % (not window.head_panel.isHidden(), window.head_panel.width(),
+                 window.head_panel.sizeHint().width()))
         for name, label in window.head_labels.items():
             print("  head label %s: width %d, needs %d, %r"
                   % (name, label.width(), label.sizeHint().width(), label.text()))
