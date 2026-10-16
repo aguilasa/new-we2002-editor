@@ -278,10 +278,11 @@ Balaban com as CLUTs (32,480) e (160,480).
 
 **Feito na fase 3** ([KRP-TASK-09](/docs/tasks/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md)
 a [11](/docs/tasks/kits-replay/11-fechamento-da-fase-3.md)). A regra fechou inteira, e por isso a
-§3.2 desenha tudo o que a §3.1 mediu, sem parte deixada no default. O que difere do texto de cima:
-o `replay.py` ganhou `head` (`--player`, `--drawn`, `--plant-hair-column`), o `check` passou a
-julgar a cabeça de toda figura seguida contra `HEAD_EXPECT`, e o `confront --tab` ganhou
-`--player`. O jogador real no seletor continua no [§6](#6).
+§3.2 desenha tudo o que a §3.1 mediu, sem parte deixada no default. O `head --player`, o
+julgamento contra `HEAD_EXPECT` e o `confront --tab --player` saíram como o texto de cima descreve.
+O que se afasta dele são duas opções do `head`: `--drawn`, que é relatório e não gate
+([CORR-KRP-018](/docs/tasks/kits-replay/CORR-KRP-018.md)), e `--plant-hair-column`, a planta com
+dado real. O jogador real no seletor continua no [§6](#6).
 
 ## 4. Goleiro pela família 13
 
