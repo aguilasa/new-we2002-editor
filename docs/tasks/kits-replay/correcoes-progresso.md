@@ -27,5 +27,5 @@
 | [CORR-KRP-022](/docs/tasks/kits-replay/CORR-KRP-022.md) | KRP-TASK-22 declara docs/PLAN-KITS-REPLAY.md no files mas não em Arquivos a criar ou modificar | KRP-TASK-22 | medium | done | 2026-10-16 |
 | [CORR-KRP-023](/docs/tasks/kits-replay/CORR-KRP-023.md) | Linhas $ do Log da KRP-TASK-22 encurtadas e o lado antes (ca147a8e) não mostrado | KRP-TASK-22 | medium | pending | — |
 | [CORR-KRP-024](/docs/tasks/kits-replay/CORR-KRP-024.md) | head_judge não pega painel de cabeça largo demais, e o exit 2 de --player-looks inválido não tem gate | KRP-TASK-22 | low | pending | — |
-| [CORR-KRP-025](/docs/tasks/kits-replay/CORR-KRP-025.md) | Altura da vista 3D depende do comprimento do caminho da imagem (940x409 contra 940x379) | KRP-TASK-22 | low | pending | — |
+| [CORR-KRP-025](/docs/tasks/kits-replay/CORR-KRP-025.md) | Altura da vista 3D depende do comprimento do caminho da imagem (940x409 contra 940x379) | KRP-TASK-22 | low | done | 2026-10-16 |
 <!-- rite:end -->

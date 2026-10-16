@@ -164,3 +164,7 @@ controls: 81 of 81 red
 
 O `ctest -R kits` completo do perfil não foi rodado nesta corrida; o `kits_ui` e o `kits_selftest`
 acima são dois dos alvos dele.
+- **Closed** — commit `14c44501` (2026-10-16): fix(kits): status and geometry note stay one line, so the 3D view height no longer depends on the image path
+  - Files (`git show --name-status 14c44501`):
+    - `M docs/tasks/kits-replay/CORR-KRP-025.md`
+    - `M tools/kits/ui/app.py`

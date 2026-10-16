@@ -320,12 +320,12 @@
       "title": "Altura da vista 3D depende do comprimento do caminho da imagem (940x409 contra 940x379)",
       "origin": "KRP-TASK-22",
       "severity": "low",
-      "files": [],
-      "resources": [],
-      "status": "pending",
+      "files": ["tools/kits/ui/app.py"],
+      "resources": ["tela"],
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-16",
+      "done_commit": "14c44501"
     }
   ]
 }
