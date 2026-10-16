@@ -99,13 +99,14 @@ FIGURE_TRIANGLES = _figure.TRIANGLES
 
 
 def figure(kit, kit_set=1, figure=0, geometry_path=None, frame=None, geometry=None,
-           armband=False, sleeves=None):
+           armband=False, sleeves=None, player=None):
     """The looks `Scene` of *figure* (0 player, 1 goalkeeper) in set *kit_set*
     of *kit*, with the captain's *armband* and *sleeves* ("short" or "long";
-    None, the figure's own) put on by the rule of G3.  The geometry comes from *geometry_path*, else
+    None, the figure's own) put on by the rule of G3, and with *player* (a looks
+    tuple) that player's head (PLAN-KITS-REPLAY section 3.2).  The geometry comes from *geometry_path*, else
     from `WE2002_LOOKS_IMAGE`; with neither, `NoGeometry` (section 3.1)."""
     return _figure.scene_of(kit, kit_set, figure, geometry_path, frame, geometry,
-                            armband, sleeves)
+                            armband, sleeves, player)
 
 
 MATCH_FIGURES = _figure.MATCH_FIGURES
@@ -114,15 +115,23 @@ MATCH_VIEWS = _figure.MATCH_VIEWS
 
 
 def match_figure(kit, kit_set=1, armband=False, sleeves="long", figure="outfield",
-                 view="torso", geometry=None, geometry_path=None, pose=None):
+                 view="torso", geometry=None, geometry_path=None, pose=None, player=None):
     """The match figure of section 4.3: MODEL.BIN's pieces in the pose the
     game drew them in, with the captain's armband or not and long or short
-    sleeves, wearing set *kit_set* of *kit*."""
+    sleeves, wearing set *kit_set* of *kit*; with *player* (a looks tuple)
+    that player's head."""
     return _figure.match_scene(kit, kit_set, armband, sleeves, figure, view, geometry,
-                               geometry_path, pose)
+                               geometry_path, pose, player)
 
 
 SHIRT_NUMBERS = _figure.NUMBERS
+MODEL_FILE = _figure.layout.MODEL
+CLUT_COLUMN_BITS = _figure.skin.COLUMN_BITS
+CLUT_COLUMN_STEP = 16
+"""A CLUT id is the VRAM row above `CLUT_COLUMN_BITS` and the 16-entry
+window across it below; x is the window times `CLUT_COLUMN_STEP`."""
+PLAYER_REFERENCE = _figure.TUPLE
+"""The looks tuple the figure wears without a player: its head is this one's."""
 
 
 def numbered(drawn, kit, kit_set, figure, number):

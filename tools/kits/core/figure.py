@@ -35,6 +35,7 @@ import assembly  # noqa: E402  (tools/looks)
 import atlas  # noqa: E402
 import layout  # noqa: E402
 import looks  # noqa: E402
+import pieces  # noqa: E402
 import scene  # noqa: E402
 import skin  # noqa: E402
 import texture  # noqa: E402
@@ -83,11 +84,12 @@ def read_geometry(path: str) -> dict:
 
 
 def scene_of(kit, kit_set: int = 1, figure: int = 0, geometry_path=None, frame=None,
-             geometry=None, armband: bool = False, sleeves: str = None):
+             geometry=None, armband: bool = False, sleeves: str = None, player: str = None):
     """The looks `Scene` of *figure* wearing set *kit_set* of *kit*, with the
     captain's *armband* and *sleeves* ("short" or "long"; None, the
     figure's own: short for the player, long for the goalkeeper) put on by
-    `dressed_scene`.
+    `dressed_scene`, and with *player* (a looks tuple, `A-L3-H-A-A`) the
+    head that player's record draws (`player_headed`); None keeps `TUPLE`'s.
 
     *geometry* is the dict `read_geometry` gives, for a caller drawing more
     than one figure off the same disc."""
@@ -109,8 +111,95 @@ def scene_of(kit, kit_set: int = 1, figure: int = 0, geometry_path=None, frame=N
     # The game copies the shirt back into the torso gap on every LOOKS SET
     # figure (BACK_COPY, measured), number or not: drawn without it the back
     # showed through (KITS-AJUSTES-3D.md G5, K3D-TASK-05).
+    if player is not None:
+        built = player_headed(built, player_values(player), kit, kit_set, geometry, frame)
     backed = numbered_scene(built, kit, kit_set, figure, None)
     return dressed_scene(backed, kit, kit_set, figure, geometry, frame, armband, sleeves)
+
+
+# -- the player's head (PLAN-KITS-REPLAY section 3) --------------------------------
+
+def player_values(player: str) -> dict:
+    """The five looks of a player tuple (`looks.parse_tuple`), or FigureError."""
+    try:
+        return looks.parse_tuple(player)
+    except (looks.BadLooks, ValueError, KeyError) as exc:
+        raise FigureError("%r is not a looks tuple like %s: %s" % (player, TUPLE, exc)) from exc
+
+
+def player_head_section(values: dict) -> int:
+    """The MODEL.BIN head the game draws for a record (KRP-TASK-09, measured on
+    the 22 of slots 9 and 10): the section of its HAIR style
+    (`assembly.HAIR_MAP`), the twin `FACE_TWINS` names when its beard is F or
+    G."""
+    number = assembly.HAIR_MAP[values["hair_style"]][0]
+    if values["beard_style"] >= assembly.FACE_TWIN_FROM:
+        number = assembly.FACE_TWINS[assembly.HEAD_FIGURE][number]
+    return number
+
+
+def player_head_clut(clut: int, values: dict) -> int:
+    """The CLUT the game samples a head primitive with, from the one the disc
+    gives it (KRP-TASK-09): the row of skin `skin_colour`, and the disc's hair
+    column (`layout.HAIR_COLUMN`) moved to `hair_colour`'s, its beard column
+    (`layout.BEARD_COLUMN`) to `beard_colour`'s.  A CLUT off the skin records
+    or in another column is the disc's: the rule says nothing of it."""
+    row, column = skin.grid(clut)
+    if not layout.CLUT_ROW_FIRST <= row < layout.CLUT_ROW_FIRST + len(layout.SKIN_PALETTES):
+        return clut
+    if column == layout.HAIR_COLUMN:
+        column += values["hair_colour"]
+    elif column == layout.BEARD_COLUMN:
+        column += values["beard_colour"]
+    else:
+        return clut
+    return skin.clut_id(layout.CLUT_ROW_FIRST + values["skin_colour"], column)
+
+
+def player_head_parts(values: dict, geometry, kit, kit_set: int, surfaces: dict,
+                      notes: dict) -> tuple:
+    """(the head's section, its parts at the file's origin): every primitive of
+    `player_head_section`, with the disc's own texels and `player_head_clut`,
+    textured as `match_scene` textures a MODEL.BIN primitive."""
+    import copy
+    import section
+
+    number = player_head_section(values)
+    one = section.scan(geometry[layout.MODEL], layout.MODEL_GEOMETRY_START).sections[number]
+    banks = _model_banks(geometry, kit, kit_set)
+    parts = []
+    for at, primitive in enumerate(one.primitives):
+        worn = copy.copy(primitive)
+        worn.clut = player_head_clut(primitive.clut, values)
+        parts.append(_model_part(worn, one.vertices, number, at, banks, surfaces, notes))
+    return number, parts
+
+
+def player_headed(drawn, values: dict, kit, kit_set: int, geometry, frame=None):
+    """*drawn* (a LOOKS SET figure of `scene_of`) with its MODEL.BIN head taken
+    out and the player's put in (`player_head_parts`), through the place the
+    frame gives the head (`scene.place_for`: every head takes the HEAD's pose).
+    Nothing else of the figure changes: the rule measured is the head's."""
+    heads = {p.section for p in drawn.parts if p.file == layout.MODEL}
+    if len(heads) != 1:
+        raise FigureError("the figure draws %d MODEL.BIN section(s) before its head is "
+                          "swapped, not one: %s" % (len(heads), sorted(heads)))
+    surfaces, notes = dict(drawn.surfaces), dict(drawn.notes)
+    number, head = player_head_parts(values, geometry, kit, kit_set, surfaces, notes)
+    places = scene.pose(geometry, frame) if frame is not None else {}
+    place = scene.place_for(places, (layout.MODEL, number),
+                            (layout.MODEL, pieces.HEAD_SECTION)) if places else None
+    parts = [p for p in drawn.parts if p.file != layout.MODEL]
+    for part in head:
+        if place is not None:
+            part = scene.Part(part.file, part.section, part.primitive,
+                              scene.drawn_points(part.points, *place), part.uvs,
+                              part.surface, part.why, part.clut, part.band,
+                              part.band_unmeasured)
+        parts.append(part)
+    notes["player head"] = {"section": number, "replaced": sorted(heads)[0]}
+    return scene.Scene(parts, {k: v for k, v in surfaces.items() if v is not None},
+                       drawn.values, drawn.figure, notes)
 
 
 # -- control 4 of section 5: swapping 486 and 488 -----------------------------------
@@ -333,7 +422,7 @@ def _model_part(primitive, vertices, number: int, at: int, banks, surfaces: dict
 
 def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "long",
                 figure: str = "outfield", view: str = "torso", geometry=None,
-                geometry_path=None, pose=None):
+                geometry_path=None, pose=None, player: str = None):
     """The looks `Scene` of a match figure wearing set *kit_set* of *kit*.
 
     The pieces are MODEL.BIN's sections in the order the game drew them, each
@@ -342,7 +431,10 @@ def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "lo
     CLUT the disc gives it, looked for in `DAT2D.BIN` first and in the kit
     second.  The texel of each corner follows the stored vertex order, as
     `scene.part_for` reads it -- the order KITS-TASK-45 measured.  The head
-    wears the disc's own CLUTs: no LOOKS SET tuple edits it."""
+    wears the disc's own CLUTs: no LOOKS SET tuple edits it -- unless
+    *player* (a looks tuple) is given: then the head is that record's, the
+    section `player_head_section` and the CLUTs `player_head_clut`, in the
+    measured head's matrix."""
     import section
 
     if kit_set not in KIT_SETS:
@@ -354,6 +446,10 @@ def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "lo
     pose = pose if pose is not None else read_match_pose()
     measured = pose["figures"][figure]
     order = match_order(measured["pieces"], armband, sleeves)
+    values = player_values(player) if player is not None else None
+    if values is not None:
+        number, rotation, translation = order[0]
+        order = [(player_head_section(values), rotation, translation)] + order[1:]
     if geometry is None:
         geometry = read_geometry(geometry_path_for(geometry_path))
     kit.require()
@@ -380,9 +476,16 @@ def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "lo
                 p = _apply(undo, (p[0] - root[1][0], p[1] - root[1][1], p[2] - root[1][2]))
             moved.append(_Vertex(*p))
         for at, primitive in enumerate(one.primitives):
+            if values is not None and number == order[0][0]:
+                import copy
+
+                primitive = copy.copy(primitive)
+                primitive.clut = player_head_clut(primitive.clut, values)
             parts.append(_model_part(primitive, moved, number, at, banks, surfaces, notes))
+    if values is not None:
+        notes["player head"] = {"section": order[0][0]}
     return scene.Scene(parts, {k: v for k, v in surfaces.items() if v is not None},
-                       looks.parse_tuple(TUPLE), 0, notes)
+                       values if values is not None else looks.parse_tuple(TUPLE), 0, notes)
 
 
 def screen_points(drawn, part) -> list:

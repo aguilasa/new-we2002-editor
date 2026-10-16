@@ -246,6 +246,29 @@ Dois slots medidos dizem "nos dois", não "sempre".
 `TUPLE = assembly.CORPUS_REFERENCE`. O CLI e a aba ganham a opção (a tupla, e depois o jogador real
 pelo [§6](#6)). Confronto de antes e depois pelo `confront --tab` nos três de perto.
 
+**Feito** ([KRP-TASK-10](/docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md)).
+Os dois recebem `player` (uma tupla da looks, `A-L3-H-A-A`). Quem desenha a cabeça é a regra do
+[§3.1](#3.1), em `core/figure.py`, e o `replay.py head` usa a mesma regra de seção:
+
+- `player_head_section`: a seção do `HAIR_MAP`, e a gêmea do `FACE_TWINS` para barba F ou G;
+- `player_head_clut`: aplicada sobre a CLUT que o **disco** dá a cada primitiva da cabeça. A linha
+  vira `480 + skin_colour`, a coluna 1 vira `1 + hair_colour` e a coluna 9 vira
+  `9 + beard_colour`. Qualquer outra CLUT fica como o disco a dá;
+- os texels são os do disco, como o `match_scene` texturiza uma seção do MODEL.BIN.
+
+Na figura da aba (`scene_of`), a cabeça da tupla de referência sai inteira e a do jogador entra no
+lugar que a pose dá à cabeça (`scene.place_for`). A cena da looks com a tupla do jogador não serve:
+ela deixa parte das primitivas da 46 na coluna do disco, e o jogo pinta todas. **O resto da figura
+não muda**, inclusive a pele do corpo, que nenhum replay mediu. No `match_scene`, a seção da cabeça
+troca na mesma matriz.
+
+Sem a opção nada muda, e o digest de `cli.py figure` (as duas cenas) é o de antes. O CLI tem
+`figure --player`; a aba tem a caixa "Cabeça do jogador" e o `--player-looks`; o
+`confront --tab --player` repassa a tupla do jogador que o painel da captura nomeia
+(`HEAD_EXPECT`). O confronto do desenho com o jogo, primitiva a primitiva, é o
+`replay.py head --drawn`: as três capturas de perto e os 24 focos de cada laço amostram a CLUT do
+jogo em toda primitiva.
+
 ## 4. Goleiro pela família 13
 
 Medido ([item 3](/docs/KITS-REPLAYS-9-10.md#3)): o goleiro do jogo é a família 13 inteira — torso

@@ -401,7 +401,15 @@ class Window(QtWidgets.QMainWindow):
         self.armband_box = QtWidgets.QCheckBox()
         self.long_box = QtWidgets.QCheckBox()
         self.player_long = False         # the player's Long sleeves while the goalkeeper shows
-        for widget in (self.number_box, self.armband_box, self.long_box):
+        # The player's head (PLAN-KITS-REPLAY section 3.2): his looks tuple
+        # picks the head section and its CLUTs by the rule KRP-TASK-09
+        # measured on the 22 of two replays; unticked, the reference head.
+        self.player_box = QtWidgets.QCheckBox()
+        self.player_edit = QtWidgets.QLineEdit()
+        self.player_edit.setPlaceholderText(api.PLAYER_REFERENCE)
+        self.player_edit.setText(api.PLAYER_REFERENCE)
+        self.player_edit.editingFinished.connect(self.draw_figure)
+        for widget in (self.number_box, self.armband_box, self.long_box, self.player_box):
             widget.toggled.connect(self.draw_figure)
         self.number_spin.valueChanged.connect(self.draw_figure)
         self.figure_box.currentIndexChanged.connect(self.dressings)
@@ -423,7 +431,8 @@ class Window(QtWidgets.QMainWindow):
         three_layout = QtWidgets.QVBoxLayout(three)
         three_layout.addLayout(row)
         dress = QtWidgets.QHBoxLayout()
-        for widget in (self.number_box, self.number_spin, self.armband_box, self.long_box):
+        for widget in (self.number_box, self.number_spin, self.armband_box, self.long_box,
+                       self.player_box, self.player_edit):
             dress.addWidget(widget)
         dress.addStretch(1)
         three_layout.addLayout(dress)
@@ -594,6 +603,7 @@ class Window(QtWidgets.QMainWindow):
         self.long_box.setText(tr("long_keeper") if keeper else tr("long_sleeves"))
         self.armband_box.setText(tr("armband"))
         self.number_box.setText(tr("number"))
+        self.player_box.setText(tr("player_head"))
 
     def draw_figure(self) -> None:
         """The figure in the chosen set, drawn only while its tab is shown."""
@@ -609,7 +619,9 @@ class Window(QtWidgets.QMainWindow):
                                frame=api.FIGURE_POSE, geometry=self.geometry,
                                armband=self.armband_box.isChecked(),
                                sleeves=api.MATCH_SLEEVES[
-                                   0 if self.long_box.isChecked() else 1])
+                                   0 if self.long_box.isChecked() else 1],
+                               player=self.player_edit.text().strip()
+                               if self.player_box.isChecked() else None)
             if self.number_box.isChecked():
                 scene = api.numbered(scene, self.kit, self.set_box.currentData(),
                                      self.figure_box.currentData(),
@@ -940,6 +952,9 @@ def main(argv=None) -> int:
                         help="3D: tick Captain armband")
     parser.add_argument("--long-sleeves", action="store_true",
                         help="3D: tick Long sleeves")
+    parser.add_argument("--player-looks", metavar="TUPLE",
+                        help="3D: tick Player's head and draw this looks tuple's head, "
+                             "e.g. A-L3-H-A-A")
     parser.add_argument("--number", type=int, metavar="N",
                         help="3D: tick Number, with N in its field")
     parser.add_argument("--list-3d", action="store_true",
@@ -1015,13 +1030,17 @@ def main(argv=None) -> int:
     if args.number is not None:
         window.number_spin.setValue(args.number)
         window.number_box.setChecked(True)
+    if args.player_looks is not None:
+        window.player_edit.setText(args.player_looks)
+        window.player_box.setChecked(True)
     window.dressings()
     if args.list_3d:
         boxes = {"number": window.number_box, "armband": window.armband_box,
-                 "long sleeves": window.long_box}
+                 "long sleeves": window.long_box, "player head": window.player_box}
         for name, box in boxes.items():
             print("  box %s: shown %s, enabled %s, ticked %s, text %s"
                   % (name, not box.isHidden(), box.isEnabled(), box.isChecked(), box.text()))
+        print("  player looks: %s" % window.player_edit.text())
         print("  figure selector: %s: %s" % (
             window.figure_labels["figure"].text(),
             " | ".join(window.figure_box.itemText(i) for i in range(window.figure_box.count()))))

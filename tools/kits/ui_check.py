@@ -188,10 +188,11 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
 STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO, \
-    BACK, RASTER, FRAME, SAME = ("style", "hover", "3D", "3D off", "selector", "diagnosis",
-                                 "diagnosis note", "reset", "armband", "dressing",
-                                 "dressing boxes", "combo width", "back copy", "core drawing",
-                                 "frame time", "same figure")
+    BACK, RASTER, FRAME, SAME, PLAYER = ("style", "hover", "3D", "3D off", "selector",
+                                         "diagnosis", "diagnosis note", "reset", "armband",
+                                         "dressing", "dressing boxes", "combo width",
+                                         "back copy", "core drawing", "frame time",
+                                         "same figure", "player head")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -260,8 +261,8 @@ PLANTS = (
      "            if self.number_box.isChecked():\n",
      "            if False:  # planted: Number ignored\n"),
     ("Long sleeves ignored", DRESS,
-     "                                   0 if self.long_box.isChecked() else 1])\n",
-     "                                   1])  # planted: Long sleeves ignored\n"),
+     "                                   0 if self.long_box.isChecked() else 1],\n",
+     "                                   1],  # planted: Long sleeves ignored\n"),
     ("kit 1 labelled first", BOXES,
      '        self.set_box.setItemText(0, tr("set_first"))\n',
      '        self.set_box.setItemText(0, "first")  # planted\n'),
@@ -303,6 +304,13 @@ PLANTS = (
     ("kit labels bare tags", SELECTOR,
      '                labels[tag] = tr("kit_team", team=team.name, tag=tag)\n',
      '                labels[tag] = tr("kit_tag", tag=tag)  # planted: bare tags\n'),
+    ("Player's head ignored", PLAYER,
+     "                               if self.player_box.isChecked() else None)\n",
+     "                               if False else None)  # planted: Player's head ignored\n"),
+    ("the player's hair colour not moved", PLAYER,
+     '        column += values["hair_colour"]\n',
+     "        column += 0  # planted: the hair colour not moved\n",
+     "../core/figure.py"),
     ("Plan changes without geometry", OFF,
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n",
      "        self.tabs.setTabEnabled(1, self.geometry is not None)\n"
@@ -919,15 +927,19 @@ stays ticked and off, and BOX_WANT asserts that."""
 BOX_WANT = {
     ("0", "en-US"): {"number": (True, True, "Number"),
                      "armband": (True, True, "Captain armband"),
-                     "long sleeves": (True, True, "Long sleeves")},
+                     "long sleeves": (True, True, "Long sleeves"),
+                     "player head": (True, True, "Player's head (looks)")},
     ("1", "en-US"): {"number": (True, True, "Number"),
                      "armband": (True, True, "Captain armband"),
-                     "long sleeves": (True, False, "Long sleeves: the goalkeeper wears no other")},
+                     "long sleeves": (True, False, "Long sleeves: the goalkeeper wears no other"),
+                     "player head": (True, True, "Player's head (looks)")},
     ("1", "pt-BR"): {"armband": (True, True, "Braçadeira de capitão"),
-                     "long sleeves": (True, False, "Mangas longas: o goleiro não usa outra")},
+                     "long sleeves": (True, False, "Mangas longas: o goleiro não usa outra"),
+                     "player head": (True, True, "Cabeça do jogador (aparência)")},
     ("0", "pt-BR"): {"number": (True, True, "Número"),
                      "armband": (True, True, "Braçadeira de capitão"),
-                     "long sleeves": (True, True, "Mangas longas")},
+                     "long sleeves": (True, True, "Mangas longas"),
+                     "player head": (True, True, "Cabeça do jogador (aparência)")},
 }
 """What `app.py --list-3d` has to print per (figure, language): (shown,
 enabled, text) of each dressing box, None where it does not matter.  Every
@@ -976,6 +988,35 @@ def dress_judge(python, image, env, tmp, app=APP) -> tuple:
                                % (figure, box, ", ".join(sorted(chosen)) or "nothing else"))
             seen.append("figure %s %s at least %s px" % (figure, box, least))
         seen.append("figure %s: %d combinations" % (figure, len(shots)))
+    return bad, ", ".join(seen)
+
+
+PLAYER_LOOKS = (("Croatia 11", "A-L3-H-A-A"), ("Croatia 2", "A-L3-B-A-A"))
+"""Two heads the replays measured (`replay.py` HEAD_EXPECT, KRP-TASK-09): the
+same style, skin and beard, and only the hair colour apart -- H against B --
+so a hair colour left where the disc has it draws the two the same."""
+
+
+def player_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, what was seen): `--player-looks` changes the 3D view against
+    the reference head, and two players apart only in hair colour are drawn
+    apart (PLAN-KITS-REPLAY section 3.2)."""
+    bad, seen, shots = [], [], {}
+    for name, looks_tuple in (("reference", None),) + PLAYER_LOOKS:
+        out = os.path.join(tmp, "player-%s.png" % name.replace(" ", "-"))
+        shot, more, _ = capture(python, app, image,
+                                ["--tag", MATCH_TAG, "--tab", "3d"]
+                                + (["--player-looks", looks_tuple] if looks_tuple else []),
+                                out, env)
+        bad += ["%s: %s" % (name, m) for m in more]
+        shots[name] = shot
+    if any(shot is None for shot in shots.values()):
+        return bad + ["no picture of a player head"], ""
+    for one, two in (("reference", PLAYER_LOOKS[0][0]), (PLAYER_LOOKS[0][0], PLAYER_LOOKS[1][0])):
+        n = differing_in_view(shots[one], shots[two])
+        seen.append("%s against %s %d px" % (one, two, n))
+        if n <= 0:
+            bad.append("%s and %s draw the same 3D view" % (one, two))
     return bad, ", ".join(seen)
 
 
@@ -1294,6 +1335,9 @@ def run(python: str, image: str) -> int:
         bad, seen = dress_judge(python, image, env, tmp)
         t.ok("3D TEX_%s from the back: every combination of the boxes on both figures, "
              "and each box changes the view in every one (%s)" % (MATCH_TAG, seen), bad)
+        bad, seen = player_judge(python, image, env, tmp)
+        t.ok("3D TEX_%s: Player's head draws the looks tuple's head, and two players "
+             "apart only in hair colour are drawn apart (%s)" % (MATCH_TAG, seen), bad)
         t.ok("the dressing boxes: all shown on both figures, the goalkeeper's Long "
              "sleeves ticked and off with the sentence; the kit selector "
              "Kit Home/Away, Uniforme Casa/Visitante; the figure selector two items, "
@@ -1342,6 +1386,8 @@ def run(python: str, image: str) -> int:
                     bad = []
                 elif judge == DRESS:
                     red, bad = dress_judge(python, image, env, box, app)[0], []
+                elif judge == PLAYER:
+                    red, bad = player_judge(python, image, env, box, app)[0], []
                 elif judge == RASTER:
                     red, bad = raster_judge(python, image, env, box, app)[0], []
                 elif judge == FRAME:

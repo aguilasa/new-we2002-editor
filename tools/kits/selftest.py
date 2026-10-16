@@ -1559,6 +1559,7 @@ def _replay_checks(c) -> None:
          "%s" % sorted(doc))
     _replay_reader_checks(c, cli, replay)
     _replay_head_checks(c, cli, replay)
+    _player_head_checks(c)
 
 
 def _replay_head_checks(c, cli, replay) -> None:
@@ -1654,6 +1655,39 @@ def _replay_head_checks(c, cli, replay) -> None:
          len(cli.HEAD_EXPECT) == cli.HEAD_PLAYERS and teams == sorted(cli.HEAD_TEAMS.values())
          and all(sum(t == team for t, _n in cli.HEAD_EXPECT) == 11 for team in teams),
          "%d, %s" % (len(cli.HEAD_EXPECT), teams))
+
+
+def _player_head_checks(c) -> None:
+    """figure.py, the player's head (KRP-TASK-10): the section and the CLUT the
+    rule KRP-TASK-09 measured, applied to the disc's own CLUT ids."""
+    from core import figure
+    import looks
+    import skin
+
+    values = looks.parse_tuple("D-L3-H-A-C")
+    moved = {(column, row): skin.grid(figure.player_head_clut(skin.clut_id(row, column), values))
+             for row, column in ((480, 1), (480, 9), (480, 0), (486, 1))}
+    c.ok("figure.py: the player's hair column moves to his hair colour",
+         moved[1, 480] == (483, 8), "%s" % moved)
+    c.ok("figure.py: the player's beard column moves to his beard colour",
+         moved[9, 480] == (483, 11), "%s" % moved)
+    c.ok("figure.py: the player's skin is the CLUT row 480 + skin_colour",
+         moved[1, 480][0] == 483 and moved[9, 480][0] == 483, "%s" % moved)
+    c.ok("figure.py: a head CLUT in no hair or beard column, or off the skin records, "
+         "is the disc's", moved[0, 480] == (480, 0) and moved[1, 486] == (486, 1),
+         "%s" % moved)
+    sections = {t: figure.player_head_section(looks.parse_tuple(t))
+                for t in ("A-L3-H-A-A", "A-L3-H-F-C", "A-A1-B-A-A", "A-I1-B-A-B")}
+    c.ok("figure.py: the player's head is his HAIR style's section, the twin for beard F",
+         sections == {"A-L3-H-A-A": 46, "A-L3-H-F-C": 47, "A-A1-B-A-A": 24,
+                      "A-I1-B-A-B": 34}, "%s" % sections)
+    refused = None
+    try:
+        figure.player_values("X")
+    except figure.FigureError as exc:
+        refused = str(exc)
+    c.ok("figure.py: a player that is not a looks tuple is refused in a sentence",
+         refused is not None and "is not a looks tuple" in refused, "%s" % refused)
 
 
 def _replay_reader_capture(replay, cell) -> tuple:

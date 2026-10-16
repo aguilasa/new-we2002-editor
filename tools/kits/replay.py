@@ -15,10 +15,10 @@ Usage:
     python tools/kits/replay.py panel <capture.json> [--on-axis | --nearest] [--nth N] [--json]
     python tools/kits/replay.py walk <replay-field-*-capture.json> [--json]
     python tools/kits/replay.py head <capture.json> [--player all|RECORD]
-                                     [--plant-hair-column] [--json]
+                                     [--plant-hair-column] [--drawn] [--json]
     python tools/kits/replay.py show <capture.json> --png out.png [--section S | --box]
     python tools/kits/replay.py confront <capture.json> [--section S] [--json]
-    python tools/kits/replay.py confront <capture.json> --tab [--out DIR] [--json]
+    python tools/kits/replay.py confront <capture.json> --tab [--player] [--out DIR] [--json]
     python tools/kits/replay.py capture --slot S [--focus K] [--turn R1|L1] [--walk L2|R2]
                                         [--out DIR] [--cue CUE]   # boots the emulator
     python tools/kits/replay.py check [<folder>] [--plant-hair-column]  # the kits_replay gate
@@ -380,11 +380,12 @@ def game_pixels(capture, index, which: str, on_axis: bool):
             if 0 <= py - y0 < len(rows) and 0 <= px - x0 < len(rows[0])]
 
 
-def tab_args(capture, index) -> dict:
+def tab_args(capture, index, player: bool = False) -> dict:
     """What the tab is asked to draw for the capture's figure: the kit (the
     one whose player palette the figure samples, behind a player), figure 0
     or 1, the armband, the long sleeves and the number of the measured
-    expectation (`oracle.REPLAY_EXPECT`)."""
+    expectation (`oracle.REPLAY_EXPECT`); with *player*, the looks tuple of the
+    player the panel names (`HEAD_TEAMS`, `HEAD_EXPECT`), for his head."""
     O = _kits_oracle()
     frames, figure = followed(capture, "front", bool(capture.focus), 0)
     tag, kit_set = capture.data.get("tag"), capture.data.get("set")
@@ -396,13 +397,18 @@ def tab_args(capture, index) -> dict:
     tag = "41" if tag is None else tag
     keeper = figure is not None and figure.root in (13, 56)
     expect = O.REPLAY_EXPECT.get((capture.slot, capture.focus), {})
-    return {"tag": tag, "set": kit_set, "figure": 1 if keeper else 0,
-            "armband": expect.get("armband", replay.KEEPER_ARMBAND) is not None,
-            "long_sleeves": not keeper and capture.slot in O.REPLAY_LONG_SLOTS,
-            "number": expect.get("number")}
+    asked = {"tag": tag, "set": kit_set, "figure": 1 if keeper else 0,
+             "armband": expect.get("armband", replay.KEEPER_ARMBAND) is not None,
+             "long_sleeves": not keeper and capture.slot in O.REPLAY_LONG_SLOTS,
+             "number": expect.get("number"), "player": None}
+    if player:
+        panel = expect.get("panel")
+        asked["player"] = HEAD_EXPECT.get((HEAD_TEAMS.get(panel[0]) if panel else None,
+                                           expect.get("number")))
+    return asked
 
 
-def confront_tab(capture, index, out_dir: str) -> dict:
+def confront_tab(capture, index, out_dir: str, player: bool = False) -> dict:
     """The tab's figure against the game's, front with front and back with
     back (`game_side`), by colour histogram: the intersection over all the
     game's colours and over the colours the tab draws.  It records; it asserts
@@ -412,12 +418,12 @@ def confront_tab(capture, index, out_dir: str) -> dict:
     O = _kits_oracle()
     confront = _kits_confront()
     image = os.environ[IMAGE_VARIABLE]
-    asked = tab_args(capture, index)
+    asked = tab_args(capture, index, player)
     python = confront.VENV_PYTHON
     if not os.path.isfile(python):
         raise SystemExit("replay.py: no venv python at %s (make looks-venv)" % python)
     os.makedirs(out_dir, exist_ok=True)
-    stem = os.path.splitext(os.path.basename(capture.path))[0]
+    stem = os.path.splitext(os.path.basename(capture.path))[0] + ("-player" if player else "")
     sides = {}
     for side in TAB_SIDES:
         which = game_side(side, capture.focus)
@@ -430,6 +436,7 @@ def confront_tab(capture, index, out_dir: str) -> dict:
         args += ["--armband"] if asked["armband"] else []
         args += ["--long-sleeves"] if asked["long_sleeves"] else []
         args += ["--number", str(asked["number"])] if asked["number"] is not None else []
+        args += ["--player-looks", asked["player"]] if asked["player"] else []
         if shown is None:
             sides[side] = {"game_capture": which, "game_pixels": 0, "intersection": None,
                            "intersection_tab_colours": None, "tab_png": None,
@@ -842,7 +849,39 @@ def shifted_cluts(cluts, plant: bool) -> list:
     return [(x + replay.HEAD_CLUT_STEP, y) if plant else (x, y) for x, y in cluts]
 
 
-def head_report(capture, index, player=None, image_path=None, plant: bool = False) -> dict:
+HEAD_KIT = "41"
+"""The kit `head --drawn` dresses the figure in: any kit would do, the head
+textures come from DAT2D.BIN (`figure._model_banks`)."""
+
+
+def drawn_head(figure, samples, index, tuple_text: str, geometry, kit) -> dict:
+    """The head the window draws for *tuple_text* (`api.figure`, in the pose
+    it opens with) against the game's, primitive by primitive: for every
+    primitive of the game's head section the capture samples, the CLUT the
+    game used and the one we draw it with.  `differ` lists the ones that do
+    not agree; a drawn section other than the game's is `section`."""
+    from core import api, figure as kits_figure
+
+    drawn = api.figure(kit, 1, 0, frame=api.FIGURE_POSE, geometry=geometry, player=tuple_text)
+    sec = index["sections"].get((kits_figure.layout.MODEL, figure.head))
+    by_uv = {tuple(tuple(t) for t in p.texcoords): at for at, p in enumerate(sec.primitives)}
+    game = {}
+    for one in replay.head_samples(figure, samples, index):
+        game[by_uv[tuple(tuple(t) for t in one["uv"])]] = tuple(one["clut"])
+    section = drawn.notes["player head"]["section"]
+    ours = {}
+    for part in drawn.parts:
+        if part.file == kits_figure.layout.MODEL and part.section == section:
+            row, column = kits_figure.skin.grid(part.clut)
+            ours[part.primitive] = (column * replay.HEAD_CLUT_STEP, row)
+    differ = sorted([at, list(game[at]), list(ours[at]) if at in ours else None]
+                    for at in game if section != figure.head or game[at] != ours.get(at))
+    return {"section": section, "game_section": figure.head, "primitives": len(game),
+            "differ": differ}
+
+
+def head_report(capture, index, player=None, image_path=None, plant: bool = False,
+                drawn: bool = False) -> dict:
     """`head`: per followed figure, its section, CLUTs and the head they read;
     with *player* "all" the record each locates by page and number, or with a
     record index that one record, decoded and judged; and the summary of how
@@ -850,6 +889,12 @@ def head_report(capture, index, player=None, image_path=None, plant: bool = Fals
     import looks  # noqa: E402  (tools/looks)
 
     records = disc_records(image_path) if player is not None else None
+    geometry = kit = None
+    if drawn:
+        from core import api
+
+        geometry = api.read_geometry(image_path)
+        kit = api.open_source(image_path).kit(HEAD_KIT)
     out = []
     for row in head_rows(capture, index):
         samples = replay.head_samples(row["figure"], row["samples"], index)
@@ -858,7 +903,7 @@ def head_report(capture, index, player=None, image_path=None, plant: bool = Fals
         team = HEAD_TEAMS.get(row["page"])
         doc = {"k": row["k"], "page": row["page"], "team": team, "number": row["number"],
                "primitives": len(samples), "reading": reading, "record": None, "slot": None,
-               "disc": None, "expected": None, "failures": None}
+               "disc": None, "expected": None, "failures": None, "drawn": None}
         if player is not None:
             if player == "all":
                 record, slot = (player_of(image_path, team, row["number"])
@@ -875,15 +920,22 @@ def head_report(capture, index, player=None, image_path=None, plant: bool = Fals
             else:
                 doc["failures"] = ["no record for page %s number %s"
                                    % (row["page"], row["number"])]
+        want = HEAD_EXPECT.get((team, row["number"]))
+        if drawn and want is not None and row["figure"] is not None:
+            doc["drawn"] = drawn_head(row["figure"], row["samples"], index, want, geometry, kit)
+            doc["drawn"]["tuple"] = want
         out.append(doc)
     players = {}
     for doc in out:
         if doc["failures"] is not None:
             key = (doc["team"], doc["number"]) if doc["record"] is not None else ("k", doc["k"])
             players[key] = players.get(key, True) and not doc["failures"]
+    drawn_rows = [doc for doc in out if doc["drawn"] is not None]
     return {"schema": SCHEMA, "capture": _capture_doc(capture), "player": player,
             "plant": plant, "rows": out, "players": len(players),
-            "match": sum(players.values()) if players else None}
+            "match": sum(players.values()) if players else None,
+            "drawn": len(drawn_rows) if drawn else None,
+            "drawn_agree": sum(not d["drawn"]["differ"] for d in drawn_rows) if drawn else None}
 
 
 def head_constant_failures(image_path: str) -> list:
@@ -1044,6 +1096,15 @@ def _print_head(doc) -> None:
                      e["beard"], "; ".join(r["failures"]) or "ok"))
         elif r["failures"]:
             print("           %s" % "; ".join(r["failures"]))
+        if r["drawn"] is not None:
+            d = r["drawn"]
+            print("           drawn %s: section %d (the game's %d), %d primitive(s) the game "
+                  "samples, %s" % (d["tuple"], d["section"], d["game_section"], d["primitives"],
+                                   "%d differ: %s" % (len(d["differ"]), d["differ"])
+                                   if d["differ"] else "every CLUT the game's"))
+    if doc["drawn"] is not None:
+        print("%s of %s drawn head(s) sample the game's CLUT on every primitive"
+              % (doc["drawn_agree"], doc["drawn"]))
     if doc["player"] is not None:
         print("%s of %s distinct player(s) match their disc record%s" % (
             doc["match"], doc["players"], " (plant: every CLUT a column right)"
@@ -1071,6 +1132,7 @@ def main(argv=None) -> int:
     head.add_argument("capture")
     head.add_argument("--player")
     head.add_argument("--plant-hair-column", action="store_true")
+    head.add_argument("--drawn", action="store_true")
     head.add_argument("--json", action="store_true")
     show = sub.add_parser("show")
     show.add_argument("capture")
@@ -1082,6 +1144,7 @@ def main(argv=None) -> int:
     confront.add_argument("capture")
     confront.add_argument("--section", type=int)
     confront.add_argument("--tab", action="store_true")
+    confront.add_argument("--player", action="store_true")
     confront.add_argument("--out", default=os.path.join("work", "kits-replay", "tab"))
     confront.add_argument("--json", action="store_true")
     take = sub.add_parser("capture")
@@ -1146,7 +1209,7 @@ def main(argv=None) -> int:
             print("replay.py head: --player takes all or a record index", file=sys.stderr)
             return 1
         doc = head_report(capture, _index(), args.player, os.environ.get(IMAGE_VARIABLE),
-                          args.plant_hair_column)
+                          args.plant_hair_column, args.drawn)
         for row in doc["rows"]:
             row["reading"]["cluts"] = [list(c) for c in row["reading"]["cluts"]]
             row["reading"]["stray"] = [list(c) for c in row["reading"]["stray"]]
@@ -1154,7 +1217,7 @@ def main(argv=None) -> int:
             print(json.dumps(doc, indent=1, sort_keys=True))
         else:
             _print_head(doc)
-        failed = [r for r in doc["rows"] if r["failures"]]
+        failed = [r for r in doc["rows"] if r["failures"] or (r["drawn"] and r["drawn"]["differ"])]
         return 1 if failed else 0
     if args.command == "show":
         picture = show_picture(capture, _index(), args.section, args.box)
@@ -1170,7 +1233,7 @@ def main(argv=None) -> int:
                   "(%d px drawn)" % (args.png, doc["width"], doc["height"], doc["drawn"]))
         return 0
     if args.command == "confront" and args.tab:
-        doc = confront_tab(capture, _index(), args.out)
+        doc = confront_tab(capture, _index(), args.out, args.player)
         if args.json:
             print(json.dumps(doc, indent=1, sort_keys=True))
         else:

@@ -645,7 +645,7 @@ CONTROLS = (
         "(KRP-TASK-09, PLAN-KITS-REPLAY section 3.1)",
     ),
     Control(
-        "replay-head-twin-unasked", "kits/core/replay.py", "head_expected",
+        "replay-head-twin-unasked", "kits/core/figure.py", "player_head_section",
         '    if values["beard_style"] >= assembly.FACE_TWIN_FROM:\n',
         '    if values["beard_style"] > assembly.FACE_TWIN_FROM:\n',
         "FAIL  replay.py head: head_expected draws the twin for beard F",
@@ -669,6 +669,22 @@ CONTROLS = (
         "the box of the whole figure takes in a neighbour's head: on slot 10, focus 8 reads "
         "CLUT (16,482) (32,480) and Croatia's 4 is judged skin A/C (CORR-KRP-016, "
         "PLAN-KITS-REPLAY section 3.1)",
+    ),
+    Control(
+        "figure-player-hair-unmoved", "kits/core/figure.py", "player_head_clut",
+        '        column += values["hair_colour"]\n',
+        "        column += 0\n",
+        "FAIL  figure.py: the player's hair column moves to his hair colour",
+        "every head keeps the disc's hair column: Bokšić's blond and Balaban's brown both "
+        "draw as hair colour A (KRP-TASK-10, PLAN-KITS-REPLAY section 3.2)",
+    ),
+    Control(
+        "figure-player-skin-unmoved", "kits/core/figure.py", "player_head_clut",
+        '    return skin.clut_id(layout.CLUT_ROW_FIRST + values["skin_colour"], column)\n',
+        "    return skin.clut_id(row, column)\n",
+        "FAIL  figure.py: the player's skin is the CLUT row 480 + skin_colour",
+        "the head keeps the disc's row 480, skin A: Brazil's 10 and 11 (skins C and D) "
+        "would draw as Croatia's (KRP-TASK-10)",
     ),
 )
 BY_ID = {c.id: c for c in CONTROLS}

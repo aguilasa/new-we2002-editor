@@ -1286,13 +1286,12 @@ def head_expected(values: dict) -> dict:
     """The head a player record says the game draws: the section of his HAIR
     style (`assembly.HAIR_MAP`), its twin when his beard is F or G
     (`FACE_TWINS`, from `FACE_TWIN_FROM`), and his skin, hair colour and beard
-    colour as letters."""
-    import assembly  # noqa: E402  (tools/looks)
+    colour as letters.  The section is the one the figure draws for him
+    (`figure.player_head_section`): one rule, read and drawn."""
     import looks  # noqa: E402  (tools/looks)
-    section = assembly.HAIR_MAP[values["hair_style"]][0]
-    if values["beard_style"] >= assembly.FACE_TWIN_FROM:
-        section = assembly.FACE_TWINS[assembly.HEAD_FIGURE][section]
-    return {"section": section, "skin": looks.LETTERS[values["skin_colour"]],
+    from .figure import player_head_section
+
+    return {"section": player_head_section(values), "skin": looks.LETTERS[values["skin_colour"]],
             "hair": looks.LETTERS[values["hair_colour"]],
             "beard": looks.LETTERS[values["beard_colour"]]}
 

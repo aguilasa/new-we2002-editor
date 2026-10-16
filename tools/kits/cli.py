@@ -1076,7 +1076,23 @@ def _scene_digest(scene) -> str:
     return h.hexdigest()
 
 
-def _match_figure(kit, geometry, sets, armband, sleeves) -> int:
+def _player_head(scene) -> str:
+    """What `figure --player` adds to a line: the head section drawn and the
+    CLUTs its primitives sample, as (x,y) of VRAM, with how many each."""
+    head = scene.notes.get("player head")
+    if head is None:
+        return ""
+    found = {}
+    for part in scene.parts:
+        if part.file == api.MODEL_FILE and part.section == head["section"]:
+            row, column = part.clut >> api.CLUT_COLUMN_BITS, part.clut & ((1 << api.CLUT_COLUMN_BITS) - 1)
+            key = (column * api.CLUT_COLUMN_STEP, row)
+            found[key] = found.get(key, 0) + 1
+    return "  head %d: %s" % (head["section"], " ".join(
+        "(%d,%d)x%d" % (x, y, n) for (x, y), n in sorted(found.items())))
+
+
+def _match_figure(kit, geometry, sets, armband, sleeves, player=None) -> int:
     """`figure --match`: the match figure the 3D tab draws (section 4.3), one
     line per set: its order of MODEL.BIN sections, parts, surfaces and the
     digest of the scene."""
@@ -1089,17 +1105,17 @@ def _match_figure(kit, geometry, sets, armband, sleeves) -> int:
     for kit_set in sets:
         try:
             scene = api.match_figure(kit, kit_set, armband=armband, sleeves=sleeves,
-                                     geometry=geometry, pose=pose)
+                                     geometry=geometry, pose=pose, player=player)
         except api.FigureError as exc:
             bad += 1
             print("set %d match figure: %s" % (kit_set, exc))
             continue
         print("set %d match figure, %s sleeves%s: order %s  %d parts, %d textured, "
-              "%d surfaces  %s"
+              "%d surfaces  %s%s"
               % (kit_set, sleeves, ", armband" if armband else "",
                  " ".join(map(str, scene.notes["order"])), len(scene.parts),
                  sum(1 for p in scene.parts if p.textured), len(scene.surfaces),
-                 _scene_digest(scene)))
+                 _scene_digest(scene), _player_head(scene)))
     return 1 if bad else 0
 
 
@@ -1134,7 +1150,7 @@ def cmd_figure(args) -> int:
     sets = (1, 2) if args.negative else chosen_sets(args)
     figures = tuple(args.figure or (0, 1))
     if args.match:
-        return _match_figure(kit, geometry, sets, args.armband, args.sleeves)
+        return _match_figure(kit, geometry, sets, args.armband, args.sleeves, args.player)
 
     def draw(drawn_as) -> tuple:
         digests, bad = {}, 0
@@ -1142,7 +1158,7 @@ def cmd_figure(args) -> int:
             for figure in figures:
                 try:
                     scene = api.figure(kit, drawn_as(kit_set), figure, frame=api.FIGURE_POSE,
-                                       geometry=geometry)
+                                       geometry=geometry, player=args.player)
                 except api.FigureError as exc:
                     bad += 1
                     print("set %d figure %d: %s" % (kit_set, figure, exc))
@@ -1150,11 +1166,11 @@ def cmd_figure(args) -> int:
                 low, high = scene.bounds()
                 digests[kit_set, figure] = _scene_digest(scene)
                 print("set %d figure %d  %d parts, %d textured, %d surfaces, "
-                      "bounds (%d,%d,%d)..(%d,%d,%d)  %s"
+                      "bounds (%d,%d,%d)..(%d,%d,%d)  %s%s"
                       % (kit_set, figure, len(scene.parts),
                          sum(1 for p in scene.parts if p.textured), len(scene.surfaces),
                          low[0], low[1], low[2], high[0], high[1], high[2],
-                         digests[kit_set, figure]))
+                         digests[kit_set, figure], _player_head(scene)))
         verdicts = {}
         if sets == (1, 2):
             for figure in figures:
@@ -1355,6 +1371,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--match", action="store_true",
                    help="the match figure (MODEL.BIN, the measured pose) instead")
     p.add_argument("--armband", action="store_true", help="with --match: the captain's armband")
+    p.add_argument("--player", metavar="TUPLE",
+                   help="the head a player's looks draw, e.g. A-L3-H-A-A (default: the "
+                        "reference tuple's)")
     p.add_argument("--sleeves", choices=("long", "short"), default="long",
                    help="with --match: the sleeve length (default long)")
     p.set_defaults(fn=cmd_figure)
