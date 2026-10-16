@@ -65,3 +65,4 @@ bc5176d231e7c96a81ef5bc7735f83ec0803d293cf7d06e19c73d9e885cb12c2  work/krp-t23/p
   - Files (`git show --name-status 61b1fa45`):
     - `M docs/PLAN-KITS-REPLAY.md`
     - `M docs/tasks/kits-replay/23-fechamento-da-fase-3a.md`
+- **Reviewed** (2026-10-16) at `1bf78cdb`: CORR-KRP-026

@@ -1,0 +1,52 @@
+---
+id: CORR-KRP-026
+---
+
+# CORR-KRP-026 — Logs de fechamento trazem $ sh rite check, que não roda; a forma é sh "$RITE_HOME/bin/rite"
+
+Origin: [KRP-TASK-23](/docs/tasks/kits-replay/23-fechamento-da-fase-3a.md)
+
+## Problem
+
+A linha de evidência `$ sh rite check --cycle kits-replay` do Log não roda como está escrita: não há
+arquivo `rite` na raiz do repositório, então `sh rite` falha. A forma exigida é
+`sh "$RITE_HOME/bin/rite"`. A mesma linha está copiada nas tasks de fechamento das fases 2 e 3.
+
+A saída colada está certa; só o texto do comando está errado.
+
+## Evidência
+
+```text
+$ ls rite
+ls: cannot access 'rite': No such file or directory
+$ git grep -n '\$ sh rite\b' -- docs/tasks/kits-replay
+docs/tasks/kits-replay/08-fechamento-da-fase-2.md:48:$ sh rite check --cycle kits-replay
+docs/tasks/kits-replay/11-fechamento-da-fase-3.md:43:$ sh rite check --cycle kits-replay
+docs/tasks/kits-replay/23-fechamento-da-fase-3a.md:43:$ sh rite check --cycle kits-replay
+$ sh "$RITE_HOME/bin/rite" check --cycle kits-replay
+check: 0 error(s), 0 warning(s) in 1 cycle(s)
+```
+
+## Root cause
+
+(Hipótese.) O comando foi abreviado à mão ao ser colado no Log.
+
+## Fix
+
+No bloco de Log das tasks 08, 11 e 23, trocar `$ sh rite check` por `$ sh "$RITE_HOME/bin/rite" check`.
+
+## Arquivos a criar ou modificar
+
+- `docs/tasks/kits-replay/08-fechamento-da-fase-2.md`
+- `docs/tasks/kits-replay/11-fechamento-da-fase-3.md`
+- `docs/tasks/kits-replay/23-fechamento-da-fase-3a.md`
+
+## Verificação
+
+```sh
+git grep -n '\$ sh rite\b' -- docs/tasks/kits-replay
+```
+
+Hoje lista 3 linhas. Depois do conserto não pode listar nenhuma.
+
+## Log de Execução

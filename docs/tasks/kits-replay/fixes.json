@@ -326,6 +326,19 @@
       "depends_on": [],
       "done_on": "2026-10-16",
       "done_commit": "14c44501"
+    },
+    {
+      "id": "CORR-KRP-026",
+      "file": "CORR-KRP-026.md",
+      "title": "Logs de fechamento trazem $ sh rite check, que não roda; a forma é sh \"$RITE_HOME/bin/rite\"",
+      "origin": "KRP-TASK-23",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
