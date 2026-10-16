@@ -291,6 +291,33 @@ def describe(entry) -> str:
         tr("readout_transparent") if not a else "")
 
 
+class OneLineLabel(QtWidgets.QLabel):
+    """A label that keeps one line whatever it is told: what does not fit is
+    elided in the middle on screen, and text() and the tooltip keep it whole.
+
+    The status line and the geometry note carry the image's path, and as
+    word-wrapped labels a long path took a second line each, 30 px off the
+    3D view (940x379 against 940x409, CORR-KRP-025): the layout followed
+    where the disc was opened from."""
+
+    def __init__(self, text: str = "") -> None:
+        super().__init__(text)
+        self.setWordWrap(False)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Ignored,
+                           QtWidgets.QSizePolicy.Policy.Fixed)
+
+    def setText(self, text: str) -> None:  # noqa: N802 (Qt's name)
+        super().setText(text)
+        self.setToolTip(text if text.strip() else "")
+
+    def paintEvent(self, event) -> None:  # noqa: N802 (Qt's name)
+        painter = QtGui.QPainter(self)
+        area = self.contentsRect()
+        shown = self.fontMetrics().elidedText(self.text(), QtCore.Qt.TextElideMode.ElideMiddle,
+                                              area.width())
+        painter.drawText(area, int(self.alignment()), shown)
+
+
 class Window(QtWidgets.QMainWindow):
     def __init__(self) -> None:
         super().__init__()
@@ -477,11 +504,10 @@ class Window(QtWidgets.QMainWindow):
         diag_layout.addWidget(self.diag_summary)
         diag_layout.addWidget(self.diag_list, 1)
         self.tabs.addTab(diag, "")
-        self.figure_note = QtWidgets.QLabel(" ")
-        self.figure_note.setWordWrap(True)
+        # One line each, whatever path they carry (CORR-KRP-025).
+        self.figure_note = OneLineLabel(" ")
 
-        self.status = QtWidgets.QLabel(" ")
-        self.status.setWordWrap(True)
+        self.status = OneLineLabel(" ")
         central = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(central)
         layout.addLayout(top)
