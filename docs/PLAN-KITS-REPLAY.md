@@ -315,6 +315,10 @@ Com o painel à vista a vista 3D fica mais estreita (940×409 → 786×409 px na
 mesmos números de antes nas três capturas de perto (medido na
 [KRP-TASK-22](/docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md)).
 
+**Feito na fase 3a** ([KRP-TASK-22](/docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md)
+e [23](/docs/tasks/kits-replay/23-fechamento-da-fase-3a.md)), como escrito acima e sem diferença
+do texto. O painel na tela, nas duas línguas, está nas capturas do Log da task 23.
+
 ## 4. Goleiro pela família 13
 
 Medido ([item 3](/docs/KITS-REPLAYS-9-10.md#3)): o goleiro do jogo é a família 13 inteira — torso
