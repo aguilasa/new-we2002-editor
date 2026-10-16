@@ -62,3 +62,4 @@ Nas trÃªs de perto (`replay-9-3`, `replay-10-2`, `replay-9`), o mesmo comando dÃ
   - Files (`git show --name-status 5a3e0df4`):
     - `M docs/PLAN-KITS-REPLAY.md`
     - `M docs/tasks/kits-replay/11-fechamento-da-fase-3.md`
+- **Reviewed** (2026-10-16) at `37c92fb0`: CORR-KRP-020, CORR-KRP-021

@@ -248,6 +248,32 @@
       "depends_on": [],
       "done_on": "2026-10-16",
       "done_commit": "e500c499"
+    },
+    {
+      "id": "CORR-KRP-020",
+      "file": "CORR-KRP-020.md",
+      "title": "KRP-TASK-11 edita docs/PLAN-KITS-REPLAY.md sem declará-lo, e as tasks de fechamento pendentes repetem o modelo",
+      "origin": "KRP-TASK-11",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-021",
+      "file": "CORR-KRP-021.md",
+      "title": "Parágrafo da fase 3 lista como diferença do plano o que o plano já previa",
+      "origin": "KRP-TASK-11",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

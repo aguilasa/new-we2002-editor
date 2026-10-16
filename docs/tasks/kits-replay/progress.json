@@ -180,8 +180,8 @@
       "status": "done",
       "done_on": "2026-10-16",
       "done_commit": "5a3e0df4",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-16",
+      "review_commit": "37c92fb0"
     },
     {
       "id": "KRP-TASK-12",
