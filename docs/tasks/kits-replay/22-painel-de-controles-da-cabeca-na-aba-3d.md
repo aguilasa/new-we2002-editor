@@ -166,3 +166,4 @@ controls: 81 of 81 red
   - **Outside declared files** (`tools/kits/core/api.py`, `tools/kits/ui/app.py`, `tools/kits/ui/i18n.py`, `tools/kits/ui_check.py`, `tools/kits/selftest.py`, `tools/kits/controls.py`, `docs/PLAN-KITS-REPLAY.md`):
     - `docs/tasks/kits-replay/progress.json`
     - `docs/tasks/kits-replay/progresso.md`
+- **Reviewed** (2026-10-16) at `34809e3f`: CORR-KRP-022, CORR-KRP-023, CORR-KRP-024, CORR-KRP-025

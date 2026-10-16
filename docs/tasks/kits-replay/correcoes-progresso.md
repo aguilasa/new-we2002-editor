@@ -24,4 +24,8 @@
 | [CORR-KRP-019](/docs/tasks/kits-replay/CORR-KRP-019.md) | Log da KRP-TASK-10 cola resumo condensado sob dois comandos figure --json | CORR-KRP-017 | low | done | 2026-10-16 |
 | [CORR-KRP-020](/docs/tasks/kits-replay/CORR-KRP-020.md) | KRP-TASK-11 edita docs/PLAN-KITS-REPLAY.md sem declará-lo, e as tasks de fechamento pendentes repetem o modelo | KRP-TASK-11 | medium | done | 2026-10-16 |
 | [CORR-KRP-021](/docs/tasks/kits-replay/CORR-KRP-021.md) | Parágrafo da fase 3 lista como diferença do plano o que o plano já previa | KRP-TASK-11 | low | done | 2026-10-16 |
+| [CORR-KRP-022](/docs/tasks/kits-replay/CORR-KRP-022.md) | KRP-TASK-22 declara docs/PLAN-KITS-REPLAY.md no files mas não em Arquivos a criar ou modificar | KRP-TASK-22 | medium | pending | — |
+| [CORR-KRP-023](/docs/tasks/kits-replay/CORR-KRP-023.md) | Linhas $ do Log da KRP-TASK-22 encurtadas e o lado antes (ca147a8e) não mostrado | KRP-TASK-22 | medium | pending | — |
+| [CORR-KRP-024](/docs/tasks/kits-replay/CORR-KRP-024.md) | head_judge não pega painel de cabeça largo demais, e o exit 2 de --player-looks inválido não tem gate | KRP-TASK-22 | low | pending | — |
+| [CORR-KRP-025](/docs/tasks/kits-replay/CORR-KRP-025.md) | Altura da vista 3D depende do comprimento do caminho da imagem (940x409 contra 940x379) | KRP-TASK-22 | low | pending | — |
 <!-- rite:end -->
