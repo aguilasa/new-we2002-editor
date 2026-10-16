@@ -47,6 +47,7 @@ graph TD
   end
   subgraph phase_3a["Fase 3a"]
     KRP_TASK_22["KRP-TASK-22<br/>Painel de controles da cabeça na aba 3D, no lugar da tupla em texto"]
+    KRP_TASK_24["KRP-TASK-24<br/>A pele do corpo segue a Cor da Pele do painel da cabeça"]
     KRP_TASK_23["KRP-TASK-23<br/>Fechamento da fase 3a"]
   end
   KRP_TASK_01 --> KRP_TASK_02
@@ -66,6 +67,7 @@ graph TD
   KRP_TASK_09 --> KRP_TASK_11
   KRP_TASK_10 --> KRP_TASK_11
   KRP_TASK_11 --> KRP_TASK_22
+  KRP_TASK_22 --> KRP_TASK_24
   KRP_TASK_22 --> KRP_TASK_23
   KRP_TASK_11 --> KRP_TASK_12
   KRP_TASK_23 --> KRP_TASK_12
@@ -103,6 +105,7 @@ A ferramenta vem primeiro (fases 1 e 2), porque toda melhoria começa lendo uma 
 | [KRP-TASK-10](/docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md) | Cabeça pela tupla do jogador no scene_of e no match_scene, no CLI e na aba | 3 | implementação | KRP-TASK-09 | done | 2026-10-16 | 2026-10-16 |
 | [KRP-TASK-11](/docs/tasks/kits-replay/11-fechamento-da-fase-3.md) | Fechamento da fase 3 | 3 | closing | KRP-TASK-09, KRP-TASK-10 | done | 2026-10-16 | 2026-10-16 |
 | [KRP-TASK-22](/docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md) | Painel de controles da cabeça na aba 3D, no lugar da tupla em texto | 3a | implementação | KRP-TASK-11 | done | 2026-10-16 | 2026-10-16 |
+| [KRP-TASK-24](/docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md) | A pele do corpo segue a Cor da Pele do painel da cabeça | 3a | implementação | KRP-TASK-22 | pending | — | — |
 | [KRP-TASK-23](/docs/tasks/kits-replay/23-fechamento-da-fase-3a.md) | Fechamento da fase 3a | 3a | closing | KRP-TASK-22 | done | 2026-10-16 | 2026-10-16 |
 | [KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md) | Goleiro pela família 13, com a pose medida e a 92 | 4 | implementação | KRP-TASK-11, KRP-TASK-23 | pending | — | — |
 | [KRP-TASK-13](/docs/tasks/kits-replay/13-fechamento-da-fase-4.md) | Fechamento da fase 4 | 4 | closing | KRP-TASK-12 | pending | — | — |

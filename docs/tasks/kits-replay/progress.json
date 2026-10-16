@@ -5,7 +5,7 @@
   "plan": "/docs/PLAN-KITS-REPLAY.md",
   "ticket": null,
   "local": false,
-  "order": ["KRP-TASK-01", "KRP-TASK-02", "KRP-TASK-03", "KRP-TASK-04", "KRP-TASK-05", "KRP-TASK-07", "KRP-TASK-06", "KRP-TASK-08", "KRP-TASK-09", "KRP-TASK-10", "KRP-TASK-11", "KRP-TASK-22", "KRP-TASK-23", "KRP-TASK-12", "KRP-TASK-13", "KRP-TASK-14", "KRP-TASK-15", "KRP-TASK-16", "KRP-TASK-17", "KRP-TASK-18", "KRP-TASK-19", "KRP-TASK-20", "KRP-TASK-21"],
+  "order": ["KRP-TASK-01", "KRP-TASK-02", "KRP-TASK-03", "KRP-TASK-04", "KRP-TASK-05", "KRP-TASK-07", "KRP-TASK-06", "KRP-TASK-08", "KRP-TASK-09", "KRP-TASK-10", "KRP-TASK-11", "KRP-TASK-22", "KRP-TASK-24", "KRP-TASK-23", "KRP-TASK-12", "KRP-TASK-13", "KRP-TASK-14", "KRP-TASK-15", "KRP-TASK-16", "KRP-TASK-17", "KRP-TASK-18", "KRP-TASK-19", "KRP-TASK-20", "KRP-TASK-21"],
   "tasks": [
     {
       "id": "KRP-TASK-01",
@@ -198,6 +198,22 @@
       "done_commit": "c74ba1cb",
       "reviewed_on": "2026-10-16",
       "review_commit": "34809e3f"
+    },
+    {
+      "id": "KRP-TASK-24",
+      "file": "24-pele-do-corpo-segue-a-da-cabeca.md",
+      "title": "A pele do corpo segue a Cor da Pele do painel da cabeça",
+      "type": "implementação",
+      "phase": "3a",
+      "depends_on": ["KRP-TASK-22"],
+      "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#3.3",
+      "files": ["tools/kits/core/figure.py", "tools/kits/ui_check.py", "tools/kits/selftest.py", "docs/PLAN-KITS-REPLAY.md"],
+      "resources": [],
+      "status": "pending",
+      "done_on": null,
+      "done_commit": null,
+      "reviewed_on": null,
+      "review_commit": null
     },
     {
       "id": "KRP-TASK-23",

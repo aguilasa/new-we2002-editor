@@ -307,7 +307,16 @@ Os rótulos são os do usuário, literais. Trocar de idioma com a janela aberta 
 **reajusta a largura** do painel, para o rótulo mais longo não cortar nem o painel sobrar.
 
 Ficam de fora o sexto campo (`boots`, `looks.TUPLE_EXTRA`) e altura e corpo: `player_headed` só
-troca a cabeça ([§3.2](#3.2)). O `--player-looks TUPLE` do `app.py` continua, agora posicionando os
+troca a cabeça ([§3.2](#3.2)).
+
+**A pele do corpo segue a da cabeça** (decisão do usuário, 2026-10-16, depois de ver o painel:
+trocar a Cor da Pele e o corpo ficar na de referência não serve). Isto **revoga** o "inclusive a
+pele do corpo" do §3.2 na figura da aba: o `scene_of` monta a figura com o `skin_colour` do jogador
+no lugar do da tupla de referência, e a regra é a que o ciclo `looks` mediu na `LOOKS SET` — SKIN
+desce toda primitiva de pele nua das duas figuras para a linha `480 + skin_colour`
+([CORR-LOOKS-103](/docs/tasks/concluidos/looks/CORR-LOOKS-103.md), `tools/looks/skin.py`). A cabeça
+continua pela regra do §3.1. O `match_scene` não muda: a aba não o desenha, e o corpo na partida
+nenhum replay mediu. O `--player-looks TUPLE` do `app.py` continua, agora posicionando os
 combos: é a porta dos gates e do `confront --tab --player`.
 
 Com o painel à vista a vista 3D fica mais estreita (940×409 → 786×409 px na janela do
