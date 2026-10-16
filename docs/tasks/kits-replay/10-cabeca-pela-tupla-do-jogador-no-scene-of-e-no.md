@@ -154,3 +154,4 @@ controls: 76 of 76 red
     - `M tools/kits/ui/app.py`
     - `M tools/kits/ui/i18n.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-16) at `32283929`: CORR-KRP-017, CORR-KRP-018
