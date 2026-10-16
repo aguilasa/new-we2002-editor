@@ -1560,6 +1560,7 @@ def _replay_checks(c) -> None:
     _replay_reader_checks(c, cli, replay)
     _replay_head_checks(c, cli, replay)
     _player_head_checks(c)
+    _player_match_checks(c)
 
 
 def _replay_head_checks(c, cli, replay) -> None:
@@ -1688,6 +1689,71 @@ def _player_head_checks(c) -> None:
         refused = str(exc)
     c.ok("figure.py: a player that is not a looks tuple is refused in a sentence",
          refused is not None and "is not a looks tuple" in refused, "%s" % refused)
+
+
+def _player_match_checks(c) -> None:
+    """figure.py, `match_scene` with a player (CORR-KRP-018): the head of the
+    versioned match pose swapped for the player's section, in the same
+    matrix, and only that section's CLUTs moved by `player_head_clut`.  The
+    disc is stood in for -- every section one primitive in the hair column
+    and one in the beard column of row 480 -- so the check runs with no
+    image, which is how controls.py runs it; `kits_image` draws the real
+    one (`_player_match_image_checks`)."""
+    from types import SimpleNamespace
+
+    from core import figure
+    import section
+    import skin
+
+    step = api.CLUT_COLUMN_STEP
+    on_disc = (skin.clut_id(480, figure.layout.HAIR_COLUMN),
+               skin.clut_id(480, figure.layout.BEARD_COLUMN))
+    sections = [SimpleNamespace(vertices=[SimpleNamespace(x=0, y=0, z=0)],
+                                primitives=[SimpleNamespace(clut=clut) for clut in on_disc])
+                for _ in range(128)]
+    drawn = []
+
+    def part(primitive, _vertices, number, at, _banks, _surfaces, _notes):
+        drawn.append((number, at, primitive.clut))
+        return SimpleNamespace(file=figure.layout.MODEL, section=number, clut=primitive.clut)
+
+    kept = (section.scan, figure._model_banks, figure._model_part)
+    section.scan = lambda *_a: SimpleNamespace(sections=sections)
+    figure._model_banks = lambda *_a: []
+    figure._model_part = part
+    try:
+        kit = SimpleNamespace(require=lambda: None, data=b"")
+        geometry = {figure.layout.MODEL: b""}
+        plain = c.attempt("match_scene with no player on a stand-in disc",
+                          lambda: figure.match_scene(kit, geometry=geometry))
+        plain_drawn, drawn[:] = list(drawn), []
+        headed = c.attempt("match_scene with player A-L3-B-A-B on a stand-in disc",
+                           lambda: figure.match_scene(kit, geometry=geometry,
+                                                      player="A-L3-B-A-B"))
+        headed_drawn = list(drawn)
+    finally:
+        section.scan, figure._model_banks, figure._model_part = kept
+    if plain is None or headed is None:
+        return
+
+    def cluts(rows, number):
+        return sorted((skin.grid(clut)[1] * step, skin.grid(clut)[0])
+                      for n, _at, clut in rows if n == number)
+
+    head = plain.notes["order"][0]
+    order = headed.notes["order"]
+    c.ok("figure.py: match_scene with a player draws his section where the head was, "
+         "the rest of the order kept",
+         order[0] == 46 and order[1:] == plain.notes["order"][1:]
+         and headed.notes.get("player head") == {"section": 46},
+         "order %s, head %s, note %s" % (order[:3], head, headed.notes.get("player head")))
+    others = sorted({(skin.grid(clut)[1] * step, skin.grid(clut)[0])
+                     for n, _at, clut in headed_drawn if n != 46})
+    c.ok("figure.py: match_scene with a player draws his head with his CLUTs, "
+         "(32,480) and (160,480), and every other section with the disc's",
+         cluts(headed_drawn, 46) == [(32, 480), (160, 480)]
+         and others == [(16, 480), (144, 480)] and cluts(plain_drawn, head) == others,
+         "head %s, others %s" % (cluts(headed_drawn, 46), others))
 
 
 def _replay_reader_capture(replay, cell) -> tuple:
@@ -2168,6 +2234,7 @@ def _figure_checks(c, image_path) -> None:
          lone is not None and lone.kind == "tex" and worn > 0,
          "kind %r" % (lone and lone.kind))
     _figure_cli_checks(c, image_path, src.kit("00"), geometry)
+    _player_match_image_checks(c, src.kit("00"), geometry)
     for tag in ("A4", "00"):
         kit = src.kit(tag)
         for figure in (0, 1):
@@ -2180,6 +2247,28 @@ def _figure_checks(c, image_path) -> None:
                       % (tag, kit_set, figure, swap.rows, swap.surfaces, len(swap.wrong)))
                 c.ok("TEX_%s set %d figure %d: 486/488 swapped draws the other figure's colours"
                      % (tag, kit_set, figure), swap.ok, "; ".join(swap.wrong[:3]))
+
+
+def _player_match_image_checks(c, kit, geometry) -> None:
+    """`api.match_figure` with a player, on the disc (CORR-KRP-018): Balaban,
+    A-L3-B-A-B, draws section 46 with the CLUTs the game drew him with,
+    (32,480) and (160,480) (KITS-REPLAYS-9-10 item (a)).  The stand-in of
+    `_player_match_checks` is what controls.py plants; this is the disc."""
+    model = api.MODEL_FILE
+    drawn = c.attempt("match_figure with player A-L3-B-A-B",
+                      lambda: api.match_figure(kit, 1, geometry=geometry, player="A-L3-B-A-B"))
+    if drawn is None:
+        return
+    step = api.CLUT_COLUMN_STEP
+    sections = sorted({p.section for p in drawn.parts if p.file == model})
+    cluts = sorted({((p.clut & ((1 << api.CLUT_COLUMN_BITS) - 1)) * step,
+                     p.clut >> api.CLUT_COLUMN_BITS)
+                    for p in drawn.parts if p.file == model and p.section == 46})
+    c.ok("match_figure, player A-L3-B-A-B on the disc: section 46 drawn, with CLUTs "
+         "(32,480) and (160,480)",
+         46 in sections and drawn.notes.get("player head") == {"section": 46}
+         and cluts == [(32, 480), (160, 480)],
+         "sections %s, CLUTs of 46 %s" % (sections, cluts))
 
 
 def _figure_cli_checks(c, image_path, kit, geometry) -> None:

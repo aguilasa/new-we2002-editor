@@ -269,6 +269,13 @@ Sem a opção nada muda, e o digest de `cli.py figure` (as duas cenas) é o de a
 `replay.py head --drawn`: as três capturas de perto e os 24 focos de cada laço amostram a CLUT do
 jogo em toda primitiva.
 
+**O `head --drawn` é relatório, não gate** ([CORR-KRP-018](/docs/tasks/kits-replay/CORR-KRP-018.md)):
+sai 1 quando uma primitiva diverge, mas o `replay.py check` não o roda e o `controls.py` não o
+planta, porque o sandbox dos controles corre sem o disco. Quem segura a regra que ele confronta são
+as asserções do `kits_selftest` sobre `player_head_clut` e sobre o `match_scene` com jogador (este
+num disco de faz-de-conta), cada uma com o seu controle, e a do `kits_image` que desenha a 46 do
+Balaban com as CLUTs (32,480) e (160,480).
+
 ## 4. Goleiro pela família 13
 
 Medido ([item 3](/docs/KITS-REPLAYS-9-10.md#3)): o goleiro do jogo é a família 13 inteira — torso

@@ -686,6 +686,40 @@ CONTROLS = (
         "the head keeps the disc's row 480, skin A: Brazil's 10 and 11 (skins C and D) "
         "would draw as Croatia's (KRP-TASK-10)",
     ),
+    Control(
+        "figure-player-beard-unmoved", "kits/core/figure.py", "player_head_clut",
+        '        column += values["beard_colour"]\n',
+        "        column += 0\n",
+        "FAIL  figure.py: the player's beard column moves to his beard colour",
+        "every head keeps the disc's beard column: a beard B would draw as beard A "
+        "(CORR-KRP-018, PLAN-KITS-REPLAY section 3.2)",
+    ),
+    Control(
+        "figure-player-off-skin-moved", "kits/core/figure.py", "player_head_clut",
+        "    if not layout.CLUT_ROW_FIRST <= row < layout.CLUT_ROW_FIRST"
+        " + len(layout.SKIN_PALETTES):\n",
+        "    if False:\n",
+        "FAIL  figure.py: a head CLUT in no hair or beard column, or off the skin records, "
+        "is the disc's",
+        "a head CLUT off the skin records, row 486 the kit's, would be moved onto a skin "
+        "row as if it were the hair's (CORR-KRP-018)",
+    ),
+    Control(
+        "figure-match-player-clut", "kits/core/figure.py", "match_scene",
+        "            if values is not None and number == order[0][0]:\n",
+        "            if values is not None and number == -1:\n",
+        "FAIL  figure.py: match_scene with a player draws his head with his CLUTs",
+        "the match figure draws the player's section in the disc's CLUTs: Balaban's "
+        "hair B would show as hair A in the match tab (CORR-KRP-018)",
+    ),
+    Control(
+        "figure-match-player-section", "kits/core/figure.py", "match_scene",
+        "        order = [(player_head_section(values), rotation, translation)] + order[1:]\n",
+        "        order = list(order)\n",
+        "FAIL  figure.py: match_scene with a player draws his section where the head was",
+        "the match figure keeps the measured head's section whatever the player: every "
+        "head would be the pose's (CORR-KRP-018)",
+    ),
 )
 BY_ID = {c.id: c for c in CONTROLS}
 
