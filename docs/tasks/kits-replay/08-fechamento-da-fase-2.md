@@ -45,7 +45,7 @@ controls: 70 of 70 red
 $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py check; echo "exit=$?"
 kits_replay: skipped -- WE2002_KITS_REPLAY_DIR is not set (the folder of the kept captures, work/kits-oracle)
 exit=77
-$ sh rite check --cycle kits-replay
+$ sh "$RITE_HOME/bin/rite" check --cycle kits-replay
 check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ```
 

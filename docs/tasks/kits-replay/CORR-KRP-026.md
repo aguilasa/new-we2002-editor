@@ -50,3 +50,24 @@ git grep -n '\$ sh rite\b' -- docs/tasks/kits-replay
 Hoje lista 3 linhas. Depois do conserto não pode listar nenhuma.
 
 ## Log de Execução
+
+### 2026-10-16
+
+Reprodução (`rite reproduce`, HEAD `22c48f71`): `ls rite` sai 2 (não há `rite` na raiz), e as
+linhas 48 da task 08 e 43 das tasks 11 e 23 traziam `$ sh rite check --cycle kits-replay`.
+
+Conserto: nas três, a linha virou `$ sh "$RITE_HOME/bin/rite" check --cycle kits-replay`. A saída
+colada abaixo delas não muda.
+
+O `git grep` da Verificação, sobre a pasta inteira, também acha esta correção e a tabela de correções,
+que citam o texto velho de propósito; conferido nos três arquivos da task:
+
+```text
+$ git grep -n '\$ sh rite\b' -- docs/tasks/kits-replay/08-fechamento-da-fase-2.md docs/tasks/kits-replay/11-fechamento-da-fase-3.md docs/tasks/kits-replay/23-fechamento-da-fase-3a.md
+$ git grep -n 'RITE_HOME/bin/rite" check --cycle' -- docs/tasks/kits-replay/08-fechamento-da-fase-2.md docs/tasks/kits-replay/11-fechamento-da-fase-3.md docs/tasks/kits-replay/23-fechamento-da-fase-3a.md
+docs/tasks/kits-replay/08-fechamento-da-fase-2.md:48:$ sh "$RITE_HOME/bin/rite" check --cycle kits-replay
+docs/tasks/kits-replay/11-fechamento-da-fase-3.md:43:$ sh "$RITE_HOME/bin/rite" check --cycle kits-replay
+docs/tasks/kits-replay/23-fechamento-da-fase-3a.md:43:$ sh "$RITE_HOME/bin/rite" check --cycle kits-replay
+```
+
+O primeiro não imprime nada (sai 1).

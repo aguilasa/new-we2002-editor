@@ -40,7 +40,7 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin WE
 100% tests passed, 0 tests failed out of 5
 $ python3 tools/kits/controls.py
 controls: 80 of 80 red
-$ sh rite check --cycle kits-replay
+$ sh "$RITE_HOME/bin/rite" check --cycle kits-replay
 check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ```
 
