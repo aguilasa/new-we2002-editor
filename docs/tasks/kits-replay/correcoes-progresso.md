@@ -22,6 +22,6 @@
 | [CORR-KRP-017](/docs/tasks/kits-replay/CORR-KRP-017.md) | Log da KRP-TASK-10 explica a frente de Marcos e as colunas de barba com o que a medição desmente | KRP-TASK-10 | medium | done | 2026-10-16 |
 | [CORR-KRP-018](/docs/tasks/kits-replay/CORR-KRP-018.md) | Coluna de barba, match_scene com player e head --drawn sem controle plantado | KRP-TASK-10 | medium | done | 2026-10-16 |
 | [CORR-KRP-019](/docs/tasks/kits-replay/CORR-KRP-019.md) | Log da KRP-TASK-10 cola resumo condensado sob dois comandos figure --json | CORR-KRP-017 | low | done | 2026-10-16 |
-| [CORR-KRP-020](/docs/tasks/kits-replay/CORR-KRP-020.md) | KRP-TASK-11 edita docs/PLAN-KITS-REPLAY.md sem declará-lo, e as tasks de fechamento pendentes repetem o modelo | KRP-TASK-11 | medium | pending | — |
-| [CORR-KRP-021](/docs/tasks/kits-replay/CORR-KRP-021.md) | Parágrafo da fase 3 lista como diferença do plano o que o plano já previa | KRP-TASK-11 | low | pending | — |
+| [CORR-KRP-020](/docs/tasks/kits-replay/CORR-KRP-020.md) | KRP-TASK-11 edita docs/PLAN-KITS-REPLAY.md sem declará-lo, e as tasks de fechamento pendentes repetem o modelo | KRP-TASK-11 | medium | done | 2026-10-16 |
+| [CORR-KRP-021](/docs/tasks/kits-replay/CORR-KRP-021.md) | Parágrafo da fase 3 lista como diferença do plano o que o plano já previa | KRP-TASK-11 | low | in-progress | — |
 <!-- rite:end -->

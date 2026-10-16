@@ -90,3 +90,12 @@ docs/tasks/kits-replay/13-fechamento-da-fase-4.md:0
 docs/tasks/kits-replay/11-fechamento-da-fase-3.md:0
 docs/tasks/kits-replay/16-fechamento-da-fase-5.md:0
 ```
+- **Closed** — commit `d0721060` (2026-10-16): docs(kits): closing tasks declare the plan they write to
+  - Files (`git show --name-status d0721060`):
+    - `M docs/tasks/kits-replay/11-fechamento-da-fase-3.md`
+    - `M docs/tasks/kits-replay/13-fechamento-da-fase-4.md`
+    - `M docs/tasks/kits-replay/16-fechamento-da-fase-5.md`
+    - `M docs/tasks/kits-replay/19-fechamento-da-fase-6.md`
+    - `M docs/tasks/kits-replay/21-fechamento-da-fase-7.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-020.md`
+    - `M docs/tasks/kits-replay/progress.json`
