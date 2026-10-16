@@ -58,7 +58,7 @@ $ diff work/krp10/digest-before.txt work/krp10/digest-after.txt && echo SAME
 SAME
 ```
 
-A seção e a CLUT da captura contra as do desenho (Bokšić na 9-3, Balaban na 10-2). O desenho põe toda primitiva da 46 na coluna do jogo. As (144,480) e (160,480) são a coluna da barba: uma vista de frente não a amostra, e o CLI conta as 34 primitivas da seção.
+A seção e a CLUT da captura contra as do desenho (Bokšić na 9-3, Balaban na 10-2). O desenho põe toda primitiva da 46 na coluna do jogo. O CLI conta as 34 primitivas da seção, e as (144,480) e (160,480) são a coluna da barba. A (144,480) não aparece na captura 9-3, que só amostra a (128,480); a (160,480) aparece na 10-2 (refeito pela CORR-KRP-017, 2026-10-16; medição no fim deste Log).
 
 ```
 $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-9-3.json --section 46 --json
@@ -107,7 +107,38 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin py
   tab back (yaw 0) against the game's back capture: 7381 px, histogram intersection 0.414, 0.730 over the colours the tab draws
 ```
 
-A interseção sobe em 5 dos 6 lados medidos; no Marcos de frente (9-R1, yaw 180) fica igual (0,501 → 0,500), porque a cabeça dele já era a 34 com a mesma CLUT do jogo.
+A interseção sobe em 5 dos 6 lados medidos; no Marcos de frente (9-R1, yaw 180) fica igual (0,501 → 0,500), e isso ainda não tem explicação: a cabeça de referência é a 24, nas colunas 1/9, e com `--player` a aba desenha a 34 com as CLUTs do jogo (refeito pela CORR-KRP-017, 2026-10-16; medição abaixo).
+
+**Nota de 2026-10-16, refeita pela CORR-KRP-017.** As duas explicações acima foram reescritas porque a medição as desmentia. A frente parada do Marcos (0,501 → 0,500) **continua sem explicação**: não é que a cabeça já fosse a do jogo. A figura de referência do kit 41 desenha a seção 24 nas colunas 1/9; com a tupla do Marcos desenha a 34 nas colunas 2/10, que são as (32,480)/(160,480) do jogo. As figuras 0 e 1 dão o mesmo:
+
+```
+$ cd tools/kits && WE2002_LOOKS_IMAGE=$PWD/../../roms/japanese-shift-jis.bin python3 - <<'PY'
+import os
+from core import figure as F, api
+geo=F.read_geometry(os.environ['WE2002_LOOKS_IMAGE'])
+kit=api.open_source(os.environ['WE2002_LOOKS_IMAGE']).kit("41")
+for fig in (0,1):
+    for pl in (None,"A-I1-B-A-B"):
+        s=api.figure(kit,1,fig,frame=api.FIGURE_POSE,geometry=geo,player=pl)
+        c={}
+        for p in s.parts:
+            if p.file==F.layout.MODEL: k=(p.section,F.skin.grid(p.clut)); c[k]=c.get(k,0)+1
+        print(fig, pl, c)
+PY
+0 None {(24, (480, 1)): 16, (24, (480, 9)): 2}
+0 A-I1-B-A-B {(34, (480, 2)): 20, (34, (480, 10)): 3}
+1 None {(24, (480, 1)): 16, (24, (480, 9)): 2}
+1 A-I1-B-A-B {(34, (480, 2)): 20, (34, (480, 10)): 3}
+```
+
+A coluna da barba nas duas capturas de perto, sem `--json`. De cada saída fica só a linha da seção 46; as de `on_axis`, `order` e `panel` foram omitidas:
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-9-3.json --section 46
+  section 46: 14 prim(s), 0 shaded, 0 raw, 0 semi; CLUT [[128, 480]]; page [[512, 256]]; error 0.9468100891177211
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-10-2.json --section 46
+  section 46: 18 prim(s), 0 shaded, 0 raw, 0 semi; CLUT [[32, 480], [160, 480]]; page [[512, 256]]; error 1.0405544040781696
+```
 
 Plantas: `figure-player-hair-unmoved`, `figure-player-skin-unmoved` (controles) e `replay-head-twin-unasked`, que passou a mirar `figure.player_head_section`. No `kits_ui`, `player_judge` e duas plantas: `Player's head ignored` e `the player's hair colour not moved`. A planta antiga `Long sleeves ignored` teve o literal ajustado à linha nova do `draw_figure`.
 

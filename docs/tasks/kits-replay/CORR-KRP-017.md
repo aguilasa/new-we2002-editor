@@ -74,3 +74,5 @@ grep -n "já era a 34" docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no
 Hoje imprime uma linha. Depois do conserto não pode imprimir nada.
 
 ## Log de Execução
+
+- 2026-10-16: as duas frases do Log da KRP-TASK-10 foram reescritas. A frente parada do Marcos fica registrada como **sem explicação** (a cabeça de referência é a 24, nas colunas 1/9; com `--player` a aba desenha a 34 com as CLUTs do jogo), e a coluna da barba passou a dizer o que as capturas amostram: a (144,480) não aparece na 9-3 e a (160,480) aparece na 10-2. As medições foram coladas numa nota datada no fim do Log da task, com o script inteiro em heredoc e, do `replay.py figure` sem `--json`, só a linha da seção 46. A causa raiz continua hipótese: nada aqui mede como o texto anterior foi escrito.
