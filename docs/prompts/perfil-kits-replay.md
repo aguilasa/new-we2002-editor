@@ -78,6 +78,14 @@ which commands search instead of reading whole.
 - `confront --tab` antes e depois colado no Log da task de desenho.
 - Gates do ciclo.
 
+### Fase 3a — controles da cabeça na aba (§3.3)
+
+- Nenhum `QLineEdit` na aba 3D; com "Cabeça do jogador" marcada, o painel à direita mostra os cinco combos com 4, 32, 8, 7 e 7 itens; desmarcada, o painel some.
+- Os rótulos são os cinco do §3.3, literais, nas duas línguas, escritos no `ui_check.py` e não lidos do `i18n.py`.
+- Troca de idioma ao vivo reajusta a largura do painel, com planta que a deixa fixa vista vermelha.
+- Sem a caixa marcada, digest e `--export-3d` iguais aos de antes; `confront --tab --player` antes e depois colado no Log.
+- Gates do ciclo.
+
 ### Fase 4 — goleiro pela família 13 (§4)
 
 - Nenhum UV nem vértice escrito à mão: toda seção vem do `MODEL.BIN`.

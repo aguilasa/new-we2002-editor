@@ -284,6 +284,35 @@ O que se afasta dele são duas opções do `head`: `--drawn`, que é relatório 
 ([CORR-KRP-018](/docs/tasks/kits-replay/CORR-KRP-018.md)), e `--plant-hair-column`, a planta com
 dado real. O jogador real no seletor continua no [§6](#6).
 
+### 3.3 Os controles da cabeça na aba
+
+Decisão do usuário (2026-10-16), validando a fase 3 na tela: a tupla crua num campo de texto
+(`A-A1-A-A-A`, ao lado da caixa "Cabeça do jogador") não serve. A caixa de texto **sai**, e no lugar
+dela entra um painel de controles padrão do Qt **à direita da vista 3D**, visível só com a caixa
+marcada.
+
+O painel tem um `QComboBox` por campo da tupla (`looks.TUPLE_ORDER`), com os itens que a tela
+`LOOKS SET` escreve (`tools/looks/looks.py`, `FIELDS`), sem tradução, e o valor da tupla de
+referência como default:
+
+| campo | linha do jogo | itens | rótulo en-US | rótulo pt-BR |
+|---|---|---|---|---|
+| `skin_colour` | SKIN | A–D (4) | Skin Color | Cor da Pele |
+| `hair_style` | HAIR | `HAIR_STYLES` (32) | Hair Style | Estilo do Cabelo |
+| `hair_colour` | H.COL | A–H (8) | Hair Color | Cor do Cabelo |
+| `beard_style` | FACE | A–G (7) | Beard Style | Estilo da Barba |
+| `beard_colour` | H.F.COL. | A–G (7) | Beard Color | Cor da Barba |
+
+Os rótulos são os do usuário, literais. Trocar de idioma com a janela aberta reescreve os rótulos e
+**reajusta a largura** do painel, para o rótulo mais longo não cortar nem o painel sobrar.
+
+Ficam de fora o sexto campo (`boots`, `looks.TUPLE_EXTRA`) e altura e corpo: `player_headed` só
+troca a cabeça ([§3.2](#3.2)). O `--player-looks TUPLE` do `app.py` continua, agora posicionando os
+combos: é a porta dos gates e do `confront --tab --player`.
+
+Com o painel à vista a vista 3D fica mais estreita, e o `--export-3d` desenha no tamanho da vista;
+o `confront --tab --player` muda de número sem a cabeça mudar, e por isso é registrado de novo.
+
 ## 4. Goleiro pela família 13
 
 Medido ([item 3](/docs/KITS-REPLAYS-9-10.md#3)): o goleiro do jogo é a família 13 inteira — torso
@@ -366,6 +395,7 @@ investigação: negativa é resultado e não bloqueia; só a cópia mestra ausen
 | 1 | [§2.1](#2.1), [§2.2](#2.2) | o leitor puro e o oracle sobre ele, com saída idêntica |
 | 2 | [§2.3](#2.3)–[§2.6](#2.6) | a linha de comando, `show`, `confront` e `confront --tab`, a captura e o gate `kits_replay` |
 | 3 | [§3](#3) | a regra da cabeça medida nos 22, e a cabeça por jogador desenhada |
+| 3a | [§3.3](#3.3) | os controles da cabeça na aba, no lugar da tupla em texto |
 | 4 | [§4](#4) | o goleiro pela família 13 |
 | 5 | [§5](#5) | a corrida medida no `ANIME.BIN` e a pose de corrida na aba |
 | 6 | [§6](#6), [§7](#7) | jogador real no seletor e a vista dos dois times |
@@ -376,6 +406,8 @@ Por que esta ordem:
 - **A ferramenta primeiro** (fases 1 e 2): as fases 3 a 5 começam lendo uma captura, e o
   `confront --tab` é a métrica de antes e depois de todas as tasks de desenho.
 - **A cabeça antes do goleiro**: o goleiro da família 13 usa a cabeça do jogador.
+- **A 3a logo depois da 3**: refaz a interface que a 3 entregou, antes de o goleiro (4) e o
+  jogador real (6) mexerem no mesmo trecho da aba.
 - **A medição da corrida só depende da ferramenta** e pode correr cedo; posar pela corrida espera o
   goleiro, porque posa as duas famílias.
 - **O jogador real junta as três** (cabeça, goleiro, pose) no seletor; os dois times vêm em cima
