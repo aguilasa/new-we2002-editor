@@ -84,3 +84,7 @@ Verificação:
 $ grep -c 'section 46 n 1[48] cluts' docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md
 0
 ```
+- **Closed** — commit `e500c499` (2026-10-16): docs(kits): paste the figure --section 46 output into the KRP-TASK-10 Log
+  - Files (`git show --name-status e500c499`):
+    - `M docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-019.md`

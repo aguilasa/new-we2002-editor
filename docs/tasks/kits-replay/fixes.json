@@ -244,10 +244,10 @@
       "severity": "low",
       "files": ["docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md"],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-16",
+      "done_commit": "e500c499"
     }
   ]
 }
