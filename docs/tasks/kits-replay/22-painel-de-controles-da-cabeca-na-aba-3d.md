@@ -88,43 +88,91 @@ $ work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --
 
 Troca ao vivo (`--switch-to`), julgada pelo `head_judge` do `kits_ui`: depois da troca, painel en-US 148 px e pt-BR 172 px, e todo rótulo com a largura que o texto pede. A planta `head panel width fixed` (o `fit_head_panel()` só na primeira vez) corta dois rótulos, e fica vermelha (linhas do `ctest` abaixo).
 
-Sem a caixa, o digest e o PNG são os de antes. Mesmos comandos na HEAD `ca147a8e` e na árvore da task:
+Sem a caixa, o digest e o PNG são os de antes. Lado antes: as `tools/` da HEAD `ca147a8e` extraídas fora do repositório. Lado depois: a árvore do repositório. Os dois rodam com o repositório como diretório corrente, porque o `confront` acha o venv por `work/venv-looks/…` relativo a ele.
+
+Este bloco e os dois `confront` abaixo foram **refeitos em 2026-10-16 pela [CORR-KRP-023](/docs/tasks/kits-replay/CORR-KRP-023.md)**, com cada comando inteiro. O lado depois agora é a HEAD `17b1d791`, não a árvore da task. Desde a task o `app.py` mudou em dois pontos: a CORR-KRP-024 pôs `fits` no `--list-combos`, e a CORR-KRP-025 deixou status e nota de geometria numa linha só, o que só pesa com caminho de imagem longo. Nenhum número mudou: digest, PNG e as seis interseções são os da corrida original, e `work/krp22/digest-after.txt` e `work/krp22/after-fig{0,1}.png` batem byte a byte com os refeitos. O `app.py` imprime as linhas de status e `window up`, que a transcrição original cortava, e o `frame` (ms) é tempo de relógio.
 
 ```
-$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/cli.py figure roms/japanese-shift-jis.bin --tag 22; … --tag 22 --match --set 1   (> digest-before.txt / digest-after.txt)
-$ diff work/krp22/digest-before.txt work/krp22/digest-after.txt && echo SAME-DIGEST
+$ git rev-parse HEAD
+17b1d7910304351f63a0e218e9977e0635afc610
+$ mkdir -p /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before work/krp23
+$ git archive ca147a8e tools | tar -x -C /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before/tools/kits/cli.py figure roms/japanese-shift-jis.bin --tag 22 > work/krp23/digest-before.txt
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before/tools/kits/cli.py figure roms/japanese-shift-jis.bin --tag 22 --match --set 1 >> work/krp23/digest-before.txt
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/cli.py figure roms/japanese-shift-jis.bin --tag 22 > work/krp23/digest-after.txt
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/cli.py figure roms/japanese-shift-jis.bin --tag 22 --match --set 1 >> work/krp23/digest-after.txt
+$ cat work/krp23/digest-before.txt
+set 1 figure 0  593 parts, 593 textured, 6 surfaces, bounds (-113,-33,-281)..(65,419,27)  9b136766e64f5bc1ae1b961002014bdc5e1e2bbf3f7fa39cb9fbf338afaa96ec
+set 1 figure 1  629 parts, 629 textured, 6 surfaces, bounds (-113,-33,-281)..(60,419,27)  aab125ff5eb9f7d40d8498fb4c4aec868d86745a2d53ba9301ca83477794726c
+set 2 figure 0  593 parts, 593 textured, 6 surfaces, bounds (-113,-33,-281)..(65,419,27)  e32b14c8e91bed5efa8d0c514780689f4e7f049b647182e27265faa9ed6a8ca6
+set 2 figure 1  629 parts, 629 textured, 6 surfaces, bounds (-113,-33,-281)..(60,419,27)  c3d349fdd92419692989e849617d158465f656e6e65b721e77c442901a24a6dd
+figure 0: set 1 and set 2 differ
+figure 1: set 1 and set 2 differ
+set 1 match figure, long sleeves: order 24 2 95 96 97 98 7 9 11 8 10 12  140 parts, 140 textured, 7 surfaces  a68ac8aca6428b0d2fdb5daa6f2c066bbe383e853dc562d85347f57ee01fa97b
+$ cat work/krp23/digest-after.txt
+set 1 figure 0  593 parts, 593 textured, 6 surfaces, bounds (-113,-33,-281)..(65,419,27)  9b136766e64f5bc1ae1b961002014bdc5e1e2bbf3f7fa39cb9fbf338afaa96ec
+set 1 figure 1  629 parts, 629 textured, 6 surfaces, bounds (-113,-33,-281)..(60,419,27)  aab125ff5eb9f7d40d8498fb4c4aec868d86745a2d53ba9301ca83477794726c
+set 2 figure 0  593 parts, 593 textured, 6 surfaces, bounds (-113,-33,-281)..(65,419,27)  e32b14c8e91bed5efa8d0c514780689f4e7f049b647182e27265faa9ed6a8ca6
+set 2 figure 1  629 parts, 629 textured, 6 surfaces, bounds (-113,-33,-281)..(60,419,27)  c3d349fdd92419692989e849617d158465f656e6e65b721e77c442901a24a6dd
+figure 0: set 1 and set 2 differ
+figure 1: set 1 and set 2 differ
+set 1 match figure, long sleeves: order 24 2 95 96 97 98 7 9 11 8 10 12  140 parts, 140 textured, 7 surfaces  a68ac8aca6428b0d2fdb5daa6f2c066bbe383e853dc562d85347f57ee01fa97b
+$ diff work/krp23/digest-before.txt work/krp23/digest-after.txt && echo SAME-DIGEST
 SAME-DIGEST
-$ work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 22 --tab 3d --figure $f --export-3d work/krp22/after-fig$f.png   (f = 0, 1)
-  3d view: at 20,169, 940x409, yaw 180, pitch 0, frame 213 ms
-  3d view: at 20,169, 940x409, yaw 180, pitch 0, frame 119 ms
-$ cmp work/krp22/before-fig$f.png work/krp22/after-fig$f.png && echo SAME-PNG-$f
+$ diff work/krp22/digest-after.txt work/krp23/digest-after.txt && echo SAME-AS-TASK22-DIGEST
+SAME-AS-TASK22-DIGEST
+$ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before/tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 22 --tab 3d --figure 0 --export-3d work/krp23/before-fig0.png
+  3d view: at 20,169, 940x409, yaw 180, pitch 0, frame 107 ms
+  Croatia — TEX_22 · image work bitmap, 1st set · palette player palette, first set · /BIN/TEX_22.BIN on roms/japanese-shift-jis.bin, 30772 bytes
+  window up, at -32000,-32000
+$ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before/tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 22 --tab 3d --figure 1 --export-3d work/krp23/before-fig1.png
+  3d view: at 20,169, 940x409, yaw 180, pitch 0, frame 105 ms
+  Croatia — TEX_22 · image work bitmap, 1st set · palette player palette, first set · /BIN/TEX_22.BIN on roms/japanese-shift-jis.bin, 30772 bytes
+  window up, at -32000,-32000
+$ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 22 --tab 3d --figure 0 --export-3d work/krp23/after-fig0.png
+  3d view: at 20,169, 940x409, yaw 180, pitch 0, frame 106 ms
+  Croatia — TEX_22 · image work bitmap, 1st set · palette player palette, first set · /BIN/TEX_22.BIN on roms/japanese-shift-jis.bin, 30772 bytes
+  window up, at -32000,-32000
+$ DISPLAY=:98 XAUTHORITY= work/venv-looks/bin/python tools/kits/ui/app.py roms/japanese-shift-jis.bin --tag 22 --tab 3d --figure 1 --export-3d work/krp23/after-fig1.png
+  3d view: at 20,169, 940x409, yaw 180, pitch 0, frame 109 ms
+  Croatia — TEX_22 · image work bitmap, 1st set · palette player palette, first set · /BIN/TEX_22.BIN on roms/japanese-shift-jis.bin, 30772 bytes
+  window up, at -32000,-32000
+$ cmp work/krp23/before-fig0.png work/krp23/after-fig0.png && echo SAME-PNG-0
 SAME-PNG-0
+$ cmp work/krp23/before-fig1.png work/krp23/after-fig1.png && echo SAME-PNG-1
 SAME-PNG-1
+$ cmp work/krp22/after-fig0.png work/krp23/after-fig0.png && echo SAME-AS-TASK22-PNG-0
+SAME-AS-TASK22-PNG-0
+$ cmp work/krp22/after-fig1.png work/krp23/after-fig1.png && echo SAME-AS-TASK22-PNG-1
+SAME-AS-TASK22-PNG-1
 ```
 
-`confront --tab --player` antes (HEAD `ca147a8e`) e depois, nas três de perto, com `DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/<captura>.json --tab --player --out work/krp22/<antes|depois>`. Os números são os mesmos: com o painel a vista fica 786×409 em vez de 940×409 (`--export-3d … --player-looks A-L3-H-A-A` imprime `3d view: at 20,169, 786x409`), mas a altura é a mesma e a figura sai igual. Registra número, não afirma limite.
+`confront --tab --player` antes e depois, nas três de perto. Os números são os mesmos: com o painel a vista fica 786×409 em vez de 940×409 (`--export-3d` com `--player-looks A-L3-H-A-A` imprime `3d view: at 20,169, 786x409`), mas a altura é a mesma e a figura sai igual. Registra número, não afirma limite.
 
-Antes:
+Antes (`ca147a8e`):
 
 ```
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before/tools/kits/replay.py confront work/kits-replay/tab/replay-9-3-R1.json --tab --player --out work/krp23/before
   tab front (yaw 180) against the game's back capture: 3200 px, histogram intersection 0.442, 0.668 over the colours the tab draws
   tab back (yaw 0) against the game's front capture: 3520 px, histogram intersection 0.439, 0.748 over the colours the tab draws
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before/tools/kits/replay.py confront work/kits-replay/tab/replay-10-2-R1.json --tab --player --out work/krp23/before
   tab front (yaw 180) against the game's back capture: 3401 px, histogram intersection 0.335, 0.521 over the colours the tab draws
   tab back (yaw 0) against the game's front capture: 2777 px, histogram intersection 0.424, 0.636 over the colours the tab draws
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 /tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/19ade030-e44d-4060-8aef-84fed13cb062/scratchpad/k23/before/tools/kits/replay.py confront work/kits-replay/tab/replay-9-R1.json --tab --player --out work/krp23/before
   tab front (yaw 180) against the game's front capture: 4440 px, histogram intersection 0.500, 0.666 over the colours the tab draws
   tab back (yaw 0) against the game's back capture: 7381 px, histogram intersection 0.414, 0.730 over the colours the tab draws
 ```
 
-Depois:
+Depois (HEAD `17b1d791`):
 
 ```
-$ ... confront work/kits-replay/tab/replay-9-3-R1.json --tab --player
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/replay-9-3-R1.json --tab --player --out work/krp23/after
   tab front (yaw 180) against the game's back capture: 3200 px, histogram intersection 0.442, 0.668 over the colours the tab draws
   tab back (yaw 0) against the game's front capture: 3520 px, histogram intersection 0.439, 0.748 over the colours the tab draws
-$ ... confront work/kits-replay/tab/replay-10-2-R1.json --tab --player
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/replay-10-2-R1.json --tab --player --out work/krp23/after
   tab front (yaw 180) against the game's back capture: 3401 px, histogram intersection 0.335, 0.521 over the colours the tab draws
   tab back (yaw 0) against the game's front capture: 2777 px, histogram intersection 0.424, 0.636 over the colours the tab draws
-$ ... confront work/kits-replay/tab/replay-9-R1.json --tab --player
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py confront work/kits-replay/tab/replay-9-R1.json --tab --player --out work/krp23/after
   tab front (yaw 180) against the game's front capture: 4440 px, histogram intersection 0.500, 0.666 over the colours the tab draws
   tab back (yaw 0) against the game's back capture: 7381 px, histogram intersection 0.414, 0.730 over the colours the tab draws
 ```
