@@ -58,3 +58,7 @@ exit=0
 ```
 
 Nas três de perto (`replay-9-3`, `replay-10-2`, `replay-9`), o mesmo comando dá `1 of 1` nas duas linhas.
+- **Closed** — commit `5a3e0df4` (2026-10-16): docs(kits): close phase 3 of kits-replay with the gates rerun at HEAD
+  - Files (`git show --name-status 5a3e0df4`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/11-fechamento-da-fase-3.md`

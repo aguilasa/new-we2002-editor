@@ -94,7 +94,7 @@ A ferramenta vem primeiro (fases 1 e 2), porque toda melhoria começa lendo uma 
 | [KRP-TASK-08](/docs/tasks/kits-replay/08-fechamento-da-fase-2.md) | Fechamento da fase 2 | 2 | closing | KRP-TASK-04, KRP-TASK-05, KRP-TASK-06, KRP-TASK-07 | done | 2026-10-15 | 2026-10-15 |
 | [KRP-TASK-09](/docs/tasks/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md) | Medir a regra da cabeça (estilo, pele, cabelo e barba) contra o registro do disco nos 22 | 3 | investigação | KRP-TASK-08 | done | 2026-10-15 | 2026-10-15 |
 | [KRP-TASK-10](/docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md) | Cabeça pela tupla do jogador no scene_of e no match_scene, no CLI e na aba | 3 | implementação | KRP-TASK-09 | done | 2026-10-16 | 2026-10-16 |
-| [KRP-TASK-11](/docs/tasks/kits-replay/11-fechamento-da-fase-3.md) | Fechamento da fase 3 | 3 | closing | KRP-TASK-09, KRP-TASK-10 | pending | — | — |
+| [KRP-TASK-11](/docs/tasks/kits-replay/11-fechamento-da-fase-3.md) | Fechamento da fase 3 | 3 | closing | KRP-TASK-09, KRP-TASK-10 | done | 2026-10-16 | pending |
 | [KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md) | Goleiro pela família 13, com a pose medida e a 92 | 4 | implementação | KRP-TASK-11 | pending | — | — |
 | [KRP-TASK-13](/docs/tasks/kits-replay/13-fechamento-da-fase-4.md) | Fechamento da fase 4 | 4 | closing | KRP-TASK-12 | pending | — | — |
 | [KRP-TASK-14](/docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md) | Medir a corrida no ANIME.BIN: ponteiro do par na captura e pose --against-anime | 5 | investigação | KRP-TASK-08 | pending | — | — |
