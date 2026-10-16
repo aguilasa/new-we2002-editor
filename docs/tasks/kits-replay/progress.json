@@ -209,10 +209,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#3.3",
       "files": ["docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-16",
+      "done_commit": "61b1fa45",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

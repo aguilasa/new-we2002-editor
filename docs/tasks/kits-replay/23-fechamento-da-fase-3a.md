@@ -61,3 +61,7 @@ $ sha256sum work/krp-t23/*.png
 bc5176d231e7c96a81ef5bc7735f83ec0803d293cf7d06e19c73d9e885cb12c2  work/krp-t23/panel-en-US.png
 8b15577a1550170bda33e1d84d9eb6846ce35f6e026e94a8c23d271dc91260d6  work/krp-t23/panel-pt-BR.png
 ```
+- **Closed** — commit `61b1fa45` (2026-10-16): docs(kits): close phase 3a of kits-replay with the gates rerun at HEAD
+  - Files (`git show --name-status 61b1fa45`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/23-fechamento-da-fase-3a.md`
