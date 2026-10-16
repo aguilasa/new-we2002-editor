@@ -79,3 +79,7 @@ O que se afasta dele são duas opções do `head`: `--drawn`, que é relatório 
 ([CORR-KRP-018](/docs/tasks/kits-replay/CORR-KRP-018.md)), e `--plant-hair-column`, a planta com
 dado real. O jogador real no seletor continua no [§6](#6).
 ```
+- **Closed** — commit `8a2ab7dd` (2026-10-16): docs(kits): phase 3 paragraph lists only the real departures from the plan
+  - Files (`git show --name-status 8a2ab7dd`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-021.md`
