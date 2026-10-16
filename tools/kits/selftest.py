@@ -480,7 +480,7 @@ the headless stdout and argparse messages, the style's name, the PNG format,
 QPalette role names and colours (section 3.4, KITS-TASK-36)."""
 NOT_SHOWN_CONSTANTS = ("WORK", "COLOURS", "DISABLED_TEXT", "DISABLED_ROLES", "CHECKER",
                        "BACKDROP", "ZONE_PEN", "GAP_PEN", "FONT_FAMILIES", "CORE_TEXT",
-                       "TAB_NAMES")
+                       "TAB_NAMES", "HEAD_BOX")
 """Module constants of ui/app.py that hold keys, colours and font families."""
 _FORMAT_SPEC = re.compile(r"%[-#0 +]*\d*(?:\.\d+)?[a-zA-Z%]|\{[^{}]*\}")
 
@@ -1689,6 +1689,16 @@ def _player_head_checks(c) -> None:
         refused = str(exc)
     c.ok("figure.py: a player that is not a looks tuple is refused in a sentence",
          refused is not None and "is not a looks tuple" in refused, "%s" % refused)
+    # api.py, the head panel's two ends (KRP-TASK-22, PLAN-KITS-REPLAY section
+    # 3.3): the combos' fields and items, and the tuple they name back.
+    counts = [(name, len(items)) for name, items in api.PLAYER_FIELDS]
+    c.ok("api.py: PLAYER_FIELDS is the tuple's five fields, with 4, 32, 8, 7 and 7 items",
+         counts == [("skin_colour", 4), ("hair_style", 32), ("hair_colour", 8),
+                    ("beard_style", 7), ("beard_colour", 7)], "%s" % counts)
+    trips = {t: api.player_tuple(api.player_fields(t))
+             for t in (api.PLAYER_REFERENCE, "A-L3-H-A-A", "A-L3-B-A-A", "D-P1-H-G-G")}
+    c.ok("api.py: player_tuple names back the tuple player_fields read",
+         all(t == back for t, back in trips.items()), "%s" % trips)
 
 
 def _player_match_checks(c) -> None:

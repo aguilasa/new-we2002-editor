@@ -132,6 +132,24 @@ CLUT_COLUMN_STEP = 16
 window across it below; x is the window times `CLUT_COLUMN_STEP`."""
 PLAYER_REFERENCE = _figure.TUPLE
 """The looks tuple the figure wears without a player: its head is this one's."""
+PLAYER_FIELDS = tuple(
+    (name, tuple((label, _figure.looks.BY_NAME[name].bias + index)
+                 for index, label in enumerate(_figure.looks.BY_NAME[name].labels)))
+    for name in _figure.looks.TUPLE_ORDER)
+"""(field, ((label LOOKS SET writes, value), ...)) of each part of a player
+tuple, in the tuple's order (PLAN-KITS-REPLAY section 3.3): what the 3D tab
+offers one combo per field for."""
+
+
+def player_fields(text: str) -> dict:
+    """The fields of a player tuple (`A-L3-H-A-A`) as {field: value}, or
+    FigureError with the core's sentence."""
+    return _figure.player_values(text)
+
+
+def player_tuple(values: dict) -> str:
+    """The inverse of `player_fields`: the tuple that names *values*."""
+    return _figure.looks.format_tuple(values)
 
 
 def numbered(drawn, kit, kit_set, figure, number):

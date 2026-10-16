@@ -67,6 +67,8 @@ TAB_NAMES = ("plan", "3d", "diag")
 """--tab names of the three tabs, in tab order."""
 DEFAULT_NUMBER = 10
 """The number the Number field opens with: the slot 5 captain's (section 4.7)."""
+HEAD_BOX = "head_%s_box"
+"""The window attribute of the head panel's combo of a field (`head_box_name`)."""
 WORK = ("work1", "work2")
 """--image names of the two work bitmaps (first and second set); any other
 --image is an image record number."""
@@ -89,6 +91,11 @@ CHECKER = ("#cfcfcf", "#f2f2f2")
 BACKDROP = "#8c8c8c"
 ZONE_PEN = "#e0157a"
 GAP_PEN = "#1e9be0"
+
+
+def head_box_name(field: str) -> str:
+    """The window attribute holding the head panel's combo of *field*."""
+    return HEAD_BOX % field
 
 
 def fixed_palette() -> QtGui.QPalette:
@@ -404,11 +411,26 @@ class Window(QtWidgets.QMainWindow):
         # The player's head (PLAN-KITS-REPLAY section 3.2): his looks tuple
         # picks the head section and its CLUTs by the rule KRP-TASK-09
         # measured on the 22 of two replays; unticked, the reference head.
+        # The tuple is set by one combo per field, in a panel to the right of
+        # the view shown only while the box is ticked (section 3.3, the user's
+        # decision of 2026-10-16).  Each combo is an attribute of its own, so
+        # that `combos()` fits and judges it with the rest (G2).
         self.player_box = QtWidgets.QCheckBox()
-        self.player_edit = QtWidgets.QLineEdit()
-        self.player_edit.setPlaceholderText(api.PLAYER_REFERENCE)
-        self.player_edit.setText(api.PLAYER_REFERENCE)
-        self.player_edit.editingFinished.connect(self.draw_figure)
+        self.head_panel = QtWidgets.QGroupBox()
+        self.head_labels = {}
+        head_form = QtWidgets.QFormLayout(self.head_panel)
+        reference = api.player_fields(api.PLAYER_REFERENCE)
+        for name, items in api.PLAYER_FIELDS:
+            box = QtWidgets.QComboBox()
+            for label, value in items:
+                box.addItem(label, value)
+            box.setCurrentIndex(box.findData(reference[name]))
+            box.currentIndexChanged.connect(self.draw_figure)
+            setattr(self, head_box_name(name), box)
+            self.head_labels[name] = QtWidgets.QLabel()
+            head_form.addRow(self.head_labels[name], box)
+        self.head_panel.setVisible(False)
+        self.player_box.toggled.connect(self.head_panel.setVisible)
         for widget in (self.number_box, self.armband_box, self.long_box, self.player_box):
             widget.toggled.connect(self.draw_figure)
         self.number_spin.valueChanged.connect(self.draw_figure)
@@ -432,12 +454,15 @@ class Window(QtWidgets.QMainWindow):
         three_layout.addLayout(row)
         dress = QtWidgets.QHBoxLayout()
         for widget in (self.number_box, self.number_spin, self.armband_box, self.long_box,
-                       self.player_box, self.player_edit):
+                       self.player_box):
             dress.addWidget(widget)
         dress.addStretch(1)
         three_layout.addLayout(dress)
         three_layout.addWidget(self.figure_hint)
-        three_layout.addWidget(self.figure_view, 1)
+        view_row = QtWidgets.QHBoxLayout()
+        view_row.addWidget(self.figure_view, 1)
+        view_row.addWidget(self.head_panel, 0, QtCore.Qt.AlignmentFlag.AlignTop)
+        three_layout.addLayout(view_row, 1)
         self.tabs.addTab(three, "")
         self.tabs.currentChanged.connect(self.draw_figure)
         # The Diagnosis tab (section 3.4, KITS-TASK-33): the guard's problems
@@ -509,11 +534,45 @@ class Window(QtWidgets.QMainWindow):
         self.dressings()
         self.figure_hint.setText(tr("figure_hint"))
         self.reset_button.setText(tr("reset_view"))
+        self.head_panel.setTitle(tr("head_panel"))
+        texts = {"skin_colour": tr("head_skin_colour"), "hair_style": tr("head_hair_style"),
+                 "hair_colour": tr("head_hair_colour"), "beard_style": tr("head_beard_style"),
+                 "beard_colour": tr("head_beard_colour")}
+        for name, label in self.head_labels.items():
+            label.setText(texts[name])
+        self.fit_head_panel()
         self.show_geometry()
         self.relabel_tags()
         self.show_diagnosis()
         self.say(*self.said)
         self.readout.setText(" ")
+
+    def fit_head_panel(self) -> None:
+        """The head panel as wide as its widest label and combo in the
+        language in force: fixed, so the view keeps the rest, and refitted on
+        every language, so "Estilo do Cabelo" is not cut nor the English
+        panel left wide (section 3.3)."""
+        for label in self.head_labels.values():
+            label.adjustSize()
+        self.head_panel.setMinimumWidth(0)
+        self.head_panel.setMaximumWidth(16777215)  # QWIDGETSIZE_MAX
+        self.head_panel.layout().invalidate()
+        self.head_panel.setFixedWidth(self.head_panel.sizeHint().width())
+
+    def player_looks(self) -> str:
+        """The looks tuple the head panel's combos name."""
+        return api.player_tuple({name: getattr(self, head_box_name(name)).currentData()
+                                 for name, _ in api.PLAYER_FIELDS})
+
+    def set_player_looks(self, text: str) -> None:
+        """The head panel's combos on the fields of *text* (FigureError for
+        one that is not a tuple), drawn once."""
+        values = api.player_fields(text)
+        for name, _ in api.PLAYER_FIELDS:
+            box = getattr(self, head_box_name(name))
+            with QtCore.QSignalBlocker(box):
+                box.setCurrentIndex(box.findData(values[name]))
+        self.draw_figure()
 
     def language_changed(self) -> None:
         i18n.set_language(self.language_box.currentData())
@@ -620,7 +679,7 @@ class Window(QtWidgets.QMainWindow):
                                armband=self.armband_box.isChecked(),
                                sleeves=api.MATCH_SLEEVES[
                                    0 if self.long_box.isChecked() else 1],
-                               player=self.player_edit.text().strip()
+                               player=self.player_looks()
                                if self.player_box.isChecked() else None)
             if self.number_box.isChecked():
                 scene = api.numbered(scene, self.kit, self.set_box.currentData(),
@@ -1031,7 +1090,11 @@ def main(argv=None) -> int:
         window.number_spin.setValue(args.number)
         window.number_box.setChecked(True)
     if args.player_looks is not None:
-        window.player_edit.setText(args.player_looks)
+        try:
+            window.set_player_looks(args.player_looks)
+        except api.FigureError as exc:
+            print("--player-looks: %s" % exc, file=sys.stderr)
+            return 2
         window.player_box.setChecked(True)
     window.dressings()
     if args.list_3d:
@@ -1040,7 +1103,20 @@ def main(argv=None) -> int:
         for name, box in boxes.items():
             print("  box %s: shown %s, enabled %s, ticked %s, text %s"
                   % (name, not box.isHidden(), box.isEnabled(), box.isChecked(), box.text()))
-        print("  player looks: %s" % window.player_edit.text())
+        # Every line edit of the 3D tab that is a field of its own, not the
+        # one inside a spin box or a combo (section 3.3: the tuple's text field is gone).
+        edits = [e for e in window.tabs.widget(1).findChildren(QtWidgets.QLineEdit)
+                 if not isinstance(e.parent(), (QtWidgets.QAbstractSpinBox,
+                                                QtWidgets.QComboBox))]
+        print("  line edits: %d" % len(edits))
+        print("  head panel: %s, shown %s, width %d, looks %s"
+              % (window.head_panel.title(), not window.head_panel.isHidden(),
+                 window.head_panel.width(), window.player_looks()))
+        for name, _ in api.PLAYER_FIELDS:
+            box, label = getattr(window, head_box_name(name)), window.head_labels[name]
+            print("  head %s: %s, label width %d, combo width %d, %d items, current %s"
+                  % (name, label.text(), label.sizeHint().width(), box.sizeHint().width(),
+                     box.count(), box.currentText()))
         print("  figure selector: %s: %s" % (
             window.figure_labels["figure"].text(),
             " | ".join(window.figure_box.itemText(i) for i in range(window.figure_box.count()))))
@@ -1073,6 +1149,13 @@ def main(argv=None) -> int:
         for name, box in window.combos().items():
             field, longest, text = combo_fit(box)
             print("  combo %s: field %d, longest %d, %r" % (name, field, longest, text))
+        # The head panel after the switch (section 3.3): its width, and each
+        # label's laid-out width against the width its text needs.
+        print("  head panel: shown %s, width %d" % (not window.head_panel.isHidden(),
+                                                  window.head_panel.width()))
+        for name, label in window.head_labels.items():
+            print("  head label %s: width %d, needs %d, %r"
+                  % (name, label.width(), label.sizeHint().width(), label.text()))
         return 0
 
     if args.walk:

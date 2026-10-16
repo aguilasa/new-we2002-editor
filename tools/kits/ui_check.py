@@ -188,11 +188,12 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
 STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO, \
-    BACK, RASTER, FRAME, SAME, PLAYER = ("style", "hover", "3D", "3D off", "selector",
-                                         "diagnosis", "diagnosis note", "reset", "armband",
-                                         "dressing", "dressing boxes", "combo width",
-                                         "back copy", "core drawing", "frame time",
-                                         "same figure", "player head")
+    BACK, RASTER, FRAME, SAME, PLAYER, HEAD = ("style", "hover", "3D", "3D off", "selector",
+                                               "diagnosis", "diagnosis note", "reset",
+                                               "armband", "dressing", "dressing boxes",
+                                               "combo width", "back copy", "core drawing",
+                                               "frame time", "same figure", "player head",
+                                               "head panel")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -307,6 +308,17 @@ PLANTS = (
     ("Player's head ignored", PLAYER,
      "                               if self.player_box.isChecked() else None)\n",
      "                               if False else None)  # planted: Player's head ignored\n"),
+    ("hair colour combo ignored", PLAYER,
+     "        return api.player_tuple({name: getattr(self, head_box_name(name)).currentData()\n",
+     "        return api.player_tuple({name: 0 if name == \"hair_colour\"  # planted: ignored\n"
+     "                                 else getattr(self, head_box_name(name)).currentData()\n"),
+    ("head panel never shown", HEAD,
+     "        self.player_box.toggled.connect(self.head_panel.setVisible)\n",
+     "        pass  # planted: the head panel never shown\n"),
+    ("head panel width fixed", HEAD,
+     "        self.fit_head_panel()\n",
+     "        if self.head_panel.maximumWidth() >= 16777215:  # planted: width fixed\n"
+     "            self.fit_head_panel()\n"),
     ("the player's hair colour not moved", PLAYER,
      '        column += values["hair_colour"]\n',
      "        column += 0  # planted: the hair colour not moved\n",
@@ -1020,6 +1032,83 @@ def player_judge(python, image, env, tmp, app=APP) -> tuple:
     return bad, ", ".join(seen)
 
 
+HEAD_WANT = {
+    "en-US": ("Player's head", (("skin_colour", "Skin Color", 4), ("hair_style", "Hair Style", 32),
+                                ("hair_colour", "Hair Color", 8),
+                                ("beard_style", "Beard Style", 7),
+                                ("beard_colour", "Beard Color", 7))),
+    "pt-BR": ("Cabeça do jogador", (("skin_colour", "Cor da Pele", 4),
+                                    ("hair_style", "Estilo do Cabelo", 32),
+                                    ("hair_colour", "Cor do Cabelo", 8),
+                                    ("beard_style", "Estilo da Barba", 7),
+                                    ("beard_colour", "Cor da Barba", 7))),
+}
+"""The head panel per language (PLAN-KITS-REPLAY section 3.3): its title, and
+(field, label, items) of each combo in the tuple's order.  The labels are the
+user's (2026-10-16), written here and not read from ui/i18n.py."""
+HEAD_LOOKS = ("A-L3-H-A-A", {"hair_style": "L3", "hair_colour": "H"})
+"""A tuple --player-looks puts on the combos, and what two of them then show."""
+
+
+def head_judge(python, image, env, app=APP) -> tuple:
+    """(failures, what was seen): the 3D tab has no text field; the head panel
+    is hidden with Player's head unticked and shown ticked, with the five combos
+    of HEAD_WANT set by --player-looks; and after each live switch every label
+    is as wide as its text and the panel's width follows the language."""
+    bad, seen = [], []
+    for lang, (title, rows) in sorted(HEAD_WANT.items()):
+        for ticked in (False, True):
+            args = [image, "--tag", MATCH_TAG, "--tab", "3d", "--lang", lang, "--list-3d"]
+            args += ["--player-looks", HEAD_LOOKS[0]] if ticked else []
+            code, output = run_app(python, app, args, env)
+            if code != 0:
+                bad.append("%s ticked %s: exit %s" % (lang, ticked, code))
+                continue
+            lines = [ln.strip() for ln in output.splitlines()]
+            if "line edits: 0" not in lines:
+                bad.append("%s: the 3D tab has a text field (%s)"
+                           % (lang, [ln for ln in lines if ln.startswith("line edits")]))
+            panel = [ln for ln in lines if ln.startswith("head panel: ")]
+            want = "head panel: %s, shown %s," % (title, ticked)
+            if not panel or not panel[0].startswith(want):
+                bad.append("%s ticked %s: %r, not %r..." % (lang, ticked, panel, want))
+            for field, label, items in rows:
+                row = [ln for ln in lines if ln.startswith("head %s: " % field)]
+                current = HEAD_LOOKS[1].get(field, "A") if ticked else (
+                    "A1" if field == "hair_style" else "A")
+                if not row or not row[0].startswith("head %s: %s," % (field, label)) \
+                        or not row[0].endswith(", %d items, current %s" % (items, current)):
+                    bad.append("%s ticked %s: %r, not %s %s with %d items on %s"
+                               % (lang, ticked, row, field, label, items, current))
+    widths = {}
+    for first, then in COMBO_SWITCHES:
+        code, output = run_app(python, app, [image, "--tag", MATCH_TAG, "--tab", "3d",
+                                             "--lang", first, "--switch-to", then,
+                                             "--player-looks", HEAD_LOOKS[0],
+                                             "--list-combos"], env)
+        if code != 0:
+            bad.append("%s to %s: exit %s" % (first, then, code))
+            continue
+        for line in output.splitlines():
+            line = line.strip()
+            if line.startswith("head panel: "):
+                if "shown True" not in line:
+                    bad.append("%s to %s: %s" % (first, then, line))
+                widths[then] = int(line.rsplit("width ", 1)[1])
+            elif line.startswith("head label "):
+                name, rest = line[len("head label "):].split(": ", 1)
+                width, needs = (int(part.split()[1]) for part in rest.split(", ")[:2])
+                if width < needs:
+                    bad.append("%s to %s: the label of %s is %d px and its text needs %d"
+                               % (first, then, name, width, needs))
+    seen.append("panel width after the switch %s"
+                % ", ".join("%s %s" % (k, v) for k, v in sorted(widths.items())))
+    if len(widths) == 2 and len(set(widths.values())) == 1:
+        bad.append("the head panel is %d px in both languages: the switch did not refit it"
+                   % widths["en-US"])
+    return bad, ", ".join(seen)
+
+
 def boxes_judge(python, image, env, app=APP) -> list:
     """The dressing boxes per figure and language, against BOX_WANT."""
     bad = []
@@ -1067,7 +1156,8 @@ def boxes_judge(python, image, env, app=APP) -> list:
 
 
 COMBO_NAMES = ("tag_box", "language_box", "image_box", "palette_box", "zoom_box",
-               "set_box", "figure_box")
+               "set_box", "figure_box", "head_skin_colour_box", "head_hair_style_box",
+               "head_hair_colour_box", "head_beard_style_box", "head_beard_colour_box")
 """Every combo of the window, written here: the window finds its own, and one
 missing from its list -- or a new one missing from this -- fails the judge (G2)."""
 COMBO_SWITCHES = (("en-US", "pt-BR"), ("pt-BR", "en-US"))
@@ -1338,6 +1428,10 @@ def run(python: str, image: str) -> int:
         bad, seen = player_judge(python, image, env, tmp)
         t.ok("3D TEX_%s: Player's head draws the looks tuple's head, and two players "
              "apart only in hair colour are drawn apart (%s)" % (MATCH_TAG, seen), bad)
+        bad, seen = head_judge(python, image, env)
+        t.ok("the head panel: no text field on the 3D tab, hidden unticked and shown "
+             "ticked with the five combos and their labels in en-US and pt-BR, and "
+             "refitted on a live switch (%s)" % seen, bad)
         t.ok("the dressing boxes: all shown on both figures, the goalkeeper's Long "
              "sleeves ticked and off with the sentence; the kit selector "
              "Kit Home/Away, Uniforme Casa/Visitante; the figure selector two items, "
@@ -1388,6 +1482,8 @@ def run(python: str, image: str) -> int:
                     red, bad = dress_judge(python, image, env, box, app)[0], []
                 elif judge == PLAYER:
                     red, bad = player_judge(python, image, env, box, app)[0], []
+                elif judge == HEAD:
+                    red, bad = head_judge(python, image, env, app)[0], []
                 elif judge == RASTER:
                     red, bad = raster_judge(python, image, env, box, app)[0], []
                 elif judge == FRAME:

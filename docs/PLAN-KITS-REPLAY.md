@@ -310,8 +310,10 @@ Ficam de fora o sexto campo (`boots`, `looks.TUPLE_EXTRA`) e altura e corpo: `pl
 troca a cabeça ([§3.2](#3.2)). O `--player-looks TUPLE` do `app.py` continua, agora posicionando os
 combos: é a porta dos gates e do `confront --tab --player`.
 
-Com o painel à vista a vista 3D fica mais estreita, e o `--export-3d` desenha no tamanho da vista;
-o `confront --tab --player` muda de número sem a cabeça mudar, e por isso é registrado de novo.
+Com o painel à vista a vista 3D fica mais estreita (940×409 → 786×409 px na janela do
+`--export-3d`), mas a altura não muda e a figura sai a mesma: o `confront --tab --player` dá os
+mesmos números de antes nas três capturas de perto (medido na
+[KRP-TASK-22](/docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md)).
 
 ## 4. Goleiro pela família 13
 

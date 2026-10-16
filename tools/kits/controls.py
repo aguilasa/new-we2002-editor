@@ -671,6 +671,15 @@ CONTROLS = (
         "PLAN-KITS-REPLAY section 3.1)",
     ),
     Control(
+        "api-player-tuple-drops-a-field", "kits/core/api.py", "player_tuple",
+        "    return _figure.looks.format_tuple(values)\n",
+        "    return _figure.looks.format_tuple(dict(values, hair_colour=0))\n",
+        "FAIL  api.py: player_tuple names back the tuple player_fields read",
+        "the head panel's hair colour combo would draw every player with hair colour A: "
+        "the tuple the window builds from its combos loses the field (KRP-TASK-22, "
+        "PLAN-KITS-REPLAY section 3.3)",
+    ),
+    Control(
         "figure-player-hair-unmoved", "kits/core/figure.py", "player_head_clut",
         '        column += values["hair_colour"]\n',
         "        column += 0\n",
