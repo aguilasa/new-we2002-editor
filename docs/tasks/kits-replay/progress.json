@@ -209,10 +209,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#3.3",
       "files": ["tools/kits/core/figure.py", "tools/kits/ui_check.py", "tools/kits/selftest.py", "docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-16",
+      "done_commit": "a0bec3f8",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

@@ -69,3 +69,9 @@ controls: 81 of 81 red
 ```
 
 A planta do `kits_ui` não tem par no `controls.py`: a regra está no `scene_of`, que só roda com o disco, e o sandbox dos controles corre sem ele (mesma razão do §3.2 para o `head --drawn`).
+- **Closed** — commit `a0bec3f8` (2026-10-16): feat(kits): the body's skin follows the player's skin colour
+  - Files (`git show --name-status a0bec3f8`):
+    - `M docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui_check.py`
