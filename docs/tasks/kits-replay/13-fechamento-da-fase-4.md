@@ -11,7 +11,7 @@ A fase 4 (o goleiro pela família 13) fica fechada: os gates do [§9](/docs/PLAN
 ## Arquivos a criar ou modificar
 
 - In:
-  - nenhum: só reroda e corrige escrituração
+  - `docs/PLAN-KITS-REPLAY.md`: o que a fase mudou, escrito no plano (o resto só reroda e corrige escrituração)
 - Out:
   - código novo
 

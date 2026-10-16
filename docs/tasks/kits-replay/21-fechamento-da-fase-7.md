@@ -11,7 +11,7 @@ A fase 7 (a câmera replay) fica fechada: os gates do [§9](/docs/PLAN-KITS-REPL
 ## Arquivos a criar ou modificar
 
 - In:
-  - nenhum: só reroda e corrige escrituração
+  - `docs/PLAN-KITS-REPLAY.md`: o que a fase mudou, escrito no plano (o resto só reroda e corrige escrituração)
 - Out:
   - código novo
 

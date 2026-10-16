@@ -63,3 +63,30 @@ Rodar de novo o `python3 -c` da Evidência: as cinco linhas têm de listar
 `['docs/PLAN-KITS-REPLAY.md']`. Hoje todas imprimem `[]`.
 
 ## Log de Execução
+
+### 2026-10-16
+
+Reprodução (`rite reproduce`, HEAD `397e9817`): `git show --stat 5a3e0df4` lista
+`docs/PLAN-KITS-REPLAY.md | 7 ++++`; o `python3 -c` da Evidência imprime `[]` para as cinco tasks; o
+"Arquivos" da 11 diz `nenhum: só reroda e corrige escrituração`.
+
+Conserto: `rite set KRP-TASK-<N> --files docs/PLAN-KITS-REPLAY.md` para 11, 13, 16, 19 e 21, e no
+"Arquivos a criar ou modificar" de cada uma o "nenhum" virou
+`` `docs/PLAN-KITS-REPLAY.md`: o que a fase mudou, escrito no plano (o resto só reroda e corrige escrituração) ``.
+
+Verificação:
+
+```text
+$ python3 -c "import json;d=json.load(open('docs/tasks/kits-replay/progress.json'));[print(t['id'],t.get('files')) for t in d['tasks'] if t['id'] in ('KRP-TASK-11','KRP-TASK-13','KRP-TASK-16','KRP-TASK-19','KRP-TASK-21')]"
+KRP-TASK-11 ['docs/PLAN-KITS-REPLAY.md']
+KRP-TASK-13 ['docs/PLAN-KITS-REPLAY.md']
+KRP-TASK-16 ['docs/PLAN-KITS-REPLAY.md']
+KRP-TASK-19 ['docs/PLAN-KITS-REPLAY.md']
+KRP-TASK-21 ['docs/PLAN-KITS-REPLAY.md']
+$ grep -c "nenhum: só reroda" docs/tasks/kits-replay/{11,13,16,19,21}-fechamento-*.md
+docs/tasks/kits-replay/19-fechamento-da-fase-6.md:0
+docs/tasks/kits-replay/21-fechamento-da-fase-7.md:0
+docs/tasks/kits-replay/13-fechamento-da-fase-4.md:0
+docs/tasks/kits-replay/11-fechamento-da-fase-3.md:0
+docs/tasks/kits-replay/16-fechamento-da-fase-5.md:0
+```
