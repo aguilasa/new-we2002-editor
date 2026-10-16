@@ -52,3 +52,35 @@ grep -c 'section 46 n 1[48] cluts' docs/tasks/kits-replay/10-cabeca-pela-tupla-d
 Hoje dá 2. Depois do conserto tem de dar 0.
 
 ## Log de Execução
+
+### 2026-10-16
+
+Reprodução (`rite reproduce`, HEAD `90585357`): as linhas 64-67 do Log da KRP-TASK-10 traziam
+`section 46 n 14 cluts [[128, 480]]` e `section 46 n 18 cluts [[32, 480], [160, 480]]` sob comandos
+`--json`, cuja saída real começa por `{` / `"back_frames": 44,`. `grep -c 'section 46 n 1[48] cluts'`
+deu 2.
+
+Conserto: os dois comandos passaram a sair sem `--json`, com a saída literal rerodada na HEAD:
+
+```text
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-9-3.json --section 46
+work/kits-oracle/replay-9-3.json, on_axis: outfield 2, head 46, sleeves short, armband 90 for 4; still 0; depth 4694
+  order 46 2 3 5 90 6 7 9 11 8 10
+  panel [640, 60, 104] from the front capture, number 11
+  section 46: 14 prim(s), 0 shaded, 0 raw, 0 semi; CLUT [[128, 480]]; page [[512, 256]]; error 0.9468100891177211
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-10-2.json --section 46
+work/kits-oracle/replay-10-2.json, on_axis: outfield 2, head 46, sleeves long, armband None; still 0; depth 4699
+  order 46 2 95 96 97 98 7 9 11 8 10
+  panel [640, 80, 104] from the front capture, number 20
+  section 46: 18 prim(s), 0 shaded, 0 raw, 0 semi; CLUT [[32, 480], [160, 480]]; page [[512, 256]]; error 1.0405544040781696
+```
+
+Os números (14 e 18 primitivas, as CLUTs) são os do resumo antigo. Uma nota datada no Log da task diz
+que os blocos foram refeitos.
+
+Verificação:
+
+```text
+$ grep -c 'section 46 n 1[48] cluts' docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md
+0
+```

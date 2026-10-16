@@ -58,13 +58,19 @@ $ diff work/krp10/digest-before.txt work/krp10/digest-after.txt && echo SAME
 SAME
 ```
 
-A seção e a CLUT da captura contra as do desenho (Bokšić na 9-3, Balaban na 10-2). O desenho põe toda primitiva da 46 na coluna do jogo. O CLI conta as 34 primitivas da seção, e as (144,480) e (160,480) são a coluna da barba. A (144,480) não aparece na captura 9-3, que só amostra a (128,480); a (160,480) aparece na 10-2 (refeito pela CORR-KRP-017, 2026-10-16; medição no fim deste Log).
+A seção e a CLUT da captura contra as do desenho (Bokšić na 9-3, Balaban na 10-2). O desenho põe toda primitiva da 46 na coluna do jogo. O CLI conta as 34 primitivas da seção, e as (144,480) e (160,480) são a coluna da barba. A (144,480) não aparece na captura 9-3, que só amostra a (128,480); a (160,480) aparece na 10-2 (refeito pela CORR-KRP-017, 2026-10-16; medição no fim deste Log). Os dois comandos `figure` abaixo saem sem `--json`, com a saída literal (refeitos pela [CORR-KRP-019](/docs/tasks/kits-replay/CORR-KRP-019.md), 2026-10-16).
 
 ```
-$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-9-3.json --section 46 --json
-  section 46 n 14 cluts [[128, 480]]
-$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-10-2.json --section 46 --json
-  section 46 n 18 cluts [[32, 480], [160, 480]]
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-9-3.json --section 46
+work/kits-oracle/replay-9-3.json, on_axis: outfield 2, head 46, sleeves short, armband 90 for 4; still 0; depth 4694
+  order 46 2 3 5 90 6 7 9 11 8 10
+  panel [640, 60, 104] from the front capture, number 11
+  section 46: 14 prim(s), 0 shaded, 0 raw, 0 semi; CLUT [[128, 480]]; page [[512, 256]]; error 0.9468100891177211
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-10-2.json --section 46
+work/kits-oracle/replay-10-2.json, on_axis: outfield 2, head 46, sleeves long, armband None; still 0; depth 4699
+  order 46 2 95 96 97 98 7 9 11 8 10
+  panel [640, 80, 104] from the front capture, number 20
+  section 46: 18 prim(s), 0 shaded, 0 raw, 0 semi; CLUT [[32, 480], [160, 480]]; page [[512, 256]]; error 1.0405544040781696
 $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/cli.py figure roms/japanese-shift-jis.bin --tag 22 --set 1 --figure 0 --player A-L3-H-A-A
 set 1 figure 0  609 parts, 609 textured, 8 surfaces, bounds (-113,-33,-281)..(65,422,27)  e5d692df0f923715f75b8b6cc46150e09fbe9b3532eeb6c7b1a84bfe0017567a  head 46: (128,480)x31 (144,480)x3
 $ ... --match --player A-L3-H-A-A
