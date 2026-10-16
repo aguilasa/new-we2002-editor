@@ -27,7 +27,7 @@ $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.
   section 46 n 18 cluts [[32, 480], [160, 480]]
 $ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py figure work/kits-oracle/replay-9-3.json --section 46 --json | head -2
 {
- "capture": {
+ "back_frames": 44,
 ```
 
 ## Root cause
