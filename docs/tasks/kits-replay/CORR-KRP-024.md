@@ -141,3 +141,8 @@ kits_ui: 0 failure(s)
 
 O plant antigo `head panel width fixed` agora fica vermelho também pela igualdade nova (`the head
 panel is 148 px and its contents need 172`), além dos rótulos cortados que já o pegavam.
+- **Closed** — commit `b271c87f` (2026-10-16): test(kits): head panel judge requires the fitted width and gates the invalid --player-looks refusal
+  - Files (`git show --name-status b271c87f`):
+    - `M docs/tasks/kits-replay/CORR-KRP-024.md`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui_check.py`

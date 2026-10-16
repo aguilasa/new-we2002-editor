@@ -307,12 +307,12 @@
       "title": "head_judge não pega painel de cabeça largo demais, e o exit 2 de --player-looks inválido não tem gate",
       "origin": "KRP-TASK-22",
       "severity": "low",
-      "files": [],
-      "resources": [],
-      "status": "pending",
+      "files": ["tools/kits/ui_check.py", "tools/kits/ui/app.py"],
+      "resources": ["tela"],
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-16",
+      "done_commit": "b271c87f"
     },
     {
       "id": "CORR-KRP-025",
