@@ -21,4 +21,5 @@
 | [CORR-KRP-016](/docs/tasks/kits-replay/CORR-KRP-016.md) | Filtro de caixa da peça em head_samples sem controle; as CLUTs vizinhas da §3.1 não se reproduzem por ferramenta | KRP-TASK-09 | medium | done | 2026-10-15 |
 | [CORR-KRP-017](/docs/tasks/kits-replay/CORR-KRP-017.md) | Log da KRP-TASK-10 explica a frente de Marcos e as colunas de barba com o que a medição desmente | KRP-TASK-10 | medium | done | 2026-10-16 |
 | [CORR-KRP-018](/docs/tasks/kits-replay/CORR-KRP-018.md) | Coluna de barba, match_scene com player e head --drawn sem controle plantado | KRP-TASK-10 | medium | done | 2026-10-16 |
+| [CORR-KRP-019](/docs/tasks/kits-replay/CORR-KRP-019.md) | Log da KRP-TASK-10 cola resumo condensado sob dois comandos figure --json | CORR-KRP-017 | low | pending | — |
 <!-- rite:end -->

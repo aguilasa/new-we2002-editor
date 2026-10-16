@@ -235,6 +235,19 @@
       "depends_on": [],
       "done_on": "2026-10-16",
       "done_commit": "34430857"
+    },
+    {
+      "id": "CORR-KRP-019",
+      "file": "CORR-KRP-019.md",
+      "title": "Log da KRP-TASK-10 cola resumo condensado sob dois comandos figure --json",
+      "origin": "CORR-KRP-017",
+      "severity": "low",
+      "files": ["docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md"],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
