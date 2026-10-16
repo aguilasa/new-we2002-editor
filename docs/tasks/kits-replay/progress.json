@@ -159,12 +159,12 @@
       "phase": 3,
       "depends_on": ["KRP-TASK-09"],
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#3.2",
-      "files": ["tools/kits/core/figure.py", "tools/kits/cli.py", "tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py", "tools/kits/selftest.py", "tools/kits/controls.py"],
+      "files": ["tools/kits/core/figure.py", "tools/kits/core/api.py", "tools/kits/core/replay.py", "tools/kits/replay.py", "tools/kits/cli.py", "tools/kits/ui/app.py", "tools/kits/ui/i18n.py", "tools/kits/ui_check.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/PLAN-KITS-REPLAY.md"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-16",
+      "done_commit": "a2952514",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

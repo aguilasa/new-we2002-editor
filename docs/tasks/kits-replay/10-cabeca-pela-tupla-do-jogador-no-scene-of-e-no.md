@@ -140,3 +140,17 @@ $ python3 tools/kits/controls.py
   RED    figure-player-skin-unmoved   kits/core/figure.py :: player_head_clut
 controls: 76 of 76 red
 ```
+- **Closed** — commit `a2952514` (2026-10-16): feat(kits): draw the player's head from his looks tuple
+  - Files (`git show --name-status a2952514`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/api.py`
+    - `M tools/kits/core/figure.py`
+    - `M tools/kits/core/replay.py`
+    - `M tools/kits/replay.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui/app.py`
+    - `M tools/kits/ui/i18n.py`
+    - `M tools/kits/ui_check.py`
