@@ -63,3 +63,31 @@ grep -n "Log da 22" docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md
 Não pode imprimir nada, e o bloco de evidência não pode ter mais nenhum "…".
 
 ## Log de Execução
+
+### 2026-10-17
+
+Reprodução (`rite reproduce`, HEAD `364cc3a2`): `git log --all --oneline -S108094` só acha o
+`a0bec3f8` e a revisão; `grep -c 108094` no arquivo da task 22 dá 0; e a linha de digest do Log da
+task 24 é encurtada com `…`, com os redirecionamentos em prosa.
+
+Conserto, no Log da KRP-TASK-24:
+
+- "no Log da 22" virou "no `kits_ui` da árvore de antes desta task (`34763c76`)", com o script de
+  remontagem e a linha que ele imprime. Rodado da raiz no `:98`, ele dá `reference against Croatia 11
+  108094 px, Croatia 11 against Croatia 2 617 px`, o número do Log;
+- a comparação de digest passou a ser um script inteiro (`git archive 34763c76`, as duas invocações
+  de `cli.py figure`, a sem opção e a com `--match --set 1`, em cada lado, e o `diff`), com as sete
+  linhas de digest coladas. Deu `SAME`, como antes.
+
+Um tropeço no caminho: a primeira corrida do `kits_ui` antigo saiu 77, `skipped -- no display :98`.
+O Xvfb do `:98` tinha caído, e foi subido de novo com a receita do `CLAUDE.md` antes da corrida acima.
+
+Verificação:
+
+```text
+$ grep -n "Log da 22" docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md
+$ sed -n '/^## Log/,$p' docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md | grep -c "…"
+0
+```
+
+O primeiro não imprime nada (sai 1).
