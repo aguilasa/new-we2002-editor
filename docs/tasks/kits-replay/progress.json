@@ -212,8 +212,8 @@
       "status": "done",
       "done_on": "2026-10-16",
       "done_commit": "a0bec3f8",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-17",
+      "review_commit": "212e579c"
     },
     {
       "id": "KRP-TASK-23",

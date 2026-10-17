@@ -75,3 +75,4 @@ A planta do `kits_ui` não tem par no `controls.py`: a regra está no `scene_of`
     - `M tools/kits/core/figure.py`
     - `M tools/kits/selftest.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-17) at `212e579c`: CORR-KRP-027, CORR-KRP-028

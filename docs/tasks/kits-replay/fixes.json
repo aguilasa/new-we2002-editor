@@ -339,6 +339,32 @@
       "depends_on": [],
       "done_on": "2026-10-16",
       "done_commit": "e92e6353"
+    },
+    {
+      "id": "CORR-KRP-027",
+      "file": "CORR-KRP-027.md",
+      "title": "§3.2 ainda diz que a pele do corpo não muda, e o Feito da §3.3 não credita a KRP-TASK-24",
+      "origin": "KRP-TASK-24",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-028",
+      "file": "CORR-KRP-028.md",
+      "title": "Log da KRP-TASK-24 atribui 108094 px ao Log da 22 e encurta a linha de digest",
+      "origin": "KRP-TASK-24",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
