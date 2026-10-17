@@ -348,10 +348,10 @@
       "severity": "medium",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-17",
+      "done_commit": "9fe3ca92"
     },
     {
       "id": "CORR-KRP-028",
@@ -361,7 +361,7 @@
       "severity": "low",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "depends_on": [],
       "done_on": null,
       "done_commit": null

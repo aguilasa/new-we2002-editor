@@ -88,3 +88,7 @@ $ grep -n "inclusive a pele do corpo" docs/PLAN-KITS-REPLAY.md
 
 A outra ocorrência da frase, no parágrafo da §3.3, está entre aspas e o `grep` não a pega: ela cita
 justamente o que foi revogado.
+- **Closed** — commit `9fe3ca92` (2026-10-17): docs(kits): 3.2 points at the body-skin revocation, and phase 3a credits KRP-TASK-24
+  - Files (`git show --name-status 9fe3ca92`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-027.md`
