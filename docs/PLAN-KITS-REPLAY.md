@@ -259,8 +259,10 @@ Os dois recebem `player` (uma tupla da looks, `A-L3-H-A-A`). Quem desenha a cabe
 Na figura da aba (`scene_of`), a cabeça da tupla de referência sai inteira e a do jogador entra no
 lugar que a pose dá à cabeça (`scene.place_for`). A cena da looks com a tupla do jogador não serve:
 ela deixa parte das primitivas da 46 na coluna do disco, e o jogo pinta todas. **O resto da figura
-não muda**, inclusive a pele do corpo, que nenhum replay mediu. No `match_scene`, a seção da cabeça
-troca na mesma matriz.
+não muda**, inclusive a pele do corpo, que nenhum replay mediu — na figura da aba isso foi revogado
+em 2026-10-16: a pele do corpo segue a Cor da Pele do jogador ([§3.3](#3.3),
+[KRP-TASK-24](/docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md)). No `match_scene`, a
+seção da cabeça troca na mesma matriz, e a pele do corpo continua sem mudar.
 
 Sem a opção nada muda, e o digest de `cli.py figure` (as duas cenas) é o de antes. O CLI tem
 `figure --player`; a aba tem a caixa "Cabeça do jogador" e o `--player-looks`; o
@@ -326,7 +328,9 @@ mesmos números de antes nas três capturas de perto (medido na
 
 **Feito na fase 3a** ([KRP-TASK-22](/docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md)
 e [23](/docs/tasks/kits-replay/23-fechamento-da-fase-3a.md)), como escrito acima e sem diferença
-do texto. O painel na tela, nas duas línguas, está nas capturas do Log da task 23.
+do texto. O painel na tela, nas duas línguas, está nas capturas do Log da task 23. O parágrafo da
+pele do corpo veio depois, decidido em 2026-10-16 e entregue pela
+[KRP-TASK-24](/docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md).
 
 ## 4. Goleiro pela família 13
 

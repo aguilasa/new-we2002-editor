@@ -63,3 +63,28 @@ Hoje imprime 0. Depois do conserto tem de imprimir pelo menos 1, e a frase "incl
 corpo" tem de estar ao lado de uma referência à §3.3.
 
 ## Log de Execução
+
+### 2026-10-17
+
+Reprodução (`rite reproduce`, HEAD `364cc3a2`): a §3.2 dizia, sem ressalva, que a pele do corpo não
+muda (linhas 261-263); a linha "Feito na fase 3a" creditava só as KRP-TASK-22 e 23; e o
+`sed -n 255,330p … | grep -c "KRP-TASK-24\|24-pele-do-corpo"` dava 0.
+
+Conserto, no `docs/PLAN-KITS-REPLAY.md`:
+
+- na §3.2, depois de "inclusive a pele do corpo, que nenhum replay mediu", a remissão à revogação de
+  2026-10-16 na figura da aba ([§3.3](#3.3), KRP-TASK-24), mantendo que no `match_scene` a pele do
+  corpo continua sem mudar;
+- a linha "Feito na fase 3a" ganhou a frase que credita o parágrafo da pele à KRP-TASK-24.
+
+Verificação:
+
+```text
+$ sed -n 255,335p docs/PLAN-KITS-REPLAY.md | grep -c "KRP-TASK-24\|24-pele-do-corpo"
+2
+$ grep -n "inclusive a pele do corpo" docs/PLAN-KITS-REPLAY.md
+262:não muda**, inclusive a pele do corpo, que nenhum replay mediu — na figura da aba isso foi revogado
+```
+
+A outra ocorrência da frase, no parágrafo da §3.3, está entre aspas e o `grep` não a pega: ela cita
+justamente o que foi revogado.
