@@ -30,5 +30,5 @@
 | [CORR-KRP-025](/docs/tasks/kits-replay/CORR-KRP-025.md) | Altura da vista 3D depende do comprimento do caminho da imagem (940x409 contra 940x379) | KRP-TASK-22 | low | done | 2026-10-16 |
 | [CORR-KRP-026](/docs/tasks/kits-replay/CORR-KRP-026.md) | Logs de fechamento trazem $ sh rite check, que não roda; a forma é sh "$RITE_HOME/bin/rite" | KRP-TASK-23 | low | done | 2026-10-16 |
 | [CORR-KRP-027](/docs/tasks/kits-replay/CORR-KRP-027.md) | §3.2 ainda diz que a pele do corpo não muda, e o Feito da §3.3 não credita a KRP-TASK-24 | KRP-TASK-24 | medium | done | 2026-10-17 |
-| [CORR-KRP-028](/docs/tasks/kits-replay/CORR-KRP-028.md) | Log da KRP-TASK-24 atribui 108094 px ao Log da 22 e encurta a linha de digest | KRP-TASK-24 | low | in-progress | — |
+| [CORR-KRP-028](/docs/tasks/kits-replay/CORR-KRP-028.md) | Log da KRP-TASK-24 atribui 108094 px ao Log da 22 e encurta a linha de digest | KRP-TASK-24 | low | done | 2026-10-17 |
 <!-- rite:end -->

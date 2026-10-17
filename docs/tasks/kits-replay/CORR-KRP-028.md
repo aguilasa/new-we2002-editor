@@ -91,3 +91,7 @@ $ sed -n '/^## Log/,$p' docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabec
 ```
 
 O primeiro não imprime nada (sai 1).
+- **Closed** — commit `acb67846` (2026-10-17): docs(kits): KRP-TASK-24 Log rebuilds the 108094 px and spells out the digest run
+  - Files (`git show --name-status acb67846`):
+    - `M docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-028.md`
