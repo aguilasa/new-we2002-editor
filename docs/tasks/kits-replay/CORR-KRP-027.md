@@ -73,7 +73,7 @@ muda (linhas 261-263); a linha "Feito na fase 3a" creditava só as KRP-TASK-22 e
 Conserto, no `docs/PLAN-KITS-REPLAY.md`:
 
 - na §3.2, depois de "inclusive a pele do corpo, que nenhum replay mediu", a remissão à revogação de
-  2026-10-16 na figura da aba ([§3.3](#3.3), KRP-TASK-24), mantendo que no `match_scene` a pele do
+  2026-10-16 na figura da aba ([§3.3](/docs/PLAN-KITS-REPLAY.md#3.3), KRP-TASK-24), mantendo que no `match_scene` a pele do
   corpo continua sem mudar;
 - a linha "Feito na fase 3a" ganhou a frase que credita o parágrafo da pele à KRP-TASK-24.
 

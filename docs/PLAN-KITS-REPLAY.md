@@ -369,6 +369,11 @@ A pose medida tem **uma chuteira só**, a 11, como o item 3. O goleiro sai com o
 segunda chuteira não se inventa. Com a família 13, o `arm_dress` deixou de ser chamado para o goleiro:
 o ramo dele continua coberto pelo selftest, sem uso na aba.
 
+**Feito na fase 4** ([KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)
+e [13](/docs/tasks/kits-replay/13-fechamento-da-fase-4.md)), como escrito acima. O que se afasta do
+texto de cima são as duas lacunas já ditas: uma chuteira só, e o `arm_dress` sem uso para o goleiro.
+A pose de corrida das duas famílias continua no [§5](#5).
+
 ## 5. Pose de corrida
 
 ### 5.1 Medir a corrida no `ANIME.BIN`
