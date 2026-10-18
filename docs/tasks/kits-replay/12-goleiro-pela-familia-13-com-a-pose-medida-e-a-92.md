@@ -145,3 +145,13 @@ $ python3 tools/kits/controls.py
   RED    figure-keeper-armband-always kits/core/figure.py :: keeper_order
 controls: 82 of 82 red
 ```
+- **Closed** — commit `e4b2535e` (2026-10-18): feat(kits): draw the goalkeeper as the match one, family 13 of MODEL.BIN
+  - Files (`git show --name-status e4b2535e`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/figure.py`
+    - `A tools/kits/core/keeper_pose.json`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui_check.py`

@@ -241,10 +241,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#4",
       "files": ["tools/kits/core/figure.py", "tools/kits/core/keeper_pose.json", "tools/kits/cli.py", "tools/kits/ui/app.py", "tools/kits/ui_check.py", "tools/kits/selftest.py", "tools/kits/controls.py", "docs/PLAN-KITS-REPLAY.md"],
       "resources": ["tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-18",
+      "done_commit": "e4b2535e",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {
