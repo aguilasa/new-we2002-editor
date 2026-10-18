@@ -257,10 +257,10 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#9",
       "files": ["docs/PLAN-KITS-REPLAY.md", "docs/tasks/kits-replay/CORR-KRP-027.md"],
       "resources": ["tela"],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-18",
+      "done_commit": "87dc98a6",
+      "reviewed_on": "pending",
       "review_commit": null
     },
     {

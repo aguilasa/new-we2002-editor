@@ -57,3 +57,11 @@ $ git show e4b2535e -- tools/kits/core/figure.py | grep "^+" | grep -nE "texcoor
 112:+        for v in one.vertices:
 117:+            moved.append(_Vertex(*p))
 ```
+- **Closed** — commit `87dc98a6` (2026-10-18): docs(kits): close phase 4 of kits-replay with the gates rerun at HEAD
+  - Files (`git show --name-status 87dc98a6`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/13-fechamento-da-fase-4.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-027.md`
+    - `M docs/tasks/kits-replay/progress.json`
+  - **Outside declared files** (`docs/PLAN-KITS-REPLAY.md`, `docs/tasks/kits-replay/CORR-KRP-027.md`):
+    - `docs/tasks/kits-replay/progress.json`
