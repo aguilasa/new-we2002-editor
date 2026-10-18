@@ -65,3 +65,4 @@ $ git show e4b2535e -- tools/kits/core/figure.py | grep "^+" | grep -nE "texcoor
     - `M docs/tasks/kits-replay/progress.json`
   - **Outside declared files** (`docs/PLAN-KITS-REPLAY.md`, `docs/tasks/kits-replay/CORR-KRP-027.md`):
     - `docs/tasks/kits-replay/progress.json`
+- **Reviewed** (2026-10-18) at `2475b135`: no finding
