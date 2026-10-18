@@ -155,3 +155,4 @@ controls: 82 of 82 red
     - `A tools/kits/core/keeper_pose.json`
     - `M tools/kits/selftest.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-18) at `0a7b4b94`: no finding

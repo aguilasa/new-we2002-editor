@@ -244,8 +244,8 @@
       "status": "done",
       "done_on": "2026-10-18",
       "done_commit": "e4b2535e",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-18",
+      "review_commit": "0a7b4b94"
     },
     {
       "id": "KRP-TASK-13",
