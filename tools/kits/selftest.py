@@ -1560,6 +1560,7 @@ def _replay_checks(c) -> None:
     _replay_reader_checks(c, cli, replay)
     _replay_head_checks(c, cli, replay)
     _player_head_checks(c)
+    _keeper_order_checks(c)
     _player_match_checks(c)
 
 
@@ -1656,6 +1657,23 @@ def _replay_head_checks(c, cli, replay) -> None:
          len(cli.HEAD_EXPECT) == cli.HEAD_PLAYERS and teams == sorted(cli.HEAD_TEAMS.values())
          and all(sum(t == team for t, _n in cli.HEAD_EXPECT) == 11 for team in teams),
          "%d, %s" % (len(cli.HEAD_EXPECT), teams))
+
+
+def _keeper_order_checks(c) -> None:
+    """figure.py, the match goalkeeper (KRP-TASK-12): `keeper_order` puts 92 in
+    the position of 15 with the armband and 15 in the position of 92 without,
+    each keeping its position's matrix."""
+    from core import figure
+
+    pieces = [{"section": s, "rotation": [s] * 9, "translation": [s, 0, 0]}
+              for s in (34, 13, 14, 16, 92, 17)]
+    worn = {a: figure.keeper_order(pieces, a) for a in (True, False)}
+    c.ok("figure.py: the goalkeeper wears 92 in 15's place with the armband, 15 without",
+         [s for s, _r, _t in worn[True]] == [34, 13, 14, 16, 92, 17]
+         and [s for s, _r, _t in worn[False]] == [34, 13, 14, 16, 15, 17],
+         "%s" % {a: [s for s, _r, _t in o] for a, o in worn.items()})
+    c.ok("figure.py: the goalkeeper's arm keeps the matrix of its position",
+         worn[False][4][1:] == ((92,) * 9, (92, 0, 0)), "%s" % (worn[False][4],))
 
 
 def _player_head_checks(c) -> None:
@@ -2246,6 +2264,7 @@ def _figure_checks(c, image_path) -> None:
     _figure_cli_checks(c, image_path, src.kit("00"), geometry)
     _player_match_image_checks(c, src.kit("00"), geometry)
     _player_skin_image_checks(c, src.kit("22"), geometry)
+    _keeper_image_checks(c, src.kit("41"), geometry)
     for tag in ("A4", "00"):
         kit = src.kit(tag)
         for figure in (0, 1):
@@ -2260,11 +2279,41 @@ def _figure_checks(c, image_path) -> None:
                      % (tag, kit_set, figure), swap.ok, "; ".join(swap.wrong[:3]))
 
 
+KEEPER_ORDER = {True: [34, 13, 14, 16, 92, 17, 18, 20, 11, 19, 21],
+                False: [34, 13, 14, 16, 15, 17, 18, 20, 11, 19, 21]}
+"""The goalkeeper's MODEL.BIN sections in draw order, with the armband and
+without, with Marcos's head (I1, section 34): KITS-REPLAYS-9-10 item 3,
+constant here (K1), never read from the pose file."""
+
+
+def _keeper_image_checks(c, kit, geometry) -> None:
+    """The goalkeeper is family 13 of MODEL.BIN (KRP-TASK-12, PLAN-KITS-REPLAY
+    section 4): its sections in the measured order, 92 in place of 15 only with
+    the armband, and nothing of EDT_MOD.BIN."""
+    for armband in (True, False):
+        scene = c.attempt("goalkeeper, armband %s" % armband,
+                          lambda a=armband: api.figure(kit, 1, 1, frame=api.FIGURE_POSE,
+                                                       geometry=geometry, armband=a,
+                                                       player="A-I1-B-A-B"))
+        if scene is None:
+            return
+        drawn = []
+        for p in scene.parts:
+            if (p.file, p.section) not in drawn:
+                drawn.append((p.file, p.section))
+        files = sorted({f for f, _s in drawn})
+        print("  ..... goalkeeper, armband %s: %s, order %s"
+              % (armband, files, " ".join(str(s) for _f, s in drawn)))
+        c.ok("goalkeeper, armband %s: MODEL.BIN family 13 in the measured order" % armband,
+             files == [api.MODEL_FILE] and [s for _f, s in drawn] == KEEPER_ORDER[armband],
+             "%s %s" % (files, [s for _f, s in drawn]))
+
+
 def _player_skin_image_checks(c, kit, geometry) -> None:
     """`api.figure` with a player, on the disc (KRP-TASK-24, PLAN-KITS-REPLAY
     section 3.3): the body's bare skin follows the player's SKIN.  Skin D
     against skin A, the rest of the tuple the same: some primitive outside
-    the MODEL.BIN head changes CLUT on both figures, and every one that does
+    the head section changes CLUT on both figures, and every one that does
     is three rows down (the looks rule, CORR-LOOKS-103)."""
     for figure in api.FIGURES:
         drawn = {}
@@ -2275,8 +2324,11 @@ def _player_skin_image_checks(c, kit, geometry) -> None:
                                                                geometry=geometry, player=t))
             if scene is None:
                 return
+            # everything but the head: the goalkeeper's body is MODEL.BIN too
+            # (family 13, KRP-TASK-12), so the head is told apart by section
+            head = (api.MODEL_FILE, scene.notes["player head"]["section"])
             drawn[looks_tuple] = {(p.file, p.section, p.primitive): p.clut
-                                  for p in scene.parts if p.file != api.MODEL_FILE}
+                                  for p in scene.parts if (p.file, p.section) != head}
         light, dark = drawn["A-L3-H-A-A"], drawn["D-L3-H-A-A"]
         moved = [k for k in light if light[k] != dark.get(k)]
         rows = sorted({(dark[k] >> api.CLUT_COLUMN_BITS) - (light[k] >> api.CLUT_COLUMN_BITS)

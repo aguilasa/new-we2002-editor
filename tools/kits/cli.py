@@ -1158,7 +1158,8 @@ def cmd_figure(args) -> int:
             for figure in figures:
                 try:
                     scene = api.figure(kit, drawn_as(kit_set), figure, frame=api.FIGURE_POSE,
-                                       geometry=geometry, player=args.player)
+                                       geometry=geometry, player=args.player,
+                                       armband=args.armband)
                 except api.FigureError as exc:
                     bad += 1
                     print("set %d figure %d: %s" % (kit_set, figure, exc))
@@ -1171,6 +1172,8 @@ def cmd_figure(args) -> int:
                          sum(1 for p in scene.parts if p.textured), len(scene.surfaces),
                          low[0], low[1], low[2], high[0], high[1], high[2],
                          digests[kit_set, figure], _player_head(scene)))
+                if "order" in scene.notes:
+                    print("  order %s" % " ".join(map(str, scene.notes["order"])))
         verdicts = {}
         if sets == (1, 2):
             for figure in figures:
@@ -1370,7 +1373,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="draw set 2 as set 1 and require the set-1-vs-set-2 verdict to flip")
     p.add_argument("--match", action="store_true",
                    help="the match figure (MODEL.BIN, the measured pose) instead")
-    p.add_argument("--armband", action="store_true", help="with --match: the captain's armband")
+    p.add_argument("--armband", action="store_true",
+                   help="the captain's armband (the match figure, and the tab's two figures)")
     p.add_argument("--player", metavar="TUPLE",
                    help="the head a player's looks draw, e.g. A-L3-H-A-A (default: the "
                         "reference tuple's)")

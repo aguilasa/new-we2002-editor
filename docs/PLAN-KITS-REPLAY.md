@@ -345,6 +345,30 @@ A mudança: desenhar o goleiro pela família 13 do `MODEL.BIN`, com a cabeça do
 no plano e no perfil, datada. Confronto de antes e depois pelo `confront --tab` no goleiro dos dois
 slots.
 
+**Reaberta em 2026-10-12, por decisão do usuário**, a
+[K3D-TASK-10](/docs/tasks/concluidos/kits-3d/10-duas-figuras.md): a aba tinha ficado com as duas
+figuras do `EDT_MOD.BIN`, e o goleiro passa a ser o de partida.
+
+**Feito** ([KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)).
+A figura 1 do `scene_of` é `core/figure.py:keeper_scene`:
+
+- **a pose** é `core/keeper_pose.json`, cópia byte a byte de `work/kits-pose/slot9-keeper-front.json`,
+  com o sha256 no Log da task;
+- **a ordem** é a da pose: `keeper_order` põe a 92 na posição da 15 com faixa, e a 15 na posição da
+  92 sem. `cli.py figure --figure 1 [--armband]` imprime `order 34 13 14 16 92 17 18 20 11 19 21`
+  com faixa e a 15 no lugar sem; o `kits_image` afirma as duas ordens;
+- **a cabeça** é a do [§3](#3): a da tupla de referência sem jogador, a do jogador com ele;
+- **a pele, o cabelo e a barba do corpo** saem por `player_body_clut`. A coluna 0 (pele nua) vai para
+  a linha da pele, e as colunas 1 e 9 seguem a regra da cabeça. No laço do slot 9, as pernas do 10 e
+  do 11 do Brasil amostram (0,482) e (0,483), e os torsos (16,482) e (16,483); os goleiros, (0,480) e
+  (32,480);
+- toda seção, vértice e texel vêm do `MODEL.BIN`, texturizados como no `match_scene`, que passou a
+  compartilhar o mesmo `_model_scene`.
+
+A pose medida tem **uma chuteira só**, a 11, como o item 3. O goleiro sai com o outro pé de meia, e a
+segunda chuteira não se inventa. Com a família 13, o `arm_dress` deixou de ser chamado para o goleiro:
+o ramo dele continua coberto pelo selftest, sem uso na aba.
+
 ## 5. Pose de corrida
 
 ### 5.1 Medir a corrida no `ANIME.BIN`

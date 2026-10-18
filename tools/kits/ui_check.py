@@ -188,12 +188,10 @@ HOVER_PNG = "TEX_%s_set1_player.png" % HOVER_TAG
 """What `cli.py export --work-bitmap` names that bitmap."""
 
 STYLE, HOVER, FIGURE, OFF, SELECTOR, DIAG, DIAG_NOTE, RESET, MATCH, DRESS, BOXES, COMBO, \
-    BACK, RASTER, FRAME, SAME, PLAYER, HEAD = ("style", "hover", "3D", "3D off", "selector",
-                                               "diagnosis", "diagnosis note", "reset",
-                                               "armband", "dressing", "dressing boxes",
-                                               "combo width", "back copy", "core drawing",
-                                               "frame time", "same figure", "player head",
-                                               "head panel")
+    BACK, RASTER, FRAME, SAME, PLAYER, HEAD, FAMILY = (
+        "style", "hover", "3D", "3D off", "selector", "diagnosis", "diagnosis note", "reset",
+        "armband", "dressing", "dressing boxes", "combo width", "back copy", "core drawing",
+        "frame time", "same figure", "player head", "head panel", "match goalkeeper")
 """DIAG_NOTE is the Diagnosis judge on the note rows: only the European
 Deluxe TEX_13 makes one, so its plant is judged only with ED_VARIABLE set
 and says it was not judged otherwise (CORR-KITS-061)."""
@@ -292,8 +290,8 @@ PLANTS = (
      "                self.long_box.setChecked(True)\n",
      "                pass  # planted: unticked\n"),
     ("goalkeeper's armband ignored", DRESS,
-     "        return {ARM_PIECES[KEEPER_ARMBAND]: KEEPER_ARMBAND} if armband else {}\n",
-     "        return {}  # planted: the goalkeeper's armband ignored\n",
+     "            section = KEEPER_ARMBAND if armband else KEEPER_ARM\n",
+     "            section = KEEPER_ARM  # planted: the goalkeeper's armband ignored\n",
      "../core/figure.py"),
     ("armband drawn on the torso", MATCH,
      "        out[ARM_PIECES[band]] = band\n",
@@ -305,6 +303,10 @@ PLANTS = (
     ("kit labels bare tags", SELECTOR,
      '                labels[tag] = tr("kit_team", team=team.name, tag=tag)\n',
      '                labels[tag] = tr("kit_tag", tag=tag)  # planted: bare tags\n'),
+    ("the goalkeeper of EDT_MOD.BIN back", FAMILY,
+     "    if figure == KEEPER_FIGURE:\n",
+     "    if False:  # planted: the EDT_MOD.BIN goalkeeper back\n",
+     "../core/figure.py"),
     ("Player's head ignored", PLAYER,
      "                               if self.player_box.isChecked() else None)\n",
      "                               if False else None)  # planted: Player's head ignored\n"),
@@ -1045,6 +1047,40 @@ def differing_in_body(one: tuple, two: tuple) -> int:
                if one[2][y * w + x] != two[2][y * w + x])
 
 
+FAMILY_TAG = "41"
+FAMILY_RATIO = 0.5
+"""The least width over height of the goalkeeper's silhouette from the front:
+the match goalkeeper of family 13 opens arms and legs, the LOOKS SET one of
+EDT_MOD.BIN does not.  Measured on TEX_41 at yaw 180 on 2026-10-18
+(KRP-TASK-12): 194 x 343 px, 0.566, against 132 x 343, 0.385, before the task."""
+
+
+def family_judge(python, image, env, tmp, app=APP) -> tuple:
+    """(failures, what was seen): the goalkeeper the 3D tab draws is the match
+    one, family 13 of MODEL.BIN (PLAN-KITS-REPLAY section 4): his silhouette
+    from the front is at least FAMILY_RATIO as wide as it is tall."""
+    out = os.path.join(tmp, "keeper-front.png")
+    _shot, bad, _ = capture(python, app, image,
+                            ["--tag", FAMILY_TAG, "--tab", "3d", "--figure", "1",
+                             "--yaw", "180", "--export-3d", out],
+                            os.path.join(tmp, "keeper-window.png"), env)
+    try:
+        width, _height, pixels = picture(out)[:3]
+    except (OSError, BadPicture, zlib.error) as exc:
+        return bad + ["no goalkeeper picture: %s" % exc], ""
+    ground = pixels[0]
+    xs = [i % width for i, p in enumerate(pixels) if p != ground]
+    ys = [i // width for i, p in enumerate(pixels) if p != ground]
+    if not xs:
+        return bad + ["the goalkeeper picture is empty"], ""
+    w, h = max(xs) - min(xs) + 1, max(ys) - min(ys) + 1
+    seen = "%d x %d px, %.3f" % (w, h, w / h)
+    if w / h < FAMILY_RATIO:
+        bad.append("the goalkeeper from the front is %s, under %.2f: the LOOKS SET figure, "
+                   "not the match one" % (seen, FAMILY_RATIO))
+    return bad, seen
+
+
 def player_judge(python, image, env, tmp, app=APP) -> tuple:
     """(failures, what was seen): `--player-looks` changes the 3D view against
     the reference head, and two players apart only in hair colour are drawn
@@ -1486,6 +1522,10 @@ def run(python: str, image: str) -> int:
         bad, seen = dress_judge(python, image, env, tmp)
         t.ok("3D TEX_%s from the back: every combination of the boxes on both figures, "
              "and each box changes the view in every one (%s)" % (MATCH_TAG, seen), bad)
+        bad, seen = family_judge(python, image, env, tmp)
+        t.ok("3D TEX_%s: the goalkeeper is the match one, family 13, his silhouette from "
+             "the front at least %.2f as wide as tall (%s)" % (FAMILY_TAG, FAMILY_RATIO, seen),
+             bad)
         bad, seen = player_judge(python, image, env, tmp)
         t.ok("3D TEX_%s: Player's head draws the looks tuple's head, and two players "
              "apart only in hair colour are drawn apart (%s)" % (MATCH_TAG, seen), bad)
@@ -1541,6 +1581,8 @@ def run(python: str, image: str) -> int:
                     bad = []
                 elif judge == DRESS:
                     red, bad = dress_judge(python, image, env, box, app)[0], []
+                elif judge == FAMILY:
+                    red, bad = family_judge(python, image, env, box, app)[0], []
                 elif judge == PLAYER:
                     red, bad = player_judge(python, image, env, box, app)[0], []
                 elif judge == HEAD:
