@@ -356,7 +356,7 @@ slots.
 [K3D-TASK-10](/docs/tasks/concluidos/kits-3d/10-duas-figuras.md): a aba tinha ficado com as duas
 figuras do `EDT_MOD.BIN`, e o goleiro passa a ser o de partida.
 
-**Desfeito em 2026-10-18, por decisão do usuário**
+**Desfeito em 2026-10-19, por decisão do usuário de 2026-10-18**
 ([KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md)): a
 figura 1 voltou ao goleiro do `EDT_MOD.BIN`, com só a 92 trocada quando capitão, vestido pelo
 `arm_dress`. O código do commit `e4b2535e` saiu por revert, e o `cli.py figure` dá o digest da

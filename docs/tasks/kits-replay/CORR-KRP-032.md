@@ -43,3 +43,19 @@ grep -c "Desfeito em 2026-10-19" docs/PLAN-KITS-REPLAY.md
 Hoje imprime 0. Depois do conserto tem de imprimir 1.
 
 ## Log de Execução
+
+### 2026-10-19
+
+Reprodução (`rite reproduce --all --cycle kits-replay`, HEAD `ab98809b`): `git log -1 --format=%ad
+--date=short afbcf78c` deu `2026-10-19`, e `grep -n "Desfeito em" docs/PLAN-KITS-REPLAY.md` deu
+`357:**Desfeito em 2026-10-18, por decisão do usuário**`.
+
+Conserto: a frase da §4 virou `**Desfeito em 2026-10-19, por decisão do usuário de 2026-10-18**`. As
+outras datas 2026-10-18 do plano e do perfil são de decisão do usuário e ficam.
+
+Verificação:
+
+```text
+$ grep -c "Desfeito em 2026-10-19" docs/PLAN-KITS-REPLAY.md
+1
+```
