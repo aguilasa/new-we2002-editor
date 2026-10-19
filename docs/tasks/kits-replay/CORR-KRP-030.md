@@ -50,3 +50,21 @@ grep -c '"explains": 10' docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-
 Hoje imprime 0. Depois do conserto tem de imprimir pelo menos 5.
 
 ## Log de Execução
+
+### 2026-10-19
+
+Reprodução (`rite reproduce --all --cycle kits-replay`, HEAD `d5a52c01`): `grep -c -- "--against-anime --json"`
+no arquivo da task deu 1 (a linha do critério), e `grep -c '"explains": 10'` deu 0.
+
+Conserto: o Log da KRP-TASK-14 ganhou uma nota datada com as cinco saídas `--json`, coladas como
+saíram: para cada pose, o resumo (`jq '{animations, frame, explains, explained, linked, pieces,
+expect, failures}'`) e uma linha por peça (`jq -c '.rows[] | …'`), com par, slot do par e regra. As
+regras batem com a prosa já escrita: `mirror`/`flip` no slot 9 goleiro e no 10 foco 2, `plain` nas
+outras três.
+
+Verificação:
+
+```text
+$ grep -c '"explains": 10' docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md
+5
+```

@@ -66,6 +66,153 @@ slot 10 focus 3: 10 of 11 piece(s) carry a pair, 10 explained; animation [4] fra
 
 Por peça, o `--json` dá o par, o quadro, o slot do par e a regra: no slot 9 goleiro e no 10 foco 2, `mirror` no torso e `flip` nos membros, que leem o par do irmão (`anime.WALK_SIDE_RULES`); nos outros três, `plain`. A cabeça fica sem par: ela vem antes de qualquer parada de `ANIME_BUILD`.
 
+Nota de 2026-10-19 ([CORR-KRP-030](/docs/tasks/kits-replay/CORR-KRP-030.md)): o critério 1 pede o `--json`, e o bloco acima só tinha o resumo em texto. As cinco saídas `--json`, rerodadas na HEAD `d5a52c01`, com o resumo e uma linha por peça (`[seção, par, animações, quadro, slot do par, regras]`; `null` é a cabeça, sem par):
+
+```
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot9-keeper-front.json --against-anime --json | jq '{animations, frame, explains, explained, linked, pieces, expect, failures}'
+{
+  "animations": [
+    0,
+    1
+  ],
+  "frame": 0,
+  "explains": 10,
+  "explained": 10,
+  "linked": 10,
+  "pieces": 11,
+  "expect": [
+    0,
+    0
+  ],
+  "failures": []
+}
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot9-keeper-front.json --against-anime --json | jq -c '.rows[] | if . then [.section, .pair, .animations, .frame, .slot, .rules] else null end'
+null
+[13,824,[0,1],0,1,["mirror"]]
+[14,848,[0,1],0,4,["flip"]]
+[16,856,[0,1],0,5,["flip"]]
+[92,832,[0,1],0,2,["flip"]]
+[17,840,[0,1],0,3,["flip"]]
+[18,888,[0,1],0,9,["flip"]]
+[20,896,[0,1],0,10,["flip"]]
+[11,904,[0,1],0,11,["flip"]]
+[19,864,[0,1],0,6,["flip"]]
+[21,872,[0,1],0,7,["flip"]]
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot10-keeper-front.json --against-anime --json | jq '{animations, frame, explains, explained, linked, pieces, expect, failures}'
+{
+  "animations": [
+    0,
+    1
+  ],
+  "frame": 0,
+  "explains": 10,
+  "explained": 10,
+  "linked": 10,
+  "pieces": 11,
+  "expect": [
+    0,
+    0
+  ],
+  "failures": []
+}
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot10-keeper-front.json --against-anime --json | jq -c '.rows[] | if . then [.section, .pair, .animations, .frame, .slot, .rules] else null end'
+null
+[13,824,[0,1],0,1,["plain"]]
+[14,832,[0,1],0,2,["plain"]]
+[16,840,[0,1],0,3,["plain"]]
+[92,848,[0,1],0,4,["plain"]]
+[17,856,[0,1],0,5,["plain"]]
+[18,864,[0,1],0,6,["plain"]]
+[20,872,[0,1],0,7,["plain"]]
+[11,880,[0,1],0,8,["plain"]]
+[19,888,[0,1],0,9,["plain"]]
+[21,896,[0,1],0,10,["plain"]]
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot9-focus3-first.json --against-anime --json | jq '{animations, frame, explains, explained, linked, pieces, expect, failures}'
+{
+  "animations": [
+    146
+  ],
+  "frame": 8,
+  "explains": 10,
+  "explained": 10,
+  "linked": 10,
+  "pieces": 11,
+  "expect": [
+    146,
+    8
+  ],
+  "failures": []
+}
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot9-focus3-first.json --against-anime --json | jq -c '.rows[] | if . then [.section, .pair, .animations, .frame, .slot, .rules] else null end'
+null
+[2,8828,[146],8,1,["plain"]]
+[3,8836,[146],8,2,["plain"]]
+[5,8844,[146],8,3,["plain"]]
+[90,8852,[146],8,4,["plain"]]
+[6,8860,[146],8,5,["plain"]]
+[7,8868,[146],8,6,["plain"]]
+[9,8876,[146],8,7,["plain"]]
+[11,8884,[146],8,8,["plain"]]
+[8,8892,[146],8,9,["plain"]]
+[10,8900,[146],8,10,["plain"]]
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot10-focus2-first.json --against-anime --json | jq '{animations, frame, explains, explained, linked, pieces, expect, failures}'
+{
+  "animations": [
+    134
+  ],
+  "frame": 9,
+  "explains": 10,
+  "explained": 10,
+  "linked": 10,
+  "pieces": 11,
+  "expect": [
+    134,
+    9
+  ],
+  "failures": []
+}
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot10-focus2-first.json --against-anime --json | jq -c '.rows[] | if . then [.section, .pair, .animations, .frame, .slot, .rules] else null end'
+null
+[2,89508,[134],9,1,["mirror"]]
+[95,89532,[134],9,4,["flip"]]
+[96,89540,[134],9,5,["flip"]]
+[97,89516,[134],9,2,["flip"]]
+[98,89524,[134],9,3,["flip"]]
+[7,89572,[134],9,9,["flip"]]
+[9,89580,[134],9,10,["flip"]]
+[11,89588,[134],9,11,["flip"]]
+[8,89548,[134],9,6,["flip"]]
+[10,89556,[134],9,7,["flip"]]
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot10-focus3-first.json --against-anime --json | jq '{animations, frame, explains, explained, linked, pieces, expect, failures}'
+{
+  "animations": [
+    4
+  ],
+  "frame": 9,
+  "explains": 10,
+  "explained": 10,
+  "linked": 10,
+  "pieces": 11,
+  "expect": [
+    4,
+    9
+  ],
+  "failures": []
+}
+$ WE2002_LOOKS_IMAGE=$PWD/roms/japanese-shift-jis.bin python3 tools/kits/replay.py pose work/kits-oracle/anime/slot10-focus3-first.json --against-anime --json | jq -c '.rows[] | if . then [.section, .pair, .animations, .frame, .slot, .rules] else null end'
+null
+[2,17248,[4],9,1,["plain"]]
+[95,17256,[4],9,2,["plain"]]
+[96,17264,[4],9,3,["plain"]]
+[93,17272,[4],9,4,["plain"]]
+[98,17280,[4],9,5,["plain"]]
+[7,17288,[4],9,6,["plain"]]
+[9,17296,[4],9,7,["plain"]]
+[11,17304,[4],9,8,["plain"]]
+[8,17312,[4],9,9,["plain"]]
+[10,17320,[4],9,10,["plain"]]
+```
+
 K1 e K2: o esperado é `ANIME_EXPECT` em `tools/kits/replay.py`, constante por (slot, foco), e o `kits_replay` o julga sobre as cinco poses. A planta muda a animação esperada e derruba as 50 peças explicadas com dado real:
 
 ```
