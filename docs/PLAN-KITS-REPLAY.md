@@ -391,7 +391,9 @@ que explicam cada uma das cinco poses — ou a negativa, com comando e saída.
 
 **Medido** ([KRP-TASK-14](/docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md)):
 positivo nas cinco. O `ANIME.BIN` está inteiro na RAM do replay, no mesmo `layout.ANIME_BASE` da
-`LOOKS SET`, nas duas cópias mestras, e o `ANIME_BUILD` é a mesma instrução. O `pose_capture` para
+`LOOKS SET`, nas duas cópias mestras, e o `ANIME_BUILD` é a mesma instrução — quem mede é
+`replay.py anime-ram <state.sav>...`, que compara a RAM byte a byte com o arquivo e a palavra com o
+`jal 0x8003D4BC` ([CORR-KRP-029](/docs/tasks/kits-replay/CORR-KRP-029.md)). O `pose_capture` para
 nela e na carga da câmera (`POSE_MATRIX`), e cada parada de matriz leva o par e a câmera.
 `oracle.py --replay SLOT [--focus K] --pose-dir DIR` grava a pose com eles, e
 `replay.py pose <pose> --against-anime` acha o quadro de cada par e a regra de desempacotar
@@ -408,8 +410,10 @@ nela e na carga da câmera (`POSE_MATRIX`), e cada parada de matriz leva o par e
 Cada pose tem 11 peças: a cabeça vem antes de qualquer parada de `ANIME_BUILD`, e fica sem par; a
 peça que o atraso de desenho deixa sem nome não entra na pose. O lado espelhado é o mesmo da
 caminhada da `LOOKS SET` (`anime.WALK_SIDE_RULES`): os membros leem o par do irmão. A recaptura
-reproduz as cinco poses de `work/kits-pose/` peça por peça. O `kits_replay` julga as cinco contra
-`ANIME_EXPECT` (constante por slot e foco), e `--plant-anime` o derruba.
+reproduz as cinco poses de `work/kits-pose/` peça por peça, em seção, rotação e translação —
+`replay.py pose work/kits-oracle/anime/<pose>.json --same-as work/kits-pose/<pose>.json`. O
+`kits_replay` julga as cinco contra `ANIME_EXPECT` (constante por slot e foco), e `--plant-anime` o
+derruba.
 
 ### 5.2 Posar pela corrida
 

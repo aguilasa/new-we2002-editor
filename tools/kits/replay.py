@@ -21,6 +21,9 @@ Usage:
     python tools/kits/replay.py confront <capture.json> --tab [--player] [--out DIR] [--json]
     python tools/kits/replay.py capture --slot S [--focus K] [--turn R1|L1] [--walk L2|R2]
                                         [--out DIR] [--cue CUE]   # boots the emulator
+    python tools/kits/replay.py pose <pose|capture> --against-anime [--plant-anime] [--json]
+    python tools/kits/replay.py pose <pose|capture> --same-as <pose|capture> [--json]
+    python tools/kits/replay.py anime-ram <state.sav>... [--json]
     python tools/kits/replay.py check [<folder>] [--plant-hair-column]  # the kits_replay gate
 
 The geometry comes from `WE2002_LOOKS_IMAGE`, the Japanese data track.
@@ -1022,6 +1025,67 @@ def read_anime(image_path: str) -> bytes:
         return anime.read(disc)
 
 
+RAM_MASK = 0x1FFFFF
+"""A KSEG0 address to its offset in the two megabytes of RAM a save state keeps."""
+ROT_MATRIX = 0x8003D4BC
+"""`RotMatrix`, the routine `layout.ANIME_BUILD` calls (its docstring and
+`anime.rotation`'s say `jal 0x8003D4BC`, measured in the `looks` cycle)."""
+ANIME_BUILD_WORD = 0x0C000000 | ((ROT_MATRIX >> 2) & 0x03FFFFFF)
+"""The word `anime-ram` expects at `layout.ANIME_BUILD`: `jal ROT_MATRIX`
+encoded (opcode 3, the target's 26 word bits), 0x0C00F52F.  The same word is
+in the two LOOKS SET master states, `work/looks-states/SLPM-87056_1.sav` and
+`_2.sav` -- `anime-ram` on them prints it (CORR-KRP-029)."""
+SAME_POSE_FIELDS = ("section", "rotation", "translation")
+"""What `pose A --same-as B` compares, piece by piece: the pair and the camera
+a recapture adds are not in the older pose, and are not compared."""
+
+
+def anime_ram_report(ram: bytes, data: bytes) -> dict:
+    """`anime-ram`: the RAM of a save state at `layout.ANIME_BASE` against the
+    whole `/BIN/ANIME.BIN` *data*, byte by byte, and the word at
+    `layout.ANIME_BUILD` against `ANIME_BUILD_WORD`.  `failures` is empty only
+    when every byte matches and the word is the `jal`."""
+    import struct
+
+    import layout  # tools/looks
+
+    base = layout.ANIME_BASE & RAM_MASK
+    window = bytes(ram[base:base + len(data)])
+    same = sum(a == b for a, b in zip(window, data))
+    word = struct.unpack_from("<I", ram, layout.ANIME_BUILD & RAM_MASK)[0]
+    failures = []
+    if same != len(data):
+        failures.append("%d of %d bytes of ANIME.BIN at ANIME_BASE 0x%08X differ"
+                        % (len(data) - same, len(data), layout.ANIME_BASE))
+    if word != ANIME_BUILD_WORD:
+        failures.append("word 0x%08X at ANIME_BUILD 0x%08X, not the jal 0x%08X (0x%08X)"
+                        % (word, layout.ANIME_BUILD, ROT_MATRIX, ANIME_BUILD_WORD))
+    return {"schema": SCHEMA, "same": same, "bytes": len(data),
+            "base": "0x%08X" % layout.ANIME_BASE, "build": "0x%08X" % layout.ANIME_BUILD,
+            "word": "0x%08X" % word, "expect_word": "0x%08X" % ANIME_BUILD_WORD,
+            "failures": failures}
+
+
+def same_pose_report(a: dict, b: dict) -> dict:
+    """`pose A --same-as B`: piece by piece, in order, the `SAME_POSE_FIELDS`
+    of the two poses.  `failures` names every piece that differs, and a
+    different piece count."""
+    rows = []
+    failures = []
+    pa, pb = a["pieces"], b["pieces"]
+    if len(pa) != len(pb):
+        failures.append("%d piece(s) against %d" % (len(pa), len(pb)))
+    for n, (x, y) in enumerate(zip(pa, pb)):
+        differ = [k for k in SAME_POSE_FIELDS if x.get(k) != y.get(k)]
+        rows.append({"piece": n, "section": x.get("section"), "differ": differ})
+        if differ:
+            failures.append("piece %d (section %s) differs in %s"
+                            % (n, x.get("section"), ", ".join(differ)))
+    return {"schema": SCHEMA, "pieces": [len(pa), len(pb)],
+            "same": sum(not r["differ"] for r in rows), "fields": list(SAME_POSE_FIELDS),
+            "rows": rows, "failures": failures}
+
+
 def load_pose(path: str) -> dict:
     """A pose, as `work/kits-pose/` keeps it ({"slot", "focus", "pieces"}),
     from a pose file or from a capture's followed figure."""
@@ -1269,9 +1333,14 @@ def main(argv=None) -> int:
     take.add_argument("--cue")
     pose = sub.add_parser("pose")
     pose.add_argument("capture")
-    pose.add_argument("--against-anime", action="store_true", required=True)
+    against = pose.add_mutually_exclusive_group(required=True)
+    against.add_argument("--against-anime", action="store_true")
+    against.add_argument("--same-as", metavar="POSE")
     pose.add_argument("--plant-anime", action="store_true")
     pose.add_argument("--json", action="store_true")
+    ram = sub.add_parser("anime-ram")
+    ram.add_argument("states", nargs="+")
+    ram.add_argument("--json", action="store_true")
     gate = sub.add_parser("check")
     gate.add_argument("folder", nargs="?")
     gate.add_argument("--quiet", action="store_true")
@@ -1314,6 +1383,43 @@ def main(argv=None) -> int:
             return SKIP
         return 1 if check(folder, not args.quiet, args.plant_hair_column,
                           args.plant_anime) else 0
+    if args.command == "anime-ram":
+        if not os.environ.get(IMAGE_VARIABLE):
+            print("replay.py anime-ram: needs %s (the Japanese data track)" % IMAGE_VARIABLE)
+            return 1
+        import savestate  # tools/pes2
+
+        data = read_anime(os.environ[IMAGE_VARIABLE])
+        failed = 0
+        for path in args.states:
+            doc = dict(anime_ram_report(savestate.SaveState(path).ram, data), state=path)
+            if args.json:
+                print(json.dumps(doc, indent=1, sort_keys=True))
+            else:
+                print("%s: %d of %d bytes of ANIME.BIN at ANIME_BASE %s; word %s at "
+                      "ANIME_BUILD %s (expected %s)" % (path, doc["same"], doc["bytes"],
+                                                        doc["base"], doc["word"],
+                                                        doc["build"], doc["expect_word"]))
+                for line in doc["failures"]:
+                    print("  FAIL  %s" % line)
+            failed += bool(doc["failures"])
+        return 1 if failed else 0
+    if args.command == "pose" and args.same_as:
+        try:
+            doc = same_pose_report(load_pose(args.capture), load_pose(args.same_as))
+        except replay.ReplayError as exc:
+            print("replay.py: %s" % exc, file=sys.stderr)
+            return 1
+        doc.update(pose=args.capture, same_as=args.same_as)
+        if args.json:
+            print(json.dumps(doc, indent=1, sort_keys=True))
+        else:
+            print("%s against %s: %d of %d piece(s) the same in %s (%d against %d piece(s))"
+                  % (args.capture, args.same_as, doc["same"], max(doc["pieces"]),
+                     ", ".join(doc["fields"]), doc["pieces"][0], doc["pieces"][1]))
+            for line in doc["failures"]:
+                print("  FAIL  %s" % line)
+        return 1 if doc["failures"] else 0
     if args.command == "pose":
         if not os.environ.get(IMAGE_VARIABLE):
             print("replay.py pose: needs %s (the Japanese data track)" % IMAGE_VARIABLE)

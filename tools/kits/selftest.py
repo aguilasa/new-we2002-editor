@@ -1560,6 +1560,7 @@ def _replay_checks(c) -> None:
     _replay_reader_checks(c, cli, replay)
     _replay_head_checks(c, cli, replay)
     _replay_anime_checks(c, cli, replay)
+    _replay_anime_ram_checks(c, cli)
     _player_head_checks(c)
     _keeper_order_checks(c)
     _player_match_checks(c)
@@ -1617,6 +1618,60 @@ def _replay_anime_checks(c, cli, replay) -> None:
                                       "camera": [4096] * 9}
          and replay.pose_piece({"section": 13, "matrix": ((1,) * 9, (0, 0, 0))})
          == {"section": 13, "rotation": [1] * 9, "translation": [0, 0, 0]}, "")
+
+
+def _replay_anime_ram_checks(c, cli) -> None:
+    """replay.py anime-ram and pose --same-as (CORR-KRP-029), on a synthetic
+    two-megabyte RAM holding `anime._synthetic()` at `layout.ANIME_BASE` and
+    the `jal` at `layout.ANIME_BUILD`: the file found there whole, the word
+    judged, a copy one byte off and another word refused; and two poses
+    compared section, rotation and translation, piece by piece."""
+    import struct
+
+    import anime  # tools/looks
+    import layout  # tools/looks
+
+    data = anime._synthetic()
+    ram = bytearray(cli.RAM_MASK + 1)
+    base = layout.ANIME_BASE & cli.RAM_MASK
+    ram[base:base + len(data)] = data
+    struct.pack_into("<I", ram, layout.ANIME_BUILD & cli.RAM_MASK, cli.ANIME_BUILD_WORD)
+    doc = cli.anime_ram_report(ram, data)
+    c.ok("replay.py anime-ram: the file read at ANIME_BASE matches byte for byte",
+         (doc["same"], doc["bytes"], doc["failures"]) == (len(data), len(data), []),
+         "%s" % doc)
+    c.ok("replay.py anime-ram: the expected word is jal 0x8003D4BC",
+         cli.ANIME_BUILD_WORD == 0x0C00F52F and doc["word"] == "0x0C00F52F",
+         "0x%08X, %s" % (cli.ANIME_BUILD_WORD, doc["word"]))
+    shifted = bytearray(ram)
+    shifted[base:base + len(data) + 1] = b"\0" + data
+    doc = cli.anime_ram_report(shifted, data)
+    c.ok("replay.py anime-ram: the file one byte off ANIME_BASE fails",
+         doc["same"] < len(data) and any("ANIME_BASE" in f for f in doc["failures"]),
+         "%s" % doc["failures"])
+    other = bytearray(ram)
+    struct.pack_into("<I", other, layout.ANIME_BUILD & cli.RAM_MASK, cli.ANIME_BUILD_WORD + 1)
+    doc = cli.anime_ram_report(other, data)
+    c.ok("replay.py anime-ram: another word at ANIME_BUILD fails",
+         any("ANIME_BUILD" in f for f in doc["failures"]), "%s" % doc["failures"])
+
+    piece = {"section": 13, "rotation": [4096, 0, 0, 0, 4096, 0, 0, 0, 4096],
+             "translation": [1, 2, 3]}
+    pose = {"pieces": [dict(piece), dict(piece, section=14)]}
+    recaptured = {"pieces": [dict(p, pair=824, camera=[4096] * 9) for p in pose["pieces"]]}
+    doc = cli.same_pose_report(recaptured, pose)
+    c.ok("replay.py pose --same-as: a recapture with pair and camera added is the same pose",
+         (doc["same"], doc["failures"]) == (2, []), "%s" % doc)
+    for field, value in (("section", 15), ("rotation", [4095] + [0] * 8),
+                         ("translation", [1, 2, 4])):
+        moved = {"pieces": [dict(piece, **{field: value}), pose["pieces"][1]]}
+        doc = cli.same_pose_report(moved, pose)
+        c.ok("replay.py pose --same-as: a piece whose %s differs fails" % field,
+             doc["same"] == 1 and len(doc["failures"]) == 1 and field in doc["failures"][0],
+             "%s" % doc["failures"])
+    doc = cli.same_pose_report({"pieces": pose["pieces"][:1]}, pose)
+    c.ok("replay.py pose --same-as: a different piece count fails",
+         doc["failures"][:1] == ["1 piece(s) against 2"], "%s" % doc["failures"])
 
 
 def _replay_head_checks(c, cli, replay) -> None:

@@ -1329,9 +1329,11 @@ def pose_capture(game, maps, submits: int = POSE_SUBMITS) -> dict:
     Two more stops name where each matrix came from (KRP-TASK-14): the build
     at `layout.ANIME_BUILD`, whose `s0` is the `/BIN/ANIME.BIN` pair the
     matrix is turned from, and the camera load at `layout.POSE_MATRIX`.  The
-    file sits at `layout.ANIME_BASE` in the replay too, all of it (measured
-    on both save states by content), and a matrix stop carries the pair and
-    camera seen since the previous one, or None."""
+    file sits at `layout.ANIME_BASE` in the replay too, all of it, and the
+    word at `layout.ANIME_BUILD` is the same `jal` -- `replay.py anime-ram
+    <state.sav>...` measures both on the save states (CORR-KRP-029) -- and a
+    matrix stop carries the pair and camera seen since the previous one, or
+    None."""
     import who_writes
 
     import oracle as looks_oracle  # tools/looks

@@ -696,6 +696,31 @@ CONTROLS = (
         "--against-anime` could judge no piece of it (KRP-TASK-14)",
     ),
     Control(
+        "replay-anime-ram-base-shifted", "kits/replay.py", "anime_ram_report",
+        "    base = layout.ANIME_BASE & RAM_MASK\n",
+        "    base = (layout.ANIME_BASE + 1) & RAM_MASK\n",
+        "FAIL  replay.py anime-ram: the file read at ANIME_BASE matches byte for byte",
+        "the RAM read one byte past ANIME_BASE is not the file: the probe that says ANIME.BIN "
+        "sits whole in the replay's RAM has to see that (CORR-KRP-029, PLAN-KITS-REPLAY "
+        "section 5.1)",
+    ),
+    Control(
+        "replay-anime-ram-word-unjudged", "kits/replay.py", "anime_ram_report",
+        "    if word != ANIME_BUILD_WORD:\n",
+        "    if False:\n",
+        "FAIL  replay.py anime-ram: another word at ANIME_BUILD fails",
+        "a word printed and never compared: a state whose ANIME_BUILD is another instruction "
+        "would pass, and the breakpoint there would stop on something else (CORR-KRP-029)",
+    ),
+    Control(
+        "replay-same-pose-section-only", "kits/replay.py", "module constant",
+        'SAME_POSE_FIELDS = ("section", "rotation", "translation")\n',
+        'SAME_POSE_FIELDS = ("section",)\n',
+        "FAIL  replay.py pose --same-as: a piece whose rotation differs fails",
+        "comparing sections alone, any pose of the same figure is 'the same': the recapture "
+        "would reproduce the old poses by construction (CORR-KRP-029)",
+    ),
+    Control(
         "api-player-tuple-drops-a-field", "kits/core/api.py", "player_tuple",
         "    return _figure.looks.format_tuple(values)\n",
         "    return _figure.looks.format_tuple(dict(values, hair_colour=0))\n",
