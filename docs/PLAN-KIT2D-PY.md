@@ -461,8 +461,10 @@ o plano diz que **pular não é passar**.
 Os states que já existem não servem: `work/kits-states/SLPM-87056_3.sav` e
 `_10.sav` são **em partida** (Escócia × Dinamarca, e um replay do
 `kits-3d`), não na tela de opções. No ciclo, as tasks que precisam do state
-nascem `blocked` com `--unblocked-by "test -f work/kit2d-states/SLPM-87056_1.sav"`
-(conferido em 2026-10-19: o arquivo não existe).
+nascem `blocked`, com o motivo `test -f work/kit2d-states/SLPM-87056_1.sav`
+(conferido em 2026-10-19: o arquivo não existe). É motivo, não gatilho: o
+`--unblocked-by` do Rite só vale para correção, então quem destrava é
+`rite mark <ID> pending` quando o state existir.
 
 ### 4.5 (e) O modelo é uma lista só?
 
