@@ -55,3 +55,21 @@ grep -n -A3 "passa a ser desenhado pela família 13" docs/PLAN-KITS-REPLAY.md do
 Hoje imprime 0. Depois do conserto tem de imprimir 2.
 
 ## Log de Execução
+
+### 2026-10-19
+
+Reprodução (`rite reproduce --all --cycle kits-replay`, HEAD `ab98809b`): `grep -n "família 13"`
+mostrou a decisão vigente em `docs/prompts/perfil-kits-replay.md:14` e `docs/PLAN-KITS-REPLAY.md:35`,
+sem nota de desfeito; a Verificação dava 0.
+
+Conserto: nas duas listas de decisões, uma linha datada logo abaixo da decisão da família 13 diz que
+ela foi desfeita em 2026-10-19 (o revert `afbcf78c`, `git log -1 --format=%ad --date=short afbcf78c`
+dá `2026-10-19`), por decisão do usuário de 2026-10-18 (Notas da KRP-TASK-25, linha 39), com link
+para a KRP-TASK-25 e para a §4.
+
+Verificação:
+
+```text
+$ grep -n -A3 "passa a ser desenhado pela família 13" docs/PLAN-KITS-REPLAY.md docs/prompts/perfil-kits-replay.md | grep -c "desfeit"
+2
+```

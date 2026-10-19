@@ -35,6 +35,8 @@ colados da ferramenta, e não se reescrevem aqui.
 - **O goleiro passa a ser desenhado pela família 13**, com a pose medida e a 92 no lugar da 15.
   Isto **reabre a [K3D-TASK-10](/docs/tasks/concluidos/kits-3d/10-duas-figuras.md)**, que tirou a
   figura de partida do seletor (usuário, 2026-10-12; [§4](#4)).
+  Decisão desfeita em 2026-10-19, por decisão do usuário de 2026-10-18: o goleiro voltou ao
+  `EDT_MOD.BIN` ([KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md); [§4](#4)).
 - **Entram no ciclo**: jogador real no seletor ([§6](#6)), vista dos dois times ([§7](#7)), câmera
   "replay" em perspectiva ([§8](#8)) e o `confront --tab` ([§2.4](#2.4)) (usuário, 2026-10-12).
 - **As fases 5 a 7 não serão feitas** (usuário, 2026-10-18): pose de corrida na aba ([§5.2](#5.2)),
