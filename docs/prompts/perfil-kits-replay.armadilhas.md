@@ -73,7 +73,7 @@ Format:
 
 ### `--json` condensado no Log
 - tags: log, transcrição, json
-- paths: docs/tasks/kits-replay/*.md
+- paths: docs/tasks/concluidos/kits-replay/*.md
 - proven by: CORR-KRP-030 (2026-10-19); also 005, 012, 019, 023
 - rule: com `--json` o Log cola o documento inteiro, ou a linha `$` roda o modo texto; resumo de extrator, placeholder (`<f>`) e `…` não são saída de ferramenta.
 
