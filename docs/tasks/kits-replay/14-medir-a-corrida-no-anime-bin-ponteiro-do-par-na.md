@@ -94,3 +94,12 @@ controls: 85 of 85 red
 ```
 
 `$S` é o scratchpad da sessão; as capturas ali não são lidas por nada versionado.
+- **Closed** — commit `5fc15802` (2026-10-18): feat(kits): read the ANIME.BIN pair in the replay capture and judge the pose against it
+  - Files (`git show --name-status 5fc15802`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/replay.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/replay.py`
+    - `M tools/kits/selftest.py`

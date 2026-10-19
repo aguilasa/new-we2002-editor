@@ -33,22 +33,15 @@ graph TD
   end
   subgraph phase_5["Fase 5"]
     KRP_TASK_14["KRP-TASK-14<br/>Medir a corrida no ANIME.BIN: ponteiro do par na captura e pose --against-anime"]
-    KRP_TASK_15["KRP-TASK-15<br/>Posar as famílias 2 e 13 pela corrida do arquivo, com seletor de caminhada ou corrida"]
-    KRP_TASK_16["KRP-TASK-16<br/>Fechamento da fase 5"]
-  end
-  subgraph phase_6["Fase 6"]
-    KRP_TASK_17["KRP-TASK-17<br/>Jogador real no seletor: time, jogador, número, capitão, cabeça, goleiro e manga"]
-    KRP_TASK_18["KRP-TASK-18<br/>Vista dos dois times"]
-    KRP_TASK_19["KRP-TASK-19<br/>Fechamento da fase 6"]
-  end
-  subgraph phase_7["Fase 7"]
-    KRP_TASK_20["KRP-TASK-20<br/>Câmera replay em perspectiva no raster, e o preset na aba"]
-    KRP_TASK_21["KRP-TASK-21<br/>Fechamento da fase 7"]
   end
   subgraph phase_3a["Fase 3a"]
     KRP_TASK_22["KRP-TASK-22<br/>Painel de controles da cabeça na aba 3D, no lugar da tupla em texto"]
     KRP_TASK_24["KRP-TASK-24<br/>A pele do corpo segue a Cor da Pele do painel da cabeça"]
     KRP_TASK_23["KRP-TASK-23<br/>Fechamento da fase 3a"]
+  end
+  subgraph phase_4a["Fase 4a"]
+    KRP_TASK_25["KRP-TASK-25<br/>Desfazer a KRP-TASK-12: o goleiro volta ao do EDT_MOD.BIN, com a 92 trocada"]
+    KRP_TASK_26["KRP-TASK-26<br/>Desfazer a KRP-TASK-13 e fechar a fase 4a"]
   end
   KRP_TASK_01 --> KRP_TASK_02
   KRP_TASK_01 --> KRP_TASK_03
@@ -72,17 +65,9 @@ graph TD
   KRP_TASK_11 --> KRP_TASK_12
   KRP_TASK_23 --> KRP_TASK_12
   KRP_TASK_12 --> KRP_TASK_13
+  KRP_TASK_13 --> KRP_TASK_25
+  KRP_TASK_25 --> KRP_TASK_26
   KRP_TASK_08 --> KRP_TASK_14
-  KRP_TASK_13 --> KRP_TASK_15
-  KRP_TASK_14 --> KRP_TASK_15
-  KRP_TASK_14 --> KRP_TASK_16
-  KRP_TASK_15 --> KRP_TASK_16
-  KRP_TASK_16 --> KRP_TASK_17
-  KRP_TASK_17 --> KRP_TASK_18
-  KRP_TASK_17 --> KRP_TASK_19
-  KRP_TASK_18 --> KRP_TASK_19
-  KRP_TASK_19 --> KRP_TASK_20
-  KRP_TASK_20 --> KRP_TASK_21
 ```
 <!-- rite:end -->
 
@@ -109,14 +94,9 @@ A ferramenta vem primeiro (fases 1 e 2), porque toda melhoria começa lendo uma 
 | [KRP-TASK-23](/docs/tasks/kits-replay/23-fechamento-da-fase-3a.md) | Fechamento da fase 3a | 3a | closing | KRP-TASK-22 | done | 2026-10-16 | 2026-10-16 |
 | [KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md) | Goleiro pela família 13, com a pose medida e a 92 | 4 | implementação | KRP-TASK-11, KRP-TASK-23 | done | 2026-10-18 | 2026-10-18 |
 | [KRP-TASK-13](/docs/tasks/kits-replay/13-fechamento-da-fase-4.md) | Fechamento da fase 4 | 4 | closing | KRP-TASK-12 | done | 2026-10-18 | 2026-10-18 |
-| [KRP-TASK-14](/docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md) | Medir a corrida no ANIME.BIN: ponteiro do par na captura e pose --against-anime | 5 | investigação | KRP-TASK-08 | pending | — | — |
-| [KRP-TASK-15](/docs/tasks/kits-replay/15-posar-as-familias-2-e-13-pela-corrida-do.md) | Posar as famílias 2 e 13 pela corrida do arquivo, com seletor de caminhada ou corrida | 5 | implementação | KRP-TASK-13, KRP-TASK-14 | pending | — | — |
-| [KRP-TASK-16](/docs/tasks/kits-replay/16-fechamento-da-fase-5.md) | Fechamento da fase 5 | 5 | closing | KRP-TASK-14, KRP-TASK-15 | pending | — | — |
-| [KRP-TASK-17](/docs/tasks/kits-replay/17-jogador-real-no-seletor-time-jogador-numero.md) | Jogador real no seletor: time, jogador, número, capitão, cabeça, goleiro e manga | 6 | implementação | KRP-TASK-16 | pending | — | — |
-| [KRP-TASK-18](/docs/tasks/kits-replay/18-vista-dos-dois-times.md) | Vista dos dois times | 6 | implementação | KRP-TASK-17 | pending | — | — |
-| [KRP-TASK-19](/docs/tasks/kits-replay/19-fechamento-da-fase-6.md) | Fechamento da fase 6 | 6 | closing | KRP-TASK-17, KRP-TASK-18 | pending | — | — |
-| [KRP-TASK-20](/docs/tasks/kits-replay/20-camera-replay-em-perspectiva-no-raster-e-o.md) | Câmera replay em perspectiva no raster, e o preset na aba | 7 | implementação | KRP-TASK-19 | pending | — | — |
-| [KRP-TASK-21](/docs/tasks/kits-replay/21-fechamento-da-fase-7.md) | Fechamento da fase 7 | 7 | closing | KRP-TASK-20 | pending | — | — |
+| [KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md) | Desfazer a KRP-TASK-12: o goleiro volta ao do EDT_MOD.BIN, com a 92 trocada | 4a | implementação | KRP-TASK-13 | pending | — | — |
+| [KRP-TASK-26](/docs/tasks/kits-replay/26-desfazer-a-krp-task-13-e-fechar-a-fase-4a.md) | Desfazer a KRP-TASK-13 e fechar a fase 4a | 4a | closing | KRP-TASK-25 | pending | — | — |
+| [KRP-TASK-14](/docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md) | Medir a corrida no ANIME.BIN: ponteiro do par na captura e pose --against-anime | 5 | investigação | KRP-TASK-08 | done | 2026-10-18 | pending |
 <!-- rite:end -->
 
 ## Notes
