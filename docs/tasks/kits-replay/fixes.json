@@ -408,10 +408,14 @@
       "severity": "medium",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-19",
+      "done_commit": "5378adc0",
+      "active_since": null,
+      "started_at": "2026-10-19T16:34:54-03:00",
+      "active_s": 717,
+      "finished_at": "2026-10-19T16:46:51-03:00"
     },
     {
       "id": "CORR-KRP-032",

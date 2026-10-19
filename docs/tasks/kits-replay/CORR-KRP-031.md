@@ -73,3 +73,8 @@ Verificação:
 $ grep -n -A3 "passa a ser desenhado pela família 13" docs/PLAN-KITS-REPLAY.md docs/prompts/perfil-kits-replay.md | grep -c "desfeit"
 2
 ```
+- **Closed** — commit `5378adc0` (2026-10-19): docs(kits): mark the family-13 goalkeeper decision as undone in the plan and the profile
+  - Files (`git show --name-status 5378adc0`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/prompts/perfil-kits-replay.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-031.md`
