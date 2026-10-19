@@ -108,4 +108,13 @@ controls: 87 of 87 red
 $ python3 tools/kits/controls.py --list | grep -c keeper-armband-always
 0
 ```
-
+- **Closed** — commit `afbcf78c` (2026-10-19): revert(kits): draw the goalkeeper from EDT_MOD.BIN again, undoing family 13
+  - Files (`git show --name-status afbcf78c`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md`
+    - `M tools/kits/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/core/figure.py`
+    - `D tools/kits/core/keeper_pose.json`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui_check.py`
