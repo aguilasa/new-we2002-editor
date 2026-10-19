@@ -391,13 +391,14 @@
       "severity": "low",
       "files": ["docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md", "docs/tasks/kits-replay/CORR-KRP-030.md"],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null,
-      "active_since": "2026-10-19T11:19:21-03:00",
+      "done_on": "2026-10-19",
+      "done_commit": "76addcc1",
+      "active_since": null,
       "started_at": "2026-10-19T11:19:21-03:00",
-      "active_s": 0
+      "active_s": 3398,
+      "finished_at": "2026-10-19T12:15:59-03:00"
     }
   ]
 }

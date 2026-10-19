@@ -68,3 +68,7 @@ Verificação:
 $ grep -c '"explains": 10' docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md
 5
 ```
+- **Closed** — commit `76addcc1` (2026-10-19): docs(kits): paste the five pose --against-anime --json outputs into the KRP-TASK-14 Log
+  - Files (`git show --name-status 76addcc1`):
+    - `M docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-030.md`
