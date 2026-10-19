@@ -37,6 +37,11 @@ colados da ferramenta, e não se reescrevem aqui.
   figura de partida do seletor (usuário, 2026-10-12; [§4](#4)).
 - **Entram no ciclo**: jogador real no seletor ([§6](#6)), vista dos dois times ([§7](#7)), câmera
   "replay" em perspectiva ([§8](#8)) e o `confront --tab` ([§2.4](#2.4)) (usuário, 2026-10-12).
+- **As fases 5 a 7 não serão feitas** (usuário, 2026-10-18): pose de corrida na aba ([§5.2](#5.2)),
+  jogador real no seletor ([§6](#6)), vista dos dois times ([§7](#7)) e câmera "replay"
+  ([§8](#8)). A exceção é a medição da corrida ([§5.1](#5.1), KRP-TASK-14), que já estava em
+  andamento e termina para guardar o conhecimento; nada se constrói sobre ela neste ciclo. As
+  tasks KRP-TASK-15 a 21 foram excluídas. As seções abaixo ficam como registro do que se planejou.
 
 ### O que não muda
 
@@ -408,11 +413,15 @@ reproduz as cinco poses de `work/kits-pose/` peça por peça. O `kits_replay` ju
 
 ### 5.2 Posar pela corrida
 
+**Não será feito** (usuário, 2026-10-18; [§0](#0)).
+
 Famílias 2 e 13 posadas pela animação e quadro medidos, como hoje se posa a caminhada da
 `LOOKS SET`; a aba ganha seletor de pose (caminhada ou corrida). Se a §5.1 der negativa, a pose
 capturada versionada é o fallback, e isso fica escrito.
 
 ## 6. Jogador real no seletor
+
+**Não será feito** (usuário, 2026-10-18; [§0](#0)).
 
 O que faz as fases 3 a 5 virarem a vista de um jogador escolhido: o seletor da aba ganha **time e
 jogador**, e daí saem número (`SquadNumbers`), capitão (`Team.captain`), cabeça ([§3](#3)), figura
@@ -422,11 +431,15 @@ número, capitão) sai dos `OFS_*` já mapeados para o `we2002_core`, pelo camin
 
 ## 7. Vista dos dois times
 
+**Não será feito** (usuário, 2026-10-18; [§0](#0)).
+
 Medido ([item (e)](/docs/KITS-REPLAYS-9-10.md#e-dois-kits-na-vram-ao-mesmo-tempo-e-o-kit-pela-paleta)):
 na partida os dois kits ficam lado a lado na VRAM, cada um com a sua paleta de jogador e de goleiro.
 A aba ganha a vista de dois jogadores, um de cada time, cada um com o seu kit. Nada novo de formato.
 
 ## 8. Câmera "replay"
+
+**Não será feito** (usuário, 2026-10-18; [§0](#0)).
 
 Medido ([item 9](/docs/KITS-REPLAYS-9-10.md#9)): projeção do GTE com H 1376 e OFX, OFY 0; o jogador
 a 4681–4682 de profundidade de frente no zoom máximo e a ~4700 de costas; giro de 8 a 12 graus por
@@ -467,9 +480,12 @@ investigação: negativa é resultado e não bloqueia; só a cópia mestra ausen
 | 3 | [§3](#3) | a regra da cabeça medida nos 22, e a cabeça por jogador desenhada |
 | 3a | [§3.3](#3.3) | os controles da cabeça na aba, no lugar da tupla em texto |
 | 4 | [§4](#4) | o goleiro pela família 13 |
-| 5 | [§5](#5) | a corrida medida no `ANIME.BIN` e a pose de corrida na aba |
-| 6 | [§6](#6), [§7](#7) | jogador real no seletor e a vista dos dois times |
-| 7 | [§8](#8) | a câmera "replay" em perspectiva |
+| 5 | [§5](#5) | a corrida medida no `ANIME.BIN`; a pose de corrida na aba **não será feita** |
+| 6 | [§6](#6), [§7](#7) | **não será feita**: jogador real no seletor e a vista dos dois times |
+| 7 | [§8](#8) | **não será feita**: a câmera "replay" em perspectiva |
+
+As fases 5 (salvo a medição da [§5.1](#5.1)), 6 e 7 **não serão feitas**, a pedido do usuário em
+2026-10-18 ([§0](#0)). A ordem abaixo é a que foi planejada.
 
 Por que esta ordem:
 

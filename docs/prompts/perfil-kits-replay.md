@@ -94,6 +94,13 @@ which commands search instead of reading whole.
 - A reabertura da K3D-TASK-10 aparece datada no §4 do plano.
 - Gates do ciclo.
 
+### Fase 4a — desfazer o goleiro pela família 13 (§4)
+
+- O goleiro da figura 1 tem o digest de antes da KRP-TASK-12 (`e4b2535e^`), com e sem faixa; `keeper_scene`, `keeper_order` e `core/keeper_pose.json` não existem mais.
+- O `match_scene` não muda: digest igual antes e depois.
+- A reversão aparece datada no §4 do plano, sem apagar o registro do que a fase 4 fez.
+- Gates do ciclo.
+
 ### Fase 5 — corrida (§5)
 
 - A pose de corrida sai do `ANIME.BIN` com animação e quadro impressos, ou a negativa está no §5.1 e a pose capturada versionada é o fallback declarado.
