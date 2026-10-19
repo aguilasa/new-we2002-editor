@@ -103,3 +103,4 @@ controls: 85 of 85 red
     - `M tools/kits/oracle.py`
     - `M tools/kits/replay.py`
     - `M tools/kits/selftest.py`
+- **Reviewed** (2026-10-19) at `f064a839`: CORR-KRP-029, CORR-KRP-030
