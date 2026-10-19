@@ -381,8 +381,30 @@ A pose de corrida das duas famílias continua no [§5](#5).
 As cinco poses de `work/kits-pose/` são a corrida do replay. O `ANIME.BIN` guarda 204 animações, e
 `tools/looks/anime.py --against-pose` liga uma captura ao par que o jogo lia — medido no `looks`
 para a caminhada. A medição: a captura passa a gravar o ponteiro do par (como o `--pose` do `looks`;
-o `pose_capture` hoje não o lê), e `replay pose <captura> --against-anime` imprime animação e quadro
+o `pose_capture` não o lia), e `replay pose <captura> --against-anime` imprime animação e quadro
 que explicam cada uma das cinco poses — ou a negativa, com comando e saída.
+
+**Medido** ([KRP-TASK-14](/docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md)):
+positivo nas cinco. O `ANIME.BIN` está inteiro na RAM do replay, no mesmo `layout.ANIME_BASE` da
+`LOOKS SET`, nas duas cópias mestras, e o `ANIME_BUILD` é a mesma instrução. O `pose_capture` para
+nela e na carga da câmera (`POSE_MATRIX`), e cada parada de matriz leva o par e a câmera.
+`oracle.py --replay SLOT [--focus K] --pose-dir DIR` grava a pose com eles, e
+`replay.py pose <pose> --against-anime` acha o quadro de cada par e a regra de desempacotar
+(`anime.WALK_RULES`) que, sob a câmera, reproduz a matriz capturada inteiro por inteiro:
+
+| Slot, foco | Animação (entrada do cabeçalho) | Quadro | Peças explicadas | Regras |
+|---|---|---|---|---|
+| 9, goleiro | 0 (o bloco das entradas 0 e 1) | 0 | 10 de 10 pareadas | `mirror` no torso, `flip` nos membros |
+| 10, goleiro | 0 (o bloco das entradas 0 e 1) | 0 | 10 de 10 pareadas | `plain` |
+| 9, foco 3 | 146 | 8 | 10 de 10 pareadas | `plain` |
+| 10, foco 2 | 134 | 9 | 10 de 10 pareadas | `mirror` no torso, `flip` nos membros |
+| 10, foco 3 | 4 | 9 | 10 de 10 pareadas | `plain` |
+
+Cada pose tem 11 peças: a cabeça vem antes de qualquer parada de `ANIME_BUILD`, e fica sem par; a
+peça que o atraso de desenho deixa sem nome não entra na pose. O lado espelhado é o mesmo da
+caminhada da `LOOKS SET` (`anime.WALK_SIDE_RULES`): os membros leem o par do irmão. A recaptura
+reproduz as cinco poses de `work/kits-pose/` peça por peça. O `kits_replay` julga as cinco contra
+`ANIME_EXPECT` (constante por slot e foco), e `--plant-anime` o derruba.
 
 ### 5.2 Posar pela corrida
 

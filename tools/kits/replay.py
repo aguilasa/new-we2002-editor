@@ -978,6 +978,94 @@ def head_gate_failures(capture, index, plant: bool = False) -> list:
     return out
 
 
+# -- pose: the pose against ANIME.BIN (PLAN-KITS-REPLAY section 5.1) ----------
+
+ANIME_EXPECT = {
+    (9, 0): (0, 0), (10, 0): (0, 0),
+    (9, 3): (146, 8), (10, 2): (134, 9), (10, 3): (4, 9),
+}
+"""(slot, focus) -> (animation, frame) of `/BIN/ANIME.BIN` the followed
+figure's pose is read from: the first header entry of the block its pairs
+are in (the goalkeepers' block is entries 0 and 1), and the frame there.
+Measured by `pose --against-anime` on the five recaptured poses, 10 of 10
+paired pieces explained in each (KRP-TASK-14).  Constant per (slot, focus),
+never read from the capture (K1)."""
+
+ANIME_POSES = {
+    "anime/slot9-keeper-front.json":
+        "18fbf3c345321b06762f5e2463c3da0a4e8761dbbf0961df321e396ac8faaca2",
+    "anime/slot10-keeper-front.json":
+        "a2d4e3bba073c704bcc66e7b2c68ca698e88ea9c162008062a86160ec7b032f7",
+    "anime/slot9-focus3-first.json":
+        "4f5221f9775fd73bde745c6cd2e7d50e53270617903ff1405c1c3d74e4cd2b9c",
+    "anime/slot10-focus2-first.json":
+        "27da64f776a881d90b6278deb8a3587ab13156e3f7a0ee4ff51c6234c6c2d683",
+    "anime/slot10-focus3-first.json":
+        "63c427bfac827f8efc87b6381c4ccd0a08140b943b892c0d00f0ae863e64dc4b",
+}
+"""The poses `check` judges against `ANIME_EXPECT`, in the folder of the kept
+captures, with the sha256 each was kept with: the five up close recaptured
+with the pair (`oracle.py --replay SLOT [--focus K] --pose-dir
+<folder>/anime`, KRP-TASK-14)."""
+
+ANIME_PLANT = 1
+"""`--plant-anime`: the animation expected is moved this many entries on, so
+the judge has to find every explained piece in another animation."""
+
+
+def read_anime(image_path: str) -> bytes:
+    """The whole of `/BIN/ANIME.BIN`, through the `looks` digest guard."""
+    import anime  # tools/looks
+    import iso_source  # tools/pes2
+
+    with iso_source.open_disc(image_path) as disc:
+        return anime.read(disc)
+
+
+def load_pose(path: str) -> dict:
+    """A pose, as `work/kits-pose/` keeps it ({"slot", "focus", "pieces"}),
+    from a pose file or from a capture's followed figure."""
+    with open(path) as fh:
+        doc = json.load(fh)
+    if "pieces" in doc:
+        return doc
+    capture = replay.Capture.load(path)
+    figure = followed(capture, "front", bool(capture.focus), 0)[1]
+    if figure is None:
+        raise replay.ReplayError("%s follows no figure" % path)
+    return dict(figure.pose(), slot=capture.slot, focus=capture.focus or 0)
+
+
+def anime_report(pose: dict, data: bytes, plant: bool = False) -> dict:
+    """The pose against the file (`replay.anime_reading`), judged against
+    `ANIME_EXPECT` for its (slot, focus); with *plant* the expected animation
+    is `ANIME_PLANT` entries on."""
+    key = (pose["slot"], pose.get("focus") or 0)
+    reading = replay.anime_reading(data, pose)
+    expect = ANIME_EXPECT.get(key)
+    if expect is not None and plant:
+        expect = (expect[0] + ANIME_PLANT, expect[1])
+    failures = (["no ANIME_EXPECT for slot %d focus %d" % key] if expect is None
+                else replay.anime_judge(reading, expect))
+    return dict(reading, slot=key[0], focus=key[1], expect=list(expect) if expect else None,
+                plant=plant, failures=failures)
+
+
+def anime_gate_failures(folder: str, data: bytes, plant: bool = False) -> list:
+    """`check`'s part for the poses: each of `ANIME_POSES` holds its digest
+    and reads the frame `ANIME_EXPECT` says."""
+    out = []
+    for name, want in ANIME_POSES.items():
+        path = os.path.join(folder, name)
+        problem = digest_problem(path, want)
+        if problem:
+            out.append(problem)
+            continue
+        doc = anime_report(load_pose(path), data, plant)
+        out.extend("%s: %s" % (name, line) for line in doc["failures"])
+    return out
+
+
 def _kits_oracle():
     """tools/kits/oracle.py, by path: `import oracle` finds the looks one,
     which `core.tex` put first on sys.path.  Loaded once; when the oracle is
@@ -994,7 +1082,8 @@ def _kits_oracle():
     return module
 
 
-def check(folder: str, verbose: bool = True, plant_head: bool = False) -> int:
+def check(folder: str, verbose: bool = True, plant_head: bool = False,
+          plant_anime: bool = False) -> int:
     """`kits_replay`: every capture of `CAPTURES` in *folder* holds its digest,
     and the readers' answer on it holds the oracle's judges against the
     measured expectations (`REPLAY_EXPECT`, `REPLAY_FIELD_EXPECT`).  Returns
@@ -1052,11 +1141,35 @@ def check(folder: str, verbose: bool = True, plant_head: bool = False) -> int:
             print("  FAIL  %s: %s" % (name, line))
         if not got and verbose:
             print("  ok    %s: %s" % (name, said))
+    anime = anime_gate_failures(folder, read_anime(os.environ[IMAGE_VARIABLE]), plant_anime)
+    for line in anime:
+        failures.append("ANIME_EXPECT: %s" % line)
+        print("  FAIL  ANIME_EXPECT: %s" % line)
+    if not anime and verbose:
+        print("  ok    ANIME_EXPECT: the %d pose(s) up close read the animation and frame "
+              "it says, every paired piece explained" % len(ANIME_POSES))
     print("kits_replay: %d failure(s)" % len(failures))
     return len(failures)
 
 
 # -- printing ----------------------------------------------------------------
+
+def _print_anime(doc) -> None:
+    for row in doc["rows"]:
+        if row is None:
+            print("  piece with no pair")
+            continue
+        print("  %-4s pair %6d: animation %s frame %s slot %s, rules %s"
+              % (row["section"], row["pair"], row["animations"], row["frame"], row["slot"],
+                 ",".join(row["rules"]) or "none"))
+    print("slot %d focus %d: %d of %d piece(s) carry a pair, %d explained; animation %s "
+          "frame %s explains %d; expected %s%s"
+          % (doc["slot"], doc["focus"], doc["linked"], doc["pieces"], doc["explained"],
+             doc["animations"], doc["frame"], doc["explains"], doc["expect"],
+             " (planted)" if doc["plant"] else ""))
+    for line in doc["failures"]:
+        print("  FAIL  %s" % line)
+
 
 def _print_figure(doc) -> None:
     f = doc["figure"]
@@ -1154,10 +1267,16 @@ def main(argv=None) -> int:
     take.add_argument("--walk", choices=("L2", "R2"))
     take.add_argument("--out", default=CAPTURE_DIR)
     take.add_argument("--cue")
+    pose = sub.add_parser("pose")
+    pose.add_argument("capture")
+    pose.add_argument("--against-anime", action="store_true", required=True)
+    pose.add_argument("--plant-anime", action="store_true")
+    pose.add_argument("--json", action="store_true")
     gate = sub.add_parser("check")
     gate.add_argument("folder", nargs="?")
     gate.add_argument("--quiet", action="store_true")
     gate.add_argument("--plant-hair-column", action="store_true")
+    gate.add_argument("--plant-anime", action="store_true")
     args = parser.parse_args(argv)
 
     if args.command == "capture":
@@ -1193,7 +1312,23 @@ def main(argv=None) -> int:
         if not os.environ.get(IMAGE_VARIABLE):
             print("kits_replay: skipped -- %s is not set" % IMAGE_VARIABLE)
             return SKIP
-        return 1 if check(folder, not args.quiet, args.plant_hair_column) else 0
+        return 1 if check(folder, not args.quiet, args.plant_hair_column,
+                          args.plant_anime) else 0
+    if args.command == "pose":
+        if not os.environ.get(IMAGE_VARIABLE):
+            print("replay.py pose: needs %s (the Japanese data track)" % IMAGE_VARIABLE)
+            return 1
+        try:
+            pose_doc = load_pose(args.capture)
+        except replay.ReplayError as exc:
+            print("replay.py: %s" % exc, file=sys.stderr)
+            return 1
+        doc = anime_report(pose_doc, read_anime(os.environ[IMAGE_VARIABLE]), args.plant_anime)
+        if args.json:
+            print(json.dumps(doc, indent=1, sort_keys=True))
+        else:
+            _print_anime(doc)
+        return 1 if doc["failures"] else 0
 
     try:
         capture = replay.Capture.load(args.capture)

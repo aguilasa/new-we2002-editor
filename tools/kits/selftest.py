@@ -1559,9 +1559,64 @@ def _replay_checks(c) -> None:
          "%s" % sorted(doc))
     _replay_reader_checks(c, cli, replay)
     _replay_head_checks(c, cli, replay)
+    _replay_anime_checks(c, cli, replay)
     _player_head_checks(c)
     _keeper_order_checks(c)
     _player_match_checks(c)
+
+
+def _replay_anime_checks(c, cli, replay) -> None:
+    """replay.py pose --against-anime (KRP-TASK-14), on the two-frame file
+    `anime._synthetic` builds: a piece is placed by the frame its pair is in,
+    explained by the one unpack rule whose angles give its rotation under the
+    camera, and judged against (animation, frame)."""
+    import struct
+
+    import anime  # tools/looks
+
+    data = anime._synthetic()
+    camera = [4096, 0, 0, 0, 4096, 0, 0, 0, 4096]
+    start = anime.HEADER_WORDS * anime.WORD
+    pieces = []
+    for slot, rule in ((1, "plain"), (2, "mirror"), (3, "flip")):
+        at = start + anime.FRAME_BYTES + slot * anime.PAIR_BYTES
+        three = anime.angles(struct.unpack_from("<I", data, at)[0])
+        pieces.append({"section": 10 + slot, "pair": at, "camera": camera,
+                       "rotation": anime.compose(camera, anime.WALK_RULES[rule](three)),
+                       "translation": [0, 0, 0]})
+    pieces.append({"section": 34, "rotation": camera, "translation": [0, 0, 0]})
+    reading = replay.anime_reading(data, {"pieces": pieces})
+    rows = reading["rows"]
+    c.ok("replay.py pose: each paired piece is placed in the frame its pair is in",
+         [(r["frame"], r["slot"]) for r in rows[:3]] == [(1, 1), (1, 2), (1, 3)]
+         and rows[3] is None, "%s" % rows)
+    c.ok("replay.py pose: each piece is explained by the rule that built its rotation",
+         [r["rules"] for r in rows[:3]] == [["plain"], ["mirror"], ["flip"]], "%s" % rows)
+    c.ok("replay.py pose: the frame the explained pieces share is reported, with the count",
+         (reading["animations"][0], reading["frame"], reading["explains"], reading["linked"],
+          reading["pieces"]) == (0, 1, 3, 3, 4), "%s" % reading)
+    c.ok("replay.py pose: the judge passes the measured animation and frame",
+         replay.anime_judge(reading, (0, 1)) == [], "%s" % replay.anime_judge(reading, (0, 1)))
+    c.ok("replay.py pose: another animation expected fails every explained piece",
+         len(replay.anime_judge(reading, (0 + cli.ANIME_PLANT, 1))) == 3,
+         "%s" % replay.anime_judge(reading, (1, 1)))
+    off = [dict(p) for p in pieces]
+    off[0]["rotation"] = [v + 1 for v in off[0]["rotation"]]
+    c.ok("replay.py pose: a paired piece no rule explains fails the judge",
+         any("explained by no rule" in line
+             for line in replay.anime_judge(replay.anime_reading(data, {"pieces": off}), (0, 1))),
+         "%s" % replay.anime_judge(replay.anime_reading(data, {"pieces": off}), (0, 1)))
+    c.ok("replay.py pose: a pose with no pair at all fails the judge",
+         replay.anime_judge(replay.anime_reading(data, {"pieces": pieces[3:]}), (0, 1))
+         == ["no piece carries an ANIME.BIN pair"], "")
+    piece = {"section": 13, "matrix": ((1,) * 9, (0, 0, 0)), "pair": 824,
+             "camera": [4096] * 9}
+    c.ok("replay.py pose: a pose piece keeps the pair and camera, and an old one stays as it was",
+         replay.pose_piece(piece) == {"section": 13, "rotation": [1] * 9,
+                                      "translation": [0, 0, 0], "pair": 824,
+                                      "camera": [4096] * 9}
+         and replay.pose_piece({"section": 13, "matrix": ((1,) * 9, (0, 0, 0))})
+         == {"section": 13, "rotation": [1] * 9, "translation": [0, 0, 0]}, "")
 
 
 def _replay_head_checks(c, cli, replay) -> None:

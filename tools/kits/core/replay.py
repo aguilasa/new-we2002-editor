@@ -276,15 +276,39 @@ def sample_zones(sample) -> set:
             if z.x <= x1 and x0 < z.x + z.w and z.y <= y1 and y0 < z.y + z.h}
 
 
+ANIME_KEYS = ("pair", "camera")
+"""What a matrix stop may carry past rotation and translation: the offset in
+`/BIN/ANIME.BIN` of the pair `layout.ANIME_BUILD` built the matrix from, and
+the camera rotation `layout.POSE_MATRIX` handed the GTE just before it."""
+
+
+def pose_piece(piece) -> dict:
+    """One piece as `work/kits-pose/` keeps it: section, rotation and
+    translation, and the pair and camera when the capture read them."""
+    out = {"section": piece["section"], "rotation": list(piece["matrix"][0]),
+           "translation": list(piece["matrix"][1])}
+    for key in ANIME_KEYS:
+        if piece.get(key) is not None:
+            out[key] = piece[key]
+    return out
+
+
 def matrix_pieces(stops, lag: int = 1) -> list:
     """The stops turned into drawn pieces: the matrix of stop k belongs to the
     section the pointers name *lag* stops later, each as {"section",
-    "matrix"}; a stop naming no section, or several, is a None section."""
+    "matrix"}; a stop naming no section, or several, is a None section.
+    A stop that carries the ANIME.BIN pair and the camera it was drawn under
+    (`pose_capture`, KRP-TASK-14) hands them to its piece: they belong to
+    the matrix, built just before it, and not to the lagged pointer."""
     out = []
     for k in range(len(stops) - lag):
         named = stops[k + lag]["named"]
-        out.append({"section": named[0][1] if len(named) == 1 else None,
-                    "matrix": (tuple(stops[k]["rotation"]), tuple(stops[k]["translation"]))})
+        piece = {"section": named[0][1] if len(named) == 1 else None,
+                 "matrix": (tuple(stops[k]["rotation"]), tuple(stops[k]["translation"]))}
+        for key in ANIME_KEYS:
+            if key in stops[k]:
+                piece[key] = stops[k][key]
+        out.append(piece)
     return out
 
 
@@ -414,8 +438,7 @@ class Figure(list):
         """The pose as `work/kits-pose/` keeps it: the projection and each
         piece's rotation and translation."""
         return {"projection": self[0]["projection"],
-                "pieces": [{"section": p["section"], "rotation": list(p["matrix"][0]),
-                            "translation": list(p["matrix"][1])} for p in self]}
+                "pieces": [pose_piece(p) for p in self]}
 
     def group(self, index) -> tuple:
         """(quads, fit) of `figure_group` over the frame's samples."""
@@ -1314,3 +1337,93 @@ def head_judge(reading: dict, expected: dict) -> list:
     if reading["stray"]:
         out.append("CLUT(s) %s fit no skin, hair or beard column" % reading["stray"])
     return out
+
+
+# -- the pose against ANIME.BIN (PLAN-KITS-REPLAY section 5.1) ---------------
+
+ANIME_RULES = ("plain", "mirror", "flip")
+"""The unpack variants a pair's angles can reach the GTE through
+(`anime.WALK_RULES`, measured on the LOOKS SET walk), in the order tried."""
+
+
+def anime_frames(data: bytes) -> list:
+    """(start, animations, frame) for every frame of the file: the header
+    entries whose block holds it (seven entries repeat), and its index there."""
+    import anime  # tools/looks
+
+    owners = {}
+    for number, at in enumerate(anime.header(data)):
+        owners.setdefault(at, []).append(number)
+    out = []
+    for at, numbers in sorted(owners.items()):
+        for index, start in enumerate(anime.block(data, at)["frames"]):
+            out.append((start, tuple(numbers), index))
+    return out
+
+
+def anime_piece(data: bytes, frames: list, piece: dict):
+    """Where one piece's pose sits in the file: the pair's frame (animations,
+    frame, slot of the pair in it) and the rules whose angles, under the
+    captured camera, give the captured rotation exactly; None for a piece the
+    capture gave no pair or no camera."""
+    import struct
+
+    import anime  # tools/looks
+
+    pair, camera = piece.get("pair"), piece.get("camera")
+    if pair is None or camera is None:
+        return None
+    if not 0 <= pair <= len(data) - anime.PAIR_BYTES:
+        raise KitsError("a piece read a pair at %d, outside the %d byte(s) of %s"
+                        % (pair, len(data), anime.layout.ANIME))
+    three = anime.angles(struct.unpack_from("<I", data, pair)[0])
+    rotation = list(piece["rotation"])
+    rules = [name for name in ANIME_RULES
+             if anime.compose(camera, anime.WALK_RULES[name](three)) == rotation]
+    found = [(numbers, index, (pair - start) // anime.PAIR_BYTES)
+             for start, numbers, index in frames
+             if start <= pair < start + anime.FRAME_BYTES]
+    numbers, index, slot = found[0] if found else (None, None, None)
+    return {"section": piece.get("section"), "pair": pair, "angles": list(three),
+            "animations": list(numbers) if numbers else None, "frame": index,
+            "slot": slot, "rules": rules}
+
+
+def anime_reading(data: bytes, pose: dict) -> dict:
+    """A pose (`work/kits-pose/` shape) against the file: per piece the frame
+    its pair is in and the rules that explain it, and the frame most of the
+    explained pieces share -- (animations, frame) -- with how many it
+    explains."""
+    from collections import Counter
+
+    frames = anime_frames(data)
+    rows = [anime_piece(data, frames, piece) for piece in pose["pieces"]]
+    linked = [row for row in rows if row is not None]
+    explained = [row for row in linked if row["rules"] and row["animations"]]
+    keys = Counter((tuple(row["animations"]), row["frame"]) for row in explained)
+    best, count = keys.most_common(1)[0] if keys else (None, 0)
+    return {"pieces": len(rows), "linked": len(linked), "explained": len(explained),
+            "animations": list(best[0]) if best else None,
+            "frame": best[1] if best else None, "explains": count,
+            "rules": dict(Counter(row["rules"][0] for row in explained)), "rows": rows}
+
+
+def anime_judge(reading: dict, expect: tuple) -> list:
+    """Failures of a reading against the measured (animation, frame): no pair
+    read, a paired piece no rule explains, or a frame other than *expect*
+    (the first of its animations and the frame) for any explained piece."""
+    out = []
+    if not reading["linked"]:
+        return ["no piece carries an ANIME.BIN pair"]
+    if reading["explained"] != reading["linked"]:
+        out.append("%d of %d paired piece(s) explained by no rule"
+                   % (reading["linked"] - reading["explained"], reading["linked"]))
+    for row in reading["rows"]:
+        if row is None or not row["rules"] or not row["animations"]:
+            continue
+        if (row["animations"][0], row["frame"]) != tuple(expect):
+            out.append("section %s reads animation %s frame %s, not %s frame %s"
+                       % (row["section"], row["animations"][0], row["frame"],
+                          expect[0], expect[1]))
+    return out
+

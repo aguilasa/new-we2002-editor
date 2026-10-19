@@ -671,6 +671,31 @@ CONTROLS = (
         "PLAN-KITS-REPLAY section 3.1)",
     ),
     Control(
+        "replay-anime-rule-ignored", "kits/core/replay.py", "anime_piece",
+        "             if anime.compose(camera, anime.WALK_RULES[name](three)) == rotation]\n",
+        "             if anime.compose(camera, three) == rotation]\n",
+        "FAIL  replay.py pose: each piece is explained by the rule that built its rotation",
+        "the angles taken as the file stores them explain only the pieces the game unpacks "
+        "plain: on the replay's mirrored side every limb flips, and the pose would be read "
+        "as no pair at all (KRP-TASK-14, PLAN-KITS-REPLAY section 5.1)",
+    ),
+    Control(
+        "replay-anime-pair-slot", "kits/core/replay.py", "anime_piece",
+        "    found = [(numbers, index, (pair - start) // anime.PAIR_BYTES)\n",
+        "    found = [(numbers, index, (pair - start) // anime.FRAME_BYTES)\n",
+        "FAIL  replay.py pose: each paired piece is placed in the frame its pair is in",
+        "the pair's slot counted in frames is 0 for every piece, and which piece of the "
+        "frame each section reads would be lost (KRP-TASK-14)",
+    ),
+    Control(
+        "replay-anime-pose-drops-pair", "kits/core/replay.py", "pose_piece",
+        "        if piece.get(key) is not None:\n",
+        "        if False:\n",
+        "FAIL  replay.py pose: a pose piece keeps the pair and camera",
+        "the pose file `--replay --pose-dir` writes would lose the pair, and `pose "
+        "--against-anime` could judge no piece of it (KRP-TASK-14)",
+    ),
+    Control(
         "api-player-tuple-drops-a-field", "kits/core/api.py", "player_tuple",
         "    return _figure.looks.format_tuple(values)\n",
         "    return _figure.looks.format_tuple(dict(values, hair_colour=0))\n",

@@ -144,6 +144,7 @@ from core.replay import (  # noqa: E402,F401  (the reader: KRP-TASK-02 moved the
     TORSO_MARGIN, armband_of, back_indices, colour_confront, field_focus, field_number,
     field_panels, field_row, figure_depth, figure_group, figure_off_axis, figure_tag, glyphs,
     is_figure, judge as replay_judge, judge_walk, kit_image_of, matrix_pieces, panel_cell, panel_cells,
+    pose_piece,
     panel_samples, piece_box, piece_error, pixel_index, pose_change, pose_frames, pose_project,
     read_panel, read_panels, replay_figures, replay_focus, restore_samples, sample_pixels,
     sample_zones, section_samples, shading_of, sleeves_of, texel_colour, triangle_pixels,
@@ -1323,18 +1324,27 @@ def pose_capture(game, maps, submits: int = POSE_SUBMITS) -> dict:
     load (as `matrix_stops` reads it, plus the GTE projection in force) and
     every list handed to the GPU, in the order they happen.  Paused at the
     last submit, both ordering tables are still whole in RAM, and each head
-    is walked into its textured samples."""
+    is walked into its textured samples.
+
+    Two more stops name where each matrix came from (KRP-TASK-14): the build
+    at `layout.ANIME_BUILD`, whose `s0` is the `/BIN/ANIME.BIN` pair the
+    matrix is turned from, and the camera load at `layout.POSE_MATRIX`.  The
+    file sits at `layout.ANIME_BASE` in the replay too, all of it (measured
+    on both save states by content), and a matrix stop carries the pair and
+    camera seen since the previous one, or None."""
     import who_writes
 
     import oracle as looks_oracle  # tools/looks
 
     client = game.client
     client.call("breakpoint", action="clear")
-    for address in (layout.POSE_PIECE_MATRIX, layout.GPU_LIST_SUBMIT):
+    for address in (layout.POSE_PIECE_MATRIX, layout.GPU_LIST_SUBMIT, layout.ANIME_BUILD,
+                    layout.POSE_MATRIX):
         client.call("breakpoint", action="add", type="execute",
                     address=who_writes.hx(address))
     path = os.path.join(game.out_dir, "pose-matrix.bin")
     events, seen_submits, matrices = [], 0, 0
+    pair = camera = None
     try:
         while seen_submits < submits:
             client.call("continue")
@@ -1342,6 +1352,14 @@ def pose_capture(game, maps, submits: int = POSE_SUBMITS) -> dict:
                 raise RuntimeError("the frame loop stopped after %d event(s)" % len(events))
             registers = client.call("read_registers", group="gpr")
             pc = who_writes.register_value(registers, "pc")
+            if pc == layout.ANIME_BUILD:
+                pair = (who_writes.register_value(registers, layout.ANIME_BUILD_BASE)
+                        - layout.ANIME_BASE)
+                continue
+            if pc == layout.POSE_MATRIX:
+                camera = looks_oracle._matrix_struct(game, who_writes.register_value(
+                    registers, layout.POSE_MATRIX_BASE), path)[0]
+                continue
             if pc == layout.GPU_LIST_SUBMIT:
                 events.append({"kind": "submit", "head": who_writes.register_value(
                     registers, layout.GPU_LIST_HEAD)})
@@ -1358,7 +1376,9 @@ def pose_capture(game, maps, submits: int = POSE_SUBMITS) -> dict:
             events.append({"kind": "matrix", "named": sorted(named), "rotation": rotation,
                            "translation": translation,
                            "projection": looks_oracle.gte_projection(
-                               client.call("get_gte_registers"))})
+                               client.call("get_gte_registers")),
+                           "pair": pair, "camera": camera})
+            pair = camera = None
     finally:
         try:
             client.call("breakpoint", action="clear")
@@ -2914,11 +2934,13 @@ def replay_panel(capture, index, nth: int, choose, on_torso: bool):
     return focus, panel_samples(group)
 
 def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool = False,
-               focus_k: int = 0) -> int:
+               focus_k: int = 0, pose_dir: str = POSE_DIR) -> int:
     """`--replay SLOT [--focus K]`: G8, the followed figure of a paused replay
     up close -- its family and armband, the GPU's colours for its arms, its
     still pose, the panel its back shows and the number in it.  With K the
-    camera is first moved K taps of L2 to a player (K3D-TASK-19)."""
+    camera is first moved K taps of L2 to a player (K3D-TASK-19).  The pose
+    goes to *pose_dir* (`--pose-dir`), with each piece's ANIME.BIN pair and
+    camera when the capture read them (KRP-TASK-14)."""
     import json
 
     import oracle as looks_oracle  # tools/looks
@@ -2981,16 +3003,15 @@ def run_replay(slot: int, cue: str, rotate: str = None, cache=None, plant: bool 
     print("  still pose: the followed figure's matrices differ by %s between the last two "
           "frames (limit %d)" % (still, REPLAY_STILL))
     if focus is not None:
-        pose_path = os.path.join(POSE_DIR, "slot%d-keeper-front.json" % slot if not focus_k
+        pose_path = os.path.join(pose_dir, "slot%d-keeper-front.json" % slot if not focus_k
                                  else "slot%d-focus%d-first.json" % (slot, focus_k))
-        os.makedirs(POSE_DIR, exist_ok=True)
+        os.makedirs(pose_dir, exist_ok=True)
         with open(pose_path, "w") as fh:
             json.dump({"slot": slot, "focus": focus_k,
                        "source": "python3 tools/kits/oracle.py --replay %d%s"
                        % (slot, " --focus %d" % focus_k if focus_k else ""),
                        "projection": focus[0]["projection"],
-                       "pieces": [{"section": p["section"], "rotation": list(p["matrix"][0]),
-                                   "translation": list(p["matrix"][1])} for p in focus]},
+                       "pieces": [pose_piece(p) for p in focus]},
                       fh, indent=1)
         print("  pose kept at %s (projection H %s, OFX %s, OFY %s)"
               % (pose_path, focus[0]["projection"]["H"], focus[0]["projection"]["OFX"],
@@ -3719,6 +3740,9 @@ def main(argv=None) -> int:
                         help="with --back: the set the goalkeeper zones are compared with")
     parser.add_argument("--blocks", action="store_true",
                         help="with --back: every block of pixels that differs from the disc")
+    parser.add_argument("--pose-dir", default=POSE_DIR, metavar="DIR",
+                        help="with --replay: where the followed figure's pose is written "
+                             "(default %s)" % POSE_DIR)
     parser.add_argument("--frame-json", metavar="JSON",
                         help="with --attach, --attach-matrix or --match-pose: read the "
                              "capture kept by an earlier run")
@@ -3775,7 +3799,7 @@ def main(argv=None) -> int:
             print("oracle: skipped -- no --cue and %s is not set" % DRIVE_VARIABLE)
             return SKIP
         return run_replay(args.replay, cue, args.rotate, args.frame_json, args.plant_replay,
-                          args.focus)
+                          args.focus, args.pose_dir)
     if args.replay_field is not None:
         cue = args.cue or os.environ.get(DRIVE_VARIABLE)
         if not cue and not args.frame_json:
