@@ -59,3 +59,7 @@ Verificação:
 $ grep -c "Desfeito em 2026-10-19" docs/PLAN-KITS-REPLAY.md
 1
 ```
+- **Closed** — commit `928d3446` (2026-10-19): docs(kits): date the undo of phase 4 on the revert day, not the decision day
+  - Files (`git show --name-status 928d3446`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-032.md`
