@@ -1308,14 +1308,17 @@ todos (retros do `looks`,
 do `port-mcr`,
 [docs/tasks/concluidos/port-mcr/retro.md](docs/tasks/concluidos/port-mcr/retro.md),
 do `kits`, [docs/tasks/concluidos/kits/retro.md](docs/tasks/concluidos/kits/retro.md),
-e do `kits-3d`, [docs/tasks/kits-3d/retro.md](docs/tasks/concluidos/kits-3d/retro.md)):
+do `kits-3d`, [docs/tasks/kits-3d/retro.md](docs/tasks/concluidos/kits-3d/retro.md),
+e do `kits-replay`, [docs/tasks/kits-replay/retro.md](docs/tasks/kits-replay/retro.md)):
 
 - **Número em Log ou documento é colado da ferramenta, na HEAD entregue.** Não
   se reescreve de memória, não sai de sonda descartável — sonda que produziu um
   número vira opção de uma ferramenta versionada antes de o número entrar em
-  texto —, e a transcrição de gate é refeita depois da última edição. Foram 17
-  correções no `looks` e uma série no `wte` ("o Log diz 41 regras, e o gerador
-  tem 47").
+  texto —, e a transcrição de gate é refeita depois da última edição. Com
+  `--json`, o Log cola o documento inteiro ou a linha `$` roda o modo texto:
+  resumo de extrator, placeholder e linha `$` encurtada com `…` contam como
+  número reescrito. Foram 17 correções no `looks`, uma série no `wte` ("o Log
+  diz 41 regras, e o gerador tem 47"), 3 no `kits-3d` e 8 no `kits-replay`.
 - **Verificador sem vermelho visto não é gate.** Toda asserção nova entra com um
   defeito plantado que a derruba, e o Log mostra o vermelho; veredito impresso e
   não afirmado, pulo silencioso ou função sem chamador contam como ausência de
@@ -1324,10 +1327,12 @@ e do `kits-3d`, [docs/tasks/kits-3d/retro.md](docs/tasks/concluidos/kits-3d/retr
 - **Fechar um veredito é varrer quem dizia o anterior.** Critério, total ou
   decisão que muda numa task muda na mesma task em todo lugar que o repete —
   regra, perfil, plano, docstring, cabeçalho de seção, a entrada da fase em
-  "Verificações específicas por fase" —, e um total vive em **um** documento só,
-  os outros remetendo ao comando que o imprime. Foram 20 correções no `looks` e
-  8 no `port-mcr`, 5 delas altas (entre elas a contagem de controles e a de
-  alvos de `ctest`).
+  "Verificações específicas por fase", as listas de decisões já confirmadas do
+  plano e do perfil, a linha "Feito" da seção —, e um total vive em **um**
+  documento só, os outros remetendo ao comando que o imprime. Foram 20
+  correções no `looks`, 8 no `port-mcr`, 5 delas altas (entre elas a contagem
+  de controles e a de alvos de `ctest`), e 3 no `kits-replay`, que escaparam
+  pelas listas de decisões e pela linha "Feito".
 - **Um caso medido não é a regra.** Um slot, um cartão, uma imagem medidos dizem
   aquele caso; a frase diz "o menor", não "todos", e amostra se conta **por
   conteúdo** (digest), não por arquivo nem pelos que a task usou — três dos
