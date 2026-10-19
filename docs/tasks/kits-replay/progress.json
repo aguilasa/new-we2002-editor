@@ -294,12 +294,14 @@
       "status": "done",
       "done_on": "2026-10-19",
       "done_commit": "1d065a8b",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-19",
+      "review_commit": "1a40b318",
       "active_since": null,
       "started_at": "2026-10-19T16:59:31-03:00",
       "active_s": 1037,
-      "finished_at": "2026-10-19T17:16:48-03:00"
+      "finished_at": "2026-10-19T17:16:48-03:00",
+      "review_started_at": "2026-10-19T17:43:26-03:00",
+      "review_s": 745
     },
     {
       "id": "KRP-TASK-14",

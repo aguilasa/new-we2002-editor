@@ -58,3 +58,4 @@ As verificações da fase 4a do perfil (digest de `e4b2535e^`, `match_scene` igu
   - **Outside declared files** (`docs/PLAN-KITS-REPLAY.md`):
     - `docs/tasks/kits-replay/progress.json`
     - `docs/tasks/kits-replay/progresso.md`
+- **Reviewed** (2026-10-19) at `1a40b318`: no finding
