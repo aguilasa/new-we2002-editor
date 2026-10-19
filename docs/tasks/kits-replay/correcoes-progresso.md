@@ -31,6 +31,6 @@
 | [CORR-KRP-026](/docs/tasks/kits-replay/CORR-KRP-026.md) | Logs de fechamento trazem $ sh rite check, que não roda; a forma é sh "$RITE_HOME/bin/rite" | KRP-TASK-23 | low | done | 2026-10-16 |
 | [CORR-KRP-027](/docs/tasks/kits-replay/CORR-KRP-027.md) | §3.2 ainda diz que a pele do corpo não muda, e o Feito da §3.3 não credita a KRP-TASK-24 | KRP-TASK-24 | medium | done | 2026-10-17 |
 | [CORR-KRP-028](/docs/tasks/kits-replay/CORR-KRP-028.md) | Log da KRP-TASK-24 atribui 108094 px ao Log da 22 e encurta a linha de digest | KRP-TASK-24 | low | done | 2026-10-17 |
-| [CORR-KRP-029](/docs/tasks/kits-replay/CORR-KRP-029.md) | ANIME.BIN inteiro na RAM e recaptura igual à pose antiga medidos por sonda descartável, sem opção versionada | KRP-TASK-14 | medium | pending | — |
-| [CORR-KRP-030](/docs/tasks/kits-replay/CORR-KRP-030.md) | Log da KRP-TASK-14 não cola o --json que o critério 1 pede | KRP-TASK-14 | low | pending | — |
+| [CORR-KRP-029](/docs/tasks/kits-replay/CORR-KRP-029.md) | ANIME.BIN inteiro na RAM e recaptura igual à pose antiga medidos por sonda descartável, sem opção versionada | KRP-TASK-14 | medium | done | 2026-10-19 |
+| [CORR-KRP-030](/docs/tasks/kits-replay/CORR-KRP-030.md) | Log da KRP-TASK-14 não cola o --json que o critério 1 pede | KRP-TASK-14 | low | in-progress | — |
 <!-- rite:end -->

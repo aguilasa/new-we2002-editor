@@ -372,12 +372,16 @@
       "title": "ANIME.BIN inteiro na RAM e recaptura igual à pose antiga medidos por sonda descartável, sem opção versionada",
       "origin": "KRP-TASK-14",
       "severity": "medium",
-      "files": [],
+      "files": ["tools/kits/replay.py", "tools/kits/oracle.py", "docs/PLAN-KITS-REPLAY.md", "tools/kits/controls.py", "tools/kits/selftest.py", "docs/tasks/kits-replay/CORR-KRP-029.md"],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-19",
+      "done_commit": "368fe60d",
+      "active_since": null,
+      "started_at": "2026-10-19T11:19:20-03:00",
+      "active_s": 2694,
+      "finished_at": "2026-10-19T12:04:14-03:00"
     },
     {
       "id": "CORR-KRP-030",
@@ -385,12 +389,15 @@
       "title": "Log da KRP-TASK-14 não cola o --json que o critério 1 pede",
       "origin": "KRP-TASK-14",
       "severity": "low",
-      "files": [],
+      "files": ["docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md", "docs/tasks/kits-replay/CORR-KRP-030.md"],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "depends_on": [],
       "done_on": null,
-      "done_commit": null
+      "done_commit": null,
+      "active_since": "2026-10-19T11:19:21-03:00",
+      "started_at": "2026-10-19T11:19:21-03:00",
+      "active_s": 0
     }
   ]
 }

@@ -165,3 +165,11 @@ $ python3 tools/kits/controls.py --only replay-same-pose-section-only
   RED    replay-same-pose-section-only kits/replay.py :: module constant
 controls: 1 of 1 red
 ```
+- **Closed** — commit `368fe60d` (2026-10-19): feat(kits): version the ANIME.BIN-in-RAM and recapture probes as replay.py anime-ram and pose --same-as
+  - Files (`git show --name-status 368fe60d`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/CORR-KRP-029.md`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/replay.py`
+    - `M tools/kits/selftest.py`
