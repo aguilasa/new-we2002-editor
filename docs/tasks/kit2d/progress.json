@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "cycle": "kit2d",
+  "prefix": "K2D",
+  "plan": "/docs/PLAN-KIT2D-PY.md",
+  "ticket": null,
+  "local": false,
+  "tasks": []
+}
