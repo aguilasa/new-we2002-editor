@@ -383,10 +383,15 @@ A pose medida tem **uma chuteira só**, a 11, como o item 3. O goleiro sai com o
 segunda chuteira não se inventa. Com a família 13, o `arm_dress` deixou de ser chamado para o goleiro:
 o ramo dele continua coberto pelo selftest, sem uso na aba.
 
-**Feito na fase 4** ([KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)
-e [13](/docs/tasks/kits-replay/13-fechamento-da-fase-4.md)), como escrito acima. O que se afasta do
-texto de cima são as duas lacunas já ditas: uma chuteira só, e o `arm_dress` sem uso para o goleiro.
-A pose de corrida das duas famílias continua no [§5](#5).
+**Feito na fase 4, e desfeito em 2026-10-19** ([KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)
+e [13](/docs/tasks/kits-replay/13-fechamento-da-fase-4.md)): a fase 4 fechou com o goleiro da
+família 13, com duas lacunas (uma chuteira só, e o `arm_dress` sem uso para o goleiro), e a fase 4a
+a desfez.
+
+**Feito na fase 4a** ([KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md)
+e [26](/docs/tasks/kits-replay/26-desfazer-a-krp-task-13-e-fechar-a-fase-4a.md)): a figura 1 é de
+novo o goleiro do `EDT_MOD.BIN`, com só a 92 trocada quando capitão e vestido pelo `arm_dress`, com
+os digests da árvore de `e4b2535e^`. As duas lacunas da fase 4 deixaram de existir com ela.
 
 ## 5. Pose de corrida
 
@@ -492,7 +497,8 @@ investigação: negativa é resultado e não bloqueia; só a cópia mestra ausen
 | 2 | [§2.3](#2.3)–[§2.6](#2.6) | a linha de comando, `show`, `confront` e `confront --tab`, a captura e o gate `kits_replay` |
 | 3 | [§3](#3) | a regra da cabeça medida nos 22, e a cabeça por jogador desenhada |
 | 3a | [§3.3](#3.3) | os controles da cabeça na aba, no lugar da tupla em texto |
-| 4 | [§4](#4) | o goleiro pela família 13 |
+| 4 | [§4](#4) | o goleiro pela família 13 (desfeito na 4a) |
+| 4a | [§4](#4) | o goleiro do `EDT_MOD.BIN` de volta, desfazendo a 4 |
 | 5 | [§5](#5) | a corrida medida no `ANIME.BIN`; a pose de corrida na aba **não será feita** |
 | 6 | [§6](#6), [§7](#7) | **não será feita**: jogador real no seletor e a vista dos dois times |
 | 7 | [§8](#8) | **não será feita**: a câmera "replay" em perspectiva |
