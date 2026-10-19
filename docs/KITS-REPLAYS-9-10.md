@@ -190,7 +190,7 @@ os quads da figura) registra, sem afirmar limite:
 captura; quando a tabela foi medida, faltava comparar a frente do jogo com a frente da aba —
 [CORR-K3D-034](/docs/tasks/concluidos/kits-3d/CORR-K3D-034.md).)
 
-**Nota de 2026-10-15:** a [KRP-TASK-06](/docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md) fechou essa lacuna. O
+**Nota de 2026-10-15:** a [KRP-TASK-06](/docs/tasks/concluidos/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md) fechou essa lacuna. O
 `replay.py confront <captura> --tab` compara cada lado da aba com o **mesmo** lado do jogo — a
 captura girada guarda o frame buffer da figura —, e os números de mesmo lado, frente com frente e
 costas com costas, estão no Log daquela task; esta tabela não foi refeita com eles.
@@ -314,7 +314,7 @@ de cabelo escuro, nas duas figuras.
 - até a KRP-TASK-06, a frente do jogo não era comparada com a frente da aba (os focos de linha só
   capturam as costas de primeira). **Nota de 2026-10-15:** fechado pelo `replay.py confront --tab`,
   que pareia os lados pela captura girada; os números estão no Log da
-  [KRP-TASK-06](/docs/tasks/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md);
+  [KRP-TASK-06](/docs/tasks/concluidos/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md);
 - a segunda corrida de cabeças do `MODEL.BIN` (seções 74 a 105) não apareceu em nenhum dos 22.
 
 ## O que as treze correções mudaram no instrumento

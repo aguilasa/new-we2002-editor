@@ -36,7 +36,7 @@ colados da ferramenta, e não se reescrevem aqui.
   Isto **reabre a [K3D-TASK-10](/docs/tasks/concluidos/kits-3d/10-duas-figuras.md)**, que tirou a
   figura de partida do seletor (usuário, 2026-10-12; [§4](#4)).
   Decisão desfeita em 2026-10-19, por decisão do usuário de 2026-10-18: o goleiro voltou ao
-  `EDT_MOD.BIN` ([KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md); [§4](#4)).
+  `EDT_MOD.BIN` ([KRP-TASK-25](/docs/tasks/concluidos/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md); [§4](#4)).
 - **Entram no ciclo**: jogador real no seletor ([§6](#6)), vista dos dois times ([§7](#7)), câmera
   "replay" em perspectiva ([§8](#8)) e o `confront --tab` ([§2.4](#2.4)) (usuário, 2026-10-12).
 - **As fases 5 a 7 não serão feitas** (usuário, 2026-10-18): pose de corrida na aba ([§5.2](#5.2)),
@@ -108,9 +108,9 @@ O critério do move é **saída idêntica**: `oracle.py --replay … --frame-jso
 `--replay-field … --frame-json` e `--replay-confront` dão o mesmo texto antes e depois, sobre as
 capturas existentes.
 
-**Feito na fase 1** ([KRP-TASK-01](/docs/tasks/kits-replay/01-leitor-puro-core-replay-py-capture-v0v1-frame.md),
-[02](/docs/tasks/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md) e
-[03](/docs/tasks/kits-replay/03-fechamento-da-fase-1.md)), e o que difere do texto acima:
+**Feito na fase 1** ([KRP-TASK-01](/docs/tasks/concluidos/kits-replay/01-leitor-puro-core-replay-py-capture-v0v1-frame.md),
+[02](/docs/tasks/concluidos/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md) e
+[03](/docs/tasks/concluidos/kits-replay/03-fechamento-da-fase-1.md)), e o que difere do texto acima:
 
 - o leitor não lê o disco: o índice do MODEL.BIN (`oracle.model_index`) e a largura do registro do
   uniforme entram como parâmetro — `Figure.box(index)`, `Figure.sections(index, buffer, texture)`,
@@ -179,10 +179,10 @@ Alvo novo de `ctest`, **`kits_replay`**: roda os leitores sobre as capturas da p
 `WE2002_KITS_REPLAY_DIR` (hoje `work/kits-oracle/`), confere o digest de cada uma contra o
 registrado, e sai 77 (*skipped*) sem a variável ou sem `WE2002_LOOKS_IMAGE`. Não há pasta default:
 o `ctest` roda de `build/tests`, e um default relativo pularia em silêncio
-([KRP-TASK-04](/docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md)). A contagem de alvos `kits` mora só no [§9](#9).
+([KRP-TASK-04](/docs/tasks/concluidos/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md)). A contagem de alvos `kits` mora só no [§9](#9).
 
-**Feito na fase 2** ([KRP-TASK-04](/docs/tasks/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md)
-a [08](/docs/tasks/kits-replay/08-fechamento-da-fase-2.md)), e o que difere do texto acima:
+**Feito na fase 2** ([KRP-TASK-04](/docs/tasks/concluidos/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md)
+a [08](/docs/tasks/concluidos/kits-replay/08-fechamento-da-fase-2.md)), e o que difere do texto acima:
 
 - o `check` confere cada captura contra a tabela `CAPTURES` do `replay.py` (nome e sha256) e julga
   com as constantes do oracle, importado **por caminho** — o `oracle.py` e o `confront.py` da looks
@@ -212,7 +212,7 @@ cabelo e barba da captura, e com `--player` confronta com o registro de 12 bytes
 
 Resultado negativo é resultado: se a regra não fechar, a §3.2 desenha só o que fechou.
 
-**Medido** ([KRP-TASK-09](/docs/tasks/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md)):
+**Medido** ([KRP-TASK-09](/docs/tasks/concluidos/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md)):
 a regra **fecha nos 22 dos dois laços**, e nas três capturas de perto.
 `replay.py head <captura> --player all` dá `22 of 22 distinct player(s) match their disc record` em
 `replay-field-9-capture.json` e em `-10-`. O jogador se acha pela página e pelo número do painel:
@@ -236,7 +236,7 @@ O que a medição fixa:
   inteira pega a cabeça de um vizinho. No slot 10 isso daria (16,482) no 4 da Croácia e (32,480) no
   10 do Brasil: o `replay.py head` lê os dois com as duas CLUTs, (16,482) e (32,480), e o
   `kits_replay` cai em 4 falhas. Esses números são de uma corrida remontável, com script e saída no
-  Log da [CORR-KRP-016](/docs/tasks/kits-replay/CORR-KRP-016.md). O que fica no gate é o controle
+  Log da [CORR-KRP-016](/docs/tasks/concluidos/kits-replay/CORR-KRP-016.md). O que fica no gate é o controle
   `replay-head-piece-box` do `controls.py`. Ele tira a condição e derruba uma asserção sintética do
   selftest, sem dado real: uma figura e um quad da cabeça de um vizinho, dentro do box da figura e fora do box
   da peça.
@@ -253,7 +253,7 @@ Dois slots medidos dizem "nos dois", não "sempre".
 `TUPLE = assembly.CORPUS_REFERENCE`. O CLI e a aba ganham a opção (a tupla, e depois o jogador real
 pelo [§6](#6)). Confronto de antes e depois pelo `confront --tab` nos três de perto.
 
-**Feito** ([KRP-TASK-10](/docs/tasks/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md)).
+**Feito** ([KRP-TASK-10](/docs/tasks/concluidos/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md)).
 Os dois recebem `player` (uma tupla da looks, `A-L3-H-A-A`). Quem desenha a cabeça é a regra do
 [§3.1](#3.1), em `core/figure.py`, e o `replay.py head` usa a mesma regra de seção:
 
@@ -268,7 +268,7 @@ lugar que a pose dá à cabeça (`scene.place_for`). A cena da looks com a tupla
 ela deixa parte das primitivas da 46 na coluna do disco, e o jogo pinta todas. **O resto da figura
 não muda**, inclusive a pele do corpo, que nenhum replay mediu — na figura da aba isso foi revogado
 em 2026-10-16: a pele do corpo segue a Cor da Pele do jogador ([§3.3](#3.3),
-[KRP-TASK-24](/docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md)). No `match_scene`, a
+[KRP-TASK-24](/docs/tasks/concluidos/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md)). No `match_scene`, a
 seção da cabeça troca na mesma matriz, e a pele do corpo continua sem mudar.
 
 Sem a opção nada muda, e o digest de `cli.py figure` (as duas cenas) é o de antes. O CLI tem
@@ -278,19 +278,19 @@ Sem a opção nada muda, e o digest de `cli.py figure` (as duas cenas) é o de a
 `replay.py head --drawn`: as três capturas de perto e os 24 focos de cada laço amostram a CLUT do
 jogo em toda primitiva.
 
-**O `head --drawn` é relatório, não gate** ([CORR-KRP-018](/docs/tasks/kits-replay/CORR-KRP-018.md)):
+**O `head --drawn` é relatório, não gate** ([CORR-KRP-018](/docs/tasks/concluidos/kits-replay/CORR-KRP-018.md)):
 sai 1 quando uma primitiva diverge, mas o `replay.py check` não o roda e o `controls.py` não o
 planta, porque o sandbox dos controles corre sem o disco. Quem segura a regra que ele confronta são
 as asserções do `kits_selftest` sobre `player_head_clut` e sobre o `match_scene` com jogador (este
 num disco de faz-de-conta), cada uma com o seu controle, e a do `kits_image` que desenha a 46 do
 Balaban com as CLUTs (32,480) e (160,480).
 
-**Feito na fase 3** ([KRP-TASK-09](/docs/tasks/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md)
-a [11](/docs/tasks/kits-replay/11-fechamento-da-fase-3.md)). A regra fechou inteira, e por isso a
+**Feito na fase 3** ([KRP-TASK-09](/docs/tasks/concluidos/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md)
+a [11](/docs/tasks/concluidos/kits-replay/11-fechamento-da-fase-3.md)). A regra fechou inteira, e por isso a
 §3.2 desenha tudo o que a §3.1 mediu, sem parte deixada no default. O `head --player`, o
 julgamento contra `HEAD_EXPECT` e o `confront --tab --player` saíram como o texto de cima descreve.
 O que se afasta dele são duas opções do `head`: `--drawn`, que é relatório e não gate
-([CORR-KRP-018](/docs/tasks/kits-replay/CORR-KRP-018.md)), e `--plant-hair-column`, a planta com
+([CORR-KRP-018](/docs/tasks/concluidos/kits-replay/CORR-KRP-018.md)), e `--plant-hair-column`, a planta com
 dado real. O jogador real no seletor continua no [§6](#6).
 
 ### 3.3 Os controles da cabeça na aba
@@ -331,13 +331,13 @@ combos: é a porta dos gates e do `confront --tab --player`.
 Com o painel à vista a vista 3D fica mais estreita (940×409 → 786×409 px na janela do
 `--export-3d`), mas a altura não muda e a figura sai a mesma: o `confront --tab --player` dá os
 mesmos números de antes nas três capturas de perto (medido na
-[KRP-TASK-22](/docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md)).
+[KRP-TASK-22](/docs/tasks/concluidos/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md)).
 
-**Feito na fase 3a** ([KRP-TASK-22](/docs/tasks/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md)
-e [23](/docs/tasks/kits-replay/23-fechamento-da-fase-3a.md)), como escrito acima e sem diferença
+**Feito na fase 3a** ([KRP-TASK-22](/docs/tasks/concluidos/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md)
+e [23](/docs/tasks/concluidos/kits-replay/23-fechamento-da-fase-3a.md)), como escrito acima e sem diferença
 do texto. O painel na tela, nas duas línguas, está nas capturas do Log da task 23. O parágrafo da
 pele do corpo veio depois, decidido em 2026-10-16 e entregue pela
-[KRP-TASK-24](/docs/tasks/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md).
+[KRP-TASK-24](/docs/tasks/concluidos/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md).
 
 ## 4. Goleiro pela família 13
 
@@ -357,13 +357,13 @@ slots.
 figuras do `EDT_MOD.BIN`, e o goleiro passa a ser o de partida.
 
 **Desfeito em 2026-10-19, por decisão do usuário de 2026-10-18**
-([KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md)): a
+([KRP-TASK-25](/docs/tasks/concluidos/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md)): a
 figura 1 voltou ao goleiro do `EDT_MOD.BIN`, com só a 92 trocada quando capitão, vestido pelo
 `arm_dress`. O código do commit `e4b2535e` saiu por revert, e o `cli.py figure` dá o digest da
 árvore de `e4b2535e^`. O parágrafo abaixo é o registro do que a fase 4 tinha feito, e não descreve
 mais a aba.
 
-**Feito, e desfeito depois** ([KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)).
+**Feito, e desfeito depois** ([KRP-TASK-12](/docs/tasks/concluidos/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)).
 A figura 1 do `scene_of` era `core/figure.py:keeper_scene`:
 
 - **a pose** é `core/keeper_pose.json`, cópia byte a byte de `work/kits-pose/slot9-keeper-front.json`,
@@ -383,13 +383,13 @@ A pose medida tem **uma chuteira só**, a 11, como o item 3. O goleiro sai com o
 segunda chuteira não se inventa. Com a família 13, o `arm_dress` deixou de ser chamado para o goleiro:
 o ramo dele continua coberto pelo selftest, sem uso na aba.
 
-**Feito na fase 4, e desfeito em 2026-10-19** ([KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)
-e [13](/docs/tasks/kits-replay/13-fechamento-da-fase-4.md)): a fase 4 fechou com o goleiro da
+**Feito na fase 4, e desfeito em 2026-10-19** ([KRP-TASK-12](/docs/tasks/concluidos/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)
+e [13](/docs/tasks/concluidos/kits-replay/13-fechamento-da-fase-4.md)): a fase 4 fechou com o goleiro da
 família 13, com duas lacunas (uma chuteira só, e o `arm_dress` sem uso para o goleiro), e a fase 4a
 a desfez.
 
-**Feito na fase 4a** ([KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md)
-e [26](/docs/tasks/kits-replay/26-desfazer-a-krp-task-13-e-fechar-a-fase-4a.md)): a figura 1 é de
+**Feito na fase 4a** ([KRP-TASK-25](/docs/tasks/concluidos/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md)
+e [26](/docs/tasks/concluidos/kits-replay/26-desfazer-a-krp-task-13-e-fechar-a-fase-4a.md)): a figura 1 é de
 novo o goleiro do `EDT_MOD.BIN`, com só a 92 trocada quando capitão e vestido pelo `arm_dress`, com
 os digests da árvore de `e4b2535e^`. As duas lacunas da fase 4 deixaram de existir com ela.
 
@@ -403,11 +403,11 @@ para a caminhada. A medição: a captura passa a gravar o ponteiro do par (como 
 o `pose_capture` não o lia), e `replay pose <captura> --against-anime` imprime animação e quadro
 que explicam cada uma das cinco poses — ou a negativa, com comando e saída.
 
-**Medido** ([KRP-TASK-14](/docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md)):
+**Medido** ([KRP-TASK-14](/docs/tasks/concluidos/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md)):
 positivo nas cinco. O `ANIME.BIN` está inteiro na RAM do replay, no mesmo `layout.ANIME_BASE` da
 `LOOKS SET`, nas duas cópias mestras, e o `ANIME_BUILD` é a mesma instrução — quem mede é
 `replay.py anime-ram <state.sav>...`, que compara a RAM byte a byte com o arquivo e a palavra com o
-`jal 0x8003D4BC` ([CORR-KRP-029](/docs/tasks/kits-replay/CORR-KRP-029.md)). O `pose_capture` para
+`jal 0x8003D4BC` ([CORR-KRP-029](/docs/tasks/concluidos/kits-replay/CORR-KRP-029.md)). O `pose_capture` para
 nela e na carga da câmera (`POSE_MATRIX`), e cada parada de matriz leva o par e a câmera.
 `oracle.py --replay SLOT [--focus K] --pose-dir DIR` grava a pose com eles, e
 `replay.py pose <pose> --against-anime` acha o quadro de cada par e a regra de desempacotar
