@@ -1,8 +1,10 @@
 # Plano — visualizador e editor do uniforme 2D, em Python + Qt
 
-Proposta de 2026-10-01. **Nenhuma fase foi executada**; o que está marcado como
-medido foi medido ao escrever este plano, com o comando ou o snippet ao lado
-(§1.2 e §7 do [SUPERPACK-UNIFORMES-2D.md](/docs/SUPERPACK-UNIFORMES-2D.md)).
+Proposta de 2026-10-01, revista em 2026-10-19 ao abrir o ciclo `kit2d`
+(§3.3, §3.4, §3.5, §4.4 e §8). **Nenhuma fase foi executada**; o que está
+marcado como medido foi medido ao escrever este plano, com o comando ou o
+snippet ao lado (§1.2 e §7 do
+[SUPERPACK-UNIFORMES-2D.md](/docs/SUPERPACK-UNIFORMES-2D.md)).
 
 Segue as premissas do [PLAN-KITS-PY.md](/docs/PLAN-KITS-PY.md): núcleo e
 interface separados por uma fachada só, núcleo Python puro sem Qt, CLI como
@@ -257,7 +259,8 @@ O que isso diz, e o que não diz:
 | `tools/pes2/lzss.py` | `decompress`, `scan` | os streams 21/22/23 do `DATSEL.BIN` |
 | `tools/pes2/asset_write.py` | `refuse_roms` | nunca gravar em `roms/` |
 | `tools/kits/core/source.py` | reconhecer ROM pelo conteúdo (imagem, `.cue`) | a origem do §3.2 |
-| `tools/kits/` (KITS-TASK-12/13, pendentes) | o gerador de `TEAM_NAMES`/`OFS_TEAM_NAME_*` com `--check` e `teams.py` | os nomes do §3.3 |
+| `tools/kits/core/teams.py`, `tools/kits/core/generated/` (KITS-TASK-12/13) | o gerador de `TEAM_NAMES`/`OFS_TEAM_NAME_*` com `--check` e `teams.py` | os nomes do §3.3 |
+| `tools/kits/ui/i18n.py` (KITS-TASK-36) | o catálogo de texto da janela, en-US por default | a forma do catálogo do §3.4 |
 | `tools/kits/controls.py`, `selftest.py` | o padrão de controle negativo plantado e o `harness` do `looks` | os gates do §5 |
 | `tools/pes2/mcp.py`, `fork.py`, `tools/looks/oracle.py` | subir o fork, apertar botão, `read_memory`, `read_vram_region`, `take_screenshot`, `save_state`/`load_state` | a fase 0 e os confrontos |
 | `src/core/include/we2002/Offsets.hpp`, `src/app/FlagKitDialog.*` | `OFS_KIT_PREVIEW*`; o que o `ed.exe` expõe (palavras 2..15) | os offsets; a divergência deliberada da §6 |
@@ -352,12 +355,14 @@ o mesmo que o port e o `ed.exe` fazem com a paleta.
 A **mesma regra e o mesmo gerador do `kits`** (§3.3 de lá): japonês decidido pelo
 disco (boot `SLPM_870.56`, digests), tabela inglesa `TEAM_NAMES` de
 `src/core/Tables.cpp` via gerador com `--check` no `ctest`, `name_origin`
-dizendo de onde veio. As tasks que entregam isso são a **KITS-TASK-12** e a
-**KITS-TASK-13**, pendentes em 2026-10-01. Este ciclo **não duplica**: a fase 1
-importa `tools/kits/core/generated` e `teams.py` quando existirem; se o `kits`
-ainda não os tiver entregue quando a fase 1 começar, a task de nomes daqui
-**faz lá** (em `tools/kits/`, com os gates do `kits` verdes antes e depois) e
-importa — nunca uma segunda tabela.
+dizendo de onde veio. Quem entregou isso foram a
+[KITS-TASK-12](/docs/tasks/concluidos/kits/12-gerador-de-nomes.md) e a
+[KITS-TASK-13](/docs/tasks/concluidos/kits/13-nomes-dos-times.md), fechadas em
+2026-10-01; o ciclo `kits` está arquivado. Este ciclo **não duplica**: a fase 1
+importa `tools/kits/core/teams.py` e `tools/kits/core/generated/` — nunca uma
+segunda tabela. Se o que falta aqui não estiver lá, a task de nomes daqui
+**muda lá** (com `kits_selftest` e `kits_image` verdes antes e depois) e
+importa.
 
 ### 3.4 A interface (`tools/kit2d/ui/`)
 
@@ -388,9 +393,20 @@ Só apresentação: widgets que chamam a fachada e desenham o que ela devolve.
 **Estilo**: Fusion, `QPalette` fixa, fonte em pixels, layouts Qt — o §3.4 do
 `kits`, palavra por palavra, pelo mesmo motivo.
 
+**Idioma da interface** (decisão do usuário, 2026-10-19): a mesma regra do
+`kits`. Todo texto da janela sai de um catálogo em Python puro,
+`tools/kit2d/ui/i18n.py`, na forma do `tools/kits/ui/i18n.py` — inglês dos EUA
+por default, `pt-BR` como segunda língua, escolha por `--lang`, depois
+`WE2002_KIT2D_LANG`, depois o default; código desconhecido é recusado; uma chave
+entra em todas as línguas com os mesmos `{campos}`, e o `kit2d_selftest` recusa
+catálogo desigual. Mensagens do núcleo e da CLI e nomes de time ficam em
+inglês, como lá. Quando os dois projetos forem absorvidos pela aplicação única,
+os dois catálogos viram um.
+
 ### 3.5 Idioma e ambiente
 
-Código e docstrings em inglês, documentos em português. Venv `work/venv-looks/`
+Código e docstrings em inglês, documentos em português; a janela fala o
+idioma do catálogo do §3.4. Venv `work/venv-looks/`
 (já tem PySide6); o núcleo não precisa dele. `make.ps1 kit2d` / `make kit2d` e
 `kit2d-98` abrem a janela, como `looks`. `ctest` ganha:
 
@@ -437,9 +453,16 @@ Sai do render medido contra a VRAM, por índice.
 Não há rota nem state para o WE2002. **Pré-requisito humano**: o usuário grava
 um save state do fork **na tela de opções de uma partida amistosa**, com um
 time em que titular e suplente diferem de cada lado, e o deixa em
-`work/kit2d-states/` (`WE2002_KIT2D_STATES`), como os do `looks`. A rota de
+`work/kit2d-states/` (`WE2002_KIT2D_STATES`), como os do `looks`, com o nome
+que o slot 1 do fork dá: `work/kit2d-states/SLPM-87056_1.sav`. A rota de
 botões, se for medida, fica registrada; sem o state as fases 0, 2 e 7 pulam, e
 o plano diz que **pular não é passar**.
+
+Os states que já existem não servem: `work/kits-states/SLPM-87056_3.sav` e
+`_10.sav` são **em partida** (Escócia × Dinamarca, e um replay do
+`kits-3d`), não na tela de opções. No ciclo, as tasks que precisam do state
+nascem `blocked` com `--unblocked-by "test -f work/kit2d-states/SLPM-87056_1.sav"`
+(conferido em 2026-10-19: o arquivo não existe).
 
 ### 4.5 (e) O modelo é uma lista só?
 
@@ -519,15 +542,18 @@ fase 0, sem a qual todo render é inferência, e a fase 7, sem a qual "grava" é
 
 ## 8. Como iniciar o ciclo
 
-1. `/rite:new-cycle kit2d` — pasta `docs/tasks/kit2d/`, perfil
+1. `/rite:new-cycle kit2d --prefix K2D` — pasta `docs/tasks/kit2d/`, perfil
    `docs/prompts/perfil-kit2d.md` com uma entrada por fase (0 a 8) em
    "Verificações específicas por fase", e os recursos serializados `emulador`,
-   `save-states` e `tela` nas tasks das fases 0, 2 e 7.
+   `save-states` e `tela` nas tasks das fases 0, 2 e 7. As tasks que precisam do
+   state da §4.4 nascem `blocked` por ele; como a fase 1 depende da 0, só o
+   esqueleto e as sondas de disco da fase 0 andam antes de o state existir.
 2. `/rite:plan-to-tasks kit2d docs/PLAN-KIT2D-PY.md` — `source_of_truth` com
    âncora de seção (`rite anchors docs/PLAN-KIT2D-PY.md` lista as válidas).
 3. Antes do primeiro commit do ciclo: o state da §4.4 gravado pelo usuário, e
    `ctest -R tasks` verde.
-4. As regras que valem o ciclo todo são as quatro do `CLAUDE.md`
+4. As regras que valem o ciclo todo são as cinco do `CLAUDE.md`
    ("Convenções da documentação"): número colado da ferramenta na HEAD
    entregue; verificador sem vermelho visto não é gate; fechar um veredito é
-   varrer quem dizia o anterior; um caso medido não é a regra.
+   varrer quem dizia o anterior; um caso medido não é a regra; nota de passagem
+   não vai no arquivo da task seguinte.
