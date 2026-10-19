@@ -354,8 +354,15 @@ slots.
 [K3D-TASK-10](/docs/tasks/concluidos/kits-3d/10-duas-figuras.md): a aba tinha ficado com as duas
 figuras do `EDT_MOD.BIN`, e o goleiro passa a ser o de partida.
 
-**Feito** ([KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)).
-A figura 1 do `scene_of` é `core/figure.py:keeper_scene`:
+**Desfeito em 2026-10-18, por decisão do usuário**
+([KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md)): a
+figura 1 voltou ao goleiro do `EDT_MOD.BIN`, com só a 92 trocada quando capitão, vestido pelo
+`arm_dress`. O código do commit `e4b2535e` saiu por revert, e o `cli.py figure` dá o digest da
+árvore de `e4b2535e^`. O parágrafo abaixo é o registro do que a fase 4 tinha feito, e não descreve
+mais a aba.
+
+**Feito, e desfeito depois** ([KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md)).
+A figura 1 do `scene_of` era `core/figure.py:keeper_scene`:
 
 - **a pose** é `core/keeper_pose.json`, cópia byte a byte de `work/kits-pose/slot9-keeper-front.json`,
   com o sha256 no Log da task;

@@ -739,8 +739,8 @@ CONTROLS = (
     ),
     Control(
         "figure-player-skin-unmoved", "kits/core/figure.py", "player_head_clut",
-        '        return clut\n    return skin.clut_id(layout.CLUT_ROW_FIRST + values["skin_colour"], column)\n',
-        "        return clut\n    return skin.clut_id(row, column)\n",
+        '    return skin.clut_id(layout.CLUT_ROW_FIRST + values["skin_colour"], column)\n',
+        "    return skin.clut_id(row, column)\n",
         "FAIL  figure.py: the player's skin is the CLUT row 480 + skin_colour",
         "the head keeps the disc's row 480, skin A: Brazil's 10 and 11 (skins C and D) "
         "would draw as Croatia's (KRP-TASK-10)",
@@ -765,8 +765,8 @@ CONTROLS = (
     ),
     Control(
         "figure-match-player-clut", "kits/core/figure.py", "match_scene",
-        "    recolour = ((lambda number, clut: player_head_clut(clut, values) if number == head else clut)\n",
-        "    recolour = ((lambda number, clut: player_head_clut(clut, values) if number == -1 else clut)\n",
+        "            if values is not None and number == order[0][0]:\n",
+        "            if values is not None and number == -1:\n",
         "FAIL  figure.py: match_scene with a player draws his head with his CLUTs",
         "the match figure draws the player's section in the disc's CLUTs: Balaban's "
         "hair B would show as hair A in the match tab (CORR-KRP-018)",
@@ -778,14 +778,6 @@ CONTROLS = (
         "FAIL  figure.py: match_scene with a player draws his section where the head was",
         "the match figure keeps the measured head's section whatever the player: every "
         "head would be the pose's (CORR-KRP-018)",
-    ),
-    Control(
-        "figure-keeper-armband-always", "kits/core/figure.py", "keeper_order",
-        "            section = KEEPER_ARMBAND if armband else KEEPER_ARM\n",
-        "            section = KEEPER_ARMBAND\n",
-        "FAIL  figure.py: the goalkeeper wears 92 in 15's place with the armband, 15 without",
-        "the measured pose carries Marcos's 92: copied as it is, every goalkeeper of the tab "
-        "would wear the captain's armband (KRP-TASK-12, PLAN-KITS-REPLAY section 4)",
     ),
 )
 BY_ID = {c.id: c for c in CONTROLS}

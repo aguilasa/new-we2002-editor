@@ -101,15 +101,6 @@ def scene_of(kit, kit_set: int = 1, figure: int = 0, geometry_path=None, frame=N
     if geometry is None:
         geometry = read_geometry(geometry_path_for(geometry_path))
     kit.require()
-    if figure == KEEPER_FIGURE:
-        # The goalkeeper is the match's, family 13 of MODEL.BIN in the measured
-        # pose (PLAN-KITS-REPLAY section 4, the user's decision of 2026-10-12
-        # reopening K3D-TASK-10); he wears long sleeves only (G4).
-        if sleeves not in (None,) + KEEPER_SLEEVES:
-            raise FigureError("The goalkeeper wears %s sleeves only, not %r."
-                              % (" or ".join(KEEPER_SLEEVES), sleeves))
-        built = keeper_scene(kit, kit_set, armband, geometry, player=player)
-        return numbered_scene(built, kit, kit_set, figure, None)
     files = dict(geometry)
     files[SLOT] = kit.data
     values = looks.parse_tuple(TUPLE)
@@ -169,19 +160,6 @@ def player_head_clut(clut: int, values: dict) -> int:
     else:
         return clut
     return skin.clut_id(layout.CLUT_ROW_FIRST + values["skin_colour"], column)
-
-
-def player_body_clut(clut: int, values: dict) -> int:
-    """The CLUT the game samples a MODEL.BIN body primitive with: the bare-skin
-    column (`layout.BARE_SKIN_COLUMN`) on the row of skin `skin_colour`, and the
-    hair and beard columns as on the head (`player_head_clut`).  Measured on the
-    walk of slot 9: the legs of Brazil's 10 and 11 sample (0,482) and (0,483),
-    their torsos (16,482) and (16,483), the goalkeepers' (0,480) and (32,480)."""
-    row, column = skin.grid(clut)
-    if column == layout.BARE_SKIN_COLUMN and \
-            layout.CLUT_ROW_FIRST <= row < layout.CLUT_ROW_FIRST + len(layout.SKIN_PALETTES):
-        return skin.clut_id(layout.CLUT_ROW_FIRST + values["skin_colour"], column)
-    return player_head_clut(clut, values)
 
 
 def player_head_parts(values: dict, geometry, kit, kit_set: int, surfaces: dict,
@@ -338,8 +316,6 @@ or b, is the sign of the section's mean z, since each pair is the other one
 mirrored in z vertex for vertex.  14 15 16 17 and 92 are the arms and the
 armband of the goalkeeper drawn from torso 13 (K3D-TASK-08, slot 7); they lie
 on the goalkeeper's own arm pieces (K3D-TASK-11)."""
-KEEPER_FIGURE = 1
-"""The figure number of the goalkeeper (`FIGURES`)."""
 KEEPER_ARMBAND = 92
 """The goalkeeper's captain's armband: drawn in slot 7 in place of 15, whose
 vertices it has (`oracle.py --keeper-armband 7`, G4 of KITS-AJUSTES-3D.md)."""
@@ -359,108 +335,6 @@ def read_match_pose(path=None) -> dict:
     except OSError as exc:
         raise FigureError("No match pose at %s (python tools/kits/oracle.py --match-pose 5 "
                           "--write measures it): %s" % (path, exc.strerror or exc)) from exc
-
-
-KEEPER_POSE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "keeper_pose.json")
-"""The pose of the match goalkeeper, family 13: `work/kits-pose/slot9-keeper-front.json`
-as `oracle.py --replay 9` wrote it, copied byte for byte (KRP-TASK-12, its
-digest in the Log), never edited by hand."""
-KEEPER_ROOT = 13
-"""The torso of family 13: the piece the goalkeeper's torso view keeps upright."""
-KEEPER_ARM = 15
-"""The arm section the goalkeeper's armband `KEEPER_ARMBAND` stands in for."""
-
-
-def read_keeper_pose(path=None) -> dict:
-    """The measured goalkeeper pose, or `FigureError`."""
-    import json
-
-    path = path or KEEPER_POSE
-    try:
-        with open(path, encoding="utf-8") as fh:
-            return json.load(fh)
-    except OSError as exc:
-        raise FigureError("No goalkeeper pose at %s: %s" % (path, exc.strerror or exc)) from exc
-
-
-def keeper_order(pieces, armband: bool) -> list:
-    """[(section, rotation, translation)] of the measured goalkeeper: family 13
-    as the replay drew it, with `KEEPER_ARMBAND` where `KEEPER_ARM` is when
-    *armband*, and `KEEPER_ARM` where the armband is when not -- each section
-    keeps the matrix the game gave its position (KITS-REPLAYS-9-10 item 3)."""
-    out = []
-    for piece in pieces:
-        section = piece["section"]
-        if section in (KEEPER_ARMBAND, KEEPER_ARM):
-            section = KEEPER_ARMBAND if armband else KEEPER_ARM
-        out.append((section, tuple(piece["rotation"]), tuple(piece["translation"])))
-    return out
-
-
-def keeper_scene(kit, kit_set: int = 1, armband: bool = False, geometry=None,
-                 geometry_path=None, pose=None, player: str = None, view: str = "torso"):
-    """The goalkeeper as the match draws him (PLAN-KITS-REPLAY section 4): the
-    MODEL.BIN family 13 in the measured pose (`keeper_pose.json`), the armband
-    92 in place of 15 when *armband*, the head the looks of *player* draw
-    (`TUPLE`'s without one), and every skin, hair and beard CLUT by
-    `player_body_clut`.  No vertex nor texel is made here: the sections are
-    MODEL.BIN's own, textured as `match_scene` textures them."""
-    if kit_set not in KIT_SETS:
-        raise FigureError("Kit set %r is not one of %s." % (kit_set, KIT_SETS))
-    pose = pose if pose is not None else read_keeper_pose()
-    values = player_values(player) if player is not None else looks.parse_tuple(TUPLE)
-    order = keeper_order(pose["pieces"], armband)
-    head, rotation, translation = order[0]
-    order = [(player_head_section(values), rotation, translation)] + order[1:]
-    if geometry is None:
-        geometry = read_geometry(geometry_path_for(geometry_path))
-    kit.require()
-    notes = {"figure": "keeper", "armband": armband, "player head": {"section": order[0][0]}}
-    return _model_scene(order, KEEPER_ROOT, pose["projection"], view, geometry, kit, kit_set,
-                        values, lambda number, clut: player_body_clut(clut, values), notes)
-
-
-def _model_scene(order, root_section: int, projection, view: str, geometry, kit,
-                 kit_set: int, values, recolour, extra: dict):
-    """The scene of MODEL.BIN sections *order* [(section, rotation, translation)]:
-    each section's vertices through its matrix, in *view* ("torso": in the axes
-    of *root_section*, upright), every primitive's CLUT through *recolour*
-    (section, clut) -> clut, and textured as `_model_part` textures one."""
-    import copy
-    import section
-
-    if view not in MATCH_VIEWS:
-        raise FigureError("View %r is not one of %s." % (view, MATCH_VIEWS))
-    banks = _model_banks(geometry, kit, kit_set)
-    sections = section.scan(geometry[layout.MODEL], layout.MODEL_GEOMETRY_START).sections
-    root = next(((r, t) for s, r, t in order if s == root_section), None)
-    if root is None:
-        raise FigureError("the pose has no section %d" % root_section)
-    undo = _inverse(tuple(v / scene.ONE for v in root[0]))
-    surfaces, parts = {}, []
-    notes = {"no image": 0, "no palette": 0, "off the record": 0, "view": view,
-             "projection": dict(projection), "order": [s for s, _r, _t in order]}
-    notes.update(extra)
-    for number, rotation, translation in order:
-        if not 0 <= number < len(sections):
-            raise FigureError("section %d is not in %s" % (number, layout.MODEL))
-        one = sections[number]
-        r = tuple(v / scene.ONE for v in rotation)
-        moved = []
-        for v in one.vertices:
-            p = _apply(r, (v.x, v.y, v.z))
-            p = (p[0] + translation[0], p[1] + translation[1], p[2] + translation[2])
-            if view == "torso":
-                p = _apply(undo, (p[0] - root[1][0], p[1] - root[1][1], p[2] - root[1][2]))
-            moved.append(_Vertex(*p))
-        for at, primitive in enumerate(one.primitives):
-            worn = recolour(number, primitive.clut)
-            if worn != primitive.clut:
-                primitive = copy.copy(primitive)
-                primitive.clut = worn
-            parts.append(_model_part(primitive, moved, number, at, banks, surfaces, notes))
-    return scene.Scene(parts, {k: v for k, v in surfaces.items() if v is not None},
-                       values, 0, notes)
 
 
 def match_order(pieces, armband: bool, sleeves: str) -> list:
@@ -567,6 +441,8 @@ def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "lo
     *player* (a looks tuple) is given: then the head is that record's, the
     section `player_head_section` and the CLUTs `player_head_clut`, in the
     measured head's matrix."""
+    import section
+
     if kit_set not in KIT_SETS:
         raise FigureError("Kit set %r is not one of %s." % (kit_set, KIT_SETS))
     if figure not in MATCH_FIGURES:
@@ -583,15 +459,39 @@ def match_scene(kit, kit_set: int = 1, armband: bool = False, sleeves: str = "lo
     if geometry is None:
         geometry = read_geometry(geometry_path_for(geometry_path))
     kit.require()
-    head = order[0][0]
-    notes = {"figure": figure, "armband": armband, "sleeves": sleeves}
+    banks = _model_banks(geometry, kit, kit_set)
+    sections = section.scan(geometry[layout.MODEL], layout.MODEL_GEOMETRY_START).sections
+    root = next(((r, t) for s, r, t in order if s == ROOT_SECTION), None)
+    if root is None:
+        raise FigureError("the match pose has no section %d" % ROOT_SECTION)
+    undo = _inverse(tuple(v / scene.ONE for v in root[0]))
+    surfaces, parts = {}, []
+    notes = {"no image": 0, "no palette": 0, "off the record": 0, "view": view,
+             "projection": dict(pose["projection"]), "order": [s for s, _r, _t in order],
+             "figure": figure, "armband": armband, "sleeves": sleeves}
+    for number, rotation, translation in order:
+        if not 0 <= number < len(sections):
+            raise FigureError("section %d is not in %s" % (number, layout.MODEL))
+        one = sections[number]
+        r = tuple(v / scene.ONE for v in rotation)
+        moved = []
+        for v in one.vertices:
+            p = _apply(r, (v.x, v.y, v.z))
+            p = (p[0] + translation[0], p[1] + translation[1], p[2] + translation[2])
+            if view == "torso":
+                p = _apply(undo, (p[0] - root[1][0], p[1] - root[1][1], p[2] - root[1][2]))
+            moved.append(_Vertex(*p))
+        for at, primitive in enumerate(one.primitives):
+            if values is not None and number == order[0][0]:
+                import copy
+
+                primitive = copy.copy(primitive)
+                primitive.clut = player_head_clut(primitive.clut, values)
+            parts.append(_model_part(primitive, moved, number, at, banks, surfaces, notes))
     if values is not None:
-        notes["player head"] = {"section": head}
-    recolour = ((lambda number, clut: player_head_clut(clut, values) if number == head else clut)
-                if values is not None else (lambda number, clut: clut))
-    return _model_scene(order, ROOT_SECTION, pose["projection"], view, geometry, kit, kit_set,
-                        values if values is not None else looks.parse_tuple(TUPLE), recolour,
-                        notes)
+        notes["player head"] = {"section": order[0][0]}
+    return scene.Scene(parts, {k: v for k, v in surfaces.items() if v is not None},
+                       values if values is not None else looks.parse_tuple(TUPLE), 0, notes)
 
 
 def screen_points(drawn, part) -> list:
