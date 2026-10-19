@@ -49,4 +49,12 @@ check: 0 error(s), 0 warning(s) in 1 cycle(s)
 ```
 
 As verificações da fase 4a do perfil (digest de `e4b2535e^`, `match_scene` igual, reversão datada no §4) estão medidas no Log da [KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md); o código não mudou desde ela.
-
+- **Closed** — commit `1d065a8b` (2026-10-19): docs(kits): close phase 4a of kits-replay, the family-13 goalkeeper undone
+  - Files (`git show --name-status 1d065a8b`):
+    - `M docs/PLAN-KITS-REPLAY.md`
+    - `M docs/tasks/kits-replay/26-desfazer-a-krp-task-13-e-fechar-a-fase-4a.md`
+    - `M docs/tasks/kits-replay/progress.json`
+    - `M docs/tasks/kits-replay/progresso.md`
+  - **Outside declared files** (`docs/PLAN-KITS-REPLAY.md`):
+    - `docs/tasks/kits-replay/progress.json`
+    - `docs/tasks/kits-replay/progresso.md`

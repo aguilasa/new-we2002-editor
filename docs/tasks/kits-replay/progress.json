@@ -291,14 +291,15 @@
       "source_of_truth": "/docs/PLAN-KITS-REPLAY.md#4",
       "files": ["docs/PLAN-KITS-REPLAY.md"],
       "resources": [],
-      "status": "in-progress",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-19",
+      "done_commit": "1d065a8b",
+      "reviewed_on": "pending",
       "review_commit": null,
-      "active_since": "2026-10-19T16:59:31-03:00",
+      "active_since": null,
       "started_at": "2026-10-19T16:59:31-03:00",
-      "active_s": 0
+      "active_s": 1037,
+      "finished_at": "2026-10-19T17:16:48-03:00"
     },
     {
       "id": "KRP-TASK-14",
