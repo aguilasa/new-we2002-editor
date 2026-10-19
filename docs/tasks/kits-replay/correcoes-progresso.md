@@ -33,4 +33,6 @@
 | [CORR-KRP-028](/docs/tasks/kits-replay/CORR-KRP-028.md) | Log da KRP-TASK-24 atribui 108094 px ao Log da 22 e encurta a linha de digest | KRP-TASK-24 | low | done | 2026-10-17 |
 | [CORR-KRP-029](/docs/tasks/kits-replay/CORR-KRP-029.md) | ANIME.BIN inteiro na RAM e recaptura igual à pose antiga medidos por sonda descartável, sem opção versionada | KRP-TASK-14 | medium | done | 2026-10-19 |
 | [CORR-KRP-030](/docs/tasks/kits-replay/CORR-KRP-030.md) | Log da KRP-TASK-14 não cola o --json que o critério 1 pede | KRP-TASK-14 | low | done | 2026-10-19 |
+| [CORR-KRP-031](/docs/tasks/kits-replay/CORR-KRP-031.md) | Decisões confirmadas do plano e do perfil ainda trazem o goleiro pela família 13 sem nota de desfeito | KRP-TASK-25 | medium | pending | — |
+| [CORR-KRP-032](/docs/tasks/kits-replay/CORR-KRP-032.md) | §4 data o desfazer em 2026-10-18, dia da decisão; o revert é de 2026-10-19 | KRP-TASK-25 | low | pending | — |
 <!-- rite:end -->

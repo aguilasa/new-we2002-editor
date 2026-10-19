@@ -399,6 +399,32 @@
       "started_at": "2026-10-19T11:19:21-03:00",
       "active_s": 3398,
       "finished_at": "2026-10-19T12:15:59-03:00"
+    },
+    {
+      "id": "CORR-KRP-031",
+      "file": "CORR-KRP-031.md",
+      "title": "Decisões confirmadas do plano e do perfil ainda trazem o goleiro pela família 13 sem nota de desfeito",
+      "origin": "KRP-TASK-25",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-KRP-032",
+      "file": "CORR-KRP-032.md",
+      "title": "§4 data o desfazer em 2026-10-18, dia da decisão; o revert é de 2026-10-19",
+      "origin": "KRP-TASK-25",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

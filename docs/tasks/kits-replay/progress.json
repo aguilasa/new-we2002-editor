@@ -276,8 +276,10 @@
       "status": "done",
       "done_on": "2026-10-19",
       "done_commit": "afbcf78c",
-      "reviewed_on": "pending",
-      "review_commit": null
+      "reviewed_on": "2026-10-19",
+      "review_commit": "b2a95d5a",
+      "review_started_at": "2026-10-19T15:36:50-03:00",
+      "review_s": 818
     },
     {
       "id": "KRP-TASK-26",

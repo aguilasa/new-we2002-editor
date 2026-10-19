@@ -94,7 +94,7 @@ A ferramenta vem primeiro (fases 1 e 2), porque toda melhoria começa lendo uma 
 | [KRP-TASK-23](/docs/tasks/kits-replay/23-fechamento-da-fase-3a.md) | Fechamento da fase 3a | 3a | closing | KRP-TASK-22 | done | 2026-10-16 | 2026-10-16 |
 | [KRP-TASK-12](/docs/tasks/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md) | Goleiro pela família 13, com a pose medida e a 92 | 4 | implementação | KRP-TASK-11, KRP-TASK-23 | done | 2026-10-18 | 2026-10-18 |
 | [KRP-TASK-13](/docs/tasks/kits-replay/13-fechamento-da-fase-4.md) | Fechamento da fase 4 | 4 | closing | KRP-TASK-12 | done | 2026-10-18 | 2026-10-18 |
-| [KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md) | Desfazer a KRP-TASK-12: o goleiro volta ao do EDT_MOD.BIN, com a 92 trocada | 4a | implementação | KRP-TASK-13 | done | 2026-10-19 | pending |
+| [KRP-TASK-25](/docs/tasks/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md) | Desfazer a KRP-TASK-12: o goleiro volta ao do EDT_MOD.BIN, com a 92 trocada | 4a | implementação | KRP-TASK-13 | done | 2026-10-19 | 2026-10-19 |
 | [KRP-TASK-26](/docs/tasks/kits-replay/26-desfazer-a-krp-task-13-e-fechar-a-fase-4a.md) | Desfazer a KRP-TASK-13 e fechar a fase 4a | 4a | closing | KRP-TASK-25 | pending | — | — |
 | [KRP-TASK-14](/docs/tasks/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md) | Medir a corrida no ANIME.BIN: ponteiro do par na captura e pose --against-anime | 5 | investigação | KRP-TASK-08 | done | 2026-10-18 | 2026-10-19 |
 <!-- rite:end -->

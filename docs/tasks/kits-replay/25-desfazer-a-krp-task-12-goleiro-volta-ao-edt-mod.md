@@ -118,3 +118,4 @@ $ python3 tools/kits/controls.py --list | grep -c keeper-armband-always
     - `D tools/kits/core/keeper_pose.json`
     - `M tools/kits/selftest.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-19) at `b2a95d5a`: CORR-KRP-031, CORR-KRP-032
