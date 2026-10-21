@@ -25,7 +25,7 @@ O item 1 do [§5](/docs/PLAN-KIT2D-PY.md#5): no state da §4.4, a caixa do unifo
 
 ## Notes
 
-Bloqueada até o state existir.
+State: `work/kit2d-states/SLPM-87056_1.sav`, gravado em 2026-10-21; o que ele mostra está em [KIT2D-STATES.md](/docs/KIT2D-STATES.md).
 
 ## Log de Execução
 

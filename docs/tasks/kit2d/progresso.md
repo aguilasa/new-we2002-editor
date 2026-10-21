@@ -129,16 +129,16 @@ graph TD
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [K2D-TASK-01](/docs/tasks/kit2d/01-esqueleto.md) | Esqueleto de tools/kit2d/: layout.py, selftest.py e kit2d_selftest no ctest | 0 | infra | — | pending | — | — |
 | [K2D-TASK-02](/docs/tasks/kit2d/02-sondas-de-disco.md) | Sondas de disco versionadas: cli.py base e cli.py sprites reproduzem o §1.2 | 0 | ferramenta | K2D-TASK-01 | pending | — | — |
-| [K2D-TASK-03](/docs/tasks/kit2d/03-base-de-carga-na-ram.md) | Base de carga do overlay medida na RAM pelo MCP | 0 | engenharia-reversa | K2D-TASK-02 | blocked | — | — |
-| [K2D-TASK-04](/docs/tasks/kit2d/04-listas-e-attr-na-vram.md) | O que delimita uma lista, o que é attr e onde u,v caem na VRAM | 0 | engenharia-reversa | K2D-TASK-03 | blocked | — | — |
-| [K2D-TASK-05](/docs/tasks/kit2d/05-palavras-0-e-1.md) | Palavras 0 e 1 da paleta: o que os sprites amostram | 0 | engenharia-reversa | K2D-TASK-04 | blocked | — | — |
+| [K2D-TASK-03](/docs/tasks/kit2d/03-base-de-carga-na-ram.md) | Base de carga do overlay medida na RAM pelo MCP | 0 | engenharia-reversa | K2D-TASK-02 | pending | — | — |
+| [K2D-TASK-04](/docs/tasks/kit2d/04-listas-e-attr-na-vram.md) | O que delimita uma lista, o que é attr e onde u,v caem na VRAM | 0 | engenharia-reversa | K2D-TASK-03 | pending | — | — |
+| [K2D-TASK-05](/docs/tasks/kit2d/05-palavras-0-e-1.md) | Palavras 0 e 1 da paleta: o que os sprites amostram | 0 | engenharia-reversa | K2D-TASK-04 | pending | — | — |
 | [K2D-TASK-06](/docs/tasks/kit2d/06-fechamento-fase-0.md) | Fechamento da fase 0 — as incógnitas medidas | 0 | closing | K2D-TASK-01, K2D-TASK-02, K2D-TASK-03, K2D-TASK-04, K2D-TASK-05 | pending | — | — |
 | [K2D-TASK-07](/docs/tasks/kit2d/07-origem-e-times.md) | source.py e api.open_source: a ROM pelo conteúdo, e os 95 times por import do kits | 1 | implementação | K2D-TASK-06 | pending | — | — |
 | [K2D-TASK-08](/docs/tasks/kit2d/08-graficos-e-paleta.md) | graphics.py e palette.py: os três streams do DATSEL.BIN e BGR555 | 1 | implementação | K2D-TASK-06 | pending | — | — |
 | [K2D-TASK-09](/docs/tasks/kit2d/09-sprites-e-render.md) | sprites.py e render.py: listas de 10 bytes e o compositor, api.render e api.render_model | 1 | implementação | K2D-TASK-07, K2D-TASK-08 | pending | — | — |
 | [K2D-TASK-10](/docs/tasks/kit2d/10-cli-de-leitura.md) | CLI de leitura: info, teams, models, render, export; e kit2d_image no ctest | 1 | ferramenta | K2D-TASK-09 | pending | — | — |
 | [K2D-TASK-11](/docs/tasks/kit2d/11-fechamento-fase-1.md) | Fechamento da fase 1 — núcleo, leitura | 1 | closing | K2D-TASK-07, K2D-TASK-08, K2D-TASK-09, K2D-TASK-10 | pending | — | — |
-| [K2D-TASK-12](/docs/tasks/kit2d/12-confronto-render-vram.md) | Confronto 1: render contra o quadro do emulador, com controle negativo | 2 | verificação | K2D-TASK-11 | blocked | — | — |
+| [K2D-TASK-12](/docs/tasks/kit2d/12-confronto-render-vram.md) | Confronto 1: render contra o quadro do emulador, com controle negativo | 2 | verificação | K2D-TASK-11 | pending | — | — |
 | [K2D-TASK-13](/docs/tasks/kit2d/13-fechamento-fase-2.md) | Fechamento da fase 2 — render contra o emulador | 2 | closing | K2D-TASK-12 | pending | — | — |
 | [K2D-TASK-14](/docs/tasks/kit2d/14-buffer-de-edicao.md) | edit.py: o buffer de edições, diff() em bytes e revert | 3 | implementação | K2D-TASK-11 | pending | — | — |
 | [K2D-TASK-15](/docs/tasks/kit2d/15-gravacao-e-round-trip.md) | writer.py: api.apply in-place na cópia, refuse_roms e round-trip | 3 | implementação | K2D-TASK-14 | pending | — | — |

@@ -26,7 +26,7 @@ Com o jogo de pé no state da [§4.4](/docs/PLAN-KIT2D-PY.md#4.4), `oracle.py --
 
 ## Notes
 
-Bloqueada até o state existir. Armadilha da CORR-LOOKS-062: número na faixa não prova alinhamento.
+State: `work/kit2d-states/SLPM-87056_1.sav`, gravado em 2026-10-21; o que ele mostra está em [KIT2D-STATES.md](/docs/KIT2D-STATES.md). Armadilha da CORR-LOOKS-062: número na faixa não prova alinhamento.
 
 ## Log de Execução
 

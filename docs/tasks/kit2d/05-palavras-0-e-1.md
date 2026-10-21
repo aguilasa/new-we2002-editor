@@ -24,7 +24,7 @@ Medido contra a VRAM, por índice, que índices da paleta os sprites do uniforme
 
 ## Notes
 
-Bloqueada até o state existir.
+State: `work/kit2d-states/SLPM-87056_1.sav`, gravado em 2026-10-21; o que ele mostra está em [KIT2D-STATES.md](/docs/KIT2D-STATES.md).
 
 ## Log de Execução
 
