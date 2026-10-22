@@ -4,7 +4,7 @@ id: CORR-DMCP-004
 
 # CORR-DMCP-004 — Tirar do shim mcp.py o monkeypatch de vivacidade e a lógica de teste própria
 
-Origin: [DMCP-TASK-06](/docs/tasks/duckmcp/06-cli.md)
+Origin: [DMCP-TASK-06](/docs/tasks/duckmcp/06-cli-e-shim-mcp.md)
 
 ## Problem
 
