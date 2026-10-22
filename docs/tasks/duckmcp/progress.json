@@ -85,12 +85,14 @@
       "status": "done",
       "done_on": "2026-10-22",
       "done_commit": "b32f6cd2",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-22",
+      "review_commit": "f01920c4",
       "active_since": null,
       "started_at": "2026-10-22T15:07:09-03:00",
       "active_s": 66,
-      "finished_at": "2026-10-22T15:08:15-03:00"
+      "finished_at": "2026-10-22T15:08:15-03:00",
+      "review_started_at": "2026-10-22T15:31:42-03:00",
+      "review_s": 75
     },
     {
       "id": "DMCP-TASK-05",
