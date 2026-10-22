@@ -40,6 +40,10 @@ O comando da Evidência passa a sair `exit=1`, listando `('p.py', 1, …)`; `pyt
 
 - 2026-10-22 — reproduzido na HEAD `88f9e194` (`rite reproduce`, antes da CORR-K2D-001): `kit2d_selftest: 12 check(s) ran, 0 failure(s)` / `exit=0` com `int("0x3F534", 16)` em `p.py`.
 - Correção: `_literal_int()` devolve o inteiro de um token `NUMBER` ou de um `STRING` cujo valor (`ast.literal_eval`, sem espaços) é só um literal inteiro decimal ou `0x`; `address_breaks()` usa os dois. Controle novo em `PLANTS`: `planted.py` com `OFFSET = int("0x3F534", 16)`.
+- **Closed** — commit `dcfe2b79` (2026-10-22): fix(kit2d): catch section 1.1 addresses spelled as strings
+  - Files (`git show --name-status dcfe2b79`):
+    - `M docs/tasks/kit2d/CORR-K2D-002.md`
+    - `M tools/kit2d/selftest.py`
 
 ## Verificação feita
 
