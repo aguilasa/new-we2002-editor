@@ -67,3 +67,9 @@ grep=1
 
 As linhas `$` novas foram rodadas como estão escritas, e as saídas coladas são dessa corrida (HEAD
 `5330355b`).
+- **Closed** — commit `5e65c088` (2026-10-22): docs(duckmcp): rewrite the task 14 equivalence checks as steps rebuilt from git
+  - Files (`git show --name-status 5e65c088`):
+    - `M docs/tasks/duckmcp/14-savestate.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-016.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`

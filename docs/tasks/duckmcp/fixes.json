@@ -253,13 +253,14 @@
       "severity": "low",
       "files": [],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null,
-      "active_since": "2026-10-22T19:01:47-03:00",
+      "done_on": "2026-10-22",
+      "done_commit": "5e65c088",
+      "active_since": null,
       "started_at": "2026-10-22T19:01:47-03:00",
-      "active_s": 0
+      "active_s": 90,
+      "finished_at": "2026-10-22T19:03:17-03:00"
     }
   ]
 }
