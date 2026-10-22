@@ -63,3 +63,9 @@ $ grep -n 'controls.py --only press-without-duration' docs/tasks/duckmcp/12-sess
 145:$ python3 tools/duckmcp/controls.py --only press-without-duration
 144:duckmcp_selftest: 361 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `7b217b47` (2026-10-22): docs(duckmcp): paste the selftest and press-without-duration transcripts into task 12
+  - Files (`git show --name-status 7b217b47`):
+    - `M docs/tasks/duckmcp/12-session.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-012.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
