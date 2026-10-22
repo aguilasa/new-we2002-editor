@@ -364,3 +364,18 @@ if(Python3_FOUND)
     # tools/pes2/selftest.py), so a loaded machine does not time it out.
     set_tests_properties(kit2d_selftest PROPERTIES TIMEOUT 120)
 endif()
+
+# The DuckStation MCP library (docs/PLAN-DUCKMCP-PY.md) is game-agnostic and
+# lives in tools/duckmcp/, imported as `import duckmcp` with tools/ on the path.
+if(Python3_FOUND)
+    # The mandatory gate, needing nothing and never skipping: the errors and
+    # their exit code, and env.py -- each DUCKSTATION_* variable beating its
+    # legacy fallback, XAUTHORITY emptied on :98 only, is_roms on both
+    # separators and the state_path shape.
+    add_test(NAME duckmcp_selftest
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/duckmcp/selftest.py --quiet)
+    # 30 s, far over 1.5x the well-under-a-second it takes alone, so a loaded
+    # machine does not time it out.
+    set_tests_properties(duckmcp_selftest PROPERTIES TIMEOUT 30)
+endif()
