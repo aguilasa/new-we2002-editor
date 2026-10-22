@@ -49,13 +49,14 @@
       "severity": "medium",
       "files": ["tools/pes2/mcp.py", "docs/prompts/perfil-duckmcp.md", "docs/tasks/duckmcp/CORR-DMCP-004.md"],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null,
-      "active_since": "2026-10-22T15:56:57-03:00",
+      "done_on": "2026-10-22",
+      "done_commit": "6c37f6a4",
+      "active_since": null,
       "started_at": "2026-10-22T15:56:57-03:00",
-      "active_s": 0
+      "active_s": 64,
+      "finished_at": "2026-10-22T15:58:01-03:00"
     }
   ]
 }

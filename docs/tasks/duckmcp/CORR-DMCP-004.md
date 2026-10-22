@@ -89,3 +89,10 @@ $ python3 tools/duckmcp/selftest.py --quiet; echo dmcp=$?
 duckmcp_selftest: 137 check(s) ran, 0 failure(s)
 dmcp=0
 ```
+- **Closed** — commit `6c37f6a4` (2026-10-22): docs(duckmcp): record the shim's liveness rebinding as a measured exception
+  - Files (`git show --name-status 6c37f6a4`):
+    - `M docs/prompts/perfil-duckmcp.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-004.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/pes2/mcp.py`
