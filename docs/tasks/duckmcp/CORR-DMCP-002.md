@@ -77,3 +77,8 @@ $ python3 $T/tools/duckmcp/selftest.py --quiet; echo exit=$?   # cópia plantada
 duckmcp_selftest: 88 check(s) ran, 1 failure(s)
 exit=1
 ```
+- **Closed** — commit `63bf946b` (2026-10-22): fix(duckmcp): resolve os aliases in rule (d) and plant d-aliased-os
+  - Files (`git show --name-status 63bf946b`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-002.md`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`
