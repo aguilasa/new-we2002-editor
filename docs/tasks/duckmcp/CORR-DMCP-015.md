@@ -60,3 +60,24 @@ Acrescentar `81..9F` e `C1..DF` à diferença (1) nas Notas da
 casa nos dois arquivos (e `C1..DF` também).
 
 ## Log de Execução
+
+2026-10-22 — reproduzido com o comando da Evidência (`git archive 87987d9d`):
+`0x81 looks 8 gpu 4`, `0x9f looks 8 gpu 4`, `0xc1 looks 8 gpu 3`, `0xdf looks 8 gpu 3`. O
+`grep '81..9F'` vinha vazio.
+
+Conserto: a diferença (1) das Notas da `13-hardware-e-pixels.md` e o comentário de linhagem do
+`gpu.py` passaram a dizer que o `COMMAND_WORDS` do `looks` só tinha `00`/`02`/`80`/`C0`. Por isso
+`81..9F` e `C1..DF` levavam o resto do nó, e aqui levam 4 e 3 palavras.
+
+Verificação:
+
+```text
+$ grep -n '81..9F' docs/tasks/duckmcp/13-hardware-e-pixels.md tools/duckmcp/gpu.py | cut -c1-60
+tools/duckmcp/gpu.py:27:# and the copy knew only 00/02/80/C0, so the VRAM co
+docs/tasks/duckmcp/13-hardware-e-pixels.md:28:- **`gpu.py` segue o hardware o
+$ grep -c 'C1..DF' docs/tasks/duckmcp/13-hardware-e-pixels.md tools/duckmcp/gpu.py
+docs/tasks/duckmcp/13-hardware-e-pixels.md:1
+tools/duckmcp/gpu.py:1
+$ python3 tools/duckmcp/selftest.py --quiet
+duckmcp_selftest: 361 check(s) ran, 0 failure(s)
+```

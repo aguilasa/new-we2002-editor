@@ -23,7 +23,9 @@ the screen being read, not on the console.
 # tools/looks/oracle.py, generalised from a RAM blob to a read callable.
 # Three differences from that copy, all towards the hardware: an opcode it
 # did not know took the rest of the node, here each GP0 opcode has its size
-# (the no-ops and E0/E7-FF are one word, CPU-to-VRAM carries its data words);
+# (the no-ops and E0/E7-FF are one word, CPU-to-VRAM carries its data words,
+# and the copy knew only 00/02/80/C0, so the VRAM copies 81..9F take 4 words
+# and the VRAM reads C1..DF take 3 here, where it took the rest of the node);
 # the polyline terminator is looked for only where the next vertex (gouraud:
 # its colour) would begin once two vertices are in, not at every word; and a
 # revisited node is refused as a loop apart from a list that is merely long.
