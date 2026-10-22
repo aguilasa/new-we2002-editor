@@ -113,3 +113,4 @@ Total Test time (real) = 361.10 sec
     - `M tools/pes2/boot_check.sh`
     - `M tools/pes2/fork.py`
     - `M tools/pes2/run_duckstation.sh`
+- **Reviewed** (2026-10-22) at `20ebe074`: CORR-DMCP-006, CORR-DMCP-008, CORR-DMCP-009, CORR-DMCP-010
