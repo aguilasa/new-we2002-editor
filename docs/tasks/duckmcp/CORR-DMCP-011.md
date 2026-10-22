@@ -55,3 +55,40 @@ primeiro passo; em seguida `python3 tools/duckmcp/cli.py kill`. O controle novo 
 ordem antiga.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido na HEAD `69910a9f`: com o fork lançado no `:98` (`pids: [471966]`), o
+`live.py --display :97` sai 77 e depois o `procs` mostra `pids: []`.
+
+Causa confirmada, e um detalhe que mudou o conserto: o `fork.launch` levanta `Fail` também **depois** do
+`Popen` ("the game window never appeared"), com o processo dele ainda vivo. Tirar o `launch` do `try`, a
+primeira opção da CORR, deixaria órfão. Por isso o `run()` anota os PIDs vivos antes do `launch`. Se o
+`launch` levantar, mata só quando há PID novo; se voltar, o try/finally mata como antes. O docstring do
+módulo diz isso.
+
+Gate: `check_live_kill` no `selftest.py` troca `fork.launch`/`kill`/`running_pids` por falsos e cobre
+dois casos. Um `Skip` com emulador alheio de pé não pode matar; um `Fail` com PID novo tem de matar. O
+`controls.py` ganhou `live-kills-on-skip`, que planta a ordem antiga (`if True:`).
+
+Verificação:
+
+```text
+$ DISPLAY=:98 XAUTHORITY= python3 tools/duckmcp/cli.py launch …/we2002-english.cue; python3 tools/duckmcp/cli.py procs | head -1
+pids: [481485]
+$ python3 tools/duckmcp/live.py --image …/we2002-english.cue --display :97; echo exit=$?
+duckmcp_live: skipped -- no X server on :97
+exit=77
+$ python3 tools/duckmcp/cli.py procs | head -1; python3 tools/duckmcp/cli.py kill
+pids: [481485]
+stopped 1 DuckStation process(es): [481485]
+$ python3 tools/duckmcp/live.py --image …/we2002-english.cue --display :98 | tail -1   # caminho feliz
+duckmcp_live: ok -- frame_number moved 5 for 5 frame_step (want 5); tools=95 frames 92->97
+$ python3 tools/duckmcp/cli.py procs | head -1
+pids: []
+$ python3 tools/duckmcp/controls.py --only live-kills-on-skip | tail -2
+red    live-kills-on-skip (rule live): FAIL  live: a skipped launch leaves another session's emulator alive  kill() called 1 time(s), want 0
+duckmcp_controls: 1 control(s), 1 red as required; per rule (live) 1/1
+$ python3 tools/duckmcp/selftest.py --quiet
+duckmcp_selftest: 198 check(s) ran, 0 failure(s)
+$ python3 tools/duckmcp/controls.py | tail -1
+duckmcp_controls: 20 control(s), 20 red as required; per rule (a) 2/2, (c) 8/8, (client) 2/2, (d) 4/4, (fork) 3/3, (live) 1/1
+```

@@ -12,8 +12,10 @@ What it does, in order: `fork.launch` (no title match), `pause`, count
 `tools/list`, read `get_status` `frame_number`, call `frame_step` `--steps`
 times, read `frame_number` again and demand it advanced by **exactly** the
 number of steps -- measured on 2026-10-22, one `frame_step` is one frame of
-`frame_number`, paused before and after. The fork is killed in `finally`,
-whatever happened.
+`frame_number`, paused before and after. The fork is killed once `launch`
+returns, whatever happens after; when `launch` raises, only if a DuckStation
+pid appeared that was not there before -- a skipped run (no X server, no
+image) never stops an emulator it did not open (CORR-DMCP-011).
 
 Exit codes: 0 ok; 77 (`errors.SKIP`, ctest's *skipped*) with no image, no
 fork or no X server, the reason printed; 1 when the fork failed or the frame
@@ -52,8 +54,16 @@ def run(image, steps, display=None):
 
     Returns `(passed, tools, before, after)`.
     """
+    running = set(fork.running_pids())
     try:
         _pid, _window, client = fork.launch(image, display=display)
+    except BaseException:
+        # A Fail can come after the Popen (no window in time), so a new pid
+        # is ours to stop; none new means nothing was launched.
+        if set(fork.running_pids()) - running:
+            fork.kill(verbose=False)
+        raise
+    try:
         client.call("pause")
         names = client.tools()
         print("  tools declared: %d" % len(names), flush=True)

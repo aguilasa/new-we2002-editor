@@ -65,7 +65,7 @@ TOOLS_DIR = os.path.dirname(DUCKMCP_DIR)
 sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
-from duckmcp import audit, cli, client, env, errors, fork  # noqa: E402
+from duckmcp import audit, cli, client, env, errors, fork, live  # noqa: E402
 
 JUDGES = ("selftest.py", "controls.py")
 """The files that hold the patterns of rule (c), and so are exempt from it."""
@@ -425,6 +425,42 @@ def check_cli_refused(c):
          repr(proc.stderr[-300:]))
 
 
+def check_live_kill(c):
+    """`live.run` stops the fork only when it launched one (CORR-DMCP-011).
+
+    `fork.launch`, `kill` and `running_pids` are stubbed: a launch that skips
+    with an emulator of somebody else's running must not kill it, a launch
+    that fails after its Popen (a new pid) must, and so must a launch that
+    returned.
+    """
+    saved = fork.launch, fork.kill, fork.running_pids
+    cases = (
+        ("a skipped launch leaves another session's emulator alive",
+         errors.Skip("no X server on :97"), [[4242], [4242]], 0),
+        ("a launch that fails after its Popen stops the new pid",
+         errors.Fail("the game window never appeared"), [[], [5150]], 1),
+    )
+    try:
+        for name, raised, answers, want in cases:
+            kills = []
+            answers = list(answers)
+
+            def launch(image, display=None, exc=raised):
+                raise exc
+
+            fork.launch = launch
+            fork.kill = lambda verbose=True: kills.append(1) or 0
+            fork.running_pids = lambda: answers.pop(0) if answers else []
+            try:
+                live.run("/x/a.cue", 1)
+            except (errors.Skip, errors.Fail):
+                pass
+            c.ok("live: %s" % name, len(kills) == want,
+                 "kill() called %d time(s), want %d" % (len(kills), want))
+    finally:
+        fork.launch, fork.kill, fork.running_pids = saved
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--quiet", action="store_true",
@@ -449,6 +485,7 @@ def main(argv=None):
     check_child_env(c)
     c.module("cli", cli.self_check)
     check_cli_refused(c)
+    check_live_kill(c)
     c.module("audit", audit.self_check)
     check_rules(c)
 

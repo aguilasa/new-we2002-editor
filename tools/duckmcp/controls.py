@@ -172,6 +172,14 @@ CONTROLS = (
         "FAIL  fork: select_pids drops our own pid even when pgrep lists it",
         None,
         "the own-pid filter dropped: kill() would SIGKILL its caller"),
+    Control(
+        "live-kills-on-skip", "live", "live.py",
+        "        if set(fork.running_pids()) - running:\n",
+        "        if True:\n",
+        "FAIL  live: a skipped launch leaves another session's emulator "
+        "alive", None,
+        "the old order: kill in a finally around launch, so a skipped run "
+        "stops an emulator it never opened"),
 )
 """Every control, in report order."""
 
