@@ -6,11 +6,29 @@
     python3 tools/duckmcp/cli.py call TOOL k=v ...  # one tool; values JSON when they parse
     python3 tools/duckmcp/cli.py ping               # the handshake alone
 
+and the fork's process, which needs no server:
+
+    python3 tools/duckmcp/cli.py launch COPY.cue [--display :98]
+                                 [--timeout 120] [--match REGEX]
+    python3 tools/duckmcp/cli.py kill               # every DuckStation
+    python3 tools/duckmcp/cli.py procs              # `pids: [...]`, and which binary
+    python3 tools/duckmcp/cli.py recipe             # how to get the fork
+    python3 tools/duckmcp/cli.py which              # the binary; 77 when absent
+
+`status` is the server's `get_status`; what is *running* is `procs`, a
+different name so the two never mean each other. `launch` prints
+`PID=`, `WINDOW=`, `DISPLAY=` (not on Windows) and `MCP=` and leaves the
+fork running; `--match` is the caller's regex over the window title, and
+without it the widest window the child owns that is not an emulator dialog
+is taken (`fork.pick_window`).
+
 `--host` and `--port` go before the subcommand and default to
 `env.mcp_host()` and `env.mcp_port()`. Exit codes: 0 when the server
-answered, 77 (`errors.SKIP`, ctest's *skipped*) when no server answered --
-the `NotRunning` sentence goes to stderr --, 1 when the server refused the
-call (`ToolError`), 2 for a bad command line.
+answered (or the process command did its work), 77 (`errors.SKIP`, ctest's
+*skipped*) when no server answered -- the `NotRunning` sentence goes to
+stderr -- or the machine cannot run the fork (`Skip`: no install, no
+image, no X server), 1 when the server refused the call (`ToolError`) or
+the fork failed (`Fail`), 2 for a bad command line.
 
 Run it as a script or import it as `duckmcp.cli`. As a script it puts
 `tools/` -- the parent of this folder -- on `sys.path` and takes this folder
@@ -31,12 +49,18 @@ if __package__ in (None, ""):
                    if os.path.abspath(p or os.curdir) != _HERE]
     sys.path.insert(0, os.path.dirname(_HERE))
 
-from duckmcp import env  # noqa: E402
+from duckmcp import env, fork  # noqa: E402
 from duckmcp.client import Client, self_check as client_self_check  # noqa: E402
-from duckmcp.errors import SKIP, NotRunning, ToolError  # noqa: E402
+from duckmcp.errors import SKIP, Fail, NotRunning, Skip, ToolError  # noqa: E402
 
-SUBCOMMANDS = ("ping", "list", "status", "call")
-"""What the parser accepts today; process control joins in a later task."""
+SERVER_COMMANDS = ("ping", "list", "status", "call")
+"""The subcommands that talk to the MCP server."""
+
+PROCESS_COMMANDS = ("launch", "kill", "procs", "recipe", "which")
+"""The subcommands that act on the fork's process and need no server."""
+
+SUBCOMMANDS = SERVER_COMMANDS + PROCESS_COMMANDS
+"""What the parser accepts."""
 
 
 def parse_value(text):
@@ -75,6 +99,23 @@ def build_parser():
     call = sub.add_parser("call", help="call one tool")
     call.add_argument("tool")
     call.add_argument("pairs", nargs="*", metavar="KEY=VALUE")
+    launch = sub.add_parser("launch", help="boot a .cue under the fork, "
+                            "dismiss its dialogs, wait for MCP")
+    launch.add_argument("image", help=".cue of a working copy")
+    launch.add_argument("--display", default=None,
+                        help="X display (default: env.display())")
+    # Its own dest: the top-level --timeout is the client's, in seconds per
+    # request, and a subparser default would overwrite it.
+    launch.add_argument("--timeout", dest="launch_timeout", type=int,
+                        default=120, help="seconds for the whole boot")
+    launch.add_argument("--match", default=None, metavar="REGEX",
+                        help="regex over the window title (default: the "
+                             "widest non-dialog window; ANY means the same)")
+    sub.add_parser("kill", help="stop every DuckStation process")
+    sub.add_parser("procs", help="the DuckStation processes running, as "
+                                 "`pids: [...]`, and which binary each is")
+    sub.add_parser("recipe", help="how to get the fork")
+    sub.add_parser("which", help="the fork's binary; exit 77 when absent")
     return ap
 
 
@@ -93,8 +134,47 @@ def parse(argv):
     return args
 
 
+def run_process(args, out=None):
+    """Carry out one of `PROCESS_COMMANDS`. Returns the exit code."""
+    out = out or sys.stdout
+    try:
+        if args.command == "recipe":
+            print(fork.RECIPE, file=out)
+            return 0
+        if args.command == "which":
+            print(fork.binary(), file=out)
+            print("installed" if fork.installed() else "NOT INSTALLED",
+                  file=out)
+            return 0 if fork.installed() else SKIP
+        if args.command == "kill":
+            fork.kill()
+            return 0
+        if args.command == "procs":
+            print("pids: %s" % (fork.running_pids(),), file=out)
+            fork.status()
+            return 0
+        display = args.display or env.display()
+        pid, window, client = fork.launch(
+            args.image, match=args.match, display=display,
+            timeout=args.launch_timeout)
+        print("PID=%s" % pid, file=out)
+        print("WINDOW=%s" % window, file=out)
+        if not fork.WINDOWS:
+            print("DISPLAY=%s" % display, file=out)
+        print("MCP=%s" % client.url, file=out)
+        return 0
+    except Skip as exc:
+        print("skipping: %s" % exc, file=out)
+        return SKIP
+    except Fail as exc:
+        print("FORK FAILED: %s" % exc, file=sys.stderr)
+        return 1
+
+
 def run(args, out=None):
     """Carry out a parsed command. Returns the exit code."""
+    if args.command in PROCESS_COMMANDS:
+        return run_process(args, out)
     out = out or sys.stdout
     try:
         with Client(args.host, args.port, timeout=args.timeout) as c:
@@ -215,6 +295,28 @@ def self_check() -> list:
     lines, chk = legacy_argv(["--self-check"])
     check("no old action is a ping, and --self-check is seen",
           lines == [["ping"]] and chk, (lines, chk))
+    args = parse(["--timeout", "5", "launch", "x.cue", "--timeout", "9",
+                  "--match", "^T$"])
+    check("launch keeps its boot timeout apart from the client's",
+          (args.timeout, args.launch_timeout, args.match, args.display)
+          == (5.0, 9, "^T$", None),
+          (args.timeout, args.launch_timeout, args.match, args.display))
+    args = parse(["launch", "x.cue"])
+    check("launch has no default title (--match None)", args.match is None,
+          args.match)
+    check("process commands and server commands do not share a name",
+          not set(SERVER_COMMANDS) & set(PROCESS_COMMANDS))
+    import io as _io
+    buf = _io.StringIO()
+    code = run(parse(["recipe"]), out=buf)
+    check("recipe prints the fork's recipe and exits 0",
+          code == 0 and buf.getvalue().strip() == fork.RECIPE.strip(), code)
+    import contextlib
+    buf = _io.StringIO()
+    with contextlib.redirect_stderr(_io.StringIO()) as err:
+        code = run(parse(["launch", "/x/roms/a.cue"]), out=buf)
+    check("launch of a roms/ path exits 1 (Fail), before any boot",
+          code == 1 and "roms/" in err.getvalue(), (code, err.getvalue()))
     check("the default host and port come from env.py",
           build_parser().parse_args(["list"]).port is None
           and Client().port == env.mcp_port())

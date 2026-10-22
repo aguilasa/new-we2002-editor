@@ -2058,9 +2058,16 @@ def _replay_reader_checks(c, cli, replay) -> None:
 def _live_guard_checks(c) -> None:
     """A game controller plugged in refuses a measuring run, before the fork
     boots (CORR-K3D-031): its buttons would reach the game under test."""
-    import fork  # tools/pes2
+    import fork  # tools/pes2, the shim over duckmcp.fork
 
     import oracle as looks_oracle  # tools/looks
+    from duckmcp import fork as lib  # what the shim's names resolve through
+
+    # The patches go on duckmcp.fork, not on the shim (DMCP-TASK-09): the
+    # shim's refuse_joysticks is the lib's own function and reads
+    # `joysticks` from the lib module, and the shim's launch calls
+    # `duckmcp.fork.launch` at call time -- a patch on the shim would reach
+    # neither, and the oracle would boot past it.
 
     with tempfile.TemporaryDirectory() as root:
         open(os.path.join(root, "js0"), "w").close()
@@ -2075,8 +2082,8 @@ def _live_guard_checks(c) -> None:
     def no_launch(*_args, **_kwargs):
         raise AssertionError("the fork was launched")
 
-    saved = fork.joysticks, fork.launch
-    fork.joysticks, fork.launch = (lambda root=None: ["/dev/input/js0"]), no_launch
+    saved = lib.joysticks, lib.launch
+    lib.joysticks, lib.launch = (lambda root=None: ["/dev/input/js0"]), no_launch
     try:
         with tempfile.NamedTemporaryFile(suffix=".cue") as cue:
             try:
@@ -2087,7 +2094,7 @@ def _live_guard_checks(c) -> None:
             except AssertionError as exc:
                 stopped = str(exc)
     finally:
-        fork.joysticks, fork.launch = saved
+        lib.joysticks, lib.launch = saved
     c.ok("live runs: the oracle refuses before it boots the fork", stopped == "refused", stopped)
 
     # replay.py capture (KRP-TASK-07): the controller is refused before
@@ -2100,8 +2107,8 @@ def _live_guard_checks(c) -> None:
     def no_maps(*_args, **_kwargs):
         raise AssertionError("the disc was read before the controller guard")
 
-    saved = fork.joysticks, fork.launch, looks_oracle.model_maps
-    fork.joysticks, fork.launch = (lambda root=None: ["/dev/input/js0"]), no_launch
+    saved = lib.joysticks, lib.launch, looks_oracle.model_maps
+    lib.joysticks, lib.launch = (lambda root=None: ["/dev/input/js0"]), no_launch
     looks_oracle.model_maps = no_maps
     try:
         try:
@@ -2112,7 +2119,7 @@ def _live_guard_checks(c) -> None:
         except Exception as exc:  # noqa: BLE001
             stopped = "%s: %s" % (type(exc).__name__, exc)
     finally:
-        fork.joysticks, fork.launch, looks_oracle.model_maps = saved
+        lib.joysticks, lib.launch, looks_oracle.model_maps = saved
     c.ok("replay.py capture refuses a plugged-in controller before it reads or boots anything",
          stopped == "refused", stopped)
     kept = {"kind": "close", "front_frames": 70, "turn_frames": 610, "back_frames": 120}

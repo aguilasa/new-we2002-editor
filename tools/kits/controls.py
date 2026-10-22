@@ -353,7 +353,7 @@ CONTROLS = (
         "the walk ends early with an ok (G8, CORR-K3D-030)",
     ),
     Control(
-        "fork-joystick-let-through", "pes2/fork.py", "refuse_joysticks",
+        "fork-joystick-let-through", "duckmcp/fork.py", "refuse_joysticks",
         "    if found:\n        raise Fail(\"a game controller is plugged in",
         "    if False:\n        raise Fail(\"a game controller is plugged in",
         "FAIL  live runs: a plugged-in controller refuses the run",

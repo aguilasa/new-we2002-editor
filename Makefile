@@ -345,7 +345,7 @@ wte-98:
 #
 #   o fork NAO e versionado -- licenca CC-BY-NC-ND, mesma regra de roms/ -- e
 #   nao esta no PATH. Ele mora em ~/Applications/duckstation-mcp/, e
-#   `python3 tools/pes2/fork.py recipe` imprime como reconstrui-lo;
+#   `python3 $(DUCKMCP) recipe` imprime como reconstrui-lo;
 #
 #   o display default e o $(XVFB), nao o do shell. Os alvos `wte` e `oracle`
 #   abrem na tela do usuario porque o ponto deles e olhar; a secao 6.10 do
@@ -370,6 +370,14 @@ PES2_STAMP   := $(PES2_DIR)/.copied
 # quem chamou.
 PES2_DISPLAY ?= $(XVFB)
 
+# O lancador e o da lib (PLAN-DUCKMCP-PY, DMCP-TASK-09), que e agnostico de
+# jogo: sem --match ele pega a janela mais larga que o processo tem. O titulo
+# da janela do PES2 e do PES2, e mora aqui -- e no GAME_WINDOW do shim de
+# fork do PES2 (tools/pes2), que diz o mesmo. `procs` e o que o processo esta
+# fazendo; o `status` da lib e o get_status do servidor MCP, outra coisa.
+DUCKMCP      := tools/duckmcp/cli.py
+PES2_WINDOW  ?= ^Pro Evolution Soccer 2$$
+
 .PHONY: pes2 pes2-play pes2-copy pes2-kill pes2-status
 
 $(PES2_STAMP): | $(WORK)
@@ -390,17 +398,18 @@ pes2-copy: $(PES2_STAMP)
 # alcanca os tres nomes de processo (o `--kill` do run_duckstation.sh nao
 # alcancava o fork -- armadilha 31 da secao 6.11).
 pes2: $(PES2_STAMP)
-	@python3 tools/pes2/fork.py which >/dev/null 2>&1 || { \
+	@python3 $(DUCKMCP) which >/dev/null 2>&1 || { \
 	  echo 'ERRO: fork do DuckStation ausente.'; \
 	  echo '      Ele nao e versionado (CC-BY-NC-ND-4.0). Para reconstruir:'; \
-	  echo '        python3 tools/pes2/fork.py recipe'; exit 1; }
+	  echo '        python3 $(DUCKMCP) recipe'; exit 1; }
 	@cue=$$(ls '$(PES2_DIR)'/*.cue 2>/dev/null | head -1); \
 	 test -n "$$cue" || { \
 	   echo 'ERRO: nenhum .cue em $(PES2_DIR) -- refaca com `make pes2-copy`'; \
 	   exit 1; }; \
 	 echo ">> $$cue"; \
 	 echo ">> DISPLAY=$(PES2_DISPLAY)"; \
-	 python3 tools/pes2/fork.py launch "$$cue" --display '$(PES2_DISPLAY)'
+	 python3 $(DUCKMCP) launch "$$cue" --display '$(PES2_DISPLAY)' \
+	   --match '$(PES2_WINDOW)'
 
 # A excecao da secao 6.10, e ela existe porque o usuario a pede: jogar. E o
 # caso de `ending`, que so se alcanca vencendo uma final -- decidido em
@@ -426,16 +435,16 @@ pes2-enfrde-play:
 	@$(MAKE) --no-print-directory pes2-play PES2_TAG=EnFrDe
 
 pes2-kill:
-	@python3 tools/pes2/fork.py kill
+	@python3 $(DUCKMCP) kill
 
 pes2-status:
-	@python3 tools/pes2/fork.py status
+	@python3 $(DUCKMCP) procs
 
 # ---------------------------------------------------------------- we2002 ----
 #
 # O JOGO, e nao o editor: `run` abre o newWe2002 SOBRE a imagem, `we2002-play`
 # poe a imagem para rodar, sob o mesmo fork do DuckStation que o alvo `pes2`
-# usa (tools/pes2/fork.py serve os dois -- o caminho diz pes2, o codigo nao).
+# usa (o lancador e o da lib, tools/duckmcp/cli.py, agnostico de jogo).
 #
 # Por que ele existe: o option file -- o save `BISLPM-87056WEW-OPT` de um
 # memory card -- so nasce quando o PROPRIO JOGO grava. O que wte/re/mcr.md
@@ -593,14 +602,14 @@ we2002-play: $(GAME_CUE)
 	   echo "$$card" | sed 's/^/   /'; \
 	   echo '   (`make we2002-play-fresh` comeca do zero)'; \
 	 fi
-	@python3 tools/pes2/fork.py which >/dev/null 2>&1 || { \
+	@python3 $(DUCKMCP) which >/dev/null 2>&1 || { \
 	  echo 'ERRO: fork do DuckStation ausente.'; \
 	  echo '      Ele nao e versionado (CC-BY-NC-ND-4.0). Para reconstruir:'; \
-	  echo '        python3 tools/pes2/fork.py recipe'; exit 1; }
+	  echo '        python3 $(DUCKMCP) recipe'; exit 1; }
 	@echo '>> $(GAME_CUE)'
 	@echo '>> DISPLAY=$(GAME_DISPLAY)'
-	@python3 tools/pes2/fork.py launch '$(GAME_CUE)' \
-	   --display '$(GAME_DISPLAY)' --window ANY
+	@python3 $(DUCKMCP) launch '$(GAME_CUE)' \
+	   --display '$(GAME_DISPLAY)'
 	@echo '>> o cartao aparece em $(DUCK_CARDS)/ assim que o jogo gravar.'
 	@echo '   Encerre com `make pes2-kill` (o mesmo fork, os tres nomes).'
 

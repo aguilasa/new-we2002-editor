@@ -91,7 +91,7 @@ param(
 
     # Onde o DuckStation guarda cartao e save state. No Windows ele roda em
     # **modo portable**, entao e a pasta do proprio .exe e nao um
-    # ~/.local/share. Vale tambem como PES2_FORK para o fork.py.
+    # ~/.local/share. Vale tambem como DUCKSTATION_FORK para a lib duckmcp.
     [string]$DuckData,
 
     # Obrigatorio em `we2002-card-snap`: o rotulo da amostra.
@@ -187,10 +187,18 @@ $DUCK_CARDS  = Join-Path $DUCK_DATA 'memcards'
 $DUCK_STATES = Join-Path $DUCK_DATA 'savestates'
 
 # Um lugar so declara onde o fork mora. Sem isto o caminho ficaria repetido
-# aqui e no default do `fork.py`, e `-DuckData` mudaria um sem mudar o outro.
+# aqui e no default do `duckmcp/env.py`, e `-DuckData` mudaria um sem mudar o
+# outro. DUCKSTATION_FORK e o nome que a lib le primeiro (ganha do legado);
+# PES2_FORK continua exportado para quem ainda le o nome antigo.
+$env:DUCKSTATION_FORK = $DUCK_DATA
 $env:PES2_FORK = $DUCK_DATA
 
-$FORK_PY = Join-Path $ROOT 'tools\pes2\fork.py'
+# O lancador e o CLI da lib (DMCP-TASK-09), agnostico de jogo: sem `--match`
+# ele pega a janela mais larga do processo. O titulo da janela do PES2 e do
+# PES2 e mora aqui; `procs` e o que esta rodando (o `status` da lib e o
+# get_status do servidor MCP, outra coisa).
+$FORK_PY = Join-Path $ROOT 'tools\duckmcp\cli.py'
+$PES2_WINDOW = '^Pro Evolution Soccer 2$'
 
 $PES2_RELEASE = Join-Path $GAMES_ROMS "Pro Evolution Soccer 2 (Europe) ($Pes2Tag)"
 
@@ -342,11 +350,11 @@ Procurados: python, py. (`python3` e o stub da Microsoft Store e nao serve.)
 
 function Invoke-Fork {
     <#
-      Roda o `tools/pes2/fork.py` e traduz o codigo de saida.
+      Roda o `tools/duckmcp/cli.py` e traduz o codigo de saida.
 
       Tres coisas que parecem detalhe e nao sao:
 
-      `-u`: o `fork.py` so da flush dentro do `say()`. Sem isto o resto fica
+      `-u`: o `duckmcp.fork` so da flush dentro do `say()`. Sem isto o resto fica
       no buffer do pipe e quem chamou olha um terminal morto por dois
       minutos enquanto o jogo boota.
 
@@ -355,7 +363,7 @@ function Invoke-Fork {
       $ErrorActionPreference = 'Stop' isso ESTOURA numa corrida que deu
       certo, no exato momento em que se queria capturar a mensagem.
 
-      `77` e o SKIP do fork.py -- "esta maquina nao pode" --, e nao falha.
+      `77` e o SKIP da lib -- "esta maquina nao pode" --, e nao falha.
     #>
     param([string[]]$ForkArgs, [switch]$Silencioso)
 
@@ -368,10 +376,10 @@ function Invoke-Fork {
     }
     $codigo = $LASTEXITCODE
     if ($codigo -eq 77) {
-        throw "fork.py $($ForkArgs[0]): pulado (77) -- a mensagem acima diz por que"
+        throw "cli.py $($ForkArgs[0]): pulado (77) -- a mensagem acima diz por que"
     }
     if ($codigo -ne 0) {
-        throw "fork.py $($ForkArgs[0]) saiu $codigo"
+        throw "cli.py $($ForkArgs[0]) saiu $codigo"
     }
     return $saida
 }
@@ -388,7 +396,7 @@ function Test-Fork {
         throw @"
 fork do DuckStation ausente em $DUCK_DATA
 Ele nao e versionado (CC-BY-NC-ND-4.0). Para reconstruir:
-  python tools\pes2\fork.py recipe
+  python tools\duckmcp\cli.py recipe
 "@
     }
 }
@@ -405,7 +413,7 @@ function New-CopiaPes2 {
       $GAMES_WORK, que nao tem carimbo nenhum.
 
       **Dirigida pela origem**, nunca um espelho: o destino tambem tem o
-      `duckstation-fork.log`, que o fork.py escreve ao lado da imagem, e um
+      `duckstation-fork.log`, que o duckmcp.fork escreve ao lado da imagem, e um
       /MIR o apagaria.
 
       E nada de `Copy-Item -Recurse` do diretorio: com o destino ausente ele
@@ -677,7 +685,7 @@ function Invoke-Help {
         & $py $FORK_PY which | Out-Null
         $temFork = ($LASTEXITCODE -eq 0)
     }
-    Write-Host "  fork            $DUCK_DATA$(if ($temFork) { '' } else { '   <AUSENTE -- fork.py recipe>' })"
+    Write-Host "  fork            $DUCK_DATA$(if ($temFork) { '' } else { '   <AUSENTE -- duckmcp/cli.py recipe>' })"
     Write-Host "  release PES2    $PES2_RELEASE$(if (Test-Path -LiteralPath $PES2_RELEASE) { '' } else { '   <AUSENTE>' })"
     Write-Host "  copia PES2      $PES2_DIR$(if (Test-Path -LiteralPath $PES2_DIR) { '' } else { '   <sera copiada, ~571 MB>' })"
 
@@ -940,12 +948,13 @@ function Invoke-Pes2 {
       modal, espera a porta MCP responder e volta com o PID. Encerre com
       `pes2-kill`.
 
-      **Sem `--display`.** Nao ha Xvfb aqui, e o fork.py ignora a opcao no
+      **Sem `--display`.** Nao ha Xvfb aqui, e a lib ignora a opcao no
       Windows -- passa-la faria este script prometer algo que nao acontece.
 
-      E sem `--window ANY`: o titulo da janela do PES2 e estavel
-      ("Pro Evolution Soccer 2"), entao vale o regex default. Quem precisa
-      de ANY e o WE2002, cujo titulo vem do gamedb em japones.
+      Com `--match $PES2_WINDOW`: o titulo da janela do PES2 e estavel
+      ("Pro Evolution Soccer 2"), e a lib, agnostica de jogo, nao o conhece.
+      O WE2002 vai sem `--match` (a janela mais larga), porque o titulo dele
+      vem do gamedb em japones.
     #>
     Test-Fork
     New-CopiaPes2 | Out-Null
@@ -953,11 +962,11 @@ function Invoke-Pes2 {
     Write-Host ">> $cue"
     Write-Host '>> para parkar um save state, peca: o slot 1 e o atalho do'
     Write-Host '   menu principal e nao deve ser sobrescrito.'
-    Invoke-Fork @('launch', $cue)
+    Invoke-Fork @('launch', $cue, '--match', $PES2_WINDOW)
 }
 
 function Invoke-Pes2Kill   { Invoke-Fork @('kill') }
-function Invoke-Pes2Status { Invoke-Fork @('status') }
+function Invoke-Pes2Status { Invoke-Fork @('procs') }
 
 function Invoke-We2002Cards {
     <#
@@ -1012,10 +1021,10 @@ function Invoke-We2002Play {
     $copia = New-CopiaDoJogo
     $cue = New-CueDoJogo $copia
     Write-Host ">> $cue"
-    # `--window ANY`: o DuckStation nomeia a janela pelo DISPLAY TITLE do
-    # gamedb, e para o WE2002 esse titulo e japones -- cravar o texto aqui
-    # prenderia o alvo a uma revisao do gamedb.
-    Invoke-Fork @('launch', $cue, '--window', 'ANY')
+    # Sem `--match` (a janela mais larga): o DuckStation nomeia a janela pelo
+    # DISPLAY TITLE do gamedb, e para o WE2002 esse titulo e japones --
+    # cravar o texto aqui prenderia o alvo a uma revisao do gamedb.
+    Invoke-Fork @('launch', $cue)
     Write-Host ">> o cartao aparece em $DUCK_CARDS\ assim que o jogo gravar."
     Write-Host '   Encerre com `.\make.ps1 pes2-kill` (o mesmo fork).'
 }

@@ -6,7 +6,8 @@
 # obvious is a trap that cost time once; see docs/PLAN-PES2-PSX.md 6.11.
 #
 #   PES2_IMAGE     .cue of the working copy (required, except for --kill)
-#   PES2_DISPLAY   X display, default :98 -- the one place the number lives.
+#   PES2_DISPLAY   X display, default :98 (DUCKSTATION_DISPLAY wins over it,
+#                  as in tools/duckmcp/env.py).
 #                  Set it to :1 to open on the user's own screen, which is
 #                  for working *with* them and needs them to have asked;
 #                  the cookie is kept in that case, and window placement is
@@ -37,8 +38,10 @@
 # Prints the PID and the window id, so a driver script can take it from here.
 set -euo pipefail
 
-DISPLAY_="${PES2_DISPLAY:-:98}"
-APPIMAGE="${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage}"
+# The same precedence as tools/duckmcp/env.py: the DUCKSTATION_* name, then
+# the legacy PES2_* one, then the default.
+DISPLAY_="${DUCKSTATION_DISPLAY:-${PES2_DISPLAY:-:98}}"
+APPIMAGE="${DUCKSTATION_APPIMAGE:-${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage}}"
 IMAGE="${PES2_IMAGE:-}"
 
 
@@ -49,56 +52,21 @@ IMAGE="${PES2_IMAGE:-}"
 # matches the command line of the shell running it and kills the caller.
 # And `pgrep -x DuckStation-x64` misses it: the AppImage runs as **AppRun**,
 # so a name filter on the inner binary matches nothing while two live
-# instances keep their windows on the display. Match every name, and never
-# this script.
+# instances keep their windows on the display. And the MCP fork is a third
+# name, `duckstation-qt`, which once escaped the first two and held the
+# display through a run of this launcher.
 #
-# **`duckstation-qt` is the third**, added 2026-09-03: the MCP fork is a
-# plain binary rather than an AppImage, so it escaped both of the names
-# above and an instance of it went on holding the display through a run of
-# this launcher. `tools/pes2/fork.py kill` has the same list.
+# **The list lives in one place**, `PROCESS_NAMES` of tools/duckmcp/fork.py,
+# and so does the rest of the cleanup: SIGKILL by exact name (SIGTERM parks
+# it on a "Confirm Exit" dialog for ever, even with ConfirmPowerOff = false),
+# the wait for the processes to go, and the unmount of the squashfs the
+# AppImage leaves behind -- unmounting while a process still holds it fails
+# silently. This used to be a copy of all that in shell, with a comment
+# saying fork.py "has the same list"; since DMCP-TASK-09 it is the lib's
+# `kill`, so the two cannot drift.
+DUCKMCP="$(cd "$(dirname "${BASH_SOURCE[0]}")/../duckmcp" && pwd)/cli.py"
 kill_leftovers() {
-    local pid killed=""
-    for pid in $(pgrep -x 'AppRun' 2>/dev/null || true) \
-               $(pgrep -x 'DuckStation-x64' 2>/dev/null || true) \
-               $(pgrep -x 'duckstation-qt' 2>/dev/null || true); do
-        [ "$pid" = "$$" ] && continue
-        # Case-insensitively, and that is not a nicety: the AppImage's path
-        # says `DuckStation` and the fork's says `duckstation-mcp`, so the
-        # exact-case version of this guard skipped every fork it had just
-        # been taught to find.
-        grep -qsi 'duckstation' "/proc/$pid/cmdline" || continue
-        # SIGTERM leaves it parked on a "Confirm Exit" dialog forever,
-        # holding its windows open, even with ConfirmPowerOff = false.
-        kill -9 "$pid" 2>/dev/null || true
-        killed="$killed $pid"
-    done
-
-    # Wait for them to actually go. Unmounting while a process still holds
-    # the squashfs silently fails and leaves the mount behind -- which is
-    # what happened the first time this ran.
-    local waited=0
-    while [ -n "${killed// /}" ] && [ "$waited" -lt 20 ]; do
-        local alive=""
-        for pid in $killed; do
-            kill -0 "$pid" 2>/dev/null && alive="$alive $pid"
-        done
-        killed="$alive"
-        [ -z "${killed// /}" ] && break
-        sleep 0.5
-        waited=$((waited + 1))
-    done
-
-    # The AppImage leaves its squashfs mounted when killed this way.
-    local m attempt
-    for attempt in 1 2 3; do
-        local left=0
-        for m in $(mount | awk '/DuckStation-x64.AppImage/{print $3}'); do
-            fusermount -u "$m" 2>/dev/null || left=1
-            rmdir "$m" 2>/dev/null || true
-        done
-        [ "$(mount | grep -c 'DuckStation-x64.AppImage')" -eq 0 ] && break
-        sleep 1
-    done
+    python3 "$DUCKMCP" kill >/dev/null
 }
 if [ "${1:-}" = "--kill" ]; then
     kill_leftovers

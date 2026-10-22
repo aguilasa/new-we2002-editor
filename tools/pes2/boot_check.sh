@@ -49,6 +49,12 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# The fork's launcher is the lib's (DMCP-TASK-09). It is game-agnostic, so the
+# PES2 window title is passed here as --match; the display comes from the
+# lib's env.display() (DUCKSTATION_DISPLAY, legacy PES2_DISPLAY, default :98),
+# the same value the X check below reads.
+DUCKMCP="$HERE/../duckmcp/cli.py"
+PES2_WINDOW='^Pro Evolution Soccer 2$'
 SHOTDIR="${PES2_SHOTDIR:-$(mktemp -d -t pes2-boot-XXXXXX)}"
 WARMUP="${PES2_WARMUP:-45}"
 GAP="${PES2_GAP:-12}"
@@ -158,7 +164,7 @@ esac
 # launcher, the cleanup and the line this prints at the end.
 BINARY="${PES2_BINARY:-}"
 if [ -z "$BINARY" ]; then
-    if python3 "$HERE/fork.py" which >/dev/null 2>&1; then
+    if python3 "$DUCKMCP" which >/dev/null 2>&1; then
         BINARY=fork
     else
         BINARY=appimage
@@ -166,18 +172,18 @@ if [ -z "$BINARY" ]; then
 fi
 case "$BINARY" in
     fork)
-        python3 "$HERE/fork.py" which >/dev/null 2>&1 ||
-            skip "no DuckStation fork -- see tools/pes2/fork.py recipe"
-        LAUNCH=(python3 "$HERE/fork.py" launch "$PES2_IMAGE")
-        KILL=(python3 "$HERE/fork.py" kill)
-        WHICH="the fork ($(python3 "$HERE/fork.py" which | head -1))"
+        python3 "$DUCKMCP" which >/dev/null 2>&1 ||
+            skip "no DuckStation fork -- see tools/duckmcp/cli.py recipe"
+        LAUNCH=(python3 "$DUCKMCP" launch "$PES2_IMAGE" --match "$PES2_WINDOW")
+        KILL=(python3 "$DUCKMCP" kill)
+        WHICH="the fork ($(python3 "$DUCKMCP" which | head -1))"
         ;;
     appimage)
-        [ -f "${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage}" ] ||
-            skip "no DuckStation AppImage"
+        APPIMAGE_="${DUCKSTATION_APPIMAGE:-${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage}}"
+        [ -f "$APPIMAGE_" ] || skip "no DuckStation AppImage"
         LAUNCH=("$HERE/run_duckstation.sh")
         KILL=("$HERE/run_duckstation.sh" --kill)
-        WHICH="the official AppImage (${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage})"
+        WHICH="the official AppImage ($APPIMAGE_)"
         ;;
     *) echo "PES2_BINARY must be fork or appimage, not $BINARY" >&2; exit 1 ;;
 esac
@@ -185,8 +191,9 @@ esac
 command -v import   >/dev/null || skip "ImageMagick import is missing"
 command -v identify >/dev/null || skip "ImageMagick identify is missing"
 command -v xdotool  >/dev/null || skip "xdotool is missing"
-DISPLAY="${PES2_DISPLAY:-:98}" XAUTHORITY= xdotool getdisplaygeometry >/dev/null 2>&1 ||
-    skip "no X server on ${PES2_DISPLAY:-:98}"
+DPY_="${DUCKSTATION_DISPLAY:-${PES2_DISPLAY:-:98}}"   # env.display()'s precedence
+DISPLAY="$DPY_" XAUTHORITY= xdotool getdisplaygeometry >/dev/null 2>&1 ||
+    skip "no X server on $DPY_"
 
 mkdir -p "$SHOTDIR"
 cleanup() { "${KILL[@]}" >/dev/null 2>&1 || true; }
