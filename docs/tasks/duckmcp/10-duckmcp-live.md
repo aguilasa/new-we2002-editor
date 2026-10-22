@@ -91,3 +91,8 @@ exit=0
 ```
 
 Para a DMCP-TASK-28 (documentação): o alvo `duckmcp_live` e a variável `DUCKSTATION_TEST_IMAGE` ainda não aparecem no `CLAUDE.md` nem nas listas de alvos do `ctest` dos documentos.
+- **Closed** — commit `981b4860` (2026-10-22): feat(duckmcp): add live.py and the duckmcp_live ctest target
+  - Files (`git show --name-status 981b4860`):
+    - `M docs/tasks/duckmcp/10-duckmcp-live.md`
+    - `M tests/CMakeLists.txt`
+    - `A tools/duckmcp/live.py`

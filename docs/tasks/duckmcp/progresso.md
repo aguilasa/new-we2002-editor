@@ -125,7 +125,7 @@ graph TD
 | [DMCP-TASK-07](/docs/tasks/duckmcp/07-fechamento-fase-1.md) | Fechamento da Fase 1 — o transporte | 1 | closing | DMCP-TASK-05, DMCP-TASK-06 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-08](/docs/tasks/duckmcp/08-fork.md) | `fork.py` agnóstico de jogo — janela pelo PID, título opcional, `hide_window` e `size_window` | 2 | implementação | DMCP-TASK-07 | done | 2026-10-22 | pending |
 | [DMCP-TASK-09](/docs/tasks/duckmcp/09-cli-fork-e-lancadores.md) | `cli.py launch/kill/status/recipe/which`, shim do `pes2/fork.py`, e os lançadores apontados | 2 | implementação | DMCP-TASK-08 | done | 2026-10-22 | pending |
-| [DMCP-TASK-10](/docs/tasks/duckmcp/10-duckmcp-live.md) | `duckmcp_live` — subir o fork com um `.cue` qualquer, andar, ler e matar | 2 | verificação | DMCP-TASK-09 | pending | — | — |
+| [DMCP-TASK-10](/docs/tasks/duckmcp/10-duckmcp-live.md) | `duckmcp_live` — subir o fork com um `.cue` qualquer, andar, ler e matar | 2 | verificação | DMCP-TASK-09 | done | 2026-10-22 | pending |
 | [DMCP-TASK-11](/docs/tasks/duckmcp/11-fechamento-fase-2.md) | Fechamento da Fase 2 — o lançador | 2 | closing | DMCP-TASK-08, DMCP-TASK-09, DMCP-TASK-10 | pending | — | — |
 | [DMCP-TASK-12](/docs/tasks/duckmcp/12-session.md) | `buttons.py` e `session.py` — a sessão, com `game()` | 3 | implementação | DMCP-TASK-11 | pending | — | — |
 | [DMCP-TASK-13](/docs/tasks/duckmcp/13-hardware-e-pixels.md) | `psx.py`, `gpu.py`, `png.py` e `vram.py` | 3 | implementação | DMCP-TASK-11 | pending | — | — |

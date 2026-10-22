@@ -210,11 +210,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#5.1",
       "files": ["tools/duckmcp/live.py", "tests/CMakeLists.txt"],
       "resources": ["emulador", "tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-22",
+      "done_commit": "981b4860",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-22T17:15:50-03:00",
+      "active_s": 315,
+      "finished_at": "2026-10-22T17:21:05-03:00"
     },
     {
       "id": "DMCP-TASK-11",
