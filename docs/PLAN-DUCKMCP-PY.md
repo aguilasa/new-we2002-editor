@@ -250,7 +250,11 @@ Cada uma afirmada pelo `selftest.py` e com defeito plantado no `controls.py`:
 - **(c)** dentro de `tools/duckmcp/`, nenhum serial de jogo (padrão
   `S[LC][EPU][SM]-\d{5}`), nenhum nome de projeto (`pes2`, `looks`, `kits`,
   `kit2d`, `WE2002`, `PES2` — fora de comentário de linhagem marcado), e
-  nenhum endereço literal fora das faixas de `psx.py`;
+  nenhum endereço literal fora das faixas de `psx.py`. **Exceção única**: os
+  cinco nomes legados `PES2_MCP_HOST`, `PES2_MCP_PORT`, `PES2_FORK`,
+  `PES2_DUCKSTATION` e `PES2_DISPLAY`, como código e só no `env.py`, porque a
+  decisão 3 do §2 os lê como fallback; um sexto nome, ou um deles fora do
+  `env.py`, é vermelho;
 - **(d)** só `env.py` lê variável de ambiente, e só `env.py` monta
   `XAUTHORITY`.
 

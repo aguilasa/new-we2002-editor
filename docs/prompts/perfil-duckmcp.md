@@ -14,6 +14,7 @@ which commands search instead of reading whole.
 - 2026-10-22 — **agnóstica de jogo**: só hardware PS1 e emulador; nada de serial, título, endereço de RAM de jogo, rota ou slot ([§2.1](/docs/PLAN-DUCKMCP-PY.md#2.1)).
 - 2026-10-22 — `tools/pes2/mcp.py`, `fork.py` e `savestate.py` são shims só durante o ciclo; o fechamento os apaga ([§2](/docs/PLAN-DUCKMCP-PY.md#2)).
 - 2026-10-22 — variáveis `DUCKSTATION_*` novas, com as `PES2_*` lidas como fallback e marcadas legado; a nova ganha ([§2](/docs/PLAN-DUCKMCP-PY.md#2)).
+- 2026-10-22 — a regra (c) isenta exatamente os cinco nomes legados `PES2_*`, só no `env.py`, pela decisão 3 ([§3.3](/docs/PLAN-DUCKMCP-PY.md#3.3), CORR-DMCP-003).
 - 2026-10-22 — o cliente parte do `mcp.py` da PES2-TASK-03, commit `f21182ea` ([§2](/docs/PLAN-DUCKMCP-PY.md#2)).
 
 ## Sources of truth

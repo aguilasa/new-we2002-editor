@@ -47,3 +47,18 @@ decisões já confirmadas do `docs/prompts/perfil-duckmcp.md`.
 tem de imprimir ao menos 1 depois do conserto.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido (`sed -n '/^### 3.3/,/^### 3.4/p' … | grep -c 'PES2_MCP_HOST'` → `0`).
+
+Conserto: a regra (c) do §3.3 ganhou a exceção única — os cinco nomes legados de `LEGACY` no
+`env.py` (`PES2_MCP_HOST`, `PES2_MCP_PORT`, `PES2_FORK`, `PES2_DUCKSTATION`, `PES2_DISPLAY`), como
+código e só ali, pela decisão 3 do §2; sexto nome ou nome fora do `env.py` é vermelho, que é o que os
+controles `c-sixth-legacy-name` e `c-legacy-name-elsewhere` já plantam. O perfil ganhou a linha
+correspondente nas decisões confirmadas.
+
+Verificação:
+
+```text
+$ sed -n '/^### 3.3/,/^### 3.4/p' docs/PLAN-DUCKMCP-PY.md | grep -c 'PES2_MCP_HOST'
+1
+```
