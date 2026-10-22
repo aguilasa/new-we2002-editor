@@ -88,3 +88,10 @@ duckmcp_selftest: 195 check(s) ran, 0 failure(s)
 $ python3 tools/duckmcp/controls.py | tail -1
 duckmcp_controls: 17 control(s), 17 red as required; per rule (a) 2/2, (c) 8/8, (client) 2/2, (d) 4/4, (fork) 1/1
 ```
+- **Closed** — commit `299c3f7f` (2026-10-22): fix(duckmcp): keep only pids whose command line says duckstation
+  - Files (`git show --name-status 299c3f7f`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-008.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/fork.py`
