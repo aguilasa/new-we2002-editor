@@ -305,13 +305,14 @@
       "status": "done",
       "done_on": "2026-10-22",
       "done_commit": "09609aed",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-22",
+      "review_commit": "661993fc",
       "active_since": null,
       "started_at": "2026-10-22T18:29:16-03:00",
       "active_s": 602,
       "finished_at": "2026-10-22T18:39:18-03:00",
-      "review_started_at": "2026-10-22T18:45:05-03:00"
+      "review_started_at": "2026-10-22T18:45:05-03:00",
+      "review_s": 367
     },
     {
       "id": "DMCP-TASK-15",

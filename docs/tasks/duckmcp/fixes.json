@@ -228,6 +228,19 @@
       "depends_on": [],
       "done_on": null,
       "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-016",
+      "file": "CORR-DMCP-016.md",
+      "title": "Escrever as conferências de equivalência pré-mudança como passos refeitos do git",
+      "origin": "DMCP-TASK-14",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

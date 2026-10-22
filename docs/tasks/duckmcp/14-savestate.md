@@ -108,3 +108,4 @@ Critério do `git log --follow`, medido pelo fio principal depois do commit de t
 - **Closed** — commit `09609aed` (2026-10-22): docs(duckmcp): record the git log --follow measure of the savestate move
   - Files (`git show --name-status 09609aed`):
     - `M docs/tasks/duckmcp/14-savestate.md`
+- **Reviewed** (2026-10-22) at `661993fc`: CORR-DMCP-016
