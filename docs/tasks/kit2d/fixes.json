@@ -10,10 +10,14 @@
       "severity": "low",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-22",
+      "done_commit": "969d680f",
+      "active_since": null,
+      "started_at": "2026-10-22T13:01:08-03:00",
+      "active_s": 40,
+      "finished_at": "2026-10-22T13:01:48-03:00"
     },
     {
       "id": "CORR-K2D-002",

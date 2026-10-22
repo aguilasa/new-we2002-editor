@@ -43,6 +43,10 @@ O primeiro comando da Evidência passa a sair `exit=1`, listando `('ui/layout.py
 
 - 2026-10-22 — reproduzido na HEAD `88f9e194` (`rite reproduce`): `kit2d_selftest: 12 check(s) ran, 0 failure(s)` / `exit=0` com o literal em `ui/layout.py`.
 - Correção: `EXEMPT_FILES` guarda `os.path.abspath(layout.__file__)` e `os.path.abspath(__file__)`, e `address_breaks()` compara o caminho absoluto. Controle novo em `PLANTS`: `ui/layout.py` com `OFFSET = 172096` (o laço de plantio cria o subdiretório).
+- **Closed** — commit `969d680f` (2026-10-22): fix(kit2d): exempt layout.py and selftest.py by path, not by base name
+  - Files (`git show --name-status 969d680f`):
+    - `M docs/tasks/kit2d/CORR-K2D-001.md`
+    - `M tools/kit2d/selftest.py`
 
 ## Verificação feita
 
