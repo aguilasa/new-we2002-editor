@@ -10,20 +10,13 @@ decision 2); new code imports `duckmcp` with `tools/` on `sys.path`.
     python3 tools/pes2/mcp.py --list|--status|--call TOOL k=v  # still works
     python3 tools/pes2/mcp.py --self-check                     # no emulator
 
-One measured exception to "only re-exports" (CORR-DMCP-004): importing this
-module rebinds `duckmcp.client.process_alive` to a probe over
-`fork.running_pids()`, so a refused port still says whether duckstation-qt is
-alive, as the old `mcp.py --list` did. The rebinding is process-wide -- it
-also changes `duckmcp.client` for code that imports the lib directly -- and
-`self_check` carries the two checks of that probe. The lib cannot hold the
-probe yet: it would import `tools/pes2/fork.py`, against rules (b) and (c) of
-PLAN-DUCKMCP-PY §3.3. DMCP-TASK-08 brings `running_pids` into
-`duckmcp.fork`; the probe and its two checks move there, and this exception
-goes away with it.
+The liveness probe a refused port reads -- is duckstation-qt alive? --
+lives in the lib since DMCP-TASK-08, over `duckmcp.fork.running_pids()`,
+with its two checks in the lib's selftest; this shim no longer rebinds
+anything in `duckmcp.client` (CORR-DMCP-004).
 """
 
 import functools
-import importlib
 import os
 import sys
 
@@ -39,42 +32,13 @@ from duckmcp.errors import (SKIP, NotRunning, SessionLost,  # noqa: E402,F401
 DEFAULT_HOST = env.mcp_host()
 DEFAULT_PORT = env.mcp_port()
 
-# The liveness seam of duckmcp.client, filled from fork.py so a refused port
-# still says whether duckstation-qt is alive. Temporary: DMCP-TASK-08 fills
-# the seam inside the lib. Lazy because fork.py imports this module; an
-# exception in the probe reads as "unknown" (Client._liveness catches it).
-_LIB_PROBE = client.process_alive
-client.process_alive = lambda: bool(
-    importlib.import_module("fork").running_pids())
-
 
 def self_check(verbose=True):
-    """duckmcp.client.self_check(), plus the fork-backed probe wired above.
+    """duckmcp.client.self_check() in the shape selftest.py reads.
 
-    Returns failure strings, empty when green -- the shape selftest.py reads.
-    The lib's checks run against its own default probe, as they assume.
+    Returns failure strings, empty when green.
     """
-    fork = importlib.import_module("fork")
-    wired, real = client.process_alive, fork.running_pids
-    client.process_alive = _LIB_PROBE
-    try:
-        results = list(client.self_check())
-    finally:
-        client.process_alive = wired
-    for pids, want in (([], "no DuckStation process either"),
-                       ([4242], "duckstation-qt IS running")):
-        fork.running_pids = lambda pids=pids: pids
-        try:
-            Client(port=1, timeout=2.0).call("get_status")
-            got = "it connected"
-        except NotRunning as e:
-            got = str(e)
-        except Exception as e:                               # noqa: BLE001
-            got = "%s: %s" % (type(e).__name__, e)
-        finally:
-            fork.running_pids = real
-        results.append(("the shim's probe reads fork.running_pids() == %r"
-                        % (pids,), want in got, got))
+    results = list(client.self_check())
     bad = ["%s: %s" % (name, detail) if detail else name
            for name, passed, detail in results if not passed]
     if verbose:

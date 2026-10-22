@@ -14,6 +14,13 @@ In this order:
    unknown, and against a loopback stand-in of the fork's one-session rule a
    stolen session is recovered once, a second loss is an error, and another
    `ToolError` passes without a new handshake;
+4b. `fork.self_check()`: the kill list, a missing install is `Skip` naming
+   the recipe, `roms/` refused by `launch` on both separators, a joystick
+   node refused, `running_pids` never our own pid, the window choice with
+   and without a title, and the client's default liveness probe over
+   `fork.running_pids()` stubbed (`[]` dead, `[4242]` alive, raising
+   unknown); then, here, `fork.child_env`'s `:98` rule, which spells the
+   variable only this file and `env.py` may;
 5. `cli.self_check()`: `call TOOL a=1 b="x"` decodes into the arguments it
    sends, the old flags become subcommand lines; and `cli.py list` against
    a refused port (port 1), run as a script, exits 77 with the
@@ -27,7 +34,8 @@ In this order:
      `duckmcp` and each of its modules, each in a fresh interpreter, loads
      nothing outside the stdlib (`sys.stdlib_module_names`);
    - (c) no game serial, no project name outside a marked `# lineage:`
-     comment, and no address literal outside the PS1 hardware ranges;
+     comment, no game window title this repository drives (anywhere, lineage
+     included), and no address literal outside the PS1 hardware ranges;
    - (d) only `env.py` reads the environment, and only `env.py` mentions
      `XAUTHORITY`.
    `selftest.py` and `controls.py` are exempt from (c) and from the
@@ -57,7 +65,7 @@ TOOLS_DIR = os.path.dirname(DUCKMCP_DIR)
 sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
-from duckmcp import audit, cli, client, env, errors  # noqa: E402
+from duckmcp import audit, cli, client, env, errors, fork  # noqa: E402
 
 JUDGES = ("selftest.py", "controls.py")
 """The files that hold the patterns of rule (c), and so are exempt from it."""
@@ -84,6 +92,14 @@ PROJECT_RE = re.compile(r"(?<![A-Za-z0-9])(pes2|looks|kits|kit2d|we2002)"
 
 The boundary is any non-alphanumeric, not `\\b`: `_` is a word character,
 and `\\bpes2\\b` would let `PES2_SERIAL` through.
+"""
+
+TITLE_RE = re.compile(r"Pro Evolution Soccer|Winning Eleven|World Soccer",
+                      re.IGNORECASE)
+"""A game window title this repository drives (rule (c), section 2.1).
+
+A deny-list, so a title not on it passes: the structural half is
+`fork.self_check`'s "launch() has no default title (match=None)".
 """
 
 LINEAGE = "# lineage:"
@@ -357,6 +373,10 @@ def check_rules(c):
                  for m in PROJECT_RE.finditer(text)]
         c.ok("rule (c): %s names no project outside a lineage comment" % rel,
              not names, where(names))
+        titles = [(i + 1, m.group(0)) for i, line in enumerate(lines)
+                  for m in TITLE_RE.finditer(line)]
+        c.ok("rule (c): %s names no game window title" % rel, not titles,
+             where(titles))
         addresses = [(i + 1, m.group(0)) for i, line in enumerate(lines)
                      for m in HEX_RE.finditer(line)
                      if outside_hardware(int(m.group(0).replace("_", ""), 16))]
@@ -367,6 +387,23 @@ def check_rules(c):
     missing = [n for n in LEGACY_ENV_NAMES if n not in env_text]
     c.ok("rule (c): every allow-listed legacy name is still in env.py",
          not missing, missing)
+
+
+def check_child_env(c):
+    """`fork.child_env`: the `:98` rule comes from `env.x_env`, and a missing
+    install adds no library path."""
+    on98 = fork.child_env(":98", home="/nowhere")
+    c.ok("fork: child_env(':98') blanks XAUTHORITY",
+         on98.get("XAUTHORITY") == "", repr(on98.get("XAUTHORITY")))
+    on1 = fork.child_env(":1", home="/nowhere")
+    c.ok("fork: child_env(':1') leaves XAUTHORITY as env.x_env does",
+         on1.get("XAUTHORITY") == env.x_env(":1").get("XAUTHORITY"),
+         repr(on1.get("XAUTHORITY")))
+    c.ok("fork: child_env sets DISPLAY", on98.get("DISPLAY") == ":98")
+    c.ok("fork: a missing install adds no library path",
+         on98.get("LD_LIBRARY_PATH") == env.x_env(":98").get("LD_LIBRARY_PATH")
+         and on98.get("QT_PLUGIN_PATH") == env.x_env(":98").get(
+             "QT_PLUGIN_PATH"))
 
 
 def check_cli_refused(c):
@@ -408,6 +445,8 @@ def main(argv=None):
     c.module("errors", errors.self_check)
     c.module("env", env.self_check)
     c.module("client", client.self_check)
+    c.module("fork", fork.self_check)
+    check_child_env(c)
     c.module("cli", cli.self_check)
     check_cli_refused(c)
     c.module("audit", audit.self_check)

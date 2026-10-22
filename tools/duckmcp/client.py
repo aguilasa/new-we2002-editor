@@ -53,15 +53,19 @@ PLAN = "PLAN-DUCKMCP-PY §1.3"
 def process_alive():
     """Whether a DuckStation process is running: True, False, or None.
 
-    **The seam for the liveness probe.** This package has no process module
-    yet, so the default answers None -- *unknown* -- and a refused port reads
-    with the message that does not guess. The module that knows how to list
-    the fork's processes replaces this function (`client.process_alive =
-    ...`) or a caller passes `Client(alive=...)`; the client reads it at
-    the moment the port is refused, so a replacement made after import is
-    honoured.
+    **The seam for the liveness probe**, filled by `duckmcp.fork`: True when
+    `fork.running_pids()` lists a process, False when it lists none, and
+    None -- *unknown*, the message that does not guess -- when the listing
+    itself fails. The import is lazy because `fork` imports this module, and
+    `fork.running_pids` is looked up at each call, so the client reads the
+    process table at the moment the port is refused. A caller that knows
+    better passes `Client(alive=...)`.
     """
-    return None
+    try:
+        from . import fork
+        return bool(fork.running_pids())
+    except Exception:                                        # noqa: BLE001
+        return None
 
 
 class Client:
@@ -472,7 +476,11 @@ def self_check() -> list:
         raise OSError("probe failed")
     absent(broken, ["not running", "pitfall 35"],
            "a probe that raises reads as unknown, not as a crash")
-    check("the default liveness probe answers unknown", process_alive() is None)
+    # The default probe lists processes through duckmcp.fork; the two
+    # answers it gives a refused port are asserted there, with
+    # running_pids() stubbed. Here: it answers in the probe's vocabulary.
+    check("the default liveness probe answers True, False or None",
+          process_alive() in (True, False, None), repr(process_alive()))
 
     # **One session, newest handshake wins** -- the fork's behaviour, played
     # by the stand-in. The red case is the same call with `reclaim` off.

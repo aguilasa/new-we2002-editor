@@ -16,8 +16,9 @@ control the untouched sandbox must come out green, or no red means anything.
 The rules are those of PLAN-DUCKMCP-PY.md section 3.3: (a) nothing outside
 the stdlib on import, (c) nothing of a game inside the package, (d) only
 `env.py` reads the environment. Rule (b) closes in phase 4. Beside them,
-the controls of rule `client` break the transport itself, and demand the
-assertion of `client.self_check()` that covers the broken behaviour.
+the controls of rule `client` break the transport itself and its liveness
+seam, and demand the assertion of `client.self_check()` or
+`fork.self_check()` that covers the broken behaviour.
 
 The last line says how many controls ran, how many went red as required,
 and the count per rule; the exit is 0 only when every one did.
@@ -101,6 +102,19 @@ CONTROLS = (
         "comment", None,
         "a trailing `# lineage:` exempts the comment, not the code before it"),
     Control(
+        "c-game-window-title", "c", "fork.py", "\nDIALOGS = (",
+        "\nGAME_WINDOW = \"^Pro Evolution Soccer 2$\"\nDIALOGS = (",
+        "FAIL  rule (c): fork.py names no game window title", None,
+        "the title default the launcher had before it moved (section 2.1): "
+        "a game's window title is the caller's"),
+    Control(
+        "c-launch-default-title", "c", "fork.py",
+        "def launch(image, match=None,",
+        "def launch(image, match=\"^Any Game$\",",
+        "FAIL  fork: launch() has no default title (match=None)", None,
+        "a default title the deny-list does not know: the structural half "
+        "of the same rule"),
+    Control(
         "d-os-environ", "d", "errors.py", ANCHOR,
         "\nimport os\nSKIP = int(os.environ.get(\"SKIP\", \"77\"))\n",
         "FAIL  rule (d): errors.py does not read the environment", None,
@@ -128,6 +142,14 @@ CONTROLS = (
         "through", None,
         "a stolen session (pitfall 46) re-raised instead of taken back: the "
         "loopback stand-in of the one-session rule must catch it"),
+    Control(
+        "client-liveness-unwired", "client", "client.py",
+        "        return bool(fork.running_pids())\n",
+        "        return None\n",
+        "FAIL  fork: process_alive() is False when running_pids() == []",
+        None,
+        "the seam left at its old unknown answer: a refused port could no "
+        "longer tell a dead fork from a mute server"),
 )
 """Every control, in report order."""
 
