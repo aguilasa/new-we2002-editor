@@ -1,5 +1,32 @@
 {
   "schema": 1,
   "cycle": "kit2d",
-  "fixes": []
+  "fixes": [
+    {
+      "id": "CORR-K2D-001",
+      "file": "CORR-K2D-001.md",
+      "title": "Isentar só kit2d/core/layout.py e selftest.py da regra de endereço, não qualquer arquivo homônimo",
+      "origin": "K2D-TASK-01",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-K2D-002",
+      "file": "CORR-K2D-002.md",
+      "title": "Varrer também literais de string na regra de endereço do layout.py",
+      "origin": "K2D-TASK-01",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    }
+  ]
 }

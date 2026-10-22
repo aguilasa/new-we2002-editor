@@ -57,3 +57,4 @@ O `kits_selftest` (`tools/kits/selftest.py`) é o modelo de forma.
     - `A tools/kit2d/core/errors.py`
     - `A tools/kit2d/core/layout.py`
     - `A tools/kit2d/selftest.py`
+- **Reviewed** (2026-10-22) at `fbb61444`: CORR-K2D-001, CORR-K2D-002
