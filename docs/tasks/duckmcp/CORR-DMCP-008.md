@@ -59,3 +59,32 @@ O comando da Evidência imprime "still alive", e `python3 tools/duckmcp/cli.py k
 `AppRun` falso vivo (matá-lo à mão depois). O controle novo fica vermelho com o filtro removido.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido na HEAD `69910a9f`: o AppRun falso (`/bin/sleep` copiado) dá
+`old-guard-would-skip` e depois `KILLED pid 471686` pelo `run_duckstation.sh --kill`.
+
+Conserto: o `running_pids()` passa a saída do `pgrep` por `select_pids(found, own, cmdline)`, função pura.
+Ela descarta o próprio PID, as repetições e todo PID cujo `/proc/<pid>/cmdline` não diz "duckstation" em
+qualquer caixa, que era a guarda do shell removido. O `self_check` ganhou o caso com três linhas (um
+AppRun alheio, um AppImage do DuckStation e o fork), e o `controls.py` ganhou `fork-kills-foreign-apprun`,
+que tira o filtro.
+
+Verificação:
+
+```text
+$ <Evidência> ; bash tools/pes2/run_duckstation.sh --kill; …
+leftover DuckStation processes and mounts cleared
+still alive
+$ python3 tools/duckmcp/cli.py kill; kill -0 $P && echo "cli kill: still alive"
+stopped 0 DuckStation process(es)
+cli kill: still alive
+$ python3 tools/duckmcp/controls.py --only fork-kills-foreign-apprun
+red    fork-kills-foreign-apprun (rule fork): FAIL  fork: an AppRun whose command line is not DuckStation's is spared  [11, 12, 13]
+duckmcp_controls: 1 control(s), 1 red as required; per rule (fork) 1/1
+$ DISPLAY=:98 XAUTHORITY= python3 tools/duckmcp/cli.py launch …/we2002-english.cue; python3 tools/duckmcp/cli.py kill
+stopped 1 DuckStation process(es): [473816]      # o fork de verdade continua achado
+$ python3 tools/duckmcp/selftest.py --quiet
+duckmcp_selftest: 195 check(s) ran, 0 failure(s)
+$ python3 tools/duckmcp/controls.py | tail -1
+duckmcp_controls: 17 control(s), 17 red as required; per rule (a) 2/2, (c) 8/8, (client) 2/2, (d) 4/4, (fork) 1/1
+```

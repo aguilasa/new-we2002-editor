@@ -265,17 +265,43 @@ def running_pids():
     """
     if WINDOWS:
         return _tasklist_pids()
-    pids = []
+    found = []
     for name in PROCESS_NAMES:
         out = subprocess.run(["pgrep", "-x", name], capture_output=True,
                              text=True)
-        for line in out.stdout.split():
-            try:
-                pid = int(line)
-            except ValueError:
-                continue
-            if pid != os.getpid() and pid not in pids:
-                pids.append(pid)
+        found.extend(out.stdout.split())
+    return select_pids(found, os.getpid(), _cmdline)
+
+
+def _cmdline(pid):
+    """`/proc/<pid>/cmdline` as text, or "" when the process is gone."""
+    try:
+        with open("/proc/%d/cmdline" % pid, "rb") as handle:
+            return handle.read().decode("utf-8", "replace")
+    except OSError:
+        return ""
+
+
+def select_pids(found, own, cmdline):
+    """The DuckStation pids among `pgrep` output lines `found`.
+
+    Drops our own pid `own`, repeats, and every pid whose command line
+    (`cmdline(pid)`) does not say "duckstation" in any case. That last
+    filter is not a nicety: every type-2 AppImage runs as `AppRun`, and
+    without it `kill()` SIGKILLs other people's AppImages. Any case because
+    the AppImage's path says `DuckStation` and the fork's `duckstation-mcp`.
+    """
+    pids = []
+    for line in found:
+        try:
+            pid = int(line)
+        except ValueError:
+            continue
+        if pid == own or pid in pids:
+            continue
+        if "duckstation" not in cmdline(pid).lower():
+            continue
+        pids.append(pid)
     return pids
 
 
@@ -875,6 +901,12 @@ def self_check() -> list:
           "duckstation-mcp" in RECIPE)
     check("running_pids never returns our own pid",
           os.getpid() not in running_pids())
+    lines = {"11": "/opt/other-app/AppRun\0300", "12": "/x/DuckStation.AppImage",
+             "13": "/home/u/duckstation-mcp/bin/duckstation-qt"}
+    check("an AppRun whose command line is not DuckStation's is spared",
+          select_pids(["11", "12", "13"], -1, lambda p: lines[str(p)])
+          == [12, 13], select_pids(["11", "12", "13"], -1,
+                                   lambda p: lines[str(p)]))
 
     # The window choice, which launch() feeds from X or Win32.
     seen = [("Automatic Updater", 651, "d"), ("Qt Selection Owner", 3000, "q"),

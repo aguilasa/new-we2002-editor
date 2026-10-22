@@ -150,6 +150,15 @@ CONTROLS = (
         None,
         "the seam left at its old unknown answer: a refused port could no "
         "longer tell a dead fork from a mute server"),
+    Control(
+        "fork-kills-foreign-apprun", "fork", "fork.py",
+        "        if \"duckstation\" not in cmdline(pid).lower():\n"
+        "            continue\n",
+        "",
+        "FAIL  fork: an AppRun whose command line is not DuckStation's is "
+        "spared", None,
+        "the command-line filter dropped: kill() SIGKILLs every type-2 "
+        "AppImage, since all of them run as AppRun"),
 )
 """Every control, in report order."""
 
