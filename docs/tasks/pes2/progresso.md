@@ -143,7 +143,7 @@ graph TD
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [PES2-TASK-01](/docs/tasks/pes2/01-ferramental-das-fases-3-e-4.md) | Ferramental das fases 3 e 4 — numpy e desmontador MIPS | 0 | decisão | — | done | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-02](/docs/tasks/pes2/02-poke-por-conjunto-de-copias.md) | `tools/pes2/poke.py` — gravação pelo conjunto de cópias | 2 | ferramenta | — | done | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-03](/docs/tasks/pes2/03-direcao-do-emulador.md) | Direção do DuckStation — navegar até a tela e capturar | 2 | ferramenta | — | in-progress | — | — |
+| [PES2-TASK-03](/docs/tasks/pes2/03-direcao-do-emulador.md) | Direção do DuckStation — navegar até a tela e capturar | 2 | ferramenta | — | done | 2026-10-22 | pending |
 | [PES2-TASK-04](/docs/tasks/pes2/04-poke-de-validacao.md) | O `poke` de validação — PIEMONTE em todas as telas | 2 | verificação | PES2-TASK-02, PES2-TASK-03 | pending | — | — |
 | [PES2-TASK-05](/docs/tasks/pes2/05-diferencial-de-cartao.md) | Harness de diferencial de memory card | 3 | ferramenta | PES2-TASK-03 | pending | — | — |
 | [PES2-TASK-06](/docs/tasks/pes2/06-registro-de-jogador-no-cartao.md) | Estrutura do registro de jogador, pelo cartão | 3 | engenharia-reversa | PES2-TASK-05 | pending | — | — |

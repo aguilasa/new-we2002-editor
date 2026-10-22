@@ -42,12 +42,12 @@
       "category": "verificação",
       "phase": 2,
       "depends_on": [],
-      "status": "in-progress",
+      "status": "done",
       "source_of_truth": "/docs/PLAN-PES2-PSX.md#3.4",
-      "reviewed_on": null,
+      "reviewed_on": "pending",
       "review_commit": null,
-      "done_on": null,
-      "done_commit": null
+      "done_on": "2026-10-22",
+      "done_commit": "f21182ea"
     },
     {
       "id": "PES2-TASK-04",

@@ -760,3 +760,16 @@ vez (`SessionLost`); a chamada recusada não chegou a ferramenta nenhuma. O
 
 Fora do repositório: `~/.local/share/duckstation/savestates/SLES-03957_5.sav`,
 com cópia em `work/pes2-states/SLES-03957_5.sav.20261022-135320`.
+- **Closed** — commit `f21182ea` (2026-10-22): feat(pes2): replay route from a parked save state, and survive a stolen MCP session
+  - Files (`git show --name-status f21182ea`):
+    - `M docs/PLAN-PES2-PSX.md`
+    - `M docs/prompts/perfil-pes2.md`
+    - `M docs/tasks/pes2/03-direcao-do-emulador.md`
+    - `M docs/tasks/pes2/progresso.md`
+    - `M tools/pes2/mcp.py`
+    - `M tools/pes2/mcp_drive.py`
+  - **No files declared** — the work commit changed:
+    - `docs/PLAN-PES2-PSX.md`
+    - `docs/prompts/perfil-pes2.md`
+    - `tools/pes2/mcp.py`
+    - `tools/pes2/mcp_drive.py`
