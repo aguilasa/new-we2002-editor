@@ -26,6 +26,6 @@ id: K2D-TASK-07
 
 ## Notes
 
-—
+- Da K2D-TASK-01: `tools/kits/core` e `tools/kit2d/core` são os dois pacotes `core`, e o primeiro no `sys.path` ganha para os dois (`ImportError: cannot import name 'layout' from 'core'`, visto). O `selftest.py` importa o do `kits` sob outro nome (`kits_core`, por `importlib.util.spec_from_file_location`); o `source.py`/`teams.py` daqui precisa do mesmo arranjo, de preferência movido para o núcleo e usado pelo selftest.
 
 ## Log de Execução

@@ -127,7 +127,7 @@ graph TD
 <!-- rite:begin tasks -->
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [K2D-TASK-01](/docs/tasks/kit2d/01-esqueleto.md) | Esqueleto de tools/kit2d/: layout.py, selftest.py e kit2d_selftest no ctest | 0 | infra | — | pending | — | — |
+| [K2D-TASK-01](/docs/tasks/kit2d/01-esqueleto.md) | Esqueleto de tools/kit2d/: layout.py, selftest.py e kit2d_selftest no ctest | 0 | infra | — | in-progress | — | — |
 | [K2D-TASK-02](/docs/tasks/kit2d/02-sondas-de-disco.md) | Sondas de disco versionadas: cli.py base e cli.py sprites reproduzem o §1.2 | 0 | ferramenta | K2D-TASK-01 | pending | — | — |
 | [K2D-TASK-03](/docs/tasks/kit2d/03-base-de-carga-na-ram.md) | Base de carga do overlay medida na RAM pelo MCP | 0 | engenharia-reversa | K2D-TASK-02 | pending | — | — |
 | [K2D-TASK-04](/docs/tasks/kit2d/04-listas-e-attr-na-vram.md) | O que delimita uma lista, o que é attr e onde u,v caem na VRAM | 0 | engenharia-reversa | K2D-TASK-03 | pending | — | — |

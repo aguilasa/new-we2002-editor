@@ -14,13 +14,16 @@
       "phase": 0,
       "depends_on": [],
       "source_of_truth": "/docs/PLAN-KIT2D-PY.md#3.5",
-      "files": ["tools/kit2d/core/__init__.py", "tools/kit2d/core/layout.py", "tools/kit2d/core/errors.py", "tools/kit2d/selftest.py", "tests/CMakeLists.txt"],
+      "files": ["tools/kit2d/core/__init__.py", "tools/kit2d/core/layout.py", "tools/kit2d/core/errors.py", "tools/kit2d/selftest.py", "tests/CMakeLists.txt", "docs/tasks/kit2d/07-origem-e-times.md"],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,
-      "review_commit": null
+      "review_commit": null,
+      "active_since": "2026-10-22T11:25:53-03:00",
+      "started_at": "2026-10-22T11:25:53-03:00",
+      "active_s": 0
     },
     {
       "id": "K2D-TASK-02",

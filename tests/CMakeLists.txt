@@ -348,3 +348,19 @@ if(Python3_FOUND)
         SKIP_RETURN_CODE 77
         TIMEOUT 300)
 endif()
+
+# The 2D kit editor (docs/PLAN-KIT2D-PY.md) is its own project: Python 3 in
+# tools/kit2d/, importing tools/pes2 and tools/kits instead of copying them.
+if(Python3_FOUND)
+    # The mandatory gate, needing nothing and never skipping: the self-checks
+    # of what kit2d imports (iso.py, lzss.py, the kits teams tables), the
+    # layout's own consistency, and the rules of section 3.1 -- no Qt, print or
+    # exit in core/, no address of section 1.1 outside layout.py -- each also
+    # planted in a scratch folder and required to go red.
+    add_test(NAME kit2d_selftest
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/kit2d/selftest.py --quiet)
+    # 120 s, well over 1.5x the ~10 s it takes alone (most of it is
+    # tools/pes2/selftest.py), so a loaded machine does not time it out.
+    set_tests_properties(kit2d_selftest PROPERTIES TIMEOUT 120)
+endif()
