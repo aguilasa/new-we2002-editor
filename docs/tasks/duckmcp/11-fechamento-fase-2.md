@@ -43,3 +43,4 @@ Sweep: nenhum nome, arquivo ou número mudou nesta task — `sweep: none`.
 - **Closed** — commit `e20446c6` (2026-10-22): docs(duckmcp): close phase 2, gates and phase checks re-run
   - Files (`git show --name-status e20446c6`):
     - `M docs/tasks/duckmcp/11-fechamento-fase-2.md`
+- **Reviewed** (2026-10-22) at `8a69fe14`: no finding
