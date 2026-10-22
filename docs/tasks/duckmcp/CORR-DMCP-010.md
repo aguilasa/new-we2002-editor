@@ -60,3 +60,9 @@ $ python3 tools/kits/controls.py --only fork-joystick-let-through | tail -2
   RED    fork-joystick-let-through    duckmcp/fork.py :: refuse_joysticks
 controls: 1 of 1 red
 ```
+- **Closed** — commit `3ae5c1b2` (2026-10-22): docs(duckmcp): prove criterion 6 of task 09 with a command naming the control
+  - Files (`git show --name-status 3ae5c1b2`):
+    - `M docs/tasks/duckmcp/09-cli-fork-e-lancadores.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-010.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
