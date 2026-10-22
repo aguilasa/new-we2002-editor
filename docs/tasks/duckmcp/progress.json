@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "cycle": "duckmcp",
+  "prefix": "DMCP",
+  "plan": "/docs/PLAN-DUCKMCP-PY.md",
+  "ticket": null,
+  "local": false,
+  "tasks": []
+}
