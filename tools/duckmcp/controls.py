@@ -191,6 +191,49 @@ CONTROLS = (
         "alive", None,
         "the old order: kill in a finally around launch, so a skipped run "
         "stops an emulator it never opened"),
+    Control(
+        "gpu-loop-as-too-long", "gpu", "gpu.py",
+        "            raise GpuListLoop(\n",
+        "            raise GpuListTooLong(\n",
+        "FAIL  gpu: walk refuses a list looping back to its head as a loop",
+        None,
+        "a loop reported as a long list: the caller can no longer tell a "
+        "corrupt list from a big one"),
+    Control(
+        "gpu-end-marker-ignored", "gpu", "gpu.py",
+        "        if nxt == END_MARKER:\n",
+        "        if nxt == END_MARKER and False:\n",
+        "FAIL  gpu.self_check() raised ValueError", None,
+        "the walk runs past the end marker into memory that is not the list"),
+    Control(
+        "png-paeth-tie-upleft-first", "png", "png.py",
+        "    if pa <= pb and pa <= pc:\n"
+        "        return left\n"
+        "    return up if pb <= pc else upleft\n",
+        "    if pc <= pa and pc <= pb:\n"
+        "        return upleft\n"
+        "    if pa <= pb:\n"
+        "        return left\n"
+        "    return up\n",
+        "FAIL  png: Paeth breaks its ties left, then up, then upper-left, as "
+        "Pillow did", None,
+        "the tie-break order swapped on both sides: a round trip passes, "
+        "only the fixed tie vector sees it"),
+    Control(
+        "vram-blue-shift", "vram", "vram.py",
+        "    return (r << 3, g << 3, b << 3)\n",
+        "    return (r << 3, g << 3, b << 2)\n",
+        "FAIL  vram: to_halfword(to_rgb(h)) == h for all 32768 values", None,
+        "one channel scaled by the wrong shift"),
+    Control(
+        "psx-range-planted", "psx", "psx.py",
+        "    (\"BIOS\", 0xBFC00000, 0xBFC7FFFF),\n",
+        "    (\"BIOS\", 0xBFC00000, 0xBFC7FFFF),\n"
+        "    (\"planted\", 0x12340000, 0x1234FFFF),\n",
+        "FAIL  rule (c): the address judge refuses the gaps between ranges",
+        None,
+        "a range that is not the console's: rule (c) reads psx.py, so its "
+        "sentinel has to go red"),
 )
 """Every control, in report order."""
 
