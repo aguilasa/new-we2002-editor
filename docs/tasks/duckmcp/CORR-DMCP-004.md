@@ -62,3 +62,30 @@ dois arquivos. Nos dois casos, `python3 tools/pes2/selftest.py` e `python3 tools
 continuam saindo 0.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido na HEAD `ddb8f489`: `grep` acha os dois `lambda` (linhas 36 e 55), e o
+`print(a is client.process_alive)` imprime `False`.
+
+Escolhida a **opção (a)**. A DMCP-TASK-07 não decide, porque é só o fechamento da fase. Quem decide é a
+(b), que não cabe agora: `tools/duckmcp/` não tem `fork.py` (`ls tools/duckmcp/` → `audit.py client.py
+cli.py controls.py env.py errors.py __init__.py selftest.py`). A sonda na lib importaria
+`tools/pes2/fork.py`, contra as regras (b) e (c) do §3.3, ou adiantaria o `running_pids` da DMCP-TASK-08.
+Código sem mudança. A exceção medida está no docstring do `tools/pes2/mcp.py` e na entrada da Fase 1 do
+`docs/prompts/perfil-duckmcp.md`, e os dois nomeiam a DMCP-TASK-08 como o lugar onde a sonda entra na lib.
+Edição do perfil declarada com `rite set CORR-DMCP-004 --files …`.
+
+Verificação:
+
+```text
+$ python3 -c "…sys.exit(0 if a is client.process_alive else 1)"; echo probe=$?
+probe=1                      # esperado na opção (a): a religação continua, documentada
+$ grep -c 'CORR-DMCP-004' tools/pes2/mcp.py docs/prompts/perfil-duckmcp.md
+tools/pes2/mcp.py:1
+docs/prompts/perfil-duckmcp.md:1
+$ python3 tools/pes2/selftest.py; echo pes2=$?
+OK
+pes2=0
+$ python3 tools/duckmcp/selftest.py --quiet; echo dmcp=$?
+duckmcp_selftest: 137 check(s) ran, 0 failure(s)
+dmcp=0
+```

@@ -9,6 +9,17 @@ decision 2); new code imports `duckmcp` with `tools/` on `sys.path`.
     python3 tools/duckmcp/cli.py list|status|call TOOL k=v   # the new CLI
     python3 tools/pes2/mcp.py --list|--status|--call TOOL k=v  # still works
     python3 tools/pes2/mcp.py --self-check                     # no emulator
+
+One measured exception to "only re-exports" (CORR-DMCP-004): importing this
+module rebinds `duckmcp.client.process_alive` to a probe over
+`fork.running_pids()`, so a refused port still says whether duckstation-qt is
+alive, as the old `mcp.py --list` did. The rebinding is process-wide -- it
+also changes `duckmcp.client` for code that imports the lib directly -- and
+`self_check` carries the two checks of that probe. The lib cannot hold the
+probe yet: it would import `tools/pes2/fork.py`, against rules (b) and (c) of
+PLAN-DUCKMCP-PY §3.3. DMCP-TASK-08 brings `running_pids` into
+`duckmcp.fork`; the probe and its two checks move there, and this exception
+goes away with it.
 """
 
 import functools

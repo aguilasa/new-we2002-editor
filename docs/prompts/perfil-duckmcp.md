@@ -57,7 +57,11 @@ which commands search instead of reading whole.
 ### Fase 1 — transporte ([§3.1](/docs/PLAN-DUCKMCP-PY.md#3.1), [§2](/docs/PLAN-DUCKMCP-PY.md#2))
 
 - O selftest cobre sessão roubada (uma recuperação, segunda perda é erro) com o servidor de teste, sem emulador.
-- `tools/pes2/mcp.py` só reexporta; `python3 tools/pes2/selftest.py` sai 0.
+- `tools/pes2/mcp.py` só reexporta; `python3 tools/pes2/selftest.py` sai 0. **Exceção medida**
+  ([CORR-DMCP-004](/docs/tasks/duckmcp/CORR-DMCP-004.md)): o import religa `duckmcp.client.process_alive`
+  para a sonda sobre `fork.running_pids()`, e o `self_check` do shim traz as duas checagens dela. A lib
+  ainda não tem `fork` e não pode importar o de `tools/pes2/` (regras (b) e (c) do §3.3); a sonda e as
+  duas checagens entram na lib na [DMCP-TASK-08](/docs/tasks/duckmcp/08-fork.md), e a exceção some ali.
 - Importar `duckmcp.client` não carrega PIL, PySide6 nem numpy.
 
 ### Fase 2 — lançador ([§2.1](/docs/PLAN-DUCKMCP-PY.md#2.1), [§4.4](/docs/PLAN-DUCKMCP-PY.md#4.4), [§5.1](/docs/PLAN-DUCKMCP-PY.md#5.1))
