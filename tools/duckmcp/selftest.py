@@ -47,6 +47,10 @@ In this order:
    for pixel under each of the five filters and each colour type, a fixed
    vector decodes as Pillow did, and bad files are refused with the reason;
    `vram.self_check()`: all 32768 fifteen-bit values round-trip;
+   `savestate.self_check()`: synthetic stored states read back, `diff` and
+   `scan` find what was planted, and a missing kernel mark, one shifted by
+   45 bytes, a truncated file, a wrong RAM size and a missing file are
+   refused;
 7. the design rules of PLAN-DUCKMCP-PY.md section 3.3, over every `.py` of
    this package:
    - (a) every `import` names the stdlib or this package, and importing
@@ -86,7 +90,8 @@ sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
 from duckmcp import (audit, buttons, cli, client, env, errors,  # noqa: E402
-                     fork, gpu, live, png, psx, session, vram)
+                     fork, gpu, live, png, psx, savestate, session,
+                     vram)
 
 JUDGES = ("selftest.py", "controls.py")
 """The files that hold the patterns of rule (c), and so are exempt from it."""
@@ -516,6 +521,7 @@ def main(argv=None):
     c.module("gpu", gpu.self_check)
     c.module("png", png.self_check)
     c.module("vram", vram.self_check)
+    c.module("savestate", savestate.self_check)
     check_rules(c)
 
     print("duckmcp_selftest: %d check(s) ran, %d failure(s)" % (c.ran, c.failed))
