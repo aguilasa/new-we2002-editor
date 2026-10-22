@@ -24,6 +24,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import ast
 import importlib
 import importlib.util
 import os
@@ -160,6 +161,25 @@ def core_rule_breaks(core: str = CORE_DIR) -> list:
     return out
 
 
+def _literal_int(tok):
+    """The integer a NUMBER token spells, or a STRING token holding only an integer."""
+    text = tok.string
+    if tok.type == tokenize.STRING:
+        try:
+            text = ast.literal_eval(text)
+        except (ValueError, SyntaxError):
+            return None
+        if not isinstance(text, str):
+            return None
+        text = text.strip()
+    elif tok.type != tokenize.NUMBER:
+        return None
+    try:
+        return int(text.replace("_", ""), 0)
+    except ValueError:
+        return None
+
+
 def address_breaks(folder: str = KIT2D_DIR) -> list:
     """(file, line, literal) for every section 1.1 address spelled outside layout.py."""
     wanted = set(layout.ADDRESSES)
@@ -168,11 +188,8 @@ def address_breaks(folder: str = KIT2D_DIR) -> list:
         if os.path.abspath(path) in EXEMPT_FILES:
             continue
         for tok in _tokens(path):
-            if tok.type != tokenize.NUMBER:
-                continue
-            try:
-                value = int(tok.string.replace("_", ""), 0)
-            except ValueError:
+            value = _literal_int(tok)
+            if value is None:
                 continue
             if value in wanted:
                 out.append((os.path.relpath(path, folder), tok.start[0], tok.string))
@@ -197,6 +214,8 @@ PLANTS = (
      "OFFSET = 0x3F534\n", address_breaks, ""),
     ("an address literal in a file merely named layout.py",
      os.path.join("ui", "layout.py"), "OFFSET = 172096\n", address_breaks, ""),
+    ("an address spelled as a string", "planted.py",
+     'OFFSET = int("0x3F534", 16)\n', address_breaks, ""),
 )
 
 

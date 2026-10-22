@@ -37,3 +37,28 @@ Em `address_breaks()`, também interpretar tokens `STRING` cujo conteúdo, sem a
 O comando da Evidência passa a sair `exit=1`, listando `('p.py', 1, …)`; `python3 tools/kit2d/selftest.py` continua verde na árvore real.
 
 ## Log de Execução
+
+- 2026-10-22 — reproduzido na HEAD `88f9e194` (`rite reproduce`, antes da CORR-K2D-001): `kit2d_selftest: 12 check(s) ran, 0 failure(s)` / `exit=0` com `int("0x3F534", 16)` em `p.py`.
+- Correção: `_literal_int()` devolve o inteiro de um token `NUMBER` ou de um `STRING` cujo valor (`ast.literal_eval`, sem espaços) é só um literal inteiro decimal ou `0x`; `address_breaks()` usa os dois. Controle novo em `PLANTS`: `planted.py` com `OFFSET = int("0x3F534", 16)`.
+
+## Verificação feita
+
+```text
+$ S=$(mktemp -d); git ls-files tools src | tar -c -T - | tar -x -C $S; echo 'X = int("0x3F534", 16)' > $S/tools/kit2d/p.py; python3 $S/tools/kit2d/selftest.py --quiet; echo exit=$?
+  FAIL  no address of section 1.1 is spelled outside layout.py  [('p.py', 1, '"0x3F534"')]
+kit2d_selftest: 14 check(s) ran, 1 failure(s)
+exit=1
+$ python3 tools/kit2d/selftest.py --quiet; echo exit=$?
+kit2d_selftest: 14 check(s) ran, 0 failure(s)
+exit=0
+```
+
+Controle do controle — o ramo de `STRING` desligado numa cópia derruba o plantio novo:
+
+```text
+  FAIL  planted an address spelled as a string turns its rule red
+kit2d_selftest: 14 check(s) ran, 1 failure(s)
+exit=1
+```
+
+Gates: `kit2d_selftest` e `ctest -R kit2d_selftest` verdes; o terceiro (`tools/kit2d/controls.py`) sai 2, esperado até a K2D-TASK-16.
