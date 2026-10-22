@@ -48,3 +48,18 @@ HEAD entregue.
 — hoje os dois vazios; depois do conserto os dois casam.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido: os dois `grep` da Verificação vinham vazios, e o Log da 12 remetia ao
+"relatório do worker".
+
+Conserto: o Log da `12-session.md` ganhou a transcrição refeita na HEAD `004cc884`. São as 36 linhas
+`session:`/`buttons:` do selftest, a última linha dele e a saída inteira do
+`controls.py --only press-without-duration`.
+
+Verificação:
+
+```text
+$ grep -n 'controls.py --only press-without-duration' docs/tasks/duckmcp/12-session.md && grep -n 'check(s) ran' docs/tasks/duckmcp/12-session.md
+145:$ python3 tools/duckmcp/controls.py --only press-without-duration
+144:duckmcp_selftest: 361 check(s) ran, 0 failure(s)
+```

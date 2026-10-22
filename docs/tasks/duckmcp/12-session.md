@@ -99,3 +99,51 @@ substituição exata, fica vermelho na asserção
     - `M tools/duckmcp/selftest.py`
     - `A tools/duckmcp/session.py`
 - **Reviewed** (2026-10-22) at `225d5145`: CORR-DMCP-012
+
+**Transcrição refeita em 2026-10-22, na HEAD `004cc884`** (CORR-DMCP-012; antes, o Log só resumia e remetia ao relatório do worker):
+
+```text
+$ python3 tools/duckmcp/selftest.py | grep -E '  (ok|FAIL) +(session|buttons):'
+  ok    buttons: there are sixteen distinct buttons
+  ok    buttons: canonical() round-trips every name in any capitalisation
+  ok    buttons: canonical() agrees with the old capitalize() rule on every valid name
+  ok    buttons: canonical() rejects junk with the list of names
+  ok    buttons: UnknownButton is a ValueError
+  ok    session: press always sends duration_frames (pitfall 36)
+  ok    session: press sends the canonical button name
+  ok    session: press steps frames + after (3+17, 5+0, 1+40)
+  ok    session: press pauses only with pause_first
+  ok    session: press refuses an unknown button before any call
+  ok    session: press refuses a hold of zero frames
+  ok    session: Session(fake) takes any object with initialize, call, session, server
+  ok    session: Session(client=...) refuses an object without server
+  ok    session: Session('a.cue') keeps a string as the image
+  ok    session: capture returns the path, as a str
+  ok    session: capture refuses a screenshot that wrote no file
+  ok    session: read_ram returns exactly size bytes
+  ok    session: read_ram refuses a short file
+  ok    session: read_ram refuses more than read_memory's 2 MiB
+  ok    session: read_vram_region moves the server's file to the path given
+  ok    session: read_vram_region refuses a rectangle outside VRAM
+  ok    session: dump_vram returns the path
+  ok    session: write_vram_region sends raw from a file of w*h*2 bytes
+  ok    session: write_vram_region refuses data of the wrong size
+  ok    session: game() reads game_serial and game_title
+  ok    session: game() answers None for an empty serial
+  ok    session: save_state waits for the state file and returns it
+  ok    session: save_state fails when the file never moves
+  ok    session: load_state loads, then steps settle frames
+  ok    session: exit does not kill a wrapped or attached client
+  ok    session: exit kills the fork this session launched, once
+  ok    session: a launch that fails after its Popen stops the new pid
+  ok    session: a skipped launch leaves another session's emulator alive
+  ok    session: a pause that fails in __enter__ kills what it launched
+  ok    session: attach handshakes and does not pause
+  ok    session: importing duckmcp.session loads no PIL, PySide6 or numpy
+$ python3 tools/duckmcp/selftest.py | tail -1
+duckmcp_selftest: 361 check(s) ran, 0 failure(s)
+$ python3 tools/duckmcp/controls.py --only press-without-duration
+baseline: the untouched sandbox is green
+red    press-without-duration (rule session): FAIL  session: press always sends duration_frames (pitfall 36)  [{'button': 'Down'}, {'button': 'Cross'}, {'button': 'Start'}]
+duckmcp_controls: 1 control(s), 1 red as required; per rule (session) 1/1
+```
