@@ -46,3 +46,14 @@ O `kits_selftest` (`tools/kits/selftest.py`) é o modelo de forma.
 - O endereço que a regra varre é `layout.ADDRESSES` (offsets, faixa dos ponteiros e base); os LBAs ficam fora de propósito — 850 ou 1050 são tão prováveis como largura de janela quanto como setor, e os arquivos se leem pelo caminho.
 - Os dois pacotes chamam-se `core`: o do `kits` entra como `kits_core` por `importlib`. Nota deixada na K2D-TASK-07, que vai precisar do mesmo.
 - O terceiro gate do perfil (`tools/kit2d/controls.py`) sai 2 — o arquivo nasce na K2D-TASK-16, e o perfil o marca "desde a K2D-TASK-16".
+- **Closed** — commit `44383532` (2026-10-22): build(kit2d): add tools/kit2d skeleton, layout.py and kit2d_selftest
+  - Files (`git show --name-status 44383532`):
+    - `M docs/tasks/kit2d/01-esqueleto.md`
+    - `M docs/tasks/kit2d/07-origem-e-times.md`
+    - `M docs/tasks/kit2d/progress.json`
+    - `M docs/tasks/kit2d/progresso.md`
+    - `M tests/CMakeLists.txt`
+    - `A tools/kit2d/core/__init__.py`
+    - `A tools/kit2d/core/errors.py`
+    - `A tools/kit2d/core/layout.py`
+    - `A tools/kit2d/selftest.py`
