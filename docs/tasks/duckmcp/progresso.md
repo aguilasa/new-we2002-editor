@@ -128,7 +128,7 @@ graph TD
 | [DMCP-TASK-10](/docs/tasks/duckmcp/10-duckmcp-live.md) | `duckmcp_live` — subir o fork com um `.cue` qualquer, andar, ler e matar | 2 | verificação | DMCP-TASK-09 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-11](/docs/tasks/duckmcp/11-fechamento-fase-2.md) | Fechamento da Fase 2 — o lançador | 2 | closing | DMCP-TASK-08, DMCP-TASK-09, DMCP-TASK-10 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-12](/docs/tasks/duckmcp/12-session.md) | `buttons.py` e `session.py` — a sessão, com `game()` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-13](/docs/tasks/duckmcp/13-hardware-e-pixels.md) | `psx.py`, `gpu.py`, `png.py` e `vram.py` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | pending |
+| [DMCP-TASK-13](/docs/tasks/duckmcp/13-hardware-e-pixels.md) | `psx.py`, `gpu.py`, `png.py` e `vram.py` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-14](/docs/tasks/duckmcp/14-savestate.md) | `savestate.py` movido para a lib, com shim no `pes2` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | pending |
 | [DMCP-TASK-15](/docs/tasks/duckmcp/15-fechamento-fase-3.md) | Fechamento da Fase 3 — as primitivas | 3 | closing | DMCP-TASK-12, DMCP-TASK-13, DMCP-TASK-14 | pending | — | — |
 | [DMCP-TASK-16](/docs/tasks/duckmcp/16-debug.md) | `debug.py` — uma espera, breakpoints que sempre limpam, `who_writes` e watches | 4 | implementação | DMCP-TASK-15 | pending | — | — |

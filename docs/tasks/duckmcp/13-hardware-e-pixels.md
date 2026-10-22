@@ -164,3 +164,4 @@ $ ctest --test-dir build -R duckmcp_selftest -V | grep -E 'duckmcp_selftest:|Pas
     - `A tools/duckmcp/psx.py`
     - `M tools/duckmcp/selftest.py`
     - `A tools/duckmcp/vram.py`
+- **Reviewed** (2026-10-22) at `cb4ddf38`: CORR-DMCP-013, CORR-DMCP-014, CORR-DMCP-015

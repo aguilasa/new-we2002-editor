@@ -189,6 +189,45 @@
       "depends_on": [],
       "done_on": null,
       "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-013",
+      "file": "CORR-DMCP-013.md",
+      "title": "Versionar como controles as plantas dos checks novos de gpu, png, vram e psx",
+      "origin": "DMCP-TASK-13",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-014",
+      "file": "CORR-DMCP-014.md",
+      "title": "Pôr o filtro 0 no vetor fixo de PNG ou parar de dizer cinco filtros",
+      "origin": "DMCP-TASK-13",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-015",
+      "file": "CORR-DMCP-015.md",
+      "title": "Listar 81-9F e C1-DF entre os opcodes que a cópia do looks perdia",
+      "origin": "DMCP-TASK-13",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
