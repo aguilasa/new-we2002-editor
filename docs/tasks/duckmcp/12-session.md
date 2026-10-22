@@ -90,3 +90,11 @@ de `duckmcp.session` e `duckmcp.buttons` não carrega PIL, PySide6 nem numpy; e
 o controle `press-without-duration`, que tira `duration_frames` do `press` numa
 substituição exata, fica vermelho na asserção
 `session: press always sends duration_frames (pitfall 36)`.
+- **Closed** — commit `0c58ebd7` (2026-10-22): feat(duckmcp): add Session and buttons.canonical; press always sends duration_frames
+  - Files (`git show --name-status 0c58ebd7`):
+    - `M docs/tasks/duckmcp/12-session.md`
+    - `M tools/duckmcp/__init__.py`
+    - `A tools/duckmcp/buttons.py`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`
+    - `A tools/duckmcp/session.py`

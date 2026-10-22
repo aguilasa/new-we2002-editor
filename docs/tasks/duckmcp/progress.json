@@ -258,11 +258,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#3.1",
       "files": ["tools/duckmcp/buttons.py", "tools/duckmcp/session.py", "tools/duckmcp/__init__.py", "tools/duckmcp/selftest.py", "tools/duckmcp/controls.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-22",
+      "done_commit": "0c58ebd7",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-22T18:06:30-03:00",
+      "active_s": 397,
+      "finished_at": "2026-10-22T18:13:07-03:00"
     },
     {
       "id": "DMCP-TASK-13",
