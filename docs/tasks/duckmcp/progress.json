@@ -124,11 +124,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#2",
       "files": ["tools/duckmcp/cli.py", "tools/pes2/mcp.py", "tools/duckmcp/selftest.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-22",
+      "done_commit": "4de49640",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-22T15:39:15-03:00",
+      "active_s": 364,
+      "finished_at": "2026-10-22T15:45:19-03:00"
     },
     {
       "id": "DMCP-TASK-07",

@@ -71,4 +71,9 @@ looks_selftest: 0 failure(s)
 $ ctest --test-dir build -R 'duckmcp_selftest|pes2_selftest' | tail -3
 100% tests passed, 0 tests failed out of 2
 ```
-
+- **Closed** — commit `4de49640` (2026-10-22): feat(duckmcp): add cli.py list/status/call, and reduce tools/pes2/mcp.py to a shim
+  - Files (`git show --name-status 4de49640`):
+    - `M docs/tasks/duckmcp/06-cli-e-shim-mcp.md`
+    - `A tools/duckmcp/cli.py`
+    - `M tools/duckmcp/selftest.py`
+    - `M tools/pes2/mcp.py`
