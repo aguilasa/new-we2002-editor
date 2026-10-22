@@ -19,7 +19,7 @@ id: DMCP-TASK-14
 
 - [x] `python3 tools/duckmcp/selftest.py` sai 0, e a última linha diz quantos checks rodaram
 - [x] `python3 tools/pes2/selftest.py` sai 0
-- [ ] `git log --follow --oneline tools/duckmcp/savestate.py | tail -1` mostra o primeiro commit do arquivo original
+- [x] `git log --follow --oneline tools/duckmcp/savestate.py | tail -1` mostra o primeiro commit do arquivo original
 - [x] `python3 tools/duckmcp/savestate.py info <um .sav do looks>` dá a mesma saída que o `tools/pes2/savestate.py info` dava na HEAD anterior, colada no Log
 
 ## Notes
@@ -103,3 +103,5 @@ $ (idem para _2)                                                                
 
 O critério do `git log --follow` fica aberto: só se confere depois do commit
 que registra o move, e quem commita é o fluxo principal.
+
+Critério do `git log --follow`, medido pelo fio principal depois do commit de trabalho `3495bb77`: `git log --follow --oneline tools/duckmcp/savestate.py | tail -1` → `d9d090e9 feat(pes2): read PSX RAM out of a save state, and drop the emulator fork`, o mesmo de `git log --oneline --diff-filter=A -- tools/pes2/savestate.py | tail -1` (o primeiro commit do arquivo original). Um commit só basta: com o caminho antigo virando shim no mesmo commit, o `--follow` acha a cópia — testado antes numa worktree descartável, contra a alternativa de dois commits (rename puro, depois o shim), e as duas dão a mesma linha.
