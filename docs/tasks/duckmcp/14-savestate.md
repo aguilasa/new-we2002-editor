@@ -58,15 +58,10 @@ O que a adaptação mudou, e por quê:
 - `Skip` vem de `duckmcp.errors`; `BadState` ficou local (é do formato).
 
 Vermelho visto (cópia da árvore em scratchpad, desligando a guarda do marcador
-deslocado e repondo o serial antigo):
-
-```
-$ python3 <cópia>/tools/duckmcp/selftest.py --quiet; echo exit=$?
-  FAIL  savestate: a kernel mark 45 bytes off is refused  accepted it -- this is the bug that shipped
-  FAIL  rule (c): savestate.py holds no game serial  line 468: SLES-00000
-duckmcp_selftest: 361 check(s) ran, 2 failure(s)
-exit=1
-```
+deslocado e repondo o serial antigo): `2 failure(s)`, as duas asserções que
+o defeito mira. A cópia era sem nome e o patch estava só em prosa; os passos
+que a refazem a partir do git estão na entrada de 2026-10-22 abaixo
+(CORR-DMCP-016).
 
 Verde, na árvore:
 
@@ -88,18 +83,11 @@ $ ctest --test-dir build -R 'duckmcp_selftest|pes2_selftest'
 100% tests passed, 0 tests failed out of 2
 ```
 
-Saída de `info` idêntica à da HEAD anterior: as referências foram capturadas
-com o arquivo antigo (`python3 tools/pes2/savestate.py info
-work/looks-states/SLPM-87056_<n>.sav`) antes da mudança, e comparadas com
-`cmp` contra a lib e contra o shim:
-
-```
-$ python3 tools/duckmcp/savestate.py info work/looks-states/SLPM-87056_1.sav > lib_1.txt; cmp lib_1.txt sav_info_before_1.txt  -> identical
-$ python3 tools/pes2/savestate.py info work/looks-states/SLPM-87056_1.sav > shim_1.txt; cmp shim_1.txt sav_info_before_1.txt -> identical
-$ (idem para _2)                                                                                                       -> identical
-3104c3e8d1a35b61759b51cb92267a984232d8d5908ea2c56f368155388a9242  lib_1.txt = shim_1.txt = sav_info_before_1.txt
-38a70d7dddc0932d757ce311c69a5368b5b93808fd7baa1adecd5bb3b8ff6ceb  lib_2.txt = shim_2.txt = sav_info_before_2.txt
-```
+Saída de `info` idêntica à da HEAD anterior. As referências foram capturadas
+com o arquivo antigo antes da mudança, num arquivo que não ficou em lugar
+nenhum, e os digests eram `3104c3e8…` (`_1`) e `38a70d7d…` (`_2`). As
+conferências que se refazem do git, para `info`, `diff`, `scan` e `shot`,
+estão na entrada de 2026-10-22 abaixo (CORR-DMCP-016).
 
 O critério do `git log --follow` fica aberto: só se confere depois do commit
 que registra o move, e quem commita é o fluxo principal.
@@ -109,3 +97,60 @@ Critério do `git log --follow`, medido pelo fio principal depois do commit de t
   - Files (`git show --name-status 09609aed`):
     - `M docs/tasks/duckmcp/14-savestate.md`
 - **Reviewed** (2026-10-22) at `661993fc`: CORR-DMCP-016
+
+### 2026-10-22 — conferências refeitas do git (CORR-DMCP-016), HEAD `5330355b`
+
+Partem de um clone limpo mais `work/looks-states/`. A versão antiga é a de `74cfe939`, com numpy e
+Pillow (`numpy 2.5.2`, `Pillow 12.3.0` nesta máquina). Rodado em `zsh`: nos laços, um par se escreve
+`a:b` e se separa por expansão, porque o `zsh` não divide palavra de variável.
+
+```text
+$ S=$(mktemp -d); git archive 74cfe939 tools | tar -x -C "$S"; ST=work/looks-states/SLPM-87056
+$ for n in 1 2; do
+    python3 "$S"/tools/pes2/savestate.py info ${ST}_$n.sav > "$S"/old_$n.txt
+    python3 tools/duckmcp/savestate.py info ${ST}_$n.sav > "$S"/lib_$n.txt
+    python3 tools/pes2/savestate.py info ${ST}_$n.sav > "$S"/shim_$n.txt
+    cmp "$S"/old_$n.txt "$S"/lib_$n.txt && cmp "$S"/old_$n.txt "$S"/shim_$n.txt && echo "info _$n: old = lib = shim"
+    sha256sum "$S"/old_$n.txt | cut -c1-64
+  done
+info _1: old = lib = shim
+3104c3e8d1a35b61759b51cb92267a984232d8d5908ea2c56f368155388a9242
+info _2: old = lib = shim
+38a70d7dddc0932d757ce311c69a5368b5b93808fd7baa1adecd5bb3b8ff6ceb
+$ python3 "$S"/tools/pes2/savestate.py diff ${ST}_1.sav ${ST}_2.sav > "$S"/olddiff.txt
+$ python3 tools/duckmcp/savestate.py diff ${ST}_1.sav ${ST}_2.sav > "$S"/newdiff.txt
+$ cmp "$S"/olddiff.txt "$S"/newdiff.txt && echo "diff: old = lib"; head -1 "$S"/newdiff.txt
+diff: old = lib
+8715 run(s), 25769 byte(s) differ (1.23% of RAM)
+$ n=0; for w in 1 2 4; do for sg in "" --signed; do for v in 0:0 1:1 7:7 16:17 100:100; do a=${v%:*}; b=${v#*:}
+    python3 "$S"/tools/pes2/savestate.py scan --width $w $sg ${ST}_1.sav=$a ${ST}_2.sav=$b > "$S"/os.txt 2>&1
+    python3 tools/duckmcp/savestate.py scan --width $w $sg ${ST}_1.sav=$a ${ST}_2.sav=$b > "$S"/ns.txt 2>&1
+    cmp -s "$S"/os.txt "$S"/ns.txt && n=$((n+1)) || echo "scan DIFFERS w=$w $sg $v"; done; done; done; echo "scan: $n of 30 runs old = lib"
+scan: 30 of 30 runs old = lib
+$ for n in 1 2; do
+    python3 "$S"/tools/pes2/savestate.py shot ${ST}_$n.sav --out "$S"/old_$n.png
+    python3 tools/duckmcp/savestate.py shot ${ST}_$n.sav --out "$S"/new_$n.png
+    python3 -I -c "import sys; from PIL import Image; a=Image.open(sys.argv[1]).convert('RGB'); b=Image.open(sys.argv[2]).convert('RGB'); print('shot _$n (Pillow):', a.size, 'equal' if a.tobytes()==b.tobytes() else 'DIFFER')" "$S"/old_$n.png "$S"/new_$n.png
+  done
+256x192 -> …/old_1.png
+256x192 -> …/new_1.png
+shot _1 (Pillow): (256, 192) equal
+256x192 -> …/old_2.png
+256x192 -> …/new_2.png
+shot _2 (Pillow): (256, 192) equal
+```
+
+O caso vermelho, com o patch nas duas linhas `sed` exatas, aplicadas numa cópia da HEAD:
+
+```text
+$ C=$(mktemp -d); git archive HEAD tools | tar -x -C "$C"
+$ sed -i 's/^            if at != KERNEL_MARK_AT:$/            if False:/' "$C"/tools/duckmcp/savestate.py
+$ sed -i 's/b"NONE-00000"/b"SLES-00000"/' "$C"/tools/duckmcp/savestate.py
+$ diff <(git show HEAD:tools/duckmcp/savestate.py) "$C"/tools/duckmcp/savestate.py | grep -c '^>'
+2
+$ python3 "$C"/tools/duckmcp/selftest.py --quiet; echo exit=$?
+  FAIL  savestate: a kernel mark 45 bytes off is refused  accepted it -- this is the bug that shipped
+  FAIL  rule (c): savestate.py holds no game serial  line 468: SLES-00000
+duckmcp_selftest: 361 check(s) ran, 2 failure(s)
+exit=1
+```

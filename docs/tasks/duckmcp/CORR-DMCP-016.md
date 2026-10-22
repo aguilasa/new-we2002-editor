@@ -47,3 +47,23 @@ dependa deles, e toda linha `$` nova roda a partir de um clone limpo mais `work/
 saída colada.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido: o `grep 'sav_info_before\|<cópia>'` achava as linhas `$` do Log
+(64, 97-101), e nenhum passo versionado as refazia.
+
+Conserto: as duas conferências que dependiam de arquivo sumido viraram prosa com os valores e uma
+remissão. A entrada nova do Log da 14 refaz tudo a partir de `git archive 74cfe939`: `info` (antigo =
+lib = shim, nos dois digests), `diff` (8715 corridas, `cmp` igual), `scan` (30 de 30 corridas, larguras
+1/2/4, com e sem sinal, cinco pares) e `shot` (pixels iguais pelo Pillow). O caso vermelho entrou como
+as duas linhas `sed` exatas numa cópia `git archive HEAD`. O `shot` não estava na conferência original
+e entrou aqui, porque a CORR o pede.
+
+Verificação:
+
+```text
+$ grep -n 'sav_info_before\|<cópia>' docs/tasks/duckmcp/14-savestate.md; echo grep=$?
+grep=1
+```
+
+As linhas `$` novas foram rodadas como estão escritas, e as saídas coladas são dessa corrida (HEAD
+`5330355b`).
