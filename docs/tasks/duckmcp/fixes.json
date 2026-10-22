@@ -57,6 +57,19 @@
       "started_at": "2026-10-22T15:56:57-03:00",
       "active_s": 64,
       "finished_at": "2026-10-22T15:58:01-03:00"
+    },
+    {
+      "id": "CORR-DMCP-005",
+      "file": "CORR-DMCP-005.md",
+      "title": "kits_selftest vermelho: o sandbox dos controles não copia tools/duckmcp, e o shim pes2/mcp.py não importa",
+      "origin": "DMCP-TASK-06",
+      "severity": "high",
+      "files": ["tools/kits/controls.py", "tools/kits/ui_check.py", "tools/looks/controls.py", "tools/looks/ui_check.py"],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
