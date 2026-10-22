@@ -81,3 +81,9 @@ $ python3 tools/duckmcp/selftest.py | grep -E 'png:.*vector|FAIL|check\(s\)'
   ok    png: a fixed vector of all five filters decodes as Pillow did
 duckmcp_selftest: 361 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `c0cf3724` (2026-10-22): test(duckmcp): give the fixed PNG vector one row per filter, 0 included
+  - Files (`git show --name-status c0cf3724`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-014.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/png.py`
