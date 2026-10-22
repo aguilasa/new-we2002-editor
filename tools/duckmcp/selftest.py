@@ -8,7 +8,10 @@ In this order:
 2. `errors.self_check()`: `SKIP == 77` and the exception hierarchy;
 3. `env.self_check()`: the new variable beats its legacy fallback, the
    legacy one alone beats the default, neither gives the default; the `:98`
-   rule of `x_env`; `is_roms` on both separators; the `state_path` shape.
+   rule of `x_env`; `is_roms` on both separators; the `state_path` shape;
+4. `audit.self_check()`: the audit of rule (b) over synthetic tools trees
+   built in a temporary directory -- a clean one counts 0, one planted
+   `import fork` counts 1, and each site category is seen once.
 
 Each failed assertion prints one `FAIL` line naming it. The last line says
 how many checks ran and how many failed; the exit is 0 only with none.
@@ -26,7 +29,7 @@ TOOLS_DIR = os.path.dirname(DUCKMCP_DIR)
 sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
-from duckmcp import env, errors  # noqa: E402
+from duckmcp import audit, env, errors  # noqa: E402
 
 
 class Checker:
@@ -76,6 +79,7 @@ def main(argv=None):
                        "SessionLost")))
     c.module("errors", errors.self_check)
     c.module("env", env.self_check)
+    c.module("audit", audit.self_check)
 
     print("duckmcp_selftest: %d check(s) ran, %d failure(s)" % (c.ran, c.failed))
     return 0 if c.failed == 0 else 1
