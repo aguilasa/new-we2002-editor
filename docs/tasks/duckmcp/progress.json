@@ -56,11 +56,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#3.3",
       "files": ["tools/duckmcp/selftest.py", "tools/duckmcp/controls.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-22",
+      "done_commit": "94c5634f",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-22T14:47:14-03:00",
+      "active_s": 287,
+      "finished_at": "2026-10-22T14:52:01-03:00"
     },
     {
       "id": "DMCP-TASK-04",

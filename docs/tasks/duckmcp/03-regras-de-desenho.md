@@ -91,3 +91,8 @@ $ cd build && ctest -R duckmcp_selftest
 1/1 Test #24: duckmcp_selftest .................   Passed    0.16 sec
 100% tests passed, 0 tests failed out of 1
 ```
+- **Closed** — commit `94c5634f` (2026-10-22): test(duckmcp): assert design rules (a), (c), (d) and plant them in controls.py
+  - Files (`git show --name-status 94c5634f`):
+    - `M docs/tasks/duckmcp/03-regras-de-desenho.md`
+    - `A tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`
