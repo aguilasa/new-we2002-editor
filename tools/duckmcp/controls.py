@@ -18,7 +18,9 @@ the stdlib on import, (c) nothing of a game inside the package, (d) only
 `env.py` reads the environment. Rule (b) closes in phase 4. Beside them,
 the controls of rule `client` break the transport itself and its liveness
 seam, and demand the assertion of `client.self_check()` or
-`fork.self_check()` that covers the broken behaviour.
+`fork.self_check()` that covers the broken behaviour; the control of rule
+`session` drops `duration_frames` from `Session.press` (pitfall 36) and
+demands the fake-client assertion of `session.self_check()`.
 
 The last line says how many controls ran, how many went red as required,
 and the count per rule; the exit is 0 only when every one did.
@@ -172,6 +174,15 @@ CONTROLS = (
         "FAIL  fork: select_pids drops our own pid even when pgrep lists it",
         None,
         "the own-pid filter dropped: kill() would SIGKILL its caller"),
+    Control(
+        "press-without-duration", "session", "session.py",
+        "        self.call(\"press_button\", button=name, duration_frames=frames,\n"
+        "                  **extra)\n",
+        "        self.call(\"press_button\", button=name,\n"
+        "                  **extra)\n",
+        "FAIL  session: press always sends duration_frames (pitfall 36)", None,
+        "the press without its release: the server holds the button until "
+        "something else lets it go (pitfall 36)"),
     Control(
         "live-kills-on-skip", "live", "live.py",
         "        if set(fork.running_pids()) - running:\n",

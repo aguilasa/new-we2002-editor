@@ -9,9 +9,10 @@ serial, a title, a menu route or a game's RAM address. Callers put `tools/`
 from .errors import (SKIP, Fail, NotRunning, SessionLost, Skip,  # noqa: F401
                      ToolError)
 from .client import Client  # noqa: F401
+from .session import Session  # noqa: F401
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 """The package version; bumped when the public surface changes."""
 
-__all__ = ["Client", "SKIP", "Fail", "Skip", "NotRunning", "ToolError",
+__all__ = ["Session", "Client", "SKIP", "Fail", "Skip", "NotRunning", "ToolError",
            "SessionLost", "__version__"]

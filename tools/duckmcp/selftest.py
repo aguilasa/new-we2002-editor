@@ -25,6 +25,16 @@ In this order:
    sends, the old flags become subcommand lines; and `cli.py list` against
    a refused port (port 1), run as a script, exits 77 with the
    `NotRunning` sentence on stderr;
+5b. `buttons.self_check()`: the sixteen names round-trip in any
+   capitalisation, junk is refused with the list, and `canonical()` agrees
+   with the `capitalize()` rule it replaces; `session.self_check()`, against
+   a fake client that records calls: `press` always sends `duration_frames`
+   (pitfall 36) and steps `frames + after`, `Session(fake)` takes any object
+   with `initialize`, `call`, `session`, `server`, `capture` returns a path,
+   `read_ram` checks the length, `game()` reads `game_serial`/`game_title`,
+   `save_state` waits for the file, and the fork is killed on exit only when
+   the session launched it; then, here, importing `duckmcp.session` in a
+   fresh interpreter loads no imaging library;
 6. `audit.self_check()`: the audit of rule (b) over synthetic tools trees
    built in a temporary directory -- a clean one counts 0, one planted
    `import fork` counts 1, and each site category is seen once;
@@ -65,7 +75,8 @@ TOOLS_DIR = os.path.dirname(DUCKMCP_DIR)
 sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
-from duckmcp import audit, cli, client, env, errors, fork, live  # noqa: E402
+from duckmcp import (audit, buttons, cli, client, env, errors,  # noqa: E402
+                     fork, live, session)
 
 JUDGES = ("selftest.py", "controls.py")
 """The files that hold the patterns of rule (c), and so are exempt from it."""
@@ -461,6 +472,16 @@ def check_live_kill(c):
         fork.launch, fork.kill, fork.running_pids = saved
 
 
+def check_session_imports(c):
+    """`capture` hands back a path, so the module needs no imaging library:
+    a fresh `-I` interpreter importing `duckmcp.session` loads none."""
+    names, error = loaded_foreign("duckmcp.session")
+    imaging = [n for n in names or () if n.split(".")[0] in ("PIL", "PySide6",
+                                                             "numpy")]
+    c.ok("session: importing duckmcp.session loads no PIL, PySide6 or numpy",
+         error is None and not imaging, error or imaging)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--quiet", action="store_true",
@@ -474,6 +495,8 @@ def main(argv=None):
     c.ok("duckmcp has a __version__", bool(getattr(duckmcp, "__version__", "")))
     c.ok("duckmcp re-exports Client", getattr(duckmcp, "Client", None)
          is client.Client)
+    c.ok("duckmcp re-exports Session", getattr(duckmcp, "Session", None)
+         is session.Session)
     c.ok("duckmcp re-exports the errors",
          all(getattr(duckmcp, n, None) is getattr(errors, n)
              for n in ("SKIP", "Fail", "Skip", "NotRunning", "ToolError",
@@ -486,6 +509,9 @@ def main(argv=None):
     c.module("cli", cli.self_check)
     check_cli_refused(c)
     check_live_kill(c)
+    c.module("buttons", buttons.self_check)
+    c.module("session", session.self_check)
+    check_session_imports(c)
     c.module("audit", audit.self_check)
     check_rules(c)
 
