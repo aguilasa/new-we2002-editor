@@ -92,3 +92,11 @@ duckmcp_selftest: 198 check(s) ran, 0 failure(s)
 $ python3 tools/duckmcp/controls.py | tail -1
 duckmcp_controls: 20 control(s), 20 red as required; per rule (a) 2/2, (c) 8/8, (client) 2/2, (d) 4/4, (fork) 3/3, (live) 1/1
 ```
+- **Closed** — commit `2d80af64` (2026-10-22): fix(duckmcp): stop the fork in live.py only when this run launched one
+  - Files (`git show --name-status 2d80af64`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-011.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/live.py`
+    - `M tools/duckmcp/selftest.py`
