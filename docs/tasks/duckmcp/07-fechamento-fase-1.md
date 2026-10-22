@@ -40,3 +40,6 @@ Verificações da Fase 1 do perfil, uma a uma:
 - `python3 -c 'import sys; sys.path.insert(0, "tools"); import duckmcp.client; print(sorted(m for m in sys.modules if m.split(".")[0] in ("PIL","PySide6","numpy")))'` → `[]`.
 
 Sweep: nenhum nome, arquivo ou número mudou nesta task — `sweep: none`.
+- **Closed** — commit `26d02a3e` (2026-10-22): docs(duckmcp): close phase 1, gates and phase checks re-run
+  - Files (`git show --name-status 26d02a3e`):
+    - `M docs/tasks/duckmcp/07-fechamento-fase-1.md`
