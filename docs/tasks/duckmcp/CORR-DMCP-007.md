@@ -90,3 +90,10 @@ duckmcp_controls: 19 control(s), 19 red as required; per rule (a) 2/2, (c) 8/8, 
 $ python3 tools/duckmcp/selftest.py --quiet
 duckmcp_selftest: 196 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `cc8d5a39` (2026-10-22): test(duckmcp): make the widest-window and own-pid checks able to fail
+  - Files (`git show --name-status cc8d5a39`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-007.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/fork.py`
