@@ -81,3 +81,10 @@ tools/duckmcp/gpu.py:1
 $ python3 tools/duckmcp/selftest.py --quiet
 duckmcp_selftest: 361 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `6e3a4beb` (2026-10-22): docs(duckmcp): list 81..9F and C1..DF among the opcodes the looks copy lost
+  - Files (`git show --name-status 6e3a4beb`):
+    - `M docs/tasks/duckmcp/13-hardware-e-pixels.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-015.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/gpu.py`
