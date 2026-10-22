@@ -60,3 +60,11 @@ Modelo de forma: `tools/kit2d/selftest.py` e o alvo `kit2d_selftest`. O `drive.p
 - `cmake -S . -B build >/dev/null && ctest --test-dir build -R duckmcp_selftest` → `1/1 Test #24: duckmcp_selftest .................   Passed    0.02 sec`, `100% tests passed, 0 tests failed out of 1`, sem *skipped*. Timeout 30 s, muito acima de 1,5× os 0,01 s medidos por `/usr/bin/time -f %e` em três corridas.
 - Decisões: string vazia conta como não definida (`DUCKSTATION_MCP_PORT=` cai para o legado, não vira `int("")`); toda função lê o ambiente na chamada, e recebe `environ` opcional para o self-check não tocar no processo; `x_env` só mexe em `DISPLAY` e `XAUTHORITY` — `LD_LIBRARY_PATH` e `QT_PLUGIN_PATH` ficam para o lançamento do fork (fase 1); `is_roms` normaliza `os.sep` **e** `\`, para a asserção das barras invertidas valer também no Linux.
 - Os nomes legados `PES2_*` aparecem em `env.py` como literais — a tabela `LEGACY` e as asserções de precedência — e não só em comentário de linhagem. A regra (c) do §3.3, quando o `controls.py` a varrer, precisa isentar esses cinco nomes no `env.py`, ou a regra muda.
+- **Closed** — commit `b5d381a7` (2026-10-22): build(duckmcp): add tools/duckmcp skeleton, errors.py, env.py and duckmcp_selftest
+  - Files (`git show --name-status b5d381a7`):
+    - `M docs/tasks/duckmcp/01-esqueleto.md`
+    - `M tests/CMakeLists.txt`
+    - `A tools/duckmcp/__init__.py`
+    - `A tools/duckmcp/env.py`
+    - `A tools/duckmcp/errors.py`
+    - `A tools/duckmcp/selftest.py`
