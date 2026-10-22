@@ -66,3 +66,4 @@ Sweep: `live.py` mudou de contrato (linha final e o que afirma). O docstring del
   - Files (`git show --name-status 09cafe76`):
     - `M docs/tasks/duckmcp/15-fechamento-fase-3.md`
     - `M tools/duckmcp/live.py`
+- **Reviewed** (2026-10-22) at `5127bd79`: CORR-DMCP-017, CORR-DMCP-018, CORR-DMCP-019, CORR-DMCP-020

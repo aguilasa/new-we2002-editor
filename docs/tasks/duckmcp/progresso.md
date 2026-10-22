@@ -130,7 +130,7 @@ graph TD
 | [DMCP-TASK-12](/docs/tasks/duckmcp/12-session.md) | `buttons.py` e `session.py` — a sessão, com `game()` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-13](/docs/tasks/duckmcp/13-hardware-e-pixels.md) | `psx.py`, `gpu.py`, `png.py` e `vram.py` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-14](/docs/tasks/duckmcp/14-savestate.md) | `savestate.py` movido para a lib, com shim no `pes2` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-15](/docs/tasks/duckmcp/15-fechamento-fase-3.md) | Fechamento da Fase 3 — as primitivas | 3 | closing | DMCP-TASK-12, DMCP-TASK-13, DMCP-TASK-14 | done | 2026-10-22 | pending |
+| [DMCP-TASK-15](/docs/tasks/duckmcp/15-fechamento-fase-3.md) | Fechamento da Fase 3 — as primitivas | 3 | closing | DMCP-TASK-12, DMCP-TASK-13, DMCP-TASK-14 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-16](/docs/tasks/duckmcp/16-debug.md) | `debug.py` — uma espera, breakpoints que sempre limpam, `who_writes` e watches | 4 | implementação | DMCP-TASK-15 | pending | — | — |
 | [DMCP-TASK-17](/docs/tasks/duckmcp/17-regra-b.md) | Regra (b) como gate, e os controles da lib completos | 4 | verificação | DMCP-TASK-16 | pending | — | — |
 | [DMCP-TASK-18](/docs/tasks/duckmcp/18-fechamento-fase-4.md) | Fechamento da Fase 4 — a depuração | 4 | closing | DMCP-TASK-16, DMCP-TASK-17 | pending | — | — |

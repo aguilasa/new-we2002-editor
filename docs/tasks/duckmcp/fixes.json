@@ -261,6 +261,58 @@
       "started_at": "2026-10-22T19:01:47-03:00",
       "active_s": 90,
       "finished_at": "2026-10-22T19:03:17-03:00"
+    },
+    {
+      "id": "CORR-DMCP-017",
+      "file": "CORR-DMCP-017.md",
+      "title": "Capturar PngError no live.main para a última linha ser sempre o veredito",
+      "origin": "DMCP-TASK-15",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-018",
+      "file": "CORR-DMCP-018.md",
+      "title": "Versionar controles para os checks de RAM, VRAM e serial do live.py",
+      "origin": "DMCP-TASK-15",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-019",
+      "file": "CORR-DMCP-019.md",
+      "title": "Atualizar o docstring e a linha FAIL do live.py para os checks novos",
+      "origin": "DMCP-TASK-15",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-020",
+      "file": "CORR-DMCP-020.md",
+      "title": "Colar inteira no Log da 15 a transcrição do duckmcp_live",
+      "origin": "DMCP-TASK-15",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
