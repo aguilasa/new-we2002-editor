@@ -1354,7 +1354,9 @@ nunca à mão. Comandos: `/rite:status`, `/rite:execute`, `/rite:review`, `/rite
 
 **Um ciclo vivo também pode morar numa subpasta**, desde 2026-09-07. O ciclo é
 o **argumento do comando**, pelo nome — `/rite:execute pes2`,
-`/rite:review pes2` — e o único vivo hoje é `pes2` (`docs/tasks/pes2/`);
+`/rite:review pes2` — e os vivos hoje são `pes2` (`docs/tasks/pes2/`),
+`kit2d` (`docs/tasks/kit2d/`) e `duckmcp` (`docs/tasks/duckmcp/`, a lib
+comum do MCP do DuckStation, [docs/PLAN-DUCKMCP-PY.md](docs/PLAN-DUCKMCP-PY.md));
 `wte`, `looks` e `port-mcr` estão arquivados. `depends_on` não atravessa pasta, e uma pasta é
 ciclo se, e só se, tem `progresso.md` próprio.
 
