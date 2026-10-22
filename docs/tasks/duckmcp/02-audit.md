@@ -313,3 +313,8 @@ exit=0
 ```
 
 **Selftest inteiro:** `python3 tools/duckmcp/selftest.py; echo exit=$?` termina em `duckmcp_selftest: 47 check(s) ran, 0 failure(s)` e `exit=0` (transcrição acima); `ctest --test-dir build -R duckmcp_selftest` dá `100% tests passed, 0 tests failed out of 1`.
+- **Closed** — commit `b1e38d58` (2026-10-22): feat(duckmcp): add audit.py, the probe of raw MCP sites per project
+  - Files (`git show --name-status b1e38d58`):
+    - `M docs/tasks/duckmcp/02-audit.md`
+    - `A tools/duckmcp/audit.py`
+    - `M tools/duckmcp/selftest.py`
