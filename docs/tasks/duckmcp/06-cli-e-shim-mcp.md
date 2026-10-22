@@ -77,3 +77,4 @@ $ ctest --test-dir build -R 'duckmcp_selftest|pes2_selftest' | tail -3
     - `A tools/duckmcp/cli.py`
     - `M tools/duckmcp/selftest.py`
     - `M tools/pes2/mcp.py`
+- **Reviewed** (2026-10-22) at `a964eaf3`: CORR-DMCP-004

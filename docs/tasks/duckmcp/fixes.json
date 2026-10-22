@@ -40,6 +40,19 @@
       "depends_on": [],
       "done_on": "2026-10-22",
       "done_commit": "9810b015"
+    },
+    {
+      "id": "CORR-DMCP-004",
+      "file": "CORR-DMCP-004.md",
+      "title": "Tirar do shim mcp.py o monkeypatch de vivacidade e a lógica de teste própria",
+      "origin": "DMCP-TASK-06",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
