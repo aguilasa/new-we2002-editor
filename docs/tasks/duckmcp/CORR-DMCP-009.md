@@ -69,3 +69,10 @@ $ grep -n 'procs' docs/PLAN-DUCKMCP-PY.md
 $ grep -n 'launch/kill/status' docs/PLAN-DUCKMCP-PY.md; echo exit=$?
 exit=1
 ```
+- **Closed** — commit `124bd8b2` (2026-10-22): docs(duckmcp): name procs as the process status of cli.py in the plan
+  - Files (`git show --name-status 124bd8b2`):
+    - `M docs/PLAN-DUCKMCP-PY.md`
+    - `M docs/tasks/duckmcp/09-cli-fork-e-lancadores.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-009.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
