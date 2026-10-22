@@ -40,8 +40,9 @@ sys.path.insert(0, os.path.join(TOOLS_DIR, "pes2"))
 
 from core import layout  # noqa: E402
 
-LAYOUT_FILE = "layout.py"
-SELF_FILE = os.path.basename(os.path.abspath(__file__))
+# The two files allowed to spell the addresses, by path: a layout.py elsewhere
+# in kit2d/ is not exempt.
+EXEMPT_FILES = (os.path.abspath(layout.__file__), os.path.abspath(__file__))
 
 
 class Checker:
@@ -164,7 +165,7 @@ def address_breaks(folder: str = KIT2D_DIR) -> list:
     wanted = set(layout.ADDRESSES)
     out = []
     for path in _py_files(folder):
-        if os.path.basename(path) in (LAYOUT_FILE, SELF_FILE):
+        if os.path.abspath(path) in EXEMPT_FILES:
             continue
         for tok in _tokens(path):
             if tok.type != tokenize.NUMBER:
@@ -194,6 +195,8 @@ PLANTS = (
      "print('x')\n", core_rule_breaks, "core"),
     ("an address literal outside layout.py", "planted.py",
      "OFFSET = 0x3F534\n", address_breaks, ""),
+    ("an address literal in a file merely named layout.py",
+     os.path.join("ui", "layout.py"), "OFFSET = 172096\n", address_breaks, ""),
 )
 
 
@@ -202,6 +205,7 @@ def _plant_checks(c: Checker) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             os.makedirs(os.path.join(tmp, "core"))
             clean = rule(os.path.join(tmp, scope))
+            os.makedirs(os.path.dirname(os.path.join(tmp, rel)), exist_ok=True)
             with open(os.path.join(tmp, rel), "w", encoding="utf-8") as fh:
                 fh.write(text)
             red = rule(os.path.join(tmp, scope))
