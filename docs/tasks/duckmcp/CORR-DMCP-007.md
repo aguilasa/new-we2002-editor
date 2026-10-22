@@ -60,3 +60,33 @@ As duas plantas da Evidência deixam `python3 tools/duckmcp/selftest.py` com pel
 vermelhos. Na árvore real, o selftest sai 0.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido na HEAD `69910a9f`, e as duas plantas da Evidência dão
+`duckmcp_selftest: 194 check(s) ran, 0 failure(s)`. Na (b) aparece
+`ok    fork: running_pids never returns our own pid`.
+
+Conserto:
+- (a) Na lista `seen` do `self_check`, ("Other", 400) passou a vir antes de ("Some Game", 800).
+- (b) O parse do `pgrep` já é a função pura `select_pids(found, own, cmdline)`, desde a CORR-DMCP-008. O
+  check novo dá a ela o próprio PID na entrada e exige que ele saia; o check vivo antigo continua lá.
+- Controles novos: `fork-first-window-wins` (`return kept[0][1]`) e `fork-own-pid-kept` (sem
+  `pid == own`). O texto da planta (b) da Evidência mudou de lugar com a CORR-DMCP-008, e o controle
+  planta onde o filtro mora agora.
+
+Verificação:
+
+```text
+$ <planta (a) da Evidência numa cópia>; python3 tools/duckmcp/selftest.py | grep -E 'FAIL|check\(s\)'
+  FAIL  fork: with no match the widest non-dialog window wins  o
+  FAIL  fork: ANY_WINDOW is the same as no match
+duckmcp_selftest: 196 check(s) ran, 2 failure(s)
+$ python3 tools/duckmcp/controls.py --only fork-first-window-wins | tail -1
+duckmcp_controls: 1 control(s), 1 red as required; per rule (fork) 1/1
+$ python3 tools/duckmcp/controls.py --only fork-own-pid-kept | tail -2
+red    fork-own-pid-kept (rule fork): FAIL  fork: select_pids drops our own pid even when pgrep lists it  [7, 8]
+duckmcp_controls: 1 control(s), 1 red as required; per rule (fork) 1/1
+$ python3 tools/duckmcp/controls.py | tail -1
+duckmcp_controls: 19 control(s), 19 red as required; per rule (a) 2/2, (c) 8/8, (client) 2/2, (d) 4/4, (fork) 3/3
+$ python3 tools/duckmcp/selftest.py --quiet
+duckmcp_selftest: 196 check(s) ran, 0 failure(s)
+```

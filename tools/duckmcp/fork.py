@@ -901,6 +901,11 @@ def self_check() -> list:
           "duckstation-mcp" in RECIPE)
     check("running_pids never returns our own pid",
           os.getpid() not in running_pids())
+    # pgrep -x never lists this python, so the live call above cannot go red:
+    # the own-pid filter is judged on select_pids, with our pid in the input.
+    check("select_pids drops our own pid even when pgrep lists it",
+          select_pids(["7", "8"], 7, lambda p: "duckstation-qt") == [8],
+          select_pids(["7", "8"], 7, lambda p: "duckstation-qt"))
     lines = {"11": "/opt/other-app/AppRun\0300", "12": "/x/DuckStation.AppImage",
              "13": "/home/u/duckstation-mcp/bin/duckstation-qt"}
     check("an AppRun whose command line is not DuckStation's is spared",
@@ -909,8 +914,9 @@ def self_check() -> list:
                                    lambda p: lines[str(p)]))
 
     # The window choice, which launch() feeds from X or Win32.
+    # The narrower window comes first, so "take the first" cannot pass.
     seen = [("Automatic Updater", 651, "d"), ("Qt Selection Owner", 3000, "q"),
-            ("Some Game", 800, "g"), ("Other", 400, "o")]
+            ("Other", 400, "o"), ("Some Game", 800, "g")]
     check("with no match the widest non-dialog window wins",
           pick_window(seen) == "g", pick_window(seen))
     check("ANY_WINDOW is the same as no match",

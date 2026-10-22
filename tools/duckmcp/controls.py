@@ -159,6 +159,19 @@ CONTROLS = (
         "spared", None,
         "the command-line filter dropped: kill() SIGKILLs every type-2 "
         "AppImage, since all of them run as AppRun"),
+    Control(
+        "fork-first-window-wins", "fork", "fork.py",
+        "return max(kept, key=lambda pair: pair[0])[1]",
+        "return kept[0][1]",
+        "FAIL  fork: with no match the widest non-dialog window wins", None,
+        "the pes2 rule the move replaced: the first window, not the widest"),
+    Control(
+        "fork-own-pid-kept", "fork", "fork.py",
+        "        if pid == own or pid in pids:\n",
+        "        if pid in pids:\n",
+        "FAIL  fork: select_pids drops our own pid even when pgrep lists it",
+        None,
+        "the own-pid filter dropped: kill() would SIGKILL its caller"),
 )
 """Every control, in report order."""
 
