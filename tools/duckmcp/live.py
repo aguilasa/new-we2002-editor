@@ -12,7 +12,11 @@ What it does, in order: `fork.launch` (no title match), `pause`, count
 `tools/list`, read `get_status` `frame_number`, call `frame_step` `--steps`
 times, read `frame_number` again and demand it advanced by **exactly** the
 number of steps -- measured on 2026-10-22, one `frame_step` is one frame of
-`frame_number`, paused before and after. The fork is killed once `launch`
+`frame_number`, paused before and after. Then, through a `Session` wrapping
+the same client (which does not own the process): all of main RAM by
+`read_ram` must be `psx.RAM_SIZE` bytes, `dump_vram` must write a PNG of
+`psx.VRAM_WIDTH` x `psx.VRAM_HEIGHT`, and `game()` must name a serial --
+whatever disc it is, the gate only asks that one is loaded. The fork is killed once `launch`
 returns, whatever happens after; when `launch` raises, only if a DuckStation
 pid appeared that was not there before -- a skipped run (no X server, no
 image) never stops an emulator it did not open (CORR-DMCP-011).
@@ -25,7 +29,9 @@ count is wrong. The last line is always
 
 import argparse
 import os
+import shutil
 import sys
+import tempfile
 
 if __package__ in (None, ""):
     _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -33,7 +39,8 @@ if __package__ in (None, ""):
                    if os.path.abspath(p or os.curdir) != _HERE]
     sys.path.insert(0, os.path.dirname(_HERE))
 
-from duckmcp import env, fork  # noqa: E402
+from duckmcp import env, fork, png, psx  # noqa: E402
+from duckmcp.session import Session  # noqa: E402
 from duckmcp.errors import (SKIP, Fail, NotRunning, Skip,  # noqa: E402
                             ToolError)
 
@@ -52,7 +59,8 @@ def frame_number(client):
 def run(image, steps, display=None):
     """Launch, pause, count tools, step, compare; kill in `finally`.
 
-    Returns `(passed, tools, before, after)`.
+    Returns `(passed, tools, before, after, reads)`, `reads` the RAM length,
+    the VRAM PNG size and the `Game` that `game()` answered.
     """
     running = set(fork.running_pids())
     try:
@@ -73,9 +81,35 @@ def run(image, steps, display=None):
         after = frame_number(client)
         print("  frame_number %d -> %d after %d frame_step"
               % (before, after, steps), flush=True)
-        return after - before == steps, len(names), before, after
+        reads = read_back(Session(client=client))
+        passed = (after - before == steps
+                  and reads["ram"] == psx.RAM_SIZE
+                  and reads["vram"] == (psx.VRAM_WIDTH, psx.VRAM_HEIGHT)
+                  and reads["game"].serial is not None)
+        return passed, len(names), before, after, reads
     finally:
         fork.kill(verbose=False)
+
+
+def read_back(session):
+    """Main RAM, all of VRAM and `game()`, through `Session`.
+
+    The VRAM goes to a temporary PNG, decoded with `png.read_png` for its
+    size only; the folder is removed whatever happens.
+    """
+    ram = len(session.read_ram(psx.RAM_BASE, psx.RAM_SIZE))
+    print("  read_ram: %d bytes from %#x" % (ram, psx.RAM_BASE), flush=True)
+    scratch = tempfile.mkdtemp(prefix="duckmcp-live-")
+    try:
+        width, height, _rows = png.read_png(
+            session.dump_vram(os.path.join(scratch, "vram.png")))
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+    print("  dump_vram: %dx%d" % (width, height), flush=True)
+    game = session.game()
+    print("  game(): serial=%r title=%r" % (game.serial, game.title),
+          flush=True)
+    return {"ram": ram, "vram": (width, height), "game": game}
 
 
 def main(argv=None):
@@ -93,7 +127,8 @@ def main(argv=None):
         return SKIP
     print("duckmcp_live: %s, %d steps" % (image, args.steps), flush=True)
     try:
-        passed, tools, before, after = run(image, args.steps, args.display)
+        passed, tools, before, after, reads = run(image, args.steps,
+                                                  args.display)
     except Skip as exc:
         print("duckmcp_live: skipped -- %s" % exc)
         return SKIP
@@ -102,9 +137,10 @@ def main(argv=None):
         return 1
     verdict = "ok" if passed else "FAIL"
     print("duckmcp_live: %s -- frame_number moved %d for %d frame_step "
-          "(want %d); tools=%d frames %d->%d"
+          "(want %d); tools=%d frames %d->%d; ram=%d vram=%dx%d serial=%s"
           % (verdict, after - before, args.steps, args.steps, tools,
-             before, after))
+             before, after, reads["ram"], reads["vram"][0], reads["vram"][1],
+             reads["game"].serial))
     return 0 if passed else 1
 
 
