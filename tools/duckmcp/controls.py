@@ -109,6 +109,11 @@ CONTROLS = (
         "FAIL  rule (d): audit.py does not read the environment", None,
         "the same read spelled without `os.`"),
     Control(
+        "d-aliased-os", "d", "errors.py", ANCHOR,
+        "\nimport os as _os\nSKIP = int(_os.environ.get('SKIP', '77'))\n",
+        "FAIL  rule (d): errors.py does not read the environment", None,
+        "the same read through `os` bound to another name"),
+    Control(
         "d-xauthority", "d", "errors.py", ANCHOR,
         "\n# the cookie goes in XAUTHORITY\nSKIP = 77\n",
         "FAIL  rule (d): errors.py does not mention XAUTHORITY", None,

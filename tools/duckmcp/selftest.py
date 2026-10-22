@@ -103,6 +103,9 @@ ENV_ATTRS = ("environ", "environb", "getenv", "getenvb", "putenv",
              "unsetenv")
 """The `os` names that read or write the environment (rule (d))."""
 
+OS_MODULES = ("os", "posix", "nt")
+"""The modules that hold those names: `os` and its two platform halves."""
+
 XAUTH = "XAUTHORITY"
 """The variable only `env.py` may build (rule (d))."""
 
@@ -257,16 +260,23 @@ def outside_hardware(value):
 
 def env_reads(tree):
     """`(line, what)` of each environment access in a parsed module."""
+    # the names `os` (or `posix`/`nt`, which hold the same reads) is bound
+    # to: `import os as _os` reads through `_os.environ`
+    modules = {"os"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules.update(a.asname or a.name for a in node.names
+                           if a.name in OS_MODULES)
     out = []
     for node in ast.walk(tree):
         if (isinstance(node, ast.Attribute) and node.attr in ENV_ATTRS
                 and isinstance(node.value, ast.Name)
-                and node.value.id == "os"):
-            out.append((node.lineno, "os.%s" % node.attr))
-        elif (isinstance(node, ast.ImportFrom) and node.module == "os"
+                and node.value.id in modules):
+            out.append((node.lineno, "%s.%s" % (node.value.id, node.attr)))
+        elif (isinstance(node, ast.ImportFrom) and node.module in OS_MODULES
               and any(a.name in ENV_ATTRS for a in node.names)):
-            out.append((node.lineno, "from os import %s"
-                        % ", ".join(a.name for a in node.names)))
+            out.append((node.lineno, "from %s import %s"
+                        % (node.module, ", ".join(a.name for a in node.names))))
         elif (isinstance(node, ast.Name) and node.id in ("environ", "getenv")
               and isinstance(node.ctx, ast.Load)):
             out.append((node.lineno, node.id))

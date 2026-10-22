@@ -51,3 +51,29 @@ controle `d-aliased-os` com a substituição acima, esperando
 continua saindo 0 na árvore real.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido (cópia plantada com `import os as _os`: selftest 86 checks, exit 0). Causa
+confirmada: `env_reads()` comparava `node.value.id == "os"` literal.
+
+Conserto: `env_reads()` coleta os nomes ligados por `import os|posix|nt [as X]` (nova constante
+`OS_MODULES`) e trata `X.<ENV_ATTRS>` como leitura; o `from … import` passou a aceitar os três
+módulos. `controls.py` ganhou `d-aliased-os`, com a substituição da Evidência.
+
+Verificação:
+
+```text
+$ python3 tools/duckmcp/selftest.py --quiet; echo exit=$?
+duckmcp_selftest: 88 check(s) ran, 0 failure(s)
+exit=0
+$ python3 tools/duckmcp/controls.py --only d-aliased-os; echo exit=$?
+baseline: the untouched sandbox is green
+red    d-aliased-os (rule d): FAIL  rule (d): errors.py does not read the environment  line 12: _os.environ
+duckmcp_controls: 1 control(s), 1 red as required; per rule (d) 1/1
+exit=0
+$ python3 tools/duckmcp/controls.py | tail -1
+duckmcp_controls: 12 control(s), 12 red as required; per rule (a) 2/2, (c) 6/6, (d) 4/4
+$ python3 $T/tools/duckmcp/selftest.py --quiet; echo exit=$?   # cópia plantada da Evidência
+  FAIL  rule (d): errors.py does not read the environment  line 12: _os.environ
+duckmcp_selftest: 88 check(s) ran, 1 failure(s)
+exit=1
+```
