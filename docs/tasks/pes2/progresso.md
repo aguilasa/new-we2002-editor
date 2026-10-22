@@ -235,13 +235,12 @@ correspondência entre as oito listas estão feitos; falta o `poke` de
 validação, e é ele que fecha a fase — as PES2-TASK-02 a 04 são exatamente isso,
 partido em ferramenta, direção e medida.
 
-**A PES2-TASK-03 está `🔄 Em andamento` desde 2026-09-04**, e falta uma coisa
-só: **`replay` não tem rota versionada**. As outras quatro telas do quadro
-dela têm — `title`, `main-menu`, `team-select`, `edit` e `result` — e a
-repetibilidade foi medida: duas corridas seguidas de `team-select`, `edit` e
-`result` produzem PNG **idênticos byte a byte**. Quem a retomar começa por
-aí, porque a regra de seleção manda concluir o que está em andamento antes de
-pegar a próxima pendente.
+**A PES2-TASK-03 fechou em 2026-10-22**, com a rota `replay`: o usuário
+parkou um replay no **slot 5**, e a rota carrega, reconhece a tela pela
+legenda `□ GUARDAR` e captura — duas corridas, PNG **idêntico byte a byte**.
+As cinco telas do quadro dela têm rota — `team-select`, `edit`, `result`,
+`ending` e `replay`, mais `title` e `main-menu` no caminho —, e duas delas
+(`ending`, `replay`) só correm nesta máquina, porque partem de save state.
 
 **A tela `ending` foi alcançada em 2026-09-06.** O usuário jogou e ganhou uma
 Copa do Mundo, parkou a final no **slot 3**, e a rota `ending` existe: 130 s,

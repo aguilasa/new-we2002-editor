@@ -68,8 +68,12 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
 11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-12. **Quarenta e cinco armadilhas ao dirigir o DuckStation**, todas medidas
-    (§6.11) — eram treze quando este perfil foi escrito. **As seis últimas
+12. **Quarenta e seis armadilhas ao dirigir o DuckStation**, todas medidas
+    (§6.11) — eram treze quando este perfil foi escrito. **A 46 é do fork,
+    de 2026-10-22**: o servidor MCP guarda uma sessão só, e o Claude Code,
+    pelo `.mcp.json`, a rouba no meio de uma rota — `400 ... invalid
+    MCP-Session-Id` com o emulador vivo. O `mcp.py` refaz o handshake e
+    reenvia uma vez. **As seis de 2026-09-04
     são de 2026-09-04 e todas dizem a mesma coisa**: depois que a rota entra
     numa partida, **brilho não reconhece tela nenhuma**. As opções de partida
     abrem em `Al azar`, então o gramado lê 0,301 de dia e 0,1123 de noite, e

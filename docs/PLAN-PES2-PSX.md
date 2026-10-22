@@ -1473,7 +1473,7 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    > | `Programa` | **texto** (`Brasil`, `Rusia`, `Camerún`…) | tabela de jogos do campeonato |
    > | `Tabla torneo` | **texto** (`Brazil`, `Italy`, `Denmark`, `South Africa`) | rota `ending`, três toques antes do fim |
    > | **fim de campeonato** | **texto**, em corpo grande: `CHAMPION BRAZIL` | rota `ending` |
-   > | placar, replay, `RESULTADO`, menu pós-partida | bandeira | — |
+   > | placar, replay, `RESULTADO`, menu pós-partida | bandeira | replay: rota `replay`, do slot 5 (2026-10-22) |
    >
    > O `RESULTADO` de campeonato foi medido nesta data e confirma o
    > parágrafo acima — bandeira dos dois lados, sem texto —, mas a **segunda
@@ -1868,7 +1868,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Quarenta e cinco armadilhas ao dirigir o DuckStation
+### 6.11 Quarenta e seis armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -2266,6 +2266,21 @@ aponta para o lugar errado.
     teste é o mesmo e o resultado é outro, quem decide é a distância medida
     entre os dois lados — não o teste.
 
+46. **O servidor MCP do fork guarda uma sessão só, e o `initialize` mais
+    novo vence.** Esta é do fork, não do AppImage. Medido em 2026-10-22: um
+    segundo cliente que faz o handshake transforma toda chamada seguinte do
+    primeiro em `400 Bad Request: missing or invalid MCP-Session-Id`, com o
+    emulador vivo. O segundo cliente **não é nosso**: o `.mcp.json` do
+    projeto aponta o Claude Code para a mesma porta, e ele se conecta
+    sozinho quando a porta abre, num instante que rota nenhuma prevê. O
+    sintoma foi uma rota caindo em uma de três corridas, sempre no meio, e
+    sempre depois de alguns segundos — o que parecia o replay terminando
+    era o relógio do outro cliente. O `mcp.py` passou a refazer o handshake
+    e reenviar **uma vez** (`SessionLost`): a chamada recusada não chegou a
+    ferramenta nenhuma, então reenviar não repete efeito. O `--self-check`
+    do `mcp.py` reproduz a regra com um servidor local e tem o caso
+    vermelho — sem o `reclaim`, a chamada roubada falha.
+
 ---
 
 ### 6.12 Asset também tem conjunto de cópias — e ele é por idioma
@@ -2415,7 +2430,7 @@ continuam certos: 3 estrelas, 0 forks, 12.330 commits na branch `mcp`. E trocar 
 binário **invalida toda assinatura de quadro medida**: a da tela de título
 (0,550 / 0,341) e a do menu (0,1405 / 0,2124) saem do renderer e da versão,
 e as armadilhas da §6.11 são sobre o AppImage oficial — vinte e seis
-naquela data, quarenta e cinco hoje.
+naquela data, quarenta e seis hoje.
 
 > **A frase sobre as assinaturas foi medida em 2026-09-03 e está errada
 > pela metade.** As médias sobreviveram à troca de binário; o desvio da
@@ -2713,7 +2728,7 @@ mesmo dia — o caminho feliz inteiro percorrido **sem uma chamada de
 `Modo Editar` por `pause` mais cinco vezes (`Down` + doze `frame_step`).
 Cinco teclas, cinco linhas, com o emulador parado entre elas. É isso que o
 `xdotool` num display sem window manager não consegue dar, e é a raiz de boa
-parte das quarenta e cinco armadilhas da §6.11: o foco que segue o ponteiro, o
+parte das quarenta e seis armadilhas da §6.11: o foco que segue o ponteiro, o
 `TAP` contra o `HOLD` calibrados na tentativa, o auto-repeat que dá volta num
 menu de sete itens, e o `menu_pick` que **conta** quantas linhas registraram
 porque não dá para confiar que cinco teclas movam cinco.

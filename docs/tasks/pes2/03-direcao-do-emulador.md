@@ -92,8 +92,9 @@ tê-las em mente ao escolher as telas:
 ## Critério de conclusão
 
 - [x] Pelo menos **três** das cinco telas alcançadas e capturadas.
-      **Cinco** desde 2026-09-06 — `team-select`, `edit`, `result` e
-      `ending` por rota versionada, e `replay` à mão pelo `pad.py`.
+      **Cinco, todas por rota versionada**, desde 2026-10-22 —
+      `team-select`, `edit`, `result`, `ending` e `replay`. O `replay` foi
+      à mão pelo `pad.py` até essa data.
 
       > **O critério dizia "com o PNG mostrando um nome de time legível", e
       > isso o jogo não dá.** Medido em 2026-09-02 e reconfirmado em
@@ -115,6 +116,7 @@ tê-las em mente ao escolher as telas:
       | `result` | 225,78 s e 227,56 s | **0** |
       | `main-menu` | 52,71 s e 48,69 s | 0,00029855 |
       | `ending` | 131,03 s e 128,87 s | **0** (nas cinco capturas) |
+      | `replay` | 5,1 s e 5,1 s | **0** (2026-10-22) |
 
       **As três primeiras partem de save state e a quarta não**, e é isso
       que explica a diferença: a rota fria atravessa a abertura em tempo
@@ -128,8 +130,9 @@ tê-las em mente ao escolher as telas:
       tolerância do `PES2_TOLERANCE`; agora não é preciso tolerância
       nenhuma.
 
-      **`replay` continua sem rota versionada**, e é o que mantém esta task
-      parcial — as outras quatro têm, `ending` desde 2026-09-06.
+      **`replay` ganhou rota em 2026-10-22**, do slot 5 — ver a sexta
+      sessão no Log. `ending` e `replay` partem de save state que não entra
+      no git, então em outro clone as duas reportam *skipped*.
 - [x] As telas não alcançadas estão listadas, com o motivo e a via proposta.
 - [x] Encerra sempre pelo `run_duckstation.sh --kill`, sem deixar montagem
       FUSE nem janela órfã no `:98`.
@@ -686,5 +689,74 @@ gitignored).
   a lição é a de sempre: fiz backup só do slot 1 e devia ter feito de tudo.
   Agora `work/pes2-states/` guarda cada `.sav` e `.bak` com a data no nome.
 
-**O que continua faltando nesta task:** `replay` não tem rota versionada.
-É o único item aberto, e é o que a mantém `🔄 Em andamento`.
+**O que continuava faltando nesta task em 2026-09-06:** `replay` sem rota
+versionada. Fechado na sexta sessão, abaixo.
+
+---
+
+### Sexta sessão de 2026-10-22 — a rota `replay`, e a sessão MCP roubada
+
+**A task fecha.** O usuário dirigiu uma partida até um gol e salvou o
+replay no **slot 5** — o 1 é o atalho do menu, o 3 é o `ending` e o 4
+estava ocupado. A rota `replay` do `mcp_drive.py` carrega o slot, conta 30
+quadros com `frame_step` (o replay anima, então relógio de parede cairia
+num instante diferente a cada corrida), confere a tela e captura. Sem o
+`.sav` ela reporta *skipped*, como o `ending`.
+
+**O reconhecedor é a legenda `□ GUARDAR`, e não o logo nem a média.**
+`Repetición` pisca e some em poucos segundos; a câmera varre gramado, gol e
+torcida, e a média anda (0,2468–0,2537 em doze olhadas). A legenda fica
+parada no canto inferior esquerdo o replay inteiro, num azul claro
+(164, 222, 255) que nada mais desenha ali. Fração desses pixels no recorte
+`REPLAY_CAPTION`, medida com sondas sobre o slot 5 e o slot 4:
+
+| quadros | fração |
+|---|---:|
+| 27 olhadas do replay, 15 s dele | **0,1267** em todas |
+| 15 olhadas depois do fim do replay (saque congelado) | 0,0000 |
+| 20 olhadas de jogo corrido, com o painel `Radolno` no mesmo canto | 0,0000 |
+
+O limiar fica em 0,06. O `--self-check` traz o azul contra grama, caixa
+escura, texto branco do painel, a etiqueta vermelha `DL` e a borda cinza-
+azulada da própria caixa, e três defeitos plantados o derrubaram: limiar
+0,2, teste de cor frouxo (`b >= 100`), e `REPLAY_SLOT = 3`.
+
+```
+$ python3 tools/pes2/mcp_drive.py "<copia.cue>" --screen replay --out-dir <r1>
+  replay  GUARDAR share=0.1267
+MCP DRIVE OK: <r1>  5.1s, 0 presses, 32 frames stepped
+$ (de novo, em <r2>) ... MCP DRIVE OK: <r2>  5.1s, 0 presses, 32 frames stepped
+$ compare -metric AE r1/replay.png r2/replay.png null:
+0
+$ PES2_REPLAY_SLOT=4 python3 tools/pes2/mcp_drive.py ... --screen replay
+MCP DRIVE FAILED: slot 4 is not on a replay: the GUARDAR caption covers 0.0000 of its box, against 0.06 needed and 0.1267 measured
+$ PES2_REPLAY_SLOT=9 ...     # slot vazio
+skipping: no save state at .../SLES-03957_9.sav -- ...   (saída 77)
+```
+
+**O que quase escondeu isso: a sessão MCP roubada.** As primeiras sondas
+caíram no meio, uma em três, com `400 Bad Request: missing or invalid
+MCP-Session-Id` e o emulador vivo. Parecia o fim do replay e não era: o
+servidor do fork guarda **uma** sessão, o `initialize` mais novo vence, e o
+`.mcp.json` do projeto faz o Claude Code se conectar à porta 2346 sozinho
+quando ela abre. Provado com dois clientes nossos: o segundo handshake
+invalida o primeiro. O `mcp.py` passou a refazer o handshake e reenviar uma
+vez (`SessionLost`); a chamada recusada não chegou a ferramenta nenhuma. O
+`--self-check` dele reproduz a regra com um servidor local, e sem o
+`reclaim` o caso falha (vermelho visto). Virou a armadilha 46 da §6.11.
+
+**Arquivos criados/modificados**
+
+- `tools/pes2/mcp_drive.py` — a rota `replay`, `REPLAY_SLOT`,
+  `REPLAY_CAPTION`, `caption_blue`, `replay_caption_share`, e as asserções
+  do `--self-check`
+- `tools/pes2/mcp.py` — `SessionLost`, o `reclaim` do `Client.call`, e o
+  servidor de uma sessão do `--self-check`
+- `docs/PLAN-PES2-PSX.md` — §6.11 de 45 para **46** armadilhas, as duas
+  citações da contagem, e a linha do replay na tabela da §4.2 item 3a
+- `docs/prompts/perfil-pes2.md` — a armadilha 12 do perfil
+- `docs/tasks/pes2/progresso.md` — o parágrafo sobre esta task
+- `docs/tasks/pes2/03-direcao-do-emulador.md` — critérios e este Log
+
+Fora do repositório: `~/.local/share/duckstation/savestates/SLES-03957_5.sav`,
+com cópia em `work/pes2-states/SLES-03957_5.sav.20261022-135320`.

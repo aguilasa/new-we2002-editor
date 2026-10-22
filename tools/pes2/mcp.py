@@ -61,6 +61,21 @@ class ToolError(Exception):
     """The server took the call and refused it, or the tool itself failed."""
 
 
+class SessionLost(ToolError):
+    """The server no longer knows our session id.
+
+    **The fork keeps one MCP session, and the newest `initialize` wins.**
+    Measured on 2026-10-22: a second client's handshake turns every later
+    call of the first into `400 Bad Request: missing or invalid
+    MCP-Session-Id`. The second client is usually not ours -- the project's
+    `.mcp.json` points Claude Code at the same port, and it connects on its
+    own whenever the port opens, at a moment no route can predict. That is
+    what made a route fail one run in three, mid-replay, with the emulator
+    alive. `Client.call` answers it by handshaking again and resending once;
+    the refused request never reached a tool, so resending is safe.
+    """
+
+
 class Client:
     """One MCP session against the emulator.
 
@@ -71,7 +86,7 @@ class Client:
     """
 
     def __init__(self, host=DEFAULT_HOST, port=DEFAULT_PORT, timeout=30.0,
-                 name="pes2-tools"):
+                 name="pes2-tools", reclaim=True):
         self.host = host
         self.port = port
         self.timeout = timeout
@@ -80,6 +95,8 @@ class Client:
         self.session = None
         self.server = None
         self._id = 0
+        self.reclaim = reclaim       # handshake again when the session is taken
+        self.reclaimed = 0
 
     # -- context manager --
 
@@ -114,6 +131,9 @@ class Client:
                     self.session = sid
         except urllib.error.HTTPError as e:                  # pragma: no cover
             detail = e.read().decode("utf-8", "replace")[:400]
+            if e.code == 400 and "MCP-Session-Id" in detail and self.session:
+                raise SessionLost(f"HTTP 400 from the server: {detail}") \
+                    from None
             raise ToolError(f"HTTP {e.code} from the server: {detail}") from None
         except (urllib.error.URLError, socket.timeout, ConnectionError) as e:
             # "The fork is not running" is true either way and useless in one
@@ -199,10 +219,19 @@ class Client:
         decoder would.
         """
         self.initialize()
-        reply = self._post({
-            "jsonrpc": "2.0", "id": self._next_id(), "method": "tools/call",
-            "params": {"name": name, "arguments": arguments},
-        })
+        request = {"jsonrpc": "2.0", "method": "tools/call",
+                   "params": {"name": name, "arguments": arguments}}
+        try:
+            reply = self._post(dict(request, id=self._next_id()))
+        except SessionLost:
+            if not self.reclaim:
+                raise
+            # Another client took the session -- see SessionLost. Take it
+            # back and resend; a second loss in a row is a real failure.
+            self.session = self.server = None
+            self.initialize()
+            self.reclaimed += 1
+            reply = self._post(dict(request, id=self._next_id()))
         result = _result(reply, tool=name)
         if result.get("isError"):
             raise ToolError(f"{name}: {_text_of(result)}")
@@ -259,6 +288,64 @@ def _text_of(result):
 
 
 # --- self-check --------------------------------------------------------
+
+class _OneSessionServer:
+    """A loopback stand-in for the fork's session rule, for the self-check.
+
+    Each `initialize` mints a new id and forgets the previous one; any
+    other request carrying a stale id gets the fork's own 400. Everything
+    else answers `{"ok": 1}`.
+    """
+
+    def __enter__(self):
+        import http.server
+        import threading
+        state = {"sid": None, "n": 0}
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *a):
+                pass
+
+            def do_POST(self):
+                body = json.loads(self.rfile.read(
+                    int(self.headers.get("Content-Length", 0))))
+                if body.get("method") == "initialize":
+                    state["n"] += 1
+                    state["sid"] = f"s{state['n']}"
+                    out = {"jsonrpc": "2.0", "id": body["id"],
+                           "result": {"serverInfo": {"name": "stand-in"}}}
+                    self.send_response(200)
+                    self.send_header("MCP-Session-Id", state["sid"])
+                elif self.headers.get("MCP-Session-Id") != state["sid"]:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write(b'{"jsonrpc":"2.0","error":{"code":'
+                                     b'-32600,"message":"Bad Request: missing'
+                                     b' or invalid MCP-Session-Id"}}')
+                    return
+                elif "id" not in body:
+                    self.send_response(202)
+                    self.end_headers()
+                    return
+                else:
+                    out = {"jsonrpc": "2.0", "id": body["id"], "result": {
+                        "content": [{"type": "text", "text": '{"ok": 1}'}]}}
+                    self.send_response(200)
+                data = json.dumps(out).encode()
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+        self._httpd = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=self._httpd.serve_forever, daemon=True).start()
+        return self._httpd.server_address[1]
+
+    def __exit__(self, *exc):
+        self._httpd.shutdown()
+        self._httpd.server_close()
+        return False
+
 
 def self_check(verbose=True):
     """Exercise the decoding and the red cases with no emulator in sight.
@@ -341,6 +428,32 @@ def self_check(verbose=True):
     _absent([4242], ["duckstation-qt IS running", "not answering"],
             "an absent server with a live process says the server is the problem")
 
+    # **One session, newest handshake wins** -- the fork's behaviour, played
+    # by a local stand-in so it runs with no emulator. Client A is robbed by
+    # client B mid-run; with `reclaim` it gets the session back and the call
+    # goes through, and the red case is the same call with `reclaim` off,
+    # which has to fail with SessionLost.
+    with _OneSessionServer() as port:
+        a = Client(port=port, timeout=5.0)
+        check("the stand-in answers a call", a.call("get_status") == {"ok": 1})
+        Client(port=port, timeout=5.0).initialize()
+        try:
+            check("a robbed session is taken back and the call goes through",
+                  a.call("get_status") == {"ok": 1} and a.reclaimed == 1,
+                  f"reclaimed {a.reclaimed}")
+        except Exception as e:                           # noqa: BLE001
+            check("a robbed session is taken back and the call goes through",
+                  False, f"{type(e).__name__}: {e}")
+        c = Client(port=port, timeout=5.0, reclaim=False)
+        c.call("get_status")
+        Client(port=port, timeout=5.0).initialize()
+        try:
+            c.call("get_status")
+            check("without reclaim a robbed session fails", False,
+                  "the call went through")
+        except SessionLost:
+            check("without reclaim a robbed session fails", True)
+
     # Constructing a client must not talk to anything -- tools build one to
     # look at its shape on machines with no emulator.
     check("constructing a client is inert",
@@ -348,7 +461,7 @@ def self_check(verbose=True):
 
     if verbose:
         print("SELF-CHECK " + ("FAILED" if bad else "OK: decoding, errors, "
-                               "the absent-server message"))
+                               "the absent-server message, the stolen session"))
     return bad
 
 

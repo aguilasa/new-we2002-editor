@@ -1029,6 +1029,73 @@ def wait_for_champion(s, budget=60, seconds=2.5):
                f"{best if best is not None else float('nan')}")
 
 
+# --- the replay ----------------------------------------------------------
+#
+# **Like the ending, this route starts from a save state that is not in the
+# repository**, and for the same reason. The game shows a replay on its own
+# after every goal; the user drove a match to one on 2026-10-22 and parked
+# it in slot 5. On a machine without that state the route reports *skipped*.
+# Slot 1 is the main-menu shortcut and slot 3 the ending, so 5 it is.
+#
+# **What recognises the replay is the `GUARDAR` caption**, not the logo and
+# not a mean. `Repeticion` blinks and is gone a few seconds in; the camera
+# swings over grass, goal and crowd, so the mean wanders (0.2468..0.2537 in
+# twelve looks). The `[] GUARDAR` box sits still in the lower left for the
+# whole replay, in a light blue -- (164, 222, 255) -- that nothing else in a
+# match draws there. Measured on 2026-10-22 as the share of such pixels in
+# REPLAY_CAPTION: **0.1267 in all 27 frames of the replay** (fifteen seconds
+# of it), and **0.0000 in the 15 frames after it ends and in 20 frames of
+# open play**, the in-play player panel -- which covers the same corner --
+# included.
+REPLAY_SLOT = int(os.environ.get("PES2_REPLAY_SLOT", "5"))
+REPLAY_CAPTION = (52, 520, 212, 542)
+REPLAY_CAPTION_SHARE = 0.06
+# The replay animates, so the frame captured has to be a counted one: a
+# wall-clock `run` would land on a different instant every time.
+REPLAY_STEP = 30
+
+
+def caption_blue(pixel):
+    """Is this the light blue of the `GUARDAR` caption?"""
+    r, g, b = pixel
+    return b >= 180 and g >= 150 and b - r >= 60
+
+
+def replay_caption_share(frame):
+    """The share of REPLAY_CAPTION drawn in the caption's blue."""
+    data = frame.image.crop(REPLAY_CAPTION).tobytes()
+    pixels = [tuple(data[i:i + 3]) for i in range(0, len(data), 3)]
+    return sum(1 for p in pixels if caption_blue(p)) / max(1, len(pixels))
+
+
+def route_replay(s):
+    """A goal's replay, from the state the user parked in REPLAY_SLOT.
+
+    The replay identifies the sides by **flag** (section 4.2, item 3a), so
+    this route reaches and captures the screen; it does not read a team
+    name off it. What it adds is that `REPLAYS.BIN` now has a screen that
+    can be put in front of a poke.
+    """
+    if not os.path.exists(state_path(REPLAY_SLOT)):
+        raise Skip(
+            f"no save state at {state_path(REPLAY_SLOT)} -- this route needs "
+            f"a replay parked there, and a state is not versioned (it is "
+            f"derived from a commercial game, same rule as roms/). See "
+            f"docs/tasks/pes2/03-direcao-do-emulador.md")
+
+    s.say(f"loading the replay from slot {REPLAY_SLOT}")
+    s.load_state(REPLAY_SLOT)
+    s.step(REPLAY_STEP)
+    frame = s.capture()
+    share = replay_caption_share(frame)
+    if share < REPLAY_CAPTION_SHARE:
+        raise Fail(f"slot {REPLAY_SLOT} is not on a replay: the GUARDAR "
+                   f"caption covers {share:.4f} of its box, against "
+                   f"{REPLAY_CAPTION_SHARE} needed and 0.1267 measured")
+    s.say(f"replay  GUARDAR share={share:.4f}")
+    return s.capture("replay")
+
+
 ROUTES = {
     "title": route_title,
     "main-menu": route_main_menu,
@@ -1036,6 +1103,7 @@ ROUTES = {
     "edit": route_edit,
     "result": route_result,
     "ending": route_ending,
+    "replay": route_replay,
 }
 
 
@@ -1092,11 +1160,31 @@ def self_check(verbose=True):
             bad.append(f"{what}{': ' + detail if detail else ''}")
 
     for name in ("title", "main-menu", "team-select", "edit", "result",
-                 "ending"):
+                 "ending", "replay"):
         check(f"route {name} exists", name in ROUTES)
-    check("the routes cover drive.py's, plus result and ending",
+    check("the routes cover drive.py's, plus result, ending and replay",
           set(ROUTES) == {"title", "main-menu", "team-select", "edit",
-                          "result", "ending"})
+                          "result", "ending", "replay"})
+
+    # The replay caption against what shares its corner. The blue test is
+    # fed the colours measured in that box: the caption itself, and what
+    # covers the corner when there is no replay -- grass, the dark panel,
+    # the in-play panel's white name and red position badge.
+    check("the caption blue is recognised", caption_blue((164, 222, 255)))
+    check("and so is its anti-aliased edge", caption_blue((133, 177, 201)))
+    for px, what in (((82, 99, 41), "grass"), ((41, 41, 41), "the dark box"),
+                     ((230, 230, 230), "white panel text"),
+                     ((180, 40, 40), "the red DL badge"),
+                     ((82, 101, 112), "the box's grey-blue edge")):
+        check(f"the caption blue refuses {what}", not caption_blue(px),
+              f"{px}")
+    check("the replay share clears the threshold with margin",
+          0.1267 >= 2 * REPLAY_CAPTION_SHARE, f"{REPLAY_CAPTION_SHARE}")
+    x0, y0, x1, y1 = REPLAY_CAPTION
+    check("the replay caption box is inside an 800x655 frame",
+          0 <= x0 < x1 <= 800 and 0 <= y0 < y1 <= 655)
+    check("REPLAY_SLOT is neither the main-menu shortcut nor the ending",
+          REPLAY_SLOT not in (1, ENDING_SLOT), f"slot {REPLAY_SLOT}")
 
     # The champion screen against the animation it has to be told from.
     # Mean alone is not enough and that is the point of the pair: 0.2536
