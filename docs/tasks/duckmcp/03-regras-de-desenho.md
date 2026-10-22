@@ -96,3 +96,4 @@ $ cd build && ctest -R duckmcp_selftest
     - `M docs/tasks/duckmcp/03-regras-de-desenho.md`
     - `A tools/duckmcp/controls.py`
     - `M tools/duckmcp/selftest.py`
+- **Reviewed** (2026-10-22) at `3120a3f2`: CORR-DMCP-002, CORR-DMCP-003

@@ -63,13 +63,14 @@
       "status": "done",
       "done_on": "2026-10-22",
       "done_commit": "94c5634f",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-22",
+      "review_commit": "3120a3f2",
       "active_since": null,
       "started_at": "2026-10-22T14:47:14-03:00",
       "active_s": 287,
       "finished_at": "2026-10-22T14:52:01-03:00",
-      "review_started_at": "2026-10-22T14:57:58-03:00"
+      "review_started_at": "2026-10-22T14:57:58-03:00",
+      "review_s": 186
     },
     {
       "id": "DMCP-TASK-04",
