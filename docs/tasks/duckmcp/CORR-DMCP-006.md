@@ -63,3 +63,9 @@ Verificação:
 $ grep -rn 'Pro Evolution' tools/duckmcp --exclude=selftest.py --exclude=controls.py; echo exit=$?
 exit=1
 ```
+- **Closed** — commit `7b4fa4ce` (2026-10-22): docs(duckmcp): exclude the rule (c) judges from the phase 2 title grep
+  - Files (`git show --name-status 7b4fa4ce`):
+    - `M docs/prompts/perfil-duckmcp.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-006.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
