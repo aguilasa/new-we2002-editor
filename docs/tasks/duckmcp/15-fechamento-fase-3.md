@@ -62,3 +62,7 @@ Verificações da Fase 3 do perfil, uma a uma:
 `python3 tools/duckmcp/controls.py > /dev/null; echo ctl=$?` → `ctl=0`.
 
 Sweep: `live.py` mudou de contrato (linha final e o que afirma). O docstring dele foi atualizado; o §5.1 do plano já descrevia RAM, VRAM e `game()` no `duckmcp_live` — sem outra menção a corrigir.
+- **Closed** — commit `09cafe76` (2026-10-22): test(duckmcp): duckmcp_live reads RAM, VRAM and game(); close phase 3
+  - Files (`git show --name-status 09cafe76`):
+    - `M docs/tasks/duckmcp/15-fechamento-fase-3.md`
+    - `M tools/duckmcp/live.py`
