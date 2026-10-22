@@ -62,3 +62,8 @@ Verificação:
 $ sed -n '/^### 3.3/,/^### 3.4/p' docs/PLAN-DUCKMCP-PY.md | grep -c 'PES2_MCP_HOST'
 1
 ```
+- **Closed** — commit `9810b015` (2026-10-22): docs(duckmcp): record the PES2_* legacy-name exception in plan §3.3
+  - Files (`git show --name-status 9810b015`):
+    - `M docs/PLAN-DUCKMCP-PY.md`
+    - `M docs/prompts/perfil-duckmcp.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-003.md`
