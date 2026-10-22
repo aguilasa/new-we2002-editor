@@ -62,3 +62,10 @@ duckmcp_controls: 13 control(s), 13 red as required; per rule (a) 2/2, (c) 6/6, 
 - `python3 tools/pes2/selftest.py; echo exit=$?` → última linha `OK`, `exit=0` (o `pes2` não foi tocado).
 
 Sweep: os totais anteriores (`88 check(s)`, `12 control(s)`) só aparecem em transcrições de Log e de CORR já fechadas, que ficam como estão.
+- **Closed** — commit `669c5c0d` (2026-10-22): feat(duckmcp): add client.py, with the one-session stand-in and the reclaim control
+  - Files (`git show --name-status 669c5c0d`):
+    - `M docs/tasks/duckmcp/05-client.md`
+    - `M tools/duckmcp/__init__.py`
+    - `A tools/duckmcp/client.py`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`

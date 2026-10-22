@@ -120,7 +120,7 @@ graph TD
 | [DMCP-TASK-02](/docs/tasks/duckmcp/02-audit.md) | `audit.py` — os sítios crus de MCP por projeto, o número do antes | 0 | ferramenta | DMCP-TASK-01 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-03](/docs/tasks/duckmcp/03-regras-de-desenho.md) | Regras de desenho (a), (c), (d) no selftest, e o `controls.py` da lib | 0 | verificação | DMCP-TASK-01, DMCP-TASK-02 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-04](/docs/tasks/duckmcp/04-fechamento-fase-0.md) | Fechamento da Fase 0 — o esqueleto | 0 | closing | DMCP-TASK-01, DMCP-TASK-02, DMCP-TASK-03 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-05](/docs/tasks/duckmcp/05-client.md) | `client.py` a partir do `mcp.py` de `f21182ea`, com servidor de teste | 1 | implementação | DMCP-TASK-04 | pending | — | — |
+| [DMCP-TASK-05](/docs/tasks/duckmcp/05-client.md) | `client.py` a partir do `mcp.py` de `f21182ea`, com servidor de teste | 1 | implementação | DMCP-TASK-04 | done | 2026-10-22 | pending |
 | [DMCP-TASK-06](/docs/tasks/duckmcp/06-cli-e-shim-mcp.md) | `cli.py list/status/call`, e `tools/pes2/mcp.py` vira shim | 1 | implementação | DMCP-TASK-05 | pending | — | — |
 | [DMCP-TASK-07](/docs/tasks/duckmcp/07-fechamento-fase-1.md) | Fechamento da Fase 1 — o transporte | 1 | closing | DMCP-TASK-05, DMCP-TASK-06 | pending | — | — |
 | [DMCP-TASK-08](/docs/tasks/duckmcp/08-fork.md) | `fork.py` agnóstico de jogo — janela pelo PID, título opcional, `hide_window` e `size_window` | 2 | implementação | DMCP-TASK-07 | pending | — | — |
