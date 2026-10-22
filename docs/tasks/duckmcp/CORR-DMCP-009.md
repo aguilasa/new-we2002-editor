@@ -44,3 +44,28 @@ Objetivo da `docs/tasks/duckmcp/09-cli-fork-e-lancadores.md`.
 `grep -n 'launch/kill/status' docs/PLAN-DUCKMCP-PY.md` não pode mais achar a forma antiga.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido: `grep -n 'procs' docs/PLAN-DUCKMCP-PY.md` não imprime nada, e a linha 366 diz
+`cli.py launch/kill/status/recipe/which`.
+
+Conserto: o `procs` está registrado nos três lugares.
+- Na tabela de módulos do §3 (linha do `cli.py`), que agora lista o que `cli.py --help` mostra: `ping`,
+  `list`, `status` (o `get_status` do servidor), `call`, `launch`, `kill`, `procs`, `recipe`, `which`.
+- Na linha da Fase 2 do §6.
+- No Objetivo da DMCP-TASK-09.
+
+A CORR citava "§2 e §5", mas as linhas que enunciam o `cli.py` estão no §3 e no §6.
+
+Ficou de fora: o **título** da DMCP-TASK-09 ainda diz `launch/kill/status/recipe/which`. O título vive no
+`progress.json` e alimenta a tabela gerada do `progresso.md`. O `rite set` só escreve `files`,
+`resources` e `depends_on`, então o cabeçalho foi mantido igual ao JSON em vez de descasar dele.
+
+Verificação:
+
+```text
+$ grep -n 'procs' docs/PLAN-DUCKMCP-PY.md
+224:| `cli.py` | `ping`, `list`, `status` (o `get_status` do servidor), `call TOOL k=v`, `launch`, `kill`, `procs` (os processos DuckStation vivos, `pids: [...]`), `recipe`, `which` | `mcp.py main`, `fork.py main` |
+366:| 2 | **lançador**: … `cli.py launch/kill/procs/recipe/which` (o status de processo é `procs`, porque `status` já é o `get_status` do servidor); …
+$ grep -n 'launch/kill/status' docs/PLAN-DUCKMCP-PY.md; echo exit=$?
+exit=1
+```

@@ -6,7 +6,7 @@ id: DMCP-TASK-09
 
 ## Goal
 
-`python3 tools/duckmcp/cli.py launch|kill|status|recipe|which` existe; `tools/pes2/fork.py` vira shim que reexporta `duckmcp.fork` e passa o título do PES2 como `match` no `launch` dele; `boot_check.sh`, `run_duckstation.sh`, `Makefile` e `make.ps1` chamam a lib onde chamavam `tools/pes2/fork.py`, e a lista de nomes de processo do `kill_leftovers` sai de um lugar só.
+`python3 tools/duckmcp/cli.py launch|kill|procs|recipe|which` existe (o status de processo é `procs`; `status` já é o `get_status` do servidor); `tools/pes2/fork.py` vira shim que reexporta `duckmcp.fork` e passa o título do PES2 como `match` no `launch` dele; `boot_check.sh`, `run_duckstation.sh`, `Makefile` e `make.ps1` chamam a lib onde chamavam `tools/pes2/fork.py`, e a lista de nomes de processo do `kill_leftovers` sai de um lugar só.
 
 ## Arquivos a criar ou modificar
 

@@ -221,7 +221,7 @@ entra:
 | `gpu.py` | pacotes GP0 e o andar de uma lista de comandos dada `read(address, size)` | a parte de `looks/oracle.walk_gpu_list`/`commands_of` que não depende de `layout` |
 | `png.py`, `vram.py` | um leitor de PNG stdlib; BGR555 ↔ RGB | `looks/atlas.read_png`, `pes2/asset_write.read_png`, `kits/oracle.vram_rows`, `looks/oracle._halfword` |
 | `savestate.py` | o `.sav` inteiro | `tools/pes2/savestate.py`, movido |
-| `cli.py` | `list`, `status`, `call TOOL k=v`, `launch`, `kill`, `recipe`, `which` | `mcp.py main`, `fork.py main` |
+| `cli.py` | `ping`, `list`, `status` (o `get_status` do servidor), `call TOOL k=v`, `launch`, `kill`, `procs` (os processos DuckStation vivos, `pids: [...]`), `recipe`, `which` | `mcp.py main`, `fork.py main` |
 | `audit.py` | conta, por projeto, os sítios crus do §3.3 | — |
 | `selftest.py`, `controls.py` | o gate e os defeitos plantados | — |
 
@@ -363,7 +363,7 @@ colado no Log de cada task de migração.
 |---|---|---|
 | 0 | **esqueleto**: `__init__.py`, `errors.py`, `env.py`, `audit.py` (o número do "antes"), `selftest.py` com as regras (a), (c), (d) e plantas, `duckmcp_selftest` no `ctest` | PES2-TASK-03 (`f21182ea`) |
 | 1 | **transporte**: `client.py` com `reclaim`, `cli.py list/status/call`, servidor de teste no selftest; `pes2/mcp.py` vira shim | 0 |
-| 2 | **lançador**: `fork.py` sem título de jogo, `hide_window`/`size_window`, `cli.py launch/kill/status/recipe/which`; `pes2/fork.py` vira shim que passa o título do PES2; `make.ps1`, `Makefile`, `boot_check.sh`, `run_duckstation.sh` apontados; `duckmcp_live` no `ctest` | 1 |
+| 2 | **lançador**: `fork.py` sem título de jogo, `hide_window`/`size_window`, `cli.py launch/kill/procs/recipe/which` (o status de processo é `procs`, porque `status` já é o `get_status` do servidor); `pes2/fork.py` vira shim que passa o título do PES2; `make.ps1`, `Makefile`, `boot_check.sh`, `run_duckstation.sh` apontados; `duckmcp_live` no `ctest` | 1 |
 | 3 | **primitivas**: `buttons.py`, `session.py` (com `game()`), `psx.py`, `gpu.py`, `png.py`, `vram.py`; `savestate.py` movido, shim no `pes2` | 2 |
 | 4 | **depuração**: `debug.py`; a regra (b) e o `controls.py` da lib completos | 3 |
 | 5 | **migração do `pes2`**: `mcp_drive.py`, `pad.py`, `who_writes.py`, `drive.py`, `selftest.py` | 4 |
