@@ -1,5 +1,19 @@
 {
   "schema": 1,
   "cycle": "duckmcp",
-  "fixes": []
+  "fixes": [
+    {
+      "id": "CORR-DMCP-001",
+      "file": "CORR-DMCP-001.md",
+      "title": "Cobrir o fallback por regex do audit.py com caso no selftest",
+      "origin": "DMCP-TASK-02",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    }
+  ]
 }

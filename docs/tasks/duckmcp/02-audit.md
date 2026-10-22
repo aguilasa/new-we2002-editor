@@ -318,3 +318,4 @@ exit=0
     - `M docs/tasks/duckmcp/02-audit.md`
     - `A tools/duckmcp/audit.py`
     - `M tools/duckmcp/selftest.py`
+- **Reviewed** (2026-10-22) at `cbda0ef0`: CORR-DMCP-001

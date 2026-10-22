@@ -117,7 +117,7 @@ graph TD
 | ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [DMCP-TASK-01](/docs/tasks/duckmcp/01-esqueleto.md) | Esqueleto de tools/duckmcp/: __init__, errors.py, env.py e duckmcp_selftest | 0 | infra | — | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-02](/docs/tasks/duckmcp/02-audit.md) | `audit.py` — os sítios crus de MCP por projeto, o número do antes | 0 | ferramenta | DMCP-TASK-01 | done | 2026-10-22 | pending |
+| [DMCP-TASK-02](/docs/tasks/duckmcp/02-audit.md) | `audit.py` — os sítios crus de MCP por projeto, o número do antes | 0 | ferramenta | DMCP-TASK-01 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-03](/docs/tasks/duckmcp/03-regras-de-desenho.md) | Regras de desenho (a), (c), (d) no selftest, e o `controls.py` da lib | 0 | verificação | DMCP-TASK-01, DMCP-TASK-02 | done | 2026-10-22 | pending |
 | [DMCP-TASK-04](/docs/tasks/duckmcp/04-fechamento-fase-0.md) | Fechamento da Fase 0 — o esqueleto | 0 | closing | DMCP-TASK-01, DMCP-TASK-02, DMCP-TASK-03 | pending | — | — |
 | [DMCP-TASK-05](/docs/tasks/duckmcp/05-client.md) | `client.py` a partir do `mcp.py` de `f21182ea`, com servidor de teste | 1 | implementação | DMCP-TASK-04 | pending | — | — |
