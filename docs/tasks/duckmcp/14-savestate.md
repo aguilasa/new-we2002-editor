@@ -105,3 +105,6 @@ O critério do `git log --follow` fica aberto: só se confere depois do commit
 que registra o move, e quem commita é o fluxo principal.
 
 Critério do `git log --follow`, medido pelo fio principal depois do commit de trabalho `3495bb77`: `git log --follow --oneline tools/duckmcp/savestate.py | tail -1` → `d9d090e9 feat(pes2): read PSX RAM out of a save state, and drop the emulator fork`, o mesmo de `git log --oneline --diff-filter=A -- tools/pes2/savestate.py | tail -1` (o primeiro commit do arquivo original). Um commit só basta: com o caminho antigo virando shim no mesmo commit, o `--follow` acha a cópia — testado antes numa worktree descartável, contra a alternativa de dois commits (rename puro, depois o shim), e as duas dão a mesma linha.
+- **Closed** — commit `09609aed` (2026-10-22): docs(duckmcp): record the git log --follow measure of the savestate move
+  - Files (`git show --name-status 09609aed`):
+    - `M docs/tasks/duckmcp/14-savestate.md`
