@@ -139,6 +139,19 @@
       "depends_on": [],
       "done_on": null,
       "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-011",
+      "file": "CORR-DMCP-011.md",
+      "title": "Matar o DuckStation só quando o live.py o lançou, não no pulo",
+      "origin": "DMCP-TASK-10",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

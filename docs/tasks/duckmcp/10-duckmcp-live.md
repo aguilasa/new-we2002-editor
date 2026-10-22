@@ -96,3 +96,4 @@ Para a DMCP-TASK-28 (documentação): o alvo `duckmcp_live` e a variável `DUCKS
     - `M docs/tasks/duckmcp/10-duckmcp-live.md`
     - `M tests/CMakeLists.txt`
     - `A tools/duckmcp/live.py`
+- **Reviewed** (2026-10-22) at `df6127e8`: CORR-DMCP-006, CORR-DMCP-011
