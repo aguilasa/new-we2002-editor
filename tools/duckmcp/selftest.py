@@ -38,6 +38,15 @@ In this order:
 6. `audit.self_check()`: the audit of rule (b) over synthetic tools trees
    built in a temporary directory -- a clean one counts 0, one planted
    `import fork` counts 1, and each site category is seen once;
+6b. `psx.self_check()`: the ranges against the sizes they are built from,
+   the three segments folding onto one physical address, KSEG2 refused;
+   `gpu.self_check()`: every GP0 opcode shape gets its hardware size, a
+   synthetic list with one packet of each is walked to the end marker, and
+   a list looping to its head, to its middle or through two mirrors is
+   refused; `png.self_check()`: images `png.encode` wrote are decoded pixel
+   for pixel under each of the five filters and each colour type, a fixed
+   vector decodes as Pillow did, and bad files are refused with the reason;
+   `vram.self_check()`: all 32768 fifteen-bit values round-trip;
 7. the design rules of PLAN-DUCKMCP-PY.md section 3.3, over every `.py` of
    this package:
    - (a) every `import` names the stdlib or this package, and importing
@@ -45,7 +54,8 @@ In this order:
      nothing outside the stdlib (`sys.stdlib_module_names`);
    - (c) no game serial, no project name outside a marked `# lineage:`
      comment, no game window title this repository drives (anywhere, lineage
-     included), and no address literal outside the PS1 hardware ranges;
+     included), and no address literal outside the PS1 hardware ranges,
+     which are `psx.HARDWARE_RANGES`, read through the module;
    - (d) only `env.py` reads the environment, and only `env.py` mentions
      `XAUTHORITY`.
    `selftest.py` and `controls.py` are exempt from (c) and from the
@@ -76,7 +86,7 @@ sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
 from duckmcp import (audit, buttons, cli, client, env, errors,  # noqa: E402
-                     fork, live, session)
+                     fork, gpu, live, png, psx, session, vram)
 
 JUDGES = ("selftest.py", "controls.py")
 """The files that hold the patterns of rule (c), and so are exempt from it."""
@@ -121,19 +131,6 @@ HEX_RE = re.compile(r"(?<![0-9A-Za-z_])0[xX][0-9A-Fa-f_]+")
 
 ADDRESS_FLOOR = 0x10000
 """Below this a literal is a constant, not an address, and is not judged."""
-
-HARDWARE_RANGES = (
-    ("RAM (KUSEG)", 0x00000000, 0x001FFFFF),
-    ("RAM (KSEG0)", 0x80000000, 0x801FFFFF),
-    ("RAM (KSEG1)", 0xA0000000, 0xA01FFFFF),
-    ("scratchpad", 0x1F800000, 0x1F8003FF),
-    ("I/O", 0x1F801000, 0x1F802FFF),
-    ("BIOS", 0xBFC00000, 0xBFC7FFFF),
-)
-"""The PS1 hardware ranges an address literal may fall in (rule (c)).
-
-Local until `psx.py` exists; DMCP-TASK-13 moves them there.
-"""
 
 ENV_ATTRS = ("environ", "environb", "getenv", "getenvb", "putenv",
              "unsetenv")
@@ -288,10 +285,12 @@ def judged_for_names(rel, source):
 
 
 def outside_hardware(value):
-    """True for a literal that is judged and falls in no hardware range."""
+    """True for a literal that is judged and falls in no `psx.py` range."""
     if value < ADDRESS_FLOOR:
         return False
-    return not any(lo <= value <= hi for _, lo, hi in HARDWARE_RANGES)
+    # read through the module on every call, never bound here: the ranges
+    # are psx.py's, and a constant of the same name in this file is not them
+    return not any(lo <= value <= hi for _, lo, hi in psx.HARDWARE_RANGES)
 
 
 def env_reads(tree):
@@ -513,6 +512,10 @@ def main(argv=None):
     c.module("session", session.self_check)
     check_session_imports(c)
     c.module("audit", audit.self_check)
+    c.module("psx", psx.self_check)
+    c.module("gpu", gpu.self_check)
+    c.module("png", png.self_check)
+    c.module("vram", vram.self_check)
     check_rules(c)
 
     print("duckmcp_selftest: %d check(s) ran, %d failure(s)" % (c.ran, c.failed))
