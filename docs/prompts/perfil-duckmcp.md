@@ -66,7 +66,7 @@ which commands search instead of reading whole.
 
 ### Fase 2 — lançador ([§2.1](/docs/PLAN-DUCKMCP-PY.md#2.1), [§4.4](/docs/PLAN-DUCKMCP-PY.md#4.4), [§5.1](/docs/PLAN-DUCKMCP-PY.md#5.1))
 
-- `grep -rn 'Pro Evolution' tools/duckmcp` não acha nada.
+- `grep -rn 'Pro Evolution' tools/duckmcp --exclude=selftest.py --exclude=controls.py` não acha nada (sai 1). Os dois juízes ficam de fora porque carregam o título de propósito, para impor a regra (c).
 - `grep -rn 'pes2/fork.py' Makefile make.ps1 tools/pes2/*.sh` não acha nada.
 - `duckmcp_live` pula com razão sem `DUCKSTATION_TEST_IMAGE`, e passa com o `.cue` de uma cópia no `:98`; nenhum processo do DuckStation sobra depois.
 

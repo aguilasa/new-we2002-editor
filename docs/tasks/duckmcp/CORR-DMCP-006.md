@@ -51,3 +51,15 @@ e esse (ou o equivalente) é o comando que o perfil cita na Fase 2. O grep liter
 linhas.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido: `grep -rn 'Pro Evolution' tools/duckmcp` acha `controls.py:106` e
+`selftest.py:97`, que são os juízes da regra (c).
+
+Conserto: a verificação da Fase 2 do perfil passou a excluir os dois juízes, e diz por quê.
+
+Verificação:
+
+```text
+$ grep -rn 'Pro Evolution' tools/duckmcp --exclude=selftest.py --exclude=controls.py; echo exit=$?
+exit=1
+```
