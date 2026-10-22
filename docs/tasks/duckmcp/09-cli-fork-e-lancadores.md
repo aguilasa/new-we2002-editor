@@ -30,3 +30,5 @@ id: DMCP-TASK-09
 O `run_duckstation.sh` continua sendo o caminho do AppImage oficial (não-objetivo do §0); muda só de onde tira as constantes.
 
 ## Log de Execução
+
+- **pending** (2026-10-22): batch stopped before wave 2: kits_selftest red since 4de49640 (CORR-DMCP-005); the pes2/fork.py shim would make it worse

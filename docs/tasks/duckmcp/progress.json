@@ -190,14 +190,14 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#4.4",
       "files": ["tools/duckmcp/cli.py", "tools/pes2/fork.py", "tools/pes2/boot_check.sh", "tools/pes2/run_duckstation.sh", "Makefile", "make.ps1"],
       "resources": [],
-      "status": "in-progress",
+      "status": "pending",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,
       "review_commit": null,
-      "active_since": "2026-10-22T16:14:40-03:00",
+      "active_since": null,
       "started_at": "2026-10-22T16:14:40-03:00",
-      "active_s": 0
+      "active_s": 124
     },
     {
       "id": "DMCP-TASK-10",
