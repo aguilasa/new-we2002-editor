@@ -68,3 +68,4 @@ Modelo de forma: `tools/kit2d/selftest.py` e o alvo `kit2d_selftest`. O `drive.p
     - `A tools/duckmcp/env.py`
     - `A tools/duckmcp/errors.py`
     - `A tools/duckmcp/selftest.py`
+- **Reviewed** (2026-10-22) at `157ebb2e`: no finding
