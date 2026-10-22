@@ -93,3 +93,12 @@ tools/looks/ui_check.py:1146:    for sub in ("pes2", "duckmcp"):
 $ python3 tools/duckmcp/selftest.py --quiet
 duckmcp_selftest: 181 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `6b8e385b` (2026-10-22): fix(kits,looks): copy tools/duckmcp into the control sandboxes
+  - Files (`git show --name-status 6b8e385b`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-005.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/ui_check.py`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/ui_check.py`

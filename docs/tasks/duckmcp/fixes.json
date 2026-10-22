@@ -66,13 +66,14 @@
       "severity": "high",
       "files": ["tools/kits/controls.py", "tools/kits/ui_check.py", "tools/looks/controls.py", "tools/looks/ui_check.py"],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null,
-      "active_since": "2026-10-22T16:23:42-03:00",
+      "done_on": "2026-10-22",
+      "done_commit": "6b8e385b",
+      "active_since": null,
       "started_at": "2026-10-22T16:23:42-03:00",
-      "active_s": 0
+      "active_s": 784,
+      "finished_at": "2026-10-22T16:36:46-03:00"
     }
   ]
 }
