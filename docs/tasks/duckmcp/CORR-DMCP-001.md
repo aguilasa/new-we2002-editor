@@ -74,3 +74,7 @@ $ (cd $S && python3 tools/duckmcp/selftest.py --quiet; echo exit=$?)   # cópia 
 duckmcp_selftest: 88 check(s) ran, 1 failure(s)
 exit=1
 ```
+- **Closed** — commit `9b3724cd` (2026-10-22): test(duckmcp): cover the audit regex fallback in self_check
+  - Files (`git show --name-status 9b3724cd`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-001.md`
+    - `M tools/duckmcp/audit.py`
