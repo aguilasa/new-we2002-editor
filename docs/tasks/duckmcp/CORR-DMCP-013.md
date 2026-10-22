@@ -74,3 +74,9 @@ duckmcp_controls: 26 control(s), 26 red as required; per rule (a) 2/2, (c) 8/8, 
 $ python3 tools/duckmcp/selftest.py --quiet
 duckmcp_selftest: 361 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `86b77f6e` (2026-10-22): test(duckmcp): version the gpu, png, vram and psx plants as controls
+  - Files (`git show --name-status 86b77f6e`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-013.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/controls.py`
