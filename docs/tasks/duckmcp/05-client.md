@@ -69,3 +69,4 @@ Sweep: os totais anteriores (`88 check(s)`, `12 control(s)`) só aparecem em tra
     - `A tools/duckmcp/client.py`
     - `M tools/duckmcp/controls.py`
     - `M tools/duckmcp/selftest.py`
+- **Reviewed** (2026-10-22) at `68101b5e`: no finding
