@@ -1118,14 +1118,16 @@ def _sandbox(tmp: str) -> str:
     `tools/pes2/` comes along because iso_source.py wraps its ISO reader, and
     a sandbox without it would fail to import for a reason that has nothing to
     do with the planted defect -- a red for the wrong cause is as useless as a
-    green for the wrong cause.
+    green for the wrong cause.  `tools/duckmcp/` comes with it, because the
+    `tools/pes2/mcp.py` shim imports the lib.
     """
     ignore = shutil.ignore_patterns("__pycache__", "*.pyc")
     shutil.copytree(LOOKS_DIR, os.path.join(tmp, "tools", "looks"),
                     ignore=ignore)
-    pes2 = os.path.join(TOOLS_DIR, "pes2")
-    if os.path.isdir(pes2):
-        shutil.copytree(pes2, os.path.join(tmp, "tools", "pes2"), ignore=ignore)
+    for sub in ("pes2", "duckmcp"):
+        tree = os.path.join(TOOLS_DIR, sub)
+        if os.path.isdir(tree):
+            shutil.copytree(tree, os.path.join(tmp, "tools", sub), ignore=ignore)
     return os.path.join(tmp, "tools", "looks")
 
 

@@ -4,7 +4,8 @@
 *A guard that has never gone red is decoration.*  Each control is a literal
 substitution -- a file, the function it lives in, the exact source line and
 what it becomes -- planted in a copy of `tools/kits/` (with the `tools/looks/`
-and `tools/pes2/` it imports beside it).  The copy's `selftest.py --no-plant`
+and `tools/pes2/` it imports beside it, and the `tools/duckmcp/` the
+`tools/pes2/mcp.py` shim imports).  The copy's `selftest.py --no-plant`
 then has to exit non-zero AND print the check the control aims at: a red for
 another reason is as useless as a green.  A literal that matches zero times or
 more than once is a broken control, not a red one.
@@ -28,7 +29,7 @@ import tempfile
 KITS_DIR = os.path.dirname(os.path.abspath(__file__))
 TOOLS_DIR = os.path.dirname(KITS_DIR)
 REPO_DIR = os.path.dirname(TOOLS_DIR)
-COPIED = ("tools/kits", "tools/looks", "tools/pes2", "src/core", "data")
+COPIED = ("tools/kits", "tools/looks", "tools/pes2", "tools/duckmcp", "src/core", "data")
 """What the sandbox holds, at the same paths as in the repository: the kits
 tree, the two it imports, and what the looks self-checks read from the
 repository root (the C++ core and data/defaultlook.txt)."""

@@ -1132,7 +1132,8 @@ def _sandbox(tmp: str, name: str, where: str, old: str, new: str) -> tuple:
     holding only this directory dies at import with `No module named 'lzss'`.
     That IS a red, and it is a red for the wrong cause -- the first run of this
     gate reported all three controls red without any of them having drawn a
-    single frame.
+    single frame.  `tools/duckmcp/` comes with it, because the
+    `tools/pes2/mcp.py` shim imports the lib.
 
     The literal has to match EXACTLY ONCE.  A substitution that matches nothing
     leaves the copy intact, the run comes out green, and the green is read as
@@ -1142,10 +1143,11 @@ def _sandbox(tmp: str, name: str, where: str, old: str, new: str) -> tuple:
     ignore = shutil.ignore_patterns("__pycache__", "*.pyc")
     sandbox = os.path.join(tmp, "tools", "looks")
     shutil.copytree(LOOKS_DIR, sandbox, ignore=ignore)
-    pes2 = os.path.join(os.path.dirname(LOOKS_DIR), "pes2")
-    if os.path.isdir(pes2):
-        shutil.copytree(pes2, os.path.join(tmp, "tools", "pes2"),
-                        ignore=ignore)
+    for sub in ("pes2", "duckmcp"):
+        tree = os.path.join(os.path.dirname(LOOKS_DIR), sub)
+        if os.path.isdir(tree):
+            shutil.copytree(tree, os.path.join(tmp, "tools", sub),
+                            ignore=ignore)
     broken = os.path.join(sandbox, where)
     with open(broken, encoding="utf-8") as handle:
         text = handle.read()

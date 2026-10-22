@@ -60,3 +60,36 @@ Os quatro sandboxes passam a copiar `tools/duckmcp` junto com `tools/pes2`, com 
 - `grep -n duckmcp tools/kits/controls.py tools/kits/ui_check.py tools/looks/controls.py tools/looks/ui_check.py` acha a cópia nos quatro.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido na HEAD `3625e880`: `python3 tools/kits/selftest.py --quiet` termina em
+`controls: 3 failure(s)` / `kits_selftest: 3 failure(s)`, e as falhas são as mesmas da Evidência
+(`0 of 0 controls red`).
+
+Conserto: os quatro sandboxes passaram a copiar `tools/duckmcp` ao lado de `tools/pes2`, com o mesmo
+`ignore`. No `kits/controls.py` e no `kits/ui_check.py` isso foi uma entrada a mais no `COPIED`; nos
+`_sandbox` do `looks/controls.py` e do `looks/ui_check.py`, um laço sobre `("pes2", "duckmcp")`. Os
+docstrings dizem por quê. A lib não mudou.
+
+Verificação:
+
+```text
+$ python3 tools/kits/selftest.py --quiet; echo exit=$?
+  ..... 87 of 87 controls red
+controls: 0 failure(s)
+kits_selftest: 0 failure(s)
+exit=0
+$ python3 tools/looks/selftest.py --quiet; echo exit=$?
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+exit=0
+$ grep -n duckmcp tools/kits/controls.py tools/kits/ui_check.py tools/looks/controls.py tools/looks/ui_check.py
+tools/kits/controls.py:7:and `tools/pes2/` it imports beside it, and the `tools/duckmcp/` the
+tools/kits/controls.py:32:COPIED = ("tools/kits", "tools/looks", "tools/pes2", "tools/duckmcp", "src/core", "data")
+tools/kits/ui_check.py:93:COPIED = ("kits", "looks", "pes2", "duckmcp")
+tools/looks/controls.py:1121:    green for the wrong cause.  `tools/duckmcp/` comes with it, because the
+tools/looks/controls.py:1127:    for sub in ("pes2", "duckmcp"):
+tools/looks/ui_check.py:1135:    single frame.  `tools/duckmcp/` comes with it, because the
+tools/looks/ui_check.py:1146:    for sub in ("pes2", "duckmcp"):
+$ python3 tools/duckmcp/selftest.py --quiet
+duckmcp_selftest: 181 check(s) ran, 0 failure(s)
+```

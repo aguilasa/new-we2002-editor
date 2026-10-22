@@ -90,9 +90,9 @@ TIMEOUT = 180
 KITS_DIR = os.path.dirname(os.path.abspath(__file__))
 TOOLS_DIR = os.path.dirname(KITS_DIR)
 APP = os.path.join(KITS_DIR, "ui", "app.py")
-COPIED = ("kits", "looks", "pes2")
-"""What a planted copy holds under tools/: the window, the core, and the two
-trees the core imports."""
+COPIED = ("kits", "looks", "pes2", "duckmcp")
+"""What a planted copy holds under tools/: the window, the core, the two
+trees the core imports, and the lib the `pes2/mcp.py` shim imports."""
 
 STATE = ["--tag", "00", "--image", "work1", "--palette", "2", "--zoom", "3", "--zones"]
 """The state the gate captures, and the one KITS-TASK-19 compares across systems."""
