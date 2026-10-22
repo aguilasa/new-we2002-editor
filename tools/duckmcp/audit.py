@@ -407,6 +407,23 @@ def self_check(root=None) -> list:
         expect("one site of every category, inline import and resolved "
                "sys.path target included",
                doc["by_category"], {"import": 1, "client": 3, "sys.path": 1})
+
+        # a file that does not parse falls back to the line regexes
+        broken = dict(clean)
+        broken["other/c.py"] = (
+            "import fork\n"
+            "import sys\n"
+            "sys.path.insert(0, '../emu')\n"
+            "client.call('pause')\n"
+            "def (:\n")
+        tree = os.path.join(scratch, "broken")
+        _plant(tree, broken)
+        doc = audit(tree)
+        expect("a file that does not parse is listed as unparsed",
+               [p.replace(os.sep, "/") for p in doc["unparsed"]],
+               ["broken/other/c.py"])
+        expect("the regex fallback counts one site of every category",
+               doc["by_category"], {"import": 1, "client": 1, "sys.path": 1})
     return results
 
 

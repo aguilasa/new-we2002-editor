@@ -54,3 +54,23 @@ Aplicar a planta `return sites` acima numa cópia e rodar `python3 tools/duckmcp
 hoje sai 0; depois do conserto tem de sair 1. Na árvore real, `python3 tools/duckmcp/selftest.py` sai 0.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido (planta `return sites` numa cópia: selftest 86 checks, exit 0; árvore
+sintética 2 sítios na HEAD, 0 com o fallback desligado). Causa confirmada: nenhuma árvore do
+`self_check` tinha arquivo que não parseia.
+
+Conserto: `self_check` ganhou a árvore `broken`, com `other/c.py` que não parseia e traz um sítio de
+cada categoria; afirma `doc["unparsed"] == ["broken/other/c.py"]` e
+`by_category == {"import": 1, "client": 1, "sys.path": 1}`.
+
+Verificação:
+
+```text
+$ python3 tools/duckmcp/selftest.py --quiet; echo exit=$?
+duckmcp_selftest: 88 check(s) ran, 0 failure(s)
+exit=0
+$ (cd $S && python3 tools/duckmcp/selftest.py --quiet; echo exit=$?)   # cópia com a planta
+  FAIL  audit: the regex fallback counts one site of every category  got {'import': 0, 'client': 0, 'sys.path': 0}, want {'import': 1, 'client': 1, 'sys.path': 1}
+duckmcp_selftest: 88 check(s) ran, 1 failure(s)
+exit=1
+```
