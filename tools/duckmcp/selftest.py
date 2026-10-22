@@ -14,10 +14,14 @@ In this order:
    unknown, and against a loopback stand-in of the fork's one-session rule a
    stolen session is recovered once, a second loss is an error, and another
    `ToolError` passes without a new handshake;
-5. `audit.self_check()`: the audit of rule (b) over synthetic tools trees
+5. `cli.self_check()`: `call TOOL a=1 b="x"` decodes into the arguments it
+   sends, the old flags become subcommand lines; and `cli.py list` against
+   a refused port (port 1), run as a script, exits 77 with the
+   `NotRunning` sentence on stderr;
+6. `audit.self_check()`: the audit of rule (b) over synthetic tools trees
    built in a temporary directory -- a clean one counts 0, one planted
    `import fork` counts 1, and each site category is seen once;
-6. the design rules of PLAN-DUCKMCP-PY.md section 3.3, over every `.py` of
+7. the design rules of PLAN-DUCKMCP-PY.md section 3.3, over every `.py` of
    this package:
    - (a) every `import` names the stdlib or this package, and importing
      `duckmcp` and each of its modules, each in a fresh interpreter, loads
@@ -53,7 +57,7 @@ TOOLS_DIR = os.path.dirname(DUCKMCP_DIR)
 sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
-from duckmcp import audit, client, env, errors  # noqa: E402
+from duckmcp import audit, cli, client, env, errors  # noqa: E402
 
 JUDGES = ("selftest.py", "controls.py")
 """The files that hold the patterns of rule (c), and so are exempt from it."""
@@ -365,6 +369,25 @@ def check_rules(c):
          not missing, missing)
 
 
+def check_cli_refused(c):
+    """`cli.py list` as a script, against port 1 where nothing listens."""
+    script = os.path.join(DUCKMCP_DIR, "cli.py")
+    try:
+        proc = subprocess.run([sys.executable, script, "--port", "1",
+                               "--timeout", "5", "list"],
+                              capture_output=True, text=True, timeout=60)
+    except subprocess.TimeoutExpired as exc:
+        c.ok("cli: list against a refused port exits 77", False, exc)
+        return
+    c.ok("cli: list against a refused port exits 77 (errors.SKIP)",
+         proc.returncode == errors.SKIP,
+         "exit %d; stderr %r" % (proc.returncode, proc.stderr[-300:]))
+    c.ok("cli: the refused port prints the NotRunning sentence on stderr",
+         "skipping: no MCP server at http://" in proc.stderr
+         and ":1/mcp" in proc.stderr and "Traceback" not in proc.stderr,
+         repr(proc.stderr[-300:]))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--quiet", action="store_true",
@@ -385,6 +408,8 @@ def main(argv=None):
     c.module("errors", errors.self_check)
     c.module("env", env.self_check)
     c.module("client", client.self_check)
+    c.module("cli", cli.self_check)
+    check_cli_refused(c)
     c.module("audit", audit.self_check)
     check_rules(c)
 
