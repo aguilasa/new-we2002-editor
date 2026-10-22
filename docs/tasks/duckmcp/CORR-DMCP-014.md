@@ -60,3 +60,24 @@ O comando de lista dos filtros imprime `[0, 1, 2, 3, 4]` (ou o check deixa de di
 acima dá ao menos 1 falha no `selftest.py`. Na árvore real o selftest sai 0.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido: a lista dos filtros do `VECTOR_STREAM` dava `[1, 2, 3, 4, 4]`.
+
+Conserto: o vetor novo usa os mesmos 45 bytes filtrados, com os bytes de filtro trocados para 0..4, e o
+check exige `kinds == [0, 1, 2, 3, 4]`. Os pixels vêm do Pillow 12.3.0, com o fluxo empacotado num PNG
+por um escritor feito à parte do `png.py` (IHDR 3×5 RGB de 8 bits, um IDAT). O `png.py` não pode
+importar o Pillow, pela regra (a); por isso a receita ficou no docstring do `VECTOR_STREAM`, ao lado das
+constantes.
+
+Verificação:
+
+```text
+$ python3 -c "…print([s[r*10] for r in range(5)])"
+[0, 1, 2, 3, 4]
+$ <planta da Evidência numa cópia>; python3 tools/duckmcp/selftest.py | grep -E 'FAIL|check\(s\)'
+  FAIL  png: a fixed vector of all five filters decodes as Pillow did  [[(1, 60, 119), (38, 38, 38), (38, 38, 38)]]
+duckmcp_selftest: 361 check(s) ran, 1 failure(s)
+$ python3 tools/duckmcp/selftest.py | grep -E 'png:.*vector|FAIL|check\(s\)'
+  ok    png: a fixed vector of all five filters decodes as Pillow did
+duckmcp_selftest: 361 check(s) ran, 0 failure(s)
+```

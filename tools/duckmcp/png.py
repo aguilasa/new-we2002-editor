@@ -253,15 +253,21 @@ def write_png(path, width, height, lines, colour=2, palette=None, filters=0):
 
 # ---- self check ----------------------------------------------------------
 
-VECTOR_STREAM = ("01003b76252525252525026565656666666767670398b5d347c74747c747"
-                 "0465656528282867282804656565292929292929")
-"""Five filtered rows of a 3x5 RGB image, filter byte first in each."""
+VECTOR_STREAM = ("00003b76252525252525016565656666666767670298b5d347c74747c747"
+                 "0365656528282867282804656565292929292929")
+"""Five filtered rows of a 3x5 RGB image, filter byte first in each: filter
+0, 1, 2, 3 and 4, in that order, so a bug in any one filter is seen.
 
-VECTOR_PIXELS = [(0, 59, 118), (37, 96, 155), (74, 133, 192),
-                 (101, 160, 219), (139, 198, 1), (177, 236, 39),
-                 (202, 5, 64), (241, 44, 103), (24, 83, 142),
-                 (47, 106, 165), (87, 146, 205), (127, 186, 245),
-                 (148, 207, 10), (189, 248, 51), (230, 33, 92)]
+Built by hand, not by `encode`: the 45 filtered bytes are arbitrary, the
+filter bytes were set to 0..4, and the stream was wrapped in a PNG by a
+writer written apart from this module (IHDR 3x5, 8-bit RGB, one IDAT) and
+decoded by Pillow 12.3.0 on 2026-10-22 (CORR-DMCP-014)."""
+
+VECTOR_PIXELS = [(0, 59, 118), (37, 37, 37), (37, 37, 37),
+                 (101, 101, 101), (203, 203, 203), (50, 50, 50),
+                 (253, 26, 56), (18, 146, 18), (121, 249, 121),
+                 (227, 114, 129), (162, 170, 113), (244, 249, 157),
+                 (72, 215, 230), (113, 0, 15), (203, 41, 56)]
 """What Pillow decoded `VECTOR_STREAM` to."""
 
 TIE_STREAM = "040a0208fc04fc22ee22"
@@ -314,7 +320,7 @@ def self_check():
         previous = _unfilter(kind, bytearray(line), previous, 3, "vector")
         decoded.append([tuple(previous[i:i + 3]) for i in range(0, 9, 3)])
     out.append(("a fixed vector of all five filters decodes as Pillow did",
-                kinds == [1, 2, 3, 4, 4]
+                kinds == [0, 1, 2, 3, 4]
                 and [p for row in decoded for p in row] == VECTOR_PIXELS,
                 decoded[:1]))
 

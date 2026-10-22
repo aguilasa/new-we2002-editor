@@ -16,7 +16,7 @@
 | [CORR-DMCP-011](/docs/tasks/duckmcp/CORR-DMCP-011.md) | Matar o DuckStation só quando o live.py o lançou, não no pulo | DMCP-TASK-10 | medium | done | 2026-10-22 |
 | [CORR-DMCP-012](/docs/tasks/duckmcp/CORR-DMCP-012.md) | Colar no Log da 12 as transcrições do selftest e do controle press-without-duration | DMCP-TASK-12 | medium | done | 2026-10-22 |
 | [CORR-DMCP-013](/docs/tasks/duckmcp/CORR-DMCP-013.md) | Versionar como controles as plantas dos checks novos de gpu, png, vram e psx | DMCP-TASK-13 | medium | pending | — |
-| [CORR-DMCP-014](/docs/tasks/duckmcp/CORR-DMCP-014.md) | Pôr o filtro 0 no vetor fixo de PNG ou parar de dizer cinco filtros | DMCP-TASK-13 | low | pending | — |
+| [CORR-DMCP-014](/docs/tasks/duckmcp/CORR-DMCP-014.md) | Pôr o filtro 0 no vetor fixo de PNG ou parar de dizer cinco filtros | DMCP-TASK-13 | low | in-progress | — |
 | [CORR-DMCP-015](/docs/tasks/duckmcp/CORR-DMCP-015.md) | Listar 81-9F e C1-DF entre os opcodes que a cópia do looks perdia | DMCP-TASK-13 | low | pending | — |
 | [CORR-DMCP-016](/docs/tasks/duckmcp/CORR-DMCP-016.md) | Escrever as conferências de equivalência pré-mudança como passos refeitos do git | DMCP-TASK-14 | low | pending | — |
 <!-- rite:end -->
