@@ -127,3 +127,12 @@ $ ctest --test-dir build -R 'duckmcp_selftest|pes2_selftest'
 O total do `audit.py` não mudou (208, o mesmo dos Logs da DMCP-TASK-02 e da DMCP-TASK-04): o `importlib.import_module("fork")`
 que saiu do shim não era um sítio que o auditor conta, e o `tools/pes2/fork.py` continua igual até a
 DMCP-TASK-09.
+- **Closed** — commit `e9ac6f57` (2026-10-22): feat(duckmcp): game-agnostic fork launcher, and the client's liveness probe filled in the lib
+  - Files (`git show --name-status e9ac6f57`):
+    - `M docs/prompts/perfil-duckmcp.md`
+    - `M docs/tasks/duckmcp/08-fork.md`
+    - `M tools/duckmcp/client.py`
+    - `M tools/duckmcp/controls.py`
+    - `A tools/duckmcp/fork.py`
+    - `M tools/duckmcp/selftest.py`
+    - `M tools/pes2/mcp.py`

@@ -168,13 +168,17 @@
       "phase": 2,
       "depends_on": ["DMCP-TASK-07"],
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#2.1",
-      "files": ["tools/duckmcp/fork.py", "tools/duckmcp/selftest.py", "tools/duckmcp/controls.py"],
+      "files": ["tools/duckmcp/fork.py", "tools/duckmcp/selftest.py", "tools/duckmcp/controls.py", "tools/duckmcp/client.py", "tools/pes2/mcp.py", "docs/prompts/perfil-duckmcp.md"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-22",
+      "done_commit": "e9ac6f57",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-22T16:05:53-03:00",
+      "active_s": 518,
+      "finished_at": "2026-10-22T16:14:31-03:00"
     },
     {
       "id": "DMCP-TASK-09",
