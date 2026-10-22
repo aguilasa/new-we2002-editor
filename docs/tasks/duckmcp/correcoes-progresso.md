@@ -8,4 +8,6 @@
 | [CORR-DMCP-003](/docs/tasks/duckmcp/CORR-DMCP-003.md) | Registrar no PLAN §3.3 a exceção dos nomes PES2_* do env.py | DMCP-TASK-03 | medium | done | 2026-10-22 |
 | [CORR-DMCP-004](/docs/tasks/duckmcp/CORR-DMCP-004.md) | Tirar do shim mcp.py o monkeypatch de vivacidade e a lógica de teste própria | DMCP-TASK-06 | medium | done | 2026-10-22 |
 | [CORR-DMCP-005](/docs/tasks/duckmcp/CORR-DMCP-005.md) | kits_selftest vermelho: o sandbox dos controles não copia tools/duckmcp, e o shim pes2/mcp.py não importa | DMCP-TASK-06 | high | done | 2026-10-22 |
+| [CORR-DMCP-006](/docs/tasks/duckmcp/CORR-DMCP-006.md) | Restringir o grep 'Pro Evolution' da Fase 2 aos arquivos fora dos juízes | DMCP-TASK-08 | medium | pending | — |
+| [CORR-DMCP-007](/docs/tasks/duckmcp/CORR-DMCP-007.md) | Fazer os checks de janela mais larga e de PID próprio poderem falhar | DMCP-TASK-08 | medium | pending | — |
 <!-- rite:end -->

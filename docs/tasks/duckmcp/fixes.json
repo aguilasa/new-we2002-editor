@@ -74,6 +74,32 @@
       "started_at": "2026-10-22T16:23:42-03:00",
       "active_s": 784,
       "finished_at": "2026-10-22T16:36:46-03:00"
+    },
+    {
+      "id": "CORR-DMCP-006",
+      "file": "CORR-DMCP-006.md",
+      "title": "Restringir o grep 'Pro Evolution' da Fase 2 aos arquivos fora dos juízes",
+      "origin": "DMCP-TASK-08",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-007",
+      "file": "CORR-DMCP-007.md",
+      "title": "Fazer os checks de janela mais larga e de PID próprio poderem falhar",
+      "origin": "DMCP-TASK-08",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

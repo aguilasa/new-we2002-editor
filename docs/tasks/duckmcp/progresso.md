@@ -123,7 +123,7 @@ graph TD
 | [DMCP-TASK-05](/docs/tasks/duckmcp/05-client.md) | `client.py` a partir do `mcp.py` de `f21182ea`, com servidor de teste | 1 | implementação | DMCP-TASK-04 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-06](/docs/tasks/duckmcp/06-cli-e-shim-mcp.md) | `cli.py list/status/call`, e `tools/pes2/mcp.py` vira shim | 1 | implementação | DMCP-TASK-05 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-07](/docs/tasks/duckmcp/07-fechamento-fase-1.md) | Fechamento da Fase 1 — o transporte | 1 | closing | DMCP-TASK-05, DMCP-TASK-06 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-08](/docs/tasks/duckmcp/08-fork.md) | `fork.py` agnóstico de jogo — janela pelo PID, título opcional, `hide_window` e `size_window` | 2 | implementação | DMCP-TASK-07 | done | 2026-10-22 | pending |
+| [DMCP-TASK-08](/docs/tasks/duckmcp/08-fork.md) | `fork.py` agnóstico de jogo — janela pelo PID, título opcional, `hide_window` e `size_window` | 2 | implementação | DMCP-TASK-07 | done | 2026-10-22 | 2026-10-22 |
 | [DMCP-TASK-09](/docs/tasks/duckmcp/09-cli-fork-e-lancadores.md) | `cli.py launch/kill/status/recipe/which`, shim do `pes2/fork.py`, e os lançadores apontados | 2 | implementação | DMCP-TASK-08 | done | 2026-10-22 | pending |
 | [DMCP-TASK-10](/docs/tasks/duckmcp/10-duckmcp-live.md) | `duckmcp_live` — subir o fork com um `.cue` qualquer, andar, ler e matar | 2 | verificação | DMCP-TASK-09 | done | 2026-10-22 | pending |
 | [DMCP-TASK-11](/docs/tasks/duckmcp/11-fechamento-fase-2.md) | Fechamento da Fase 2 — o lançador | 2 | closing | DMCP-TASK-08, DMCP-TASK-09, DMCP-TASK-10 | pending | — | — |

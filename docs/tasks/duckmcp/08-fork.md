@@ -136,3 +136,4 @@ DMCP-TASK-09.
     - `A tools/duckmcp/fork.py`
     - `M tools/duckmcp/selftest.py`
     - `M tools/pes2/mcp.py`
+- **Reviewed** (2026-10-22) at `dccbc63f`: CORR-DMCP-006, CORR-DMCP-007
