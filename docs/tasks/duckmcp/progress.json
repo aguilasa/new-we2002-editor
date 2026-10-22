@@ -278,11 +278,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#3.1",
       "files": ["tools/duckmcp/psx.py", "tools/duckmcp/gpu.py", "tools/duckmcp/png.py", "tools/duckmcp/vram.py", "tools/duckmcp/selftest.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-22",
+      "done_commit": "87987d9d",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-22T18:13:17-03:00",
+      "active_s": 943,
+      "finished_at": "2026-10-22T18:29:00-03:00"
     },
     {
       "id": "DMCP-TASK-14",

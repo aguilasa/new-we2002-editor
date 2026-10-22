@@ -156,3 +156,11 @@ $ ctest --test-dir build -R duckmcp_selftest -V | grep -E 'duckmcp_selftest:|Pas
 1/1 Test #24: duckmcp_selftest .................   Passed    1.66 sec
 100% tests passed, 0 tests failed out of 1
 ```
+- **Closed** — commit `87987d9d` (2026-10-22): feat(duckmcp): add psx, gpu, png and vram; rule (c) reads its ranges from psx.py
+  - Files (`git show --name-status 87987d9d`):
+    - `M docs/tasks/duckmcp/13-hardware-e-pixels.md`
+    - `A tools/duckmcp/gpu.py`
+    - `A tools/duckmcp/png.py`
+    - `A tools/duckmcp/psx.py`
+    - `M tools/duckmcp/selftest.py`
+    - `A tools/duckmcp/vram.py`
