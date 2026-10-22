@@ -98,3 +98,4 @@ substituição exata, fica vermelho na asserção
     - `M tools/duckmcp/controls.py`
     - `M tools/duckmcp/selftest.py`
     - `A tools/duckmcp/session.py`
+- **Reviewed** (2026-10-22) at `225d5145`: CORR-DMCP-012

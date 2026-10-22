@@ -176,6 +176,19 @@
       "started_at": "2026-10-22T17:44:04-03:00",
       "active_s": 71,
       "finished_at": "2026-10-22T17:45:15-03:00"
+    },
+    {
+      "id": "CORR-DMCP-012",
+      "file": "CORR-DMCP-012.md",
+      "title": "Colar no Log da 12 as transcrições do selftest e do controle press-without-duration",
+      "origin": "DMCP-TASK-12",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
