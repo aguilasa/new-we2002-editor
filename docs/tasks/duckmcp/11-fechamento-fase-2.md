@@ -40,3 +40,6 @@ Verificações da Fase 2 do perfil, uma a uma:
 - `duckmcp_live` sem a variável: `ctest --test-dir build -R duckmcp_live -V` → `25: duckmcp_live: skipped -- no image: set DUCKSTATION_TEST_IMAGE to the .cue of a working copy, or pass --image`, `1/1 Test #25: duckmcp_live ... ***Skipped 0.04 sec`; com a cópia no `:98`, o `Passed` acima; `python3 tools/duckmcp/cli.py procs` antes e depois → `pids: []`.
 
 Sweep: nenhum nome, arquivo ou número mudou nesta task — `sweep: none`.
+- **Closed** — commit `e20446c6` (2026-10-22): docs(duckmcp): close phase 2, gates and phase checks re-run
+  - Files (`git show --name-status e20446c6`):
+    - `M docs/tasks/duckmcp/11-fechamento-fase-2.md`
