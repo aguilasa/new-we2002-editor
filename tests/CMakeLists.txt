@@ -378,4 +378,17 @@ if(Python3_FOUND)
     # 30 s, far over 1.5x the well-under-a-second it takes alone, so a loaded
     # machine does not time it out.
     set_tests_properties(duckmcp_selftest PROPERTIES TIMEOUT 30)
+    # The live gate: boots DUCKSTATION_TEST_IMAGE (the .cue of a working
+    # copy) under the fork on the Xvfb, pauses, counts tools/list, and
+    # demands frame_step moves frame_number by exactly the steps taken.
+    # 77 with no image, no fork or no X server. One emulator at a time, so
+    # it shares the duckstation lock. 180 s against ~4 s measured alone:
+    # launch() itself may wait up to 120 s for a slow boot.
+    add_test(NAME duckmcp_live
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/duckmcp/live.py)
+    set_tests_properties(duckmcp_live PROPERTIES
+        SKIP_RETURN_CODE 77
+        RESOURCE_LOCK duckstation
+        TIMEOUT 180)
 endif()

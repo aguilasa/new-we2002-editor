@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+"""The live gate of duckmcp: boot a disc under the fork, step it, read it, kill it.
+
+    python3 tools/duckmcp/live.py [--image COPY.cue] [--steps 5]
+
+The image is any working copy's `.cue`; without `--image` it comes from
+`DUCKSTATION_TEST_IMAGE` (read through `env.get`, rule (d)). Nothing here
+knows which game it is: the gate asks only what every disc answers -- the
+tools the server declares, and that `frame_step` moves `frame_number`.
+
+What it does, in order: `fork.launch` (no title match), `pause`, count
+`tools/list`, read `get_status` `frame_number`, call `frame_step` `--steps`
+times, read `frame_number` again and demand it advanced by **exactly** the
+number of steps -- measured on 2026-10-22, one `frame_step` is one frame of
+`frame_number`, paused before and after. The fork is killed in `finally`,
+whatever happened.
+
+Exit codes: 0 ok; 77 (`errors.SKIP`, ctest's *skipped*) with no image, no
+fork or no X server, the reason printed; 1 when the fork failed or the frame
+count is wrong. The last line is always
+`duckmcp_live: <ok|FAIL|skipped> ...`.
+"""
+
+import argparse
+import os
+import sys
+
+if __package__ in (None, ""):
+    _HERE = os.path.dirname(os.path.abspath(__file__))
+    sys.path[:] = [p for p in sys.path
+                   if os.path.abspath(p or os.curdir) != _HERE]
+    sys.path.insert(0, os.path.dirname(_HERE))
+
+from duckmcp import env, fork  # noqa: E402
+from duckmcp.errors import (SKIP, Fail, NotRunning, Skip,  # noqa: E402
+                            ToolError)
+
+IMAGE_VARIABLE = "DUCKSTATION_TEST_IMAGE"
+"""The variable naming the `.cue` of a working copy, when `--image` is absent."""
+
+DEFAULT_STEPS = 5
+"""How many `frame_step`s the gate takes; ~57 ms each over the wire."""
+
+
+def frame_number(client):
+    """`get_status`'s `frame_number`, which `frame_step` must move."""
+    return client.call("get_status")["frame_number"]
+
+
+def run(image, steps, display=None):
+    """Launch, pause, count tools, step, compare; kill in `finally`.
+
+    Returns `(passed, tools, before, after)`.
+    """
+    try:
+        _pid, _window, client = fork.launch(image, display=display)
+        client.call("pause")
+        names = client.tools()
+        print("  tools declared: %d" % len(names), flush=True)
+        before = frame_number(client)
+        for _ in range(steps):
+            client.call("frame_step")
+        after = frame_number(client)
+        print("  frame_number %d -> %d after %d frame_step"
+              % (before, after, steps), flush=True)
+        return after - before == steps, len(names), before, after
+    finally:
+        fork.kill(verbose=False)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--image", help="the .cue of a working copy "
+                        "(default: $%s)" % IMAGE_VARIABLE)
+    parser.add_argument("--steps", type=int, default=DEFAULT_STEPS)
+    parser.add_argument("--display", help="default: env.display()")
+    args = parser.parse_args(argv)
+
+    image = args.image or env.get(IMAGE_VARIABLE)
+    if not image:
+        print("duckmcp_live: skipped -- no image: set %s to the .cue of a "
+              "working copy, or pass --image" % IMAGE_VARIABLE)
+        return SKIP
+    print("duckmcp_live: %s, %d steps" % (image, args.steps), flush=True)
+    try:
+        passed, tools, before, after = run(image, args.steps, args.display)
+    except Skip as exc:
+        print("duckmcp_live: skipped -- %s" % exc)
+        return SKIP
+    except (Fail, NotRunning, ToolError) as exc:
+        print("duckmcp_live: FAIL -- %s: %s" % (type(exc).__name__, exc))
+        return 1
+    verdict = "ok" if passed else "FAIL"
+    print("duckmcp_live: %s -- frame_number moved %d for %d frame_step "
+          "(want %d); tools=%d frames %d->%d"
+          % (verdict, after - before, args.steps, args.steps, tools,
+             before, after))
+    return 0 if passed else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
