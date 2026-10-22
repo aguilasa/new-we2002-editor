@@ -15,7 +15,9 @@ control the untouched sandbox must come out green, or no red means anything.
 
 The rules are those of PLAN-DUCKMCP-PY.md section 3.3: (a) nothing outside
 the stdlib on import, (c) nothing of a game inside the package, (d) only
-`env.py` reads the environment. Rule (b) closes in phase 4.
+`env.py` reads the environment. Rule (b) closes in phase 4. Beside them,
+the controls of rule `client` break the transport itself, and demand the
+assertion of `client.self_check()` that covers the broken behaviour.
 
 The last line says how many controls ran, how many went red as required,
 and the count per rule; the exit is 0 only when every one did.
@@ -118,6 +120,14 @@ CONTROLS = (
         "\n# the cookie goes in XAUTHORITY\nSKIP = 77\n",
         "FAIL  rule (d): errors.py does not mention XAUTHORITY", None,
         "only env.py builds the X cookie variable"),
+    Control(
+        "client-session-never-reclaimed", "client", "client.py",
+        "            if not self.reclaim:\n                raise\n",
+        "            raise\n",
+        "FAIL  client: a stolen session is recovered once and the call goes "
+        "through", None,
+        "a stolen session (pitfall 46) re-raised instead of taken back: the "
+        "loopback stand-in of the one-session rule must catch it"),
 )
 """Every control, in report order."""
 

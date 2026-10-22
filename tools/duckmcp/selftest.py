@@ -9,10 +9,15 @@ In this order:
 3. `env.self_check()`: the new variable beats its legacy fallback, the
    legacy one alone beats the default, neither gives the default; the `:98`
    rule of `x_env`; `is_roms` on both separators; the `state_path` shape;
-4. `audit.self_check()`: the audit of rule (b) over synthetic tools trees
+4. `client.self_check()`: JSON and SSE replies decode the same, error
+   replies raise, a refused port says whether the process is alive, dead or
+   unknown, and against a loopback stand-in of the fork's one-session rule a
+   stolen session is recovered once, a second loss is an error, and another
+   `ToolError` passes without a new handshake;
+5. `audit.self_check()`: the audit of rule (b) over synthetic tools trees
    built in a temporary directory -- a clean one counts 0, one planted
    `import fork` counts 1, and each site category is seen once;
-5. the design rules of PLAN-DUCKMCP-PY.md section 3.3, over every `.py` of
+6. the design rules of PLAN-DUCKMCP-PY.md section 3.3, over every `.py` of
    this package:
    - (a) every `import` names the stdlib or this package, and importing
      `duckmcp` and each of its modules, each in a fresh interpreter, loads
@@ -48,7 +53,7 @@ TOOLS_DIR = os.path.dirname(DUCKMCP_DIR)
 sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
-from duckmcp import audit, env, errors  # noqa: E402
+from duckmcp import audit, client, env, errors  # noqa: E402
 
 JUDGES = ("selftest.py", "controls.py")
 """The files that hold the patterns of rule (c), and so are exempt from it."""
@@ -371,12 +376,15 @@ def main(argv=None):
          os.path.dirname(os.path.abspath(duckmcp.__file__)) == DUCKMCP_DIR,
          duckmcp.__file__)
     c.ok("duckmcp has a __version__", bool(getattr(duckmcp, "__version__", "")))
+    c.ok("duckmcp re-exports Client", getattr(duckmcp, "Client", None)
+         is client.Client)
     c.ok("duckmcp re-exports the errors",
          all(getattr(duckmcp, n, None) is getattr(errors, n)
              for n in ("SKIP", "Fail", "Skip", "NotRunning", "ToolError",
                        "SessionLost")))
     c.module("errors", errors.self_check)
     c.module("env", env.self_check)
+    c.module("client", client.self_check)
     c.module("audit", audit.self_check)
     check_rules(c)
 
