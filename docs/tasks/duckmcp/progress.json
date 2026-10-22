@@ -188,16 +188,17 @@
       "phase": 2,
       "depends_on": ["DMCP-TASK-08"],
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#4.4",
-      "files": ["tools/duckmcp/cli.py", "tools/pes2/fork.py", "tools/pes2/boot_check.sh", "tools/pes2/run_duckstation.sh", "Makefile", "make.ps1"],
+      "files": ["tools/duckmcp/cli.py", "tools/pes2/fork.py", "tools/pes2/boot_check.sh", "tools/pes2/run_duckstation.sh", "Makefile", "make.ps1", "tools/kits/controls.py", "tools/kits/selftest.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-22",
+      "done_commit": "c2630fad",
+      "reviewed_on": "pending",
       "review_commit": null,
       "active_since": null,
       "started_at": "2026-10-22T16:14:40-03:00",
-      "active_s": 124
+      "active_s": 1934,
+      "finished_at": "2026-10-22T17:15:26-03:00"
     },
     {
       "id": "DMCP-TASK-10",

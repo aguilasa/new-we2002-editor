@@ -102,3 +102,14 @@ Total Test time (real) = 361.10 sec
 - `CLAUDE.md` (linhas da tabela do PES2 com `tools/pes2/fork.py launch|kill|status|recipe` e a prosa que o nomeia), `docs/PLAN-PES2-PSX.md`, `docs/PES2-WINDOWS.md`, `docs/LOOKS-AMBIENTE.md`, `docs/PLAN-LOOKS-PY.md` → DMCP-TASK-28 (documentação).
 - `tools/pes2/pad.py:9`, docstring → DMCP-TASK-19.
 - `tools/looks/oracle.py:330-352`: docstring "Derived from `fork.FORK_HOME`" e a leitura `os.environ.get("PES2_FORK", fork.FORK_HOME)`, que vira `env.savestates_dir()` → DMCP-TASK-22.
+- **Closed** — commit `c2630fad` (2026-10-22): feat(duckmcp): process commands in cli.py, pes2/fork.py as a shim, launchers on the lib
+  - Files (`git show --name-status c2630fad`):
+    - `M Makefile`
+    - `M docs/tasks/duckmcp/09-cli-fork-e-lancadores.md`
+    - `M make.ps1`
+    - `M tools/duckmcp/cli.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/pes2/boot_check.sh`
+    - `M tools/pes2/fork.py`
+    - `M tools/pes2/run_duckstation.sh`
