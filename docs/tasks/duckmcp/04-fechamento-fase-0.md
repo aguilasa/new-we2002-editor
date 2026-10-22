@@ -42,3 +42,6 @@ Verificações da Fase 0 do perfil, uma a uma:
 - `python3 tools/duckmcp/audit.py | tail -1` → `audit: 208 raw site(s) in 15 file(s)`, o mesmo total que a saída inteira colada no Log da DMCP-TASK-02.
 
 Sweep: nada mudou de nome, arquivo ou número nesta task — `sweep: none`.
+- **Closed** — commit `b32f6cd2` (2026-10-22): docs(duckmcp): close phase 0, gates and phase checks re-run
+  - Files (`git show --name-status b32f6cd2`):
+    - `M docs/tasks/duckmcp/04-fechamento-fase-0.md`
