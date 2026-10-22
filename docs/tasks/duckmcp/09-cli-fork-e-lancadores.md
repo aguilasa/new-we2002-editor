@@ -25,7 +25,7 @@ id: DMCP-TASK-09
 - [x] `python3 tools/duckmcp/cli.py recipe` imprime a receita, e `procs` sem fork imprime `pids: []` (o `status` da lib já é o `get_status` do servidor; ver o Log)
 - [x] `grep -rn 'pes2/fork.py' Makefile make.ps1 tools/pes2/*.sh` não acha nada
 - [x] `make -n pes2-status` mostra a chamada à lib
-- [x] `python3 tools/kits/selftest.py --quiet` sai 0, e a linha dos controles mostra `fork-joystick-let-through` vermelho no arquivo novo
+- [x] `python3 tools/kits/selftest.py --quiet` sai 0, e `python3 tools/kits/controls.py --only fork-joystick-let-through` mostra `RED    fork-joystick-let-through    duckmcp/fork.py :: refuse_joysticks` (o `--quiet` só imprime o agregado)
 
 ## Notes
 

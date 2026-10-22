@@ -45,3 +45,18 @@ tem de citar um comando cuja saída contenha o nome do controle, e esse comando,
 `RED    fork-joystick-let-through`.
 
 ## Log de Execução
+
+2026-10-22 — reproduzido: o critério 6 cita a linha de controles do `kits/selftest.py --quiet`, que só
+imprime o agregado (`87 of 87 controls red`); a saída não traz o nome do controle.
+
+Conserto: o critério 6 da DMCP-TASK-09 agora cita `python3 tools/kits/controls.py --only
+fork-joystick-let-through` e a linha `RED` que esse comando imprime, além de manter o
+`kits/selftest.py --quiet` saindo 0.
+
+Verificação:
+
+```text
+$ python3 tools/kits/controls.py --only fork-joystick-let-through | tail -2
+  RED    fork-joystick-let-through    duckmcp/fork.py :: refuse_joysticks
+controls: 1 of 1 red
+```
