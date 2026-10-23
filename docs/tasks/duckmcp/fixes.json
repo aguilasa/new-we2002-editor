@@ -465,6 +465,19 @@
       "started_at": "2026-10-23T18:07:58-03:00",
       "active_s": 32,
       "finished_at": "2026-10-23T18:08:30-03:00"
+    },
+    {
+      "id": "CORR-DMCP-029",
+      "file": "CORR-DMCP-029.md",
+      "title": "O load_pad do drive.py cai em silêncio no DEFAULT_PAD quando o [Pad1] não é de teclado",
+      "origin": "CORR-DMCP-026",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
