@@ -89,3 +89,13 @@ E a regra (b): `ok    rule (b): PENDING lists 169 site(s) in 74 entries, audit.p
 **Ao vivo.** Com o fork de pé na cópia (`cli.py launch … --match '^Pro Evolution Soccer 2$'`), `python3 tools/pes2/who_writes.py 0x801FFF8C --width 4 --timeout 20` (uma palavra de pilha) → `written by   0x80112D90  sw s3, 0x0000001C(sp)` / `sp = 0x801FFF70, 0x801FFF70 + 0x0000001C = 0x801FFF8C` / `called from  ra = 0x8011384C`, saída 0; depois, `breakpoint action=list` → `[]` e `get_status` → `"state": "paused"`. Sem emulador, o mesmo comando sai 77 com `skipping: no MCP server at http://127.0.0.1:2346/mcp …`. `cli.py procs` → `pids: []` depois de cada corrida.
 
 **Resultado negativo, anterior a esta task.** `drive.py <cópia>.cue --screen title` (o AppImage oficial, `:98`) falha igual na árvore entregue e no `drive.py` da HEAD `e2dbefe2`: `DRIVE FAILED: no frame matched mean=0.55 sd=0.341 (+-0.02) within 240s; closest was mean=0.160099 sd=0.316763` (HEAD: `mean=0.160117 sd=0.316803`). A janela é achada e capturada nos dois (`window 2097159 on :98`), então o `x_env` funciona; o que não bate é a assinatura do título, e não foi tocada aqui.
+- **Closed** — commit `be5e5484` (2026-10-23): refactor(pes2): who_writes over duckmcp.debug, drive and boot_check over env and errors
+  - Files (`git show --name-status be5e5484`):
+    - `M docs/tasks/duckmcp/20-pes2-who-writes-e-drive.md`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`
+    - `M tools/pes2/boot_check.sh`
+    - `M tools/pes2/check_image.py`
+    - `M tools/pes2/drive.py`
+    - `M tools/pes2/selftest.py`
+    - `M tools/pes2/who_writes.py`

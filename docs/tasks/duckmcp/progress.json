@@ -429,13 +429,17 @@
       "phase": 5,
       "depends_on": ["DMCP-TASK-18"],
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#4.3",
-      "files": ["tools/pes2/who_writes.py", "tools/pes2/drive.py", "tools/pes2/selftest.py", "tools/pes2/boot_check.sh", "tools/duckmcp/selftest.py"],
+      "files": ["tools/pes2/who_writes.py", "tools/pes2/drive.py", "tools/pes2/selftest.py", "tools/pes2/boot_check.sh", "tools/pes2/check_image.py", "tools/duckmcp/selftest.py", "tools/duckmcp/controls.py"],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-23",
+      "done_commit": "be5e5484",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-23T16:48:37-03:00",
+      "active_s": 1467,
+      "finished_at": "2026-10-23T17:13:04-03:00"
     },
     {
       "id": "DMCP-TASK-21",

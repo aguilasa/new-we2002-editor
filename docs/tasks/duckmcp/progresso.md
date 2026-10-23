@@ -135,7 +135,7 @@ graph TD
 | [DMCP-TASK-17](/docs/tasks/duckmcp/17-regra-b.md) | Regra (b) como gate, e os controles da lib completos | 4 | verificação | DMCP-TASK-16 | done | 2026-10-23 | 2026-10-23 | approved |
 | [DMCP-TASK-18](/docs/tasks/duckmcp/18-fechamento-fase-4.md) | Fechamento da Fase 4 — a depuração | 4 | closing | DMCP-TASK-16, DMCP-TASK-17 | done | 2026-10-23 | 2026-10-23 | approved |
 | [DMCP-TASK-19](/docs/tasks/duckmcp/19-pes2-mcp-drive-e-pad.md) | `pes2`: `mcp_drive.py` e `pad.py` sobre `Session` | 5 | implementação | DMCP-TASK-18 | blocked | — | — | — |
-| [DMCP-TASK-20](/docs/tasks/duckmcp/20-pes2-who-writes-e-drive.md) | `pes2`: `who_writes.py`, `drive.py` e `selftest.py` sobre `debug` e `env` | 5 | implementação | DMCP-TASK-18 | pending | — | — | — |
+| [DMCP-TASK-20](/docs/tasks/duckmcp/20-pes2-who-writes-e-drive.md) | `pes2`: `who_writes.py`, `drive.py` e `selftest.py` sobre `debug` e `env` | 5 | implementação | DMCP-TASK-18 | done | 2026-10-23 | pending | awaiting |
 | [DMCP-TASK-21](/docs/tasks/duckmcp/21-fechamento-fase-5.md) | Fechamento da Fase 5 — a migração do pes2 | 5 | closing | DMCP-TASK-19, DMCP-TASK-20 | pending | — | — | — |
 | [DMCP-TASK-22](/docs/tasks/duckmcp/22-looks-oracle-session.md) | `looks`: `Oracle` sobre `Session`, e o `OneSession` some | 6 | implementação | DMCP-TASK-18 | pending | — | — | — |
 | [DMCP-TASK-23](/docs/tasks/duckmcp/23-looks-breakpoints.md) | `looks`: esperas e laços de breakpoint sobre `debug` | 6 | implementação | DMCP-TASK-22 | pending | — | — | — |
