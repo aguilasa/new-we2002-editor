@@ -71,8 +71,13 @@ In this order:
    - (d) only `env.py` reads the environment, and only `env.py` mentions
      `XAUTHORITY`.
    `selftest.py` and `controls.py` are exempt from (c) and from the
-   `XAUTHORITY` half of (d): they hold the patterns they judge. Rule (b)
-   lives outside this package and closes in phase 4.
+   `XAUTHORITY` half of (d): they hold the patterns they judge.
+8. rule (b), over the rest of the tools tree (`tools/` minus this package):
+   every raw site `audit.py` finds is held against `PENDING` by its
+   `audit.site_keys` key -- file, category, printed line, never the line
+   number. A site beyond the list is red, an entry the audit no longer
+   finds is red, an entry naming a task outside `MIGRATIONS` is red, and the
+   size of the list (the sum of its counts) must equal the audit total.
 
 `controls.py` plants one defect per rule in a sandbox copy and demands
 this script goes red on the line that rule prints.
@@ -86,6 +91,7 @@ Usage:
 
 import argparse
 import ast
+import collections
 import json
 import os
 import re
@@ -154,6 +160,259 @@ OS_MODULES = ("os", "posix", "nt")
 
 XAUTH = "XAUTHORITY"
 """The variable only `env.py` may build (rule (d))."""
+
+
+MIGRATIONS = ("DMCP-TASK-19", "DMCP-TASK-20", "DMCP-TASK-22", "DMCP-TASK-23",
+              "DMCP-TASK-25", "DMCP-TASK-26", "DMCP-TASK-30")
+"""The tasks of phases 5 to 7 and 9 that remove raw sites (rule (b))."""
+
+PENDING = (
+    # DMCP-TASK-19
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'return self.client.call("get_status")["frame_number"]', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     's.client = Client()', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("continue")', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("frame_step")', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("load_state", slot=slot)', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("pause")', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("press_button", button=button.capitalize()', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("save_state", slot=slot)', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("set_speed", fast_forward=False)', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("set_speed", fast_forward=True)', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'client',
+     'self.client.call("take_screenshot", path=path)', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'import',
+     'from mcp import Client', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'import',
+     'from mcp import NotRunning, ToolError # noqa: E402', 1),
+    ('DMCP-TASK-19', 'tools/pes2/mcp_drive.py', 'import',
+     'import fork # noqa: E402', 1),
+    ('DMCP-TASK-19', 'tools/pes2/pad.py', 'client',
+     'client = Client()', 1),
+    ('DMCP-TASK-19', 'tools/pes2/pad.py', 'client',
+     'self.client.call("continue")', 1),
+    ('DMCP-TASK-19', 'tools/pes2/pad.py', 'client',
+     'self.client.call("frame_step")', 1),
+    ('DMCP-TASK-19', 'tools/pes2/pad.py', 'client',
+     'self.client.call("pause")', 1),
+    ('DMCP-TASK-19', 'tools/pes2/pad.py', 'client',
+     'self.client.call("press_button", button=button.capitalize(),', 1),
+    ('DMCP-TASK-19', 'tools/pes2/pad.py', 'client',
+     'self.client.call("set_speed", fast_forward=bool(on))', 1),
+    ('DMCP-TASK-19', 'tools/pes2/pad.py', 'client',
+     'self.client.call("take_screenshot", path=path)', 1),
+    ('DMCP-TASK-19', 'tools/pes2/pad.py', 'import',
+     'from mcp import Client, NotRunning # noqa: E402', 1),
+    # DMCP-TASK-20
+    ('DMCP-TASK-20', 'tools/pes2/selftest.py', 'import',
+     'import savestate # noqa: E402', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',
+     'client = mcp.Client()', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',
+     'client.call("breakpoint", action="add", type="write", address=hx(address))', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',
+     'client.call("breakpoint", action="clear")', 2),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',
+     'client.call("continue")', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',
+     'client.call("press_button", button=nudge.capitalize()', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',
+     'if is_paused(client.call("wait_for_pause")):', 3),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',
+     'registers = client.call("read_registers", group="gpr")', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',
+     'window = client.call("disassemble", address=hx(pc - 16), count=8)', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'import',
+     'from mcp import NotRunning, ToolError # noqa: E402', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'import',
+     'import fork # noqa: E402', 1),
+    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'import',
+     'import mcp # noqa: E402', 1),
+    # DMCP-TASK-22
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     '"frame_number": client.call("get_status").get("frame_number"),', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'after = game.client.call("get_status")', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'before = game.client.call("get_status")', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'client.call("pause")', 11),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'client.call("press_button", button="Down", duration_frames=CONFIRM_FRAMES)', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'client.call("press_button", button=button,', 2),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'client.call("press_button", button=press,', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'game.client.call("dump_vram", path=path, format="png")', 2),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'game.client.call("press_button", button="Down",', 3),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'game.client.call("press_button", button="Up",', 2),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'game.client.call("press_button", button=button,', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'game.client.call("write_vram_region", x=0, y=origin, width=width,', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'game.client.call("write_vram_region", x=page[0], y=page[1],', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'gpu = game.client.call("get_gpu_state")', 2),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'out.append((client.call("get_status")["frame_number"], pair))', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'reply = game.client.call("read_vram_region", x=x, y=y,', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'self.client.call("frame_step")', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'self.client.call("load_state", slot=slot)', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'self.client.call("pause")', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'self.client.call("press_button", button=button,', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'self.client.call("read_memory", address=address, size=size, path=path)', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'client',
+     'self.client.call("take_screenshot", path=path)', 1),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'import',
+     'import fork', 3),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'import',
+     'import mcp', 2),
+    ('DMCP-TASK-22', 'tools/looks/oracle.py', 'import',
+     'import savestate', 2),
+    # DMCP-TASK-23
+    ('DMCP-TASK-23', 'tools/looks/confront.py', 'client',
+     'client.call("breakpoint", action="add", type="execute",', 2),
+    ('DMCP-TASK-23', 'tools/looks/confront.py', 'client',
+     'client.call("breakpoint", action="clear")', 4),
+    ('DMCP-TASK-23', 'tools/looks/confront.py', 'client',
+     'client.call("continue")', 2),
+    ('DMCP-TASK-23', 'tools/looks/confront.py', 'client',
+     'game.client.call("dump_vram", path=path, format="png")', 1),
+    ('DMCP-TASK-23', 'tools/looks/confront.py', 'client',
+     'number = client.call("get_status")["frame_number"]', 1),
+    ('DMCP-TASK-23', 'tools/looks/confront.py', 'client',
+     'registers = client.call("read_registers", group="gpr")', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'client.call("breakpoint", action="add", type="execute",', 11),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'client.call("breakpoint", action="add", type="read",', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'client.call("breakpoint", action="add", type="write",', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'client.call("breakpoint", action="clear")', 27),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'client.call("continue")', 17),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'client.call("read_registers", group="all"), "pc")', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'client.call("vram_watch", action="remove",', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'game.client.call("continue")', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'hit = client.call("vram_watch", action="last_hit")', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'if not who_writes.is_paused(client.call("wait_for_pause")):', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'if who_writes.is_paused(game.client.call("wait_for_pause")):', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'listed = client.call("breakpoint", action="list")', 2),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'out.append(read(client.call("read_registers", group="gpr")))', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'registers = client.call("read_registers", group="gpr")', 9),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'reply = client.call(', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'seen.append(gte_projection(client.call("get_gte_registers")))', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'watch = client.call("vram_watch", action="add",', 1),
+    ('DMCP-TASK-23', 'tools/looks/oracle.py', 'client',
+     'window = client.call(', 1),
+    # DMCP-TASK-25
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("breakpoint", action="add", type="execute",', 2),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("breakpoint", action="clear")', 4),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("continue")', 2),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("dump_vram", path=path, format="png")', 1),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("frame_step")', 2),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("get_gte_registers")),', 1),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("load_state", slot=slot)', 1),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("pause")', 3),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'client.call("take_screenshot", path=shot)', 1),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'game.client.call("dump_vram", path=path, format="png")', 1),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'game.client.call("load_state", slot=slot)', 1),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'game.client.call("press_button", button=button,', 1),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'registers = client.call("read_registers", group="gpr")', 2),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'client',
+     'return game.client.call("get_status").get("frame_number")', 1),
+    ('DMCP-TASK-25', 'tools/kits/oracle.py', 'import',
+     'import fork', 1),
+    # DMCP-TASK-26
+    ('DMCP-TASK-26', 'tools/kits/replay.py', 'import',
+     'import fork # tools/pes2', 1),
+    ('DMCP-TASK-26', 'tools/kits/replay.py', 'import',
+     'import savestate # tools/pes2', 1),
+    ('DMCP-TASK-26', 'tools/kits/selftest.py', 'import',
+     'import fork # tools/pes2, the shim over duckmcp.fork', 1),
+    # DMCP-TASK-30
+    ('DMCP-TASK-30', 'tools/kit2d/selftest.py', 'sys.path',
+     'sys.path.insert(0, os.path.join(TOOLS_DIR, "pes2"))', 1),
+    ('DMCP-TASK-30', 'tools/kits/core/tex.py', 'sys.path',
+     'sys.path.insert(0, _path)', 1),
+    ('DMCP-TASK-30', 'tools/kits/oracle.py', 'sys.path',
+     'sys.path.insert(0, _path)', 1),
+    ('DMCP-TASK-30', 'tools/looks/atlas.py', 'sys.path',
+     'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),', 1),
+    ('DMCP-TASK-30', 'tools/looks/iso_source.py', 'sys.path',
+     'sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pes2"))', 1),
+    ('DMCP-TASK-30', 'tools/looks/oracle.py', 'sys.path',
+     'sys.path.insert(0, PES2)', 1),
+    ('DMCP-TASK-30', 'tools/looks/sprites.py', 'sys.path',
+     'sys.path.insert(0, os.path.join(os.path.dirname(HERE), "pes2"))', 1),
+)
+"""The raw sites rule (b) still tolerates outside this package.
+
+Each entry is `(task, file, category, snippet, count)`: the task that
+removes the site, then the key `audit.py` gives it -- the file under the
+repository root, the category, and the source line as the audit prints it
+(whitespace folded, cut at `audit.SNIPPET`) -- and how many sites share
+that key. The line number is left out on purpose: an unrelated edit above a
+site moves it, and the list must not churn for that. Equal lines in one
+file are one entry with their count.
+
+The check is a multiset equality both ways: a site the audit finds beyond
+an entry's count is red (a new raw site), and an entry whose count exceeds
+what the audit finds is red too (stale), so a migration that removes sites
+shrinks this list in the same commit. The size is the sum of the counts,
+and it equals the audit total; task 30 leaves it empty.
+
+The task is the planned remover, by file per the phases of
+PLAN-DUCKMCP-PY.md section 6; inside the one file split across two tasks
+the breakpoint-family calls go to the later one. A `sys.path` site stays
+until the module home is gone, so all of them are task 30's. A migrating
+task may move an entry to a later task, saying so in its Log.
+"""
 
 
 class Checker:
@@ -412,6 +671,43 @@ def check_rules(c):
          not missing, missing)
 
 
+def pending_keys():
+    """`Counter` of `(file, category, snippet)` over `PENDING`."""
+    out = collections.Counter()
+    for _, path, category, snippet, count in PENDING:
+        out[path, category, snippet] += count
+    return out
+
+
+def check_rule_b(c):
+    """Rule (b): the raw sites outside the package are exactly `PENDING`."""
+    doc = audit.audit(TOOLS_DIR)
+    found = audit.site_keys(doc)
+    listed = pending_keys()
+    size = sum(listed.values())
+
+    def show(diff):
+        return "; ".join("%s: %s: %s (x%d)" % (k + (n,))
+                         for k, n in sorted(diff.items()))
+
+    new = found - listed
+    stale = listed - found
+    c.ok("rule (b): no raw site outside PENDING", not new, show(new))
+    c.ok("rule (b): no stale PENDING entry (listed, no longer found)",
+         not stale, show(stale))
+    bad = sorted({entry[0] for entry in PENDING} - set(MIGRATIONS))
+    c.ok("rule (b): every PENDING entry names a migration task", not bad,
+         bad)
+    zero = [entry[1:4] for entry in PENDING if entry[4] < 1]
+    c.ok("rule (b): every PENDING count is at least 1", not zero, zero)
+    keys = [entry[1:4] for entry in PENDING]
+    c.ok("rule (b): no key appears twice in PENDING",
+         len(keys) == len(set(keys)),
+         sorted(k for k in set(keys) if keys.count(k) > 1))
+    c.ok("rule (b): PENDING lists %d site(s) in %d entries, audit.py counts "
+         "%d" % (size, len(PENDING), doc["total"]), size == doc["total"])
+
+
 def check_child_env(c):
     """`fork.child_env`: the `:98` rule comes from `env.x_env`, and a missing
     install adds no library path."""
@@ -616,6 +912,7 @@ def main(argv=None):
     c.module("vram", vram.self_check)
     c.module("savestate", savestate.self_check)
     check_rules(c)
+    check_rule_b(c)
 
     print("duckmcp_selftest: %d check(s) ran, %d failure(s)" % (c.ran, c.failed))
     return 0 if c.failed == 0 else 1

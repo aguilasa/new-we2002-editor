@@ -26,14 +26,18 @@ it belong to `(top)`. Files that do not parse are scanned line by line with
 regular expressions instead, and say so in the text output.
 
 It is a probe, not a gate: it exits 0 whatever it counts, and 2 only when
-the root is not a directory. The gate of rule (b) comes later.
+the root is not a directory. The gate of rule (b) is `selftest.py`, which
+holds every site this finds against its `PENDING` list by `site_keys`: the
+file, the category and the printed line, never the line number. `--keys`
+prints those keys with their counts, in the shape `PENDING` takes.
 
 Usage:
-    python3 tools/duckmcp/audit.py [--root DIR] [--json]
+    python3 tools/duckmcp/audit.py [--root DIR] [--json | --keys]
 """
 
 import argparse
 import ast
+import collections
 import json
 import os
 import re
@@ -305,6 +309,16 @@ def audit(root=None):
     }
 
 
+def site_keys(doc):
+    """`Counter` of `(file, category, snippet)` over the sites of `doc`.
+
+    The key rule (b) holds the sites by: stable across edits that only move
+    a site to another line.
+    """
+    return collections.Counter((s["file"], s["category"], s["snippet"])
+                               for s in doc["sites"])
+
+
 def render(doc):
     """The text report; its last line is the fixed-form total."""
     out = ["audit: root %s, %d file(s) scanned, modules hosted by %s"
@@ -386,6 +400,10 @@ def self_check(root=None) -> list:
         expect("the planted site is an import in proj/a.py line 5",
                [(s["category"], s["file"], s["line"]) for s in doc["sites"]],
                [("import", "planted/proj/a.py", 5)])
+        expect("site_keys keys the planted site by file, category and line "
+               "text, not line number",
+               dict(site_keys(doc)),
+               {("planted/proj/a.py", "import", "import fork"): 1})
         expect("the text report ends in the fixed-form total",
                render(doc).splitlines()[-1],
                "audit: 1 raw site(s) in 1 file(s)")
@@ -431,8 +449,12 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--root", default=TOOLS_DIR,
                     help="the tools tree to walk (default: %(default)s)")
-    ap.add_argument("--json", action="store_true",
-                    help="print the audit document as JSON")
+    out = ap.add_mutually_exclusive_group()
+    out.add_argument("--json", action="store_true",
+                     help="print the audit document as JSON")
+    out.add_argument("--keys", action="store_true",
+                     help="print each (file, category, snippet) key and its "
+                          "count, as selftest.py's PENDING holds them")
     args = ap.parse_args(argv)
     if not os.path.isdir(args.root):
         print("audit: %s is not a directory" % args.root, file=sys.stderr)
@@ -440,6 +462,12 @@ def main(argv=None):
     doc = audit(args.root)
     if args.json:
         print(json.dumps(doc, indent=2, sort_keys=False))
+    elif args.keys:
+        keys = site_keys(doc)
+        for (path, category, snippet), count in sorted(keys.items()):
+            print("(%r, %r,\n %r, %d)," % (path, category, snippet, count))
+        print("audit: %d raw site(s) under %d key(s)"
+              % (sum(keys.values()), len(keys)))
     else:
         print(render(doc))
     return 0

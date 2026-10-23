@@ -2,20 +2,27 @@
 """The negative controls of duckmcp's design rules, planted by command.
 
 A rule that has never been seen red is decoration. Each control here is ONE
-literal substitution in one file of this package: the engine copies
-`tools/duckmcp/` into a sandbox (`<tmp>/tools/duckmcp/`), substitutes, runs
-the sandbox `selftest.py --quiet`, and demands two things -- a non-zero exit,
-and a `FAIL` line carrying the text of the assertion the control claims to
-cover. Red through another assertion does not count.
+literal substitution in one file of this package, or ONE new file planted
+beside it: the engine copies `tools/duckmcp/` into a sandbox
+(`<tmp>/tools/duckmcp/`), with every other `.py` of `tools/` beside it so the
+audit of rule (b) sees the same tree, plants, runs the sandbox
+`selftest.py --quiet`, and demands two things -- a non-zero exit, and a
+`FAIL` line carrying the text of the assertion the control claims to cover.
+Red through another assertion does not count.
 
 A substitution whose old text matches zero times or more than once is a
 BROKEN control, not a red one: a literal that does not match leaves the copy
-intact, and the run would come out green for the wrong reason. Before any
-control the untouched sandbox must come out green, or no red means anything.
+intact, and the run would come out green for the wrong reason. So is a
+planted file whose directory is missing from the sandbox or that is already
+there. Before any control the untouched sandbox must come out green, or no
+red means anything.
 
 The rules are those of PLAN-DUCKMCP-PY.md section 3.3: (a) nothing outside
 the stdlib on import, (c) nothing of a game inside the package, (d) only
-`env.py` reads the environment. Rule (b) closes in phase 4. Beside them,
+`env.py` reads the environment, and (b) outside the package no raw site
+beyond the `PENDING` list of `selftest.py` -- a new file in another project
+with `import fork` or a raw `client.call(`, an entry counted past what the
+audit finds, an entry naming no migration task. Beside them,
 the controls of rule `client` break the transport itself and its liveness
 seam, and demand the assertion of `client.self_check()` or
 `fork.self_check()` that covers the broken behaviour; the control of rule
@@ -26,7 +33,8 @@ the liveness check from `debug.wait_for_pause` (pitfall 35), each demanding
 its assertion of `debug.self_check()`.
 
 The last line says how many controls ran, how many went red as required,
-and the count per rule; the exit is 0 only when every one did.
+how many of those cover the design rules (a) to (d), and the count per rule;
+the exit is 0 only when every one did.
 
 Usage:
     python3 tools/duckmcp/controls.py [--list] [--only ID]
@@ -50,8 +58,13 @@ Control = collections.namedtuple(
 Control.__doc__ = """One planted defect and the FAIL text it must cause.
 
 `extra` is `(path under the sandbox tools/, content)` or None: a file the
-control needs beside the package, never a substitution.
+control needs beside the package, never a substitution. A control with
+`file` None plants only that file.
 """
+
+DESIGN_RULES = ("a", "b", "c", "d")
+"""The rules of PLAN-DUCKMCP-PY.md section 3.3, counted apart on the last
+line."""
 
 CONTROLS = (
     Control(
@@ -139,6 +152,32 @@ CONTROLS = (
         "\n# the cookie goes in XAUTHORITY\nSKIP = 77\n",
         "FAIL  rule (d): errors.py does not mention XAUTHORITY", None,
         "only env.py builds the X cookie variable"),
+    Control(
+        "b-import-fork-kit2d", "b", None, None, None,
+        "FAIL  rule (b): no raw site outside PENDING",
+        ("kit2d/dmcp_probe_b.py", "import fork  # planted\n"),
+        "a project that never talked to the emulator starts importing the "
+        "launcher shim, in a file the list does not know"),
+    Control(
+        "b-client-call-kit2d", "b", None, None, None,
+        "FAIL  rule (b): no raw site outside PENDING",
+        ("kit2d/dmcp_probe_b.py",
+         "def poke(client):\n    return client.call(\"pause\")\n"),
+        "a raw client.call( outside the lib instead of Session or debug"),
+    Control(
+        "b-stale-entry", "b", "selftest.py",
+        "     'from mcp import Client, NotRunning # noqa: E402', 1),\n",
+        "     'from mcp import Client, NotRunning # noqa: E402', 2),\n",
+        "FAIL  rule (b): no stale PENDING entry (listed, no longer found)",
+        None,
+        "an entry counting a site the audit no longer finds: a migration "
+        "that removed sites without shrinking the list"),
+    Control(
+        "b-unknown-task", "b", "selftest.py",
+        "    ('DMCP-TASK-30', 'tools/kit2d/selftest.py', 'sys.path',\n",
+        "    ('DMCP-TASK-99', 'tools/kit2d/selftest.py', 'sys.path',\n",
+        "FAIL  rule (b): every PENDING entry names a migration task", None,
+        "an entry no task of phases 5 to 9 removes: it would never leave"),
     Control(
         "client-session-never-reclaimed", "client", "client.py",
         "            if not self.reclaim:\n                raise\n",
@@ -287,10 +326,22 @@ CONTROLS = (
 
 
 def sandbox(tmp):
-    """Copy the package to `<tmp>/tools/duckmcp`; return that folder."""
+    """Copy the package to `<tmp>/tools/duckmcp`, and every other `.py` of
+    `tools/` beside it (what the audit of rule (b) reads); return the
+    package folder."""
+    tools = os.path.dirname(DUCKMCP_DIR)
     dest = os.path.join(tmp, "tools", "duckmcp")
     shutil.copytree(DUCKMCP_DIR, dest,
                     ignore=shutil.ignore_patterns("__pycache__"))
+    for here, dirs, files in os.walk(tools):
+        dirs[:] = [d for d in dirs if d != "__pycache__" and
+                   os.path.join(here, d) != DUCKMCP_DIR]
+        for name in files:
+            if name.endswith(".py"):
+                rel = os.path.relpath(os.path.join(here, name), tools)
+                target = os.path.join(tmp, "tools", rel)
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                shutil.copy2(os.path.join(here, name), target)
     return dest
 
 
@@ -304,19 +355,26 @@ def run_selftest(pkg):
 
 def plant(pkg, control):
     """Apply the one substitution; return None or why it is broken."""
-    path = os.path.join(pkg, control.file)
-    with open(path, encoding="utf-8") as f:
-        text = f.read()
-    count = text.count(control.old)
-    if count != 1:
-        return "old text matches %d time(s) in %s, not 1" % (count,
-                                                              control.file)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(text.replace(control.old, control.new))
+    if control.file is not None:
+        path = os.path.join(pkg, control.file)
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        count = text.count(control.old)
+        if count != 1:
+            return "old text matches %d time(s) in %s, not 1" % (
+                count, control.file)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text.replace(control.old, control.new))
+    elif not control.extra:
+        return "no substitution and no planted file"
     if control.extra:
         extra, content = control.extra
-        with open(os.path.join(os.path.dirname(pkg), extra), "w",
-                  encoding="utf-8") as f:
+        target = os.path.join(os.path.dirname(pkg), *extra.split("/"))
+        if not os.path.isdir(os.path.dirname(target)):
+            return "the sandbox has no %s" % os.path.dirname(extra)
+        if os.path.exists(target):
+            return "the planted %s is already in the sandbox" % extra
+        with open(target, "w", encoding="utf-8") as f:
             f.write(content)
     return None
 
@@ -350,7 +408,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     if args.list:
         for c in CONTROLS:
-            print("%-26s rule (%s)  %s:  %s" % (c.id, c.rule, c.file, c.why))
+            print("%-26s rule (%s)  %s:  %s" % (
+                c.id, c.rule, c.file or c.extra[0], c.why))
         return 0
     chosen = [c for c in CONTROLS if args.only in (None, c.id)]
     if not chosen:
@@ -378,8 +437,11 @@ def main(argv=None):
     rules = ", ".join("(%s) %d/%d" % (r, per_rule[r],
                                       sum(c.rule == r for c in chosen))
                       for r in sorted({c.rule for c in chosen}))
-    print("duckmcp_controls: %d control(s), %d red as required; per rule %s"
-          % (len(chosen), red, rules))
+    design = sum(per_rule[r] for r in DESIGN_RULES)
+    print("duckmcp_controls: %d control(s), %d red as required; "
+          "%d/%d cover rules (a) to (d); per rule %s"
+          % (len(chosen), red, design,
+             sum(c.rule in DESIGN_RULES for c in chosen), rules))
     return 0 if red == len(chosen) else 1
 
 
