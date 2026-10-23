@@ -410,13 +410,16 @@
       "phase": 5,
       "depends_on": ["DMCP-TASK-18"],
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#5.2",
-      "files": ["tools/pes2/mcp_drive.py", "tools/pes2/pad.py", "tools/duckmcp/selftest.py"],
+      "files": ["tools/pes2/mcp_drive.py", "tools/pes2/pad.py", "tools/duckmcp/selftest.py", "tools/duckmcp/controls.py"],
       "resources": ["emulador", "save-states", "tela"],
-      "status": "pending",
+      "status": "in-progress",
       "done_on": null,
       "done_commit": null,
       "reviewed_on": null,
-      "review_commit": null
+      "review_commit": null,
+      "active_since": "2026-10-23T16:24:30-03:00",
+      "started_at": "2026-10-23T16:24:30-03:00",
+      "active_s": 0
     },
     {
       "id": "DMCP-TASK-20",
