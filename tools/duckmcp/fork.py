@@ -427,8 +427,12 @@ def pick_window(candidates, match=None):
     return max(kept, key=lambda pair: pair[0])[1]
 
 
-def _dismiss_dialogs(display, deadline):
+def dismiss_dialogs(display, deadline):
     """Click any modal of the emulator out of the way; the titles dismissed.
+
+    Public because a launcher that is not `launch` needs it too: the
+    official AppImage raises the same `Automatic Updater` over its game
+    window, and a capture of that window grabs the dialog.
 
     The button is found by geometry, because there is no accessibility
     bridge on a bare Xvfb. `Remind Me Later` is the rightmost of three, about
@@ -718,7 +722,7 @@ def launch(image, match=None, display=None, timeout=120, home=None,
                                      process.pid)
             window = pick_window(_win_candidates(process.pid), match)
         else:
-            _dismiss_dialogs(display, min(deadline, time.time() + 3))
+            dismiss_dialogs(display, min(deadline, time.time() + 3))
             window = pick_window(_x_candidates(display, process.pid, match),
                                  match)
         if window is None:
@@ -731,7 +735,7 @@ def launch(image, match=None, display=None, timeout=120, home=None,
     # 2) any modal that came up after the window: the updater sits on top.
     later = min(deadline, time.time() + 20)
     for name in (_dismiss_dialogs_windows(later, process.pid) if WINDOWS
-                 else _dismiss_dialogs(display, later)):
+                 else dismiss_dialogs(display, later)):
         say("dismissed the %s dialog" % name)
 
     # 3) with no window manager the window places itself wherever it likes

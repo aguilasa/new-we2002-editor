@@ -28,7 +28,7 @@
 | [CORR-DMCP-023](/docs/tasks/duckmcp/CORR-DMCP-023.md) | Declarar duckmcp/selftest.py nas tasks de migração que a PENDING amarra | DMCP-TASK-17 | medium | done | 2026-10-23 |
 | [CORR-DMCP-024](/docs/tasks/duckmcp/CORR-DMCP-024.md) | Fazer a regra (b) pegar imports qualificados de mcp, fork e savestate | DMCP-TASK-18 | medium | done | 2026-10-23 |
 | [CORR-DMCP-025](/docs/tasks/duckmcp/CORR-DMCP-025.md) | A guarda de Dia/Noche em route_result não vê a troca de valor e a rota result nunca chega à tela | DMCP-TASK-19 | high | done | 2026-10-23 |
-| [CORR-DMCP-026](/docs/tasks/duckmcp/CORR-DMCP-026.md) | A rota title do drive.py não reconhece mais o título e falha em 240 s | DMCP-TASK-20 | medium | pending | — |
+| [CORR-DMCP-026](/docs/tasks/duckmcp/CORR-DMCP-026.md) | A rota title do drive.py não reconhece mais o título e falha em 240 s | DMCP-TASK-20 | medium | in-progress | — |
 | [CORR-DMCP-027](/docs/tasks/duckmcp/CORR-DMCP-027.md) | Tirar o default do --display do mcp_drive.py de duckmcp.env.display() | DMCP-TASK-19 | medium | done | 2026-10-23 |
 | [CORR-DMCP-028](/docs/tasks/duckmcp/CORR-DMCP-028.md) | Nomear tools/looks/confront.py entre os chamadores das reexportações do who_writes | DMCP-TASK-20 | low | done | 2026-10-23 |
 <!-- rite:end -->

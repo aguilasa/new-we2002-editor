@@ -421,12 +421,15 @@
       "title": "A rota title do drive.py não reconhece mais o título e falha em 240 s",
       "origin": "DMCP-TASK-20",
       "severity": "medium",
-      "files": [],
+      "files": ["tools/pes2/drive.py", "tools/duckmcp/fork.py", "docs/tasks/duckmcp/CORR-DMCP-026.md"],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "depends_on": [],
       "done_on": null,
-      "done_commit": null
+      "done_commit": null,
+      "active_since": "2026-10-23T18:09:41-03:00",
+      "started_at": "2026-10-23T18:09:41-03:00",
+      "active_s": 0
     },
     {
       "id": "CORR-DMCP-027",

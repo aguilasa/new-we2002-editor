@@ -39,7 +39,7 @@ if os.path.dirname(HERE) not in sys.path:        # tools/, for duckmcp
 # `SKIP`, `Skip` and `Fail` are the lib's (DMCP-TASK-20), re-exported: the
 # routes raise them, `mcp_drive.py` imports them from here, and a caller that
 # catches `duckmcp.errors.Fail` catches what a route raises.
-from duckmcp import env                                      # noqa: E402
+from duckmcp import env, fork                                # noqa: E402
 from duckmcp.errors import SKIP, Fail, Skip                  # noqa: E402,F401
 
 try:
@@ -160,11 +160,14 @@ HOLD = float(os.environ.get("PES2_HOLD", "1.0"))
 TAP = float(os.environ.get("PES2_TAP", "0.15"))
 DPAD = frozenset(("up", "down", "left", "right"))
 
-# The title screen's signature, measured over five runs of the shell driver
-# it replaced: means 0.5502..0.5528, standard deviations 0.3397..0.3411.
-# The spread is the sparkle animation, an order of magnitude inside the
-# tolerance.
-TITLE = (0.550, 0.341)
+# The title screen's signature. First measured over five runs of the shell
+# driver this replaced: means 0.5502..0.5528, standard deviations
+# 0.3397..0.3411. Remeasured 2026-10-23 over five runs of `--screen title`,
+# once the Automatic Updater stopped covering the window (CORR-DMCP-026):
+# means 0.552336..0.555067, standard deviations 0.357224..0.357453 -- the
+# same title, with a deviation that had moved to within 0.004 of the
+# tolerance's edge. The spread is the sparkle animation.
+TITLE = (0.553, 0.357)
 
 # The main menu, measured over three consecutive runs on 2026-09-02:
 # means 0.140639, 0.140682, 0.140679; standard deviations 0.212488,
@@ -181,6 +184,10 @@ TEAM_SELECT = (0.1685, 0.2488)
 # they are derived from a commercial game, so they stay out of git exactly
 # like roms/ and the boot frames do. What is versioned is the route that
 # makes one.
+# How long a fresh session watches for the emulator's own modal before the
+# route starts. See Session.__enter__.
+DIALOG_WAIT = 5
+
 SERIAL = "SLES-03957"
 STATE_DIR = env.savestates_dir()
 
@@ -190,6 +197,12 @@ def state_path(slot=1):
 
 
 # --- frames ------------------------------------------------------------
+
+def matches(signature, mean, sd, tol=0.02):
+    """Whether a frame's mean and deviation both sit within `tol` of a
+    screen's signature -- the test `Session.wait_for_stats` waits on."""
+    return abs(mean - signature[0]) <= tol and abs(sd - signature[1]) <= tol
+
 
 class Frame:
     """One capture of the game window, compared by region rather than by
@@ -273,6 +286,19 @@ class Session:
             raise Fail("no window id from the launcher")
         self._tmp = tempfile.mkdtemp(prefix="pes2-frames-")
         self.say(f"window {self.window} on {self.display}")
+        # The AppImage raises an `Automatic Updater` over the game window,
+        # and `import -window` grabs what is on screen inside the window's
+        # rectangle: the dialog came out as a 651x474 black square in the
+        # middle of every frame, and the title read mean 0.16 against 0.55
+        # (CORR-DMCP-026). The launcher returns with it already up; the
+        # wait is for a slower boot, and it ends early once one is gone.
+        deadline = time.time() + DIALOG_WAIT
+        while time.time() < deadline:
+            gone = fork.dismiss_dialogs(self.display, deadline)
+            if gone:
+                self.say("dismissed the %s dialog" % ", ".join(gone))
+                break
+            time.sleep(0.5)
         return self
 
     def __exit__(self, *exc):
@@ -361,7 +387,7 @@ class Session:
                 near = abs(m - mean) + abs(s - sd)
                 if best is None or near < best[0]:
                     best = (near, m, s)
-                if abs(m - mean) <= tol and abs(s - sd) <= tol:
+                if matches((mean, sd), m, s, tol):
                     self.say(f"recognised  mean={m:.6f} sd={s:.6f}")
                     return frame
                 if poll:
@@ -752,6 +778,16 @@ def self_check():
         small = write("small.png", (0, 0, 0), size=(8, 8))
         assert small.difference(black) == 1.0, \
             "mismatched sizes must read as fully different"
+
+        # The title's signature takes its own readings and refuses the main
+        # menu and the frame the updater dialog made of it (CORR-DMCP-026).
+        for reading in ((0.552336, 0.357433), (0.555067, 0.357224)):
+            assert matches(TITLE, *reading), f"title {reading} refused"
+        for what, reading in (("the main menu", MAIN_MENU),
+                              ("the title under the updater",
+                               (0.160111, 0.316799))):
+            assert not matches(TITLE, *reading), \
+                f"the title signature took {what} {reading}"
 
         for name in ("title", "main-menu", "team-select", "edit"):
             assert name in ROUTES, f"route {name} went missing"
