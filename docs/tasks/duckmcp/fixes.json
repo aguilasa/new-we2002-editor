@@ -329,6 +329,45 @@
       "started_at": "2026-10-23T11:31:27-03:00",
       "active_s": 45,
       "finished_at": "2026-10-23T11:32:12-03:00"
+    },
+    {
+      "id": "CORR-DMCP-021",
+      "file": "CORR-DMCP-021.md",
+      "title": "Atribuir as entradas PENDING do replay.py à task que o declara",
+      "origin": "DMCP-TASK-17",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-022",
+      "file": "CORR-DMCP-022.md",
+      "title": "Plantar controles para as três asserções da regra (b) sem vigia",
+      "origin": "DMCP-TASK-17",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-023",
+      "file": "CORR-DMCP-023.md",
+      "title": "Declarar duckmcp/selftest.py nas tasks de migração que a PENDING amarra",
+      "origin": "DMCP-TASK-17",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

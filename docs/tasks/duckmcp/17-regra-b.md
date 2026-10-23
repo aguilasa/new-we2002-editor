@@ -120,3 +120,4 @@ Gates: `ctest --test-dir build -R 'duckmcp_selftest|tasks'` e
     - `M tools/duckmcp/audit.py`
     - `M tools/duckmcp/controls.py`
     - `M tools/duckmcp/selftest.py`
+- **Reviewed** (2026-10-23) at `edde8329`: CORR-DMCP-021, CORR-DMCP-022, CORR-DMCP-023
