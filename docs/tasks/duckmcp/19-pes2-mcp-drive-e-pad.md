@@ -119,4 +119,6 @@ fffb20923cfd08f6ac0c891887512b3aa943b526d72c3631a4f688b636845e4a  penalty-teams.
 Os quatro parciais têm os mesmos digests das corridas de antes do conserto (`after1-result`), e o `result.png` da tela de resultado é igual dos dois lados. `cli.py procs` → `pids: []` depois de cada corrida. Com isso o primeiro critério fecha: `team-select`, `edit`, `replay` e `result` com o mesmo PNG antes e depois.
 
 Gates na árvore entregue: `python3 tools/duckmcp/selftest.py | tail -1` → `duckmcp_selftest: 435 check(s) ran, 0 failure(s)`; `python3 tools/pes2/selftest.py | tail -1` → `OK`; `python3 tools/duckmcp/audit.py | tail -1` → `audit: 169 raw site(s) in 10 file(s)` (o número caiu de 184 para 169 na DMCP-TASK-20, que veio depois; os sítios destes dois arquivos continuam fora).
-
+- **Closed** — commit `47d953f4` (2026-10-23): docs(duckmcp): result route gives the same PNG before and after the migration
+  - Files (`git show --name-status 47d953f4`):
+    - `M docs/tasks/duckmcp/19-pes2-mcp-drive-e-pad.md`

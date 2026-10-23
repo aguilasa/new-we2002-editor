@@ -412,14 +412,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#5.2",
       "files": ["tools/pes2/mcp_drive.py", "tools/pes2/pad.py", "tools/duckmcp/selftest.py", "tools/duckmcp/controls.py"],
       "resources": ["emulador", "save-states", "tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
+      "status": "done",
+      "done_on": "2026-10-23",
+      "done_commit": "47d953f4",
+      "reviewed_on": "pending",
       "review_commit": null,
       "active_since": null,
       "started_at": "2026-10-23T16:24:30-03:00",
-      "active_s": 1437
+      "active_s": 1881,
+      "finished_at": "2026-10-23T17:33:23-03:00"
     },
     {
       "id": "DMCP-TASK-20",
