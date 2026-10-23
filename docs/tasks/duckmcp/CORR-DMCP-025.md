@@ -114,3 +114,7 @@ SELF-CHECK OK: routes, thresholds, regions, signatures
 Controle da guarda, da mesma corrida: sem aperto a caixa dá **0,00000**, abaixo do limiar de 0,01, e com
 aperto dá 0,04098. Um `Right` que não mudasse o valor ficaria vermelho. O `result.png` mostra
 `Pasar al siguiente partido`. Ficou para a DMCP-TASK-19 medir o PNG de `result` antes e depois.
+- **Closed** — commit `ba7ee63a` (2026-10-23): fix(pes2): judge the Dia/Noche press in its value box, and re-measure the kicker order
+  - Files (`git show --name-status ba7ee63a`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-025.md`
+    - `M tools/pes2/mcp_drive.py`

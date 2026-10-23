@@ -406,13 +406,14 @@
       "severity": "high",
       "files": [],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null,
-      "active_since": "2026-10-23T17:11:52-03:00",
+      "done_on": "2026-10-23",
+      "done_commit": "ba7ee63a",
+      "active_since": null,
       "started_at": "2026-10-23T17:11:52-03:00",
-      "active_s": 0
+      "active_s": 476,
+      "finished_at": "2026-10-23T17:19:48-03:00"
     },
     {
       "id": "CORR-DMCP-026",
