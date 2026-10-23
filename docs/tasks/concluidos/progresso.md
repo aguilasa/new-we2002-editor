@@ -181,59 +181,59 @@ graph TD
 ## Resumo
 
 <!-- rite:begin tasks -->
-| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [WTE-TASK-01](/docs/tasks/concluidos/01-ferramental.md) | Instalar e verificar o ferramental (Lazarus, FPC, Ghidra) | 0 | infra | — | done | 2026-08-05 | 2026-08-05 |
-| [WTE-TASK-02](/docs/tasks/concluidos/02-esqueleto-do-projeto.md) | Esqueleto de wte/ e build por linha de comando | 0 | infra | WTE-TASK-01 | done | 2026-08-05 | 2026-08-05 |
-| [WTE-TASK-03](/docs/tasks/concluidos/03-extrator-de-dfm.md) | tools/dfm_extract.py — os 18 formulários, completos | 1 | ferramenta | WTE-TASK-02 | done | 2026-08-05 | 2026-08-05 |
-| [WTE-TASK-04](/docs/tasks/concluidos/04-mapa-de-handlers.md) | published_methods.tsv — os 96 handlers, com dono | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-05](/docs/tasks/concluidos/05-inventario-de-strings.md) | re/strings.tsv — strings com endereço e quem as usa | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-06](/docs/tasks/concluidos/06-mapa-de-offsets.md) | re/offsets.md — a tabela em .data cruzada com Offsets.hpp | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-07](/docs/tasks/concluidos/07-unidades-duvidosas.md) | Veredito sobre Registry, Printers, Comobj e Winhelpviewer | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-08](/docs/tasks/concluidos/08-convencao-dos-assets.md) | Convenção de nome dos 198 bitmaps e do dat.bin | 1 | extração | WTE-TASK-05 | done | 2026-08-06 | 2026-08-06 |
-| [WTE-TASK-09](/docs/tasks/concluidos/09-fechamento-fase-1.md) | Fechamento da fase 1 — a extração estática está completa? | 1 | closing | WTE-TASK-03, WTE-TASK-04, WTE-TASK-05, WTE-TASK-06, WTE-TASK-07, WTE-TASK-08 | done | 2026-08-06 | 2026-08-06 |
-| [WTE-TASK-10](/docs/tasks/concluidos/10-conversor-dfm-para-lfm.md) | tools/dfm2lfm.py — gerador dos .lfm e do esqueleto das units | 2 | ferramenta | WTE-TASK-03, WTE-TASK-04, WTE-TASK-07 | done | 2026-08-06 | 2026-08-09 |
-| [WTE-TASK-11](/docs/tasks/concluidos/11-app-com-a-casca-completa.md) | App Lazarus abrindo os 18 formulários, com os 96 stubs logando | 2 | implementação | WTE-TASK-10 | done | 2026-08-06 | 2026-08-09 |
-| [WTE-TASK-12](/docs/tasks/concluidos/12-comparacao-visual.md) | Comparação visual dos 18 formulários contra o original | 2 | verificação | WTE-TASK-11 | done | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-13](/docs/tasks/concluidos/13-trace-de-eventos.md) | Trace de eventos — a ordem de disparo dos dois lados | 2 | verificação | WTE-TASK-11 | done | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-14](/docs/tasks/concluidos/14-fechamento-fase-2.md) | Fechamento da fase 2 — a casca está fiel? | 2 | closing | WTE-TASK-12, WTE-TASK-13 | done | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-15](/docs/tasks/concluidos/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | decisão | WTE-TASK-02 | done | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-16](/docs/tasks/concluidos/16-gerador-de-tabelas.md) | tools/gen_tables_pas.py — offsets e tabelas estáticas | 3 | ferramenta | WTE-TASK-15 | done | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-17](/docs/tasks/concluidos/17-transpilador-da-camada-de-dados.md) | tools/port_database_pas.py — transpilar o we2002_core | 3 | ferramenta | WTE-TASK-15, WTE-TASK-16 | done | 2026-08-09 | 2026-08-10 |
-| [WTE-TASK-18](/docs/tasks/concluidos/18-camada-de-dados-gerada.md) | Gerar a camada de dados e fazê-la compilar | 3 | implementação | WTE-TASK-17 | done | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-19](/docs/tasks/concluidos/19-os-50-offsets-restantes.md) | Descobrir os offsets que o Obocaman tem e nós não | 3 | extração | WTE-TASK-06, WTE-TASK-18 | done | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-20](/docs/tasks/concluidos/20-round-trip-headless.md) | Round-trip headless contra o we2002_core, nas duas ROMs | 3 | verificação | WTE-TASK-18, WTE-TASK-19 | done | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-21](/docs/tasks/concluidos/21-fechamento-fase-3.md) | Fechamento da fase 3 — a camada de dados é 100% gerada? | 3 | closing | WTE-TASK-20 | done | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-22](/docs/tasks/concluidos/22-harness-golden.md) | golden_check.sh — o gate: wte.exe contra o app Lazarus | 4 | ferramenta | WTE-TASK-11, WTE-TASK-21 | done | 2026-08-10 | 2026-08-11 |
-| [WTE-TASK-23](/docs/tasks/concluidos/23-formato-da-spec.md) | Decidir o formato de re/spec/ e o vocabulário de veredito | 4 | decisão | WTE-TASK-09 | done | 2026-08-09 | 2026-08-10 |
-| [WTE-TASK-24](/docs/tasks/concluidos/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland — e os VMTs da VCL | 4 | infra | WTE-TASK-04, WTE-TASK-06 | done | 2026-08-09 | 2026-08-11 |
-| [WTE-TASK-25](/docs/tasks/concluidos/25-handlers-de-carga.md) | Handlers de carga — abrir a imagem e popular as telas | 4 | implementação | WTE-TASK-22, WTE-TASK-23, WTE-TASK-24 | done | 2026-08-11 | 2026-08-11 |
-| [WTE-TASK-26](/docs/tasks/concluidos/26-handlers-de-edicao.md) | Handlers de edição — nomes, números, atributos, mover jogador | 4 | implementação | WTE-TASK-25 | done | 2026-08-18 | 2026-08-18 |
-| [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md) | Handlers de gravação — escrever na imagem de CD | 4 | implementação | WTE-TASK-26 | done | 2026-08-20 | 2026-08-20 |
-| [WTE-TASK-28](/docs/tasks/concluidos/28-import-de-mcr.md) | Import e export de .mcr — memory card do PSX | 4 | implementação | WTE-TASK-08, WTE-TASK-24, WTE-TASK-27 | done | 2026-08-20 | 2026-08-20 |
-| [WTE-TASK-29](/docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D em tempo real, com colar-cores | 4 | implementação | WTE-TASK-08, WTE-TASK-24, WTE-TASK-27 | done | 2026-08-21 | 2026-08-21 |
-| [WTE-TASK-30](/docs/tasks/concluidos/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | implementação | WTE-TASK-25 | done | 2026-08-21 | 2026-08-23 |
-| [WTE-TASK-31](/docs/tasks/concluidos/31-fechamento-fase-4.md) | Fechamento da fase 4 — os 96 têm veredito? | 4 | closing | WTE-TASK-25, WTE-TASK-26, WTE-TASK-27, WTE-TASK-28, WTE-TASK-29, WTE-TASK-30 | done | 2026-08-24 | 2026-08-24 |
-| [WTE-TASK-32](/docs/tasks/concluidos/32-preco-do-jogador.md) | Preço derivado dos atributos — jogador e time inteiro | 5 | implementação | WTE-TASK-24, WTE-TASK-25 | done | 2026-08-24 | 2026-08-24 |
-| [WTE-TASK-33](/docs/tasks/concluidos/33-slots-de-master-league.md) | Contador de slots livres de Master League | 5 | implementação | WTE-TASK-20 | done | 2026-08-19 | 2026-08-19 |
-| [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-completa.md) | Bateria golden completa — toda gravação, nas duas ROMs | 6 | verificação | WTE-TASK-31, WTE-TASK-32, WTE-TASK-33 | done | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-35](/docs/tasks/concluidos/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | verificação | WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-36](/docs/tasks/concluidos/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e comportamento de truncamento | 6 | verificação | WTE-TASK-26, WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-37](/docs/tasks/concluidos/37-reconferencia-de-ui.md) | Reconferência dos 18 formulários, com a lógica ligada | 6 | verificação | WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-38](/docs/tasks/concluidos/38-nome-e-linhagem.md) | Decidir o nome do produto e registrar a linhagem | 7 | decisão | WTE-TASK-35 | done | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md) | Ícone, .desktop, AppStream e regras de instalação | 7 | implementação | WTE-TASK-38 | done | 2026-08-26 | 2026-08-26 |
-| [WTE-TASK-40](/docs/tasks/concluidos/40-verificacao-final.md) | Verificação final — as três condições da definição de pronto | 7 | closing | WTE-TASK-36, WTE-TASK-37, WTE-TASK-39 | done | 2026-08-26 | 2026-08-26 |
-| [PAR-TASK-01](/docs/tasks/concluidos/PAR-TASK-01.md) | Nomes e abreviações de time, pela tela | — | verificação | — | done | 2026-08-28 | 2026-08-28 |
-| [PAR-TASK-02](/docs/tasks/concluidos/PAR-TASK-02.md) | Números de camisa e o clamp em 32 | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-03](/docs/tasks/concluidos/PAR-TASK-03.md) | Cobradores, capitão e o foco de combo | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-04](/docs/tasks/concluidos/PAR-TASK-04.md) | Atributos do jogador e os clamps | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-05](/docs/tasks/concluidos/PAR-TASK-05.md) | Troca de jogador nos quatro tipos de slot | — | verificação | PAR-TASK-04 | done | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-06](/docs/tasks/concluidos/PAR-TASK-06.md) | Táticas, presets e o formato `.t2002` | — | verificação | PAR-TASK-03 | done | 2026-09-01 | 2026-09-01 |
-| [PAR-TASK-07](/docs/tasks/concluidos/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | — | verificação | PAR-TASK-01 | done | 2026-08-31 | 2026-09-01 |
-| [PAR-TASK-08](/docs/tasks/concluidos/PAR-TASK-08.md) | Operações em massa | — | verificação | PAR-TASK-04, PAR-TASK-07 | blocked | — | — |
-| [PAR-TASK-09](/docs/tasks/concluidos/PAR-TASK-09.md) | Ciclo de vida da janela | — | verificação | — | done | 2026-08-31 | 2026-09-01 |
-| [PAR-TASK-10](/docs/tasks/concluidos/PAR-TASK-10.md) | O item aberto do Windows: nome de time pela janela Qt | — | verificação | PAR-TASK-01 | blocked | — | — |
-| [PAR-TASK-11](/docs/tasks/concluidos/PAR-TASK-11.md) | SoFIFA: o que dá para conferir sem rede | — | verificação | PAR-TASK-01, PAR-TASK-02, PAR-TASK-03, PAR-TASK-04, PAR-TASK-05, PAR-TASK-06, PAR-TASK-07, PAR-TASK-08, PAR-TASK-09 | blocked | — | — |
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on | Review |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [WTE-TASK-01](/docs/tasks/concluidos/01-ferramental.md) | Instalar e verificar o ferramental (Lazarus, FPC, Ghidra) | 0 | infra | — | done | 2026-08-05 | 2026-08-05 | approved |
+| [WTE-TASK-02](/docs/tasks/concluidos/02-esqueleto-do-projeto.md) | Esqueleto de wte/ e build por linha de comando | 0 | infra | WTE-TASK-01 | done | 2026-08-05 | 2026-08-05 | approved |
+| [WTE-TASK-03](/docs/tasks/concluidos/03-extrator-de-dfm.md) | tools/dfm_extract.py — os 18 formulários, completos | 1 | ferramenta | WTE-TASK-02 | done | 2026-08-05 | 2026-08-05 | approved |
+| [WTE-TASK-04](/docs/tasks/concluidos/04-mapa-de-handlers.md) | published_methods.tsv — os 96 handlers, com dono | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 | approved |
+| [WTE-TASK-05](/docs/tasks/concluidos/05-inventario-de-strings.md) | re/strings.tsv — strings com endereço e quem as usa | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 | approved |
+| [WTE-TASK-06](/docs/tasks/concluidos/06-mapa-de-offsets.md) | re/offsets.md — a tabela em .data cruzada com Offsets.hpp | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 | approved |
+| [WTE-TASK-07](/docs/tasks/concluidos/07-unidades-duvidosas.md) | Veredito sobre Registry, Printers, Comobj e Winhelpviewer | 1 | extração | WTE-TASK-02 | done | 2026-08-05 | 2026-08-06 | approved |
+| [WTE-TASK-08](/docs/tasks/concluidos/08-convencao-dos-assets.md) | Convenção de nome dos 198 bitmaps e do dat.bin | 1 | extração | WTE-TASK-05 | done | 2026-08-06 | 2026-08-06 | approved |
+| [WTE-TASK-09](/docs/tasks/concluidos/09-fechamento-fase-1.md) | Fechamento da fase 1 — a extração estática está completa? | 1 | closing | WTE-TASK-03, WTE-TASK-04, WTE-TASK-05, WTE-TASK-06, WTE-TASK-07, WTE-TASK-08 | done | 2026-08-06 | 2026-08-06 | approved |
+| [WTE-TASK-10](/docs/tasks/concluidos/10-conversor-dfm-para-lfm.md) | tools/dfm2lfm.py — gerador dos .lfm e do esqueleto das units | 2 | ferramenta | WTE-TASK-03, WTE-TASK-04, WTE-TASK-07 | done | 2026-08-06 | 2026-08-09 | approved |
+| [WTE-TASK-11](/docs/tasks/concluidos/11-app-com-a-casca-completa.md) | App Lazarus abrindo os 18 formulários, com os 96 stubs logando | 2 | implementação | WTE-TASK-10 | done | 2026-08-06 | 2026-08-09 | approved |
+| [WTE-TASK-12](/docs/tasks/concluidos/12-comparacao-visual.md) | Comparação visual dos 18 formulários contra o original | 2 | verificação | WTE-TASK-11 | done | 2026-08-09 | 2026-08-09 | approved |
+| [WTE-TASK-13](/docs/tasks/concluidos/13-trace-de-eventos.md) | Trace de eventos — a ordem de disparo dos dois lados | 2 | verificação | WTE-TASK-11 | done | 2026-08-09 | 2026-08-09 | approved |
+| [WTE-TASK-14](/docs/tasks/concluidos/14-fechamento-fase-2.md) | Fechamento da fase 2 — a casca está fiel? | 2 | closing | WTE-TASK-12, WTE-TASK-13 | done | 2026-08-09 | 2026-08-09 | approved |
+| [WTE-TASK-15](/docs/tasks/concluidos/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | decisão | WTE-TASK-02 | done | 2026-08-09 | 2026-08-09 | approved |
+| [WTE-TASK-16](/docs/tasks/concluidos/16-gerador-de-tabelas.md) | tools/gen_tables_pas.py — offsets e tabelas estáticas | 3 | ferramenta | WTE-TASK-15 | done | 2026-08-09 | 2026-08-09 | approved |
+| [WTE-TASK-17](/docs/tasks/concluidos/17-transpilador-da-camada-de-dados.md) | tools/port_database_pas.py — transpilar o we2002_core | 3 | ferramenta | WTE-TASK-15, WTE-TASK-16 | done | 2026-08-09 | 2026-08-10 | approved |
+| [WTE-TASK-18](/docs/tasks/concluidos/18-camada-de-dados-gerada.md) | Gerar a camada de dados e fazê-la compilar | 3 | implementação | WTE-TASK-17 | done | 2026-08-10 | 2026-08-10 | approved |
+| [WTE-TASK-19](/docs/tasks/concluidos/19-os-50-offsets-restantes.md) | Descobrir os offsets que o Obocaman tem e nós não | 3 | extração | WTE-TASK-06, WTE-TASK-18 | done | 2026-08-10 | 2026-08-10 | approved |
+| [WTE-TASK-20](/docs/tasks/concluidos/20-round-trip-headless.md) | Round-trip headless contra o we2002_core, nas duas ROMs | 3 | verificação | WTE-TASK-18, WTE-TASK-19 | done | 2026-08-10 | 2026-08-10 | approved |
+| [WTE-TASK-21](/docs/tasks/concluidos/21-fechamento-fase-3.md) | Fechamento da fase 3 — a camada de dados é 100% gerada? | 3 | closing | WTE-TASK-20 | done | 2026-08-10 | 2026-08-10 | approved |
+| [WTE-TASK-22](/docs/tasks/concluidos/22-harness-golden.md) | golden_check.sh — o gate: wte.exe contra o app Lazarus | 4 | ferramenta | WTE-TASK-11, WTE-TASK-21 | done | 2026-08-10 | 2026-08-11 | approved |
+| [WTE-TASK-23](/docs/tasks/concluidos/23-formato-da-spec.md) | Decidir o formato de re/spec/ e o vocabulário de veredito | 4 | decisão | WTE-TASK-09 | done | 2026-08-09 | 2026-08-10 | approved |
+| [WTE-TASK-24](/docs/tasks/concluidos/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland — e os VMTs da VCL | 4 | infra | WTE-TASK-04, WTE-TASK-06 | done | 2026-08-09 | 2026-08-11 | approved |
+| [WTE-TASK-25](/docs/tasks/concluidos/25-handlers-de-carga.md) | Handlers de carga — abrir a imagem e popular as telas | 4 | implementação | WTE-TASK-22, WTE-TASK-23, WTE-TASK-24 | done | 2026-08-11 | 2026-08-11 | approved |
+| [WTE-TASK-26](/docs/tasks/concluidos/26-handlers-de-edicao.md) | Handlers de edição — nomes, números, atributos, mover jogador | 4 | implementação | WTE-TASK-25 | done | 2026-08-18 | 2026-08-18 | approved |
+| [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md) | Handlers de gravação — escrever na imagem de CD | 4 | implementação | WTE-TASK-26 | done | 2026-08-20 | 2026-08-20 | approved |
+| [WTE-TASK-28](/docs/tasks/concluidos/28-import-de-mcr.md) | Import e export de .mcr — memory card do PSX | 4 | implementação | WTE-TASK-08, WTE-TASK-24, WTE-TASK-27 | done | 2026-08-20 | 2026-08-20 | approved |
+| [WTE-TASK-29](/docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D em tempo real, com colar-cores | 4 | implementação | WTE-TASK-08, WTE-TASK-24, WTE-TASK-27 | done | 2026-08-21 | 2026-08-21 | approved |
+| [WTE-TASK-30](/docs/tasks/concluidos/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | implementação | WTE-TASK-25 | done | 2026-08-21 | 2026-08-23 | approved |
+| [WTE-TASK-31](/docs/tasks/concluidos/31-fechamento-fase-4.md) | Fechamento da fase 4 — os 96 têm veredito? | 4 | closing | WTE-TASK-25, WTE-TASK-26, WTE-TASK-27, WTE-TASK-28, WTE-TASK-29, WTE-TASK-30 | done | 2026-08-24 | 2026-08-24 | approved |
+| [WTE-TASK-32](/docs/tasks/concluidos/32-preco-do-jogador.md) | Preço derivado dos atributos — jogador e time inteiro | 5 | implementação | WTE-TASK-24, WTE-TASK-25 | done | 2026-08-24 | 2026-08-24 | approved |
+| [WTE-TASK-33](/docs/tasks/concluidos/33-slots-de-master-league.md) | Contador de slots livres de Master League | 5 | implementação | WTE-TASK-20 | done | 2026-08-19 | 2026-08-19 | approved |
+| [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-completa.md) | Bateria golden completa — toda gravação, nas duas ROMs | 6 | verificação | WTE-TASK-31, WTE-TASK-32, WTE-TASK-33 | done | 2026-08-25 | 2026-08-25 | approved |
+| [WTE-TASK-35](/docs/tasks/concluidos/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | verificação | WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 | approved |
+| [WTE-TASK-36](/docs/tasks/concluidos/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e comportamento de truncamento | 6 | verificação | WTE-TASK-26, WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 | approved |
+| [WTE-TASK-37](/docs/tasks/concluidos/37-reconferencia-de-ui.md) | Reconferência dos 18 formulários, com a lógica ligada | 6 | verificação | WTE-TASK-34 | done | 2026-08-25 | 2026-08-25 | approved |
+| [WTE-TASK-38](/docs/tasks/concluidos/38-nome-e-linhagem.md) | Decidir o nome do produto e registrar a linhagem | 7 | decisão | WTE-TASK-35 | done | 2026-08-25 | 2026-08-25 | approved |
+| [WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md) | Ícone, .desktop, AppStream e regras de instalação | 7 | implementação | WTE-TASK-38 | done | 2026-08-26 | 2026-08-26 | approved |
+| [WTE-TASK-40](/docs/tasks/concluidos/40-verificacao-final.md) | Verificação final — as três condições da definição de pronto | 7 | closing | WTE-TASK-36, WTE-TASK-37, WTE-TASK-39 | done | 2026-08-26 | 2026-08-26 | approved |
+| [PAR-TASK-01](/docs/tasks/concluidos/PAR-TASK-01.md) | Nomes e abreviações de time, pela tela | — | verificação | — | done | 2026-08-28 | 2026-08-28 | approved |
+| [PAR-TASK-02](/docs/tasks/concluidos/PAR-TASK-02.md) | Números de camisa e o clamp em 32 | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 | approved |
+| [PAR-TASK-03](/docs/tasks/concluidos/PAR-TASK-03.md) | Cobradores, capitão e o foco de combo | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 | approved |
+| [PAR-TASK-04](/docs/tasks/concluidos/PAR-TASK-04.md) | Atributos do jogador e os clamps | — | verificação | PAR-TASK-01 | done | 2026-08-29 | 2026-08-29 | approved |
+| [PAR-TASK-05](/docs/tasks/concluidos/PAR-TASK-05.md) | Troca de jogador nos quatro tipos de slot | — | verificação | PAR-TASK-04 | done | 2026-08-29 | 2026-08-29 | approved |
+| [PAR-TASK-06](/docs/tasks/concluidos/PAR-TASK-06.md) | Táticas, presets e o formato `.t2002` | — | verificação | PAR-TASK-03 | done | 2026-09-01 | 2026-09-01 | approved |
+| [PAR-TASK-07](/docs/tasks/concluidos/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | — | verificação | PAR-TASK-01 | done | 2026-08-31 | 2026-09-01 | approved |
+| [PAR-TASK-08](/docs/tasks/concluidos/PAR-TASK-08.md) | Operações em massa | — | verificação | PAR-TASK-04, PAR-TASK-07 | blocked | — | — | — |
+| [PAR-TASK-09](/docs/tasks/concluidos/PAR-TASK-09.md) | Ciclo de vida da janela | — | verificação | — | done | 2026-08-31 | 2026-09-01 | approved |
+| [PAR-TASK-10](/docs/tasks/concluidos/PAR-TASK-10.md) | O item aberto do Windows: nome de time pela janela Qt | — | verificação | PAR-TASK-01 | blocked | — | — | — |
+| [PAR-TASK-11](/docs/tasks/concluidos/PAR-TASK-11.md) | SoFIFA: o que dá para conferir sem rede | — | verificação | PAR-TASK-01, PAR-TASK-02, PAR-TASK-03, PAR-TASK-04, PAR-TASK-05, PAR-TASK-06, PAR-TASK-07, PAR-TASK-08, PAR-TASK-09 | blocked | — | — | — |
 <!-- rite:end -->
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado

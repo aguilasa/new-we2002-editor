@@ -76,27 +76,27 @@ A ferramenta vem primeiro (fases 1 e 2), porque toda melhoria começa lendo uma 
 ## Tasks
 
 <!-- rite:begin tasks -->
-| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [KRP-TASK-01](/docs/tasks/concluidos/kits-replay/01-leitor-puro-core-replay-py-capture-v0v1-frame.md) | Leitor puro core/replay.py: Capture v0→v1, Frame, Figure e Walk, com os casos sintéticos migrados | 1 | ferramenta | — | done | 2026-10-12 | 2026-10-12 |
-| [KRP-TASK-02](/docs/tasks/concluidos/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md) | oracle.py importa o leitor: análise movida, saída de --frame-json idêntica nas capturas existentes | 1 | ferramenta | KRP-TASK-01 | done | 2026-10-12 | 2026-10-12 |
-| [KRP-TASK-03](/docs/tasks/concluidos/kits-replay/03-fechamento-da-fase-1.md) | Fechamento da fase 1 | 1 | closing | KRP-TASK-01, KRP-TASK-02 | done | 2026-10-13 | 2026-10-13 |
-| [KRP-TASK-04](/docs/tasks/concluidos/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md) | replay.py de leitura: figures, figure, panel, walk e describe com --json kits-replay/1, e o alvo kits_replay | 2 | ferramenta | KRP-TASK-03 | done | 2026-10-13 | 2026-10-13 |
-| [KRP-TASK-05](/docs/tasks/concluidos/kits-replay/05-show-png-e-confront-puro-sobre-a-captura.md) | show --png e confront puro sobre a captura | 2 | ferramenta | KRP-TASK-04 | done | 2026-10-13 | 2026-10-13 |
-| [KRP-TASK-07](/docs/tasks/concluidos/kits-replay/07-replay-py-capture-com-as-guardas-medidas-e-o.md) | replay.py capture com as guardas medidas, e o oracle capturando por ela | 2 | ferramenta | KRP-TASK-04 | done | 2026-10-14 | 2026-10-14 |
-| [KRP-TASK-06](/docs/tasks/concluidos/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md) | confront --tab: a aba contra o jogo, frente com frente e costas com costas | 2 | ferramenta | KRP-TASK-05, KRP-TASK-07 | done | 2026-10-15 | 2026-10-15 |
-| [KRP-TASK-08](/docs/tasks/concluidos/kits-replay/08-fechamento-da-fase-2.md) | Fechamento da fase 2 | 2 | closing | KRP-TASK-04, KRP-TASK-05, KRP-TASK-06, KRP-TASK-07 | done | 2026-10-15 | 2026-10-15 |
-| [KRP-TASK-09](/docs/tasks/concluidos/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md) | Medir a regra da cabeça (estilo, pele, cabelo e barba) contra o registro do disco nos 22 | 3 | investigação | KRP-TASK-08 | done | 2026-10-15 | 2026-10-15 |
-| [KRP-TASK-10](/docs/tasks/concluidos/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md) | Cabeça pela tupla do jogador no scene_of e no match_scene, no CLI e na aba | 3 | implementação | KRP-TASK-09 | done | 2026-10-16 | 2026-10-16 |
-| [KRP-TASK-11](/docs/tasks/concluidos/kits-replay/11-fechamento-da-fase-3.md) | Fechamento da fase 3 | 3 | closing | KRP-TASK-09, KRP-TASK-10 | done | 2026-10-16 | 2026-10-16 |
-| [KRP-TASK-22](/docs/tasks/concluidos/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md) | Painel de controles da cabeça na aba 3D, no lugar da tupla em texto | 3a | implementação | KRP-TASK-11 | done | 2026-10-16 | 2026-10-16 |
-| [KRP-TASK-24](/docs/tasks/concluidos/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md) | A pele do corpo segue a Cor da Pele do painel da cabeça | 3a | implementação | KRP-TASK-22 | done | 2026-10-16 | 2026-10-17 |
-| [KRP-TASK-23](/docs/tasks/concluidos/kits-replay/23-fechamento-da-fase-3a.md) | Fechamento da fase 3a | 3a | closing | KRP-TASK-22 | done | 2026-10-16 | 2026-10-16 |
-| [KRP-TASK-12](/docs/tasks/concluidos/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md) | Goleiro pela família 13, com a pose medida e a 92 | 4 | implementação | KRP-TASK-11, KRP-TASK-23 | done | 2026-10-18 | 2026-10-18 |
-| [KRP-TASK-13](/docs/tasks/concluidos/kits-replay/13-fechamento-da-fase-4.md) | Fechamento da fase 4 | 4 | closing | KRP-TASK-12 | done | 2026-10-18 | 2026-10-18 |
-| [KRP-TASK-25](/docs/tasks/concluidos/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md) | Desfazer a KRP-TASK-12: o goleiro volta ao do EDT_MOD.BIN, com a 92 trocada | 4a | implementação | KRP-TASK-13 | done | 2026-10-19 | 2026-10-19 |
-| [KRP-TASK-26](/docs/tasks/concluidos/kits-replay/26-desfazer-a-krp-task-13-e-fechar-a-fase-4a.md) | Desfazer a KRP-TASK-13 e fechar a fase 4a | 4a | closing | KRP-TASK-25 | done | 2026-10-19 | 2026-10-19 |
-| [KRP-TASK-14](/docs/tasks/concluidos/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md) | Medir a corrida no ANIME.BIN: ponteiro do par na captura e pose --against-anime | 5 | investigação | KRP-TASK-08 | done | 2026-10-18 | 2026-10-19 |
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on | Review |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [KRP-TASK-01](/docs/tasks/concluidos/kits-replay/01-leitor-puro-core-replay-py-capture-v0v1-frame.md) | Leitor puro core/replay.py: Capture v0→v1, Frame, Figure e Walk, com os casos sintéticos migrados | 1 | ferramenta | — | done | 2026-10-12 | 2026-10-12 | approved |
+| [KRP-TASK-02](/docs/tasks/concluidos/kits-replay/02-oracle-py-importa-o-leitor-analise-movida-saida.md) | oracle.py importa o leitor: análise movida, saída de --frame-json idêntica nas capturas existentes | 1 | ferramenta | KRP-TASK-01 | done | 2026-10-12 | 2026-10-12 | approved |
+| [KRP-TASK-03](/docs/tasks/concluidos/kits-replay/03-fechamento-da-fase-1.md) | Fechamento da fase 1 | 1 | closing | KRP-TASK-01, KRP-TASK-02 | done | 2026-10-13 | 2026-10-13 | approved |
+| [KRP-TASK-04](/docs/tasks/concluidos/kits-replay/04-replay-py-de-leitura-figures-figure-panel-walk.md) | replay.py de leitura: figures, figure, panel, walk e describe com --json kits-replay/1, e o alvo kits_replay | 2 | ferramenta | KRP-TASK-03 | done | 2026-10-13 | 2026-10-13 | approved |
+| [KRP-TASK-05](/docs/tasks/concluidos/kits-replay/05-show-png-e-confront-puro-sobre-a-captura.md) | show --png e confront puro sobre a captura | 2 | ferramenta | KRP-TASK-04 | done | 2026-10-13 | 2026-10-13 | approved |
+| [KRP-TASK-07](/docs/tasks/concluidos/kits-replay/07-replay-py-capture-com-as-guardas-medidas-e-o.md) | replay.py capture com as guardas medidas, e o oracle capturando por ela | 2 | ferramenta | KRP-TASK-04 | done | 2026-10-14 | 2026-10-14 | approved |
+| [KRP-TASK-06](/docs/tasks/concluidos/kits-replay/06-confront-tab-a-aba-contra-o-jogo-frente-com.md) | confront --tab: a aba contra o jogo, frente com frente e costas com costas | 2 | ferramenta | KRP-TASK-05, KRP-TASK-07 | done | 2026-10-15 | 2026-10-15 | approved |
+| [KRP-TASK-08](/docs/tasks/concluidos/kits-replay/08-fechamento-da-fase-2.md) | Fechamento da fase 2 | 2 | closing | KRP-TASK-04, KRP-TASK-05, KRP-TASK-06, KRP-TASK-07 | done | 2026-10-15 | 2026-10-15 | approved |
+| [KRP-TASK-09](/docs/tasks/concluidos/kits-replay/09-medir-a-regra-da-cabeca-estilo-pele-cabelo-e.md) | Medir a regra da cabeça (estilo, pele, cabelo e barba) contra o registro do disco nos 22 | 3 | investigação | KRP-TASK-08 | done | 2026-10-15 | 2026-10-15 | approved |
+| [KRP-TASK-10](/docs/tasks/concluidos/kits-replay/10-cabeca-pela-tupla-do-jogador-no-scene-of-e-no.md) | Cabeça pela tupla do jogador no scene_of e no match_scene, no CLI e na aba | 3 | implementação | KRP-TASK-09 | done | 2026-10-16 | 2026-10-16 | approved |
+| [KRP-TASK-11](/docs/tasks/concluidos/kits-replay/11-fechamento-da-fase-3.md) | Fechamento da fase 3 | 3 | closing | KRP-TASK-09, KRP-TASK-10 | done | 2026-10-16 | 2026-10-16 | approved |
+| [KRP-TASK-22](/docs/tasks/concluidos/kits-replay/22-painel-de-controles-da-cabeca-na-aba-3d.md) | Painel de controles da cabeça na aba 3D, no lugar da tupla em texto | 3a | implementação | KRP-TASK-11 | done | 2026-10-16 | 2026-10-16 | approved |
+| [KRP-TASK-24](/docs/tasks/concluidos/kits-replay/24-pele-do-corpo-segue-a-da-cabeca.md) | A pele do corpo segue a Cor da Pele do painel da cabeça | 3a | implementação | KRP-TASK-22 | done | 2026-10-16 | 2026-10-17 | approved |
+| [KRP-TASK-23](/docs/tasks/concluidos/kits-replay/23-fechamento-da-fase-3a.md) | Fechamento da fase 3a | 3a | closing | KRP-TASK-22 | done | 2026-10-16 | 2026-10-16 | approved |
+| [KRP-TASK-12](/docs/tasks/concluidos/kits-replay/12-goleiro-pela-familia-13-com-a-pose-medida-e-a-92.md) | Goleiro pela família 13, com a pose medida e a 92 | 4 | implementação | KRP-TASK-11, KRP-TASK-23 | done | 2026-10-18 | 2026-10-18 | approved |
+| [KRP-TASK-13](/docs/tasks/concluidos/kits-replay/13-fechamento-da-fase-4.md) | Fechamento da fase 4 | 4 | closing | KRP-TASK-12 | done | 2026-10-18 | 2026-10-18 | approved |
+| [KRP-TASK-25](/docs/tasks/concluidos/kits-replay/25-desfazer-a-krp-task-12-goleiro-volta-ao-edt-mod.md) | Desfazer a KRP-TASK-12: o goleiro volta ao do EDT_MOD.BIN, com a 92 trocada | 4a | implementação | KRP-TASK-13 | done | 2026-10-19 | 2026-10-19 | approved |
+| [KRP-TASK-26](/docs/tasks/concluidos/kits-replay/26-desfazer-a-krp-task-13-e-fechar-a-fase-4a.md) | Desfazer a KRP-TASK-13 e fechar a fase 4a | 4a | closing | KRP-TASK-25 | done | 2026-10-19 | 2026-10-19 | approved |
+| [KRP-TASK-14](/docs/tasks/concluidos/kits-replay/14-medir-a-corrida-no-anime-bin-ponteiro-do-par-na.md) | Medir a corrida no ANIME.BIN: ponteiro do par na captura e pose --against-anime | 5 | investigação | KRP-TASK-08 | done | 2026-10-18 | 2026-10-19 | approved |
 <!-- rite:end -->
 
 ## Notes

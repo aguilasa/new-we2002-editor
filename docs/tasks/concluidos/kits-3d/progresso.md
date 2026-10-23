@@ -71,27 +71,27 @@ graph TD
 ## Tasks
 
 <!-- rite:begin tasks -->
-| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [K3D-TASK-01](/docs/tasks/concluidos/kits-3d/01-kit-home-away.md) | Kit Home/Away na aba e --kit home\|away no CLI | 1 | implementação | — | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-02](/docs/tasks/concluidos/kits-3d/02-combos-ajustados.md) | Combos do tamanho da opção mais longa | 1 | implementação | — | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-03](/docs/tasks/concluidos/kits-3d/03-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | closing | K3D-TASK-01, K3D-TASK-02 | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-04](/docs/tasks/concluidos/kits-3d/04-buracos-por-angulo.md) | Ferramenta que conta o que falta na figura por ângulo | 2 | ferramenta | — | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-05](/docs/tasks/concluidos/kits-3d/05-costas-sempre.md) | Cópia das costas sempre e conserto do que a contagem achar | 2 | implementação | K3D-TASK-04 | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-06](/docs/tasks/concluidos/kits-3d/06-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | closing | K3D-TASK-04, K3D-TASK-05 | done | 2026-10-07 | 2026-10-07 |
-| [K3D-TASK-13](/docs/tasks/concluidos/kits-3d/13-rasterizador-nucleo.md) | Rasterizador por pixel no núcleo | 5 | implementação | — | done | 2026-10-08 | 2026-10-08 |
-| [K3D-TASK-14](/docs/tasks/concluidos/kits-3d/14-vista-rasterizador.md) | A vista mostra o rasterizador | 5 | implementação | K3D-TASK-13 | done | 2026-10-08 | 2026-10-08 |
-| [K3D-TASK-15](/docs/tasks/concluidos/kits-3d/15-fechamento-fase-5.md) | Fechamento da fase 5 | 5 | closing | K3D-TASK-13, K3D-TASK-14 | done | 2026-10-08 | 2026-10-08 |
-| [K3D-TASK-07](/docs/tasks/concluidos/kits-3d/07-medir-geometria-edt-mod.md) | Medir como braçadeira e manga longa entram na figura do EDT_MOD.BIN | 3 | investigação | K3D-TASK-15 | done | 2026-10-08 | 2026-10-08 |
-| [K3D-TASK-08](/docs/tasks/concluidos/kits-3d/08-medir-bracadeira-goleiro.md) | Medir a braçadeira do goleiro no emulador | 3 | verificação | K3D-TASK-15 | done | 2026-10-08 | 2026-10-08 |
-| [K3D-TASK-09](/docs/tasks/concluidos/kits-3d/09-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | closing | K3D-TASK-07, K3D-TASK-08 | done | 2026-10-08 | 2026-10-08 |
-| [K3D-TASK-10](/docs/tasks/concluidos/kits-3d/10-duas-figuras.md) | Seletor só com player e goalkeeper, vestidos pela regra medida | 4 | implementação | K3D-TASK-07 | done | 2026-10-08 | 2026-10-08 |
-| [K3D-TASK-11](/docs/tasks/concluidos/kits-3d/11-caixas-livres.md) | Number, braçadeira e manga longa livres nas duas figuras | 4 | implementação | K3D-TASK-05, K3D-TASK-08, K3D-TASK-10 | done | 2026-10-09 | 2026-10-09 |
-| [K3D-TASK-12](/docs/tasks/concluidos/kits-3d/12-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | closing | K3D-TASK-10, K3D-TASK-11 | done | 2026-10-09 | 2026-10-09 |
-| [K3D-TASK-16](/docs/tasks/concluidos/kits-3d/16-medir-tela-edit-pl-num.md) | Medir a tela EDIT PL. NUM no slot 8: modelo, número nas costas e giro | 6 | investigação | K3D-TASK-12 | done | 2026-10-09 | 2026-10-09 |
-| [K3D-TASK-17](/docs/tasks/concluidos/kits-3d/17-medir-goleiro-capitao-replay.md) | Medir o goleiro capitão de perto nos replays dos slots 9 e 10: a braçadeira como o jogo a desenha, família, painel e pose parada | 7 | investigação | K3D-TASK-16 | done | 2026-10-09 | 2026-10-09 |
-| [K3D-TASK-18](/docs/tasks/concluidos/kits-3d/18-medir-os-22-replay.md) | Medir os 22 em campo por L2/R2 nos replays: time, cabeça, manga, braçadeira e painel por jogador | 7 | investigação | K3D-TASK-17 | done | 2026-10-10 | 2026-10-11 |
-| [K3D-TASK-19](/docs/tasks/concluidos/kits-3d/19-medir-capitao-linha-replay.md) | Medir o capitão de linha (Bokšić) de perto nos replays, manga curta no 9 e longa no 10, contra a aba | 7 | investigação | K3D-TASK-18 | done | 2026-10-12 | 2026-10-12 |
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on | Review |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [K3D-TASK-01](/docs/tasks/concluidos/kits-3d/01-kit-home-away.md) | Kit Home/Away na aba e --kit home\|away no CLI | 1 | implementação | — | done | 2026-10-07 | 2026-10-07 | approved |
+| [K3D-TASK-02](/docs/tasks/concluidos/kits-3d/02-combos-ajustados.md) | Combos do tamanho da opção mais longa | 1 | implementação | — | done | 2026-10-07 | 2026-10-07 | approved |
+| [K3D-TASK-03](/docs/tasks/concluidos/kits-3d/03-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | closing | K3D-TASK-01, K3D-TASK-02 | done | 2026-10-07 | 2026-10-07 | approved |
+| [K3D-TASK-04](/docs/tasks/concluidos/kits-3d/04-buracos-por-angulo.md) | Ferramenta que conta o que falta na figura por ângulo | 2 | ferramenta | — | done | 2026-10-07 | 2026-10-07 | approved |
+| [K3D-TASK-05](/docs/tasks/concluidos/kits-3d/05-costas-sempre.md) | Cópia das costas sempre e conserto do que a contagem achar | 2 | implementação | K3D-TASK-04 | done | 2026-10-07 | 2026-10-07 | approved |
+| [K3D-TASK-06](/docs/tasks/concluidos/kits-3d/06-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | closing | K3D-TASK-04, K3D-TASK-05 | done | 2026-10-07 | 2026-10-07 | approved |
+| [K3D-TASK-13](/docs/tasks/concluidos/kits-3d/13-rasterizador-nucleo.md) | Rasterizador por pixel no núcleo | 5 | implementação | — | done | 2026-10-08 | 2026-10-08 | approved |
+| [K3D-TASK-14](/docs/tasks/concluidos/kits-3d/14-vista-rasterizador.md) | A vista mostra o rasterizador | 5 | implementação | K3D-TASK-13 | done | 2026-10-08 | 2026-10-08 | approved |
+| [K3D-TASK-15](/docs/tasks/concluidos/kits-3d/15-fechamento-fase-5.md) | Fechamento da fase 5 | 5 | closing | K3D-TASK-13, K3D-TASK-14 | done | 2026-10-08 | 2026-10-08 | approved |
+| [K3D-TASK-07](/docs/tasks/concluidos/kits-3d/07-medir-geometria-edt-mod.md) | Medir como braçadeira e manga longa entram na figura do EDT_MOD.BIN | 3 | investigação | K3D-TASK-15 | done | 2026-10-08 | 2026-10-08 | approved |
+| [K3D-TASK-08](/docs/tasks/concluidos/kits-3d/08-medir-bracadeira-goleiro.md) | Medir a braçadeira do goleiro no emulador | 3 | verificação | K3D-TASK-15 | done | 2026-10-08 | 2026-10-08 | approved |
+| [K3D-TASK-09](/docs/tasks/concluidos/kits-3d/09-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | closing | K3D-TASK-07, K3D-TASK-08 | done | 2026-10-08 | 2026-10-08 | approved |
+| [K3D-TASK-10](/docs/tasks/concluidos/kits-3d/10-duas-figuras.md) | Seletor só com player e goalkeeper, vestidos pela regra medida | 4 | implementação | K3D-TASK-07 | done | 2026-10-08 | 2026-10-08 | approved |
+| [K3D-TASK-11](/docs/tasks/concluidos/kits-3d/11-caixas-livres.md) | Number, braçadeira e manga longa livres nas duas figuras | 4 | implementação | K3D-TASK-05, K3D-TASK-08, K3D-TASK-10 | done | 2026-10-09 | 2026-10-09 | approved |
+| [K3D-TASK-12](/docs/tasks/concluidos/kits-3d/12-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | closing | K3D-TASK-10, K3D-TASK-11 | done | 2026-10-09 | 2026-10-09 | approved |
+| [K3D-TASK-16](/docs/tasks/concluidos/kits-3d/16-medir-tela-edit-pl-num.md) | Medir a tela EDIT PL. NUM no slot 8: modelo, número nas costas e giro | 6 | investigação | K3D-TASK-12 | done | 2026-10-09 | 2026-10-09 | approved |
+| [K3D-TASK-17](/docs/tasks/concluidos/kits-3d/17-medir-goleiro-capitao-replay.md) | Medir o goleiro capitão de perto nos replays dos slots 9 e 10: a braçadeira como o jogo a desenha, família, painel e pose parada | 7 | investigação | K3D-TASK-16 | done | 2026-10-09 | 2026-10-09 | approved |
+| [K3D-TASK-18](/docs/tasks/concluidos/kits-3d/18-medir-os-22-replay.md) | Medir os 22 em campo por L2/R2 nos replays: time, cabeça, manga, braçadeira e painel por jogador | 7 | investigação | K3D-TASK-17 | done | 2026-10-10 | 2026-10-11 | approved |
+| [K3D-TASK-19](/docs/tasks/concluidos/kits-3d/19-medir-capitao-linha-replay.md) | Medir o capitão de linha (Bokšić) de perto nos replays, manga curta no 9 e longa no 10, contra a aba | 7 | investigação | K3D-TASK-18 | done | 2026-10-12 | 2026-10-12 | approved |
 <!-- rite:end -->
 
 ## Notes

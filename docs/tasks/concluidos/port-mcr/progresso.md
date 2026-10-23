@@ -89,25 +89,25 @@ graph TD
 ## Resumo
 
 <!-- rite:begin tasks -->
-| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [MCR-TASK-01](/docs/tasks/concluidos/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | infraestrutura | — | done | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-02](/docs/tasks/concluidos/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | documentação | MCR-TASK-01 | done | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-03](/docs/tasks/concluidos/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | ferramenta | MCR-TASK-01 | done | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-04](/docs/tasks/concluidos/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | implementação | MCR-TASK-03 | done | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-05](/docs/tasks/concluidos/port-mcr/05-layout-e-cross-check.md) | `layout.py` e o cross-check dos 17 destinos | 1 | implementação | MCR-TASK-04 | done | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-06](/docs/tasks/concluidos/port-mcr/06-codec-de-atributos.md) | `attributes.py` — o codec de 12 bytes, contra `Player::Decode/Encode` | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-07](/docs/tasks/concluidos/port-mcr/07-dorsais-e-nome.md) | `numbers.py` e `text.py` — os 5 bits e o cp932 | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-08](/docs/tasks/concluidos/port-mcr/08-formacao-e-dominios.md) | `formation.py` e `domains.py` — X/Y, papéis, cobradores e presets | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-09](/docs/tasks/concluidos/port-mcr/09-modelo-e-round-trip.md) | `model.py`, `mcrio.py` e o round-trip byte-idêntico | 1 | implementação | MCR-TASK-06, MCR-TASK-07, MCR-TASK-08 | done | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-10](/docs/tasks/concluidos/port-mcr/10-selftest-cli-e-gate.md) | `selftest.py`, o CLI e os três alvos de `ctest` — fecha a Fase 1 | 2 | ferramenta | MCR-TASK-09 | done | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-11](/docs/tasks/concluidos/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco e ficha em leitura | 3 | implementação | MCR-TASK-10 | done | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-12](/docs/tasks/concluidos/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação e dorsais | 3 | implementação | MCR-TASK-11 | done | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-13](/docs/tasks/concluidos/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio e o veredito do console | 3 | verificação | MCR-TASK-09 | done | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-14](/docs/tasks/concluidos/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | verificação | MCR-TASK-12, MCR-TASK-13 | done | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-15](/docs/tasks/concluidos/port-mcr/15-abrir-cartao-pela-tela.md) | Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível | 5 | implementação | MCR-TASK-12 | done | 2026-09-09 | 2026-09-09 |
-| [MCR-TASK-16](/docs/tasks/concluidos/port-mcr/16-conteiner-gme.md) | Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos | 5 | implementação | MCR-TASK-15 | done | 2026-09-09 | 2026-09-09 |
-| [MCR-TASK-17](/docs/tasks/concluidos/port-mcr/17-mapa-dos-desbloqueios.md) | Onde o option file guarda os times secretos e a opção de Master League no modo exibição | 5 | verificação | MCR-TASK-09 | done | 2026-09-10 | 2026-09-10 |
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on | Review |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [MCR-TASK-01](/docs/tasks/concluidos/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | infraestrutura | — | done | 2026-09-07 | 2026-09-07 | approved |
+| [MCR-TASK-02](/docs/tasks/concluidos/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | documentação | MCR-TASK-01 | done | 2026-09-07 | 2026-09-07 | approved |
+| [MCR-TASK-03](/docs/tasks/concluidos/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | ferramenta | MCR-TASK-01 | done | 2026-09-07 | 2026-09-07 | approved |
+| [MCR-TASK-04](/docs/tasks/concluidos/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | implementação | MCR-TASK-03 | done | 2026-09-07 | 2026-09-07 | approved |
+| [MCR-TASK-05](/docs/tasks/concluidos/port-mcr/05-layout-e-cross-check.md) | `layout.py` e o cross-check dos 17 destinos | 1 | implementação | MCR-TASK-04 | done | 2026-09-07 | 2026-09-07 | approved |
+| [MCR-TASK-06](/docs/tasks/concluidos/port-mcr/06-codec-de-atributos.md) | `attributes.py` — o codec de 12 bytes, contra `Player::Decode/Encode` | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 | approved |
+| [MCR-TASK-07](/docs/tasks/concluidos/port-mcr/07-dorsais-e-nome.md) | `numbers.py` e `text.py` — os 5 bits e o cp932 | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 | approved |
+| [MCR-TASK-08](/docs/tasks/concluidos/port-mcr/08-formacao-e-dominios.md) | `formation.py` e `domains.py` — X/Y, papéis, cobradores e presets | 1 | implementação | MCR-TASK-05 | done | 2026-09-07 | 2026-09-07 | approved |
+| [MCR-TASK-09](/docs/tasks/concluidos/port-mcr/09-modelo-e-round-trip.md) | `model.py`, `mcrio.py` e o round-trip byte-idêntico | 1 | implementação | MCR-TASK-06, MCR-TASK-07, MCR-TASK-08 | done | 2026-09-08 | 2026-09-08 | approved |
+| [MCR-TASK-10](/docs/tasks/concluidos/port-mcr/10-selftest-cli-e-gate.md) | `selftest.py`, o CLI e os três alvos de `ctest` — fecha a Fase 1 | 2 | ferramenta | MCR-TASK-09 | done | 2026-09-08 | 2026-09-08 | approved |
+| [MCR-TASK-11](/docs/tasks/concluidos/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco e ficha em leitura | 3 | implementação | MCR-TASK-10 | done | 2026-09-08 | 2026-09-08 | approved |
+| [MCR-TASK-12](/docs/tasks/concluidos/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação e dorsais | 3 | implementação | MCR-TASK-11 | done | 2026-09-08 | 2026-09-08 | approved |
+| [MCR-TASK-13](/docs/tasks/concluidos/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio e o veredito do console | 3 | verificação | MCR-TASK-09 | done | 2026-09-08 | 2026-09-08 | approved |
+| [MCR-TASK-14](/docs/tasks/concluidos/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | verificação | MCR-TASK-12, MCR-TASK-13 | done | 2026-09-08 | 2026-09-08 | approved |
+| [MCR-TASK-15](/docs/tasks/concluidos/port-mcr/15-abrir-cartao-pela-tela.md) | Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível | 5 | implementação | MCR-TASK-12 | done | 2026-09-09 | 2026-09-09 | approved |
+| [MCR-TASK-16](/docs/tasks/concluidos/port-mcr/16-conteiner-gme.md) | Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos | 5 | implementação | MCR-TASK-15 | done | 2026-09-09 | 2026-09-09 | approved |
+| [MCR-TASK-17](/docs/tasks/concluidos/port-mcr/17-mapa-dos-desbloqueios.md) | Onde o option file guarda os times secretos e a opção de Master League no modo exibição | 5 | verificação | MCR-TASK-09 | done | 2026-09-10 | 2026-09-10 | approved |
 <!-- rite:end -->
 
 **A tabela acima é gerada** pelo `rite.py sync` a partir do frontmatter de cada task — não edite
