@@ -35,7 +35,7 @@ A Fase 3 (as primitivas) está fechada: todas as tasks dela concluídas e revist
 
 **O `duckmcp_live` estendido.** `live.run` passa a envolver o mesmo cliente numa `Session` (`Session(client=client)`, que não é dona do processo — quem mata continua sendo o `finally` do `run`) e chama `read_back`: `read_ram(psx.RAM_BASE, psx.RAM_SIZE)`, `dump_vram` para um PNG temporário decodificado por `png.read_png`, e `game()`. Passa só se, além do `frame_step`, a RAM vier com `psx.RAM_SIZE` bytes, a VRAM com `psx.VRAM_WIDTH` x `psx.VRAM_HEIGHT` e `game()` der um serial. Nenhum serial esperado no código: a regra (c) não deixa, e a lib não sabe que disco é.
 
-`DUCKSTATION_TEST_IMAGE=$PWD/work/looks-disc/we2002-english.cue DISPLAY=:98 XAUTHORITY= ctest --test-dir build -R duckmcp_live -V`:
+`DUCKSTATION_TEST_IMAGE=$PWD/work/looks-disc/we2002-english.cue DISPLAY=:98 XAUTHORITY= ctest --test-dir build -R duckmcp_live -V`, **aparada**: faltam as linhas `fork <pid> on :98`, `window <id>` e `duckstation-mcp 1.0.0 answering`, e o cabeçalho do ctest. A saída inteira está na entrada de 2026-10-23 abaixo (CORR-DMCP-020):
 
 ```text
 25: duckmcp_live: /home/ingmar/desenvolvimento/github/new-we2002-editor/work/looks-disc/we2002-english.cue, 5 steps
@@ -67,3 +67,51 @@ Sweep: `live.py` mudou de contrato (linha final e o que afirma). O docstring del
     - `M docs/tasks/duckmcp/15-fechamento-fase-3.md`
     - `M tools/duckmcp/live.py`
 - **Reviewed** (2026-10-22) at `5127bd79`: CORR-DMCP-017, CORR-DMCP-018, CORR-DMCP-019, CORR-DMCP-020
+
+### 2026-10-23 — a transcrição inteira do `duckmcp_live` (CORR-DMCP-020), HEAD `5039dd6b`
+
+Refeita depois das CORR-DMCP-017, -018 e -019, que mudaram o `live.py`. O `:98` tinha caído desde a
+corrida anterior, e foi subido de novo com a receita do `CLAUDE.md`, sem `-auth`. Saída `-V` inteira,
+sem corte:
+
+```text
+$ DUCKSTATION_TEST_IMAGE=$PWD/work/looks-disc/we2002-english.cue DISPLAY=:98 XAUTHORITY= ctest --test-dir build -R duckmcp_live -V
+Internal ctest changing into directory: /home/ingmar/desenvolvimento/github/new-we2002-editor/build
+UpdateCTestConfiguration  from :/home/ingmar/desenvolvimento/github/new-we2002-editor/build/DartConfiguration.tcl
+Parse Config file:/home/ingmar/desenvolvimento/github/new-we2002-editor/build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/home/ingmar/desenvolvimento/github/new-we2002-editor/build/DartConfiguration.tcl
+Parse Config file:/home/ingmar/desenvolvimento/github/new-we2002-editor/build/DartConfiguration.tcl
+Test project /home/ingmar/desenvolvimento/github/new-we2002-editor/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 25
+    Start 25: duckmcp_live
+
+25: Test command: /home/ingmar/.local/share/mise/installs/python/3.13/bin/python3 "/home/ingmar/desenvolvimento/github/new-we2002-editor/tests/../tools/duckmcp/live.py"
+25: Working Directory: /home/ingmar/desenvolvimento/github/new-we2002-editor/build/tests
+25: Test timeout computed to be: 180
+25: duckmcp_live: /home/ingmar/desenvolvimento/github/new-we2002-editor/work/looks-disc/we2002-english.cue, 5 steps
+25:   fork 23238 on :98, log /home/ingmar/desenvolvimento/github/new-we2002-editor/work/looks-disc/duckstation-fork.log
+25:   window 4194311
+25:   duckstation-mcp 1.0.0 answering
+25:   tools declared: 95
+25:   frame_number 205 -> 210 after 5 frame_step
+25:   read_ram: 2097152 bytes from 0x80000000
+25:   dump_vram: 1024x512
+25:   game(): serial='SLPM-87056' title='ワールド・サッカー・ウイニング・イレブン２００２'
+25: duckmcp_live: ok -- frame_number moved 5 for 5 frame_step (want 5); tools=95 frames 205->210; ram=2097152 vram=1024x512 serial=SLPM-87056
+1/1 Test #25: duckmcp_live .....................   Passed    6.57 sec
+
+The following tests passed:
+	duckmcp_live
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   6.57 sec
+$ python3 tools/duckmcp/cli.py procs | head -1
+pids: []
+```

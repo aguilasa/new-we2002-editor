@@ -22,5 +22,5 @@
 | [CORR-DMCP-017](/docs/tasks/duckmcp/CORR-DMCP-017.md) | Capturar PngError no live.main para a última linha ser sempre o veredito | DMCP-TASK-15 | medium | done | 2026-10-23 |
 | [CORR-DMCP-018](/docs/tasks/duckmcp/CORR-DMCP-018.md) | Versionar controles para os checks de RAM, VRAM e serial do live.py | DMCP-TASK-15 | medium | done | 2026-10-23 |
 | [CORR-DMCP-019](/docs/tasks/duckmcp/CORR-DMCP-019.md) | Atualizar o docstring e a linha FAIL do live.py para os checks novos | DMCP-TASK-15 | low | done | 2026-10-23 |
-| [CORR-DMCP-020](/docs/tasks/duckmcp/CORR-DMCP-020.md) | Colar inteira no Log da 15 a transcrição do duckmcp_live | DMCP-TASK-15 | low | pending | — |
+| [CORR-DMCP-020](/docs/tasks/duckmcp/CORR-DMCP-020.md) | Colar inteira no Log da 15 a transcrição do duckmcp_live | DMCP-TASK-15 | low | in-progress | — |
 <!-- rite:end -->
