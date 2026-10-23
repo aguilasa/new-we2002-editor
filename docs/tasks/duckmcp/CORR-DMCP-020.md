@@ -53,7 +53,7 @@ Verificação:
 
 ```text
 $ grep -c "answering" docs/tasks/duckmcp/15-fechamento-fase-3.md
-1
+2
 $ DUCKSTATION_TEST_IMAGE=… DISPLAY=:98 XAUTHORITY= ctest --test-dir build -R duckmcp_live -V | grep '^25:   \(fork\|window\|duckstation-mcp\)'
 25:   fork 23238 on :98, log /home/ingmar/desenvolvimento/github/new-we2002-editor/work/looks-disc/duckstation-fork.log
 25:   window 4194311
