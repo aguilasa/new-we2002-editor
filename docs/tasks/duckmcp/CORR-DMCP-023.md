@@ -67,3 +67,12 @@ DMCP-TASK-20 True
 DMCP-TASK-22 True
 DMCP-TASK-30 True
 ```
+- **Closed** — commit `c39e4c74` (2026-10-23): docs(duckmcp): declare duckmcp/selftest.py in the migrations PENDING binds
+  - Files (`git show --name-status c39e4c74`):
+    - `M docs/tasks/duckmcp/23-looks-breakpoints.md`
+    - `M docs/tasks/duckmcp/25-kits-oracle.md`
+    - `M docs/tasks/duckmcp/26-kits-controles.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-023.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M docs/tasks/duckmcp/progress.json`
