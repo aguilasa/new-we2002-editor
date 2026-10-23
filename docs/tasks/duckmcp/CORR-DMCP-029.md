@@ -125,3 +125,9 @@ duckmcp_selftest: 435 check(s) ran, 0 failure(s)
 `--screen main-menu` até o menu só se mede depois de o `[Pad1]` voltar ao teclado, decisão do
 usuário (pela interface do DuckStation ou restaurando os catorze botões do
 `settings (Copy).ini` de 2026-09-02).
+- **Closed** — commit `cd34c63c` (2026-10-23): fix(pes2): drive.py refuses a [Pad1] bound to a controller instead of pressing dead keys
+  - Files (`git show --name-status cd34c63c`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-029.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/pes2/drive.py`
