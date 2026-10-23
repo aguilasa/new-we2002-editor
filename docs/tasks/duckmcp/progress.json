@@ -393,12 +393,14 @@
       "status": "done",
       "done_on": "2026-10-23",
       "done_commit": "a7c78d32",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-23",
+      "review_commit": "fe14f07c",
       "active_since": null,
       "started_at": "2026-10-23T14:57:10-03:00",
       "active_s": 446,
-      "finished_at": "2026-10-23T15:04:36-03:00"
+      "finished_at": "2026-10-23T15:04:36-03:00",
+      "review_started_at": "2026-10-23T15:41:57-03:00",
+      "review_s": 930
     },
     {
       "id": "DMCP-TASK-19",

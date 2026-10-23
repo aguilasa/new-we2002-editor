@@ -380,6 +380,19 @@
       "started_at": "2026-10-23T14:03:27-03:00",
       "active_s": 19,
       "finished_at": "2026-10-23T14:03:46-03:00"
+    },
+    {
+      "id": "CORR-DMCP-024",
+      "file": "CORR-DMCP-024.md",
+      "title": "Fazer a regra (b) pegar imports qualificados de mcp, fork e savestate",
+      "origin": "DMCP-TASK-18",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

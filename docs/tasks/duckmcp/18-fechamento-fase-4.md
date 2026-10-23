@@ -61,3 +61,4 @@ A Fase 4 está fechada. O `audit.py` em 206 é o número da migração: as Fases
 - **Closed** — commit `a7c78d32` (2026-10-23): docs(duckmcp): close phase 4
   - Files (`git show --name-status a7c78d32`):
     - `M docs/tasks/duckmcp/18-fechamento-fase-4.md`
+- **Reviewed** (2026-10-23) at `fe14f07c`: CORR-DMCP-024
