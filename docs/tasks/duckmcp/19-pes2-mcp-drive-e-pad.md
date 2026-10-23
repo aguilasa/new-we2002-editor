@@ -122,3 +122,4 @@ Gates na árvore entregue: `python3 tools/duckmcp/selftest.py | tail -1` → `du
 - **Closed** — commit `47d953f4` (2026-10-23): docs(duckmcp): result route gives the same PNG before and after the migration
   - Files (`git show --name-status 47d953f4`):
     - `M docs/tasks/duckmcp/19-pes2-mcp-drive-e-pad.md`
+- **Reviewed** (2026-10-23) at `c610fdb4`: CORR-DMCP-027
