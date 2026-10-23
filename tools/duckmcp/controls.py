@@ -234,6 +234,36 @@ CONTROLS = (
         None,
         "a range that is not the console's: rule (c) reads psx.py, so its "
         "sentinel has to go red"),
+    Control(
+        "live-frames-unchecked", "live", "live.py",
+        '    if after - before != steps:\n',
+        '    if False:\n',
+        'FAIL  live: failures() names frames when frame_number moves wrong', None,
+        'frame_step no longer judged: a server that steps nothing would pass'),
+    Control(
+        "live-ram-unchecked", "live", "live.py",
+        '    if reads["ram"] != psx.RAM_SIZE:\n',
+        '    if False:\n',
+        'FAIL  live: failures() names ram when RAM is short', None,
+        'the RAM length no longer judged'),
+    Control(
+        "live-vram-unchecked", "live", "live.py",
+        '    if reads["vram"] != (psx.VRAM_WIDTH, psx.VRAM_HEIGHT):\n',
+        '    if False:\n',
+        'FAIL  live: a 1024x513 VRAM fails, named vram', None,
+        'the VRAM size no longer judged'),
+    Control(
+        "live-serial-unchecked", "live", "live.py",
+        '    if reads["game"].serial is None:\n',
+        '    if False:\n',
+        'FAIL  live: an empty serial fails, named serial', None,
+        'game() no longer has to name a disc'),
+    Control(
+        "live-png-error-escapes", "live", "live.py",
+        '    except (Fail, NotRunning, ToolError, ValueError) as exc:\n',
+        '    except (Fail, NotRunning, ToolError) as exc:\n',
+        'FAIL  live: a VRAM file that does not decode ends in a FAIL line', None,
+        'a PngError escapes main as a traceback: the last line is no verdict'),
 )
 """Every control, in report order."""
 

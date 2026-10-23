@@ -476,6 +476,89 @@ def check_live_kill(c):
         fork.launch, fork.kill, fork.running_pids = saved
 
 
+def check_live_read_back(c):
+    """`live.run` and `live.main` offline, over `session._FakeClient`
+    (CORR-DMCP-017, -018, -019): each of the four conditions can fail and is
+    named in the FAIL line, and a read that raises ends in a FAIL line, not a
+    traceback. The fake's `dump_vram` writes a real PNG of the given size."""
+    import contextlib
+    import io
+
+    blobs = {}
+
+    def vram_png(width, height):
+        if (width, height) not in blobs:
+            blobs[width, height] = png.encode(width, height,
+                                              [bytes(width * 3)] * height)
+        return blobs[width, height]
+
+    class Fake(session._FakeClient):
+        def __init__(self, vram=(psx.VRAM_WIDTH, psx.VRAM_HEIGHT), **kw):
+            super().__init__(**kw)
+            self.vram = vram
+
+        def tools(self):
+            return ["get_status", "frame_step"]
+
+        def call(self, name, **arguments):
+            out = super().call(name, **arguments)
+            if name == "dump_vram" and self.vram:
+                self._touch(arguments["path"], vram_png(*self.vram))
+            return out
+
+    saved = fork.launch, fork.kill, fork.running_pids
+
+    def main_with(client):
+        fork.launch = lambda image, display=None: (1, 2, client)
+        fork.kill = lambda verbose=True: 0
+        fork.running_pids = lambda: []
+        text = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(text):
+                rc = live.main(["--image", "/x/a.cue", "--steps", "3"])
+        except Exception as exc:                             # noqa: BLE001
+            rc = "escaped %s: %s" % (type(exc).__name__, exc)
+        lines = text.getvalue().splitlines()
+        return rc, lines[-1] if lines else ""
+
+    try:
+        rc, last = main_with(Fake())
+        c.ok("live: the read-back passes on RAM, a 1024x512 VRAM and a serial",
+             rc == 0 and last.startswith("duckmcp_live: ok --"), (rc, last))
+        rc, last = main_with(Fake(serial=""))
+        c.ok("live: an empty serial fails, named serial",
+             rc == 1 and last.startswith("duckmcp_live: FAIL (serial) --"),
+             (rc, last))
+        rc, last = main_with(Fake(vram=(psx.VRAM_WIDTH, psx.VRAM_HEIGHT + 1)))
+        c.ok("live: a 1024x513 VRAM fails, named vram",
+             rc == 1 and last.startswith("duckmcp_live: FAIL (vram) --"),
+             (rc, last))
+        rc, last = main_with(Fake(vram=None))
+        c.ok("live: a VRAM file that does not decode ends in a FAIL line",
+             rc == 1 and last.startswith("duckmcp_live: FAIL -- PngError:"),
+             (rc, last))
+        rc, last = main_with(Fake(short_read=True))
+        c.ok("live: a short RAM read ends in a FAIL line",
+             rc == 1 and last.startswith("duckmcp_live: FAIL -- ToolError:"),
+             (rc, last))
+    finally:
+        fork.launch, fork.kill, fork.running_pids = saved
+
+    # RAM and frames cannot go wrong through the fake (read_ram refuses a
+    # short read; the fake steps one frame a call), so failures() is judged
+    # directly for them.
+    ok = {"ram": psx.RAM_SIZE, "vram": (psx.VRAM_WIDTH, psx.VRAM_HEIGHT),
+          "game": session.Game("X-1", "t")}
+    c.ok("live: failures() is empty when all four hold",
+         live.failures(3, 0, 3, ok) == [], live.failures(3, 0, 3, ok))
+    c.ok("live: failures() names frames when frame_number moves wrong",
+         live.failures(3, 0, 2, ok) == ["frames"], live.failures(3, 0, 2, ok))
+    short = dict(ok, ram=psx.RAM_SIZE - 1)
+    c.ok("live: failures() names ram when RAM is short",
+         live.failures(3, 0, 3, short) == ["ram"],
+         live.failures(3, 0, 3, short))
+
+
 def check_session_imports(c):
     """`capture` hands back a path, so the module needs no imaging library:
     a fresh `-I` interpreter importing `duckmcp.session` loads none."""
@@ -513,6 +596,7 @@ def main(argv=None):
     c.module("cli", cli.self_check)
     check_cli_refused(c)
     check_live_kill(c)
+    check_live_read_back(c)
     c.module("buttons", buttons.self_check)
     c.module("session", session.self_check)
     check_session_imports(c)
