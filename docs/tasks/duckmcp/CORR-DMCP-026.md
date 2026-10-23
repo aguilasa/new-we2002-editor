@@ -171,3 +171,10 @@ O `language.png` dessa corrida ainda é o título: o Start não pegou. O `[Pad1]
 `~/.local/share/duckstation/settings.ini` (alterado em 2026-10-22 13:52) liga todo botão a `SDL-0/…`,
 e o `load_pad` ignora o que não é `Keyboard/` e cai em silêncio no `DEFAULT_PAD` — teclas ligadas a
 nada, a armadilha da §6.11. Não é o defeito desta CORR; vira CORR nova, com essa saída como Evidência.
+- **Closed** — commit `049cb6a6` (2026-10-23): fix(pes2): drive.py dismisses the AppImage's Automatic Updater before capturing
+  - Files (`git show --name-status 049cb6a6`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-026.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/fork.py`
+    - `M tools/pes2/drive.py`
