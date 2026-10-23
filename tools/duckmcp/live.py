@@ -132,7 +132,9 @@ def main(argv=None):
     except Skip as exc:
         print("duckmcp_live: skipped -- %s" % exc)
         return SKIP
-    except (Fail, NotRunning, ToolError) as exc:
+    except (Fail, NotRunning, ToolError, ValueError) as exc:
+        # ValueError: png.PngError when the VRAM file does not decode, and
+        # the size refusals of Session.read_ram -- a verdict, not a traceback.
         print("duckmcp_live: FAIL -- %s: %s" % (type(exc).__name__, exc))
         return 1
     verdict = "ok" if passed else "FAIL"

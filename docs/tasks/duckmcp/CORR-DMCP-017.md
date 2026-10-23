@@ -55,3 +55,26 @@ O heredoc da Evidência imprime `duckmcp_live: FAIL -- PngError: ...` seguido de
 `ESCAPED`.
 
 ## Log de Execução
+
+2026-10-23 — reproduzido: o heredoc da Evidência imprime `ESCAPED PngError … does not open with a PNG
+signature`.
+
+Conserto: o `except` do `main` do `live.py` passou a capturar também `ValueError`, que cobre o
+`png.PngError` (subclasse dele) e as recusas de tamanho do `Session.read_ram`. A saída é a linha FAIL de
+sempre, com o nome do tipo.
+
+Verificação:
+
+```text
+$ <heredoc da Evidência>
+duckmcp_live: /x/a.cue, 5 steps
+  tools declared: 1
+  frame_number 100 -> 105 after 5 frame_step
+  read_ram: 2097152 bytes from 0x80000000
+duckmcp_live: FAIL -- PngError: /tmp/duckmcp-live-86immvkt/vram.png does not open with a PNG signature
+rc 1
+$ python3 tools/duckmcp/selftest.py --quiet
+duckmcp_selftest: 361 check(s) ran, 0 failure(s)
+```
+
+O gate que mantém isso de pé é o check offline da CORR-DMCP-018, que roda o `run` com o cliente falso.
