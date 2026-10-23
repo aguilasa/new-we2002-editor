@@ -413,6 +413,19 @@
       "active_since": "2026-10-23T17:11:52-03:00",
       "started_at": "2026-10-23T17:11:52-03:00",
       "active_s": 0
+    },
+    {
+      "id": "CORR-DMCP-026",
+      "file": "CORR-DMCP-026.md",
+      "title": "A rota title do drive.py não reconhece mais o título e falha em 240 s",
+      "origin": "DMCP-TASK-20",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
