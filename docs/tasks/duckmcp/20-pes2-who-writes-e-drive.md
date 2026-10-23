@@ -99,3 +99,4 @@ E a regra (b): `ok    rule (b): PENDING lists 169 site(s) in 74 entries, audit.p
     - `M tools/pes2/drive.py`
     - `M tools/pes2/selftest.py`
     - `M tools/pes2/who_writes.py`
+- **Reviewed** (2026-10-23) at `9bd20b79`: CORR-DMCP-028

@@ -440,6 +440,19 @@
       "depends_on": [],
       "done_on": null,
       "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-028",
+      "file": "CORR-DMCP-028.md",
+      "title": "Nomear tools/looks/confront.py entre os chamadores das reexportações do who_writes",
+      "origin": "DMCP-TASK-20",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
