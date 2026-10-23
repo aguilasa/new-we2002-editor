@@ -82,3 +82,10 @@ exit=0
 $ python3 tools/duckmcp/selftest.py --quiet
 duckmcp_selftest: 434 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `efe82757` (2026-10-23): fix(duckmcp): give the kits/replay.py PENDING entries to DMCP-TASK-25, which declares the file
+  - Files (`git show --name-status efe82757`):
+    - `M docs/tasks/duckmcp/17-regra-b.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-021.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/selftest.py`

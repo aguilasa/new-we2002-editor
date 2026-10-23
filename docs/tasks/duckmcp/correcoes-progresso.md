@@ -23,7 +23,7 @@
 | [CORR-DMCP-018](/docs/tasks/duckmcp/CORR-DMCP-018.md) | Versionar controles para os checks de RAM, VRAM e serial do live.py | DMCP-TASK-15 | medium | done | 2026-10-23 |
 | [CORR-DMCP-019](/docs/tasks/duckmcp/CORR-DMCP-019.md) | Atualizar o docstring e a linha FAIL do live.py para os checks novos | DMCP-TASK-15 | low | done | 2026-10-23 |
 | [CORR-DMCP-020](/docs/tasks/duckmcp/CORR-DMCP-020.md) | Colar inteira no Log da 15 a transcrição do duckmcp_live | DMCP-TASK-15 | low | done | 2026-10-23 |
-| [CORR-DMCP-021](/docs/tasks/duckmcp/CORR-DMCP-021.md) | Atribuir as entradas PENDING do replay.py à task que o declara | DMCP-TASK-17 | medium | in-progress | — |
+| [CORR-DMCP-021](/docs/tasks/duckmcp/CORR-DMCP-021.md) | Atribuir as entradas PENDING do replay.py à task que o declara | DMCP-TASK-17 | medium | done | 2026-10-23 |
 | [CORR-DMCP-022](/docs/tasks/duckmcp/CORR-DMCP-022.md) | Plantar controles para as três asserções da regra (b) sem vigia | DMCP-TASK-17 | medium | pending | — |
 | [CORR-DMCP-023](/docs/tasks/duckmcp/CORR-DMCP-023.md) | Declarar duckmcp/selftest.py nas tasks de migração que a PENDING amarra | DMCP-TASK-17 | medium | pending | — |
 <!-- rite:end -->
