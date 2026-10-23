@@ -78,3 +78,9 @@ duckmcp_selftest: 361 check(s) ran, 0 failure(s)
 
 A linha FAIL nomeando a condição é afirmada pelo check offline da CORR-DMCP-018, e vista na corrida
 viva da CORR-DMCP-020.
+- **Closed** — commit `fededb1c` (2026-10-23): fix(duckmcp): name the failed conditions in live.py's FAIL line, and its docstring
+  - Files (`git show --name-status fededb1c`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-019.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/live.py`
