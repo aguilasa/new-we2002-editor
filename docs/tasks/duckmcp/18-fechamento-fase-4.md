@@ -58,4 +58,6 @@ $ ctest --test-dir build -R tasks
 - Regra (b): sítio novo fora da `PENDING` é vermelho; o tamanho bate com o `audit.py` — `ok    rule (b): no raw site outside PENDING` e `ok    rule (b): PENDING lists 206 site(s) in 108 entries, audit.py counts 206`, contra o `audit: 206 raw site(s) in 14 file(s)` acima; os sete controles `(b) 7/7` ficam vermelhos, entre eles o `import fork` plantado em `tools/kit2d/`.
 
 A Fase 4 está fechada. O `audit.py` em 206 é o número da migração: as Fases 5 a 7 o levam a zero, e a lista `PENDING` encolhe junto.
-
+- **Closed** — commit `a7c78d32` (2026-10-23): docs(duckmcp): close phase 4
+  - Files (`git show --name-status a7c78d32`):
+    - `M docs/tasks/duckmcp/18-fechamento-fase-4.md`
