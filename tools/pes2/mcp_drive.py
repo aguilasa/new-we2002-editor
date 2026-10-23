@@ -121,6 +121,14 @@ SUBMENU = (370, 95, 760, 255)
 # rows. Measured 0.0005 against 0.0082 on 2026-09-03.
 SAME_ROW = 0.003
 
+# The value of the first match-options row, `Dia/Noche` (`Al azar` / `Dia`),
+# without its two arrows. Swapping one word moves the whole frame by only
+# 0.00048 -- inside the same-row noise -- but this box by 0.04098, the same
+# in three runs on 2026-10-23 (CORR-DMCP-025).
+DIA_NOCHE_VALUE = (540, 90, 745, 120)
+# Below this inside `DIA_NOCHE_VALUE`, the value did not change.
+DIA_NOCHE_CHANGED = 0.01
+
 # The title never rests -- the attract loop is as animated as the movie
 # before it -- so it is the one screen that cannot be recognised by
 # stillness. Mean only: 0.550116..0.555093 over both binaries on
@@ -176,7 +184,10 @@ SCREEN_TOL = 0.010
 # one reason: a shootout reaches the result screen in about a minute, where
 # an exhibition match takes roughly 28 minutes of wall clock (pitfall 26).
 MATCH_OPTIONS_MEAN = 0.1626      # Dia/Noche, Duracion, Estadio...
-KICKER_ORDER_MEAN = 0.2499       # the eleven kickers of each side
+KICKER_ORDER_MEAN = 0.2638       # the eleven kickers of each side
+# 0.2499 until 2026-10-23. Since the Dia/Noche guard works and Dia is pinned,
+# the screen reads 0.2637..0.2640 in three runs (CORR-DMCP-025) -- likely the
+# lit stadium behind the two lists; the night reading was not measured.
 # The post-match box (`Pasar al siguiente partido`). **Its mean is not a
 # constant** -- `Estadio` stays on `Seleccion al azar`, and the same screen
 # read 0.3185 in one stadium and 0.3941 in another. It is kept only so the
@@ -773,9 +784,14 @@ def route_result(s):
     # one press and it is also what makes two runs comparable at all.
     s.say("pinning Dia/Noche so the pitch has one brightness")
     before = s.capture()
+    s.run(0.5)
+    noise = s.capture().difference(before, DIA_NOCHE_VALUE)
     s.press("Right")
     s.capture("match-options-lit")
-    if s.capture().difference(before) < 0.0005:
+    moved = s.capture().difference(before, DIA_NOCHE_VALUE)
+    s.say(f"Dia/Noche value box: {moved:.5f} after Right, {noise:.5f} "
+          f"without a press (changed above {DIA_NOCHE_CHANGED})")
+    if moved < DIA_NOCHE_CHANGED or noise >= DIA_NOCHE_CHANGED:
         raise Fail("Right on Dia/Noche changed nothing -- the cursor is not "
                    "on the first row")
 
