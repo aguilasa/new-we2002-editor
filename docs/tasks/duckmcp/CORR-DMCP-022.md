@@ -89,3 +89,10 @@ duckmcp_controls: 40 control(s), 40 red as required; 21/21 cover rules (a) to (d
 $ python3 tools/duckmcp/selftest.py --quiet
 duckmcp_selftest: 434 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `ef02cfe0` (2026-10-23): test(duckmcp): plant the rule (b) bookkeeping checks: duplicate key, zero count, total drift
+  - Files (`git show --name-status ef02cfe0`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-022.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`
