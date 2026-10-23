@@ -65,4 +65,6 @@ $ PES2_IMAGE="$PWD/work/pes2-EsIt/Pro Evolution Soccer 2 (Europe) (Es,It).cue" D
 - O `audit.py` não lista mais sítio do `pes2`: não há seção `pes2` e o `grep -c` dá 0.
 
 A Fase 5 está fechada.
-
+- **Closed** — commit `d0915337` (2026-10-23): docs(duckmcp): close phase 5
+  - Files (`git show --name-status d0915337`):
+    - `M docs/tasks/duckmcp/21-fechamento-fase-5.md`
