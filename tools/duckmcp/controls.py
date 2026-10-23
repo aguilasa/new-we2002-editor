@@ -159,6 +159,13 @@ CONTROLS = (
         "a project that never talked to the emulator starts importing the "
         "launcher shim, in a file the list does not know"),
     Control(
+        "b-import-qualified-kit2d", "b", None, None, None,
+        "FAIL  rule (b): no raw site outside PENDING",
+        ("kit2d/dmcp_probe_b.py",
+         "import pes2.mcp  # planted\nfrom pes2 import fork  # planted\n"),
+        "the same modules reached through the host as a namespace package: "
+        "the bare-name pattern alone would miss them (CORR-DMCP-024)"),
+    Control(
         "b-client-call-kit2d", "b", None, None, None,
         "FAIL  rule (b): no raw site outside PENDING",
         ("kit2d/dmcp_probe_b.py",

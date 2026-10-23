@@ -63,6 +63,21 @@ SNIPPET = 90
 """How much of the source line a site prints."""
 
 _IMPORT_RE = re.compile(r"^\s*(?:import|from)\s+(%s)\b" % "|".join(MODULES))
+
+
+def _import_re(home):
+    """`_IMPORT_RE`, plus the forms qualified by the host project `home`:
+    `import <home>.mcp`, `from <home>.mcp import x`, `from <home> import mcp`.
+
+    The host has no `__init__.py`, so with `tools/` on `sys.path` it imports
+    as a namespace package and reaches the same modules (CORR-DMCP-024).
+    """
+    if not home:
+        return _IMPORT_RE
+    mods, host = "|".join(MODULES), re.escape(home)
+    return re.compile(r"^\s*(?:(?:import|from)\s+(?:%s\.)?(?:%s)\b"
+                      r"|from\s+%s\s+import\s+.*\b(?:%s)\b)"
+                      % (host, mods, host, mods))
 _CLIENT_RE = re.compile(r"(?<![\w.])(?:\w+\.)?client\.call\(|(?<![\w])Client\(")
 _SYSPATH_RE = re.compile(r"sys\.path\.insert\(")
 
@@ -109,13 +124,23 @@ def _snippet(lines, lineno):
     return text if len(text) <= SNIPPET else text[:SNIPPET - 3] + "..."
 
 
-def _imports_module(node):
-    """Whether an import statement brings in one of the emulator modules."""
+def _imports_module(node, home=None):
+    """Whether an import statement brings in one of the emulator modules,
+    bare or qualified by the host project `home` (see `_import_re`)."""
+    def names_one(dotted):
+        parts = dotted.split(".")
+        return parts[0] in MODULES or (
+            home is not None and parts[0] == home and len(parts) > 1
+            and parts[1] in MODULES)
+
     if isinstance(node, ast.Import):
-        return any(a.name.split(".")[0] in MODULES for a in node.names)
+        return any(names_one(a.name) for a in node.names)
     if isinstance(node, ast.ImportFrom):
-        return node.level == 0 and bool(node.module) and \
-            node.module.split(".")[0] in MODULES
+        if node.level != 0 or not node.module:
+            return False
+        return names_one(node.module) or (
+            home is not None and node.module == home
+            and any(a.name in MODULES for a in node.names))
     return False
 
 
@@ -191,12 +216,13 @@ def _names_project(text, projects):
         r"(?i)(?<![a-z0-9])%s(?![a-z0-9])" % re.escape(p), text))
 
 
-def _sites_ast(tree, source, lines, project, targets, own_module, is_module):
+def _sites_ast(tree, source, lines, project, targets, own_module, is_module,
+               home=None):
     sites = []
     bindings = None
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
-            if not is_module and _imports_module(node):
+            if not is_module and _imports_module(node, home):
                 sites.append((node.lineno, "import"))
         elif isinstance(node, ast.Call):
             if _is_client_call(node):
@@ -211,11 +237,12 @@ def _sites_ast(tree, source, lines, project, targets, own_module, is_module):
     return sites
 
 
-def _sites_regex(lines, project, targets, own_module, is_module):
+def _sites_regex(lines, project, targets, own_module, is_module, home=None):
     sites = []
+    import_re = _import_re(home)
     for i, line in enumerate(lines, 1):
         code = line.split("#", 1)[0]
-        if not is_module and _IMPORT_RE.match(code):
+        if not is_module and import_re.match(code):
             sites.append((i, "import"))
         if own_module != CLIENT_MODULE:
             for _ in _CLIENT_RE.finditer(code):
@@ -250,9 +277,9 @@ def audit(root=None):
         if project in targets or project == TOP:
             continue
         if tree is not None:
-            hit = any(_imports_module(n) for n in ast.walk(tree))
+            hit = any(_imports_module(n, home) for n in ast.walk(tree))
         else:
-            hit = any(_IMPORT_RE.match(l) for l in source.splitlines())
+            hit = any(_import_re(home).match(l) for l in source.splitlines())
         if hit:
             targets.add(project)
 
@@ -269,11 +296,11 @@ def audit(root=None):
         is_module = own_module in MODULES
         if tree is not None:
             found = _sites_ast(tree, source, lines, project, targets,
-                               own_module, is_module)
+                               own_module, is_module, home)
         else:
             unparsed.append(os.path.relpath(path, base))
             found = _sites_regex(lines, project, targets, own_module,
-                                 is_module)
+                                 is_module, home)
         for lineno, category in sorted(found):
             sites.append({
                 "project": project,
@@ -425,6 +452,24 @@ def self_check(root=None) -> list:
         expect("one site of every category, inline import and resolved "
                "sys.path target included",
                doc["by_category"], {"import": 1, "client": 3, "sys.path": 1})
+
+        # the host imports as a namespace package: qualified forms count too
+        qualified = dict(clean)
+        forms = ("import emu.mcp\n"
+                 "from emu import fork\n"
+                 "from emu.savestate import read\n"
+                 "import emu\n")
+        qualified["other/q.py"] = forms
+        qualified["other/r.py"] = forms + "def (:\n"
+        tree = os.path.join(scratch, "qualified")
+        _plant(tree, qualified)
+        doc = audit(tree)
+        expect("imports qualified by the host count, parsed or not "
+               "(CORR-DMCP-024)",
+               sorted((s["file"].rsplit("/", 1)[-1], s["line"])
+                      for s in doc["sites"]),
+               [("q.py", 1), ("q.py", 2), ("q.py", 3),
+                ("r.py", 1), ("r.py", 2), ("r.py", 3)])
 
         # a file that does not parse falls back to the line regexes
         broken = dict(clean)
