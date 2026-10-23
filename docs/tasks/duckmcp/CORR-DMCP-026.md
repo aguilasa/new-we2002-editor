@@ -13,8 +13,9 @@ A rota `title` do `tools/pes2/drive.py` — a que dirige o **AppImage oficial** 
 (`tools/pes2/drive.py:167`) e sai com `DRIVE FAILED`. O quadro mais próximo que ela vê tem média 0,160,
 longe da faixa medida (0,5502 a 0,5528). A janela é achada e capturada, então não é display nem
 `XAUTHORITY`. O defeito é anterior à DMCP-TASK-20: falha igual na HEAD `e2dbefe2`, antes da migração, e
-na árvore entregue por ela. As outras rotas do `drive.py` (`main-menu`, `team-select`, `edit`) passam
-pelo título e ficam presas no mesmo ponto.
+na árvore entregue por ela. Pelo código, as outras rotas do `drive.py`
+(`main-menu`, `team-select`, `edit`) esperam a mesma assinatura (`drive.py:566`) e devem parar no
+mesmo ponto — leitura, não medido.
 
 ## Evidência
 
