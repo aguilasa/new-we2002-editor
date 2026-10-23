@@ -73,3 +73,7 @@ OK
 $ python3 tools/duckmcp/selftest.py 2>&1 | tail -1
 duckmcp_selftest: 435 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `e3bb6449` (2026-10-23): docs(pes2): name tools/looks/confront.py among who_writes re-export callers
+  - Files (`git show --name-status e3bb6449`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-028.md`
+    - `M tools/pes2/who_writes.py`
