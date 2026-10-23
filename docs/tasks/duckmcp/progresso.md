@@ -114,40 +114,40 @@ graph TD
 ## Tasks
 
 <!-- rite:begin tasks -->
-| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [DMCP-TASK-01](/docs/tasks/duckmcp/01-esqueleto.md) | Esqueleto de tools/duckmcp/: __init__, errors.py, env.py e duckmcp_selftest | 0 | infra | — | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-02](/docs/tasks/duckmcp/02-audit.md) | `audit.py` — os sítios crus de MCP por projeto, o número do antes | 0 | ferramenta | DMCP-TASK-01 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-03](/docs/tasks/duckmcp/03-regras-de-desenho.md) | Regras de desenho (a), (c), (d) no selftest, e o `controls.py` da lib | 0 | verificação | DMCP-TASK-01, DMCP-TASK-02 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-04](/docs/tasks/duckmcp/04-fechamento-fase-0.md) | Fechamento da Fase 0 — o esqueleto | 0 | closing | DMCP-TASK-01, DMCP-TASK-02, DMCP-TASK-03 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-05](/docs/tasks/duckmcp/05-client.md) | `client.py` a partir do `mcp.py` de `f21182ea`, com servidor de teste | 1 | implementação | DMCP-TASK-04 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-06](/docs/tasks/duckmcp/06-cli-e-shim-mcp.md) | `cli.py list/status/call`, e `tools/pes2/mcp.py` vira shim | 1 | implementação | DMCP-TASK-05 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-07](/docs/tasks/duckmcp/07-fechamento-fase-1.md) | Fechamento da Fase 1 — o transporte | 1 | closing | DMCP-TASK-05, DMCP-TASK-06 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-08](/docs/tasks/duckmcp/08-fork.md) | `fork.py` agnóstico de jogo — janela pelo PID, título opcional, `hide_window` e `size_window` | 2 | implementação | DMCP-TASK-07 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-09](/docs/tasks/duckmcp/09-cli-fork-e-lancadores.md) | `cli.py launch/kill/status/recipe/which`, shim do `pes2/fork.py`, e os lançadores apontados | 2 | implementação | DMCP-TASK-08 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-10](/docs/tasks/duckmcp/10-duckmcp-live.md) | `duckmcp_live` — subir o fork com um `.cue` qualquer, andar, ler e matar | 2 | verificação | DMCP-TASK-09 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-11](/docs/tasks/duckmcp/11-fechamento-fase-2.md) | Fechamento da Fase 2 — o lançador | 2 | closing | DMCP-TASK-08, DMCP-TASK-09, DMCP-TASK-10 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-12](/docs/tasks/duckmcp/12-session.md) | `buttons.py` e `session.py` — a sessão, com `game()` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-13](/docs/tasks/duckmcp/13-hardware-e-pixels.md) | `psx.py`, `gpu.py`, `png.py` e `vram.py` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-14](/docs/tasks/duckmcp/14-savestate.md) | `savestate.py` movido para a lib, com shim no `pes2` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-15](/docs/tasks/duckmcp/15-fechamento-fase-3.md) | Fechamento da Fase 3 — as primitivas | 3 | closing | DMCP-TASK-12, DMCP-TASK-13, DMCP-TASK-14 | done | 2026-10-22 | 2026-10-22 |
-| [DMCP-TASK-16](/docs/tasks/duckmcp/16-debug.md) | `debug.py` — uma espera, breakpoints que sempre limpam, `who_writes` e watches | 4 | implementação | DMCP-TASK-15 | done | 2026-10-23 | 2026-10-23 |
-| [DMCP-TASK-17](/docs/tasks/duckmcp/17-regra-b.md) | Regra (b) como gate, e os controles da lib completos | 4 | verificação | DMCP-TASK-16 | done | 2026-10-23 | 2026-10-23 |
-| [DMCP-TASK-18](/docs/tasks/duckmcp/18-fechamento-fase-4.md) | Fechamento da Fase 4 — a depuração | 4 | closing | DMCP-TASK-16, DMCP-TASK-17 | pending | — | — |
-| [DMCP-TASK-19](/docs/tasks/duckmcp/19-pes2-mcp-drive-e-pad.md) | `pes2`: `mcp_drive.py` e `pad.py` sobre `Session` | 5 | implementação | DMCP-TASK-18 | pending | — | — |
-| [DMCP-TASK-20](/docs/tasks/duckmcp/20-pes2-who-writes-e-drive.md) | `pes2`: `who_writes.py`, `drive.py` e `selftest.py` sobre `debug` e `env` | 5 | implementação | DMCP-TASK-18 | pending | — | — |
-| [DMCP-TASK-21](/docs/tasks/duckmcp/21-fechamento-fase-5.md) | Fechamento da Fase 5 — a migração do pes2 | 5 | closing | DMCP-TASK-19, DMCP-TASK-20 | pending | — | — |
-| [DMCP-TASK-22](/docs/tasks/duckmcp/22-looks-oracle-session.md) | `looks`: `Oracle` sobre `Session`, e o `OneSession` some | 6 | implementação | DMCP-TASK-18 | pending | — | — |
-| [DMCP-TASK-23](/docs/tasks/duckmcp/23-looks-breakpoints.md) | `looks`: esperas e laços de breakpoint sobre `debug` | 6 | implementação | DMCP-TASK-22 | pending | — | — |
-| [DMCP-TASK-24](/docs/tasks/duckmcp/24-fechamento-fase-6.md) | Fechamento da Fase 6 — a migração do looks | 6 | closing | DMCP-TASK-22, DMCP-TASK-23 | pending | — | — |
-| [DMCP-TASK-25](/docs/tasks/duckmcp/25-kits-oracle.md) | `kits`: `dump_slot`, `matrix_stops`, `pose_capture`, `read_frame` e `vram` sobre a lib | 7 | implementação | DMCP-TASK-24 | pending | — | — |
-| [DMCP-TASK-26](/docs/tasks/duckmcp/26-kits-controles.md) | `kits`: controles, `COPIED` e monkeypatch reapontados | 7 | verificação | DMCP-TASK-25 | pending | — | — |
-| [DMCP-TASK-27](/docs/tasks/duckmcp/27-fechamento-fase-7.md) | Fechamento da Fase 7 — a migração do kits | 7 | closing | DMCP-TASK-25, DMCP-TASK-26 | pending | — | — |
-| [DMCP-TASK-28](/docs/tasks/duckmcp/28-documentacao.md) | Documentação: `CLAUDE.md`, a §6.11 do PES2 e a decisão no `perfil-kit2d.md` | 8 | documentação | DMCP-TASK-21, DMCP-TASK-24, DMCP-TASK-27 | pending | — | — |
-| [DMCP-TASK-29](/docs/tasks/duckmcp/29-fechamento-fase-8.md) | Fechamento da Fase 8 — a documentação | 8 | closing | DMCP-TASK-28 | pending | — | — |
-| [DMCP-TASK-30](/docs/tasks/duckmcp/30-apagar-shims.md) | Apagar os shims, e o `audit.py` em zero | 9 | implementação | DMCP-TASK-29 | pending | — | — |
-| [DMCP-TASK-31](/docs/tasks/duckmcp/31-verificacao-final.md) | Verificação final: `duckmcp_live` em dois jogos e a bateria do §5.2 | 9 | verificação | DMCP-TASK-30 | pending | — | — |
-| [DMCP-TASK-32](/docs/tasks/duckmcp/32-fechamento-fase-9.md) | Fechamento da Fase 9 — o fechamento do ciclo | 9 | closing | DMCP-TASK-30, DMCP-TASK-31 | pending | — | — |
+| ID | Title | Phase | Type | Depends on | Status | Done on | Reviewed on | Review |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [DMCP-TASK-01](/docs/tasks/duckmcp/01-esqueleto.md) | Esqueleto de tools/duckmcp/: __init__, errors.py, env.py e duckmcp_selftest | 0 | infra | — | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-02](/docs/tasks/duckmcp/02-audit.md) | `audit.py` — os sítios crus de MCP por projeto, o número do antes | 0 | ferramenta | DMCP-TASK-01 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-03](/docs/tasks/duckmcp/03-regras-de-desenho.md) | Regras de desenho (a), (c), (d) no selftest, e o `controls.py` da lib | 0 | verificação | DMCP-TASK-01, DMCP-TASK-02 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-04](/docs/tasks/duckmcp/04-fechamento-fase-0.md) | Fechamento da Fase 0 — o esqueleto | 0 | closing | DMCP-TASK-01, DMCP-TASK-02, DMCP-TASK-03 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-05](/docs/tasks/duckmcp/05-client.md) | `client.py` a partir do `mcp.py` de `f21182ea`, com servidor de teste | 1 | implementação | DMCP-TASK-04 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-06](/docs/tasks/duckmcp/06-cli-e-shim-mcp.md) | `cli.py list/status/call`, e `tools/pes2/mcp.py` vira shim | 1 | implementação | DMCP-TASK-05 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-07](/docs/tasks/duckmcp/07-fechamento-fase-1.md) | Fechamento da Fase 1 — o transporte | 1 | closing | DMCP-TASK-05, DMCP-TASK-06 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-08](/docs/tasks/duckmcp/08-fork.md) | `fork.py` agnóstico de jogo — janela pelo PID, título opcional, `hide_window` e `size_window` | 2 | implementação | DMCP-TASK-07 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-09](/docs/tasks/duckmcp/09-cli-fork-e-lancadores.md) | `cli.py launch/kill/status/recipe/which`, shim do `pes2/fork.py`, e os lançadores apontados | 2 | implementação | DMCP-TASK-08 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-10](/docs/tasks/duckmcp/10-duckmcp-live.md) | `duckmcp_live` — subir o fork com um `.cue` qualquer, andar, ler e matar | 2 | verificação | DMCP-TASK-09 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-11](/docs/tasks/duckmcp/11-fechamento-fase-2.md) | Fechamento da Fase 2 — o lançador | 2 | closing | DMCP-TASK-08, DMCP-TASK-09, DMCP-TASK-10 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-12](/docs/tasks/duckmcp/12-session.md) | `buttons.py` e `session.py` — a sessão, com `game()` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-13](/docs/tasks/duckmcp/13-hardware-e-pixels.md) | `psx.py`, `gpu.py`, `png.py` e `vram.py` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-14](/docs/tasks/duckmcp/14-savestate.md) | `savestate.py` movido para a lib, com shim no `pes2` | 3 | implementação | DMCP-TASK-11 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-15](/docs/tasks/duckmcp/15-fechamento-fase-3.md) | Fechamento da Fase 3 — as primitivas | 3 | closing | DMCP-TASK-12, DMCP-TASK-13, DMCP-TASK-14 | done | 2026-10-22 | 2026-10-22 | approved |
+| [DMCP-TASK-16](/docs/tasks/duckmcp/16-debug.md) | `debug.py` — uma espera, breakpoints que sempre limpam, `who_writes` e watches | 4 | implementação | DMCP-TASK-15 | done | 2026-10-23 | 2026-10-23 | approved |
+| [DMCP-TASK-17](/docs/tasks/duckmcp/17-regra-b.md) | Regra (b) como gate, e os controles da lib completos | 4 | verificação | DMCP-TASK-16 | done | 2026-10-23 | 2026-10-23 | approved |
+| [DMCP-TASK-18](/docs/tasks/duckmcp/18-fechamento-fase-4.md) | Fechamento da Fase 4 — a depuração | 4 | closing | DMCP-TASK-16, DMCP-TASK-17 | pending | — | — | — |
+| [DMCP-TASK-19](/docs/tasks/duckmcp/19-pes2-mcp-drive-e-pad.md) | `pes2`: `mcp_drive.py` e `pad.py` sobre `Session` | 5 | implementação | DMCP-TASK-18 | pending | — | — | — |
+| [DMCP-TASK-20](/docs/tasks/duckmcp/20-pes2-who-writes-e-drive.md) | `pes2`: `who_writes.py`, `drive.py` e `selftest.py` sobre `debug` e `env` | 5 | implementação | DMCP-TASK-18 | pending | — | — | — |
+| [DMCP-TASK-21](/docs/tasks/duckmcp/21-fechamento-fase-5.md) | Fechamento da Fase 5 — a migração do pes2 | 5 | closing | DMCP-TASK-19, DMCP-TASK-20 | pending | — | — | — |
+| [DMCP-TASK-22](/docs/tasks/duckmcp/22-looks-oracle-session.md) | `looks`: `Oracle` sobre `Session`, e o `OneSession` some | 6 | implementação | DMCP-TASK-18 | pending | — | — | — |
+| [DMCP-TASK-23](/docs/tasks/duckmcp/23-looks-breakpoints.md) | `looks`: esperas e laços de breakpoint sobre `debug` | 6 | implementação | DMCP-TASK-22 | pending | — | — | — |
+| [DMCP-TASK-24](/docs/tasks/duckmcp/24-fechamento-fase-6.md) | Fechamento da Fase 6 — a migração do looks | 6 | closing | DMCP-TASK-22, DMCP-TASK-23 | pending | — | — | — |
+| [DMCP-TASK-25](/docs/tasks/duckmcp/25-kits-oracle.md) | `kits`: `dump_slot`, `matrix_stops`, `pose_capture`, `read_frame` e `vram` sobre a lib | 7 | implementação | DMCP-TASK-24 | pending | — | — | — |
+| [DMCP-TASK-26](/docs/tasks/duckmcp/26-kits-controles.md) | `kits`: controles, `COPIED` e monkeypatch reapontados | 7 | verificação | DMCP-TASK-25 | pending | — | — | — |
+| [DMCP-TASK-27](/docs/tasks/duckmcp/27-fechamento-fase-7.md) | Fechamento da Fase 7 — a migração do kits | 7 | closing | DMCP-TASK-25, DMCP-TASK-26 | pending | — | — | — |
+| [DMCP-TASK-28](/docs/tasks/duckmcp/28-documentacao.md) | Documentação: `CLAUDE.md`, a §6.11 do PES2 e a decisão no `perfil-kit2d.md` | 8 | documentação | DMCP-TASK-21, DMCP-TASK-24, DMCP-TASK-27 | pending | — | — | — |
+| [DMCP-TASK-29](/docs/tasks/duckmcp/29-fechamento-fase-8.md) | Fechamento da Fase 8 — a documentação | 8 | closing | DMCP-TASK-28 | pending | — | — | — |
+| [DMCP-TASK-30](/docs/tasks/duckmcp/30-apagar-shims.md) | Apagar os shims, e o `audit.py` em zero | 9 | implementação | DMCP-TASK-29 | pending | — | — | — |
+| [DMCP-TASK-31](/docs/tasks/duckmcp/31-verificacao-final.md) | Verificação final: `duckmcp_live` em dois jogos e a bateria do §5.2 | 9 | verificação | DMCP-TASK-30 | pending | — | — | — |
+| [DMCP-TASK-32](/docs/tasks/duckmcp/32-fechamento-fase-9.md) | Fechamento da Fase 9 — o fechamento do ciclo | 9 | closing | DMCP-TASK-30, DMCP-TASK-31 | pending | — | — | — |
 <!-- rite:end -->
 
 ## Notes
