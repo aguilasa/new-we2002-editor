@@ -26,5 +26,5 @@
 | [CORR-DMCP-021](/docs/tasks/duckmcp/CORR-DMCP-021.md) | Atribuir as entradas PENDING do replay.py à task que o declara | DMCP-TASK-17 | medium | done | 2026-10-23 |
 | [CORR-DMCP-022](/docs/tasks/duckmcp/CORR-DMCP-022.md) | Plantar controles para as três asserções da regra (b) sem vigia | DMCP-TASK-17 | medium | done | 2026-10-23 |
 | [CORR-DMCP-023](/docs/tasks/duckmcp/CORR-DMCP-023.md) | Declarar duckmcp/selftest.py nas tasks de migração que a PENDING amarra | DMCP-TASK-17 | medium | done | 2026-10-23 |
-| [CORR-DMCP-024](/docs/tasks/duckmcp/CORR-DMCP-024.md) | Fazer a regra (b) pegar imports qualificados de mcp, fork e savestate | DMCP-TASK-18 | medium | in-progress | — |
+| [CORR-DMCP-024](/docs/tasks/duckmcp/CORR-DMCP-024.md) | Fazer a regra (b) pegar imports qualificados de mcp, fork e savestate | DMCP-TASK-18 | medium | done | 2026-10-23 |
 <!-- rite:end -->

@@ -98,3 +98,10 @@ duckmcp_controls: 41 control(s), 41 red as required; 22/22 cover rules (a) to (d
 
 Na contagem 208 da primeira linha, o selftest dá 434 checks porque a cópia foi feita antes do caso novo
 do `self_check`. Na árvore entregue são 435.
+- **Closed** — commit `f5f3771f` (2026-10-23): fix(duckmcp): count emulator imports qualified by the host package in rule (b)
+  - Files (`git show --name-status f5f3771f`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-024.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/audit.py`
+    - `M tools/duckmcp/controls.py`
