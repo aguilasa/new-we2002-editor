@@ -93,3 +93,7 @@ OK
 $ python3 tools/duckmcp/selftest.py 2>&1 | tail -1
 duckmcp_selftest: 435 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `256200da` (2026-10-23): fix(pes2): mcp_drive --display defaults through duckmcp.env.display()
+  - Files (`git show --name-status 256200da`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-027.md`
+    - `M tools/pes2/mcp_drive.py`
