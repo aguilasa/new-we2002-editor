@@ -192,7 +192,13 @@ command -v import   >/dev/null || skip "ImageMagick import is missing"
 command -v identify >/dev/null || skip "ImageMagick identify is missing"
 command -v xdotool  >/dev/null || skip "xdotool is missing"
 DPY_="${DUCKSTATION_DISPLAY:-${PES2_DISPLAY:-:98}}"   # env.display()'s precedence
-DISPLAY="$DPY_" XAUTHORITY= xdotool getdisplaygeometry >/dev/null 2>&1 ||
+# env.x_env()'s rule: XAUTHORITY is emptied only on :98, whose Xvfb runs
+# without -auth; any other display keeps the cookie it was given.
+x_env() {   # x_env <display> -- export DISPLAY, and blank XAUTHORITY on :98
+    export DISPLAY="$1"
+    if [ "$1" = ":98" ]; then export XAUTHORITY=""; fi
+}
+( x_env "$DPY_"; xdotool getdisplaygeometry >/dev/null 2>&1 ) ||
     skip "no X server on $DPY_"
 
 mkdir -p "$SHOTDIR"
@@ -206,8 +212,7 @@ WIN="$(sed -n 's/^WINDOW=//p' <<<"$OUT")"
 DPY="$(sed -n 's/^DISPLAY=//p' <<<"$OUT")"
 [ -n "$WIN" ] || { echo "no window id in the launcher output" >&2; exit 1; }
 
-export DISPLAY="$DPY"
-export XAUTHORITY=""
+x_env "$DPY"
 
 # Capture the root window, not the game window. `import -window <id>` fails
 # with "Resource temporarily unavailable" whenever anything overlaps it --

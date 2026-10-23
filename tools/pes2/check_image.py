@@ -27,6 +27,10 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _TOOLS not in sys.path:                                   # for duckmcp
+    sys.path.insert(0, _TOOLS)
+from duckmcp.errors import SKIP                              # noqa: E402
 import iso                                                   # noqa: E402
 import tables                                                # noqa: E402
 import faq_check                                             # noqa: E402
@@ -40,8 +44,6 @@ import bin_archive                                           # noqa: E402
 import lang_map                                              # noqa: E402
 import tname                                                 # noqa: E402
 import asset_write                                           # noqa: E402
-
-SKIP = 77
 
 
 class Args:

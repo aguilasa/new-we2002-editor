@@ -33,20 +33,19 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SKIP = 77
+if os.path.dirname(HERE) not in sys.path:        # tools/, for duckmcp
+    sys.path.insert(0, os.path.dirname(HERE))
+
+# `SKIP`, `Skip` and `Fail` are the lib's (DMCP-TASK-20), re-exported: the
+# routes raise them, `mcp_drive.py` imports them from here, and a caller that
+# catches `duckmcp.errors.Fail` catches what a route raises.
+from duckmcp import env                                      # noqa: E402
+from duckmcp.errors import SKIP, Fail, Skip                  # noqa: E402,F401
 
 try:
     from PIL import Image as PILImage
 except ImportError:                                          # pragma: no cover
     PILImage = None
-
-
-class Skip(Exception):
-    """The machine cannot run this; ctest should read it as skipped."""
-
-
-class Fail(Exception):
-    """The run reached a state the route did not allow."""
 
 
 def require_pil():
@@ -183,11 +182,11 @@ TEAM_SELECT = (0.1685, 0.2488)
 # like roms/ and the boot frames do. What is versioned is the route that
 # makes one.
 SERIAL = "SLES-03957"
-STATE_DIR = os.path.expanduser("~/.local/share/duckstation/savestates")
+STATE_DIR = env.savestates_dir()
 
 
 def state_path(slot=1):
-    return os.path.join(STATE_DIR, f"{SERIAL}_{slot}.sav")
+    return env.state_path(SERIAL, slot)
 
 
 # --- frames ------------------------------------------------------------
@@ -247,7 +246,7 @@ class Session:
     def __init__(self, cue, out_dir, display=None, verbose=True):
         self.cue = cue
         self.out_dir = out_dir
-        self.display = display or os.environ.get("PES2_DISPLAY", ":98")
+        self.display = display or env.display()
         self.verbose = verbose
         self.window = None
         self.shots = []
@@ -256,10 +255,14 @@ class Session:
     # -- lifecycle --
 
     def __enter__(self):
-        env = dict(os.environ, PES2_IMAGE=self.cue,
-                   PES2_DISPLAY=self.display)
+        # Both spellings of the display: the launcher reads the new name
+        # first, so an inherited DUCKSTATION_DISPLAY would otherwise beat
+        # the one this session was given.
+        child = dict(os.environ, PES2_IMAGE=self.cue,
+                     DUCKSTATION_DISPLAY=self.display,
+                     PES2_DISPLAY=self.display)
         launcher = os.path.join(HERE, "run_duckstation.sh")
-        out = subprocess.run([launcher], env=env, capture_output=True,
+        out = subprocess.run([launcher], env=child, capture_output=True,
                              text=True)
         if out.returncode != 0:
             raise Fail("the launcher failed:\n" + (out.stderr or out.stdout))
@@ -291,8 +294,8 @@ class Session:
     # then press without --window.
 
     def _xdotool(self, *args):
-        env = dict(os.environ, DISPLAY=self.display, XAUTHORITY="")
-        return subprocess.run(["xdotool", *args], env=env,
+        return subprocess.run(["xdotool", *args],
+                              env=env.x_env(self.display),
                               capture_output=True, text=True)
 
     def _aim(self):
@@ -409,9 +412,9 @@ class Session:
             path = os.path.join(self.out_dir, f"{label}.png")
         else:
             path = os.path.join(self._tmp, f"f{time.time():.3f}.png")
-        env = dict(os.environ, DISPLAY=self.display, XAUTHORITY="")
         r = subprocess.run(["import", "-window", self.window, path],
-                           env=env, capture_output=True, text=True)
+                           env=env.x_env(self.display), capture_output=True,
+                           text=True)
         if r.returncode != 0 or not os.path.exists(path):
             raise Fail(f"capture failed: {r.stderr.strip()}")
         frame = Frame(path)
@@ -767,20 +770,19 @@ def preflight(cue, display):
     require_pil()
     if not cue:
         raise Fail("usage: drive.py <copy.cue> --screen NAME --out-dir DIR")
-    if "/roms/" in os.path.abspath(cue):
+    if env.is_roms(cue):
         raise Fail("refusing to boot roms/ -- copy first")
     if not os.path.isfile(cue):
         raise Skip(f"no image at {cue}")
-    appimage = os.environ.get(
-        "PES2_DUCKSTATION",
-        os.path.expanduser("~/Applications/DuckStation-x64.AppImage"))
-    if not os.path.isfile(appimage):
+    # The official AppImage stays this driver's binary (PLAN-DUCKMCP-PY §0);
+    # only where its path is read from moved.
+    if not os.path.isfile(env.appimage()):
         raise Skip("no DuckStation AppImage")
     for binary in ("import", "xdotool"):
         if shutil.which(binary) is None:
             raise Skip(f"{binary} is missing")
-    env = dict(os.environ, DISPLAY=display, XAUTHORITY="")
-    if subprocess.run(["xdotool", "getdisplaygeometry"], env=env,
+    if subprocess.run(["xdotool", "getdisplaygeometry"],
+                      env=env.x_env(display),
                       capture_output=True).returncode != 0:
         raise Skip(f"no X server on {display}")
 
@@ -790,7 +792,7 @@ def main(argv=None):
     ap.add_argument("image", nargs="?", help=".cue of a working copy")
     ap.add_argument("--screen", default=os.environ.get("PES2_SCREEN"))
     ap.add_argument("--out-dir", default=os.environ.get("PES2_OUTDIR"))
-    ap.add_argument("--display", default=os.environ.get("PES2_DISPLAY", ":98"))
+    ap.add_argument("--display", default=env.display())
     ap.add_argument("--save-state", type=int, metavar="SLOT", nargs="?",
                     const=1, default=None,
                     help="park a save state on the screen the route reaches")

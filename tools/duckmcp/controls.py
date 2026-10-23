@@ -185,17 +185,23 @@ CONTROLS = (
         "    ('DMCP-TASK-99', 'tools/kit2d/selftest.py', 'sys.path',\n",
         "FAIL  rule (b): every PENDING entry names a migration task", None,
         "an entry no task of phases 5 to 9 removes: it would never leave"),
+    # The target is an entry of DMCP-TASK-30, the last migration, so the
+    # control outlives every task before it (it aimed at a who_writes.py
+    # entry until DMCP-TASK-20 removed it). Every DMCP-TASK-30 entry counts
+    # 1, so the split is 1 + 0: the multiset is still unchanged -- the
+    # new-site and stale-entry lines stay green -- and the zero-count line
+    # goes red beside the one this control demands.
     Control(
         "b-duplicate-key", "b", "selftest.py",
-        "    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',\n"
-        "     'client.call(\"breakpoint\", action=\"clear\")', 2),\n",
-        "    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',\n"
-        "     'client.call(\"breakpoint\", action=\"clear\")', 1),\n"
-        "    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',\n"
-        "     'client.call(\"breakpoint\", action=\"clear\")', 1),\n",
+        "    ('DMCP-TASK-30', 'tools/kits/core/tex.py', 'sys.path',\n"
+        "     'sys.path.insert(0, _path)', 1),\n",
+        "    ('DMCP-TASK-30', 'tools/kits/core/tex.py', 'sys.path',\n"
+        "     'sys.path.insert(0, _path)', 1),\n"
+        "    ('DMCP-TASK-30', 'tools/kits/core/tex.py', 'sys.path',\n"
+        "     'sys.path.insert(0, _path)', 0),\n",
         "FAIL  rule (b): no key appears twice in PENDING", None,
-        "one key split over two entries: the multiset is unchanged, so only "
-        "the duplicate check sees it"),
+        "one key split over two entries: the multiset is unchanged, so the "
+        "multiset lines cannot see it"),
     Control(
         "b-zero-count", "b", "selftest.py",
         "    ('DMCP-TASK-30', 'tools/kit2d/selftest.py', 'sys.path',\n"

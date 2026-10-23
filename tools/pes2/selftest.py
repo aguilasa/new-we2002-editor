@@ -228,9 +228,10 @@ def main():
     # no emulator in sight -- which is exactly what the shell version it
     # replaced could not do, and why the region comparison that finally
     # told two screens apart had no test behind it for a day.
-    # Import outside the block, for the reason spelled out at the savestate
-    # block below: an `except` that names the module cannot run when the
-    # import is what failed.
+    # The import stays *outside* the block whose `except` names the module:
+    # with it inside, a failed import leaves `drive` undefined when the
+    # interpreter evaluates `except drive.Skip`, which raises NameError while
+    # handling, and the sibling `except Exception` does not catch that.
     try:
         import drive                                          # noqa: E402
     except Exception as exc:                                  # noqa: BLE001
@@ -246,41 +247,19 @@ def main():
             bad += check("drive.py frame logic", False,
                          f"{type(exc).__name__}: {exc}")
 
-    # The save-state reader, on states built here. It needs neither an
-    # emulator nor a disc nor zstd -- the synthetic states are stored
-    # uncompressed -- so the only thing that can hold it back is numpy.
-    # The import stays *outside* the block whose `except` names the module.
-    # With it inside, a failed import leaves `savestate` undefined when the
-    # interpreter evaluates `except savestate.Skip`, which raises NameError
-    # while handling -- and the sibling `except Exception` does not catch
-    # that, because the exception escapes the whole try. The result was this
-    # self-test dying with a traceback instead of reporting the FAIL that
-    # very handler was written to give.
-    try:
-        import savestate                                      # noqa: E402
-    except Exception as exc:                                  # noqa: BLE001
-        bad += check("savestate.py reader, scan and guards", False,
-                     f"{type(exc).__name__}: {exc}")
-    else:
-        try:
-            failures = savestate.self_check(verbose=False)
-            bad += check("savestate.py reader, scan and guards", not failures,
-                         ", ".join(failures))
-        except savestate.Skip as why:
-            print(f"  ..   savestate.py skipped: {why}")
-        except Exception as exc:                              # noqa: BLE001
-            bad += check("savestate.py reader, scan and guards", False,
-                         f"{type(exc).__name__}: {exc}")
-
-    # The MCP client, its launcher and the routes written on them. All
-    # three run with no emulator: what they can prove here is the decoding,
-    # the thresholds and the red cases -- including the one that matters
-    # most day to day, that an absent server says "the fork is not running"
-    # instead of unrolling a urllib traceback.
-    for name, what in (("mcp", "mcp.py client, decoding and red cases"),
-                       ("fork", "fork.py paths, kill list and refusals"),
+    # What is still PES2's own and runs with no emulator: the launcher
+    # shim's PES2 defaults and seams, the MCP routes and their thresholds,
+    # and the who_writes command line.
+    #
+    # Not here any more (DMCP-TASK-20): the MCP client (`mcp.py`), the
+    # save-state reader (`savestate.py`) and the parsing and waits that
+    # `who_writes.py` used to check. They moved to `tools/duckmcp/`, and
+    # their checks run in `duckmcp/selftest.py` (`ctest -R duckmcp_selftest`);
+    # the two shims only forwarded to them, so running them here counted the
+    # lib's checks twice under a PES2 name.
+    for name, what in (("fork", "fork.py shim: PES2 defaults and seams"),
                        ("mcp_drive", "mcp_drive.py routes and thresholds"),
-                       ("who_writes", "who_writes.py addresses, stores and waits")):
+                       ("who_writes", "who_writes.py report and exit codes")):
         try:
             module = __import__(name)
             failures = module.self_check(verbose=False)
