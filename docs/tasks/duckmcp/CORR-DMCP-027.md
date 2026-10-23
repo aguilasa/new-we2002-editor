@@ -49,3 +49,47 @@ No `main()` do `tools/pes2/mcp_drive.py`: `ap.add_argument("--display", default=
 hoje e 0 depois do conserto; `python3 tools/pes2/selftest.py` continua `OK`.
 
 ## Log de Execução
+
+**Reprodução (2026-10-23, HEAD `b0c0cc77`, `rite reproduce --all --cycle duckmcp`):** REPRODUCED.
+
+```text
+$ grep -n 'add_argument("--display"' tools/pes2/mcp_drive.py tools/pes2/drive.py
+tools/pes2/mcp_drive.py:1276:    ap.add_argument("--display", default=os.environ.get("PES2_DISPLAY", ":98"))
+tools/pes2/drive.py:795:    ap.add_argument("--display", default=env.display())
+$ DUCKSTATION_DISPLAY=:97 PES2_DISPLAY= python3 -B -c "import sys; sys.path.insert(0,'tools'); from duckmcp import env; print('env.display ->', env.display())"
+env.display -> :97
+```
+
+A causa confere: o default do argparse sempre tem valor, então o `display=None → env.display()` do
+`Session` nunca é alcançado pelo `main()`.
+
+**Conserto:** o parser do `main()` virou `_parser()`, e o `--display` passou a
+`default=env.display()`, como no `drive.py`. O `self_check()` ganhou um check que põe
+`DUCKSTATION_DISPLAY=:97` e `PES2_DISPLAY=:96` no ambiente, lê o default de `_parser()` e exige
+`:97` (o ambiente é restaurado num `finally`).
+
+**Controle** — a linha velha plantada numa cópia de `tools/pes2` + `tools/duckmcp` no scratchpad:
+
+```text
+$ grep -n 'add_argument("--display"' tools/pes2/mcp_drive.py      # na cópia
+1293:    ap.add_argument("--display", default=os.environ.get("PES2_DISPLAY", ":98"))
+$ python3 tools/pes2/mcp_drive.py --self-check | grep -E "FAIL|SELF"   # na cópia
+  FAIL   --display defaults to env.display(), the new name first  (':96')
+SELF-CHECK FAILED
+exit 1
+```
+
+**Verificação** na árvore entregue:
+
+```text
+$ grep -nE 'add_argument\("--display", default=(None|env\.display\(\))\)' tools/pes2/mcp_drive.py; echo "exit $?"
+1293:    ap.add_argument("--display", default=env.display())
+exit 0
+$ python3 tools/pes2/mcp_drive.py --self-check | grep -E "display|SELF"
+  ok   --display defaults to env.display(), the new name first
+SELF-CHECK OK: routes, thresholds, regions, signatures
+$ python3 tools/pes2/selftest.py 2>&1 | tail -1
+OK
+$ python3 tools/duckmcp/selftest.py 2>&1 | tail -1
+duckmcp_selftest: 435 check(s) ran, 0 failure(s)
+```

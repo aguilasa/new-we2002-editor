@@ -1260,6 +1260,23 @@ def self_check(verbose=True):
           state_path(3) == env.state_path(SERIAL, 3)
           and state_path(3).endswith(f"{SERIAL}_3.sav"))
 
+    # --display defaults through the lib, so DUCKSTATION_DISPLAY wins over
+    # the legacy name, as it does in drive.py (CORR-DMCP-027).
+    saved = {k: os.environ.pop(k, None)
+             for k in ("DUCKSTATION_DISPLAY", "PES2_DISPLAY")}
+    try:
+        os.environ["DUCKSTATION_DISPLAY"] = ":97"
+        os.environ["PES2_DISPLAY"] = ":96"
+        default = _parser().get_default("display")
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+    check("--display defaults to env.display(), the new name first",
+          default == ":97", repr(default))
+
     if verbose:
         print("SELF-CHECK " + ("FAILED" if bad else
                                "OK: routes, thresholds, regions, signatures"))
@@ -1268,12 +1285,12 @@ def self_check(verbose=True):
 
 # --- entry point -------------------------------------------------------
 
-def main(argv=None):
+def _parser():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("image", nargs="?", help=".cue of a working copy")
     ap.add_argument("--screen", default=os.environ.get("PES2_SCREEN"))
     ap.add_argument("--out-dir", default=os.environ.get("PES2_OUTDIR"))
-    ap.add_argument("--display", default=os.environ.get("PES2_DISPLAY", ":98"))
+    ap.add_argument("--display", default=env.display())
     ap.add_argument("--save-state", type=int, metavar="SLOT", nargs="?",
                     const=1, default=None)
     ap.add_argument("--keep-alive", action="store_true",
@@ -1284,7 +1301,11 @@ def main(argv=None):
                          "park it there with --screen main-menu --keep-alive")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--self-check", action="store_true")
-    args = ap.parse_args(argv)
+    return ap
+
+
+def main(argv=None):
+    args = _parser().parse_args(argv)
 
     if args.list:
         for name in ROUTES:
