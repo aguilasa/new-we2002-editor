@@ -368,11 +368,11 @@ PENDING = (
      'return game.client.call("get_status").get("frame_number")', 1),
     ('DMCP-TASK-25', 'tools/kits/oracle.py', 'import',
      'import fork', 1),
-    # DMCP-TASK-26
-    ('DMCP-TASK-26', 'tools/kits/replay.py', 'import',
+    ('DMCP-TASK-25', 'tools/kits/replay.py', 'import',
      'import fork # tools/pes2', 1),
-    ('DMCP-TASK-26', 'tools/kits/replay.py', 'import',
+    ('DMCP-TASK-25', 'tools/kits/replay.py', 'import',
      'import savestate # tools/pes2', 1),
+    # DMCP-TASK-26
     ('DMCP-TASK-26', 'tools/kits/selftest.py', 'import',
      'import fork # tools/pes2, the shim over duckmcp.fork', 1),
     # DMCP-TASK-30

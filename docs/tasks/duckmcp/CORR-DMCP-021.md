@@ -65,3 +65,20 @@ PY
 Hoje imprime `[('DMCP-TASK-26', 'tools/kits/replay.py')]` e sai 1; depois tem de imprimir `[]` e sair 0.
 
 ## Log de Execução
+
+2026-10-23 — reproduzido: o laço da Verificação imprimia `[('DMCP-TASK-26', 'tools/kits/replay.py')]`.
+
+Conserto: no `PENDING` do `tools/duckmcp/selftest.py`, as duas entradas `import` do `kits/replay.py`
+passaram para o grupo da DMCP-TASK-25, que declara o arquivo. As Notas da `17-regra-b.md` ganharam a
+correção da frase do Log, que continua como estava porque é histórico. A asserção opcional, conferir
+os `files` da task dona dentro do selftest, não entrou: ela faria o gate depender do CLI do Rite.
+
+Verificação:
+
+```text
+$ cd tools/duckmcp && python3 - <<'PY' … (laço da Verificação)
+[]
+exit=0
+$ python3 tools/duckmcp/selftest.py --quiet
+duckmcp_selftest: 434 check(s) ran, 0 failure(s)
+```

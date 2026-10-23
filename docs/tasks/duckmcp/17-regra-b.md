@@ -24,6 +24,13 @@ A regra (b) existe como check com lista de pendências: os sítios que o `audit.
 
 ## Notes
 
+- **Correção (CORR-DMCP-021, 2026-10-23).** O Log abaixo diz que a `kits/replay.py` "não é nomeada por
+  nenhuma task de migração" e por isso deu as duas entradas dela à DMCP-TASK-26. Era falso: os
+  arquivos declarados da DMCP-TASK-25 são `tools/kits/oracle.py` e `tools/kits/replay.py`
+  (`rite context DMCP-TASK-25`), e os da 26 não incluem o `replay.py`. As duas entradas passaram para
+  a 25 no `PENDING` do `tools/duckmcp/selftest.py`. O dono de cada entrada se confere contra os
+  `files` da task no estado do Rite, não contra o título.
+
 ## Log de Execução
 
 ### 2026-10-23 — execução
