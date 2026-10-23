@@ -35,6 +35,14 @@ In this order:
    `save_state` waits for the file, and the fork is killed on exit only when
    the session launched it; then, here, importing `duckmcp.session` in a
    fresh interpreter loads no imaging library;
+5c. `debug.self_check()`, against a fake client: addresses, stores,
+   registers and the `wait_for_pause` reply shapes; a breakpoint that never
+   fires is a `Fail`, and so is the process dying mid-wait, citing pitfall
+   35; the poll interval is slept (0 allowed) and a nudge carries its
+   release; an exception inside `breakpoints` (and `vram_watch`) still
+   leaves `breakpoint clear` and `pause` as the last calls; `who_writes`
+   returns `pc`, `registers`, `rows`, `store`, `caller`; `stops` closes on
+   repetition; `watch_reads` reads `breakpoint list`;
 6. `audit.self_check()`: the audit of rule (b) over synthetic tools trees
    built in a temporary directory -- a clean one counts 0, one planted
    `import fork` counts 1, and each site category is seen once;
@@ -89,9 +97,9 @@ TOOLS_DIR = os.path.dirname(DUCKMCP_DIR)
 sys.path.insert(0, TOOLS_DIR)
 
 import duckmcp  # noqa: E402
-from duckmcp import (audit, buttons, cli, client, env, errors,  # noqa: E402
-                     fork, gpu, live, png, psx, savestate, session,
-                     vram)
+from duckmcp import (audit, buttons, cli, client, debug, env,  # noqa: E402
+                     errors, fork, gpu, live, png, psx, savestate,
+                     session, vram)
 
 JUDGES = ("selftest.py", "controls.py")
 """The files that hold the patterns of rule (c), and so are exempt from it."""
@@ -600,6 +608,7 @@ def main(argv=None):
     c.module("buttons", buttons.self_check)
     c.module("session", session.self_check)
     check_session_imports(c)
+    c.module("debug", debug.self_check)
     c.module("audit", audit.self_check)
     c.module("psx", psx.self_check)
     c.module("gpu", gpu.self_check)

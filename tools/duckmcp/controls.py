@@ -20,7 +20,10 @@ the controls of rule `client` break the transport itself and its liveness
 seam, and demand the assertion of `client.self_check()` or
 `fork.self_check()` that covers the broken behaviour; the control of rule
 `session` drops `duration_frames` from `Session.press` (pitfall 36) and
-demands the fake-client assertion of `session.self_check()`.
+demands the fake-client assertion of `session.self_check()`, and the controls
+of rule `debug` drop the clear from the `finally` of `debug.breakpoints` and
+the liveness check from `debug.wait_for_pause` (pitfall 35), each demanding
+its assertion of `debug.self_check()`.
 
 The last line says how many controls ran, how many went red as required,
 and the count per rule; the exit is 0 only when every one did.
@@ -264,6 +267,21 @@ CONTROLS = (
         '    except (Fail, NotRunning, ToolError) as exc:\n',
         'FAIL  live: a VRAM file that does not decode ends in a FAIL line', None,
         'a PngError escapes main as a traceback: the last line is no verdict'),
+    Control(
+        "breakpoint-not-cleared", "debug", "debug.py",
+        '        _quietly(client, "breakpoint", action="clear")\n',
+        '',
+        "FAIL  debug: an exception inside breakpoints still clears and pauses",
+        None,
+        "the finally of breakpoints without its clear: a failed run leaves a "
+        "breakpoint armed in the emulator the next run inherits"),
+    Control(
+        "wait-without-liveness", "debug", "debug.py",
+        "        if probe() is False:\n",
+        "        if False:\n",
+        "FAIL  debug: a death mid-wait is a Fail citing pitfall 35", None,
+        "the wait without its liveness check: a fork that died mid-wait "
+        "(pitfall 35) reads as a breakpoint that never fired"),
 )
 """Every control, in report order."""
 
