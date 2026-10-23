@@ -107,13 +107,21 @@ def _keysym(name):
     return name
 
 
-def load_pad(path=None):
-    """The [Pad1] bindings actually in force, as xdotool keysyms."""
-    path = path or os.path.expanduser(
-        "~/.local/share/duckstation/settings.ini")
-    pad = dict(DEFAULT_PAD)
+SETTINGS = os.path.expanduser("~/.local/share/duckstation/settings.ini")
+
+# The buttons the routes press. A binding of one of them to anything but the
+# keyboard is refused by `preflight` rather than replaced by the default:
+# the default key is then bound to nothing, and the route fails three
+# screens later on a message about the game (CORR-DMCP-029).
+ROUTE_BUTTONS = ("cross", "start", "up", "down")
+
+
+def _pad1(path=None):
+    """The [Pad1] section as {button: DuckStation value}; {} with no file."""
+    found = {}
     try:
-        with open(path, encoding="utf-8", errors="replace") as fh:
+        with open(path or SETTINGS, encoding="utf-8",
+                  errors="replace") as fh:
             section = None
             for line in fh:
                 line = line.strip()
@@ -123,14 +131,29 @@ def load_pad(path=None):
                 if section != "Pad1" or "=" not in line:
                     continue
                 key, _, value = (x.strip() for x in line.partition("="))
-                if not value.startswith("Keyboard/"):
-                    continue
-                button = key.lower()
-                if button in pad:
-                    pad[button] = _keysym(value.split("/", 1)[1])
+                found[key.lower()] = value
     except OSError:
         pass
+    return found
+
+
+def load_pad(path=None):
+    """The [Pad1] bindings actually in force, as xdotool keysyms. A button
+    the file does not bind to the keyboard keeps DuckStation's default key;
+    `foreign_bindings` is what says when that default is bound to nothing."""
+    pad = dict(DEFAULT_PAD)
+    for button, value in _pad1(path).items():
+        if button in pad and value.startswith("Keyboard/"):
+            pad[button] = _keysym(value.split("/", 1)[1])
     return pad
+
+
+def foreign_bindings(path=None, buttons=ROUTE_BUTTONS):
+    """The route buttons the file binds to something other than the
+    keyboard -- a controller, `SDL-0/Start` -- as {button: value}."""
+    pad1 = _pad1(path)
+    return {b: pad1[b] for b in buttons
+            if b in pad1 and pad1[b] and not pad1[b].startswith("Keyboard/")}
 
 
 PAD = load_pad()
@@ -789,6 +812,29 @@ def self_check():
             assert not matches(TITLE, *reading), \
                 f"the title signature took {what} {reading}"
 
+        # A [Pad1] on a controller is refused, not read as the defaults;
+        # one on the keyboard is read (CORR-DMCP-029).
+        sdl = os.path.join(tmp, "sdl.ini")
+        keys = os.path.join(tmp, "keys.ini")
+        with open(sdl, "w") as fh:
+            fh.write("[Pad1]\nCross = SDL-0/A\nStart = SDL-0/Start\n"
+                     "Up = SDL-0/DPadUp\nDown = SDL-0/DPadDown\n"
+                     "L3 = SDL-0/LeftStick\n[Pad2]\nStart = SDL-0/Start\n")
+        with open(keys, "w") as fh:
+            fh.write("[Pad1]\nCross = Keyboard/M\nStart = Keyboard/Enter\n"
+                     "Up = Keyboard/UpArrow\nDown = Keyboard/DownArrow\n"
+                     "L3 = SDL-0/LeftStick\n")
+        assert foreign_bindings(sdl) == {
+            "cross": "SDL-0/A", "start": "SDL-0/Start",
+            "up": "SDL-0/DPadUp", "down": "SDL-0/DPadDown"}, \
+            f"a controller [Pad1] read as {foreign_bindings(sdl)}"
+        assert foreign_bindings(keys) == {}, \
+            f"a keyboard [Pad1] refused: {foreign_bindings(keys)}"
+        assert load_pad(keys)["start"] == "Return" \
+            and load_pad(keys)["cross"] == "m", "a keyboard [Pad1] not read"
+        assert foreign_bindings(os.path.join(tmp, "absent.ini")) == {}, \
+            "no file must mean the defaults, not a refusal"
+
         for name in ("title", "main-menu", "team-select", "edit"):
             assert name in ROUTES, f"route {name} went missing"
         for button in ("cross", "down", "up", "start"):
@@ -821,6 +867,12 @@ def preflight(cue, display):
                       env=env.x_env(display),
                       capture_output=True).returncode != 0:
         raise Skip(f"no X server on {display}")
+    foreign = foreign_bindings()
+    if foreign:
+        raise Fail("[Pad1] of %s binds %s, not the keyboard; xdotool can "
+                   "only press keys -- rebind them in DuckStation"
+                   % (SETTINGS, ", ".join("%s = %s" % (b.capitalize(), v)
+                                          for b, v in foreign.items())))
 
 
 def main(argv=None):

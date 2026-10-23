@@ -31,5 +31,5 @@
 | [CORR-DMCP-026](/docs/tasks/duckmcp/CORR-DMCP-026.md) | A rota title do drive.py não reconhece mais o título e falha em 240 s | DMCP-TASK-20 | medium | done | 2026-10-23 |
 | [CORR-DMCP-027](/docs/tasks/duckmcp/CORR-DMCP-027.md) | Tirar o default do --display do mcp_drive.py de duckmcp.env.display() | DMCP-TASK-19 | medium | done | 2026-10-23 |
 | [CORR-DMCP-028](/docs/tasks/duckmcp/CORR-DMCP-028.md) | Nomear tools/looks/confront.py entre os chamadores das reexportações do who_writes | DMCP-TASK-20 | low | done | 2026-10-23 |
-| [CORR-DMCP-029](/docs/tasks/duckmcp/CORR-DMCP-029.md) | O load_pad do drive.py cai em silêncio no DEFAULT_PAD quando o [Pad1] não é de teclado | CORR-DMCP-026 | medium | pending | — |
+| [CORR-DMCP-029](/docs/tasks/duckmcp/CORR-DMCP-029.md) | O load_pad do drive.py cai em silêncio no DEFAULT_PAD quando o [Pad1] não é de teclado | CORR-DMCP-026 | medium | in-progress | — |
 <!-- rite:end -->
