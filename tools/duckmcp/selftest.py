@@ -680,7 +680,16 @@ def pending_keys():
 
 
 def check_rule_b(c):
-    """Rule (b): the raw sites outside the package are exactly `PENDING`."""
+    """Rule (b): the raw sites outside the package are exactly `PENDING`.
+
+    The multiset comparison (no new site, no stale entry) is the rule. The
+    other lines keep the list honest as a document: every entry names a
+    migration task, counts at least 1, and has a key of its own -- a key
+    split over two entries sums to the same multiset, so only that line
+    sees it. The size line ties the list to `audit.py`'s printed total, the
+    number migration Logs paste: it goes red when `doc["total"]` drifts from
+    the sites `site_keys` counts, which the multiset lines cannot see.
+    """
     doc = audit.audit(TOOLS_DIR)
     found = audit.site_keys(doc)
     listed = pending_keys()

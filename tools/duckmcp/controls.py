@@ -179,6 +179,32 @@ CONTROLS = (
         "FAIL  rule (b): every PENDING entry names a migration task", None,
         "an entry no task of phases 5 to 9 removes: it would never leave"),
     Control(
+        "b-duplicate-key", "b", "selftest.py",
+        "    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',\n"
+        "     'client.call(\"breakpoint\", action=\"clear\")', 2),\n",
+        "    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',\n"
+        "     'client.call(\"breakpoint\", action=\"clear\")', 1),\n"
+        "    ('DMCP-TASK-20', 'tools/pes2/who_writes.py', 'client',\n"
+        "     'client.call(\"breakpoint\", action=\"clear\")', 1),\n",
+        "FAIL  rule (b): no key appears twice in PENDING", None,
+        "one key split over two entries: the multiset is unchanged, so only "
+        "the duplicate check sees it"),
+    Control(
+        "b-zero-count", "b", "selftest.py",
+        "    ('DMCP-TASK-30', 'tools/kit2d/selftest.py', 'sys.path',\n"
+        "     'sys.path.insert(0, os.path.join(TOOLS_DIR, \"pes2\"))', 1),\n",
+        "    ('DMCP-TASK-30', 'tools/kit2d/selftest.py', 'sys.path',\n"
+        "     'sys.path.insert(0, os.path.join(TOOLS_DIR, \"pes2\"))', 0),\n",
+        "FAIL  rule (b): every PENDING count is at least 1", None,
+        "an entry counting nothing: it lists a site it does not hold"),
+    Control(
+        "b-total-drifts", "b", "audit.py",
+        "        \"total\": len(sites),\n",
+        "        \"total\": len(sites) + 1,\n",
+        "FAIL  rule (b): PENDING lists", None,
+        "the audit's printed total off its own sites: the number migration "
+        "Logs paste would no longer be the list's size"),
+    Control(
         "client-session-never-reclaimed", "client", "client.py",
         "            if not self.reclaim:\n                raise\n",
         "            raise\n",
