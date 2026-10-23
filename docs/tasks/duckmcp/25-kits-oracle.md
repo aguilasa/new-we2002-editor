@@ -12,6 +12,7 @@ id: DMCP-TASK-25
 
 - In:
   - as funções nomeadas
+  - `tools/duckmcp/selftest.py`: encolher no mesmo commit as entradas do `PENDING` da regra (b) que esta task remove; sem isso o check de entrada velha fica vermelho (CORR-DMCP-023)
 - Out:
   - controles e monkeypatch (DMCP-TASK-26)
 

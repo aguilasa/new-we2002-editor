@@ -48,3 +48,22 @@ O laço da Evidência hoje imprime `False` três vezes; depois tem de imprimir `
 tenha entrada na `PENDING`.
 
 ## Log de Execução
+
+2026-10-23 — reproduzido: o laço da Evidência imprimia `False` para as DMCP-TASK-23, 25 e 26.
+
+Conserto: `rite set … --files` acrescentou `tools/duckmcp/selftest.py` aos arquivos das três,
+preservando os que já estavam. Cada uma ganhou uma linha em "Arquivos a criar ou modificar" dizendo
+por quê. Com a CORR-DMCP-021 a 26 continua dona de uma entrada (`kits/selftest.py`) e por isso fica.
+
+Verificação, sobre toda task com entrada no `PENDING`:
+
+```text
+$ for t in 19 20 22 23 25 26 30; do sh "$RITE_HOME/bin/rite" context DMCP-TASK-$t --json | python3 -c "…print(d['id'],'tools/duckmcp/selftest.py' in d['files'])"; done
+DMCP-TASK-23 True
+DMCP-TASK-25 True
+DMCP-TASK-26 True
+DMCP-TASK-19 True
+DMCP-TASK-20 True
+DMCP-TASK-22 True
+DMCP-TASK-30 True
+```

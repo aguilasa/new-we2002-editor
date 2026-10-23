@@ -12,6 +12,7 @@ id: DMCP-TASK-23
 
 - In:
   - as funções listadas no §1.2
+  - `tools/duckmcp/selftest.py`: encolher no mesmo commit as entradas do `PENDING` da regra (b) que esta task remove; sem isso o check de entrada velha fica vermelho (CORR-DMCP-023)
 - Out:
   - a análise de pose, câmera e tela, que não muda
 

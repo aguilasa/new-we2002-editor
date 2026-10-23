@@ -12,6 +12,7 @@ id: DMCP-TASK-26
 
 - In:
   - os três arquivos
+  - `tools/duckmcp/selftest.py`: encolher no mesmo commit as entradas do `PENDING` da regra (b) que esta task remove; sem isso o check de entrada velha fica vermelho (CORR-DMCP-023)
 - Out:
   - —
 
