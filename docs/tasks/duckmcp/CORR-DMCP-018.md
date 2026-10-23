@@ -89,3 +89,10 @@ red    live-png-error-escapes (rule live): FAIL  live: a VRAM file that does not
 $ python3 tools/duckmcp/controls.py | tail -1
 duckmcp_controls: 31 control(s), 31 red as required; per rule (a) 2/2, (c) 8/8, (client) 2/2, (d) 4/4, (fork) 3/3, (gpu) 2/2, (live) 6/6, (png) 1/1, (psx) 1/1, (session) 1/1, (vram) 1/1
 ```
+- **Closed** — commit `737d078a` (2026-10-23): test(duckmcp): judge live.py's read-back offline, with a control per condition
+  - Files (`git show --name-status 737d078a`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-018.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`
