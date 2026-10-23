@@ -50,3 +50,31 @@ VRAM e `game()`, e fazer a linha FAIL nomear a(s) condição(ões) que falharam.
 `grep -n "frame count is wrong" tools/duckmcp/live.py` também não.
 
 ## Log de Execução
+
+2026-10-23 — reproduzido: `grep -n "asks only what every disc answers -- the$"` achava a linha 8, e o
+parágrafo do código de saída dizia "1 when the fork failed or the frame count is wrong" (quebrado entre
+as linhas 24 e 25, por isso a segunda grep da Verificação não o achava literalmente).
+
+Conserto:
+- O parágrafo de abertura passou a nomear as quatro coisas que o gate pergunta: ferramentas e quadros,
+  RAM e VRAM nos tamanhos do console, e serial.
+- O código de saída 1 cobre leitura que levanta e qualquer das quatro condições.
+- O veredito saiu para `failures(steps, before, after, reads)`, que devolve os nomes do que falhou.
+  `run` devolve essa lista no lugar de `passed`, e a linha final diz `FAIL (serial)`, `FAIL (frames,
+  vram)` e assim por diante.
+
+Verificação:
+
+```text
+$ grep -n "asks only what every disc answers -- the$" tools/duckmcp/live.py; echo g1=$?
+g1=1
+$ grep -n "frame count is wrong" tools/duckmcp/live.py; echo g2=$?
+g2=1
+$ python3 -c "…live.failures(5,0,5,ok), …(game=Game(None,None)), …(5,0,4, vram=(1024,513))"
+[] ['serial'] ['frames', 'vram']
+$ python3 tools/duckmcp/selftest.py --quiet
+duckmcp_selftest: 361 check(s) ran, 0 failure(s)
+```
+
+A linha FAIL nomeando a condição é afirmada pelo check offline da CORR-DMCP-018, e vista na corrida
+viva da CORR-DMCP-020.

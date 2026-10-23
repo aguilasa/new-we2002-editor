@@ -5,8 +5,10 @@
 
 The image is any working copy's `.cue`; without `--image` it comes from
 `DUCKSTATION_TEST_IMAGE` (read through `env.get`, rule (d)). Nothing here
-knows which game it is: the gate asks only what every disc answers -- the
-tools the server declares, and that `frame_step` moves `frame_number`.
+knows which game it is: the gate asks only what every disc answers --
+the tools the server declares, that `frame_step` moves `frame_number`,
+that all of RAM and all of VRAM read back at the console's sizes, and
+that `game()` names a serial.
 
 What it does, in order: `fork.launch` (no title match), `pause`, count
 `tools/list`, read `get_status` `frame_number`, call `frame_step` `--steps`
@@ -22,9 +24,10 @@ pid appeared that was not there before -- a skipped run (no X server, no
 image) never stops an emulator it did not open (CORR-DMCP-011).
 
 Exit codes: 0 ok; 77 (`errors.SKIP`, ctest's *skipped*) with no image, no
-fork or no X server, the reason printed; 1 when the fork failed or the frame
-count is wrong. The last line is always
-`duckmcp_live: <ok|FAIL|skipped> ...`.
+fork or no X server, the reason printed; 1 when the fork failed, a read
+raised (a VRAM file that does not decode included), or any of the four
+conditions -- frames, RAM, VRAM, serial -- does not hold, the FAIL line
+naming which. The last line is always `duckmcp_live: <ok|FAIL|skipped> ...`.
 """
 
 import argparse
@@ -59,8 +62,10 @@ def frame_number(client):
 def run(image, steps, display=None):
     """Launch, pause, count tools, step, compare; kill in `finally`.
 
-    Returns `(passed, tools, before, after, reads)`, `reads` the RAM length,
-    the VRAM PNG size and the `Game` that `game()` answered.
+    Returns `(failed, tools, before, after, reads)`: `failed` the names of
+    the conditions that did not hold (`failures`), empty when the gate
+    passes; `reads` the RAM length, the VRAM PNG size and the `Game` that
+    `game()` answered.
     """
     running = set(fork.running_pids())
     try:
@@ -82,13 +87,24 @@ def run(image, steps, display=None):
         print("  frame_number %d -> %d after %d frame_step"
               % (before, after, steps), flush=True)
         reads = read_back(Session(client=client))
-        passed = (after - before == steps
-                  and reads["ram"] == psx.RAM_SIZE
-                  and reads["vram"] == (psx.VRAM_WIDTH, psx.VRAM_HEIGHT)
-                  and reads["game"].serial is not None)
-        return passed, len(names), before, after, reads
+        return (failures(steps, before, after, reads), len(names), before,
+                after, reads)
     finally:
         fork.kill(verbose=False)
+
+
+def failures(steps, before, after, reads):
+    """The names of the gate's conditions that do not hold, in order."""
+    failed = []
+    if after - before != steps:
+        failed.append("frames")
+    if reads["ram"] != psx.RAM_SIZE:
+        failed.append("ram")
+    if reads["vram"] != (psx.VRAM_WIDTH, psx.VRAM_HEIGHT):
+        failed.append("vram")
+    if reads["game"].serial is None:
+        failed.append("serial")
+    return failed
 
 
 def read_back(session):
@@ -127,7 +143,7 @@ def main(argv=None):
         return SKIP
     print("duckmcp_live: %s, %d steps" % (image, args.steps), flush=True)
     try:
-        passed, tools, before, after, reads = run(image, args.steps,
+        failed, tools, before, after, reads = run(image, args.steps,
                                                   args.display)
     except Skip as exc:
         print("duckmcp_live: skipped -- %s" % exc)
@@ -137,13 +153,13 @@ def main(argv=None):
         # the size refusals of Session.read_ram -- a verdict, not a traceback.
         print("duckmcp_live: FAIL -- %s: %s" % (type(exc).__name__, exc))
         return 1
-    verdict = "ok" if passed else "FAIL"
+    verdict = "FAIL (%s)" % ", ".join(failed) if failed else "ok"
     print("duckmcp_live: %s -- frame_number moved %d for %d frame_step "
           "(want %d); tools=%d frames %d->%d; ram=%d vram=%dx%d serial=%s"
           % (verdict, after - before, args.steps, args.steps, tools,
              before, after, reads["ram"], reads["vram"][0], reads["vram"][1],
              reads["game"].serial))
-    return 0 if passed else 1
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
