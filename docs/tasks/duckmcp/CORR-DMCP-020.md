@@ -59,3 +59,9 @@ $ DUCKSTATION_TEST_IMAGE=… DISPLAY=:98 XAUTHORITY= ctest --test-dir build -R d
 25:   window 4194311
 25:   duckstation-mcp 1.0.0 answering
 ```
+- **Closed** — commit `b6e17640` (2026-10-23): docs(duckmcp): paste the whole duckmcp_live transcript into task 15
+  - Files (`git show --name-status b6e17640`):
+    - `M docs/tasks/duckmcp/15-fechamento-fase-3.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-020.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
