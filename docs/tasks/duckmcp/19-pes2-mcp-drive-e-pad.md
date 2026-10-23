@@ -19,7 +19,7 @@ id: DMCP-TASK-19
 
 ## Done criteria
 
-- [ ] antes da mudança, `python3 tools/pes2/mcp_drive.py <cópia>.cue --screen <rota>` para `team-select`, `edit`, `result` e `replay`, com o `sha256sum` de cada PNG colado no Log; depois, os mesmos quatro digests
+- [x] antes da mudança, `python3 tools/pes2/mcp_drive.py <cópia>.cue --screen <rota>` para `team-select`, `edit`, `result` e `replay`, com o `sha256sum` de cada PNG colado no Log; depois, os mesmos quatro digests
 - [x] `python3 tools/duckmcp/audit.py` colado no Log antes e depois da mudança, na HEAD entregue, com o `pes2` caindo nos sítios destes dois arquivos
 - [x] `python3 tools/duckmcp/selftest.py` sai 0, e a última linha diz quantos checks rodaram
 - [x] `python3 tools/pes2/selftest.py` sai 0
@@ -97,3 +97,26 @@ A diferença da guarda, com o `drive.Frame.difference` dela sobre os PNG que a r
 **Bloqueada** no primeiro critério, por decisão do usuário: a guarda de `Dia/Noche` vira a [CORR-DMCP-025](/docs/tasks/duckmcp/CORR-DMCP-025.md), e a task volta quando ela fechar, para medir o PNG de `result` antes (HEAD `6f6d7c7b` com o conserto) e depois. A migração entra como trabalho parcial coerente: `team-select`, `edit`, `replay` e os quatro PNG parciais de `result` com o mesmo digest.
 - **blocked** (2026-10-23): criterion 1 (result route PNG before/after) cannot close: route_result stops at its Dia/Noche guard before and after the migration (difference 0.00048 < 0.0005); waits for CORR-DMCP-025. Partial work committed at 1baf69c6; team-select, edit, replay digests identical.
 - **pending** (2026-10-23): CORR-DMCP-025 is done (ba7ee63a): the result route reaches its end, so criterion 1 can be measured
+
+**Desbloqueio (2026-10-23).** A [CORR-DMCP-025](/docs/tasks/duckmcp/CORR-DMCP-025.md) fechou em `ba7ee63a`, e a task voltou a `pending` por `rite mark`. O "antes" de `result` sai de um worktree descartável na HEAD de partida `6f6d7c7b` com o diff do `ba7ee63a` aplicado ao `mcp_drive.py` antigo (`git show ba7ee63a -- tools/pes2/mcp_drive.py | git apply`, três hunks, nenhum rejeitado); o "depois" sai da árvore entregue, que já tem o conserto. Mesma cópia, mesmo `:98`:
+
+```text
+$ (worktree 6f6d7c7b + ba7ee63a) DISPLAY=:98 XAUTHORITY= python3 tools/pes2/mcp_drive.py "<cópia Es,It>.cue" --screen result --out-dir fix-before
+MCP DRIVE OK: …/fix-before  192.0s, 59 presses, 1212 frames stepped
+$ (árvore entregue) DISPLAY=:98 XAUTHORITY= python3 tools/pes2/mcp_drive.py "work/pes2-EsIt/Pro Evolution Soccer 2 (Europe) (Es,It).cue" --screen result --out-dir fix-after
+MCP DRIVE OK: …/fix-after  191.2s, 59 presses, 1212 frames stepped
+$ diff <(cd fix-before && sha256sum *.png) <(cd fix-after && sha256sum *.png) && echo IDENTICAL
+IDENTICAL
+$ cd fix-after && sha256sum *.png
+b7c7f8e18e726c22df8f567daf18a16dc067d0b417559a51356cb3e9568b9c26  kicker-order.png
+62b59dc5253e55fb7fdfa5723da81dfda24dec3602397b7bc1b601c248beb7cb  match-options-lit.png
+a82482387cc79b3cdf2d4c84e3cd17ee7fce434e2691e33076bce9f876543660  match-options.png
+90497a1b7d6e57cce8faa8adf70c9317d631ca5087df8a6c7811be7160ba2a4b  penalty-submenu.png
+fffb20923cfd08f6ac0c891887512b3aa943b526d72c3631a4f688b636845e4a  penalty-teams.png
+7ea1a9e46012c39168190a6a15f02bc97c272095dd5fd05fce1371694952878d  result.png
+```
+
+Os quatro parciais têm os mesmos digests das corridas de antes do conserto (`after1-result`), e o `result.png` da tela de resultado é igual dos dois lados. `cli.py procs` → `pids: []` depois de cada corrida. Com isso o primeiro critério fecha: `team-select`, `edit`, `replay` e `result` com o mesmo PNG antes e depois.
+
+Gates na árvore entregue: `python3 tools/duckmcp/selftest.py | tail -1` → `duckmcp_selftest: 435 check(s) ran, 0 failure(s)`; `python3 tools/pes2/selftest.py | tail -1` → `OK`; `python3 tools/duckmcp/audit.py | tail -1` → `audit: 169 raw site(s) in 10 file(s)` (o número caiu de 184 para 169 na DMCP-TASK-20, que veio depois; os sítios destes dois arquivos continuam fora).
+
