@@ -173,8 +173,8 @@ CONTROLS = (
         "a raw client.call( outside the lib instead of Session or debug"),
     Control(
         "b-stale-entry", "b", "selftest.py",
-        "     'from mcp import Client, NotRunning # noqa: E402', 1),\n",
-        "     'from mcp import Client, NotRunning # noqa: E402', 2),\n",
+        "     'sys.path.insert(0, PES2)', 1),\n",
+        "     'sys.path.insert(0, PES2)', 2),\n",
         "FAIL  rule (b): no stale PENDING entry (listed, no longer found)",
         None,
         "an entry counting a site the audit no longer finds: a migration "

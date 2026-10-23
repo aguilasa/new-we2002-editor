@@ -15,8 +15,9 @@ person deciding the next one. It is what the routes get written *from*.
     python3 tools/pes2/pad.py run 600          # fast forward, and
                                                # give every kickoff
 
-Buttons are pad names -- cross, circle, square, triangle, start, select,
-up, down, left, right, l1, l2, r1, r2, l3, r3.
+Buttons are pad names in any capitalisation -- cross, circle, square,
+triangle, start, select, up, down, left, right, l1, l2, r1, r2, l3, r3 --
+checked against `duckmcp.buttons` before anything is sent.
 
 **Ported from `xdotool` to MCP on 2026-09-03**, and three things went away
 with it rather than being reimplemented:
@@ -45,52 +46,50 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.dirname(HERE))       # tools/, for duckmcp
 
 import drive                                                  # noqa: E402
-from mcp import Client, NotRunning                            # noqa: E402
-
-BUTTONS = ("cross", "circle", "square", "triangle", "up", "down", "left",
-           "right", "l1", "l2", "r1", "r2", "start", "select", "l3", "r3")
+from duckmcp import buttons, errors                           # noqa: E402
+from duckmcp.session import Session                           # noqa: E402
 
 BAND = (0, 60, 800, 200)          # the strip that tells kickoff apart
 CLOCK = (560, 90, 760, 130)       # the match clock
 
-# Same numbers as the routes: three frames down, seventeen to act on it.
-PRESS_FRAMES = 3
-AFTER_FRAMES = 17
-
 
 class Live:
-    """An emulator someone else started, left running between commands."""
+    """An emulator someone else started, left running between commands.
 
-    def __init__(self, client):
-        self.client = client
+    A thin layer over `Session.attach()`: the press, the clock and the
+    screenshot are the lib's, and the press is the routes' -- three frames
+    down, seventeen to act on it (`duckmcp.session.PRESS_FRAMES` and
+    `AFTER_FRAMES`).
+    """
 
-    def press(self, button, frames=PRESS_FRAMES, after=AFTER_FRAMES):
+    def __init__(self, session):
+        self.session = session
+
+    def press(self, button):
         """One button, held for an exact number of the game's own frames.
 
-        Paused around the press so that the count means something; the
-        caller resumes if it wants the game to carry on.
+        **Paused first**, which the routes' press is not: between two
+        commands of this tool the game runs, so without the pause the frame
+        count would start wherever the clock happened to be. The caller
+        resumes if it wants the game to carry on.
         """
-        self.client.call("pause")
-        self.client.call("press_button", button=button.capitalize(),
-                         duration_frames=frames)
-        for _ in range(frames + after):
-            self.client.call("frame_step")
+        self.session.press(button, pause_first=True)
 
     def resume(self):
-        self.client.call("continue")
+        self.session.resume()
 
     def capture(self, path=None):
         path = path or f"/tmp/pes2-live-{time.time():.3f}.png"
-        self.client.call("take_screenshot", path=path)
-        if not os.path.exists(path):
-            raise SystemExit(f"the emulator reported a screenshot at {path} "
-                             f"and there is no file there")
-        return drive.Frame(path)
+        try:
+            return drive.Frame(self.session.capture(path))
+        except errors.ToolError as e:
+            raise SystemExit(str(e)) from None
 
     def fast_forward(self, on):
-        self.client.call("set_speed", fast_forward=bool(on))
+        self.session.call("set_speed", fast_forward=bool(on))
 
 
 def describe(frame):
@@ -110,23 +109,22 @@ def main(argv):
         return 0
 
     try:
-        client = Client()
-        client.initialize()
-    except NotRunning as e:
+        live = Live(Session.attach())
+    except errors.NotRunning as e:
         print(f"{e}", file=sys.stderr)
-        return 77
+        return errors.SKIP
 
-    live = Live(client)
     cmd, rest = argv[0], argv[1:]
 
     if cmd == "press":
         if not rest:
             raise SystemExit("press what? see --help for the button names")
-        for button in rest:
-            if button.lower() not in BUTTONS:
-                raise SystemExit(f"unknown button {button!r}")
-        for button in rest:
-            live.press(button.lower())
+        try:
+            names = [buttons.canonical(button) for button in rest]
+        except buttons.UnknownButton as e:
+            raise SystemExit(str(e)) from None
+        for name in names:
+            live.press(name)
         live.resume()
         time.sleep(0.5)
         print(describe(live.capture()))

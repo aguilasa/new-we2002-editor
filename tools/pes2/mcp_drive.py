@@ -104,10 +104,11 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.dirname(HERE))       # tools/, for duckmcp
 
-import fork                                                   # noqa: E402
 from drive import Frame, Fail, Skip, SKIP, PILImage           # noqa: E402
-from mcp import NotRunning, ToolError                         # noqa: E402
+from duckmcp import env, errors, session                      # noqa: E402
+from duckmcp.session import Session                           # noqa: E402
 
 # --- what a screen looks like ------------------------------------------
 
@@ -264,154 +265,91 @@ CHAMPION_TOL = 0.005
 CHAMPION_CALM = 0.010
 
 SERIAL = "SLES-03957"
-STATE_DIR = os.path.expanduser("~/.local/share/duckstation/savestates")
 
-# A press has to be down long enough for the game to poll it, and then the
-# game needs frames to act on it. Three down and seventeen after was
+# The PES2 window title, which the lib may not spell (PLAN-DUCKMCP-PY 2.1).
+# Same value as `GAME_WINDOW` of the `fork.py` shim; this one stays when the
+# shim goes.
+GAME_WINDOW = "^Pro Evolution Soccer 2$"
+
+# A press is the lib's: three frames down and seventeen after, which was
 # measured to move exactly one menu row, every time, over the walks of
-# 2026-09-03. Under `pause` these are exact frames, not a wall-clock guess:
-# this is the number `drive.HOLD` and `drive.TAP` were approximating.
-PRESS_FRAMES = 3
-AFTER_FRAMES = 17
+# 2026-09-03 (`duckmcp.session.PRESS_FRAMES`/`AFTER_FRAMES`). Under `pause`
+# these are exact frames, not a wall-clock guess: this is the number
+# `drive.HOLD` and `drive.TAP` were approximating.
 
 
 def state_path(slot=1):
-    return os.path.join(STATE_DIR, f"{SERIAL}_{slot}.sav")
+    """The state file of `slot` for this disc, where DuckStation writes it."""
+    return env.state_path(SERIAL, slot)
 
 
 # --- the session -------------------------------------------------------
 
-class McpSession:
-    """A booted fork, its window, and an MCP session against it.
+class McpSession(Session):
+    """The route layer over `duckmcp.Session`: a booted fork plus what the
+    routes need on top of it.
 
-    Same shape as `drive.Session` where the routes need it -- `capture`,
-    `press`, `save_state` -- so that the two can be read side by side. What
-    it adds is `step`, `run` and the assertions those make possible.
+    The clock (`pause`, `resume`, `step`, `run`), the press, the launch and
+    the kill are the lib's. What this adds is the PES2 window title, labelled
+    captures decoded as `drive.Frame`, the waits and the counted menus --
+    everything that knows what a PES2 screen looks like.
+
+    The press does **not** pause first: a session this class launched is
+    already paused on enter and stays paused between calls, so the frame
+    count of every press starts where the last one stopped.
     """
 
-    def __init__(self, cue, out_dir, display=None, verbose=True):
+    def __init__(self, cue=None, out_dir=None, display=None, verbose=True,
+                 client=None):
+        super().__init__(cue, client=client, match=GAME_WINDOW,
+                         display=display, verbose=verbose)
         self.cue = cue
         self.out_dir = out_dir
-        self.display = display or os.environ.get("PES2_DISPLAY", ":98")
-        self.verbose = verbose
-        self.client = None
-        self.window = None
-        self.pid = None
         self.shots = []
-        self.presses = 0
-        self.steps = 0
         self._tmp = None
-        self._own = True
 
     # -- lifecycle --
 
     def __enter__(self):
         if PILImage is None:
             raise Skip("PIL is missing")
-        self.pid, self.window, self.client = fork.launch(
-            self.cue, display=self.display, verbose=self.verbose)
+        super().__enter__()
         self._tmp = tempfile.mkdtemp(prefix="pes2-mcp-frames-")
-        self.pause()
         return self
 
     def __exit__(self, *exc):
-        if self._own:
-            fork.kill(verbose=False)
-        if self._tmp:
-            shutil.rmtree(self._tmp, ignore_errors=True)
-        return False
+        try:
+            return super().__exit__(*exc)
+        finally:
+            if self._tmp:
+                shutil.rmtree(self._tmp, ignore_errors=True)
 
     @classmethod
     def attach(cls, out_dir, display=None, verbose=True):
         """Talk to an emulator someone else started, and leave it running.
 
-        This is what `pad.py` is: the user has the game up in front of them
-        and wants one action sent to it.
+        `Session.attach` handshakes and neither pauses nor kills; this only
+        gives the session somewhere to put its pictures.
         """
-        from mcp import Client
-        s = cls(None, out_dir, display=display, verbose=verbose)
-        s.client = Client()
-        s.client.initialize()
-        s._own = False
+        s = super().attach(verbose=verbose)
+        s.out_dir = out_dir
+        s.display = display
         s._tmp = tempfile.mkdtemp(prefix="pes2-mcp-frames-")
         return s
-
-    def say(self, msg):
-        if self.verbose:
-            print(f"  {msg}", flush=True)
-
-    # -- the emulator clock --
-
-    def pause(self):
-        self.client.call("pause")
-
-    def resume(self):
-        self.client.call("continue")
-
-    def frame(self):
-        return self.client.call("get_status")["frame_number"]
-
-    def step(self, n=1):
-        """Advance exactly `n` frames and stay paused.
-
-        Costs about 57 ms a frame over the wire, so it is for precision --
-        a button and its consequence -- and `run` is for distance.
-        """
-        for _ in range(n):
-            self.client.call("frame_step")
-        self.steps += n
-
-    def run(self, seconds, fast=False):
-        """Let it run for a stretch of wall clock, then pause again.
-
-        Loading screens are hundreds of frames long and stepping through
-        them one call at a time costs three times real time. Fast forward
-        makes the distance cheaper still; it is a hold in DuckStation, not
-        a toggle, which is why it is set and cleared rather than tapped.
-        """
-        if fast:
-            self.client.call("set_speed", fast_forward=True)
-        self.resume()
-        time.sleep(seconds)
-        self.pause()
-        if fast:
-            self.client.call("set_speed", fast_forward=False)
-
-    # -- input --
-
-    def press(self, button, frames=PRESS_FRAMES, after=AFTER_FRAMES):
-        """Hold a pad button for `frames` frames, then let the game act.
-
-        `duration_frames` releases it on the emulator's own clock, so
-        neither the hold nor the gap depends on how fast this script is
-        talking to it. There is no pointer to aim, no focus to steal and no
-        auto-repeat to outrun -- the three things section 6.11 calibrated
-        by trial.
-        """
-        self.client.call("press_button", button=button.capitalize()
-                         if button.islower() else button,
-                         duration_frames=frames)
-        self.step(frames + after)
-        self.presses += 1
 
     # -- output --
 
     def capture(self, label=None):
-        """Grab the emulator's own frame buffer.
+        """The emulator's own frame buffer, as a `drive.Frame`.
 
-        Not `import -window`: the picture comes out of the emulator, so a
-        modal sitting on top of the game window cannot get into it, and the
-        game does not have to be on a mapped, unobscured window at all.
+        With `label`, kept in the output directory as `<label>.png` and
+        listed in `shots`; without, a scratch file overwritten each time.
         """
         if label:
             path = os.path.join(self.out_dir, f"{label}.png")
         else:
             path = os.path.join(self._tmp, "scratch.png")
-        self.client.call("take_screenshot", path=path)
-        if not os.path.exists(path):
-            raise Fail(f"the emulator reported a screenshot at {path} and "
-                       f"there is no file there")
-        frame = Frame(path)
+        frame = Frame(super().capture(path))
         if label:
             mean, sd = frame.stats()
             self.say(f"shot {label}  mean={mean:.6f} sd={sd:.6f}  {path}")
@@ -581,25 +519,17 @@ class McpSession:
 
         Pressing a hotkey and hoping is what made a previous session
         conclude "F2 wrote nothing" while looking in a directory DuckStation
-        was not using.
+        was not using. The wait is the lib's; the file is this disc's.
         """
-        path = state_path(slot)
-        before = os.path.getmtime(path) if os.path.exists(path) else 0
-        self.client.call("save_state", slot=slot)
-        for _ in range(20):
-            time.sleep(0.5)
-            if os.path.exists(path) and os.path.getmtime(path) > before:
-                self.say(f"saved slot {slot}  "
-                         f"{os.path.getsize(path)} B  {path}")
-                return path
-        raise Fail(f"no save state appeared at {path}")
+        path = super().save_state(slot, wait_for=state_path(slot))
+        self.say(f"saved slot {slot}  {os.path.getsize(path)} B  {path}")
+        return path
 
     def load_state(self, slot=1):
         if not os.path.exists(state_path(slot)):
             raise Fail(f"no save state at {state_path(slot)} -- make one "
                        f"with --save-state on a route that reaches a screen")
-        self.client.call("load_state", slot=slot)
-        self.step(2)
+        super().load_state(slot, settle=2)
         self.say(f"loaded slot {slot}")
 
 
@@ -1302,8 +1232,17 @@ def self_check(verbose=True):
     check("and the two binaries agree with each other on it",
           abs(0.360497 - 0.358742) < 0.003)
 
-    check("a press is expressed in frames, not seconds",
-          isinstance(PRESS_FRAMES, int) and isinstance(AFTER_FRAMES, int))
+    # The routes press with the lib's default pair, and every row walk
+    # above was measured with three down and seventeen after.
+    check("a press is the lib's 3 frames down and 17 after",
+          (session.PRESS_FRAMES, session.AFTER_FRAMES) == (3, 17),
+          f"{session.PRESS_FRAMES}/{session.AFTER_FRAMES}")
+    check("the route layer launches the PES2 window, not the widest one",
+          McpSession("x.cue").match == GAME_WINDOW
+          and GAME_WINDOW == "^Pro Evolution Soccer 2$")
+    check("a state file is this disc's, in DuckStation's directory",
+          state_path(3) == env.state_path(SERIAL, 3)
+          and state_path(3).endswith(f"{SERIAL}_3.sav"))
 
     if verbose:
         print("SELF-CHECK " + ("FAILED" if bad else
@@ -1365,10 +1304,10 @@ def main(argv=None):
                 # what it started in `__exit__`, and `--measure-menu` has
                 # nothing to attach to -- which is how that gate came to
                 # depend on a save state left behind by hand.
-                s._own = False
+                s.owned = False
                 s.resume()
                 print(f"  left running on {args.screen} -- "
-                      f"`fork.py kill` when done")
+                      f"`python3 tools/duckmcp/cli.py kill` when done")
             print(f"MCP DRIVE OK: {out_dir}  "
                   f"{time.time() - started:.1f}s, {s.presses} presses, "
                   f"{s.steps} frames stepped")
@@ -1376,13 +1315,13 @@ def main(argv=None):
     except Skip as e:
         print(f"skipping: {e}")
         return SKIP
-    except fork.Skip as e:
+    except errors.Skip as e:
         print(f"skipping: {e}")
         return SKIP
-    except NotRunning as e:
+    except errors.NotRunning as e:
         print(f"skipping: {e}")
         return SKIP
-    except (Fail, fork.Fail, ToolError) as e:
+    except (Fail, errors.Fail, errors.ToolError) as e:
         print(f"MCP DRIVE FAILED: {e}", file=sys.stderr)
         return 1
 
