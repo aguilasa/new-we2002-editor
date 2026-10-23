@@ -270,13 +270,14 @@
       "severity": "medium",
       "files": [],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null,
-      "active_since": "2026-10-23T11:26:58-03:00",
+      "done_on": "2026-10-23",
+      "done_commit": "8e8f5001",
+      "active_since": null,
       "started_at": "2026-10-23T11:26:58-03:00",
-      "active_s": 0
+      "active_s": 11,
+      "finished_at": "2026-10-23T11:27:09-03:00"
     },
     {
       "id": "CORR-DMCP-018",

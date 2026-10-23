@@ -78,3 +78,9 @@ duckmcp_selftest: 361 check(s) ran, 0 failure(s)
 ```
 
 O gate que mantém isso de pé é o check offline da CORR-DMCP-018, que roda o `run` com o cliente falso.
+- **Closed** — commit `8e8f5001` (2026-10-23): fix(duckmcp): end live.py with a FAIL line when the VRAM does not decode
+  - Files (`git show --name-status 8e8f5001`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-017.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/duckmcp/live.py`
