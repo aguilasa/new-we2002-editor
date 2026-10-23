@@ -114,3 +114,9 @@ exit 0
 
 Gates: `ctest --test-dir build -R 'duckmcp_selftest|tasks'` e
 `ctest --test-dir build -R kits_selftest` passaram.
+- **Closed** — commit `1b3ad31a` (2026-10-23): feat(duckmcp): rule (b) as a selftest gate with a PENDING list
+  - Files (`git show --name-status 1b3ad31a`):
+    - `M docs/tasks/duckmcp/17-regra-b.md`
+    - `M tools/duckmcp/audit.py`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`
