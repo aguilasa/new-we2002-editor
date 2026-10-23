@@ -72,3 +72,9 @@ duckmcp_controls: 1 control(s), 1 red as required; per rule (debug) 1/1
 - `ctest --test-dir build -R 'duckmcp_selftest|tasks'` → `1/2 Test  #6: tasks ... Passed 5.18 sec`, `2/2 Test #24: duckmcp_selftest ... Passed 7.71 sec`, `100% tests passed, 0 tests failed out of 2`.
 
 Nenhum emulador subiu nesta task: tudo corre contra o cliente falso do `debug.self_check`.
+- **Closed** — commit `b10bc6c8` (2026-10-23): feat(duckmcp): debug.py — one wait that watches the process, breakpoints that always clear and pause, who_writes as a dict
+  - Files (`git show --name-status b10bc6c8`):
+    - `M docs/tasks/duckmcp/16-debug.md`
+    - `M tools/duckmcp/controls.py`
+    - `A tools/duckmcp/debug.py`
+    - `M tools/duckmcp/selftest.py`
