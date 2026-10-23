@@ -78,3 +78,4 @@ Nenhum emulador subiu nesta task: tudo corre contra o cliente falso do `debug.se
     - `M tools/duckmcp/controls.py`
     - `A tools/duckmcp/debug.py`
     - `M tools/duckmcp/selftest.py`
+- **Reviewed** (2026-10-23) at `62a174f2`: no finding
