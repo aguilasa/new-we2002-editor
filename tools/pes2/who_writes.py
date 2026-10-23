@@ -32,7 +32,7 @@ empty answer, the nudge with its release, and the breakpoints cleared in a
 changed with the move: the run now ends with the machine **paused** (every
 armed wait of the lib does), and the parsing helpers below are the lib's,
 re-exported for the callers that still import them from here
-(`tools/kits/oracle.py`, `tools/looks/oracle.py`).
+(`tools/kits/oracle.py`, `tools/looks/oracle.py`, `tools/looks/confront.py`).
 """
 
 import argparse
