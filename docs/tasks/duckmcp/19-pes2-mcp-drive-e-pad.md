@@ -95,4 +95,4 @@ audit: 184 raw site(s) in 12 file(s)
 A diferença da guarda, com o `drive.Frame.difference` dela sobre os PNG que a rota grava, igual nas três corridas: `before1 0.00048095095544579156`, `before2 0.00048095095544579156`, `after1 0.00048095095544579156`.
 
 **Bloqueada** no primeiro critério, por decisão do usuário: a guarda de `Dia/Noche` vira a [CORR-DMCP-025](/docs/tasks/duckmcp/CORR-DMCP-025.md), e a task volta quando ela fechar, para medir o PNG de `result` antes (HEAD `6f6d7c7b` com o conserto) e depois. A migração entra como trabalho parcial coerente: `team-select`, `edit`, `replay` e os quatro PNG parciais de `result` com o mesmo digest.
-
+- **blocked** (2026-10-23): criterion 1 (result route PNG before/after) cannot close: route_result stops at its Dia/Noche guard before and after the migration (difference 0.00048 < 0.0005); waits for CORR-DMCP-025. Partial work committed at 1baf69c6; team-select, edit, replay digests identical.
