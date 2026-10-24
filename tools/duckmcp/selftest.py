@@ -167,9 +167,6 @@ MIGRATIONS = ("DMCP-TASK-19", "DMCP-TASK-20", "DMCP-TASK-22", "DMCP-TASK-23",
 """The tasks of phases 5 to 7 and 9 that remove raw sites (rule (b))."""
 
 PENDING = (
-    # DMCP-TASK-26
-    ('DMCP-TASK-26', 'tools/kits/selftest.py', 'import',
-     'import fork # tools/pes2, the shim over duckmcp.fork', 1),
     # DMCP-TASK-30
     ('DMCP-TASK-30', 'tools/kit2d/selftest.py', 'sys.path',
      'sys.path.insert(0, os.path.join(TOOLS_DIR, "pes2"))', 1),

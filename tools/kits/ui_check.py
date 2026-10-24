@@ -92,7 +92,7 @@ TOOLS_DIR = os.path.dirname(KITS_DIR)
 APP = os.path.join(KITS_DIR, "ui", "app.py")
 COPIED = ("kits", "looks", "pes2", "duckmcp")
 """What a planted copy holds under tools/: the window, the core, the two
-trees the core imports, and the lib the `pes2/mcp.py` shim imports."""
+trees the core imports, and `duckmcp`, the lib the fork and session calls go to."""
 
 STATE = ["--tag", "00", "--image", "work1", "--palette", "2", "--zoom", "3", "--zones"]
 """The state the gate captures, and the one KITS-TASK-19 compares across systems."""
@@ -717,7 +717,7 @@ def cli_export(image: str, out: str, tag: str = HOVER_TAG, who: str = "player") 
 
 
 def sandbox(tmp: str, old: str, new: str, target: str = "app.py") -> str:
-    """A copy of tools/{kits,looks,pes2} with *old* replaced once in
+    """A copy of tools/{kits,looks,pes2,duckmcp} with *old* replaced once in
     tools/kits/ui/*target*; returns the copied app."""
     ignore = shutil.ignore_patterns("__pycache__", "*.pyc")
     for sub in COPIED:

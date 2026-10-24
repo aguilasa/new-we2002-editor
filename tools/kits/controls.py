@@ -4,8 +4,8 @@
 *A guard that has never gone red is decoration.*  Each control is a literal
 substitution -- a file, the function it lives in, the exact source line and
 what it becomes -- planted in a copy of `tools/kits/` (with the `tools/looks/`
-and `tools/pes2/` it imports beside it, and the `tools/duckmcp/` the
-`tools/pes2/mcp.py` shim imports).  The copy's `selftest.py --no-plant`
+and `tools/pes2/` it imports beside it, and `tools/duckmcp/`, the lib the
+fork guards and the session live in).  The copy's `selftest.py --no-plant`
 then has to exit non-zero AND print the check the control aims at: a red for
 another reason is as useless as a green.  A literal that matches zero times or
 more than once is a broken control, not a red one.
@@ -600,6 +600,15 @@ CONTROLS = (
         "the controller guard has to run before the capture reads the disc or boots the "
         "fork; left to the Oracle it still refuses, but only after the work it was meant to "
         "spare (CORR-K3D-031, KRP-TASK-07)",
+    ),
+    Control(
+        "oracle-dump-joystick-unasked", "kits/oracle.py", "dump_slot",
+        "    fork.refuse_joysticks()\n    paths = []\n",
+        "    paths = []\n",
+        "FAIL  oracle.py dump_slot refuses a plugged-in controller before it boots the fork",
+        "dump_slot boots the fork itself and holds the controller guard ahead of the launch; "
+        "without it the controller's buttons reach the game being dumped (CORR-K3D-031, "
+        "DMCP-TASK-25)",
     ),
     Control(
         "replay-capture-timeout-unasked", "kits/replay.py", "timeout_failures",
