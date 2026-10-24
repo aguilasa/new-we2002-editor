@@ -499,6 +499,32 @@
       "started_at": "2026-10-24T18:18:55-03:00",
       "active_s": 32,
       "finished_at": "2026-10-24T18:19:27-03:00"
+    },
+    {
+      "id": "CORR-DMCP-031",
+      "file": "CORR-DMCP-031.md",
+      "title": "O check de duas seções numa carga de matriz do looks não afirma nada",
+      "origin": "DMCP-TASK-22",
+      "severity": "medium",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
+    },
+    {
+      "id": "CORR-DMCP-032",
+      "file": "CORR-DMCP-032.md",
+      "title": "O main do kits/oracle.py deixa Fail sair como traceback",
+      "origin": "DMCP-TASK-25",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
