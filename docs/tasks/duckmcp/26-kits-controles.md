@@ -65,3 +65,10 @@ depois: ok    rule (b): PENDING lists 7 site(s) in 7 entries, audit.py counts 7
 `grep -n 'pes2/fork.py' tools/kits/*.py` não acha nada (exit 1). `ctest --test-dir build -R kits_selftest`: `100% tests passed, 0 tests failed out of 1`.
 
 Repassado da DMCP-TASK-25, fora dos arquivos desta task: o `main` do `kits/oracle.py` não converte `Fail` em código de saída, então a corrida que chama `dump_slot` (com `--cue` ou a variável do `.cue`) termina, com controle plugado, em traceback em vez de sair 1.
+- **Closed** — commit `4a31d2cd` (2026-10-24): test(kits): live-guard check over duckmcp.fork, new dump_slot joystick control
+  - Files (`git show --name-status 4a31d2cd`):
+    - `M docs/tasks/duckmcp/26-kits-controles.md`
+    - `M tools/duckmcp/selftest.py`
+    - `M tools/kits/controls.py`
+    - `M tools/kits/selftest.py`
+    - `M tools/kits/ui_check.py`
