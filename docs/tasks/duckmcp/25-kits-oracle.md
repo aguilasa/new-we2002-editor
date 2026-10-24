@@ -102,3 +102,9 @@ audit: 8 raw site(s) in 8 file(s)
 - `audit.py` antes e depois: acima.
 - `$ python3 tools/kits/selftest.py` → `..... 87 of 87 controls red` / `controls: 0 failure(s)` / `kits_selftest: 0 failure(s)`, saída 0, em 6:11. Nenhum controle nem monkeypatch do `kits` mirava código movido. O `replay-capture-joystick-late` continua achando `fork.refuse_joysticks()` no `run_capture`.
 - `$ ctest --test-dir build -R 'duckmcp_selftest|kits_selftest|tasks'` → `100% tests passed, 0 tests failed out of 3` (`kits_selftest` 353.29 s).
+- **Closed** — commit `b532b3ac` (2026-10-24): refactor(kits): dump_slot over duckmcp.Session with the joystick guard, breakpoint loops over duckmcp.debug, BGR555 from duckmcp.vram
+  - Files (`git show --name-status b532b3ac`):
+    - `M docs/tasks/duckmcp/25-kits-oracle.md`
+    - `M tools/duckmcp/selftest.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/replay.py`
