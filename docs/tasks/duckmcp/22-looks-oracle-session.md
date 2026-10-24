@@ -95,3 +95,11 @@ E a regra (b): `python3 tools/duckmcp/selftest.py` → `ok    rule (b): PENDING 
 - `python3 tools/looks/selftest.py` → antes `..... 114 of 114 controls red` / `looks_selftest: 0 failure(s)`; depois `..... 113 of 113 controls red` / `looks_selftest: 0 failure(s)`, saída 0. A diferença é o `oracle-session-never-renewed`.
 - `grep -n 'class OneSession' tools/looks/oracle.py` → nada, saída 1.
 - `ctest --test-dir build -R 'duckmcp_selftest|looks_selftest|kits_selftest|tasks'` → `100% tests passed, 0 tests failed out of 4` (`kits_selftest` 351.79 s).
+- **Closed** — commit `17592d25` (2026-10-23): refactor(looks): Oracle over duckmcp.Session, OneSession gone, main maps the lib's errors
+  - Files (`git show --name-status 17592d25`):
+    - `M docs/tasks/duckmcp/22-looks-oracle-session.md`
+    - `M tools/duckmcp/controls.py`
+    - `M tools/duckmcp/selftest.py`
+    - `M tools/kits/oracle.py`
+    - `M tools/looks/controls.py`
+    - `M tools/looks/oracle.py`
