@@ -75,3 +75,9 @@ $ rite check --cycle duckmcp --json      # errors, warnings
 ```
 
 A linha 47 continua achada e vem seguida (linha 49) da nota que a desfaz com a medida de 2685 s.
+- **Closed** — commit `edc90412` (2026-10-24): docs(duckmcp): note that the 435 s of --screen in task 23 do not reproduce
+  - Files (`git show --name-status edc90412`):
+    - `M docs/tasks/duckmcp/23-looks-breakpoints.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-030.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
