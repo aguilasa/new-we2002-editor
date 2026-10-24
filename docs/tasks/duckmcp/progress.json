@@ -496,11 +496,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#1.2",
       "files": ["tools/looks/oracle.py", "tools/looks/confront.py", "tools/looks/controls.py", "tools/duckmcp/selftest.py"],
       "resources": ["emulador", "save-states", "tela"],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-23",
+      "done_commit": "dc42d7ce",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-23T21:22:17-03:00",
+      "active_s": 4095,
+      "finished_at": "2026-10-23T22:30:32-03:00"
     },
     {
       "id": "DMCP-TASK-24",

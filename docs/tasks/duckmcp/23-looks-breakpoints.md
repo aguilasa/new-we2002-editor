@@ -113,3 +113,9 @@ audit: 34 raw site(s) in 9 file(s)
 - `python3 tools/looks/selftest.py` → `..... 113 of 113 controls red` / `controls: 0 failure(s)` / `looks_selftest: 0 failure(s)`, saída 0. É a mesma contagem da DMCP-TASK-22: nenhum controle do `looks` mirava código movido (`grep` dos nomes migrados em `tools/looks/controls.py` não acha nada), então `controls.py` ficou como estava.
 - `python3 tools/looks/oracle.py --check` → `oracle.py: 0 failure(s)`, e `python3 tools/looks/confront.py --check` → `confront.py: 0 failure(s)`, os dois com saída 0.
 - `ctest --test-dir build -R 'duckmcp_selftest|looks_selftest|tasks'` → `100% tests passed, 0 tests failed out of 3`.
+- **Closed** — commit `dc42d7ce` (2026-10-23): refactor(looks): waits and breakpoint loops over duckmcp.debug, no raw breakpoint call left
+  - Files (`git show --name-status dc42d7ce`):
+    - `M docs/tasks/duckmcp/23-looks-breakpoints.md`
+    - `M tools/duckmcp/selftest.py`
+    - `M tools/looks/confront.py`
+    - `M tools/looks/oracle.py`
