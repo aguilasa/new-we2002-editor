@@ -131,11 +131,16 @@ for _sub in ("looks", "pes2"):
     _path = os.path.join(TOOLS_DIR, _sub)
     if _path not in sys.path:
         sys.path.insert(0, _path)
+if TOOLS_DIR not in sys.path:        # tools/, for duckmcp
+    sys.path.append(TOOLS_DIR)
 
 import atlas  # noqa: E402  (tools/looks)
 import layout  # noqa: E402
 import lzss  # noqa: E402  (tools/pes2)
 import texture  # noqa: E402
+from duckmcp import debug, fork  # noqa: E402
+from duckmcp import vram as psx_vram  # noqa: E402  (`vram` names the dump's rows here)
+from duckmcp.session import Session  # noqa: E402
 
 from core.replay import (  # noqa: E402,F401  (the reader: KRP-TASK-02 moved the analysis there)
     IMAGE_HEIGHT, KIT_BITS, KIT_CLUTS, KIT_PAGES, LONG_SLEEVES, NEUTRAL, PAIRINGS, PANEL_H, PANEL_W,
@@ -183,7 +188,7 @@ def payload(body: bytes, record) -> tuple:
 
 def five(value: int) -> int:
     """A BGR555 halfword with the STP bit dropped: what a PNG dump keeps."""
-    return value & 0x7FFF
+    return value & psx_vram.COLOUR_BITS
 
 
 def vram_rows(path: str) -> list:
@@ -192,8 +197,7 @@ def vram_rows(path: str) -> list:
     if (width, height) != (VRAM_W, VRAM_H):
         raise ValueError("%s is %dx%d, not the %dx%d VRAM" % (path, width, height,
                                                              VRAM_W, VRAM_H))
-    return [b"".join(struct.pack("<H", (p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10)
-                     for p in row) for row in rows]
+    return psx_vram.rows_to_bytes(rows)
 
 
 def find(vram: list, record, words: tuple) -> list:
@@ -424,31 +428,30 @@ def report_pages(vram: list, bodies: dict, tags) -> dict:
     return out
 
 
-def dump_slot(slot: int, cue: str, out_dir: str) -> list:
-    """Two VRAM dumps, a frame apart, of slot *slot* loaded in the fork."""
-    import fork
-    from duckmcp.fork import hide_window  # the lib; its Client reclaims a taken session
+DUMP_SETTLE = 30
+"""Frames `dump_slot` steps after the load before its first dump."""
 
+
+def dump_slot(slot: int, cue: str, out_dir: str) -> list:
+    """Two VRAM dumps, a frame apart, of slot *slot* loaded in the fork.
+
+    Refuses a plugged-in game controller before it boots anything
+    (CORR-K3D-031): its buttons would reach the game being dumped.  The guard
+    is here and not left to `Session(image)`, so that removing it from this
+    function is a defect a control can plant (DMCP-TASK-22 made the same call
+    for the `looks` Oracle); the session wraps the launched client, which it
+    handshakes and pauses, and this function kills the fork it launched."""
+    fork.refuse_joysticks()
     paths = []
-    pid, window, client = fork.launch(cue, verbose=True, match=fork.ANY_WINDOW)
+    _pid, window, client = fork.launch(cue, verbose=True, match=fork.ANY_WINDOW)
     try:
-        hide_window(window)
-        client.call("pause")
-        client.call("load_state", slot=slot)
-        for _ in range(30):
-            client.call("frame_step")
-        for n in range(2):
-            client.call("frame_step")
-            path = os.path.join(out_dir, "vram-%d.png" % n)
-            if os.path.exists(path):
-                os.remove(path)
-            client.call("dump_vram", path=path, format="png")
-            if not os.path.exists(path):
-                raise RuntimeError("dump_vram wrote nothing at %s" % path)
-            paths.append(path)
-        shot = os.path.join(out_dir, "screen.png")
-        client.call("take_screenshot", path=shot)
-        print("  screen: %s" % shot)
+        fork.hide_window(window)
+        with Session(client=client) as session:     # handshake and pause
+            session.load_state(slot, settle=DUMP_SETTLE)
+            for n in range(2):
+                session.step()
+                paths.append(session.dump_vram(os.path.join(out_dir, "vram-%d.png" % n)))
+            print("  screen: %s" % session.capture(os.path.join(out_dir, "screen.png")))
     finally:
         fork.kill(verbose=False)
     return paths
@@ -620,8 +623,7 @@ def load_slot(game, slot: int, label: str) -> None:
         raise RuntimeError("slot %d has no master copy at %s" % (slot, master))
     shutil.copyfile(master, looks_oracle.emulator_state(slot))
     game.pause()
-    game.client.call("load_state", slot=slot)
-    game.step(looks_oracle.LOAD_FRAMES)
+    game.session.load_state(slot, settle=looks_oracle.LOAD_FRAMES)
     game.capture(label)
 
 
@@ -698,15 +700,8 @@ def read_frame(slot: int, cue: str) -> list:
     with looks_oracle.Oracle(cue) as game:
         load_slot(game, slot, "sleeves-%d" % slot)
         game.step(looks_oracle.SCENERY_SETTLE)
-        heads = looks_oracle.gpu_list_heads(game)
-        first, size, step = layout.SCENERY_SWEEP
-        ram = b"".join(game.read_ram(base, step, os.path.join(
-            game.out_dir, "sleeves-%08x.bin" % base))
-            for base in range(first, first + size, step))
-        nodes = []
-        for head in dict.fromkeys(heads[len(heads) // 2:]):
-            nodes += looks_oracle.walk_gpu_list(ram, head)
-    return textured_samples(looks_oracle.commands_of(nodes))
+        commands = looks_oracle.frame_commands(game)
+    return textured_samples(commands)
 
 
 def run_sleeves(slot: int, cue: str, expect=None, plant=False) -> int:
@@ -1133,38 +1128,27 @@ def matrix_stops(game, maps, count: int = MATRIX_STOPS, partial: bool = False,
     *partial*, returned as far as it got (`--edit-number` asks for that after
     the press, G7; in slot 8 after Circle the load keeps firing through all of
     `EDIT_TURN_STOPS`, so nothing is cut short there)."""
-    import who_writes
-
     import oracle as looks_oracle  # tools/looks
 
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.POSE_PIECE_MATRIX))
     path = os.path.join(game.out_dir, "match-matrix.bin")
     out = []
-    try:
+    # cleared and paused on the way out, whatever happens (duckmcp.debug)
+    with debug.breakpoints(game.session, [layout.POSE_PIECE_MATRIX], "execute"):
         for _ in range(count):
-            client.call("continue")
+            game.session.resume()
             if not looks_oracle._wait_for_hit(game, wait or looks_oracle.WATCH_SECONDS):
                 if partial:
                     break
                 raise RuntimeError("%s stopped %d time(s) and then stopped stopping"
-                                   % (who_writes.hx(layout.POSE_PIECE_MATRIX), len(out)))
-            registers = client.call("read_registers", group="gpr")
+                                   % (debug.hx(layout.POSE_PIECE_MATRIX), len(out)))
+            registers = looks_oracle._gpr(game)
             seen = {(where[0], where[1]) for _n, _v, where
                     in looks_oracle.pointers_into_models(registers, maps)
                     if where[1] is not None}
-            base = who_writes.register_value(registers, layout.POSE_PIECE_MATRIX_BASE)
+            base = debug.register_value(registers, layout.POSE_PIECE_MATRIX_BASE)
             rotation, translation = looks_oracle._matrix_struct(game, base, path)
             out.append({"named": sorted(seen), "rotation": rotation,
                         "translation": translation})
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
     return out
 
 def matrix_passes(pieces, roots_of=ROOT_SECTIONS) -> list:
@@ -1333,36 +1317,31 @@ def pose_capture(game, maps, submits: int = POSE_SUBMITS) -> dict:
     <state.sav>...` measures both on the save states (CORR-KRP-029) -- and a
     matrix stop carries the pair and camera seen since the previous one, or
     None."""
-    import who_writes
-
     import oracle as looks_oracle  # tools/looks
 
-    client = game.client
-    client.call("breakpoint", action="clear")
-    for address in (layout.POSE_PIECE_MATRIX, layout.GPU_LIST_SUBMIT, layout.ANIME_BUILD,
-                    layout.POSE_MATRIX):
-        client.call("breakpoint", action="add", type="execute",
-                    address=who_writes.hx(address))
     path = os.path.join(game.out_dir, "pose-matrix.bin")
     events, seen_submits, matrices = [], 0, 0
     pair = camera = None
-    try:
+    # cleared and paused on the way out, whatever happens (duckmcp.debug)
+    with debug.breakpoints(game.session, (layout.POSE_PIECE_MATRIX, layout.GPU_LIST_SUBMIT,
+                                          layout.ANIME_BUILD, layout.POSE_MATRIX),
+                           "execute"):
         while seen_submits < submits:
-            client.call("continue")
+            game.session.resume()
             if not looks_oracle._wait_for_hit(game, looks_oracle.WATCH_SECONDS):
                 raise RuntimeError("the frame loop stopped after %d event(s)" % len(events))
-            registers = client.call("read_registers", group="gpr")
-            pc = who_writes.register_value(registers, "pc")
+            registers = looks_oracle._gpr(game)
+            pc = debug.register_value(registers, "pc")
             if pc == layout.ANIME_BUILD:
-                pair = (who_writes.register_value(registers, layout.ANIME_BUILD_BASE)
+                pair = (debug.register_value(registers, layout.ANIME_BUILD_BASE)
                         - layout.ANIME_BASE)
                 continue
             if pc == layout.POSE_MATRIX:
-                camera = looks_oracle._matrix_struct(game, who_writes.register_value(
+                camera = looks_oracle._matrix_struct(game, debug.register_value(
                     registers, layout.POSE_MATRIX_BASE), path)[0]
                 continue
             if pc == layout.GPU_LIST_SUBMIT:
-                events.append({"kind": "submit", "head": who_writes.register_value(
+                events.append({"kind": "submit", "head": debug.register_value(
                     registers, layout.GPU_LIST_HEAD)})
                 seen_submits += 1
                 continue
@@ -1372,20 +1351,14 @@ def pose_capture(game, maps, submits: int = POSE_SUBMITS) -> dict:
             named = {(where[0], where[1]) for _n, _v, where
                      in looks_oracle.pointers_into_models(registers, maps)
                      if where[1] is not None}
-            base = who_writes.register_value(registers, layout.POSE_PIECE_MATRIX_BASE)
+            base = debug.register_value(registers, layout.POSE_PIECE_MATRIX_BASE)
             rotation, translation = looks_oracle._matrix_struct(game, base, path)
             events.append({"kind": "matrix", "named": sorted(named), "rotation": rotation,
                            "translation": translation,
                            "projection": looks_oracle.gte_projection(
-                               client.call("get_gte_registers")),
+                               game.session.gte_registers()),
                            "pair": pair, "camera": camera})
             pair = camera = None
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
     first, size, step = layout.SCENERY_SWEEP
     ram = b"".join(game.read_ram(base, step, os.path.join(game.out_dir, "pose-%08x.bin" % base))
                    for base in range(first, first + size, step))
@@ -1758,8 +1731,7 @@ def read_image(slot: int, cue: str, x: int, y: int, w: int, h: int) -> list:
         for n in range(2):
             load_slot(game, slot, "image-%d-%d" % (slot, n))
             rows = looks_oracle.vram_region(game, x, y, w, h)
-            reads.append([(p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10
-                          for row in rows for p in row])
+            reads.append([psx_vram.to_halfword(p) for row in rows for p in row])
     if reads[0] != reads[1]:
         raise RuntimeError("the rectangle read twice differs: nothing is measured")
     return reads[0]
@@ -1913,7 +1885,7 @@ def outside_differ(vram_words, disc_words, width: int, height: int, rects) -> in
                 inside.add((x, y))
     return sum(1 for y in range(height) for x in range(width)
                if (x, y) not in inside
-               and (vram_words[y * width + x] & 0x7FFF) != (disc_words[y * width + x] & 0x7FFF))
+               and five(vram_words[y * width + x]) != five(disc_words[y * width + x]))
 
 
 def read_back(slot: int, cue: str, page_x=None) -> list:
@@ -1929,8 +1901,7 @@ def read_back(slot: int, cue: str, page_x=None) -> list:
         for n in range(2):
             load_slot(game, slot, "back-%d-%d" % (slot, n))
             rows = looks_oracle.vram_region(game, x, record.y, record.w, record.h)
-            reads.append([(p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10
-                          for row in rows for p in row])
+            reads.append([psx_vram.to_halfword(p) for row in rows for p in row])
     return reads
 
 
@@ -2562,16 +2533,13 @@ def _edit_page(game, page_x: int):
 
     record = records_of(_screen_body())[UNIFORM_RECORD]
     rows = looks_oracle.vram_region(game, page_x, record.y, record.w, record.h)
-    return [(p[0] >> 3) | (p[1] >> 3) << 5 | (p[2] >> 3) << 10 for row in rows for p in row]
+    return [psx_vram.to_halfword(p) for row in rows for p in row]
 
 
 def _edit_kit(game, bodies: dict, label: str):
     """(hits, tag, set, page x) of the kit the screen holds in VRAM, by the
     same search `--slot` makes on a dump."""
-    path = os.path.join(game.out_dir, "%s-vram.png" % label)
-    if os.path.exists(path):
-        os.remove(path)
-    game.client.call("dump_vram", path=path, format="png")
+    path = game.session.dump_vram(os.path.join(game.out_dir, "%s-vram.png" % label))
     hits = search(vram_rows(path), bodies)
     for tag, index, at, flat, shared in hits:
         if index in (0, 1, 4, 5) and not flat and not shared:
@@ -2608,8 +2576,7 @@ def edit_capture(game, maps, bodies: dict, slot: int, player: int,
     for n, button in enumerate(buttons):
         if n:
             arrive(name + "-again")
-        game.client.call("press_button", button=button,
-                         duration_frames=looks_oracle.CONFIRM_FRAMES)
+        game.hold(button, frames=looks_oracle.CONFIRM_FRAMES)
         stops = matrix_stops(game, maps, EDIT_TURN_STOPS, partial=True, wait=EDIT_TURN_WAIT)
         yaws = [piece_yaw(figure_torso(f, {})["matrix"])
                 for f in edit_figures(edit_pieces(stops))]
@@ -2848,7 +2815,7 @@ nothing draws."""
 
 def frame_now(game) -> int:
     """The emulator's frame counter."""
-    return game.client.call("get_status").get("frame_number")
+    return game.status().get("frame_number")
 
 def replay_frames(capture: dict, nth: int = 0, choose=None) -> list:
     """[{"head", "figures", "focus"}] of every frame of a `pose_capture`, the

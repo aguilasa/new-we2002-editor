@@ -41,6 +41,8 @@ import sys
 
 KITS_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, KITS_DIR)
+if os.path.dirname(KITS_DIR) not in sys.path:     # tools/, for duckmcp
+    sys.path.append(os.path.dirname(KITS_DIR))
 
 from core import replay  # noqa: E402
 
@@ -708,7 +710,7 @@ def run_capture(slot: int, focus: int = 0, turn: str = None, walk: str = None,
     figure *focus* taps of L2 lead to, turned by *turn* when asked.  Refuses
     a plugged-in controller before booting (CORR-K3D-031).  Returns (path,
     data); the capture is written in schema v1."""
-    import fork  # tools/pes2
+    from duckmcp import fork
 
     O = _kits_oracle()
     import oracle as looks_oracle  # tools/looks
@@ -1387,7 +1389,7 @@ def main(argv=None) -> int:
         if not os.environ.get(IMAGE_VARIABLE):
             print("replay.py anime-ram: needs %s (the Japanese data track)" % IMAGE_VARIABLE)
             return 1
-        import savestate  # tools/pes2
+        from duckmcp import savestate
 
         data = read_anime(os.environ[IMAGE_VARIABLE])
         failed = 0
