@@ -46,6 +46,12 @@ O `_wait_for_hit` sonda sem dormir; o intervalo novo se escolhe medindo que a co
 
 **`--screen`.** Antes: a corrida da DMCP-TASK-22, `screen measured in 2702s` / `oracle --screen: 0 difference(s) from screen.json`. `git diff --quiet 17592d25 HEAD -- tools/looks/` sai 0, então foi feita sobre a mesma árvore `tools/looks/` da HEAD de partida. Depois: `$ E python3 tools/looks/oracle.py --screen` → `screen measured in 3137s` / `oracle --screen: 0 difference(s) from screen.json`, saída 0. Os 435 s a mais vêm, ao que parece, da sonda de vida que a espera da lib roda a cada volta não pausada (`pgrep`). A contagem de paradas não muda.
 
+> **Nota (CORR-DMCP-030, 2026-10-24):** a atribuição acima não se sustenta. A revisão desta task rodou
+> o mesmo `--screen` na HEAD entregue e mediu `screen measured in 2685s` / `oracle --screen: 0
+> difference(s) from screen.json` — menos que os 2702 s do "antes". Os 435 s não reproduzem, e uma
+> corrida de cada lado não mede custo da sonda de vida: a duração varia de corrida para corrida. Não
+> use esta linha para escolher `HIT_POLL`.
+
 **`--check-live`.** `$ E python3 tools/looks/oracle.py --check-live` → `shot slot1-goalkeeper  mean=0.182425 sd=0.189376`, `shot slot2-outfield  mean=0.183158 sd=0.190350`, `the plate differs by 0.119963 between the slots`, `203 of 36072 byte(s) differ`, `20 of 64800 byte(s) differ`, `Right moved it by 0.108086`, `oracle --check-live: 0 failure(s)`, saída 0. São os números da DMCP-TASK-22.
 
 **Não rodados ao vivo.** `--hair` (`catch_write`), `check_writes` (`_burst`), `--help-box`, `--walk`/`--walk-watch`, `--rhythm`, `--camera`/`--closeups`, `--stature` e os `--silhouette*` do `confront`. Nesses, a chamada ao servidor é a mesma de antes; o que muda é a pausa na saída (ver acima).

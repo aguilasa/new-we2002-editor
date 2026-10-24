@@ -46,3 +46,32 @@ hoje; depois da correção, ou não acha mais, ou a linha vem seguida de nota qu
 2685 s.
 
 ## Log de Execução
+
+**Reprodução (2026-10-24, HEAD `690a8474`, `rite reproduce CORR-DMCP-030 --cycle duckmcp`):** REPRODUCED
+pelo segundo comando; o primeiro tem placeholder (`J=<cópia …>`) e saiu `shell_error`, sem decidir.
+
+```text
+$ grep -n '3137s\|435 s' docs/tasks/duckmcp/23-looks-breakpoints.md
+47:**`--screen`.** Antes: a corrida da DMCP-TASK-22, `screen measured in 2702s` / … Depois: … `screen measured in 3137s` / … Os 435 s a mais vêm, ao que parece, da sonda de vida que a espera da lib roda a cada volta não pausada (`pgrep`). A contagem de paradas não muda.
+```
+
+O `--screen` (~45 min de emulador) não foi corrido de novo aqui: a correção é de texto, e a medida que
+a desfaz é a da revisão (2685 s na HEAD entregue), citada como dela.
+
+**Conserto:** nota logo depois da linha 47 da `23-looks-breakpoints.md`, sem reescrever o Log: a
+atribuição à sonda de vida não se sustenta, os 435 s não reproduzem (2685 s na HEAD, contra 2702 s do
+"antes"), uma corrida por lado não mede o custo, e a linha não serve para escolher `HIT_POLL`.
+
+**Verificação:**
+
+```text
+$ grep -n 'ao que parece, da sonda de vida' docs/tasks/duckmcp/23-looks-breakpoints.md | cut -c1-60
+47:**`--screen`.** Antes: a corrida da DMCP-TASK-22, `screen
+$ grep -n 'CORR-DMCP-030' docs/tasks/duckmcp/23-looks-breakpoints.md
+49:> **Nota (CORR-DMCP-030, 2026-10-24):** a atribuição acima não se sustenta. A revisão desta task rodou
+128:- **Reviewed** (2026-10-24) at `19e27adf`: CORR-DMCP-030
+$ rite check --cycle duckmcp --json      # errors, warnings
+0 0
+```
+
+A linha 47 continua achada e vem seguida (linha 49) da nota que a desfaz com a medida de 2685 s.
