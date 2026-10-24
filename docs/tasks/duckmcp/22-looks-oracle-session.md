@@ -103,3 +103,4 @@ E a regra (b): `python3 tools/duckmcp/selftest.py` → `ok    rule (b): PENDING 
     - `M tools/kits/oracle.py`
     - `M tools/looks/controls.py`
     - `M tools/looks/oracle.py`
+- **Reviewed** (2026-10-24) at `6cefa11d`: no finding
