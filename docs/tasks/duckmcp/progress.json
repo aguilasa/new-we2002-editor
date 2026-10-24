@@ -503,12 +503,14 @@
       "status": "done",
       "done_on": "2026-10-23",
       "done_commit": "dc42d7ce",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-24",
+      "review_commit": "19e27adf",
       "active_since": null,
       "started_at": "2026-10-23T21:22:17-03:00",
       "active_s": 4095,
-      "finished_at": "2026-10-23T22:30:32-03:00"
+      "finished_at": "2026-10-23T22:30:32-03:00",
+      "review_started_at": "2026-10-24T13:11:55-03:00",
+      "review_s": 4678
     },
     {
       "id": "DMCP-TASK-24",

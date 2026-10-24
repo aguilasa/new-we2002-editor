@@ -482,6 +482,19 @@
       "started_at": "2026-10-23T19:02:10-03:00",
       "active_s": 148,
       "finished_at": "2026-10-23T19:04:38-03:00"
+    },
+    {
+      "id": "CORR-DMCP-030",
+      "file": "CORR-DMCP-030.md",
+      "title": "Desfazer no Log da 23 a causa atribuída aos 435 s do --screen",
+      "origin": "DMCP-TASK-23",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }

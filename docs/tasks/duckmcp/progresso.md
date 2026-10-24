@@ -138,7 +138,7 @@ graph TD
 | [DMCP-TASK-20](/docs/tasks/duckmcp/20-pes2-who-writes-e-drive.md) | `pes2`: `who_writes.py`, `drive.py` e `selftest.py` sobre `debug` e `env` | 5 | implementação | DMCP-TASK-18 | done | 2026-10-23 | 2026-10-23 | approved |
 | [DMCP-TASK-21](/docs/tasks/duckmcp/21-fechamento-fase-5.md) | Fechamento da Fase 5 — a migração do pes2 | 5 | closing | DMCP-TASK-19, DMCP-TASK-20 | done | 2026-10-23 | 2026-10-24 | approved |
 | [DMCP-TASK-22](/docs/tasks/duckmcp/22-looks-oracle-session.md) | `looks`: `Oracle` sobre `Session`, e o `OneSession` some | 6 | implementação | DMCP-TASK-18 | done | 2026-10-23 | 2026-10-24 | approved |
-| [DMCP-TASK-23](/docs/tasks/duckmcp/23-looks-breakpoints.md) | `looks`: esperas e laços de breakpoint sobre `debug` | 6 | implementação | DMCP-TASK-22 | done | 2026-10-23 | pending | awaiting |
+| [DMCP-TASK-23](/docs/tasks/duckmcp/23-looks-breakpoints.md) | `looks`: esperas e laços de breakpoint sobre `debug` | 6 | implementação | DMCP-TASK-22 | done | 2026-10-23 | 2026-10-24 | changes |
 | [DMCP-TASK-24](/docs/tasks/duckmcp/24-fechamento-fase-6.md) | Fechamento da Fase 6 — a migração do looks | 6 | closing | DMCP-TASK-22, DMCP-TASK-23 | pending | — | — | — |
 | [DMCP-TASK-25](/docs/tasks/duckmcp/25-kits-oracle.md) | `kits`: `dump_slot`, `matrix_stops`, `pose_capture`, `read_frame` e `vram` sobre a lib | 7 | implementação | DMCP-TASK-24 | pending | — | — | — |
 | [DMCP-TASK-26](/docs/tasks/duckmcp/26-kits-controles.md) | `kits`: controles, `COPIED` e monkeypatch reapontados | 7 | verificação | DMCP-TASK-25 | pending | — | — | — |

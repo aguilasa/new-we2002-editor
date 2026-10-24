@@ -119,3 +119,4 @@ audit: 34 raw site(s) in 9 file(s)
     - `M tools/duckmcp/selftest.py`
     - `M tools/looks/confront.py`
     - `M tools/looks/oracle.py`
+- **Reviewed** (2026-10-24) at `19e27adf`: CORR-DMCP-030
