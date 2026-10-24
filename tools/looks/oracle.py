@@ -76,7 +76,7 @@ if PES2 not in sys.path:
 if os.path.dirname(HERE) not in sys.path:        # tools/, for duckmcp
     sys.path.append(os.path.dirname(HERE))
 
-from duckmcp import buttons, env, fork  # noqa: E402
+from duckmcp import buttons, debug, env, fork  # noqa: E402
 from duckmcp.errors import Fail, NotRunning, Skip, ToolError  # noqa: E402
 from duckmcp.session import Session  # noqa: E402
 
@@ -1435,98 +1435,64 @@ def texcoord_address(image, name, index, primitive, corner=0):
             + corner * section.TEXCOORD_STRIDE + section.V_IN_TEXCOORD)
 
 
+HIT_POLL = 0
+"""Seconds `debug.wait_for_pause` sleeps between two polls, here: none.
+
+The copy this replaced polled without sleeping, and the interval is a
+parameter of the lib's one wait (PLAN-DUCKMCP-PY section 4.3), chosen by
+measurement: `--pose 1` counts the stops at `layout.POSE_MATRIX` before the
+sequence repeats, and that count is the same with this interval as with the
+hot loop it replaced (DMCP-TASK-23).  A sleep before every poll would also
+put its length under every one of the thousands of stops `--screen` reads.
+"""
+
+
 def _wait_for_hit(game, seconds):
-    """True if the armed watchpoint fired within *seconds*, False if it did not.
+    """True if the armed breakpoint fired within *seconds*, False if not.
 
-    No exception either way: this is used once as a CONTROL, where not firing
-    is the good answer, and once as the measurement, where firing is.  Which
-    silence is a failure is the caller's to say.
+    No exception for silence: this is used once as a CONTROL, where not
+    firing is the good answer, and once as the measurement, where firing is.
+    Which silence is a failure is the caller's to say.  The emulator dying
+    while waiting is a `Fail` (pitfall 35), because `debug.wait_for_pause`
+    asks the process at every round.
     """
-    import time
+    return debug.wait_for_pause(game.session, seconds, interval=HIT_POLL,
+                                required=False) is not None
 
-    import who_writes
 
-    deadline = time.time() + seconds
-    while time.time() < deadline:
-        if who_writes.is_paused(game.client.call("wait_for_pause")):
-            return True
-    return False
+def _gpr(game):
+    """The general registers at the stop the CPU is sitting on."""
+    return game.session.call("read_registers", group="gpr")
 
 
 def catch_write(game, address, seconds=WATCH_SECONDS, presses=0,
-                button="Right"):
+                button="Right", required=True):
     """Arm a write watchpoint on one byte and come back with the hit.
 
     `presses` is how many times *button* may be pressed while waiting: zero
     means the byte is expected to be written by the game on its own, which is
     what the head's scratch copy turned out to do -- it is rewritten every
     frame whether or not anything is pressed (measured 2026-09-16), and that is
-    why this does not insist on a press being the cause.
-    """
-    import who_writes
+    why this does not insist on a press being the cause.  The press comes
+    FIRST when there is one: this byte is not written every frame -- 90s of
+    free running at one value of the field and nothing touched it.
 
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="write",
-                address=who_writes.hx(address))
+    `debug.who_writes` underneath: the window around the pc and before `ra`
+    are this module's `WINDOW_BEFORE`, `WINDOW_AFTER` and `CALLER_BEFORE`,
+    and the machine is left paused with the breakpoint cleared.  With
+    *required* false, nothing writing it is None instead of a `Fail`; the
+    emulator dying is a `Fail` either way.
+    """
     try:
-        client.call("continue")
-        # The press comes FIRST when there is one.  This byte is not written
-        # every frame -- measured: 90s of free running at one value of the
-        # field and nothing touched it -- so waiting before pressing spends
-        # the whole budget on a machine that has nothing to say.
-        hit = False
-        for _ in range(max(1, presses)):
-            if presses:
-                client.call("press_button", button=button,
-                            duration_frames=CONFIRM_FRAMES)
-            hit = _wait_for_hit(game, max(1, seconds // max(1, presses)))
-            if hit:
-                break
-        if not hit:
-            raise OracleError(
-                "nothing wrote %s in %ds%s: either the address is not what "
-                "this thinks it is, or the emulator stopped stepping -- "
-                "silence is not an answer here"
-                % (who_writes.hx(address), seconds,
-                   " and %d press(es) of %s" % (presses, button)
-                   if presses else ""))
-        registers = client.call("read_registers", group="gpr")
-        pc = who_writes.register_value(registers, "pc")
-        if pc is None:
-            raise OracleError("the register read gave no pc: %r"
-                              % (str(registers)[:200],))
-        window = client.call(
-            "disassemble",
-            address=who_writes.hx(pc - WINDOW_BEFORE * INSTRUCTION_SIZE),
-            count=WINDOW_BEFORE + WINDOW_AFTER)
-        rows = window if isinstance(window, list) else []
-        store = None
-        for row in rows:
-            text = row.get("instruction") if isinstance(row, dict) else str(row)
-            parts = who_writes.split_store(text)
-            if not parts:
-                continue
-            _mnemonic, _source, offset, base = parts
-            value = who_writes.register_value(registers, base)
-            if value is not None and value + offset == address:
-                store = (row, parts, value)
-                break
-        caller = []
-        ra = who_writes.register_value(registers, "ra")
-        if ra is not None:
-            reply = client.call(
-                "disassemble",
-                address=who_writes.hx(ra - CALLER_BEFORE * INSTRUCTION_SIZE),
-                count=CALLER_BEFORE + WINDOW_AFTER)
-            caller = reply if isinstance(reply, list) else []
-        return {"pc": pc, "registers": registers, "rows": rows,
-                "store": store, "caller": caller}
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-        except Exception:  # noqa: BLE001
-            pass
+        return debug.who_writes(
+            game.session, address, seconds=seconds, presses=presses,
+            button=button, press_frames=CONFIRM_FRAMES, interval=HIT_POLL,
+            before=WINDOW_BEFORE, after=WINDOW_AFTER,
+            caller_before=CALLER_BEFORE)
+    except Fail as exc:
+        if required or not str(exc).startswith("nothing wrote"):
+            raise
+        return None
 
 
 def _flat_registers(registers):
@@ -2361,28 +2327,15 @@ def sprites_of(commands):
 
 def gpu_list_heads(game):
     """The heads the frame submits to the GPU, in the order it submits them."""
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.GPU_LIST_SUBMIT))
     heads = []
-    try:
+    with debug.breakpoints(game.session, [layout.GPU_LIST_SUBMIT]):
         for _ in range(GPU_LIST_STOPS):
-            client.call("continue")
+            game.session.resume()
             if not _wait_for_hit(game, WATCH_SECONDS):
                 raise OracleError("%s never ran, so no list reached the GPU"
-                                  % who_writes.hx(layout.GPU_LIST_SUBMIT))
-            registers = client.call("read_registers", group="gpr")
-            heads.append(who_writes.register_value(registers,
-                                                   layout.GPU_LIST_HEAD))
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
+                                  % debug.hx(layout.GPU_LIST_SUBMIT))
+            heads.append(debug.register_value(_gpr(game),
+                                              layout.GPU_LIST_HEAD))
     return heads
 
 
@@ -3510,37 +3463,25 @@ def _burst(game, maps, press=None):
     """[(band, where)] for every write the game makes after one press.
 
     Collected until the writes stop, not counted: a head is rebuilt in a burst
-    whose length is the game's business.
+    whose length is the game's business.  Left paused, the breakpoint cleared.
     """
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.HAIR_QUAD_STORE))
     hits = []
-    try:
-        client.call("continue")
+    with debug.breakpoints(game.session, [layout.HAIR_QUAD_STORE]):
+        game.session.resume()
         if press:
-            client.call("press_button", button=press,
-                        duration_frames=CONFIRM_FRAMES)
+            game.hold(press)
         for _ in range(BURST_LIMIT):
             if not _wait_for_hit(game, BURST_SECONDS):
                 break
-            registers = client.call("read_registers", group="gpr")
-            target = who_writes.register_value(registers, "a0")
-            value = who_writes.register_value(registers, "v1")
+            registers = _gpr(game)
+            target = debug.register_value(registers, "a0")
+            value = debug.register_value(registers, "v1")
             if target is not None and value is not None:
                 where = attribute(target, maps)
                 if where:
                     hits.append(((value - BAND_TOP) // layout.ATLAS_BAND,
                                  where))
-            client.call("continue")
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-        except Exception:  # noqa: BLE001
-            pass
+            game.session.resume()
     return hits
 
 
@@ -4155,46 +4096,13 @@ def _stops(game, address, read, repeat, limit):
     apart by the `pc` in the registers (CORR-LOOKS-071).
 
     The frame is closed by repetition, not by the clock: the first *repeat*
-    stops coming round again in the same order.  The emulator is left paused.
+    stops coming round again in the same order.  `debug.stops` underneath,
+    with `CYCLE_SECONDS` before a screen that is not drawing is a `Fail`.
+    The emulator is left paused.
     """
-    import time
-
-    import who_writes
-
     addresses = address if isinstance(address, tuple) else (address,)
-    address = addresses[0]
-    client = game.client
-    client.call("breakpoint", action="clear")
-    for one in addresses:
-        client.call("breakpoint", action="add", type="execute",
-                    address=who_writes.hx(one))
-    out = []
-    deadline = time.time() + CYCLE_SECONDS
-    try:
-        client.call("continue")
-        while True:
-            if time.time() > deadline:
-                raise OracleError("%s stopped %d time(s) in %ds and never came "
-                                  "round -- the screen is not drawing"
-                                  % (who_writes.hx(address), len(out),
-                                     CYCLE_SECONDS))
-            if not who_writes.is_paused(client.call("wait_for_pause")):
-                continue
-            out.append(read(client.call("read_registers", group="gpr")))
-            if (len(out) >= 2 * repeat
-                    and out[-repeat:] == out[:repeat]):
-                del out[-repeat:]
-                return out
-            if len(out) > limit:
-                raise OracleError("%s stopped %d times without a frame coming "
-                                  "round" % (who_writes.hx(address), limit))
-            client.call("continue")
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
+    return debug.stops(game.session, addresses, read, repeat, limit,
+                       seconds=CYCLE_SECONDS, interval=HIT_POLL)
 
 
 def _cstring(game, address, size=STRING_READ):
@@ -5813,7 +5721,7 @@ def help_page_sprites(game):
 
 def _page_still(game):
     """True if nothing wrote the help page while nothing was pressed."""
-    game.client.call("continue")
+    game.session.resume()
     return not _wait_for_hit(game, HELP_CONTROL_SECONDS)
 
 
@@ -5824,36 +5732,23 @@ def krom_answers(game, button="Down"):
     Ends in SILENCE: the string is rendered once, when the help text changes,
     so there is no frame coming round to close the run with.
     """
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.HELP_GLYPH_RETURN))
     out = []
-    try:
-        client.call("continue")
-        client.call("press_button", button=button,
-                    duration_frames=CONFIRM_FRAMES)
+    with debug.breakpoints(game.session, [layout.HELP_GLYPH_RETURN]):
+        game.session.resume()
+        game.hold(button)
         while True:
             if not _wait_for_hit(game, HELP_FIRST_SECONDS if not out
                                  else HELP_NEXT_SECONDS):
                 return out
-            registers = client.call("read_registers", group="gpr")
-            out.append((who_writes.register_value(registers, "s3"),
-                        who_writes.register_value(registers, "v0")))
+            registers = _gpr(game)
+            out.append((debug.register_value(registers, "s3"),
+                        debug.register_value(registers, "v0")))
             if len(out) > HELP_STOP_LIMIT:
                 raise OracleError(
                     "%s stopped more than %d time(s) for one press"
-                    % (who_writes.hx(layout.HELP_GLYPH_RETURN),
+                    % (debug.hx(layout.HELP_GLYPH_RETURN),
                        HELP_STOP_LIMIT))
-            client.call("continue")
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
+            game.session.resume()
 
 
 def _in_bios(address):
@@ -5875,20 +5770,15 @@ def _help_writes(game):
     says is the shape of the write and which tile it landed in, never how
     many tiles the press wrote.
     """
-    import who_writes
-
-    client = game.client
-    client.call("press_button", button="Down", duration_frames=CONFIRM_FRAMES)
+    game.hold("Down")
     out = []
     while _wait_for_hit(game, HELP_FIRST_SECONDS if not out
                         else HELP_NEXT_SECONDS):
-        hit = client.call("vram_watch", action="last_hit")
-        out.append(((hit.get("x"), hit.get("y"), hit.get("width"),
-                     hit.get("height")), hit.get("pc")))
+        out.append(debug.last_vram_hit(game.session))
         if len(out) > HELP_STOP_LIMIT:
             raise OracleError("the page was written more than %d time(s) for "
                               "one press" % HELP_STOP_LIMIT)
-        client.call("continue")
+        game.session.resume()
     if not out:
         raise OracleError("Down wrote nothing to the page at %r in %ds, so "
                           "the watchpoint has nothing to say"
@@ -5974,18 +5864,18 @@ def check_help_box(slots=(2, 1), verbose=True):
     problems = []
     ready = preflight()
     with Oracle(ready["cue"], verbose=verbose) as game:
-        client = game.client
         for slot in slots:
             print("  -- slot %d (%s) --" % (slot, SLOTS[slot]))
             restore_state(slot, verbose=False)
             game.load_looks(slot, label="help-%d" % slot)
             game.step(SCENERY_SETTLE)
-            client.call("breakpoint", action="clear")
-            watch = client.call("vram_watch", action="add",
-                                x=layout.HELP_PAGE[0], y=layout.HELP_PAGE[1],
-                                width=wide * HELP_TILES,
-                                height=layout.HELP_TILE)
-            try:
+            # No breakpoint may stop the run but the watch's own: cleared
+            # on the way in, as before, by an empty `breakpoints`.
+            with debug.breakpoints(game.session, []):
+                pass
+            with debug.vram_watch(game.session, layout.HELP_PAGE[0],
+                                  layout.HELP_PAGE[1], wide * HELP_TILES,
+                                  layout.HELP_TILE):
                 still = _page_still(game)
                 print("    control: with nothing pressed, nothing wrote the "
                       "page in %ds: %s"
@@ -5996,9 +5886,6 @@ def check_help_box(slots=(2, 1), verbose=True):
                                     "nothing pressed, so the press below "
                                     "proves nothing" % slot)
                 writes = _help_writes(game)
-            finally:
-                client.call("vram_watch", action="remove",
-                            id=watch.get("id", 1))
             shapes = {one[0][2:] for one in writes}
             tiles_written = sorted({(one[0][0] - layout.HELP_PAGE[0]) // wide
                                     for one in writes})
@@ -6401,34 +6288,11 @@ def _watch_reads(game, addresses, seconds=WATCH_LIMIT, stops=1):
     Returns `(hits, pcs)`: the watches that fired with their counts, and the
     program counters that were sitting on them.  **All of them at once**: a
     sample of four of this file's 204 header entries read as silence, and the
-    one entry the game does read is the sixth.
+    one entry the game does read is the sixth.  `debug.watch_reads`
+    underneath; left paused, the watches cleared.
     """
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    for address in addresses:
-        client.call("breakpoint", action="add", type="read",
-                    address=who_writes.hx(address))
-    pcs = {}
-    try:
-        for _ in range(stops):
-            client.call("continue")
-            if not _wait_for_hit(game, seconds):
-                break
-            pc = who_writes.register_value(
-                client.call("read_registers", group="all"), "pc")
-            pcs[pc] = pcs.get(pc, 0) + 1
-        listed = client.call("breakpoint", action="list")
-        hits = [(int(w["address"], 16), w["hit_count"]) for w in listed
-                if w["hit_count"]]
-    finally:
-        try:
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
-        client.call("breakpoint", action="clear")
-    return hits, pcs
+    return debug.watch_reads(game.session, addresses, seconds=seconds,
+                             stops=stops, interval=HIT_POLL)
 
 
 def check_pose(slot=None, verbose=True):
@@ -6576,29 +6440,26 @@ into a count.
 
 def _fired_among(game, addresses, stops=FIRED_STOPS, seconds=4):
     """Arm an execute breakpoint on each and report which ones run, and how
-    often, over *stops* stops."""
-    import who_writes
+    often, over *stops* stops.
 
-    client = game.client
-    client.call("breakpoint", action="clear")
-    for address in addresses:
-        client.call("breakpoint", action="add", type="execute",
-                    address=who_writes.hx(address))
-    try:
+    Counted by the pc of each stop, which on an execute breakpoint is the
+    address armed (`_pose_cycle` tells its two apart the same way): one stop
+    per `continue` is one hit, so the count is the `hit_count` the server's
+    list would give -- measured, `--pose` names the same five with the same
+    counts both ways (DMCP-TASK-23).  Ties keep the order they were armed in.
+    """
+    addresses = list(addresses)
+    counts = {}
+    with debug.breakpoints(game.session, addresses):
         for _ in range(stops):
-            client.call("continue")
+            game.session.resume()
             if not _wait_for_hit(game, seconds):
                 break
-        listed = client.call("breakpoint", action="list")
-        return sorted(((int(w["address"], 16), w["hit_count"])
-                       for w in listed if w["hit_count"]),
-                      key=lambda pair: -pair[1])
-    finally:
-        try:
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
-        client.call("breakpoint", action="clear")
+            pc = debug.register_value(_gpr(game), "pc")
+            counts[pc] = counts.get(pc, 0) + 1
+    return sorted(((address, counts[address]) for address in
+                   dict.fromkeys(addresses) if counts.get(address)),
+                  key=lambda pair: -pair[1])
 
 
 def _matrix_stops(game):
@@ -6736,36 +6597,30 @@ def _pose_cycle(game, maps, names):
       period is 12 and every section appears once -- but the rule costs
       nothing and the alternative is a silent truncation.
     """
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    # Two breakpoints, and the pair matters: the unpack names WHERE in
-    # ANIME.BIN the angles came from, and the matrix load names which piece
-    # they were for.  Neither alone is the bridge.
-    for address in (layout.ANIME_UNPACK, layout.POSE_PIECE_MATRIX):
-        client.call("breakpoint", action="add", type="execute",
-                    address=who_writes.hx(address))
     path = os.path.join(game.out_dir, "piece-matrix.bin")
     out = []
     keys = []
     pair = None
-    try:
+    # Two breakpoints, and the pair matters: the unpack names WHERE in
+    # ANIME.BIN the angles came from, and the matrix load names which piece
+    # they were for.  Neither alone is the bridge.
+    with debug.breakpoints(game.session, (layout.ANIME_UNPACK,
+                                          layout.POSE_PIECE_MATRIX)):
         while True:
-            client.call("continue")
+            game.session.resume()
             if not _wait_for_hit(game, WATCH_SECONDS):
                 raise OracleError(
                     "%s stopped %d time(s) and then stopped stopping -- the "
                     "screen is not drawing"
-                    % (who_writes.hx(layout.POSE_PIECE_MATRIX), len(out)))
-            registers = client.call("read_registers", group="gpr")
-            if who_writes.register_value(registers, "pc")                     == layout.ANIME_UNPACK:
-                pair = (who_writes.register_value(
+                    % (debug.hx(layout.POSE_PIECE_MATRIX), len(out)))
+            registers = _gpr(game)
+            if debug.register_value(registers, "pc") == layout.ANIME_UNPACK:
+                pair = (debug.register_value(
                     registers, layout.ANIME_UNPACK_BASE) - layout.ANIME_BASE)
                 continue
             where = _drawn_section(registers, maps)
-            base = who_writes.register_value(registers,
-                                             layout.POSE_PIECE_MATRIX_BASE)
+            base = debug.register_value(registers,
+                                        layout.POSE_PIECE_MATRIX_BASE)
             rotation, translation = _matrix_struct(game, base, path)
             # The three angles the game unpacked for THIS piece, still in the
             # scratchpad when the matrix built from them is loaded.  They are
@@ -6805,12 +6660,6 @@ def _pose_cycle(game, maps, names):
             if len(out) > POSE_CYCLE_LIMIT:
                 raise OracleError("%d matrix loads and the draw order never "
                                   "repeated" % POSE_CYCLE_LIMIT)
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
 
 
 def _repeating_period(keys):
@@ -6908,30 +6757,17 @@ def _camera_matrix(game):
     three times and demanding the three agree is what makes "constant" a
     measurement instead of a reading.
     """
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.POSE_MATRIX))
     path = os.path.join(game.out_dir, "camera-matrix.bin")
     found = []
-    try:
+    with debug.breakpoints(game.session, [layout.POSE_MATRIX]):
         for _ in range(CAMERA_READS):
-            client.call("continue")
+            game.session.resume()
             if not _wait_for_hit(game, WATCH_SECONDS):
                 raise OracleError("%s never ran, so there is no camera matrix "
                                   "to compose against"
-                                  % who_writes.hx(layout.POSE_MATRIX))
-            registers = client.call("read_registers", group="gpr")
-            base = who_writes.register_value(registers, layout.POSE_MATRIX_BASE)
+                                  % debug.hx(layout.POSE_MATRIX))
+            base = debug.register_value(_gpr(game), layout.POSE_MATRIX_BASE)
             found.append(_matrix_struct(game, base, path))
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
     rotations = {tuple(one[0]) for one in found}
     if len(rotations) != 1:
         raise OracleError("the camera load handed %d different rotations in "
@@ -7453,26 +7289,20 @@ def _walk_stops(game, maps, names, passes, label, watch=None,
     if watch is None:
         watch, pair_register = layout.ANIME_BUILD, layout.ANIME_BUILD_BASE
     import anime
-    import who_writes
 
-    client = game.client
-    client.call("breakpoint", action="clear")
-    for address in (watch, layout.POSE_PIECE_MATRIX):
-        client.call("breakpoint", action="add", type="execute",
-                    address=who_writes.hx(address))
     path = os.path.join(game.out_dir, "walk-%s.bin" % label)
     out = []
     pair = None
-    try:
+    with debug.breakpoints(game.session, (watch, layout.POSE_PIECE_MATRIX)):
         while len(out) < passes * (anime.PIECE_PAIRS + 1):
-            client.call("continue")
+            game.session.resume()
             if not _wait_for_hit(game, WATCH_SECONDS):
                 raise OracleError(
                     "the draw stopped after %d matrix load(s) -- the screen is "
                     "not drawing the figure any more" % len(out))
-            registers = client.call("read_registers", group="gpr")
-            if who_writes.register_value(registers, "pc") == watch:
-                pair = who_writes.register_value(
+            registers = _gpr(game)
+            if debug.register_value(registers, "pc") == watch:
+                pair = debug.register_value(
                     registers, pair_register) - layout.ANIME_BASE
                 continue
             if pair is None:
@@ -7488,8 +7318,8 @@ def _walk_stops(game, maps, names, passes, label, watch=None,
                     raise OracleError("a matrix load with no pair before it, "
                                       "%d stop(s) in" % len(out))
             where = _drawn_section(registers, maps)
-            base = who_writes.register_value(registers,
-                                             layout.POSE_PIECE_MATRIX_BASE)
+            base = debug.register_value(registers,
+                                        layout.POSE_PIECE_MATRIX_BASE)
             rotation, translation = _matrix_struct(game, base, path)
             out.append({
                 "pointer_section": where[1] if where else None,
@@ -7499,15 +7329,9 @@ def _walk_stops(game, maps, names, passes, label, watch=None,
                     "<3h", game.read_ram(layout.POSE_ANGLES, 6, path))),
                 "pair": pair,
                 "mode": game.read_ram(layout.ANIME_BLEND_MODE, 1, path)[0],
-                "frame_number": client.call("get_status").get("frame_number"),
+                "frame_number": game.status().get("frame_number"),
             })
             pair = None
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
     return out
 
 
@@ -8179,31 +8003,17 @@ def pose_builds(game, count):
     walk at the same moment; a walk that restarted would read the first frame
     of the file's block where the other reads the middle of it.
     """
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.ANIME_BUILD))
     out = []
-    try:
+    with debug.breakpoints(game.session, [layout.ANIME_BUILD]):
         while len(out) < count:
-            client.call("continue")
+            game.session.resume()
             if not _wait_for_hit(game, WATCH_SECONDS):
                 raise OracleError("the pose build stopped after %d hit(s) -- "
                                   "the screen is not drawing the figure"
                                   % len(out))
-            registers = client.call("read_registers", group="gpr")
-            pair = (who_writes.register_value(registers,
-                                              layout.ANIME_BUILD_BASE)
+            pair = (debug.register_value(_gpr(game), layout.ANIME_BUILD_BASE)
                     - layout.ANIME_BASE)
-            out.append((client.call("get_status")["frame_number"], pair))
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
+            out.append((game.status()["frame_number"], pair))
     return out
 
 
@@ -8607,8 +8417,6 @@ def capture_camera(game, slot, frame=0, row=None):
     state loads -- is not the camera of `HAIR`, and each is measured where it
     is used rather than assumed to be the other.
     """
-    import who_writes
-
     restore_state(slot, verbose=False)
     game.load_looks(slot, label="camera-%d-%d-%s" % (slot, frame, row or ""))
     if row is not None:
@@ -8621,26 +8429,16 @@ def capture_camera(game, slot, frame=0, row=None):
             game.press("Down", box=FOOTER, least=ROW_MOVED)
         game.step(CLOSE_UP_SETTLE)
     game.step(frame)
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.POSE_PIECE_MATRIX))
     seen = []
-    try:
+    with debug.breakpoints(game.session, [layout.POSE_PIECE_MATRIX]):
         for _ in range(CAMERA_STOPS):
-            client.call("continue")
+            game.session.resume()
             if not _wait_for_hit(game, WATCH_SECONDS):
                 raise OracleError("%s stopped %d time(s) and then stopped "
                                   "stopping"
-                                  % (who_writes.hx(layout.POSE_PIECE_MATRIX),
+                                  % (debug.hx(layout.POSE_PIECE_MATRIX),
                                      len(seen)))
-            seen.append(gte_projection(client.call("get_gte_registers")))
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
+            seen.append(gte_projection(game.session.gte_registers()))
     camera = _camera_matrix(game)
     return {"slot": slot, "state": SLOTS[slot], "frame": frame, "row": row,
             "projection": seen, "camera": camera,
@@ -8657,28 +8455,15 @@ def _camera_chain(game):
     refuses a chain that does not reproduce it: the chain is what lets the
     window draw a figure of another height with the camera the game would use.
     """
-    import who_writes
-
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.CAMERA_BUILD))
     path = os.path.join(game.out_dir, "camera-chain.bin")
-    try:
-        client.call("continue")
+    with debug.breakpoints(game.session, [layout.CAMERA_BUILD]):
+        game.session.resume()
         if not _wait_for_hit(game, WATCH_SECONDS):
             raise OracleError("%s never ran, so the camera was not built"
-                              % who_writes.hx(layout.CAMERA_BUILD))
-        registers = client.call("read_registers", group="gpr")
-        base = who_writes.register_value(registers, layout.CAMERA_VIEW_BASE)
+                              % debug.hx(layout.CAMERA_BUILD))
+        base = debug.register_value(_gpr(game), layout.CAMERA_VIEW_BASE)
         rotation, translation = _matrix_struct(game, base, path)
         figure = _figure_now(game)
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-            client.call("pause")
-        except Exception:  # noqa: BLE001
-            pass
     return dict(figure, view={"rotation": rotation,
                               "translation": translation})
 

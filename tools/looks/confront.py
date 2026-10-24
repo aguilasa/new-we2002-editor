@@ -1274,13 +1274,8 @@ def still_frame(game, display, oracle, screen):
     import atlas
 
     width, height = display
-    path = os.path.join(game.out_dir, "still.png")
-    if os.path.exists(path):
-        os.remove(path)
-    game.client.call("dump_vram", path=path, format="png")
-    if not os.path.exists(path):
-        raise ConfrontError("dump_vram reported %s and there is no file there"
-                            % path)
+    # The session removes a stale file first and refuses an empty answer.
+    path = game.session.dump_vram(os.path.join(game.out_dir, "still.png"))
     _width, _height, rows = atlas.read_png(path)
     best, found = None, -1
     for origin in BUFFERS:
@@ -1316,7 +1311,7 @@ def game_at(game, slot, counted, oracle, anime, data, entry, table,
     the same number twice.
     """
     import layout
-    import who_writes
+    from duckmcp import debug
 
     oracle.restore_state(slot, verbose=False)
     game.load_looks(slot, label="silhouette-%d-%d" % (slot, counted))
@@ -1329,25 +1324,16 @@ def game_at(game, slot, counted, oracle, anime, data, entry, table,
             game.press("Down", box=oracle.FOOTER, least=oracle.ROW_MOVED)
         game.step(oracle.CLOSE_UP_SETTLE)
     game.step(counted)
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.ANIME_UNPACK))
-    try:
-        client.call("continue")
+    # Left paused where it stopped, the breakpoint cleared: the dump below
+    # is of that stop.
+    with debug.breakpoints(game.session, [layout.ANIME_UNPACK]):
+        game.session.resume()
         if not oracle._wait_for_hit(game, oracle.WATCH_SECONDS):
             raise ConfrontError("the unpack at %s never ran at frame %d"
-                                % (who_writes.hx(layout.ANIME_UNPACK),
-                                   counted))
-        registers = client.call("read_registers", group="gpr")
-        pair = (who_writes.register_value(registers,
-                                          layout.ANIME_UNPACK_BASE)
+                                % (debug.hx(layout.ANIME_UNPACK), counted))
+        pair = (debug.register_value(oracle._gpr(game),
+                                     layout.ANIME_UNPACK_BASE)
                 - layout.ANIME_BASE)
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-        except Exception:  # noqa: BLE001
-            pass
     import screen as screen_module
 
     # One frame, and it is what makes the picture a FINISHED one: stopped
@@ -1514,27 +1500,17 @@ def walk_photo(game, slot, counted, oracle, table):
     """
     import layout
     import screen as screen_module
-    import who_writes
+    from duckmcp import debug
 
     oracle.restore_state(slot, verbose=False)
     game.load_looks(slot, label="walk-silhouette-%d-%d" % (slot, counted))
     game.step(counted)
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.ANIME_BUILD))
-    try:
-        client.call("continue")
+    with debug.breakpoints(game.session, [layout.ANIME_BUILD]):
+        game.session.resume()
         if not oracle._wait_for_hit(game, oracle.WATCH_SECONDS):
             raise ConfrontError("the pose build at %s never ran at frame %d"
-                                % (who_writes.hx(layout.ANIME_BUILD),
-                                   counted))
-        number = client.call("get_status")["frame_number"]
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-        except Exception:  # noqa: BLE001
-            pass
+                                % (debug.hx(layout.ANIME_BUILD), counted))
+        number = game.status()["frame_number"]
     game.step(1)
     frame = still_frame(game, table["display"], oracle, screen_module)
     return number, panel_mask(frame, table["regions"]["panel"]["native"])
@@ -2768,6 +2744,12 @@ def main(argv: list[str]) -> int:
         return SKIP
     except (ConfrontError, oracle.OracleError) as exc:
         print("confront FAILED: %s" % exc, file=sys.stderr)
+        return 1
+    except (oracle.Fail, oracle.NotRunning, oracle.ToolError) as exc:
+        # The lib's errors, mapped as oracle.main maps them (section 4.3):
+        # the waits and breakpoints are duckmcp.debug's since DMCP-TASK-23.
+        print("confront FAILED: %s: %s" % (type(exc).__name__, exc),
+              file=sys.stderr)
         return 1
     print(__doc__.strip())
     return 2
