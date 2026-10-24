@@ -63,4 +63,6 @@ $ ctest --test-dir build -R tasks
 - `looks_selftest` verde, com a contagem de controles antes e depois explicada: 114 → 113 na 22 (o que migrou), 113 na 23 (nenhum controle mirava o código movido).
 
 A Fase 6 está fechada.
-
+- **Closed** — commit `cae92110` (2026-10-24): docs(duckmcp): close phase 6
+  - Files (`git show --name-status cae92110`):
+    - `M docs/tasks/duckmcp/24-fechamento-fase-6.md`

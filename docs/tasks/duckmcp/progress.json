@@ -522,11 +522,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#6",
       "files": [],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-24",
+      "done_commit": "cae92110",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-24T18:21:34-03:00",
+      "active_s": 62,
+      "finished_at": "2026-10-24T18:22:36-03:00"
     },
     {
       "id": "DMCP-TASK-25",
