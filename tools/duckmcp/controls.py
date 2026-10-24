@@ -225,6 +225,19 @@ CONTROLS = (
         "through", None,
         "a stolen session (pitfall 46) re-raised instead of taken back: the "
         "loopback stand-in of the one-session rule must catch it"),
+    # Migrated from tools/looks/controls.py with the OneSession it planted
+    # in (DMCP-TASK-22): the loss is caught, and the session is resent
+    # under the stale id instead of a new handshake.
+    Control(
+        "oracle-session-never-renewed", "client", "client.py",
+        "            self.session = self.server = None\n",
+        "",
+        "FAIL  client: a stolen session is recovered once and the call goes "
+        "through", None,
+        "a session taken by another client on the fork's port, not "
+        "handshaken again: initialize() is a no-op with the old server "
+        "still set, the call goes out under the stale id and dies, and "
+        "whoever reads it learns to rerun until green (CORR-LOOKS-051)"),
     Control(
         "client-liveness-unwired", "client", "client.py",
         "        return bool(fork.running_pids())\n",

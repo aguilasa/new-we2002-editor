@@ -58,7 +58,6 @@ Usage:
 
 from __future__ import annotations
 
-import ctypes
 import hashlib
 import os
 import shutil
@@ -74,9 +73,14 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 PES2 = os.path.join(ROOT, "tools", "pes2")
 if PES2 not in sys.path:
     sys.path.insert(0, PES2)
+if os.path.dirname(HERE) not in sys.path:        # tools/, for duckmcp
+    sys.path.append(os.path.dirname(HERE))
+
+from duckmcp import buttons, env, fork  # noqa: E402
+from duckmcp.errors import Fail, NotRunning, Skip, ToolError  # noqa: E402
+from duckmcp.session import Session  # noqa: E402
 
 SKIP = 77
-WINDOWS = os.name == "nt"
 
 
 # --- what the environment names -------------------------------------------
@@ -330,32 +334,25 @@ def project_state(slot: int) -> str:
 def emulator_states_dir() -> str:
     """Where DuckStation itself keeps save states on this machine.
 
-    Windows runs the fork out of its own folder, so its data directory is that
-    folder; on Linux it is the user's shared one, which is what
-    `tools/pes2/mcp_drive.py` records.  Derived from `fork.FORK_HOME` rather
-    than imported from `mcp_drive`, because that module pulls in PIL at import
-    time and asking where a file lives should not need an image library.
+    `env.savestates_dir()` of the lib: the fork's own folder on Windows, where
+    it runs portable, and the user's shared one on Linux.  Read each time, so
+    a `DUCKSTATION_FORK` (or the legacy `PES2_FORK` make.ps1 sets) exported
+    after this module loaded still counts.  `WE2002_LOOKS_EMULATOR_STATES`
+    beats it, for a machine whose emulator keeps them elsewhere.
     """
     override = os.environ.get(ENV_EMULATOR_STATES)
     if override:
         return os.path.expanduser(override)
-
-    import fork
-
-    if WINDOWS:
-        # Read from the environment each time rather than from the constant
-        # fork.py resolved at import: `PES2_FORK` is how make.ps1 says where
-        # the fork lives, and a value set after this module loaded would
-        # otherwise be ignored in silence.
-        return os.path.join(os.path.expanduser(
-            os.environ.get("PES2_FORK", fork.FORK_HOME)), "savestates")
-    return os.path.expanduser("~/.local/share/duckstation/savestates")
+    return env.savestates_dir()
 
 
 def emulator_state(slot: int) -> str:
     """The slot file itself, which is the only place `load_state` reads from:
-    it takes a slot number, not a path."""
-    return os.path.join(emulator_states_dir(), "%s_%d.sav" % (SERIAL, slot))
+    it takes a slot number, not a path.  `env.state_path` names it, unless
+    the override above moved the folder."""
+    if os.environ.get(ENV_EMULATOR_STATES):
+        return os.path.join(emulator_states_dir(), "%s_%d.sav" % (SERIAL, slot))
+    return env.state_path(SERIAL, slot)
 
 
 def digest(path: str) -> str:
@@ -369,7 +366,7 @@ def media_of(path: str) -> str:
     The header is plain -- only the payload is zstd -- so this works on a
     machine with no decompressor, which this one is.
     """
-    import savestate
+    from duckmcp import savestate
 
     return savestate.SaveState(path).media
 
@@ -549,23 +546,10 @@ def preflight() -> dict:
 
 
 # --- the window -----------------------------------------------------------
-
-def hide_window(handle) -> bool:
-    """Move the emulator off the visible desktop, and do it at once.
-
-    The repository rule has no Xvfb to lean on here: on Windows the editors and
-    the emulator are moved to -32000 instead, which keeps them drawing (unlike
-    `SW_HIDE`, which blanks the capture) while keeping them off the screen the
-    user is working on.  Captures come out of the emulator's own frame buffer
-    anyway, so nothing downstream cares where the window is.
-    """
-    if not WINDOWS or not handle:
-        return False
-    off = -32000  # not-an-address: the off-screen coordinate of CLAUDE.md
-    flags = 0x0001 | 0x0004 | 0x0010  # not-an-address: NOSIZE|NOZORDER|NOACTIVATE
-    return bool(ctypes.windll.user32.SetWindowPos(int(handle), 0, off, off,
-                                                  0, 0, flags))
-
+#
+# Moving it off the desktop and sizing it are the lib's (`fork.hide_window`,
+# `fork.size_window`, DMCP-TASK-22).  What stays here is the size, because it
+# is a fact about this screen's thresholds and not about the emulator.
 
 SHOT_SIZE = (864, 655)
 """The size of the frame every threshold in this module was measured on.
@@ -577,96 +561,31 @@ Windows, whose saved `[UI] MainWindowWidth` is 864; the Linux machine's is 800,
 and the same LOOKS SET frame there came out at a mean of 0.1688 against the
 0.1828 +- 0.006 of the screen -- and at 0.1838 once the window was 864 wide
 (CORR-LOOKS-102).  The session sets it rather than trusting each machine's
-settings, and `Session.capture` refuses a frame of any other size.
+settings, and `Oracle.capture` refuses a frame of any other size.
 """
-
-
-def size_window(handle) -> bool:
-    """Make the game window SHOT_SIZE, on X, and wait until it is.
-
-    Not on Windows: there SetWindowPos sizes the frame and not the client
-    area, and no run on that machine has measured the difference.  It keeps
-    relying on its saved width, and a wrong one is caught by `capture`.
-    """
-    if WINDOWS or not handle:
-        return False
-    import subprocess
-    import time
-
-    display = os.environ.get("PES2_DISPLAY", ":98")
-    env = dict(os.environ, DISPLAY=display)
-    if display == ":98":
-        env["XAUTHORITY"] = ""
-    width, height = SHOT_SIZE
-    subprocess.run(["xdotool", "windowsize", str(handle), str(width),
-                    str(height)], env=env, capture_output=True, check=True)
-    want = "Geometry: %dx%d" % SHOT_SIZE
-    for _ in range(40):
-        geometry = subprocess.run(["xdotool", "getwindowgeometry",
-                                   str(handle)], env=env, capture_output=True,
-                                  text=True).stdout
-        if want in geometry:
-            return True
-        time.sleep(0.05)
-    raise OracleError("the game window did not become %dx%d: %s"
-                      % (width, height, geometry.strip()))
 
 
 # --- the session ----------------------------------------------------------
 
-SESSION_LOST = "invalid MCP-Session-Id"
-"""What the fork answers when the session this client holds is no longer its.
-
-**The server keeps one session.**  Measured 2026-09-17, three runs of three:
-a second client's `initialize` on the same port makes the first client's next
-call fail with exactly this, and every call after it (CORR-LOOKS-051).  This
-repository registers the fork in `.mcp.json`, so the editor is a second client
-on port 2346, and one `looks_live` run in fourteen lost its session at the first
-`pause` that way."""
-
-
-class OneSession:
-    """The fork's MCP client, handshaken again ONCE when its session is taken.
-
-    Once per loss, and said every time, never silently: a call refused for a
-    lost session was refused before it ran, so repeating it after a new
-    `initialize` is the same call and not a second one.  A loss right after
-    the new handshake raises -- two clients fighting over the port is a
-    machine to fix, not a run to repeat until it passes.
-    """
-
-    def __init__(self, client):
-        self._client = client
-        self.renewed = 0
-
-    def call(self, name, **arguments):
-        import mcp
-
-        try:
-            return self._client.call(name, **arguments)
-        except mcp.ToolError as exc:
-            if SESSION_LOST not in str(exc):
-                raise
-        self._client.session = None
-        self._client.server = None
-        self._client.initialize()
-        self.renewed += 1
-        print("  MCP session taken by another client on the port -- "
-              "initialised again before %s (%d time(s) this run)"
-              % (name, self.renewed), flush=True)
-        return self._client.call(name, **arguments)
-
-    def __getattr__(self, attribute):
-        return getattr(self._client, attribute)
-
-
 class Oracle:
-    """A booted game, paused, with an MCP session against it.
+    """A booted game, paused, with a `duckmcp.Session` against it.
 
     Use as a context manager.  It owns the emulator it started and kills it on
     the way out -- DuckStation keeps one data directory, so one instance at a
     time is the rule for the whole repository, and leaving one up would take
     the PES2 tooling down with it.
+
+    The clock, the pad, the captures and the RAM go through `self.session`,
+    which wraps the client `fork.launch` answered.  A session taken by
+    another client on the port (CORR-LOOKS-051, pitfall 46) is the client's
+    to take back: `duckmcp.Client` handshakes again once and resends, and a
+    second loss in a row raises `SessionLost`.  How many times that happened
+    is said on the way out, never silently.
+
+    The launch itself stays here rather than in `Session(image)`: the
+    controller is refused in THIS method, the one place every live
+    measurement of `looks` and `kits` enters (CORR-K3D-031), and the window
+    is moved and sized before the first pause, as it always was.
     """
 
     def __init__(self, cue=None, out_dir=None, verbose=True):
@@ -674,6 +593,7 @@ class Oracle:
         self.out_dir = out_dir or os.path.join(ROOT, "work", "looks-shots")
         self.verbose = verbose
         self.client = None
+        self.session = None
         self.window = None
         self.pid = None
         self.shots = []
@@ -683,50 +603,72 @@ class Oracle:
             print("  %s" % message, flush=True)
 
     def __enter__(self):
-        import fork
-
         cue = self.cue or drive_image()
         if not os.path.isfile(cue):
             raise Unavailable("no disc image at %s" % cue)
         fork.refuse_joysticks()
+        running = set(fork.running_pids())
         try:
             self.pid, self.window, self.client = fork.launch(
                 cue, verbose=self.verbose, match=fork.ANY_WINDOW)
-        except fork.Skip as exc:
+        except Skip as exc:
             raise Unavailable(str(exc)) from None
-        self.client = OneSession(self.client)
+        except BaseException:
+            # A Fail can come after the Popen (no window in time): a new pid
+            # is ours to stop; none new means nothing was launched.
+            if set(fork.running_pids()) - running:
+                fork.kill(verbose=False)
+            raise
+        self.session = Session(client=self.client, verbose=self.verbose)
         # From here on the emulator is up, and `__exit__` does not run for an
         # exception raised inside `__enter__`.  The first `looks_live` run
         # under ctest lost its MCP session at this `pause()` and left the
         # emulator running with nobody to kill it (LOOKS-TASK-19).
         try:
-            if hide_window(self.window):
+            if fork.hide_window(self.window):
                 self.say("window moved off the visible desktop")
-            if size_window(self.window):
+            if fork.size_window(self.window, SHOT_SIZE):
                 self.say("window sized %dx%d, the measured frame" % SHOT_SIZE)
             os.makedirs(self.out_dir, exist_ok=True)
-            self.pause()
+            self.session.__enter__()       # handshake (idempotent) and pause
         except BaseException:
             fork.kill(verbose=False)
             raise
         return self
 
     def __exit__(self, *exc):
-        import fork
-
+        reclaimed = getattr(self.client, "reclaimed", 0)
+        if reclaimed:
+            self.say("MCP session taken by another client on the port -- "
+                     "handshaken again %d time(s) this run" % reclaimed)
         fork.kill(verbose=False)
         return False
 
     # -- the clock --
 
     def pause(self):
-        self.client.call("pause")
+        self.session.pause()
 
     def step(self, frames=1):
-        for _ in range(frames):
-            self.client.call("frame_step")
+        self.session.step(frames)
+
+    def status(self):
+        """`get_status` whole: the session has a method per field it reads
+        (`frame`, `game`), and `clock_span` reads three counters at once."""
+        return self.session.call("get_status")
 
     # -- input --
+
+    def hold(self, button, frames=CONFIRM_FRAMES):
+        """`press_button` for `frames` and NO step after it.
+
+        For a press whose consequence the caller counts itself -- the turn
+        and rhythm reads step frame by frame from the press on, so the 28
+        frames `press` steps would move what they measure.  The release is
+        on the emulator's clock all the same (`duration_frames`, pitfall 36).
+        """
+        self.session.call("press_button", button=buttons.canonical(button),
+                          duration_frames=frames)
 
     def press(self, button, box=None, expect_change=True, least=None):
         """One button, held CONFIRM_FRAMES, then look.
@@ -737,9 +679,7 @@ class Oracle:
         silent no-op -- which is the failure three frames of Circle produced.
         """
         before = self.capture() if expect_change else None
-        self.client.call("press_button", button=button,
-                         duration_frames=CONFIRM_FRAMES)
-        self.step(CONFIRM_FRAMES + SETTLE_FRAMES)
+        self.session.press(button, frames=CONFIRM_FRAMES, after=SETTLE_FRAMES)
         after = self.capture()
         if expect_change:
             floor = MOVED if least is None else least
@@ -760,11 +700,7 @@ class Oracle:
         from drive import Frame
 
         name = "%s.png" % (label or "scratch")
-        path = os.path.join(self.out_dir, name)
-        self.client.call("take_screenshot", path=path)
-        if not os.path.exists(path):
-            raise OracleError("the emulator reported a screenshot at %s and "
-                              "there is no file there" % path)
+        path = self.session.capture(os.path.join(self.out_dir, name))
         frame = Frame(path)
         if frame.size != SHOT_SIZE:
             raise OracleError(
@@ -788,15 +724,9 @@ class Oracle:
         installed either, so it prints the header and then raises
         `FileNotFoundError [WinError 2]` -- a message that never mentions zstd.
         The state is the starting position; the memory comes from the running
-        emulator.
+        emulator.  A short file is the session's `ToolError`.
         """
-        self.client.call("read_memory", address=address, size=size, path=path)
-        with open(path, "rb") as handle:
-            data = handle.read()
-        if len(data) != size:
-            raise OracleError("asked for %d bytes at %#x and got %d"
-                              % (size, address, len(data)))
-        return data
+        return self.session.read_ram(address, size, path)
 
     # -- the screen --
 
@@ -810,8 +740,7 @@ class Oracle:
         if slot not in SLOTS:
             raise OracleError("slot %r is not one of this cycle's two" % slot)
         self.pause()
-        self.client.call("load_state", slot=slot)
-        self.step(LOAD_FRAMES)
+        self.session.load_state(slot, settle=LOAD_FRAMES)
         frame = self.capture(label)
         self.require_looks(frame, slot)
         self.say("slot %d restored: the %s, on LOOKS SET"
@@ -1782,12 +1711,7 @@ def vram_region(game, x, y, width, height):
     """
     import atlas
 
-    reply = game.client.call("read_vram_region", x=x, y=y,
-                             width=width, height=height)
-    path = reply.get("output_path")
-    if not path or not os.path.exists(path):
-        raise OracleError("read_vram_region reported %r and there is no file "
-                          "there" % path)
+    path = game.session.read_vram_region(x, y, width, height)
     got_w, got_h, rows = atlas.read_png(path)
     if (got_w, got_h) != (width, height):
         raise OracleError("asked VRAM for %dx%d at (%d, %d) and the PNG is "
@@ -3099,10 +3023,8 @@ def provenance_map(game, display, confront, screen):
     import atlas
 
     frame = confront.still_frame(game, display, oracle_module(), screen)
-    path = os.path.join(game.out_dir, "vram-provenance.png")
-    if os.path.exists(path):
-        os.remove(path)
-    game.client.call("dump_vram", path=path, format="png")
+    path = game.session.dump_vram(os.path.join(game.out_dir,
+                                               "vram-provenance.png"))
     width, height, rows = atlas.read_png(path)
     tile = PROVENANCE_TILE
     # Every block of VRAM OUTSIDE the two frame buffers, by its pixels.
@@ -3201,8 +3123,8 @@ def _repaint_map(game, slot, width, height, confront, screen):
     with open(path, "wb") as handle:
         handle.write(struct.pack("<H", REPAINT_COLOUR) * (width * height))
     for origin in confront.BUFFERS:
-        game.client.call("write_vram_region", x=0, y=origin, width=width,
-                         height=height, input_path=path, format="raw")
+        game.session.write_vram_region(0, origin, width, height,
+                                       input_path=path)
     game.step(REPAINT_FRAMES)
     after = confront.still_frame(game, (width, height), oracle_module(),
                                  screen)
@@ -3335,9 +3257,8 @@ def _page_frame(game, slot, display, confront, screen, page=None):
         with open(path, "wb") as handle:
             handle.write(struct.pack("<H", REPAINT_COLOUR)
                          * (PAGE_SIZE[0] * PAGE_SIZE[1]))
-        game.client.call("write_vram_region", x=page[0], y=page[1],
-                         width=PAGE_SIZE[0], height=PAGE_SIZE[1],
-                         input_path=path, format="raw")
+        game.session.write_vram_region(page[0], page[1], PAGE_SIZE[0],
+                                       PAGE_SIZE[1], input_path=path)
     game.step(PAGE_FRAMES)
     return confront.still_frame(game, display, oracle_module(), screen)
 
@@ -4486,13 +4407,8 @@ def screen_frames(game, display):
         # A name per dump, removed first: a file left by an earlier dump under
         # the same name would be read as this one if the emulator did not
         # write, and nothing would say so.
-        path = os.path.join(game.out_dir, "vram-%d.png" % sample)
-        if os.path.exists(path):
-            os.remove(path)
-        game.client.call("dump_vram", path=path, format="png")
-        if not os.path.exists(path):
-            raise OracleError("dump_vram reported %s and there is no file "
-                              "there" % path)
+        path = game.session.dump_vram(os.path.join(game.out_dir,
+                                                   "vram-%d.png" % sample))
         _, _, rows = atlas.read_png(path)
         frame = [row[:width] for row in rows[:height]]
         boxes = screen.boxes(frame, width, height)
@@ -4510,9 +4426,7 @@ def screen_frames(game, display):
 
 def tap(game, button):
     """One press, the same length the rest of the oracle uses, and no picture."""
-    game.client.call("press_button", button=button,
-                     duration_frames=CONFIRM_FRAMES)
-    game.step(CONFIRM_FRAMES + SETTLE_FRAMES)
+    game.session.press(button, frames=CONFIRM_FRAMES, after=SETTLE_FRAMES)
 
 
 class ScreenReading:
@@ -4732,7 +4646,7 @@ def measure_screen(game, verbose=True):
         # columns holds the panel and no rows box.  Four runs of this
         # measurement failed on exactly that, and were first taken for a
         # screen caught mid-draw.
-        gpu = game.client.call("get_gpu_state")
+        gpu = game.session.gpu_state()
         here_display = (int(gpu["display_width"]),
                         int(gpu["display_height"]))
         if display not in (None, here_display):
@@ -8195,9 +8109,9 @@ def clock_span(game, frames):
     per drawn pass and not once per video frame, so a cycle of the walk has to
     present its 34.
     """
-    before = game.client.call("get_status")
+    before = game.status()
     game.step(frames)
-    after = game.client.call("get_status")
+    after = game.status()
     return {
         "frames": after["frame_number"] - before["frame_number"],
         "ticks": after["global_tick_counter"] - before["global_tick_counter"],
@@ -8394,8 +8308,7 @@ def check_turn(slot=None, verbose=True):
             for _ in range(2):
                 game.load_looks(one)
                 rest = _turn_reads(game, 30)
-                game.client.call("press_button", button="Down",
-                                 duration_frames=CONFIRM_FRAMES)
+                game.hold("Down")
                 runs.append((rest, _turn_reads(game, TURN_FRAMES)))
             if runs[0] != runs[1]:
                 problems.append("slot %d: the same entry read twice differs, "
@@ -8442,8 +8355,7 @@ def check_turn(slot=None, verbose=True):
             # past the first end, so it is going UP -- leaving while it went
             # down would pass a turn that always restarts downwards.
             game.load_looks(one)
-            game.client.call("press_button", button="Down",
-                             duration_frames=CONFIRM_FRAMES)
+            game.hold("Down")
             stay = _turn_changes(_turn_reads(game, TURN_REENTER_AFTER))
             going = scene.turn_after(len(stay) - 1,
                                      layout.TURN_FIRST_DIRECTION)[1]
@@ -8453,11 +8365,9 @@ def check_turn(slot=None, verbose=True):
                                 "a kept direction from a reset one"
                                 % (one, TURN_REENTER_AFTER))
                 continue
-            game.client.call("press_button", button="Up",
-                             duration_frames=CONFIRM_FRAMES)
+            game.hold("Up")
             back = _turn_reads(game, 60)
-            game.client.call("press_button", button="Down",
-                             duration_frames=CONFIRM_FRAMES)
+            game.hold("Down")
             again = _turn_changes(_turn_reads(game, 30))
             if back[-1] != layout.TURN_REST:
                 problems.append("slot %d: back on %s the turn reads %d, not "
@@ -8527,7 +8437,7 @@ def check_rhythm(slot=None, verbose=True):
                 restore_state(one, verbose=False)
                 game.load_looks(one, label="rhythm-%d" % one)
                 spans.append(clock_span(game, frames))
-            gpu = game.client.call("get_gpu_state")
+            gpu = game.session.gpu_state()
             print("    the GPU: pal_mode %s, interlaced %s, %sx%s"
                   % (gpu.get("pal_mode"), gpu.get("interlaced"),
                      gpu.get("display_width"), gpu.get("display_height")))
@@ -8610,8 +8520,7 @@ def check_rhythm(slot=None, verbose=True):
             game.load_looks(one, label="rhythm-leave-%d" % one)
             game.press("Down", box=FOOTER, least=ROW_MOVED)
             game.step(RHYTHM_ROW_SETTLE)
-            game.client.call("press_button", button="Up",
-                             duration_frames=CONFIRM_FRAMES)
+            game.hold("Up")
             after = owners(pose_builds(game, anime.PIECE_PAIRS))
             resumed = {(entry, frame) for entry, frame, _slot in after}
             want = {(layout.ANIME_SCREEN_ENTRY, layout.WALK_HELD_FRAME + 1)}
@@ -9987,50 +9896,39 @@ def _checks(c) -> None:
                                         _FakeSection(SPAN // 2,
                                                      SPAN)])}))
 
-    # The session taken by another client, on a fake server (CORR-LOOKS-051).
+    # The session taken by another client (CORR-LOOKS-051) is the lib's to
+    # take back now: `duckmcp.Client` reclaims it, its self-check plays the
+    # fork's one-session rule on loopback, and the control that drops the
+    # new handshake lives in tools/duckmcp/controls.py (DMCP-TASK-22).
+    #
+    # What stays here is main's answer to the lib's errors (PLAN-DUCKMCP-PY
+    # section 4.3): a machine that cannot run it is a skip, 77; an emulator
+    # that did not come up, stopped answering or refused a call is a
+    # failure, 1 -- one line on stderr, never a traceback.
     import io
     import contextlib
-    import mcp
 
-    class Fake:
-        def __init__(self, losses, other=False):
-            self.losses, self.other = losses, other
-            self.session, self.server, self.handshakes, self.calls = "s", {}, 0, 0
+    from duckmcp.errors import SessionLost
 
-        def initialize(self):
-            self.handshakes += 1
-            self.server = {}
+    saved = globals()["check_states"]
+    try:
+        for kind, want in ((Skip, SKIP), (Fail, 1), (NotRunning, 1),
+                           (ToolError, 1), (SessionLost, 1)):
+            def planted(*_args, _kind=kind, **_kwargs):
+                raise _kind("planted %s" % _kind.__name__)
 
-        def call(self, name, **arguments):
-            self.calls += 1
-            if self.other:
-                raise mcp.ToolError("HTTP 500 from the server: something else")
-            if self.losses:
-                self.losses -= 1
-                raise mcp.ToolError("HTTP 400 from the server: Bad Request: "
-                                    "missing or invalid MCP-Session-Id")
-            return "done"
-
-    once = Fake(1)
-    wrapped = OneSession(once)
-    said = io.StringIO()
-    with contextlib.redirect_stdout(said):
-        answer = attempt("a call whose session was taken",
-                         lambda: wrapped.call("pause"))
-    ok("a lost session is handshaken again once, and the call goes through",
-       answer == "done" and once.handshakes == 1 and wrapped.renewed == 1,
-       "%r %d" % (answer, once.handshakes))
-    ok("and it says so", "taken by another client" in said.getvalue())
-    twice = OneSession(Fake(2))
-    with contextlib.redirect_stdout(io.StringIO()):
-        c.refusing(mcp.ToolError)("lost again right after the new handshake "
-                                  "raises", lambda: twice.call("pause"),
-                                  "MCP-Session-Id")
-    other = Fake(0, other=True)
-    c.refusing(mcp.ToolError)("any other refusal raises with no handshake",
-                              lambda: OneSession(other).call("pause"),
-                              "something else")
-    ok("and handshakes nothing", other.handshakes == 0)
+            globals()["check_states"] = planted
+            said = io.StringIO()
+            with contextlib.redirect_stdout(said), \
+                    contextlib.redirect_stderr(said):
+                got = attempt("main under a %s" % kind.__name__,
+                              lambda: main(["oracle.py", "--check-states"]))
+            ok("main answers %s with %d, and names it"
+               % (kind.__name__, want),
+               got == want and ("planted %s" % kind.__name__) in said.getvalue(),
+               "exit %r, said %r" % (got, said.getvalue()))
+    finally:
+        globals()["check_states"] = saved
     refuses_disc = c.refusing(WrongDisc)
     refuses_screen = c.refusing(NotArrived)
     refuses_ram = c.refusing(RamMismatch)
@@ -10170,7 +10068,7 @@ def _checks(c) -> None:
 
     # -- the state's media, read from inside the file -----------------------
     with tempfile.TemporaryDirectory() as tmp:
-        import savestate
+        from duckmcp import savestate
 
         state = savestate._synth(tmp, "synthetic.sav", b"\0" * 64)
         ok("the media field is read without a decompressor",
@@ -10758,8 +10656,17 @@ def main(argv):
     except Unavailable as exc:
         print("oracle: skipped -- %s" % exc)
         return SKIP
+    except Skip as exc:
+        print("oracle: skipped -- %s" % exc)
+        return SKIP
     except OracleError as exc:
         print("oracle FAILED: %s" % exc, file=sys.stderr)
+        return 1
+    except (Fail, NotRunning, ToolError) as exc:
+        # The lib's errors (PLAN-DUCKMCP-PY section 4.3): the emulator did
+        # not come up, died mid-run (pitfall 35), or refused a call.
+        print("oracle FAILED: %s: %s" % (type(exc).__name__, exc),
+              file=sys.stderr)
         return 1
     except Exception as exc:  # noqa: BLE001
         import screen

@@ -427,11 +427,10 @@ def report_pages(vram: list, bodies: dict, tags) -> dict:
 def dump_slot(slot: int, cue: str, out_dir: str) -> list:
     """Two VRAM dumps, a frame apart, of slot *slot* loaded in the fork."""
     import fork
-    from oracle import OneSession, hide_window  # tools/looks
+    from duckmcp.fork import hide_window  # the lib; its Client reclaims a taken session
 
     paths = []
     pid, window, client = fork.launch(cue, verbose=True, match=fork.ANY_WINDOW)
-    client = OneSession(client)
     try:
         hide_window(window)
         client.call("pause")
