@@ -9672,14 +9672,14 @@ def _checks(c) -> None:
     class Where:
         pass
 
-    attempt("two sections pointed at by one matrix load are refused",
-            OracleError,
-            lambda: _drawn_section({"s6": "0x8011C788", "s7": "0x8011CC78"},
-                                   {layout.BASE[layout.EDT_MOD]: (
-                                       layout.EDT_MOD, SPAN,
-                                       [_FakeSection(0, SPAN // 2),
-                                        _FakeSection(SPAN // 2,
-                                                     SPAN)])}))
+    c.refuses("two sections pointed at by one matrix load are refused",
+              lambda: _drawn_section({"s6": "0x8011C788", "s7": "0x8011CC78"},
+                                     {layout.BASE[layout.EDT_MOD]: (
+                                         layout.EDT_MOD, SPAN,
+                                         [_FakeSection(0, SPAN // 2),
+                                          _FakeSection(SPAN // 2,
+                                                       SPAN)])}),
+              "points into 2 sections at once", kind=OracleError)
 
     # The session taken by another client (CORR-LOOKS-051) is the lib's to
     # take back now: `duckmcp.Client` reclaims it, its self-check plays the

@@ -508,10 +508,13 @@
       "severity": "medium",
       "files": [],
       "resources": [],
-      "status": "pending",
+      "status": "in-progress",
       "depends_on": [],
       "done_on": null,
-      "done_commit": null
+      "done_commit": null,
+      "active_since": "2026-10-25T19:54:02-03:00",
+      "started_at": "2026-10-25T19:54:02-03:00",
+      "active_s": 0
     },
     {
       "id": "CORR-DMCP-032",

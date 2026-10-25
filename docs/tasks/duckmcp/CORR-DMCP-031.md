@@ -57,3 +57,52 @@ Varrer o arquivo atrás de outros `attempt(…, <Classe de exceção>, …)` na 
 - `python3 tools/looks/selftest.py` sai 0.
 
 ## Log de Execução
+
+**Reprodução (2026-10-25, HEAD `cdebb44f`, `rite reproduce --all --cycle duckmcp`):** REPRODUCED — com
+`_drawn_section` plantado para devolver `None`, o self-check segue verde:
+
+```text
+$ (cd "$T" && python3 tools/looks/oracle.py --check | tail -1; echo "exit=${pipestatus[1]}")
+oracle.py: 0 failure(s)
+```
+
+A causa confere: `attempt(name, fn, default=None)` (`tools/looks/harness.py:73`) recebia `OracleError`
+como `fn` e o `lambda` como `default`.
+
+**Conserto:** `tools/looks/oracle.py:9675` passou a `c.refuses(nome, lambda: _drawn_section(…),
+"points into 2 sections at once", kind=OracleError)` — o fragmento é o da mensagem de
+`_drawn_section`. Varredura de outros `attempt(…, <Classe>, …)` no arquivo e em `tools/`:
+
+```text
+$ grep -rnE 'attempt\(\s*"[^"]*",\s*[A-Z][A-Za-z]*(Error|Exception|Mismatch|Disc|Arrived)\b' tools/
+$ grep -nE 'attempt\([^,]*,\s*$' tools/looks/oracle.py
+9709:                got = attempt("main under a %s" % kind.__name__,
+9808:    found = attempt("the chain of a synthetic boot segment",
+10056:    counted, codes = attempt("walk one real node",
+10104:    inside = attempt("compare with a rewritten primitive",
+```
+
+Os quatro multilinha restantes passam um `lambda`/função como segundo argumento (lidos um a um); o da
+9675 era o único com classe.
+
+**Controle** — a planta da Evidência sobre uma cópia de `tools/looks` + `tools/duckmcp` + `tools/pes2`
+da árvore consertada:
+
+```text
+$ (cd "$T" && python3 tools/looks/oracle.py --check | grep -E "two sections|failure"; echo "exit=${pipestatus[1]}")
+  FAIL  two sections pointed at by one matrix load are refused: did NOT refuse
+oracle.py: 1 failure(s)
+exit=1
+```
+
+**Verificação** na árvore entregue:
+
+```text
+$ python3 tools/looks/oracle.py --check | grep -E "two sections|failure"
+  ok    two sections pointed at by one matrix load are refused
+oracle.py: 0 failure(s)
+$ python3 tools/looks/selftest.py 2>&1 | tail -2; echo "exit=$?"
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+exit=0
+```
