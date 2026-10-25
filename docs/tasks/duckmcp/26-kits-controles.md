@@ -72,3 +72,4 @@ Repassado da DMCP-TASK-25, fora dos arquivos desta task: o `main` do `kits/oracl
     - `M tools/kits/controls.py`
     - `M tools/kits/selftest.py`
     - `M tools/kits/ui_check.py`
+- **Reviewed** (2026-10-25) at `cdc730a2`: no finding

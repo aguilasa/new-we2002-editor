@@ -141,7 +141,7 @@ graph TD
 | [DMCP-TASK-23](/docs/tasks/duckmcp/23-looks-breakpoints.md) | `looks`: esperas e laços de breakpoint sobre `debug` | 6 | implementação | DMCP-TASK-22 | done | 2026-10-23 | 2026-10-24 | approved |
 | [DMCP-TASK-24](/docs/tasks/duckmcp/24-fechamento-fase-6.md) | Fechamento da Fase 6 — a migração do looks | 6 | closing | DMCP-TASK-22, DMCP-TASK-23 | done | 2026-10-24 | 2026-10-25 | changes |
 | [DMCP-TASK-25](/docs/tasks/duckmcp/25-kits-oracle.md) | `kits`: `dump_slot`, `matrix_stops`, `pose_capture`, `read_frame` e `vram` sobre a lib | 7 | implementação | DMCP-TASK-24 | done | 2026-10-24 | 2026-10-25 | changes |
-| [DMCP-TASK-26](/docs/tasks/duckmcp/26-kits-controles.md) | `kits`: controles, `COPIED` e monkeypatch reapontados | 7 | verificação | DMCP-TASK-25 | done | 2026-10-24 | pending | in review |
+| [DMCP-TASK-26](/docs/tasks/duckmcp/26-kits-controles.md) | `kits`: controles, `COPIED` e monkeypatch reapontados | 7 | verificação | DMCP-TASK-25 | done | 2026-10-24 | 2026-10-25 | approved |
 | [DMCP-TASK-27](/docs/tasks/duckmcp/27-fechamento-fase-7.md) | Fechamento da Fase 7 — a migração do kits | 7 | closing | DMCP-TASK-25, DMCP-TASK-26 | pending | — | — | — |
 | [DMCP-TASK-28](/docs/tasks/duckmcp/28-documentacao.md) | Documentação: `CLAUDE.md`, a §6.11 do PES2 e a decisão no `perfil-kit2d.md` | 8 | documentação | DMCP-TASK-21, DMCP-TASK-24, DMCP-TASK-27 | pending | — | — | — |
 | [DMCP-TASK-29](/docs/tasks/duckmcp/29-fechamento-fase-8.md) | Fechamento da Fase 8 — a documentação | 8 | closing | DMCP-TASK-28 | pending | — | — | — |
