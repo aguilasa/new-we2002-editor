@@ -141,6 +141,7 @@ import texture  # noqa: E402
 from duckmcp import debug, fork  # noqa: E402
 from duckmcp import vram as psx_vram  # noqa: E402  (`vram` names the dump's rows here)
 from duckmcp.session import Session  # noqa: E402
+from duckmcp.errors import Fail, NotRunning, Skip, ToolError  # noqa: E402
 
 from core.replay import (  # noqa: E402,F401  (the reader: KRP-TASK-02 moved the analysis there)
     IMAGE_HEIGHT, KIT_BITS, KIT_CLUTS, KIT_PAGES, LONG_SLEEVES, NEUTRAL, PAIRINGS, PANEL_H, PANEL_W,
@@ -3601,6 +3602,22 @@ def run_edt_arms(image_path: str, plant: bool = False) -> int:
 
 
 def main(argv=None) -> int:
+    """The command line, with the lib's errors answered here (PLAN-DUCKMCP-PY
+    section 4.3), as looks/oracle.py does: a machine that cannot run it is a
+    skip, 77; an emulator that did not come up, died or refused a call --
+    and the joystick guard of `dump_slot` -- is one line and 1, not a
+    traceback (CORR-DMCP-032)."""
+    try:
+        return _main(argv)
+    except Skip as exc:
+        print("oracle: skipped -- %s" % exc)
+        return SKIP
+    except (Fail, NotRunning, ToolError) as exc:
+        print("oracle FAILED: %s: %s" % (type(exc).__name__, exc), file=sys.stderr)
+        return 1
+
+
+def _main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--png", help="a VRAM dump (1024x512 PNG) to search, no emulator")

@@ -28,6 +28,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import importlib
 import importlib.util
 import io
@@ -881,6 +882,28 @@ def _oracle_checks(c) -> None:
     oracle = c.attempt("import tools/kits/oracle.py", lambda: _kits_module("oracle"))
     if oracle is None:
         return
+
+    # main answers the lib's errors with an exit code and one line, never a
+    # traceback (CORR-DMCP-032): dump_slot's joystick guard raises Fail.
+    from duckmcp import errors
+    saved = oracle._main
+    try:
+        for kind, want in ((errors.Skip, oracle.SKIP), (errors.Fail, 1),
+                           (errors.NotRunning, 1), (errors.ToolError, 1),
+                           (errors.SessionLost, 1)):
+            def planted(*_args, _kind=kind, **_kwargs):
+                raise _kind("planted %s" % _kind.__name__)
+
+            oracle._main = planted
+            said = io.StringIO()
+            with contextlib.redirect_stdout(said), contextlib.redirect_stderr(said):
+                got = c.attempt("oracle main under a %s" % kind.__name__,
+                                lambda: oracle.main(["--slot", "1"]))
+            c.ok("oracle main answers %s with %d, and names it" % (kind.__name__, want),
+                 got == want and ("planted %s" % kind.__name__) in said.getvalue(),
+                 "exit %r, said %r" % (got, said.getvalue()))
+    finally:
+        oracle._main = saved
     body = build_container()
     vram = [bytearray(oracle.VRAM_W * 2) for _ in range(oracle.VRAM_H)]
     records = oracle.records_of(body)
