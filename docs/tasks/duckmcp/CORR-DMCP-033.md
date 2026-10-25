@@ -86,3 +86,9 @@ $ grep -n 'Refeito em 2026-10-25 (CORR-DMCP-033)' docs/tasks/duckmcp/24-fechamen
 
 Nenhum fix aberto com origem DMCP-TASK-22 ou 23; o `high` restante é esta CORR, que o `rite finish`
 fecha.
+- **Closed** — commit `cca7ab37` (2026-10-25): docs(duckmcp): re-close phase 6 after CORR-DMCP-031
+  - Files (`git show --name-status cca7ab37`):
+    - `M docs/tasks/duckmcp/24-fechamento-fase-6.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-033.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
