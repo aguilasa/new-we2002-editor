@@ -106,3 +106,9 @@ controls: 0 failure(s)
 looks_selftest: 0 failure(s)
 exit=0
 ```
+- **Closed** — commit `15e3538f` (2026-10-25): test(looks): the two-sections check refuses through c.refuses instead of asserting nothing
+  - Files (`git show --name-status 15e3538f`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-031.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/looks/oracle.py`
