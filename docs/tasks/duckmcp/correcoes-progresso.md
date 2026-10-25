@@ -34,6 +34,6 @@
 | [CORR-DMCP-029](/docs/tasks/duckmcp/CORR-DMCP-029.md) | O load_pad do drive.py cai em silêncio no DEFAULT_PAD quando o [Pad1] não é de teclado | CORR-DMCP-026 | medium | done | 2026-10-23 |
 | [CORR-DMCP-030](/docs/tasks/duckmcp/CORR-DMCP-030.md) | Desfazer no Log da 23 a causa atribuída aos 435 s do --screen | DMCP-TASK-23 | low | done | 2026-10-24 |
 | [CORR-DMCP-031](/docs/tasks/duckmcp/CORR-DMCP-031.md) | O check de duas seções numa carga de matriz do looks não afirma nada | DMCP-TASK-22 | medium | done | 2026-10-25 |
-| [CORR-DMCP-032](/docs/tasks/duckmcp/CORR-DMCP-032.md) | O main do kits/oracle.py deixa Fail sair como traceback | DMCP-TASK-25 | low | in-progress | — |
+| [CORR-DMCP-032](/docs/tasks/duckmcp/CORR-DMCP-032.md) | O main do kits/oracle.py deixa Fail sair como traceback | DMCP-TASK-25 | low | done | 2026-10-25 |
 | [CORR-DMCP-033](/docs/tasks/duckmcp/CORR-DMCP-033.md) | Refechar a Fase 6 depois que a CORR-DMCP-031 for consertada | DMCP-TASK-24 | high | pending | — |
 <!-- rite:end -->

@@ -116,3 +116,10 @@ exit=0
 $ python3 tools/duckmcp/selftest.py 2>&1 | tail -1
 duckmcp_selftest: 435 check(s) ran, 0 failure(s)
 ```
+- **Closed** — commit `ffd37e32` (2026-10-25): fix(kits): oracle main answers the lib's errors with an exit code, not a traceback
+  - Files (`git show --name-status ffd37e32`):
+    - `M docs/tasks/duckmcp/CORR-DMCP-032.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
+    - `M tools/kits/oracle.py`
+    - `M tools/kits/selftest.py`
