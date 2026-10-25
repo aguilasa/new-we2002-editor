@@ -525,12 +525,14 @@
       "status": "done",
       "done_on": "2026-10-24",
       "done_commit": "cae92110",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-25",
+      "review_commit": "887b096c",
       "active_since": null,
       "started_at": "2026-10-24T18:21:34-03:00",
       "active_s": 62,
-      "finished_at": "2026-10-24T18:22:36-03:00"
+      "finished_at": "2026-10-24T18:22:36-03:00",
+      "review_started_at": "2026-10-25T16:45:53-03:00",
+      "review_s": 627
     },
     {
       "id": "DMCP-TASK-25",
@@ -550,7 +552,8 @@
       "active_since": null,
       "started_at": "2026-10-24T18:22:39-03:00",
       "active_s": 2082,
-      "finished_at": "2026-10-24T18:57:21-03:00"
+      "finished_at": "2026-10-24T18:57:21-03:00",
+      "review_started_at": "2026-10-25T16:45:54-03:00"
     },
     {
       "id": "DMCP-TASK-26",
@@ -570,7 +573,8 @@
       "active_since": null,
       "started_at": "2026-10-24T18:57:24-03:00",
       "active_s": 2256,
-      "finished_at": "2026-10-24T19:35:00-03:00"
+      "finished_at": "2026-10-24T19:35:00-03:00",
+      "review_started_at": "2026-10-25T16:45:54-03:00"
     },
     {
       "id": "DMCP-TASK-27",

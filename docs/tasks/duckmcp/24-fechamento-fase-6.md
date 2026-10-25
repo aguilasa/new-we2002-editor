@@ -66,3 +66,4 @@ A Fase 6 está fechada.
 - **Closed** — commit `cae92110` (2026-10-24): docs(duckmcp): close phase 6
   - Files (`git show --name-status cae92110`):
     - `M docs/tasks/duckmcp/24-fechamento-fase-6.md`
+- **Reviewed** (2026-10-25) at `887b096c`: CORR-DMCP-033

@@ -35,4 +35,5 @@
 | [CORR-DMCP-030](/docs/tasks/duckmcp/CORR-DMCP-030.md) | Desfazer no Log da 23 a causa atribuída aos 435 s do --screen | DMCP-TASK-23 | low | done | 2026-10-24 |
 | [CORR-DMCP-031](/docs/tasks/duckmcp/CORR-DMCP-031.md) | O check de duas seções numa carga de matriz do looks não afirma nada | DMCP-TASK-22 | medium | pending | — |
 | [CORR-DMCP-032](/docs/tasks/duckmcp/CORR-DMCP-032.md) | O main do kits/oracle.py deixa Fail sair como traceback | DMCP-TASK-25 | low | pending | — |
+| [CORR-DMCP-033](/docs/tasks/duckmcp/CORR-DMCP-033.md) | Refechar a Fase 6 depois que a CORR-DMCP-031 for consertada | DMCP-TASK-24 | high | pending | — |
 <!-- rite:end -->
