@@ -547,13 +547,14 @@
       "status": "done",
       "done_on": "2026-10-24",
       "done_commit": "b532b3ac",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-25",
+      "review_commit": "6c4b7eb8",
       "active_since": null,
       "started_at": "2026-10-24T18:22:39-03:00",
       "active_s": 2082,
       "finished_at": "2026-10-24T18:57:21-03:00",
-      "review_started_at": "2026-10-25T16:45:54-03:00"
+      "review_started_at": "2026-10-25T16:45:54-03:00",
+      "review_s": 626
     },
     {
       "id": "DMCP-TASK-26",

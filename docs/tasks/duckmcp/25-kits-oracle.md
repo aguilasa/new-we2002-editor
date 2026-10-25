@@ -108,3 +108,4 @@ audit: 8 raw site(s) in 8 file(s)
     - `M tools/duckmcp/selftest.py`
     - `M tools/kits/oracle.py`
     - `M tools/kits/replay.py`
+- **Reviewed** (2026-10-25) at `6c4b7eb8`: no finding
