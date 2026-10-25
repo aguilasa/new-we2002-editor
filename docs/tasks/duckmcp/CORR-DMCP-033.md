@@ -58,3 +58,31 @@ DMCP-TASK-22 ou DMCP-TASK-23 (hoje lista a CORR-DMCP-031), e o Log da 24 traz o 
 `looks_selftest` refeitos depois do conserto.
 
 ## Log de Execução
+
+**Reprodução (2026-10-25, HEAD `cdebb44f`, `rite reproduce --all --cycle duckmcp`):** REPRODUCED —
+`rite status` com `open fixes: critical 0, high 1, medium 1, low 1`, a CORR-DMCP-031 `pending` com
+origem DMCP-TASK-22, e `tools/looks/oracle.py:9675` ainda com `attempt(…, OracleError, lambda: …)`.
+
+**Conserto.** A CORR-DMCP-031 foi consertada pelo fluxo do ciclo (`15e3538f` / `b940a91c`). O critério
+1 e o `looks_selftest` da DMCP-TASK-24 foram refeitos na HEAD `e5024386` e anotados no Log da
+`docs/tasks/duckmcp/24-fechamento-fase-6.md`, depois de "A Fase 6 está fechada.", sem reescrever o
+registro antigo.
+
+**Verificação:**
+
+```text
+$ rite status --cycle duckmcp
+  open fixes: critical 0, high 1, medium 0, low 0
+  next fix: CORR-DMCP-033
+$ python3 -c "…fixes.json…"     # origem DMCP-TASK-21..24
+[('CORR-DMCP-030', 'DMCP-TASK-23', 'done'), ('CORR-DMCP-031', 'DMCP-TASK-22', 'done'), ('CORR-DMCP-033', 'DMCP-TASK-24', 'in-progress')]
+$ python3 tools/looks/selftest.py | tail -2; echo "exit=${pipestatus[1]}"
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+exit=0
+$ grep -n 'Refeito em 2026-10-25 (CORR-DMCP-033)' docs/tasks/duckmcp/24-fechamento-fase-6.md
+67:**Refeito em 2026-10-25 (CORR-DMCP-033), na HEAD `e5024386`.** …
+```
+
+Nenhum fix aberto com origem DMCP-TASK-22 ou 23; o `high` restante é esta CORR, que o `rite finish`
+fecha.

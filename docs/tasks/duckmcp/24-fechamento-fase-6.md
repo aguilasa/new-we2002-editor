@@ -63,6 +63,31 @@ $ ctest --test-dir build -R tasks
 - `looks_selftest` verde, com a contagem de controles antes e depois explicada: 114 → 113 na 22 (o que migrou), 113 na 23 (nenhum controle mirava o código movido).
 
 A Fase 6 está fechada.
+
+**Refeito em 2026-10-25 (CORR-DMCP-033), na HEAD `e5024386`.** A revisão abriu a CORR-DMCP-031 (origem
+DMCP-TASK-22) depois do fechamento: o check "two sections pointed at by one matrix load are refused"
+não afirmava nada, e o `looks_selftest` verde acima se apoiava nele. Consertada em `15e3538f`, o
+critério 1 e o gate foram refeitos:
+
+```text
+$ rite status --cycle duckmcp
+  tasks: 26 done, 0 in-progress, 6 pending, 0 blocked, 0 skipped (32 total)
+  review queue: 0
+  open fixes: critical 0, high 1, medium 0, low 0
+$ python3 -c "…fixes.json, origem DMCP-TASK-21..24…"
+[('CORR-DMCP-030', 'DMCP-TASK-23', 'done'), ('CORR-DMCP-031', 'DMCP-TASK-22', 'done'), ('CORR-DMCP-033', 'DMCP-TASK-24', 'in-progress')]
+$ python3 tools/looks/selftest.py | tail -2; echo "exit=${pipestatus[1]}"
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+exit=0
+$ ctest --test-dir build -R tasks
+1/1 Test #6: tasks ............................   Passed    6.28 sec
+100% tests passed, 0 tests failed out of 1
+```
+
+O único fix aberto é esta própria CORR-DMCP-033 (o `high` da contagem), que fecha com este registro; o
+check consertado agora é visto vermelho com `_drawn_section` plantado (Log da CORR-DMCP-031). A Fase 6
+continua fechada.
 - **Closed** — commit `cae92110` (2026-10-24): docs(duckmcp): close phase 6
   - Files (`git show --name-status cae92110`):
     - `M docs/tasks/duckmcp/24-fechamento-fase-6.md`
