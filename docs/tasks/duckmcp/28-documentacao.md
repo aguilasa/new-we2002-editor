@@ -128,3 +128,4 @@ docs/prompts/perfil-duckmcp.md:77:- `savestate.py` movido com histórico (`git l
     - `M docs/prompts/perfil-kit2d.md`
     - `M docs/prompts/perfil-pes2.md`
     - `M docs/tasks/duckmcp/28-documentacao.md`
+- **Reviewed** (2026-10-26) at `516bd6ed`: CORR-DMCP-035
