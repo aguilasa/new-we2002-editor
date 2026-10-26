@@ -78,3 +78,9 @@ cli.py call get_status -> 77
 
 Os três comandos são aceitos pelo parser (um erro de argumento sairia 2) e dão 77, o `SKIP` da lib, por
 não haver emulador de pé; medido no Linux, com `/` no lugar de `\`.
+- **Closed** — commit `15a3252c` (2026-10-26): docs(pes2): PES2-WINDOWS section 4 asks the server through tools/duckmcp/cli.py
+  - Files (`git show --name-status 15a3252c`):
+    - `M docs/PES2-WINDOWS.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-035.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`

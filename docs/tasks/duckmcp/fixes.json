@@ -576,13 +576,14 @@
       "severity": "medium",
       "files": [],
       "resources": [],
-      "status": "in-progress",
+      "status": "done",
       "depends_on": [],
-      "done_on": null,
-      "done_commit": null,
-      "active_since": "2026-10-26T13:22:12-03:00",
+      "done_on": "2026-10-26",
+      "done_commit": "15a3252c",
+      "active_since": null,
       "started_at": "2026-10-26T13:22:12-03:00",
-      "active_s": 0
+      "active_s": 29,
+      "finished_at": "2026-10-26T13:22:41-03:00"
     }
   ]
 }
