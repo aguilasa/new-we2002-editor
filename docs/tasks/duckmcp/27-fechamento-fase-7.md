@@ -71,3 +71,4 @@ A Fase 7 está fechada.
 - **Closed** — commit `2a42e57f` (2026-10-26): docs(duckmcp): close phase 7
   - Files (`git show --name-status 2a42e57f`):
     - `M docs/tasks/duckmcp/27-fechamento-fase-7.md`
+- **Reviewed** (2026-10-26) at `b284bb46`: CORR-DMCP-034

@@ -591,12 +591,14 @@
       "status": "done",
       "done_on": "2026-10-26",
       "done_commit": "2a42e57f",
-      "reviewed_on": "pending",
-      "review_commit": null,
+      "reviewed_on": "2026-10-26",
+      "review_commit": "b284bb46",
       "active_since": null,
       "started_at": "2026-10-26T10:24:11-03:00",
       "active_s": 430,
-      "finished_at": "2026-10-26T10:31:21-03:00"
+      "finished_at": "2026-10-26T10:31:21-03:00",
+      "review_started_at": "2026-10-26T10:52:43-03:00",
+      "review_s": 888
     },
     {
       "id": "DMCP-TASK-28",

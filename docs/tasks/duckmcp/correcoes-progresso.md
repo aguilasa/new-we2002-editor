@@ -36,4 +36,5 @@
 | [CORR-DMCP-031](/docs/tasks/duckmcp/CORR-DMCP-031.md) | O check de duas seções numa carga de matriz do looks não afirma nada | DMCP-TASK-22 | medium | done | 2026-10-25 |
 | [CORR-DMCP-032](/docs/tasks/duckmcp/CORR-DMCP-032.md) | O main do kits/oracle.py deixa Fail sair como traceback | DMCP-TASK-25 | low | done | 2026-10-25 |
 | [CORR-DMCP-033](/docs/tasks/duckmcp/CORR-DMCP-033.md) | Refechar a Fase 6 depois que a CORR-DMCP-031 for consertada | DMCP-TASK-24 | high | done | 2026-10-25 |
+| [CORR-DMCP-034](/docs/tasks/duckmcp/CORR-DMCP-034.md) | Apontar a linha do kits_replay no Log da 27 para um caminho de imagem que dure | DMCP-TASK-27 | low | pending | — |
 <!-- rite:end -->

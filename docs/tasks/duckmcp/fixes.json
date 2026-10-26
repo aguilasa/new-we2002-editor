@@ -550,6 +550,19 @@
       "started_at": "2026-10-25T20:09:29-03:00",
       "active_s": 61,
       "finished_at": "2026-10-25T20:10:30-03:00"
+    },
+    {
+      "id": "CORR-DMCP-034",
+      "file": "CORR-DMCP-034.md",
+      "title": "Apontar a linha do kits_replay no Log da 27 para um caminho de imagem que dure",
+      "origin": "DMCP-TASK-27",
+      "severity": "low",
+      "files": [],
+      "resources": [],
+      "status": "pending",
+      "depends_on": [],
+      "done_on": null,
+      "done_commit": null
     }
   ]
 }
