@@ -68,4 +68,6 @@ $ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=/tmp/claude-1000/-home-ingmar-desen
 - `dump_slot` recusa joystick, e o controle novo é visto vermelho: `python3 tools/kits/controls.py --only oracle-dump-joystick-unasked` → `RED    oracle-dump-joystick-unasked kits/oracle.py :: dump_slot`, `controls: 1 of 1 red`.
 
 A Fase 7 está fechada.
-
+- **Closed** — commit `2a42e57f` (2026-10-26): docs(duckmcp): close phase 7
+  - Files (`git show --name-status 2a42e57f`):
+    - `M docs/tasks/duckmcp/27-fechamento-fase-7.md`

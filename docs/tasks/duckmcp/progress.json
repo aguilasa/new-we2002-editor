@@ -588,11 +588,15 @@
       "source_of_truth": "/docs/PLAN-DUCKMCP-PY.md#6",
       "files": [],
       "resources": [],
-      "status": "pending",
-      "done_on": null,
-      "done_commit": null,
-      "reviewed_on": null,
-      "review_commit": null
+      "status": "done",
+      "done_on": "2026-10-26",
+      "done_commit": "2a42e57f",
+      "reviewed_on": "pending",
+      "review_commit": null,
+      "active_since": null,
+      "started_at": "2026-10-26T10:24:11-03:00",
+      "active_s": 430,
+      "finished_at": "2026-10-26T10:31:21-03:00"
     },
     {
       "id": "DMCP-TASK-28",
