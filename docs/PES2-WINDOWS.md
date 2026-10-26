@@ -177,9 +177,9 @@ diálogo ser dispensado.
 Depois, de dentro do repositório:
 
 ```powershell
-python tools\pes2\mcp.py --status
-python tools\pes2\mcp.py --list
-python tools\pes2\mcp.py --call get_status
+python tools\duckmcp\cli.py status
+python tools\duckmcp\cli.py list
+python tools\duckmcp\cli.py call get_status
 ```
 
 Pré-requisito do emulador: **Visual C++ Redistributable 2022 (x64)**. Se faltar,

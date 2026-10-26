@@ -46,3 +46,35 @@ Opcional: alargar a regex do check da Fase 8 no `perfil-duckmcp.md` para `pes2[/
 180-182 hoje e nada depois do conserto.
 
 ## Log de Execução
+
+**Reprodução (2026-10-26, HEAD `fe39a2f1`, `rite reproduce CORR-DMCP-035 --cycle duckmcp`):** REPRODUCED.
+
+```text
+$ grep -rnE 'pes2[/\\](mcp|fork|savestate)\.py' CLAUDE.md docs --include='*.md' | grep -v 'docs/tasks/' | grep -v PLAN-DUCKMCP | grep -v perfil-duckmcp | grep -v 'histórico'
+CLAUDE.md:698:Ela absorveu, a partir de 2026-10-22, o que morava em `tools/pes2/mcp.py`,
+docs/PES2-WINDOWS.md:180:python tools\pes2\mcp.py --status
+docs/PES2-WINDOWS.md:181:python tools\pes2\mcp.py --list
+docs/PES2-WINDOWS.md:182:python tools\pes2\mcp.py --call get_status
+```
+
+A linha do `CLAUDE.md` é registro de onde a lib veio, não instrução viva; as três do `PES2-WINDOWS.md`
+são o defeito.
+
+**Conserto:** o bloco da §4 do `docs/PES2-WINDOWS.md` passou a `python tools\duckmcp\cli.py status`,
+`… list` e `… call get_status` — os subcomandos de `cli.py --help` (`status`, `list`, `call tool
+[KEY=VALUE ...]`). A regex do check da Fase 8 no `perfil-duckmcp.md` (opcional na CORR) não foi mexida:
+fora dos arquivos declarados.
+
+**Verificação:**
+
+```text
+$ grep -nE 'pes2\\(mcp|fork|savestate)\.py' docs/PES2-WINDOWS.md | grep -v 'histórico'; echo "grep exit=${pipestatus[1]}"
+grep exit=1
+$ for c in "status" "list" "call get_status"; do python3 tools/duckmcp/cli.py $=c >/dev/null 2>&1; echo "cli.py $c -> $?"; done
+cli.py status -> 77
+cli.py list -> 77
+cli.py call get_status -> 77
+```
+
+Os três comandos são aceitos pelo parser (um erro de argumento sairia 2) e dão 77, o `SKIP` da lib, por
+não haver emulador de pé; medido no Linux, com `/` no lugar de `\`.
