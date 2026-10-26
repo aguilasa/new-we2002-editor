@@ -615,8 +615,8 @@ desenha braçadeira nem manga do `MODEL.BIN`.
 
 **Relato (usuário, 2026-10-09).** Dois **replays parados** de Brasil × Croácia, câmera focada em
 **Marcos** (goleiro, nº 1, capitão do Brasil), de frente, no **zoom mais próximo**: o **slot 9** e o
-**slot 10**, "nos mesmos moldes". O quadro dos dois states (`python3 tools/pes2/savestate.py shot
-<state>`, lido sem emulador) mostra o Marcos de corpo inteiro sob a trave, manga longa cinza, a faixa
+**slot 10**, "nos mesmos moldes". O quadro dos dois states (histórico: `python3 tools/pes2/savestate.py shot
+<state>`, hoje `tools/duckmcp/savestate.py shot`, lido sem emulador) mostra o Marcos de corpo inteiro sob a trave, manga longa cinza, a faixa
 no braço esquerdo dele, ~60 px de altura em 256×192 — o maior que o jogo o desenha. **A diferença
 entre os dois é a manga dos jogadores de linha: no slot 9 estão de manga curta, no 10 de manga longa;
 os goleiros usam manga longa sempre.** **O capitão da Croácia é o nº 11, Bokšić.** Os controles do

@@ -262,7 +262,7 @@ O que isso diz, e o que não diz:
 | `tools/kits/core/teams.py`, `tools/kits/core/generated/` (KITS-TASK-12/13) | o gerador de `TEAM_NAMES`/`OFS_TEAM_NAME_*` com `--check` e `teams.py` | os nomes do §3.3 |
 | `tools/kits/ui/i18n.py` (KITS-TASK-36) | o catálogo de texto da janela, en-US por default | a forma do catálogo do §3.4 |
 | `tools/kits/controls.py`, `selftest.py` | o padrão de controle negativo plantado e o `harness` do `looks` | os gates do §5 |
-| `tools/pes2/mcp.py`, `fork.py`, `tools/looks/oracle.py` | subir o fork, apertar botão, `read_memory`, `read_vram_region`, `take_screenshot`, `save_state`/`load_state` | a fase 0 e os confrontos |
+| `tools/duckmcp/` (`Session`, `debug`, `fork`; [§2](/docs/PLAN-DUCKMCP-PY.md#2) do plano da lib, 2026-10-26 — antes, `tools/pes2/mcp.py` e `fork.py`, histórico), `tools/looks/oracle.py` | subir o fork, apertar botão, `read_memory`, `read_vram_region`, `take_screenshot`, `save_state`/`load_state` | a fase 0 e os confrontos |
 | `src/core/include/we2002/Offsets.hpp`, `src/app/FlagKitDialog.*` | `OFS_KIT_PREVIEW*`; o que o `ed.exe` expõe (palavras 2..15) | os offsets; a divergência deliberada da §6 |
 | `tests/golden_tool.cpp`, `tools/par/8.8-*.sh` | o `Database::Save` headless; o roteiro do diálogo de uniforme no `ed.exe` (Linux) | o confronto de gravação (§5.2) |
 

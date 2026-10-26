@@ -1104,8 +1104,8 @@ por isso a receita fica registrada aqui.
 nenhum dos dois DuckStation está no `PATH`:
 
 ```sh
-python tools/pes2/fork.py status          # diz se já há um de pé
-python tools/pes2/fork.py recipe          # como obter o binário, se faltar
+python tools/duckmcp/cli.py procs         # diz se já há um de pé
+python tools/duckmcp/cli.py recipe        # como obter o binário, se faltar
 ```
 
 **Qual disco — e são dois, de propósito.** As cópias de trabalho ficam em
@@ -1133,7 +1133,8 @@ confere o carimbo `.src` da cópia:
 .\make.ps1 we2002-play-fresh    # com o option file zerado
 ```
 
-O `tools/pes2/fork.py launch <cue>` continua valendo, e é o caminho no Linux.
+O `python tools/duckmcp/cli.py launch <cue>` (até 2026-10-26, `fork.py launch` de
+`tools/pes2/`) continua valendo, e é o caminho no Linux.
 
 **A tela.** `EDIT` → `NEW PLAYER` → `LOOKS SET`. A tela de edição de jogador
 tem o título japonês `選手エディット` e sete itens à esquerda; `LOOKS SET` é o
@@ -1166,7 +1167,8 @@ mexeu no caminho. Os dois slots ainda dão um controle de graça: o que diferir
 entre goleiro e jogador de linha é **uniforme ou posição**, não LOOKS.
 
 **A RAM, porém, não sai do arquivo de state.** Medido em 2026-09-14: o
-`tools/pes2/savestate.py` lê o cabeçalho e para — ele chama o CLI `zstd`, que
+`tools/pes2/savestate.py` (histórico; hoje `tools/duckmcp/savestate.py`) lê o
+cabeçalho e para — ele chama o CLI `zstd`, que
 não está no `PATH` desta máquina, e o módulo `zstandard` também não está
 instalado. Ele imprime o cabeçalho e **depois** estoura com
 `FileNotFoundError [WinError 2]`, mensagem que não menciona `zstd` em lugar

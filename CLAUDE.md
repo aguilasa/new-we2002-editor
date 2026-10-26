@@ -588,13 +588,13 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/pad.py press\|shot\|stats\|watch\|run` | manda **um** comando ao emulador já rodando — para trabalhar junto com o usuário. Por MCP desde 2026-09-03, então o display deixou de importar. O `run` acelera a partida dando `Cross` em cada saque, que é o que a faz terminar |
 | `tools/pes2/asset_screen.sh` | quadros do boot no `:98`, para ver um asset editado na tela |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
-| `python3 tools/pes2/mcp.py --list\|--status\|--call <tool>` | o cliente MCP do fork, stdlib pura: `initialize`, sessão por `MCP-Session-Id`, `tools/call`. **95 ferramentas**, contadas contra o servidor e não contra o fonte, que declara 99 |
-| `python3 tools/pes2/fork.py launch\|kill\|status\|recipe` | sobe o **fork com MCP** de `~/Applications/duckstation-mcp/`, dispensa o `Automatic Updater` e espera a porta; o `kill` alcança os três nomes de processo, e o `recipe` diz como obtê-lo, por download ou compilação |
+| `python3 tools/duckmcp/cli.py list\|status\|call <tool>` | o cliente MCP do fork, que desde 2026-10-26 mora na lib comum (ver a seção de `tools/duckmcp/` abaixo); quantas ferramentas o servidor declara, o `list` conta contra o servidor vivo |
+| `python3 tools/duckmcp/cli.py launch\|kill\|procs\|recipe\|which` | sobe o **fork com MCP** de `~/Applications/duckstation-mcp/`, dispensa o `Automatic Updater` e espera a porta; o `kill` alcança os três nomes de processo, e o `recipe` diz como obtê-lo, por download ou compilação. Também da lib |
 | `python3 tools/pes2/mcp_drive.py <copia.cue> --screen ...` | as mesmas quatro rotas do `drive.py`, por MCP. `--keep-alive` deixa o jogo de pé na tela alcançada, e é o que torna o caso vermelho alcançável: `--measure-menu` mede as sete linhas do menu e depois pede sete, o que tem de falhar — e recusa antes de medir se a tela não for o menu |
 | `tools/pes2/run_duckstation.sh` | sobe o **AppImage oficial** no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra. Continua existindo porque é o binário que um terceiro reproduz |
 | `python3 tools/pes2/drive.py <copia.cue> --screen title\|main-menu\|team-select\|edit` | dirige o emulador por rota nomeada e captura; espera pela assinatura do quadro, não pelo relógio. `--save-state` deixa um estado na tela alcançada, e as rotas o reusam — 2,5 min por tentativa viram ~40 s |
 | `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, e alguma de doze amostras diferindo da primeira — e diz **contra qual binário** correu. Prefere o fork; `PES2_BINARY=appimage` força o outro |
-| `python3 tools/pes2/savestate.py info\|ram\|shot\|read\|diff\|scan <state.sav>` | a RAM de dentro de um save state do DuckStation — busca de valor e diff de memória em Python puro, sem fork do emulador. O que ele **não** dá é quem escreveu — para isso é breakpoint, e aí é o fork |
+| `python3 tools/duckmcp/savestate.py info\|ram\|shot\|read\|diff\|scan <state.sav>` | a RAM de dentro de um save state do DuckStation — busca de valor e diff de memória em Python puro, sem fork do emulador. O que ele **não** dá é quem escreveu — para isso é breakpoint, e aí é o fork |
 
 No `ctest` são três alvos: **`pes2_selftest`**, que monta um disco
 sintético de 24 setores e roda em qualquer lugar; **`pes2_image`**, que
@@ -627,7 +627,7 @@ Quatro coisas que custam tempo se descobertas tarde:
   localmente** — o único com servidor MCP, que é o que permite dirigir o jogo
   por chamada em vez de `xdotool` (`pause` + `frame_step`: cinco teclas,
   cinco linhas). Ele mora em `~/Applications/duckstation-mcp/`, sobe pelo
-  `tools/pes2/fork.py`, e `fork.py recipe` diz como obtê-lo — o CI do fork
+  `tools/duckmcp/cli.py launch`, e `cli.py recipe` diz como obtê-lo — o CI do fork
   publica um AppImage com o servidor, e compilar é o segundo caminho. O
   **AppImage oficial** continua em `~/Applications/` e continua sendo o que
   um terceiro reproduz; quem o sobe é o `run_duckstation.sh`, e quem o dirige
@@ -654,7 +654,7 @@ Quatro coisas que custam tempo se descobertas tarde:
   Ao subir o fork à mão, duas coisas medidas em 2026-09-03: o diálogo que
   sobe é o **`Automatic Updater`** — não o de build não-oficial — e
   `Escape` **não** o fecha, e a **porta 2346 abre antes** de ele ser
-  dispensado. O `fork.py launch` cuida dos dois. Decisão, medições e a
+  dispensado. O `cli.py launch` da lib cuida dos dois. Decisão, medições e a
   comparação entre os dois binários na §6.14.
 - **`roms/` tem os originais; PES2 grava in-place como o WE2002.** Copie a
   release inteira (571 MiB, as oito trilhas) para o scratchpad antes de
@@ -684,6 +684,58 @@ essa data o projeto estava fora do pool *por escolha*, e o backlog era a §7 do
 [docs/PES2-AJUSTES.md](docs/PES2-AJUSTES.md); aquela seção agora é registro
 histórico. O que sobrou de aberto lá é um item só, e não é código: instalar
 `numpy` e um desmontador MIPS, decisão do dono da máquina.
+
+## A lib do MCP do DuckStation — `tools/duckmcp/`
+
+Não é projeto de jogo: é a **lib comum** com que `pes2`, `looks`, `kits` e
+`kit2d` dirigem o fork do DuckStation por MCP. **Agnóstica de jogo** — hardware
+PS1, arquivos, processos e diálogos do emulador, e o protocolo; nada de serial,
+título, rota ou endereço de RAM de jogo. Stdlib pura; quem a usa põe `tools/`
+no `sys.path` e faz `import duckmcp`. O plano é
+[docs/PLAN-DUCKMCP-PY.md](docs/PLAN-DUCKMCP-PY.md) — os módulos estão na §3.1
+dele —, e o ciclo é `duckmcp` (`docs/tasks/duckmcp/`).
+
+Ela absorveu, a partir de 2026-10-22, o que morava em `tools/pes2/mcp.py`,
+`fork.py` e `savestate.py`. Esses três ficaram como **shims** até o
+fechamento do ciclo, que os apaga; código novo importa `duckmcp`, e as
+instruções vivas apontam para a lib.
+
+| Comando | O que faz |
+|---|---|
+| `python3 tools/duckmcp/cli.py ping\|list\|status\|call <tool> k=v` | o cliente: handshake, as ferramentas que o servidor declara, `get_status`, uma chamada |
+| `python3 tools/duckmcp/cli.py launch\|kill\|procs\|recipe\|which` | o lançador: sobe um `.cue` sob o fork e dispensa os diálogos, mata todo processo DuckStation, lista os vivos (`procs`, porque `status` já é do servidor), diz como obter o fork, e acha o binário (sai 77 sem ele) |
+| `python3 tools/duckmcp/savestate.py info\|ram\|shot\|read\|diff\|scan\|selftest <state.sav>` | a RAM de dentro de um save state, sem emulador |
+| `python3 tools/duckmcp/selftest.py --quiet` | o gate obrigatório; não precisa de nada e nunca pula |
+| `python3 tools/duckmcp/controls.py --list` | os defeitos plantados das regras de desenho |
+| `python3 tools/duckmcp/audit.py` | quantos sítios crus de MCP ainda sobram fora da lib, por projeto |
+
+As variáveis são lidas **só** pelo `env.py`, na hora da chamada. Cada uma tem
+um nome `PES2_*` **legado**, lido como fallback para quem ainda o exporta; o
+novo ganha do legado, e qualquer dos dois ganha do default:
+
+| variável | legado | default |
+|---|---|---|
+| `DUCKSTATION_MCP_HOST` | `PES2_MCP_HOST` | `127.0.0.1` |
+| `DUCKSTATION_MCP_PORT` | `PES2_MCP_PORT` | `2346` |
+| `DUCKSTATION_FORK` | `PES2_FORK` | `~/Applications/duckstation-mcp` (`C:\games\ps1\duckstation-mcp` no Windows) |
+| `DUCKSTATION_APPIMAGE` | `PES2_DUCKSTATION` | `~/Applications/DuckStation-x64.AppImage` |
+| `DUCKSTATION_DISPLAY` | `PES2_DISPLAY` | `:98` — nunca o `DISPLAY` herdado |
+
+No `ctest` são dois alvos: **`duckmcp_selftest`**, que não precisa de nada; e
+**`duckmcp_live`**, que sobe `DUCKSTATION_TEST_IMAGE` (o `.cue` de uma
+**cópia**) sob o fork no `:98`, pausa e confere que `frame_step` anda
+exatamente os quadros pedidos. Ele se reporta *skipped* (77) sem imagem, sem
+fork ou sem servidor X, e tem `RESOURCE_LOCK duckstation` com o `pes2_boot` e o
+`looks_live` — um emulador por vez.
+
+**As armadilhas do emulador moram no §1.3 do plano**, não aqui: janela fora da
+tela, instância morta respondendo ao `xdotool`, `pgrep -f` casando o próprio
+shell, o `Automatic Updater` e a porta que abre antes dele, `frame_step` a
+~57 ms, o fork caindo em execução livre sem log, `press_button` prendendo o
+botão sem `duration_frames`, a sessão única do servidor que outro cliente
+rouba, e o joystick físico injetando entrada. São as da §6.11 do
+[PLAN-PES2-PSX.md](docs/PLAN-PES2-PSX.md) que valem para qualquer jogo; a
+lista é a do §1.3.
 
 ## Port do editor de `.mcr` — projeto separado, em `tools/mcr/`
 
@@ -839,8 +891,9 @@ O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 `CORR-LOOKS-`, perfil [docs/prompts/perfil-looks.md](docs/prompts/perfil-looks.md)
 (as armadilhas da 70 em diante em
 [perfil-looks.armadilhas.md](docs/prompts/perfil-looks.armadilhas.md)), e rodava por `/rite:execute looks`. Não estende o `we2002_core` e não compartilha
-build; o que empresta é leitura de disco de `tools/pes2/` (`iso.py`, `lzss.py`,
-`mcp.py`, `fork.py`) e conhecimento de formato.
+build; o que empresta é leitura de disco de `tools/pes2/` (`iso.py`, `lzss.py`),
+o emulador da lib `tools/duckmcp/` (`Session`, `debug`, `fork`) e conhecimento de
+formato.
 
 **Dois discos, e cada um serve para uma coisa.** Os dois arquivos de modelo
 são byte a byte iguais no japonês e na tradução inglesa; o `DAT2D.BIN`, que tem

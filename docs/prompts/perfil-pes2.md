@@ -72,8 +72,8 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
     (§6.11) — eram treze quando este perfil foi escrito. **A 46 é do fork,
     de 2026-10-22**: o servidor MCP guarda uma sessão só, e o Claude Code,
     pelo `.mcp.json`, a rouba no meio de uma rota — `400 ... invalid
-    MCP-Session-Id` com o emulador vivo. O `mcp.py` refaz o handshake e
-    reenvia uma vez. **As seis de 2026-09-04
+    MCP-Session-Id` com o emulador vivo. O cliente (`mcp.py` na época, hoje
+    `tools/duckmcp/client.py`) refaz o handshake e reenvia uma vez. **As seis de 2026-09-04
     são de 2026-09-04 e todas dizem a mesma coisa**: depois que a rota entra
     numa partida, **brilho não reconhece tela nenhuma**. As opções de partida
     abrem em `Al azar`, então o gramado lê 0,301 de dia e 0,1123 de noite, e
@@ -91,7 +91,7 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
     pad preso é indistinguível de um jogo que não avança — seis corridas
     perdidas nisso em 2026-09-04. A anterior é a que mais custa: **o fork cai
     sozinho em execução livre e não escreve nada** — quatro mortes em seis corridas, entre 15 s e 90 s, não
-    determinístico, e o `mcp.py` passou a distinguir "nunca subiu" de "caiu
+    determinístico, e o cliente MCP (hoje `tools/duckmcp/client.py`) passou a distinguir "nunca subiu" de "caiu
     agora" porque a mensagem única custou três leituras erradas numa revisão
     só. As sete anteriores são de 2026-09-03 e são sobre dirigir por **MCP**,
     que desde essa data é como as rotas dirigem: o binário do fork **não acha as próprias
@@ -171,11 +171,10 @@ python3 tools/pes2/asset_write.py   check "<track1.bin>" --tmpdir <dir>  # o cam
 PES2_IMAGE=<copia.cue> tools/pes2/asset_screen.sh                        # quadros do boot
 python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
-python3 tools/pes2/fork.py launch "<copia.cue>"   # sobe o fork com MCP; `kill` encerra os tres binarios
-python3 tools/pes2/fork.py recipe                # os dois caminhos ate o fork: baixar ou compilar
-python3 tools/pes2/mcp.py --self-check           # o cliente MCP, sem emulador
-python3 tools/pes2/mcp.py --list                 # as 95 ferramentas, contra o servidor vivo
-python3 tools/pes2/fork.py --self-check          # caminhos, lista de kill, recusas
+python3 tools/duckmcp/cli.py launch "<copia.cue>" # sobe o fork com MCP (lib comum); `kill` encerra os tres binarios
+python3 tools/duckmcp/cli.py recipe              # os dois caminhos ate o fork: baixar ou compilar
+python3 tools/duckmcp/selftest.py --quiet        # o gate da lib: cliente, lancador e save state, sem emulador
+python3 tools/duckmcp/cli.py list                # as ferramentas, contadas contra o servidor vivo
 python3 tools/pes2/mcp_drive.py --self-check     # rotas, limiares, assinaturas
 python3 tools/pes2/who_writes.py --self-check    # fluxo A: enderecos, stores, as duas esperas
 python3 tools/pes2/who_writes.py 0x8007151B --nudge Cross   # quem escreve; depois de --screen team-select --keep-alive
@@ -187,7 +186,7 @@ tools/pes2/boot_check.sh             # mede que ele botou -- e diz contra qual b
 tools/pes2/boot_check.sh --self-check   # o veredito e seus casos vermelhos, sem emulador
 python3 tools/pes2/drive.py "<copia.cue>" --screen team-select --out-dir <dir>
 python3 tools/pes2/drive.py "<copia.cue>" --screen main-menu --save-state  # atalho
-python3 tools/pes2/savestate.py selftest                              # o leitor de save state, com os casos vermelhos
+python3 tools/duckmcp/savestate.py selftest                           # o leitor de save state, com os casos vermelhos
 
 ctest --test-dir build -R pes2       # pes2_selftest, pes2_image, pes2_boot
 ```
@@ -216,7 +215,7 @@ PES2_IMAGE="<copia>/….cue" \
 | Se a tarefa ou correção tocou | Gate |
 | --- | --- |
 | ferramenta de `tools/pes2/` | o `--check` dela verde; `pes2_selftest` verde |
-| RAM lida de save state | `savestate.py selftest` verde, e ele está dentro do `pes2_selftest`. Toda extração de RAM passa pela guarda do kernel (`PS-X Control PAD Driver` nos primeiros 64 KiB): sem ela um deslocamento errado devolve 2 MiB plausíveis e a busca de valor responde com um endereço que parece um endereço (§6.14) |
+| RAM lida de save state | `tools/duckmcp/savestate.py selftest` verde, e ele está dentro do `duckmcp_selftest` (até a DMCP-TASK-20, do `pes2_selftest`). Toda extração de RAM passa pela guarda do kernel (`PS-X Control PAD Driver` nos primeiros 64 KiB): sem ela um deslocamento errado devolve 2 MiB plausíveis e a busca de valor responde com um endereço que parece um endereço (§6.14) |
 | qualquer coisa que escreva na imagem | `iso.py roundtrip` verde **e** o `negative` provando que ele sabe ficar vermelho |
 | gravação de nome de time | `poke.py --self-check` verde nas duas releases: recusas, varredura sem sobra, e a imagem de volta byte a byte |
 | gravação de asset editado | `asset_write.py check` verde: salvar sem editar devolve a imagem idêntica, o orçamento recusa com a conta, o controle negativo fica localizado, e a cauda EDC/ECC sobrevive |
@@ -226,14 +225,14 @@ PES2_IMAGE="<copia>/….cue" \
 | offset ou tabela | remedido nas **duas** releases; a divergência sai por marcador, não por offset absoluto |
 | comportamento em tela | `boot_check.sh`, com o número medido (desvio-padrão e contagem de pixels), o quadro **fora** do git, e a linha final dizendo **contra qual binário** ele correu. E `boot_check.sh --self-check` verde: o veredito é função e seus casos vermelhos rodam sem emulador — inclusive o quadro congelado, que é o modo de falha real. **A prova de vida amostra uma vez por segundo** ao longo do `PES2_GAP` e guarda a maior diferença; a forma antiga, de dois quadros em relógio fixo, falhava 1 em 3 numa tela de abertura parada (CORR-PES2-030) |
 | rota de emulador | `mcp_drive.py --self-check` verde, e `--measure-menu` contra o jogo vivo: ele mede as sete linhas do menu e depois pede sete, o que **tem de falhar**. Verde que nunca pôde ser vermelho é decoração. **São dois comandos, e o primeiro é parte do gate:** `--screen main-menu --keep-alive` deixa o jogo de pé no menu — sem ele toda rota mata no `__exit__` o emulador que subiu, e o caso vermelho passa a depender de um save state esquecido de outra corrida. O `--measure-menu` confere a tela antes de medir, e recusa alto se não for o menu (CORR-PES2-024) |
-| cliente ou lançador de MCP | `mcp.py --self-check` e `fork.py --self-check` verdes; os dois rodam sem emulador e os dois têm o caso de servidor ausente |
+| cliente ou lançador de MCP | `python3 tools/duckmcp/selftest.py --quiet` verde (`duckmcp_selftest`): cliente e lançador da lib, sem emulador, com o caso de servidor ausente |
 | endereço de RAM atribuído a um escritor | `who_writes.py --self-check` verde **e** o disparo reproduzido no endereço em questão. Sem o disparo é conjectura: "não disparou" pode ser o endereço não ser escrito naquele estado, e a ferramenta falha alto em vez de devolver vazio. O rito são **dois comandos**, como o do `--measure-menu`: `mcp_drive.py … --screen team-select --keep-alive` e depois `who_writes.py <endereço> --nudge Cross` — o `--nudge` existe porque o PES2 congela em cada saque, e ele passa `duration_frames`, **sem o que o botão fica preso** e todo cutucão seguinte é inócuo (CORR-PES2-031) |
 | número em doc | veio de ferramenta, não de soma à mão |
 
 **São dois emuladores, e nenhum está no `PATH`.** O de trabalho é o **fork
 com servidor MCP** desde 2026-09-03 (§6.14 do plano), em
-`~/Applications/duckstation-mcp/`; quem o sobe é o `tools/pes2/fork.py`, e
-`fork.py recipe` diz como obtê-lo — dois caminhos, o download do binário
+`~/Applications/duckstation-mcp/`; quem o sobe é a lib (`tools/duckmcp/cli.py launch`), e
+`cli.py recipe` diz como obtê-lo — dois caminhos, o download do binário
 que o CI dele publica primeiro, a compilação depois. O AppImage oficial continua em
 `~/Applications/` porque é o que um terceiro reproduz, e quem o sobe continua
 sendo o `run_duckstation.sh`. **Nada do fork entra no repositório** — a
@@ -256,7 +255,7 @@ só** e serializado: uma instância por vez.
 
 Ao subir o fork à mão, duas coisas medidas em 2026-09-03: o diálogo que sobe
 é o **`Automatic Updater`** e `Escape` não o fecha, e a **porta 2346 abre
-antes** de ele ser dispensado. O `fork.py launch` cuida dos dois.
+antes** de ele ser dispensado. O `cli.py launch` da lib cuida dos dois.
 
 ---
 

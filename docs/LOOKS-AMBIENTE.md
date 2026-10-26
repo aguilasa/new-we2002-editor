@@ -16,7 +16,8 @@ defeitos que só o Linux expunha foram corrigidos (seção
 [A primeira corrida no Linux](#a-primeira-corrida-no-linux)). A tabela e os
 passos já refletem essa corrida. O que **não** foi medido está marcado como tal.
 
-Os caminhos saem do código (`tools/looks/`, `tools/pes2/fork.py`, `make.ps1`) e
+Os caminhos saem do código (`tools/looks/`, `tools/duckmcp/env.py` — à época da
+corrida, `tools/pes2/fork.py`, registro histórico —, `make.ps1`) e
 dos docs do ciclo ([PLAN-LOOKS-PY.md](/docs/PLAN-LOOKS-PY.md), o
 [perfil](/docs/prompts/perfil-looks.md) e as tasks de
 [docs/tasks/looks/](/docs/tasks/concluidos/looks/progresso.md)).
@@ -195,7 +196,7 @@ outro tamanho ([CORR-LOOKS-102](/docs/tasks/concluidos/looks/CORR-LOOKS-102.md))
 
 Se um build futuro recusar o state, há dois caminhos:
 
-- **Igualar o build.** `python3 tools/pes2/fork.py recipe` diz como obter o
+- **Igualar o build.** `python3 tools/duckmcp/cli.py recipe` diz como obter o
   fork. O zip que roda no Windows é do CI do mesmo fork.
 - **Refazer os states no Linux.** Leve o jogo à tela `LOOKS SET` nos slots 1 e
   2 e rode `oracle.py --adopt-states`. Aí **as seis pastas do passo 3 precisam
@@ -205,8 +206,8 @@ Se um build futuro recusar o state, há dois caminhos:
 ### 7. O display
 
 No Linux a regra é o `:98`, e as ferramentas já a seguem: o `ui_check.py` fixa
-`DISPLAY=:98`, e o `fork.py launch` usa `PES2_DISPLAY`, que também vale `:98`
-por default. O servidor tem de estar de pé, sem `-auth`:
+`DISPLAY=:98`, e o `duckmcp.fork.launch` usa `DUCKSTATION_DISPLAY` (legado: `PES2_DISPLAY`),
+que também vale `:98` por default. O servidor tem de estar de pé, sem `-auth`:
 
 ```sh
 Xvfb :98 -screen 0 1280x1024x24 -nolisten tcp &
@@ -321,7 +322,7 @@ não se versiona nem se publica.
   `savestates\` e `settings.ini` ficam na própria pasta. O log das subidas vai
   para `C:\games\ps1\work\duckstation-fork.log`.
 - **No Linux:** `~/Applications/duckstation-mcp/bin/duckstation-qt`, com as
-  bibliotecas em `lib/` e `plugins/`, que o `fork.py` põe no `LD_LIBRARY_PATH`.
+  bibliotecas em `lib/` e `plugins/`, que o `duckmcp.fork` põe no `LD_LIBRARY_PATH`.
   Os dados ficam em `~/.local/share/duckstation/`, que o
   `oracle.emulator_states_dir` usa.
 

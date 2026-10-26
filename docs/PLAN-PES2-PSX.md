@@ -1183,7 +1183,7 @@ máquina, instalado pelo usuário em 2026-08-29:
 | | |
 |---|---|
 | binário | `~/Applications/DuckStation-x64.AppImage` (não é Flatpak, e não está no `PATH`) |
-| binário de trabalho, desde 2026-09-03 | o **fork** `sadnescity/duckstation`, branch `mcp`, compilado localmente — é o único com servidor MCP. Mora em `~/Applications/duckstation-mcp/`, **fora do repositório** por licença (CC-BY-NC-ND-4.0, mesma regra de `roms/`); sobe pelo `tools/pes2/fork.py`, e `fork.py recipe` diz como obtê-lo — o binário que o CI dele publica, ou a compilação. Decisão e consequências na §6.14 |
+| binário de trabalho, desde 2026-09-03 | o **fork** `sadnescity/duckstation`, branch `mcp`, compilado localmente — é o único com servidor MCP. Mora em `~/Applications/duckstation-mcp/`, **fora do repositório** por licença (CC-BY-NC-ND-4.0, mesma regra de `roms/`); sobe pelo `python3 tools/duckmcp/cli.py launch` (a lib comum, desde 2026-10-26), e `cli.py recipe` diz como obtê-lo — o binário que o CI dele publica, ou a compilação. Decisão e consequências na §6.14 |
 | dados | `~/.local/share/duckstation/` |
 | BIOS | **quatro** — `scph1001`, `scph5500`, `scph5501`, `scph7502` |
 | biblioteca | `RecursivePaths = /home/ingmar/ROMs/psx`, onde a pasta `(EsIt)` está |
@@ -1502,7 +1502,7 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    resolveria quase inteiro, avaliada e **não adotada** — o porquê está na
    §6.14, junto com o caminho mais barato, que foi medido em 2026-09-02 e
    funciona: **busca de valor e diff de memória saem de um save state**, em
-   Python puro, por `tools/pes2/savestate.py`. Tente por ali antes.
+   Python puro, por `tools/duckmcp/savestate.py`. Tente por ali antes.
    Desmontar continua sendo o único caminho para *quem escreve* um endereço.
 
 ### 4.3 Ordem: texto antes de número
@@ -1885,6 +1885,15 @@ aponta para o lugar errado.
 > foi removida daqui**: armadilha medida é registro, e some quando a
 > ferramenta que a contorna morrer, não antes.
 
+> **As do emulador passaram para a lib em 2026-10-26.** As que valem para
+> qualquer jogo — 5, 6, 7, 8, 9, 14, 20, 25, 27, 28, 29, 30, 31, 34, 35, 36 e
+> 46, mais a do joystick físico (CORR-K3D-031), que nunca esteve nesta lista —
+> são tratadas por `tools/duckmcp/`, e o registro vivo delas é o
+> [§1.3](/docs/PLAN-DUCKMCP-PY.md#1.3) do [PLAN-DUCKMCP-PY.md](/docs/PLAN-DUCKMCP-PY.md). Aqui
+> ficam como **registro histórico**: quando uma delas cita `fork.py` ou
+> `mcp.py`, é o de `tools/pes2/` da data medida, hoje `tools/duckmcp/fork.py`
+> e `tools/duckmcp/client.py`.
+
 1. **O AppImage não está no `PATH`** e não responde a `--help`. É `-help`,
    com um traço só.
 2. **Um diálogo pede para criar atalho de lançador** na primeira execução
@@ -2084,7 +2093,9 @@ aponta para o lugar errado.
     máquina, a saída é o lançador exportar `LD_LIBRARY_PATH` **e**
     `QT_PLUGIN_PATH` — os dois, porque o Qt acha o plugin de plataforma por
     prefixo próprio e não pelo caminho de biblioteca. Medido em 2026-09-03;
-    é o que o `tools/pes2/fork.py` faz.
+    era o que o `tools/pes2/fork.py` fazia (histórico; hoje é o
+    `fork.env_for` de `tools/duckmcp/fork.py`, e o registro vivo é o [§1.3](/docs/PLAN-DUCKMCP-PY.md#1.3) do
+    plano da lib).
 
 29. **O diálogo que o fork abre é o `Automatic Updater`, não o de build
     não-oficial**, e **`Escape` não o fecha**: os três botões são
@@ -2092,7 +2103,7 @@ aponta para o lugar errado.
     nenhum tem papel de rejeição. Fecha-se clicando, por coordenada relativa
     à janela. O `fork.py` clica no `Remind Me Later` — o `Skip` calaria o
     aviso de vez, mas escrevendo a configuração do usuário, que é o que a
-    armadilha 4 proíbe.
+    armadilha 4 proíbe. Hoje da lib: [§1.3](/docs/PLAN-DUCKMCP-PY.md#1.3).
 
 30. **A porta 2346 abre antes de o diálogo ser dispensado.** A §6.14
     registrava o contrário, a partir da PES2-TASK-33; medido em 2026-09-03,
@@ -2100,7 +2111,8 @@ aponta para o lugar errado.
     O diálogo continua sendo dispensado, e por outro motivo: ele fica **por
     cima** da janela do jogo, então um `import -window` o captura junto.
     Uma captura por MCP não o veria — o emulador entrega o próprio frame
-    buffer —, o que é uma razão a mais para capturar por lá.
+    buffer —, o que é uma razão a mais para capturar por lá. Hoje da lib:
+    [§1.3](/docs/PLAN-DUCKMCP-PY.md#1.3).
 
 31. **O filtro de segurança do `kill_leftovers` era sensível a
     maiúsculas.** Ele confere `/proc/$pid/cmdline` contra `DuckStation`
@@ -2133,7 +2145,7 @@ aponta para o lugar errado.
     rota que atravesse uma tela de carga de trezentos quadros passo a passo
     gasta 17 s onde `continue` + `sleep` + `pause` gasta 6. A divisão que
     funciona: **quadro para precisão** — um toque e a consequência dele —,
-    **relógio para distância**.
+    **relógio para distância**. Hoje da lib: [§1.3](/docs/PLAN-DUCKMCP-PY.md#1.3).
 
 35. **O fork cai sozinho em execução livre, e não escreve nada.** Medido na
     revisão da PES2-TASK-33, em 2026-09-03: **quatro mortes em seis
@@ -2165,7 +2177,8 @@ aponta para o lugar errado.
     conferir com `pgrep -x duckstation-qt`. A frase custou três leituras
     erradas numa revisão só, porque era a mesma para "nunca subiu" e para
     "caiu há um minuto"; o `mcp.py` passou a distinguir os dois casos, e o
-    que diz "and no DuckStation process either" cita esta armadilha.
+    que diz "and no DuckStation process either" cita esta armadilha. Hoje
+    da lib: [§1.3](/docs/PLAN-DUCKMCP-PY.md#1.3).
 
 36. **`press_button` sem `duration_frames` deixa o botão preso.** Ele
     responde `{"slot": 0, "button": "Cross", "state": "pressed"}` e não
@@ -2180,7 +2193,7 @@ aponta para o lugar errado.
     única saída: não há nada do lado de cá dando `frame_step` para soltar o
     botão, então quem solta é o relógio do emulador. `duration_frames=6` é o
     que o `who_writes.py --nudge` usa, na mesma ordem de grandeza do que as
-    rotas usam para trabalho de menu.
+    rotas usam para trabalho de menu. Hoje da lib: [§1.3](/docs/PLAN-DUCKMCP-PY.md#1.3).
 
 37. **`Al azar` não é enfeite: ele destrói o reconhecimento por brilho.**
     A tela de opções de partida abre com `Día/Noche = Al azar` e
@@ -2279,7 +2292,8 @@ aponta para o lugar errado.
     e reenviar **uma vez** (`SessionLost`): a chamada recusada não chegou a
     ferramenta nenhuma, então reenviar não repete efeito. O `--self-check`
     do `mcp.py` reproduz a regra com um servidor local e tem o caso
-    vermelho — sem o `reclaim`, a chamada roubada falha.
+    vermelho — sem o `reclaim`, a chamada roubada falha. Hoje da lib
+    (`Client.reclaim`): [§1.3](/docs/PLAN-DUCKMCP-PY.md#1.3).
 
 ---
 
@@ -2457,7 +2471,8 @@ têm o jogo de foco `PointerRoot` nem a calibragem de tempo de tecla da §6.11
 O parágrafo anterior desta seção era uma **inferência a partir do tamanho do
 arquivo**, e dizia isso. A PES2-TASK-32 leu o formato, e a inferência estava
 certa: **um save state contém a RAM inteira**, e ela sai dele em Python puro.
-O leitor é `tools/pes2/savestate.py`.
+O leitor nasceu como `tools/pes2/savestate.py` (histórico; desde 2026-10-26
+mora em `tools/duckmcp/savestate.py`).
 
 O arquivo, medido sobre os estados desta máquina (versão 86 do formato):
 
@@ -2714,7 +2729,8 @@ antes de usá-lo de novo:
   sessão MCP junto.
 
 **Nada do fork entrou no repositório**, e nada dele foi baixado. O que entrou
-é o procedimento, os números acima e `tools/pes2/savestate.py`.
+é o procedimento, os números acima e `tools/pes2/savestate.py` (histórico; hoje
+`tools/duckmcp/savestate.py`).
 
 #### Decisão do usuário, 2026-09-03: **o fork é o emulador de trabalho**
 
@@ -2795,7 +2811,8 @@ usuário, ao lado do AppImage oficial que continua instalado. São três
 diretórios — `bin/`, `lib/`, `plugins/` — porque o `RUNPATH` do binário
 aponta para a árvore de build em que ele nasceu (armadilha 28); o lançador
 exporta `LD_LIBRARY_PATH` e `QT_PLUGIN_PATH`. A receita saiu do Log da
-PES2-TASK-33 e virou `tools/pes2/fork.py recipe`, que é executável e não
+PES2-TASK-33 e virou `tools/pes2/fork.py recipe` (histórico; hoje
+`python3 tools/duckmcp/cli.py recipe`), que é executável e não
 envelhece calado — e desde a CORR-PES2-028 traz **dois** caminhos, o download
 do binário publicado pelo CI do fork antes da compilação.
 

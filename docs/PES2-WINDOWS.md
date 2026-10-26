@@ -84,7 +84,7 @@ snapshot_memory  press_button   frame_step       save_state / load_state
 e **100 nomes de ferramenta** nos esquemas embutidos no binário. São contados
 no `.exe`, não contra o servidor de pé — no Linux a contagem viva deu 95 contra
 um fonte que declara 99, então espere o mesmo tipo de diferença e conte com
-`mcp.py --list` quando o jogo estiver rodando.
+`python tools\duckmcp\cli.py list` quando o jogo estiver rodando.
 
 **Isto tem de ser reconferido a cada build.** A release é reconstruída a cada
 push e nada promete que a próxima ainda carregue o servidor — a conferência é
@@ -94,7 +94,7 @@ parte da receita, não enfeite. No Windows, com o mesmo pacote:
 Select-String -Path duckstation-qt-x64-ReleaseLTCG.exe -Pattern 'EnableMCPServer' -Encoding Byte
 ```
 
-ou, mais simples, subir e perguntar: se `mcp.py --list` responde, tem servidor.
+ou, mais simples, subir e perguntar: se `tools\duckmcp\cli.py list` responde, tem servidor.
 
 ## 3. Modo portable, e por que ele
 
@@ -126,7 +126,8 @@ chamada — só impede jogar à mão.
 
 ## 4. Subir
 
-Desde 2026-09-11 o **`fork.py` roda aqui**, e o [`make.ps1`](../make.ps1) da
+Desde 2026-09-11 o **`fork.py` roda aqui** (medido no de `tools/pes2/`, histórico; hoje o
+lançador é o da lib `tools/duckmcp/`), e o [`make.ps1`](../make.ps1) da
 raiz embrulha ele — o caminho curto, que cuida da cópia e acha o `.cue`
 sozinho (o nome difere entre as releases: `(Es,It)` contra `(En,Fr,De)`):
 
@@ -141,13 +142,13 @@ sozinho (o nome difere entre as releases: `(Es,It)` contra `(En,Fr,De)`):
 `we2002-cards` tira o option file do caminho antes. Uma sessão por vez: o
 `launch` encerra todo DuckStation antes de subir, então um derruba o outro.
 
-Direto pelo `fork.py`, que é o que o alvo chama:
+Direto pelo CLI da lib, que é o que o alvo chama:
 
 ```powershell
-python tools\pes2\fork.py launch `
+python tools\duckmcp\cli.py launch `
   "C:\games\ps1\work\Pro Evolution Soccer 2 (Europe) (EsIt)\Pro Evolution Soccer 2 (Europe) (Es,It).cue"
-python tools\pes2\fork.py status
-python tools\pes2\fork.py kill
+python tools\duckmcp\cli.py procs
+python tools\duckmcp\cli.py kill
 ```
 
 Ele boota, dispensa o modal se houver e **espera a porta responder** antes de
@@ -165,7 +166,7 @@ cd C:\games\ps1\duckstation-mcp
 cinco sondagens ao longo de quinze segundos. O motivo está no `settings.ini`:
 `[AutoUpdater] LastVersion` veio junto do Linux e casa com o commit deste
 build, então o atualizador não tem o que anunciar. Um build novo no CI do fork
-o traz de volta — por isso o `fork.py` dispensa assim mesmo, e por
+o traz de volta — por isso o `fork.py` (hoje `tools/duckmcp/fork.py`) dispensa assim mesmo, e por
 **`WM_CLOSE`**, já que um diálogo Qt desenha os próprios botões e não expõe
 `HWND` filho para um `BM_CLICK` alcançar. Esse caminho é o único do módulo que
 o Windows ainda não exercitou.
@@ -191,19 +192,19 @@ existem no Windows — Xvfb, `xdotool`, `import -window`, shell:
 
 | Ferramenta | No Windows | Por quê |
 |---|---|---|
-| `tools/pes2/fork.py` | **roda** desde 2026-09-11 | portado: `tasklist` no lugar do `pgrep`, `taskkill /F` no do `SIGKILL`, `ctypes`/`user32` no do `xdotool`, e nenhum display |
+| `tools/duckmcp/fork.py` (medido como `tools/pes2/fork.py`, histórico) | **roda** desde 2026-09-11 | portado: `tasklist` no lugar do `pgrep`, `taskkill /F` no do `SIGKILL`, `ctypes`/`user32` no do `xdotool`, e nenhum display; a mudança para a lib não teve corrida nova registrada aqui |
 | os alvos `pes2*` e `we2002-*` do `Makefile` | **rodam** pelo [`make.ps1`](../make.ps1) | o `Makefile` é GNU make + bash e não roda aqui; os alvos foram portados para o script da raiz. O par `-98` e o `pes2-play` não têm objeto e são **recusados com o motivo** |
 | `tools/pes2/drive.py` | **não roda** | dirige por `xdotool` e captura por `import -window` |
 | `tools/pes2/mcp_drive.py` | **sobe, mas as rotas não reconhecem a tela** | o `fork.launch()` de que ela depende agora funciona; o que falta são as assinaturas — ver a §7 |
 | `tools/pes2/boot_check.sh`, `asset_screen.sh`, `run_duckstation.sh` | **não rodam** | shell + Xvfb |
-| `tools/pes2/savestate.py` | precisa de `zstd.exe` no `PATH` | ele descomprime o estado chamando o `zstd` de linha de comando |
-| `mcp.py`, `pad.py`, `iso.py`, `tables.py`, `team_map.py`, `poke.py`, `player_map.py`, `lzss.py`, `bin_archive.py`, `asset_write.py`, `memcard.py`, `ofs_map.py`, `diff_releases.py`, `strings_inventory.py`, `tname.py`, `lang_map.py`, `faq_check.py` | **rodam** | Python 3 puro, stdlib |
+| `tools/duckmcp/savestate.py` (medido como `tools/pes2/savestate.py`, histórico) | precisa de `zstd.exe` no `PATH` | ele descomprime o estado chamando o `zstd` de linha de comando; a mudança para a lib não teve corrida nova registrada aqui |
+| `pad.py`, `iso.py`, `tables.py`, `team_map.py`, `poke.py`, `player_map.py`, `lzss.py`, `bin_archive.py`, `asset_write.py`, `memcard.py`, `ofs_map.py`, `diff_releases.py`, `strings_inventory.py`, `tname.py`, `lang_map.py`, `faq_check.py` | **rodam** | Python 3 puro, stdlib |
 
 **A bateria golden inteira do `newWe2002` também não roda lá**, pelo mesmo
 motivo — é Xvfb, `xdotool` e Wine. Já está registrado em
 [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md).
 
-Consequência prática: o `fork.py launch` **existe aqui** desde 2026-09-11, e é
+Consequência prática: o `fork.launch` (hoje de `tools/duckmcp/`) **existe aqui** desde 2026-09-11, e é
 por onde o emulador sobe. O que não existe é a camada de tela — o `drive.py`
 continua sendo Xvfb e `import -window`, e as rotas do `mcp_drive.py` esbarram
 na §7.
@@ -224,7 +225,7 @@ Descompactar por cima de `duckstation-mcp\` preserva `portable.txt`,
 `settings.ini`, `bios\`, `memcards\` e `savestates\`, que não estão no zip.
 
 Compilar do fonte é o segundo caminho e só vale se for para mudar o servidor;
-a receita de Linux está em `tools/pes2/fork.py recipe`.
+a receita de Linux está em `python3 tools/duckmcp/cli.py recipe`.
 
 **A licença do DuckStation é CC-BY-NC-ND-4.0**, e o próprio binário diz que
 build modificado não pode ser redistribuído. Nada disto entra no repositório —
@@ -295,7 +296,7 @@ O fork **cai sozinho no Windows também**: duas mortes numa sessão em
 deixando linha de log. É a mesma armadilha 35 da §6.11 do plano, medida no
 Linux em 2026-09-03 com quatro mortes em seis corridas.
 
-O diagnóstico do `mcp.py` — que a
+O diagnóstico do `mcp.py` (registro histórico; hoje `tools/duckmcp/client.py`) — que a
 [CORR-PES2-032](/docs/tasks/pes2/CORR-PES2-032.md) construiu para separar "nunca
 subiu" de "caiu agora" — estava **degradado aqui até 2026-09-11**: ele
 pergunta a `fork.running_pids()`, que estourava no `pgrep` ausente e caía no

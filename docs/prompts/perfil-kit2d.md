@@ -17,6 +17,7 @@ which commands search instead of reading whole.
 - **Palavras 0 e 1, modelo e radar são divergência deliberada do `ed.exe`; o `PARIDADE-FUNCIONAL.md` não se toca** ([§6](/docs/PLAN-KIT2D-PY.md#6)).
 - **Nenhum render entra em gate antes de a fase 0 medir a base de carga** ([§4.1](/docs/PLAN-KIT2D-PY.md#4.1)).
 - **Tasks que precisam do state da tela de opções nascem `blocked` por `test -f work/kit2d-states/SLPM-87056_1.sav`** (usuário, 2026-10-19; [§4.4](/docs/PLAN-KIT2D-PY.md#4.4)).
+- **O `oracle.py` do `kit2d` nasce sobre a lib `tools/duckmcp/` (`duckmcp.Session`, `duckmcp.debug`), nunca sobre `tools/pes2/mcp.py`/`fork.py` nem com cliente MCP próprio** (2026-10-26; [§2](/docs/PLAN-DUCKMCP-PY.md#2)).
 
 ## Sources of truth
 
