@@ -82,3 +82,9 @@ $ grep -c '/tmp/claude-1000/.*/scratchpad' docs/tasks/duckmcp/27-fechamento-fase
 $ rite check --cycle duckmcp --json      # errors, warnings
 0 0
 ```
+- **Closed** — commit `dd51cbed` (2026-10-26): docs(duckmcp): kits_replay line of task 27 runs against a copy in work/
+  - Files (`git show --name-status dd51cbed`):
+    - `M docs/tasks/duckmcp/27-fechamento-fase-7.md`
+    - `M docs/tasks/duckmcp/CORR-DMCP-034.md`
+    - `M docs/tasks/duckmcp/correcoes-progresso.md`
+    - `M docs/tasks/duckmcp/fixes.json`
