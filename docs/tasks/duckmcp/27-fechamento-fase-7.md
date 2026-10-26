@@ -58,10 +58,14 @@ $ ctest --test-dir build -R tasks
 - `kits_replay` e `kits_selftest` com o veredito de antes (`Passed` antes e depois na DMCP-TASK-25; `kits_selftest` `Passed` na 26), refeitos aqui; `grep -c 'client.call(' tools/kits/*.py` dá 0 em todo arquivo (`grep -cE 'client\.call\(' tools/kits/*.py | grep -v ':0$'` → nada, saída 1):
 
 ```text
-$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=/tmp/claude-1000/-home-ingmar-desenvolvimento-github-new-we2002-editor/471f5f13-0bad-4499-8e65-753e81531194/scratchpad/dmcp22/japanese-shift-jis.bin WE2002_KITS_REPLAY_DIR=$PWD/work/kits-oracle ctest --test-dir build -R 'kits_replay|tasks'
-2/2 Test #22: kits_replay ......................   Passed   11.83 sec
+$ DISPLAY=:98 XAUTHORITY= WE2002_LOOKS_IMAGE=$PWD/work/looks-japanese-shift-jis.bin WE2002_KITS_REPLAY_DIR=$PWD/work/kits-oracle ctest --test-dir build -R 'kits_replay|tasks' 2>&1 | grep -E "Test #|tests passed"
+2/2 Test #22: kits_replay ......................   Passed   12.19 sec
 100% tests passed, 0 tests failed out of 2
 ```
+
+  (Refeito em 2026-10-26 na HEAD `e8890dd1` pela CORR-DMCP-034: a corrida do fechamento, `Passed
+  11.83 sec`, apontava a imagem para o scratchpad de outra sessão, que não dura. A cópia em `work/` é
+  ignorada pelo git e tem o digest de `roms/japanese-shift-jis.bin`, `93d16f10…`.)
 
   (o `kits_selftest` é o `python3 tools/kits/selftest.py` acima, `0 failure(s)`.)
 - O monkeypatch do `kits/selftest.py` troca atributos de `duckmcp.fork`, não do shim: `tools/kits/selftest.py:2085` → `from duckmcp import fork as lib`, e o comentário de `:2088` diz que os patches vão no `duckmcp.fork`.
