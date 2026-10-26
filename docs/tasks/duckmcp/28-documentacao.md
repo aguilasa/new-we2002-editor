@@ -116,3 +116,15 @@ docs/prompts/perfil-duckmcp.md:60:- `tools/pes2/mcp.py` só reexporta; `python3 
 docs/prompts/perfil-duckmcp.md:70:- `grep -rn 'pes2/fork.py' Makefile make.ps1 tools/pes2/*.sh` não acha nada.
 docs/prompts/perfil-duckmcp.md:77:- `savestate.py` movido com histórico (`git log --follow`), e o `tools/pes2/savestate.py` é shim.
 ```
+- **Closed** — commit `bbd0bd34` (2026-10-26): docs(duckmcp): document the lib in CLAUDE.md and point live instructions to tools/duckmcp
+  - Files (`git show --name-status bbd0bd34`):
+    - `M CLAUDE.md`
+    - `M docs/KITS-AJUSTES-3D.md`
+    - `M docs/LOOKS-AMBIENTE.md`
+    - `M docs/PES2-WINDOWS.md`
+    - `M docs/PLAN-KIT2D-PY.md`
+    - `M docs/PLAN-LOOKS-PY.md`
+    - `M docs/PLAN-PES2-PSX.md`
+    - `M docs/prompts/perfil-kit2d.md`
+    - `M docs/prompts/perfil-pes2.md`
+    - `M docs/tasks/duckmcp/28-documentacao.md`
